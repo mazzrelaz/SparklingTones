@@ -447,7 +447,9 @@ window.Spark = (function () {
    * non abbiamo una tabella per dedurli. Meglio un numero onesto che
    * un'etichetta inventata sopra una manopola che cambia il suono.
    */
-  const CATENA = ['Noise gate', 'Compressore', 'Drive', 'Ampli',
+  // La seconda posizione ospita anche i wah, non solo i compressori: è così
+  // che la chiama l'app ufficiale, ed è coerente con i modelli che accetta.
+  const CATENA = ['Noise gate', 'Comp / Wah', 'Drive', 'Ampli',
                   'Modulazione', 'Delay', 'Riverbero'];
 
   /**

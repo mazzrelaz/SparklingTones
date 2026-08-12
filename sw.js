@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v11';
+const VERSIONE = 'v12';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -24,6 +24,7 @@ const GUSCIO = [
   './live.html',
   './manifest.webmanifest',
   './src/spark-protocol.js',
+  './src/spark-effetti.js',
   './src/spark-transport.js',
   './src/preset-store.js',
   './src/spark-backup.js',

@@ -214,6 +214,9 @@
                       text-overflow:ellipsis; white-space:nowrap; }
   .manopola .numero:hover { color:var(--text); text-decoration:underline dotted; }
   .manopola .numero.senzaNome { color:var(--faint); font-family:Consolas,monospace; }
+  .manopola .numero.daTabella { color:var(--dim); font-style:italic; }
+  .blocco .tecnico { font-size:0.68rem; color:var(--faint);
+                     font-family:'SF Mono',Consolas,monospace; margin-top:1px; }
   .blocco .cambia { font-size:0.72rem; padding:4px 10px; border-radius:12px;
                     background:#2a2d33; color:var(--dim); }
   .manopola input[type=range] { flex:1; min-width:0; accent-color:var(--accent); }
@@ -318,9 +321,10 @@
   </div>
   <p class="spiega">Le manopole agiscono <strong>subito</strong> sul suono che l'ampli sta
     suonando. Niente viene salvato finché non premi «Salva in libreria».<br>
-    L'ampli non manda i nomi dei parametri: girane uno, senti cosa fa e
-    <strong>tocca il numero per battezzarlo</strong>. Il nome vale per quel modello, in
-    ogni preset che lo usa.</p>
+    L'ampli non manda i nomi dei parametri. Quelli <em>in corsivo</em> arrivano da una
+    tabella e sono da verificare a orecchio; quelli in chiaro li hai messi tu; i numeri
+    sono ancora da battezzare. <strong>Tocca l'etichetta per cambiarla</strong>: il nome
+    vale per quel modello, in ogni preset che lo usa.</p>
   <div id="catena"></div>
 </div>
 
@@ -355,6 +359,7 @@
 </div>
 
 <script src="src/spark-protocol.js"></script>
+<script src="src/spark-effetti.js"></script>
 <script src="src/spark-transport.js"></script>
 <script src="src/preset-store.js"></script>
 <script src="src/spark-backup.js"></script>
@@ -1266,8 +1271,16 @@ function disegnaCatena() {
     categoria.textContent = Spark.CATENA[posizione] || `posizione ${posizione + 1}`;
     const nome = document.createElement('div');
     nome.className = 'effetto';
-    nome.textContent = effetto.name;
+    // Il nome leggibile se lo conosciamo, con sotto l'identificativo vero:
+    // quello è ciò che va nei comandi, e serve saperlo quando qualcosa non torna.
+    nome.textContent = SparkEffetti.nome(effetto.name);
     nomi.append(categoria, nome);
+    if (SparkEffetti.nome(effetto.name) !== effetto.name) {
+      const tecnico = document.createElement('div');
+      tecnico.className = 'tecnico';
+      tecnico.textContent = effetto.name;
+      nomi.appendChild(tecnico);
+    }
 
     const cambia = document.createElement('button');
     cambia.className = 'cambia';
@@ -1300,17 +1313,25 @@ function disegnaCatena() {
       // L'ampli non manda i nomi dei parametri e non c'è tabella da cui
       // dedurli: li battezza l'utente, girando e ascoltando. Il nome vale per
       // il modello, quindi si dà una volta e vale in tutti i preset.
-      const dato = (nomiParam[effetto.name] || {})[param.index];
+      // Tre stati, e si distinguono a vista: il nome che hai messo tu vince
+      // sempre, quello della tabella è una proposta ancora da verificare a
+      // orecchio, e il numero è la verità quando non sappiamo niente.
+      const dato     = (nomiParam[effetto.name] || {})[param.index];
+      const proposto = SparkEffetti.manopola(effetto.name, param.index);
       const numero = document.createElement('span');
-      numero.className = 'numero' + (dato ? '' : ' senzaNome');
-      numero.textContent = dato || (param.index + 1);
+      numero.className = 'numero' +
+        (dato ? '' : proposto ? ' daTabella' : ' senzaNome');
+      numero.textContent = dato || proposto || (param.index + 1);
       numero.title = dato
-        ? `«${dato}» — tocca per rinominarlo`
-        : 'tocca per dargli un nome: varrà per ogni preset che usa ' + effetto.name;
+        ? `«${dato}», nome tuo — tocca per cambiarlo`
+        : proposto
+          ? `«${proposto}» arriva dalla tabella: gira e senti se torna. ` +
+            'Tocca per correggerlo.'
+          : 'tocca per dargli un nome: varrà per ogni preset che usa ' + effetto.name;
       numero.addEventListener('click', async () => {
         const nome = prompt(
-          `Nome del parametro ${param.index + 1} di ${effetto.name}\n` +
-          '(vuoto per tornare al numero):', dato || '');
+          `Nome del parametro ${param.index + 1} di ${SparkEffetti.nome(effetto.name)}\n` +
+          '(vuoto per tornare al valore di partenza):', dato || proposto || '');
         if (nome === null) return;
         await store.setParamName(effetto.name, param.index, nome);
         nomiParam = await store.getParamNames();
@@ -1383,7 +1404,14 @@ function disegnaElencoModelli() {
     voce.className = 'voce';
     const nome = document.createElement('span');
     nome.className = 'nome';
-    nome.textContent = modello;
+    nome.textContent = SparkEffetti.nome(modello);
+    if (SparkEffetti.nome(modello) !== modello) {
+      const tecnico = document.createElement('span');
+      tecnico.className = 'badge';
+      tecnico.textContent = modello;
+      nome.appendChild(document.createTextNode(' '));
+      nome.appendChild(tecnico);
+    }
     voce.appendChild(nome);
     if (modello === modelloInCorso.vecchio) {
       const badge = document.createElement('span');

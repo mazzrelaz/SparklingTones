@@ -22,6 +22,7 @@
 <div id="out"></div>
 
 <script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-effetti.js"></script>
 <script src="fixtures/preset0.js"></script>
 <script>
 'use strict';
@@ -296,6 +297,34 @@ check('l\'ordine della cattura reale corrisponde alle categorie',
        'ChorusAnalog', 'DelayRe201', 'bias.reverb']);
 check('il quarto blocco è l\'ampli, ed è lì che sta Twin',
       [Spark.CATENA[3], preset.effects[3].name], ['Ampli', 'Twin']);
+
+/* ---------- tabella dei nomi di effetti e manopole ----------
+   Cresce un pezzo alla volta, dettata dall'utente. Questi controlli servono a
+   intercettare una riga sbagliata mentre la tabella si allunga. */
+
+check('un effetto che conosciamo ha il suo nome leggibile',
+      SparkEffetti.nome('bias.noisegate'), 'Noise Gate');
+check('uno che non conosciamo resta il suo identificativo',
+      SparkEffetti.nome('QualcosaDiIgnoto'), 'QualcosaDiIgnoto');
+check('le manopole del noise gate',
+      [SparkEffetti.manopola('bias.noisegate', 0), SparkEffetti.manopola('bias.noisegate', 1)],
+      ['Threshold', 'Decay']);
+check('le manopole del compressore, interruttore compreso',
+      SparkEffetti.TABELLA['LA2AComp'].manopole,
+      ['Gain', 'Peak Reduction', 'Limit / Compress']);
+check('un indice oltre la fine non inventa niente',
+      SparkEffetti.manopola('bias.noisegate', 9), null);
+check('un effetto fuori tabella nemmeno',
+      SparkEffetti.manopola('QualcosaDiIgnoto', 0), null);
+
+// La cattura reale è il metro: se la tabella dichiara più manopole di quante
+// l'ampli ne manda, quella riga è sbagliata.
+for (const effetto of preset.effects) {
+  const voce = SparkEffetti.TABELLA[effetto.name];
+  if (!voce) continue;
+  check(`${effetto.name}: la tabella non dichiara più manopole di quelle vere`,
+        voce.manopole.length <= effetto.params.length, true);
+}
 check('lo slot si indirizza nei primi due byte del payload',
       Spark.serializePreset(preset, Spark.slotTarget(2)).slice(0, 2), [0x00, 0x02]);
 check('e il preset software resta un indirizzo distinto',

@@ -14,6 +14,7 @@ icons/                   icone PNG generate con lo script PowerShell in tools/
 src/spark-protocol.js    encoder/decoder puro, senza I/O — il cuore del progetto
 src/spark-transport.js   connessione BLE, coda di invio, attesa risposte, lettura preset
 src/preset-store.js      libreria su IndexedDB, import dall'ampli, backup, banchi, categorie
+src/spark-effetti.js     nomi leggibili di effetti e manopole, dettati dall'utente
 src/spark-backup.js      legge preset_backup.zip dell'app ufficiale, senza librerie
 src/pwa.js               registra il service worker, «installa» e «versione nuova»
 tools/serve.ps1          server statico su localhost, per provare la PWA senza pubblicarla
@@ -22,7 +23,7 @@ tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
-test/protocol-test.html  68 test del protocollo contro catture reali
+test/protocol-test.html  76 test del protocollo contro catture reali
 test/transport-test.html 48 test del trasporto, con send finto e catture reali
 test/store-test.html     99 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
@@ -294,6 +295,26 @@ lo slot salvato resta com'era finché non lo si riscrive.
 **Le sette posizioni sono etichettate per categoria** (`Spark.CATENA`): noise gate,
 compressore, drive, ampli, modulazione, delay, riverbero. L'ordine è documentato e
 confermato da ogni preset letto dal dispositivo — un test lo verifica sulla cattura reale.
+
+### La tabella dei nomi: `src/spark-effetti.js`
+
+Nessuna fonte dice come si chiamano gli effetti in chiaro né le loro manopole. La tabella
+la **detta l'utente**, un pezzo alla volta per categoria, leggendo l'app ufficiale.
+Struttura di una riga:
+
+```js
+'LA2AComp': { nome: 'LA Comp', manopole: ['Gain', 'Peak Reduction', 'Limit / Compress'] },
+```
+
+`manopole` è **in ordine di indice**. Il rischio noto è che l'ordine sullo schermo
+dell'app non sia quello degli indici nel protocollo: per questo i nomi della tabella si
+vedono *in corsivo*, come proposte da verificare girando, e un nome scritto a mano vince
+sempre. Un test controlla che nessuna riga dichiari più manopole di quante l'ampli ne
+manda davvero nella cattura reale — è la rete che prende una riga sbagliata mentre la
+tabella cresce.
+
+Aggiungere una categoria è solo una riga di dati: la UI, il salvataggio e la precedenza
+sono già a posto.
 
 ### I nomi dei parametri li dà l'utente
 
