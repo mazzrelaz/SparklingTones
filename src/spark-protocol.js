@@ -435,6 +435,21 @@ window.Spark = (function () {
     };
   }
 
+  /**
+   * Le sette posizioni della catena, in ordine.
+   *
+   * L'ampli manda gli effetti come array di 7 senza dire cosa sia cosa, ma
+   * l'ordine è fisso: lo dice la documentazione del protocollo e lo conferma
+   * ogni preset letto dal dispositivo (`bias.noisegate`, `LA2AComp`,
+   * `ProCoRat`, `Twin`, `ChorusAnalog`, `DelayRe201`, `bias.reverb`).
+   *
+   * I *parametri* invece restano numerati: l'ampli non manda i loro nomi e
+   * non abbiamo una tabella per dedurli. Meglio un numero onesto che
+   * un'etichetta inventata sopra una manopola che cambia il suono.
+   */
+  const CATENA = ['Noise gate', 'Compressore', 'Drive', 'Ampli',
+                  'Modulazione', 'Delay', 'Riverbero'];
+
   const LIVE_TARGET      = { bank: 0x01, number: 0x00 };
   const slotTarget       = n => ({ bank: 0x00, number: n });
   const SOFTWARE_PRESET  = 0x7f;
@@ -615,7 +630,7 @@ window.Spark = (function () {
     assemblePresetPayload, parsePreset, serializePreset, splitPresetIntoChunks,
     controllaPreset,
     presetChecksum, PARAM_MARKER, PRESET_CHUNK_SIZE,
-    LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET,
+    LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET, CATENA,
     slotLabel, SLOTS_PER_BANK,
     CMD_ACTION, CMD_QUERY, CMD_NOTIFY, CMD_ACK, TYPE,
   };

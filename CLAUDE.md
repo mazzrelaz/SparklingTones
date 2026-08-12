@@ -22,7 +22,7 @@ tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
-test/protocol-test.html  65 test del protocollo contro catture reali
+test/protocol-test.html  68 test del protocollo contro catture reali
 test/transport-test.html 48 test del trasporto, con send finto e catture reali
 test/store-test.html     89 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
@@ -276,11 +276,41 @@ comprese le variabili di colore — la vista live è più scura — e la media q
 telefono, dove nei preset il titolo si prende una riga sua e nella live sparisce del
 tutto, perché ogni riga di header è spazio tolto ai pulsantoni.
 
+## Editor della catena effetti
+
+**Le manopole agiscono sul suono che sta suonando**, non su una copia: è la scelta che
+governa tutto il resto, presa con l'utente. Per questo «Regola» prima manda il preset
+all'ampli con `loadPreset`, e solo dopo apre il pannello.
+
+Lo stato di partenza si rilegge **dall'ampli** (`readLiveState`), non dalla libreria: se
+l'utente ha girato una manopola vera o ha modificato il suono dall'app ufficiale, la
+verità è lì. Se la rilettura fallisce l'editor non si apre — meglio niente che manopole
+che partono da valori inventati.
+
+Niente viene salvato finché non si preme **Salva in libreria**: allora la catena
+modificata finisce nel record. L'ampli invece cambia subito, ma solo nel suono corrente:
+lo slot salvato resta com'era finché non lo si riscrive.
+
+**Le sette posizioni sono etichettate per categoria** (`Spark.CATENA`): noise gate,
+compressore, drive, ampli, modulazione, delay, riverbero. L'ordine è documentato e
+confermato da ogni preset letto dal dispositivo — un test lo verifica sulla cattura reale.
+**I parametri restano numerati**: l'ampli non manda i loro nomi e non abbiamo una tabella
+per dedurli. Meglio un numero onesto che un'etichetta inventata sopra una manopola che
+cambia il suono.
+
+**Il cursore va strozzato.** Un trascinamento genera decine di eventi al secondo e ogni
+comando è una scrittura BLE: mandarli tutti intasa la coda e il suono arriva in ritardo
+sul gesto. Si manda al massimo ogni 60 ms tenendo solo l'ultimo valore per manopola, e
+l'ultimo parte sempre — altrimenti si resterebbe fermi un pelo prima di dove si è
+lasciato. Verificato: 41 eventi diventano un comando solo, col valore finale giusto.
+
+Il blocco spento si vede spento e lo dice: **girare la manopola di un effetto spento non
+produce nessun suono**, ed è una trappola già pagata una volta.
+
 Ancora da fare, in ordine di utilità discussa con l'utente:
 
-1. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
-   (`0x0104`, `0x0115`, `0x0106`) sono già verificati: è lavoro di interfaccia. È il
-   passo concordato dopo Preset e Live.
+1. **Cambiare il modello di un effetto** dall'editor (`0x0106`, già verificato): oggi si
+   possono regolare gli effetti che ci sono, non sostituire il Twin con un Rectifier.
 
 `loadPreset` e `storePreset` sono **entrambi verificati sull'hardware**: il primo l'11
 agosto 2026 e riconfermato il 12, il secondo il 12 agosto nella forma nuova (scrittura

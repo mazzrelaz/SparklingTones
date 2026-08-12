@@ -196,6 +196,26 @@
                  border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
   .voce input[type=text] { flex:1; min-width:0; }
 
+  /* ---- editor della catena ------------------------------------------- */
+
+  .blocco { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+            padding:10px 12px; margin-bottom:8px; }
+  .blocco.spento { opacity:0.5; }
+  .blocco .intestazione { display:flex; align-items:center; gap:10px; }
+  .blocco .categoria { font-size:0.68rem; color:var(--faint); text-transform:uppercase;
+                       letter-spacing:0.05em; }
+  .blocco .effetto { font-weight:600; font-size:0.9rem; }
+  .blocco .interruttore { margin-left:auto; font-size:0.72rem; padding:4px 10px;
+                          border-radius:12px; background:#2a2d33; color:var(--dim); }
+  .blocco .interruttore.acceso { background:#1f3a24; color:var(--green); }
+  .manopola { display:flex; align-items:center; gap:10px; margin-top:8px; }
+  .manopola .numero { width:1.4em; text-align:right; color:var(--faint);
+                      font-size:0.74rem; font-family:Consolas,monospace; }
+  .manopola input[type=range] { flex:1; min-width:0; accent-color:var(--accent); }
+  .manopola .valore { width:3.2em; text-align:right; color:var(--dim);
+                      font-size:0.74rem; font-family:Consolas,monospace; }
+  .avviso-spento { color:var(--gold); font-size:0.72rem; margin-top:6px; }
+
   @media (max-width: 600px) {
     body:not(.vista-live) header { position:static; }
     #vistaPreset { padding:12px 12px 40px; }
@@ -281,6 +301,20 @@
   </div>
   <p class="spiega" style="margin-top:12px">Si importano sia i backup di quest'app (.json)
     sia il <code>preset_backup.zip</code> dell'app ufficiale.</p>
+</div>
+
+<!-- editor della catena effetti, in tempo reale sul suono che sta suonando -->
+<div class="pannello" id="pannelloEditor">
+  <div class="barra-alta">
+    <h2 id="titoloEditor">Regola il suono</h2>
+    <span style="flex:1"></span>
+    <button id="btnSalvaModifiche">Salva in libreria</button>
+    <button class="primary" data-chiudi="pannelloEditor">Fatto</button>
+  </div>
+  <p class="spiega">Le manopole agiscono <strong>subito</strong> sul suono che l'ampli sta
+    suonando. Niente viene salvato finché non premi «Salva in libreria».
+    I parametri sono numerati perché l'ampli non manda i loro nomi: vai a orecchio.</p>
+  <div id="catena"></div>
 </div>
 
 <!-- scelta di un preset da mettere in un posto del banco -->
@@ -435,6 +469,7 @@ document.querySelectorAll('[data-chiudi]').forEach(b => {
   b.addEventListener('click', () => {
     chiudiPannelli();
     if (b.dataset.chiudi === 'pannelloScegli') sceltaInCorso = null;
+    if (b.dataset.chiudi === 'pannelloEditor') inModifica = null;
   });
 });
 
@@ -743,6 +778,13 @@ function dettaglio(record, slot) {
   prova.disabled = !spark.connected;
   prova.addEventListener('click', () => mandaPreset(record, null));
   azioni.appendChild(prova);
+
+  const regola = document.createElement('button');
+  regola.textContent = 'Regola';
+  regola.title = 'manda il preset all\'ampli e apri le manopole';
+  regola.disabled = !spark.connected;
+  regola.addEventListener('click', () => apriEditor(record));
+  azioni.appendChild(regola);
 
   const scelta = document.createElement('select');
   scelta.title = 'slot di destinazione';
@@ -1136,6 +1178,177 @@ async function mandaPreset(record, slot) {
     logLine('invio fallito: ' + err.message);
   }
 }
+
+/* ====================================================================
+   Editor della catena effetti
+
+   Le manopole agiscono sul suono che sta suonando, non su una copia: è il
+   motivo per cui esiste, e il motivo per cui prima di aprirlo il preset va
+   mandato all'ampli. Lo stato di partenza si rilegge **dall'ampli**, non
+   dalla libreria: se l'utente ha girato una manopola vera, la verità è lì.
+   ==================================================================== */
+
+let inModifica = null;      // { record, effetti }
+
+async function apriEditor(record) {
+  if (!spark.connected) return;
+
+  logLine(`mando «${record.name}» all'ampli per regolarlo…`);
+  const esito = await spark.loadPreset(record, (i, total) =>
+    logProgress(`invio «${record.name}»: chunk ${i + 1} di ${total}…`));
+  if (!esito.ok) { logLine(`invio interrotto: ${esito.error}`); return; }
+
+  await new Promise(r => setTimeout(r, 400));
+  const attuale = await spark.readLiveState();
+  if (!attuale) {
+    logLine('non riesco a rileggere il suono corrente: senza quello l\'editor ' +
+            'partirebbe da valori che potrebbero non essere quelli veri.');
+    return;
+  }
+
+  inModifica = {
+    record,
+    effetti: attuale.effects.map(e => ({
+      name: e.name,
+      enabled: e.enabled,
+      params: e.params.map(p => ({ index: p.index, value: p.value })),
+    })),
+  };
+  $('titoloEditor').textContent = record.name;
+  disegnaCatena();
+  apriPannello('pannelloEditor');
+  logLine(`«${record.name}» è sull'ampli: gira pure.`);
+}
+
+function disegnaCatena() {
+  const catena = $('catena');
+  catena.innerHTML = '';
+  if (!inModifica) return;
+
+  inModifica.effetti.forEach((effetto, posizione) => {
+    const blocco = document.createElement('div');
+    blocco.className = 'blocco' + (effetto.enabled ? '' : ' spento');
+
+    const testa = document.createElement('div');
+    testa.className = 'intestazione';
+    const nomi = document.createElement('div');
+    const categoria = document.createElement('div');
+    categoria.className = 'categoria';
+    categoria.textContent = Spark.CATENA[posizione] || `posizione ${posizione + 1}`;
+    const nome = document.createElement('div');
+    nome.className = 'effetto';
+    nome.textContent = effetto.name;
+    nomi.append(categoria, nome);
+
+    const interruttore = document.createElement('button');
+    interruttore.className = 'interruttore' + (effetto.enabled ? ' acceso' : '');
+    interruttore.textContent = effetto.enabled ? 'acceso' : 'spento';
+    interruttore.addEventListener('click', async () => {
+      effetto.enabled = !effetto.enabled;
+      try {
+        await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
+      } catch (err) {
+        logLine('errore: ' + err.message);
+      }
+      disegnaCatena();
+    });
+
+    testa.append(nomi, interruttore);
+    blocco.appendChild(testa);
+
+    for (const param of effetto.params) {
+      const riga = document.createElement('div');
+      riga.className = 'manopola';
+
+      const numero = document.createElement('span');
+      numero.className = 'numero';
+      numero.textContent = param.index + 1;
+
+      const cursore = document.createElement('input');
+      cursore.type = 'range';
+      cursore.min = 0; cursore.max = 1; cursore.step = 0.01;
+      cursore.value = param.value;
+
+      const valore = document.createElement('span');
+      valore.className = 'valore';
+      valore.textContent = param.value.toFixed(2);
+
+      const muovi = () => {
+        param.value = Number(cursore.value);
+        valore.textContent = param.value.toFixed(2);
+        mandaParametro(effetto.name, param.index, param.value);
+      };
+      cursore.addEventListener('input', muovi);
+      cursore.addEventListener('change', muovi);
+
+      riga.append(numero, cursore, valore);
+      blocco.appendChild(riga);
+    }
+
+    // Trappola già pagata una volta: girare la manopola di un effetto spento
+    // non produce nessun suono, e sembra che il comando non funzioni.
+    if (!effetto.enabled && effetto.params.length) {
+      const avviso = document.createElement('div');
+      avviso.className = 'avviso-spento';
+      avviso.textContent = 'È spento: le manopole non si sentono finché non lo accendi.';
+      blocco.appendChild(avviso);
+    }
+
+    catena.appendChild(blocco);
+  });
+}
+
+/**
+ * Un cursore trascinato genera decine di eventi al secondo, e ogni comando è
+ * una scrittura BLE: mandarli tutti intasa la coda e il suono arriva in
+ * ritardo sul gesto. Si manda al massimo ogni 60 ms, e l'ultimo valore parte
+ * sempre — altrimenti si resterebbe fermi un pelo prima di dove si è lasciato.
+ */
+const inAttesa = new Map();
+let ultimoInvio = 0, timerInvio = null;
+
+function mandaParametro(nomeEffetto, indice, valore) {
+  inAttesa.set(nomeEffetto + '#' + indice, { nomeEffetto, indice, valore });
+  const adesso = Date.now();
+  const manca = Math.max(0, 60 - (adesso - ultimoInvio));
+  if (timerInvio) return;
+  timerInvio = setTimeout(svuotaCoda, manca);
+}
+
+async function svuotaCoda() {
+  timerInvio = null;
+  ultimoInvio = Date.now();
+  const daMandare = [...inAttesa.values()];
+  inAttesa.clear();
+  for (const { nomeEffetto, indice, valore } of daMandare) {
+    try {
+      await spark.send(Spark.commands.changeParam(nomeEffetto, indice, valore));
+    } catch (err) {
+      logLine('errore: ' + err.message);
+      return;
+    }
+  }
+  if (inAttesa.size) timerInvio = setTimeout(svuotaCoda, 60);
+}
+
+$('btnSalvaModifiche').addEventListener('click', async () => {
+  if (!inModifica) return;
+  const { record, effetti } = inModifica;
+  const aggiornato = await store.get(record.id);
+  if (!aggiornato) { logLine('il preset non è più in libreria.'); return; }
+
+  aggiornato.effects = effetti.map(e => ({
+    name: e.name,
+    enabled: e.enabled,
+    params: e.params.map(p => ({ index: p.index, value: p.value })),
+  }));
+  await store.put(aggiornato);
+  logLine(`modifiche salvate su «${aggiornato.name}» in libreria. ` +
+          'Sull\'ampli il preset salvato non cambia finché non lo riscrivi in uno slot.');
+  await ricarica();
+  disegnaPreset();
+  disegnaLive();
+});
 
 /* ====================================================================
    Categorie

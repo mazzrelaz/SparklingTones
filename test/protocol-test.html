@@ -283,6 +283,19 @@ check('senza catena effetti il controllo si ferma lì',
    le forme provate. Si indirizza lo slot direttamente. */
 
 check('0x0127 non esiste più fra i comandi', Spark.commands.savePreset, undefined);
+
+/* ---------- la catena a sette posizioni ----------
+   L'ampli non dice cosa sia cosa, ma l'ordine è fisso: lo dice il protocollo
+   e lo conferma questa cattura reale. È quello che permette all'editor di
+   scrivere «Ampli» sopra il blocco giusto. */
+
+check('sette categorie, una per posizione', Spark.CATENA.length, 7);
+check('l\'ordine della cattura reale corrisponde alle categorie',
+      preset.effects.map(e => e.name),
+      ['bias.noisegate', 'LA2AComp', 'ProCoRat', 'Twin',
+       'ChorusAnalog', 'DelayRe201', 'bias.reverb']);
+check('il quarto blocco è l\'ampli, ed è lì che sta Twin',
+      [Spark.CATENA[3], preset.effects[3].name], ['Ampli', 'Twin']);
 check('lo slot si indirizza nei primi due byte del payload',
       Spark.serializePreset(preset, Spark.slotTarget(2)).slice(0, 2), [0x00, 0x02]);
 check('e il preset software resta un indirizzo distinto',
