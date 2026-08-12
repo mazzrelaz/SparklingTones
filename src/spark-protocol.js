@@ -262,13 +262,31 @@ window.Spark = (function () {
     }),
 
     /**
-     * Salva nello slot indicato quello che c'è nel preset software.
-     * `save_hardware_preset` in SparkIO.ino:947.
+     * Salva in uno slot quello che c'è nel preset software.
+     * `save_hardware_preset(curr_preset, preset_num)` in SparkIO.ino:947.
+     *
+     * Sullo Spark 2 la forma dello Spark 40 — `[0x00, slot]` — riceve l'ack e
+     * **non salva** (verificato il 12 agosto 2026: il preset arriva nel buffer
+     * e suona, ma lo slot resta quello di prima). È lo stesso modo di fallire
+     * dei comandi sugli effetti prima di scoprire il byte `0x00` finale.
+     *
+     * Le opzioni servono a provare le varianti una alla volta, verificando
+     * ognuna rileggendo lo slot:
+     * - `sorgente`: il primo byte. Il nome `curr_preset` suggerisce che sia
+     *   *da dove* si copia, e la nostra sorgente è il preset software `0x7f`,
+     *   non `0x00`. In paulhamsh ogni chiamata reale passa `0` letterale, ma
+     *   lì il suono modificato vive nel preset corrente, non in un buffer.
+     * - `codaZero`: il byte finale che lo Spark 2 pretende su `0x0115` e
+     *   `0x0104`, e che `0x0138` invece non vuole.
      */
-    savePreset: slot => ({
-      cmd: CMD_ACTION, sub: 0x27,
-      data: [...encByte(0x00), ...encByte(slot)],
-    }),
+    savePreset: (slot, options) => {
+      const opts = options || {};
+      const sorgente = opts.sorgente === undefined ? 0x00 : opts.sorgente;
+      return {
+        cmd: CMD_ACTION, sub: 0x27,
+        data: [...encByte(sorgente), ...encByte(slot), ...(opts.codaZero ? [0x00] : [])],
+      };
+    },
 
     changeEffectModel: (oldName, newName) => ({
       cmd: CMD_ACTION, sub: 0x06,
