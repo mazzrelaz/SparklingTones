@@ -24,7 +24,7 @@ tools/explorer.html      tool diagnostico, congelato — single-file, apribile d
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
 test/protocol-test.html  68 test del protocollo contro catture reali
 test/transport-test.html 48 test del trasporto, con send finto e catture reali
-test/store-test.html     89 test della libreria, su un database temporaneo
+test/store-test.html     99 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
 test/fixtures/preset0.js catture condivise fra le suite: preset salvato e stato live
 docs/                    handoff report con la ricerca iniziale sul protocollo
@@ -294,9 +294,34 @@ lo slot salvato resta com'era finché non lo si riscrive.
 **Le sette posizioni sono etichettate per categoria** (`Spark.CATENA`): noise gate,
 compressore, drive, ampli, modulazione, delay, riverbero. L'ordine è documentato e
 confermato da ogni preset letto dal dispositivo — un test lo verifica sulla cattura reale.
-**I parametri restano numerati**: l'ampli non manda i loro nomi e non abbiamo una tabella
-per dedurli. Meglio un numero onesto che un'etichetta inventata sopra una manopola che
-cambia il suono.
+
+### I nomi dei parametri li dà l'utente
+
+L'ampli manda i parametri come indici e basta, e **non esiste una tabella da cui dedurne
+i nomi**: cercata nella documentazione del protocollo, nei sorgenti di riferimento e nelle
+catture, non c'è. Inventarli sarebbe peggio che lasciare un numero, perché un'etichetta
+sbagliata sopra una manopola che cambia il suono la si crede.
+
+Quindi li battezza l'utente, girando e ascoltando: si tocca il numero e si scrive il nome.
+Sono salvati **per modello di effetto** (`settings.nomiParametri`), non per preset, quindi
+si dà una volta e vale in ogni preset che usa quel modello.
+
+`exportAll` porta con sé nomi e categorie, e `importBackup` li **aggiunge** invece di
+sovrascrivere: reimportare un backup vecchio non deve cancellare i battesimi fatti da
+allora. È lavoro dell'utente che non si ricava da nessun'altra parte — perderlo esportando
+sarebbe il modo più stupido di buttarlo via. Non ci vanno invece i banchi, che puntano
+agli id dei preset, e gli id cambiano reimportando.
+
+### Cambiare il modello di un blocco
+
+`0x0106` scambia il modello (`changeEffectModel`), e `Spark.MODELLI` elenca i candidati
+per ogni posizione della catena, presi da `docs/HANDOFF-2026-08-10.md` §3.10 più quelli
+emersi dal backup ufficiale. L'elenco **non è per forza completo** — l'ampli ne conosce
+altri che nessuna fonte elenca — quindi c'è sempre «Scrivilo a mano».
+
+Dopo il cambio **i parametri sono altri**: cambiano di numero e di significato, e i valori
+di prima non vogliono dire più niente. Perciò si rilegge la catena dall'ampli invece di
+indovinare, e si controlla che il modello nuovo sia davvero lì — ack o no.
 
 **Il cursore va strozzato.** Un trascinamento genera decine di eventi al secondo e ogni
 comando è una scrittura BLE: mandarli tutti intasa la coda e il suono arriva in ritardo
@@ -307,10 +332,7 @@ lasciato. Verificato: 41 eventi diventano un comando solo, col valore finale giu
 Il blocco spento si vede spento e lo dice: **girare la manopola di un effetto spento non
 produce nessun suono**, ed è una trappola già pagata una volta.
 
-Ancora da fare, in ordine di utilità discussa con l'utente:
-
-1. **Cambiare il modello di un effetto** dall'editor (`0x0106`, già verificato): oggi si
-   possono regolare gli effetti che ci sono, non sostituire il Twin con un Rectifier.
+Ancora da fare: niente di concordato. Il prossimo passo lo decide l'utente.
 
 `loadPreset` e `storePreset` sono **entrambi verificati sull'hardware**: il primo l'11
 agosto 2026 e riconfermato il 12, il secondo il 12 agosto nella forma nuova (scrittura

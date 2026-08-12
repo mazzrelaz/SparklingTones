@@ -487,6 +487,47 @@ window.PresetStore = (function () {
     },
 
     /* ----------------------------------------------------------------
+       Nomi dei parametri
+
+       L'ampli manda i parametri di un effetto come indici, senza nomi, e non
+       esiste una tabella da cui dedurli: né nella documentazione del
+       protocollo né nei sorgenti di riferimento. Inventarli sarebbe peggio
+       che lasciare un numero, perché un'etichetta sbagliata sopra una
+       manopola che cambia il suono si crede.
+
+       Quindi li scrive l'utente, girando e ascoltando. Sono salvati **per
+       modello di effetto**, non per preset: chi battezza «Mix» il parametro 1
+       di DelayRe201 lo vede così in ogni preset che usa quel delay.
+       ---------------------------------------------------------------- */
+
+    async getParamNames() {
+      return this.getSetting('nomiParametri', {});
+    },
+
+    /** Il nome dato dall'utente, o null se non ne ha ancora dato uno. */
+    async paramName(effetto, indice) {
+      const tutti = await this.getParamNames();
+      const suoi = tutti[effetto];
+      return (suoi && suoi[indice]) || null;
+    },
+
+    /** Battezza un parametro. Un nome vuoto lo riporta al numero. */
+    async setParamName(effetto, indice, nome) {
+      const tutti = await this.getParamNames();
+      const pulito = String(nome || '').trim();
+      const suoi = Object.assign({}, tutti[effetto]);
+
+      if (pulito) suoi[indice] = pulito;
+      else        delete suoi[indice];
+
+      if (Object.keys(suoi).length) tutti[effetto] = suoi;
+      else                          delete tutti[effetto];
+
+      await this.setSetting('nomiParametri', tutti);
+      return tutti;
+    },
+
+    /* ----------------------------------------------------------------
        Categorie
 
        Le categorie sono le stesse etichette del campo `tags` dei record,
@@ -622,12 +663,20 @@ window.PresetStore = (function () {
        Backup
        ---------------------------------------------------------------- */
 
+    /**
+     * Nel backup vanno anche categorie e nomi dei parametri: sono lavoro
+     * dell'utente che non si ricava da nessun'altra parte, e perderli
+     * esportando sarebbe il modo più stupido di buttarli via. Non ci vanno i
+     * banchi, che puntano agli id dei preset — e gli id cambiano reimportando.
+     */
     async exportAll() {
       return {
-        format:     'spark-controller-library',
-        version:    1,
-        exportedAt: new Date().toISOString(),
-        presets:    await this.all(),
+        format:        'spark-controller-library',
+        version:       1,
+        exportedAt:    new Date().toISOString(),
+        categorie:     await this.getSetting('categorie', []),
+        nomiParametri: await this.getParamNames(),
+        presets:       await this.all(),
       };
     },
 
@@ -641,6 +690,22 @@ window.PresetStore = (function () {
         throw new Error('il file non è un backup della libreria');
       }
       if (opts.replace) await this.clear();
+
+      // Categorie e nomi dei parametri si aggiungono a quelli che ci sono
+      // già: reimportare un backup vecchio non deve cancellare i battesimi
+      // fatti da allora.
+      if (Array.isArray(backup.categorie) && backup.categorie.length) {
+        const elenco = await this.getSetting('categorie', []);
+        await this.setSetting('categorie',
+          normalizeTags(elenco.concat(backup.categorie)));
+      }
+      if (backup.nomiParametri && typeof backup.nomiParametri === 'object') {
+        const tutti = await this.getParamNames();
+        for (const [effetto, suoi] of Object.entries(backup.nomiParametri)) {
+          tutti[effetto] = Object.assign({}, suoi, tutti[effetto]);
+        }
+        await this.setSetting('nomiParametri', tutti);
+      }
 
       let imported = 0;
       for (const preset of backup.presets) {

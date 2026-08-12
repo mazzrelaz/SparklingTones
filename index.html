@@ -209,8 +209,13 @@
                           border-radius:12px; background:#2a2d33; color:var(--dim); }
   .blocco .interruttore.acceso { background:#1f3a24; color:var(--green); }
   .manopola { display:flex; align-items:center; gap:10px; margin-top:8px; }
-  .manopola .numero { width:1.4em; text-align:right; color:var(--faint);
-                      font-size:0.74rem; font-family:Consolas,monospace; }
+  .manopola .numero { min-width:5.5em; max-width:8em; text-align:left; color:var(--dim);
+                      font-size:0.74rem; cursor:pointer; overflow:hidden;
+                      text-overflow:ellipsis; white-space:nowrap; }
+  .manopola .numero:hover { color:var(--text); text-decoration:underline dotted; }
+  .manopola .numero.senzaNome { color:var(--faint); font-family:Consolas,monospace; }
+  .blocco .cambia { font-size:0.72rem; padding:4px 10px; border-radius:12px;
+                    background:#2a2d33; color:var(--dim); }
   .manopola input[type=range] { flex:1; min-width:0; accent-color:var(--accent); }
   .manopola .valore { width:3.2em; text-align:right; color:var(--dim);
                       font-size:0.74rem; font-family:Consolas,monospace; }
@@ -312,9 +317,27 @@
     <button class="primary" data-chiudi="pannelloEditor">Fatto</button>
   </div>
   <p class="spiega">Le manopole agiscono <strong>subito</strong> sul suono che l'ampli sta
-    suonando. Niente viene salvato finché non premi «Salva in libreria».
-    I parametri sono numerati perché l'ampli non manda i loro nomi: vai a orecchio.</p>
+    suonando. Niente viene salvato finché non premi «Salva in libreria».<br>
+    L'ampli non manda i nomi dei parametri: girane uno, senti cosa fa e
+    <strong>tocca il numero per battezzarlo</strong>. Il nome vale per quel modello, in
+    ogni preset che lo usa.</p>
   <div id="catena"></div>
+</div>
+
+<!-- scelta del modello per una posizione della catena -->
+<div class="pannello" id="pannelloModelli">
+  <div class="barra-alta">
+    <h2 id="titoloModelli">Scegli il modello</h2>
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloModelli">Annulla</button>
+  </div>
+  <p class="spiega">Cambiare modello azzera i parametri di quel blocco: l'ampli li
+    rimanda suoi, e l'editor li rilegge.</p>
+  <div class="barra-alta">
+    <input type="search" id="cercaModello" placeholder="cerca…" style="flex:1">
+    <button id="btnModelloAMano" class="piccolo">Scrivilo a mano</button>
+  </div>
+  <div id="elencoModelli"></div>
 </div>
 
 <!-- scelta di un preset da mettere in un posto del banco -->
@@ -373,6 +396,7 @@ let tutti      = [];      // tutti i record, nell'ordine dell'utente
 let suAmpli    = [];      // otto posti: il record che sta in quello slot, o null
 let categorie  = [];      // {nome, quanti}
 let banchi     = [];      // banchi salvati, quelli inventati dall'utente
+let nomiParam  = {};      // nomi dati dall'utente ai parametri, per modello
 
 const vista = { cerca: '', categoria: '', soloPreferiti: false, aperto: null };
 const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false };
@@ -385,6 +409,7 @@ async function ricarica() {
   suAmpli   = await store.hardware();
   categorie = await store.allCategories();
   banchi    = await store.getBanks();
+  nomiParam = await store.getParamNames();
   if (live.banco !== BANCO_AMPLI && !banchi.some(b => b.id === live.banco)) {
     live.banco = BANCO_AMPLI;
   }
@@ -470,6 +495,10 @@ document.querySelectorAll('[data-chiudi]').forEach(b => {
     chiudiPannelli();
     if (b.dataset.chiudi === 'pannelloScegli') sceltaInCorso = null;
     if (b.dataset.chiudi === 'pannelloEditor') inModifica = null;
+    if (b.dataset.chiudi === 'pannelloModelli') {
+      modelloInCorso = null;
+      if (inModifica) apriPannello('pannelloEditor');   // si torna all'editor
+    }
   });
 });
 
@@ -1240,8 +1269,16 @@ function disegnaCatena() {
     nome.textContent = effetto.name;
     nomi.append(categoria, nome);
 
+    const cambia = document.createElement('button');
+    cambia.className = 'cambia';
+    cambia.textContent = 'cambia';
+    cambia.title = 'metti un altro modello in questa posizione';
+    cambia.style.marginLeft = 'auto';
+    cambia.addEventListener('click', () => scegliModello(posizione, effetto));
+
     const interruttore = document.createElement('button');
     interruttore.className = 'interruttore' + (effetto.enabled ? ' acceso' : '');
+    interruttore.style.marginLeft = '0';
     interruttore.textContent = effetto.enabled ? 'acceso' : 'spento';
     interruttore.addEventListener('click', async () => {
       effetto.enabled = !effetto.enabled;
@@ -1253,16 +1290,32 @@ function disegnaCatena() {
       disegnaCatena();
     });
 
-    testa.append(nomi, interruttore);
+    testa.append(nomi, cambia, interruttore);
     blocco.appendChild(testa);
 
     for (const param of effetto.params) {
       const riga = document.createElement('div');
       riga.className = 'manopola';
 
+      // L'ampli non manda i nomi dei parametri e non c'è tabella da cui
+      // dedurli: li battezza l'utente, girando e ascoltando. Il nome vale per
+      // il modello, quindi si dà una volta e vale in tutti i preset.
+      const dato = (nomiParam[effetto.name] || {})[param.index];
       const numero = document.createElement('span');
-      numero.className = 'numero';
-      numero.textContent = param.index + 1;
+      numero.className = 'numero' + (dato ? '' : ' senzaNome');
+      numero.textContent = dato || (param.index + 1);
+      numero.title = dato
+        ? `«${dato}» — tocca per rinominarlo`
+        : 'tocca per dargli un nome: varrà per ogni preset che usa ' + effetto.name;
+      numero.addEventListener('click', async () => {
+        const nome = prompt(
+          `Nome del parametro ${param.index + 1} di ${effetto.name}\n` +
+          '(vuoto per tornare al numero):', dato || '');
+        if (nome === null) return;
+        await store.setParamName(effetto.name, param.index, nome);
+        nomiParam = await store.getParamNames();
+        disegnaCatena();
+      });
 
       const cursore = document.createElement('input');
       cursore.type = 'range';
@@ -1296,6 +1349,107 @@ function disegnaCatena() {
 
     catena.appendChild(blocco);
   });
+}
+
+/* ---- cambio del modello in una posizione della catena --------------- */
+
+let modelloInCorso = null;   // { posizione, vecchio }
+
+function scegliModello(posizione, effetto) {
+  modelloInCorso = { posizione, vecchio: effetto.name };
+  $('titoloModelli').textContent = `${Spark.CATENA[posizione]} — ora c'è ${effetto.name}`;
+  $('cercaModello').value = '';
+  disegnaElencoModelli();
+  apriPannello('pannelloModelli');
+}
+
+function disegnaElencoModelli() {
+  const elenco = $('elencoModelli');
+  elenco.innerHTML = '';
+  if (!modelloInCorso) return;
+
+  const termine = $('cercaModello').value.trim().toLowerCase();
+  const candidati = (Spark.MODELLI[modelloInCorso.posizione] || [])
+    .filter(m => !termine || m.toLowerCase().includes(termine));
+
+  if (candidati.length === 0) {
+    elenco.innerHTML = '<div class="vuoto-sezione">Nessun modello con questo nome. ' +
+                       'Se sai come si chiama, scrivilo a mano.</div>';
+    return;
+  }
+
+  for (const modello of candidati) {
+    const voce = document.createElement('div');
+    voce.className = 'voce';
+    const nome = document.createElement('span');
+    nome.className = 'nome';
+    nome.textContent = modello;
+    voce.appendChild(nome);
+    if (modello === modelloInCorso.vecchio) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = 'attuale';
+      voce.appendChild(badge);
+    }
+    voce.addEventListener('click', () => cambiaModello(modello));
+    elenco.appendChild(voce);
+  }
+}
+
+$('cercaModello').addEventListener('input', disegnaElencoModelli);
+
+$('btnModelloAMano').addEventListener('click', () => {
+  const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
+  if (nome && nome.trim()) cambiaModello(nome.trim());
+});
+
+/**
+ * `0x0106` scambia il modello di un blocco. Dopo il cambio **i parametri sono
+ * altri**: cambiano di numero e di significato, e i valori di prima non
+ * vogliono dire più niente. Quindi si rilegge la catena dall'ampli invece di
+ * indovinare, com'è la regola di questo editor.
+ */
+async function cambiaModello(nuovo) {
+  if (!modelloInCorso || !inModifica) return;
+  const { vecchio } = modelloInCorso;
+  modelloInCorso = null;
+  apriPannello('pannelloEditor');       // si torna alle manopole
+  if (nuovo === vecchio) return;
+
+  try {
+    logProgress(`sostituisco ${vecchio} con ${nuovo}…`);
+    await spark.send(Spark.commands.changeEffectModel(vecchio, nuovo));
+    await new Promise(r => setTimeout(r, 500));
+
+    const attuale = await spark.readLiveState();
+    if (!attuale) {
+      logLine(`comando mandato, ma non riesco a rileggere la catena: ` +
+              'riapri «Regola» per vedere com\'è rimasta.');
+      return;
+    }
+    inModifica.effetti = attuale.effects.map(e => ({
+      name: e.name,
+      enabled: e.enabled,
+      params: e.params.map(p => ({ index: p.index, value: p.value })),
+    }));
+    disegnaCatena();
+
+    const adesso = inModifica.effetti[modelloPosizione(vecchio, nuovo)];
+    if (adesso && adesso.name === nuovo) {
+      logLine(`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`);
+    } else {
+      logLine(`l'ampli ha confermato il cambio ma la catena riporta ancora ` +
+              `${vecchio}: il modello potrebbe non esistere con questo nome.`);
+    }
+  } catch (err) {
+    logLine('cambio modello fallito: ' + err.message);
+  }
+}
+
+/** Dove è finito il modello nuovo, per poter dire se il cambio ha attecchito. */
+function modelloPosizione(vecchio, nuovo) {
+  const i = inModifica.effetti.findIndex(e => e.name === nuovo);
+  return i === -1 ? inModifica.effetti.findIndex(e => e.name === vecchio) : i;
 }
 
 /**

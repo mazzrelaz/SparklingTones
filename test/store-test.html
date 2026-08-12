@@ -358,6 +358,48 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('i preset però ci sono ancora tutti', await store.count(), 4);
 
   /* ------------------------------------------------------------------ */
+  group('nomi dei parametri');
+
+  check('all\'inizio nessun parametro ha un nome', await store.getParamNames(), {});
+  check('e chiederne uno non inventa niente', await store.paramName('DelayRe201', 1), null);
+
+  await store.setParamName('DelayRe201', 1, '  Mix  ');
+  check('il nome viene ripulito dagli spazi', await store.paramName('DelayRe201', 1), 'Mix');
+  check('vale per il modello, non per un preset',
+        await store.getParamNames(), { DelayRe201: { 1: 'Mix' } });
+
+  await store.setParamName('DelayRe201', 0, 'Tempo');
+  check('più parametri dello stesso effetto convivono',
+        await store.getParamNames(), { DelayRe201: { 0: 'Tempo', 1: 'Mix' } });
+
+  await store.setParamName('DelayRe201', 1, '');
+  check('un nome vuoto lo riporta al numero',
+        await store.getParamNames(), { DelayRe201: { 0: 'Tempo' } });
+
+  await store.setParamName('DelayRe201', 0, '');
+  check('e tolto l\'ultimo sparisce anche l\'effetto',
+        await store.getParamNames(), {});
+
+  // Battesimi e categorie sono lavoro dell'utente che non si ricava da
+  // nessun'altra parte: perderli esportando sarebbe il modo più stupido di
+  // buttarli via.
+  await store.setParamName('Twin', 4, 'Master');
+  await store.addCategory('Da esportare');
+  const conNomi = await store.exportAll();
+  await store.setSetting('nomiParametri', {});
+  await store.setSetting('categorie', []);
+  await store.importBackup(conNomi);
+  check('i nomi dei parametri sopravvivono al giro di backup',
+        await store.paramName('Twin', 4), 'Master');
+  check('e le categorie dichiarate anche',
+        (await store.getSetting('categorie', [])).includes('Da esportare'), true);
+
+  await store.setParamName('Twin', 4, 'Volume');
+  await store.importBackup(conNomi);
+  check('reimportare un backup vecchio non sovrascrive un battesimo più recente',
+        await store.paramName('Twin', 4), 'Volume');
+
+  /* ------------------------------------------------------------------ */
   group('categorie del backup dell\'app ufficiale');
 
   const conCategoria = makePreset('uuid-e', 'Blues Rig', ['Bassman']);
