@@ -41,16 +41,26 @@
 <body>
 
 <h1>Prova di cambio modello (0x0106)</h1>
-<div class="sub">Il cambio di modello non ha effetto sull'ampli: stessa forma di
-fallimento dei comandi sugli effetti prima di scoprire il byte <code>0x00</code> finale —
-l'ack arriva, il suono no. Ogni variante qui sotto cambia <b>una cosa sola</b> nel
-messaggio e <b>verifica da sé</b> rileggendo la catena dall'ampli: non serve ascoltare.
-Nessuno slot viene toccato — si lavora sul suono corrente.</div>
+<div class="sub">Ogni variante cambia <b>una cosa sola</b> nel messaggio e <b>verifica da
+sé</b> rileggendo la catena dall'ampli: non serve ascoltare. Nessuno slot viene toccato —
+si lavora sul suono corrente.<br><br>
+<b>Esito del 12 agosto 2026:</b> la variante A — quella che l'app manda già — funziona,
+mentre nell'app il cambio non ha effetto. Restava una differenza sola: «Regola» prima
+manda il preset nel buffer software <code>0x7f</code>, quindi l'ampli non sta suonando uno
+slot. La riga qui sotto rimette l'ampli in quello stato: se dopo averla premuta la
+variante A smette di funzionare, il colpevole è quello.</div>
 
 <div class="row">
   <span id="status" class="status off">non connesso</span>
   <button id="btnConnect" class="primary">Connetti</button>
   <button id="btnLeggi" disabled>Rileggi la catena</button>
+</div>
+
+<div class="row">
+  <label for="pick">stato di partenza</label>
+  <select id="pick"></select>
+  <button id="btnComeRegola" disabled>Mandalo nel buffer software, come «Regola»</button>
+  <button id="btnSlot" disabled>Torna allo slot A1</button>
 </div>
 
 <div id="catena">catena non ancora letta</div>
@@ -70,10 +80,13 @@ Nessuno slot viene toccato — si lavora sul suono corrente.</div>
 <script src="../src/spark-protocol.js"></script>
 <script src="../src/spark-transport.js"></script>
 <script src="../src/spark-effetti.js"></script>
+<script src="../src/preset-store.js"></script>
 <script>
 'use strict';
 
 const $ = id => document.getElementById(id);
+const store = new PresetStore();
+let libreria = [];
 let catena = [];          // gli effetti come li riporta l'ampli adesso
 
 const spark = new SparkTransport({
@@ -84,6 +97,8 @@ const spark = new SparkTransport({
     el.textContent = state === 'connected' || state === 'connecting' ? label : 'non connesso';
     $('btnConnect').disabled = state === 'connected';
     $('btnLeggi').disabled   = state !== 'connected';
+    $('btnComeRegola').disabled = state !== 'connected';
+    $('btnSlot').disabled       = state !== 'connected';
     document.querySelectorAll('#variants button').forEach(b => b.disabled = state !== 'connected');
   },
   onLog: msg => log(msg),
@@ -166,13 +181,37 @@ async function leggiCatena() {
   const live = await spark.readLiveState();
   if (!live) { log('non riesco a rileggere lo stato live'); return null; }
   catena = live.effects.map(e => ({ name: e.name, enabled: e.enabled, n: e.params.length }));
-  $('catena').textContent = catena
+  $('catena').textContent = `suono corrente: «${live.name}»\n\n` + catena
     .map((e, i) => `${i} ${Spark.CATENA[i].padEnd(12)} ${e.name}` +
                    `${e.enabled ? '' : ' [spento]'}  (${e.n} parametri)`)
     .join('\n');
   riempiScelte();
   return catena;
 }
+
+/**
+ * Rimette l'ampli nello stato in cui lo mette «Regola»: il preset nel buffer
+ * software `0x7f` e l'ampli che suona quello, non uno slot. È l'unica
+ * differenza rimasta fra la sonda, dove il cambio modello funziona, e l'app,
+ * dove non ha effetto.
+ */
+$('btnComeRegola').addEventListener('click', async () => {
+  const record = libreria.find(r => r.id === Number($('pick').value));
+  if (!record) { log('la libreria è vuota: apri prima index.html e leggi dall\'ampli'); return; }
+  log(`── mando «${record.name}» nel buffer software, come fa «Regola»`);
+  const esito = await spark.loadPreset(record);
+  if (!esito.ok) { log('invio interrotto: ' + esito.error); return; }
+  await new Promise(r => setTimeout(r, 400));
+  await leggiCatena();
+  log('adesso l\'ampli suona il buffer software (il LED lampeggia). Riprova la variante A.');
+});
+
+$('btnSlot').addEventListener('click', async () => {
+  await spark.send(Spark.commands.changePreset(0));
+  await new Promise(r => setTimeout(r, 400));
+  await leggiCatena();
+  log('l\'ampli è tornato sullo slot A1.');
+});
 
 function riempiScelte() {
   const pos = $('pos');
@@ -266,11 +305,24 @@ $('btnConnect').addEventListener('click', async () => {
 
 $('btnLeggi').addEventListener('click', leggiCatena);
 
-costruisciTabella();
-if (!navigator.bluetooth) {
-  $('btnConnect').disabled = true;
-  log('Web Bluetooth non disponibile in questo browser.');
-}
+(async function start() {
+  costruisciTabella();
+  if (!navigator.bluetooth) {
+    $('btnConnect').disabled = true;
+    log('Web Bluetooth non disponibile in questo browser.');
+  }
+  await store.open();
+  libreria = await store.all();
+  for (const record of libreria) {
+    const o = document.createElement('option');
+    o.value = record.id;
+    o.textContent = record.name;
+    $('pick').appendChild(o);
+  }
+  if (libreria.length === 0) {
+    log('la libreria è vuota: per la prova «come Regola» apri prima index.html.');
+  }
+})();
 </script>
 </body>
 </html>

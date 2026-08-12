@@ -21,7 +21,7 @@ tools/serve.ps1          server statico su localhost, per provare la PWA senza p
 tools/make-icons.ps1     rigenera le icone di icons/ con System.Drawing
 tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
-tools/model-probe.html   idem per 0x0106, il cambio modello che non ha effetto
+tools/model-probe.html   idem per 0x0106: dieci varianti del cambio modello
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
 test/protocol-test.html  87 test del protocollo contro catture reali
@@ -415,15 +415,41 @@ Dopo il cambio **i parametri sono altri**: cambiano di numero e di significato, 
 di prima non vogliono dire più niente. Perciò si rilegge la catena dall'ampli invece di
 indovinare, e si controlla che il modello nuovo sia davvero lì — ack o no.
 
-**Sull'hardware non funziona** (riferito dall'utente il 12 agosto 2026, su ampli e drive):
-si sceglie il modello e non succede niente. Il messaggio è quello del riferimento —
-due stringhe prefissate (`SparkIO.ino:900`, docs §3.10) — più il byte `0x00` finale che
-sullo Spark 2 serve a `0x0115` e `0x0104`, ma quel byte lì **non è mai stato verificato**:
-è stato messo per analogia. È la stessa forma di fallimento di `0x0127` e dei comandi
-sugli effetti prima che si scoprisse il byte finale, e si affronta allo stesso modo —
-`tools/model-probe.html` prova dieci varianti del messaggio una alla volta e **verifica
-ognuna rileggendo la catena**, senza bisogno di ascoltare. Da rifare appena l'ampli è a
-portata; finché non lo si sa, non spostare il codice a indovinare.
+**Nell'app non funziona, ma il messaggio è giusto.** L'utente ha segnalato il 12 agosto
+2026 che scegliendo un modello (ampli, drive) non succede niente. `tools/model-probe.html`
+ha provato dieci varianti sull'ampli vero, ognuna verificata rileggendo la catena, e il
+risultato è netto:
+
+| variante | forma | esito |
+|---|---|---|
+| **A** | prefissate + `0x00` finale — **quella che l'app manda già** | **funziona** |
+| B | senza byte finale, come lo Spark 40 | nessun effetto |
+| C | due `0x00` in coda | funziona |
+| D, E | stringhe corte `0xa0+len` senza il byte di lunghezza | nessun effetto |
+| F, G | posizione della catena in testa o in coda | nessun effetto |
+| H | solo il nome nuovo | nessun effetto |
+| I | A, poi `0x0115` che riaccende | funziona |
+| J | nomi invertiti | nessun effetto |
+
+Quindi, tutto verificato sull'hardware: **anche `0x0106` vuole il byte `0x00` finale** (B
+fallisce, A no) e un secondo `0x00` non dà fastidio; **le stringhe devono essere quelle
+prefissate** `[len, 0xa0+len, …]`, non le corte; e **il primo nome è il modello che c'è
+adesso**, il secondo quello nuovo — l'ordine del riferimento (`Spark.ino:157`), non
+l'inverso.
+
+Resta quindi da spiegare perché nell'app non funzioni, mandando gli stessi byte. **Una
+differenza sola è rimasta**: nella sonda l'ampli sta suonando uno slot, mentre «Regola»
+prima manda il preset nel buffer software `0x7f` (`loadPreset`), e da lì in poi l'ampli
+non suona più uno slot. Il sospetto è che `0x0106` non abbia effetto sul buffer software —
+plausibile, perché cambiare modello vuol dire ricostruire un blocco DSP, mentre `0x0104` e
+`0x0115`, che lì funzionano, toccano solo dei valori. La sonda ha il pulsante «Mandalo nel
+buffer software, come Regola» apposta: si preme quello e si riprova la variante A. **Da
+misurare — non toccare il codice prima.**
+
+Se il sospetto è giusto, attenzione a come si rimedia: non si può ricostruire il blocco in
+locale e rimandare il preset intero, perché **i parametri del modello nuovo non li
+sappiamo** — quanti sono e quanto valgono lo decide l'ampli, ed è per questo che dopo il
+cambio la catena si rilegge.
 
 **Il cursore va strozzato.** Un trascinamento genera decine di eventi al secondo e ogni
 comando è una scrittura BLE: mandarli tutti intasa la coda e il suono arriva in ritardo
