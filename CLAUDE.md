@@ -177,6 +177,13 @@ caricati sull'ampli stanno per conto loro**, sopra, con l'etichetta A1…B4 e i 
 LED (rosso il banco A, verde il B). Tutti gli altri stanno sotto. Un preset non compare
 mai in tutti e due i posti.
 
+**Alla connessione la lettura degli otto slot parte da sola** (`leggiDallAmpli`, chiamata
+dopo `identify`): la prima cosa che serve sapere è cosa c'è davvero sull'ampli, e
+chiederlo a mano è un passaggio che si dimentica. Non costa niente perché `importFromAmp`
+non tocca il lavoro dell'utente. Durante la lettura i pulsantoni della vista live restano
+spenti: l'ampli sta rispondendo a otto richieste in fila e premerne uno infilerebbe un
+comando dentro una conversazione già aperta.
+
 `store.hardware()` restituisce sempre otto posti, con `null` dove non sappiamo ancora
 cosa ci sia: la libreria conosce uno slot solo dopo averlo letto o scritto, e gli otto
 riquadri tratteggiati lo dicono senza mentire. Nel disegnare la sezione «In libreria» il

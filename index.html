@@ -1232,23 +1232,47 @@ $('btnConnect').addEventListener('click', async () => {
     await spark.connect();
     await spark.identify();
     $('status').textContent = spark.state.name || 'connesso';
+    // Appena connessi si legge da soli: la prima cosa che serve sapere è
+    // cosa c'è davvero negli otto slot, e chiederlo a mano ogni volta è un
+    // passaggio che si dimentica. `importFromAmp` non tocca il lavoro
+    // dell'utente, quindi farlo in automatico non costa niente.
+    await leggiDallAmpli();
   } catch (err) {
     logLine('errore: ' + err.message);
   }
 });
 
-$('btnRead').addEventListener('click', async () => {
+$('btnRead').addEventListener('click', () => leggiDallAmpli());
+
+/**
+ * Legge gli otto slot e li riversa in libreria.
+ *
+ * Durante la lettura i pulsantoni della vista live restano spenti: l'ampli
+ * sta rispondendo a otto richieste in fila, e premerne uno nel mezzo
+ * infilerebbe un comando dentro una conversazione già in corso.
+ */
+async function leggiDallAmpli() {
+  if (!spark.connected) return;
   $('btnRead').disabled = true;
-  const presets = await spark.readLibrary(8, (i, max) => {
-    logProgress(`lettura slot ${i + 1} di ${max}…`);
-  });
-  const { added, updated } = await store.importFromAmp(presets);
-  logLine(`letti ${presets.length} preset: ${added} nuovi, ${updated} aggiornati`);
+  live.occupato = true;
+  disegnaLive();
+
+  try {
+    const presets = await spark.readLibrary(8, (i, max) => {
+      logProgress(`lettura slot ${i + 1} di ${max}…`);
+    });
+    const { added, updated } = await store.importFromAmp(presets);
+    logLine(`letti ${presets.length} preset dall'ampli: ${added} nuovi, ${updated} aggiornati`);
+  } catch (err) {
+    logLine('lettura interrotta: ' + err.message);
+  }
+
+  live.occupato = false;
   $('btnRead').disabled = !spark.connected;
   await ricarica();
   disegnaPreset();
   disegnaLive();
-});
+}
 
 // Legge il suono attivo senza toccare nulla: serve sia a sapere cosa sta
 // suonando l'ampli, sia a catturare il payload quando non sappiamo leggerlo.
