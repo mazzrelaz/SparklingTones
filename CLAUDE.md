@@ -172,8 +172,11 @@ live era una navigazione: il browser buttava via tutto e all'ampli toccava ricon
 a mano ogni volta. Nessuna API lo evita — `navigator.bluetooth.getDevices()` al più
 risparmia la finestra di scelta, ma la riconnessione resta. L'unico rimedio vero è non
 navigare: dal 12 agosto 2026 le due viste sono in `index.html` e si scambiano cambiando
-una classe sul `body`, quindi `spark` resta lo stesso oggetto. Verificato che l'istanza
-sopravviva al passaggio, in tutte e due le direzioni.
+una classe sul `body`, quindi `spark` resta lo stesso oggetto.
+
+**Verificato sull'hardware il 12 agosto 2026**, dal telefono sul sito pubblicato: con
+l'ampli connesso si passa fra libreria e live avanti e indietro e la connessione non
+cade. Prima di questa modifica cadeva a ogni passaggio, quindi la prova distingue.
 
 Il passaggio è sull'hash (`#live` / `#libreria`) e non su una variabile: così il tasto
 indietro di Android torna alla libreria invece di chiudere l'app, e la scorciatoia
