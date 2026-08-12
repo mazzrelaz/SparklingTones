@@ -452,38 +452,6 @@ window.Spark = (function () {
   const CATENA = ['Noise gate', 'Comp / Wah', 'Drive', 'Ampli',
                   'Modulazione', 'Delay', 'Riverbero'];
 
-  /**
-   * I modelli che si possono mettere in ogni posizione della catena, nello
-   * stesso ordine di `CATENA`. Presi dalla documentazione del protocollo
-   * (`docs/HANDOFF-2026-08-10.md` §3.10), più quelli emersi dal backup
-   * dell'app ufficiale e accettati dall'ampli.
-   *
-   * L'elenco non è per forza completo — l'ampli ne conosce altri che nessuna
-   * fonte elenca — quindi la UI lascia sempre scrivere un nome a mano.
-   */
-  const MODELLI = [
-    ['bias.noisegate'],
-    ['LA2AComp', 'BlueComp', 'Compressor', 'BassComp', 'BBEOpticalComp',
-     'Comp76', 'JH.Vox846'],
-    ['Booster', 'DistortionTS9', 'Overdrive', 'Fuzz', 'ProCoRat', 'BassBigMuff',
-     'GuitarMuff', 'MaestroBassmaster', 'SABdriver', 'KlonCentaurSilver',
-     'JH.AxisFuzz', 'JH.SupaFuzz', 'JH.Octavia', 'JH.FuzzTone'],
-    ['RolandJC120', 'Twin', 'ADClean', '94MatchDCV2', 'Bassman', 'AC Boost',
-     'Checkmate', 'TwoStoneSP50', 'Deluxe65', 'Plexi', 'OverDrivenJM45',
-     'OverDrivenLuxVerb', 'Bogner', 'OrangeAD30', 'AmericanHighGain', 'SLO100',
-     'YJM100', 'Rectifier', 'EVH', 'SwitchAxeLead', 'Invader', 'BE101',
-     'Acoustic', 'AcousticAmpV2', 'FatAcousticV2', 'FlatAcoustic', 'GK800',
-     'Sunny3000', 'W600', 'Hammer500', 'ODS50CN', 'Preamp73', 'JH.DualShowman',
-     'JH.Sunn100', 'BluesJrTweed', 'JH.JTM45', 'JH.Bassman50Silver',
-     'JH.SuperLead100', 'JH.SoundCity100', '6505Plus'],
-    ['Tremolo', 'ChorusAnalog', 'Flanger', 'Phaser', 'Vibrato01', 'UniVibe',
-     'Cloner', 'MiniVibe', 'Tremolator', 'TremoloSquare', 'JH.VoodooVibeJr',
-     'GuitarEQ6', 'BassEQ6'],
-    ['DelayMono', 'DelayEchoFilt', 'VintageDelay', 'DelayReverse',
-     'DelayMultiHead', 'DelayRe201'],
-    ['bias.reverb'],
-  ];
-
   const LIVE_TARGET      = { bank: 0x01, number: 0x00 };
   const slotTarget       = n => ({ bank: 0x00, number: n });
   const SOFTWARE_PRESET  = 0x7f;
@@ -664,7 +632,7 @@ window.Spark = (function () {
     assemblePresetPayload, parsePreset, serializePreset, splitPresetIntoChunks,
     controllaPreset,
     presetChecksum, PARAM_MARKER, PRESET_CHUNK_SIZE,
-    LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET, CATENA, MODELLI,
+    LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET, CATENA,
     slotLabel, SLOTS_PER_BANK,
     CMD_ACTION, CMD_QUERY, CMD_NOTIFY, CMD_ACK, TYPE,
   };

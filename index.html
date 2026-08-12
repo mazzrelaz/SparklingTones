@@ -1317,7 +1317,8 @@ function disegnaCatena() {
       // sempre, quello della tabella è una proposta ancora da verificare a
       // orecchio, e il numero è la verità quando non sappiamo niente.
       const dato     = (nomiParam[effetto.name] || {})[param.index];
-      const proposto = SparkEffetti.manopola(effetto.name, param.index);
+      const proposto = SparkEffetti.manopola(effetto.name, param.index,
+                                             effetto.params.length);
       const numero = document.createElement('span');
       numero.className = 'numero' +
         (dato ? '' : proposto ? ' daTabella' : ' senzaNome');
@@ -1390,7 +1391,7 @@ function disegnaElencoModelli() {
   if (!modelloInCorso) return;
 
   const termine = $('cercaModello').value.trim().toLowerCase();
-  const candidati = (Spark.MODELLI[modelloInCorso.posizione] || [])
+  const candidati = (SparkEffetti.MODELLI[modelloInCorso.posizione] || [])
     .filter(m => !termine || m.toLowerCase().includes(termine));
 
   if (candidati.length === 0) {

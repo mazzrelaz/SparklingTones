@@ -14,7 +14,7 @@ icons/                   icone PNG generate con lo script PowerShell in tools/
 src/spark-protocol.js    encoder/decoder puro, senza I/O — il cuore del progetto
 src/spark-transport.js   connessione BLE, coda di invio, attesa risposte, lettura preset
 src/preset-store.js      libreria su IndexedDB, import dall'ampli, backup, banchi, categorie
-src/spark-effetti.js     nomi leggibili di effetti e manopole, dettati dall'utente
+src/spark-effetti.js     nomi di effetti e manopole + elenco modelli, dal catalogo Soundshed
 src/spark-backup.js      legge preset_backup.zip dell'app ufficiale, senza librerie
 src/pwa.js               registra il service worker, «installa» e «versione nuova»
 tools/serve.ps1          server statico su localhost, per provare la PWA senza pubblicarla
@@ -23,7 +23,7 @@ tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
-test/protocol-test.html  76 test del protocollo contro catture reali
+test/protocol-test.html  87 test del protocollo contro catture reali
 test/transport-test.html 48 test del trasporto, con send finto e catture reali
 test/store-test.html     99 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
@@ -298,23 +298,34 @@ confermato da ogni preset letto dal dispositivo — un test lo verifica sulla ca
 
 ### La tabella dei nomi: `src/spark-effetti.js`
 
-Nessuna fonte dice come si chiamano gli effetti in chiaro né le loro manopole. La tabella
-la **detta l'utente**, un pezzo alla volta per categoria, leggendo l'app ufficiale.
-Struttura di una riga:
+Nessuna fonte del progetto diceva come si chiamano gli effetti in chiaro né le loro
+manopole. La tabella viene dal catalogo di **Soundshed**, app open source per gli Spark,
+licenza MIT (`src/spork/src/devices/spark/sparkFxCatalog.ts`) — l'idea è dell'utente, e
+ha risparmiato giorni di dettatura.
 
-```js
-'LA2AComp': { nome: 'LA Comp', manopole: ['Gain', 'Peak Reduction', 'Limit / Compress'] },
-```
+**L'ordine sullo schermo non è l'ordine degli indici, ed è il punto di tutto.** Su un
+ampli le manopole si leggono Gain, Bass, Middle, Treble, Master, ma negli indici stanno
+`Gain(0), Treble(1), Middle(2), Bass(3), Master(4)`: bassi e alti invertiti. Su LA Comp
+l'interruttore Limit/Compress è il parametro 0, non l'ultimo come appare. Trascrivendo
+dall'interfaccia — che è come avevamo cominciato — si sbagliava in silenzio. Due test
+fissano proprio questi due casi.
 
-`manopole` è **in ordine di indice**. Il rischio noto è che l'ordine sullo schermo
-dell'app non sia quello degli indici nel protocollo: per questo i nomi della tabella si
-vedono *in corsivo*, come proposte da verificare girando, e un nome scritto a mano vince
-sempre. Un test controlla che nessuna riga dichiari più manopole di quante l'ampli ne
-manda davvero nella cattura reale — è la rete che prende una riga sbagliata mentre la
-tabella cresce.
+Restano **proposte**: il catalogo è nato per lo Spark 40 e i nomi degli ampli sono quelli
+di Soundshed, non di Positive Grid. Per questo si vedono *in corsivo*, un nome scritto a
+mano vince sempre, e `manopola()` **scarta l'intera riga** se dichiara più manopole di
+quante l'ampli ne manda per quell'effetto — meglio numeri onesti che nomi su manopole
+altrui. Un test fa lo stesso controllo sulla cattura reale.
 
-Aggiungere una categoria è solo una riga di dati: la UI, il salvataggio e la precedenza
-sono già a posto.
+Il riverbero è l'unico adattamento: Soundshed lo spezza in nove voci `bias.reverb.N`, una
+per tipo, tutte con le stesse sei manopole. Il nostro ampli manda un solo `bias.reverb`
+con **sette** parametri, quindi si tengono i sei nomi e il settimo — quasi certamente il
+tipo — resta un numero. Il parametro 0 è confermato da un'altra strada: girando la
+manopola fisica del riverbero l'ampli manda `bias.reverb` parametro 0 (docs §3.6).
+
+`MODELLI` sta nello stesso file e viene dallo stesso catalogo, più i modelli che
+compaiono nei preset dell'utente ma che lì non ci sono (`JH.FuzzTone`, `Comp76`,
+`Preamp73`, gli altri `JH.*`): di quelli non sappiamo i nomi delle manopole e restano
+numerate.
 
 ### I nomi dei parametri li dà l'utente
 

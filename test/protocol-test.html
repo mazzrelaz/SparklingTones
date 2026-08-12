@@ -309,13 +309,20 @@ check('uno che non conosciamo resta il suo identificativo',
 check('le manopole del noise gate',
       [SparkEffetti.manopola('bias.noisegate', 0), SparkEffetti.manopola('bias.noisegate', 1)],
       ['Threshold', 'Decay']);
-check('le manopole del compressore, interruttore compreso',
-      SparkEffetti.TABELLA['LA2AComp'].manopole,
-      ['Gain', 'Peak Reduction', 'Limit / Compress']);
 check('un indice oltre la fine non inventa niente',
       SparkEffetti.manopola('bias.noisegate', 9), null);
 check('un effetto fuori tabella nemmeno',
       SparkEffetti.manopola('QualcosaDiIgnoto', 0), null);
+
+// Le due prove che dicono perché la tabella viene da Soundshed e non da come
+// le manopole appaiono sullo schermo dell'app: lì l'ordine è un altro.
+check('sull\'ampli gli indici sono Gain, Treble, Middle, Bass, Master — non ' +
+      'l\'ordine in cui si leggono',
+      SparkEffetti.TABELLA['Twin'].manopole,
+      ['Gain', 'Treble', 'Middle', 'Bass', 'Master']);
+check('e su LA Comp l\'interruttore Limit/Compress è il parametro 0, non l\'ultimo',
+      SparkEffetti.TABELLA['LA2AComp'].manopole,
+      ['Limit/Compress', 'Gain', 'Peak Reduction']);
 
 // La cattura reale è il metro: se la tabella dichiara più manopole di quante
 // l'ampli ne manda, quella riga è sbagliata.
@@ -325,6 +332,19 @@ for (const effetto of preset.effects) {
   check(`${effetto.name}: la tabella non dichiara più manopole di quelle vere`,
         voce.manopole.length <= effetto.params.length, true);
 }
+
+// E quando ne dichiara di più non si usa affatto: numeri onesti.
+check('una riga incompatibile con l\'ampli viene scartata, non adattata',
+      SparkEffetti.manopola('Twin', 0, 3), null);
+check('mentre se ci sta viene usata', SparkEffetti.manopola('Twin', 1, 5), 'Treble');
+check('affidabile dice la stessa cosa',
+      [SparkEffetti.affidabile('Twin', 3), SparkEffetti.affidabile('Twin', 5)], [false, true]);
+
+check('ogni posizione della catena ha i suoi modelli',
+      SparkEffetti.MODELLI.length, Spark.CATENA.length);
+check('i modelli della cattura reale sono tutti offerti nella loro posizione',
+      preset.effects.map((e, i) => SparkEffetti.MODELLI[i].includes(e.name)),
+      [true, true, true, true, true, true, true]);
 check('lo slot si indirizza nei primi due byte del payload',
       Spark.serializePreset(preset, Spark.slotTarget(2)).slice(0, 2), [0x00, 0x02]);
 check('e il preset software resta un indirizzo distinto',
