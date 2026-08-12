@@ -241,6 +241,135 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('un file estraneo viene rifiutato', errore, 'il file non è un backup della libreria');
 
   /* ------------------------------------------------------------------ */
+  group('gli otto dell\'ampli');
+
+  const suAmpli = await store.hardware();
+  check('hardware restituisce sempre otto posti', suAmpli.length, 8);
+  check('ogni preset sta al suo slot, i posti ignoti restano vuoti',
+        suAmpli.map(r => (r ? r.name : null)),
+        ['Nylon Reverb', 'Hey Jimi', null, null, null, 'Europa', null, null]);
+
+  /* ------------------------------------------------------------------ */
+  group('banchi');
+
+  const idShine = (await store.byUuid('uuid-a')).id;
+  const idJimi  = (await store.byUuid('uuid-b')).id;
+
+  check('non c\'è nessun banco all\'inizio', (await store.getBanks()).length, 0);
+
+  const banco = await store.addBank('Primo set');
+  check('un banco nasce con otto posti vuoti',
+        [banco.nome, banco.posti],
+        ['Primo set', [null, null, null, null, null, null, null, null]]);
+
+  await store.setBankSlot(banco.id, 0, idShine);
+  await store.setBankSlot(banco.id, 7, idJimi);
+  check('i preset finiscono nei posti scelti',
+        (await store.getBanks())[0].posti,
+        [idShine, null, null, null, null, null, null, idJimi]);
+
+  await store.setBankSlot(banco.id, 0, null);
+  check('un posto si può svuotare', (await store.getBanks())[0].posti[0], null);
+
+  let fuoriBanco = null;
+  try { await store.setBankSlot(banco.id, 8, idShine); } catch (e) { fuoriBanco = e.message; }
+  check('un posto oltre l\'ottavo è un errore',
+        fuoriBanco, 'posto 8 fuori dal banco: ce ne sono 8');
+
+  await store.renameBank(banco.id, 'Secondo set');
+  check('un banco si rinomina', (await store.getBanks())[0].nome, 'Secondo set');
+
+  const daButtare = await store.add(makePreset('uuid-x', 'Usa e getta', []));
+  await store.setBankSlot(banco.id, 3, daButtare);
+  check('il preset appena messo occupa il posto',
+        (await store.getBanks())[0].posti[3], daButtare);
+  await store.remove(daButtare);
+  check('cancellare un preset lascia il posto vuoto, non un pulsante morto',
+        (await store.getBanks())[0].posti[3], null);
+
+  await store.addBank('Terzo set');
+  check('i banchi si accumulano',
+        (await store.getBanks()).map(b => b.nome), ['Secondo set', 'Terzo set']);
+  await store.removeBank(banco.id);
+  check('un banco si elimina', (await store.getBanks()).map(b => b.nome), ['Terzo set']);
+
+  /* ------------------------------------------------------------------ */
+  group('categorie');
+
+  check('le categorie in uso compaiono anche senza essere state dichiarate',
+        (await store.allCategories()).map(c => c.nome + ':' + c.quanti).join(' '),
+        'acustica:1 fuzz:1 Gilmour:1 hendrix:1 pink floyd:1');
+
+  await store.addCategory('  Assoli  ');
+  check('una categoria si può creare prima di avere qualcosa da metterci',
+        (await store.allCategories())[0], { nome: 'Assoli', quanti: 0 });
+
+  await store.addCategory('assoli');
+  check('crearla due volte non la duplica',
+        (await store.allCategories()).filter(c => c.nome.toLowerCase() === 'assoli').length, 1);
+
+  await store.addTag(idShine, 'Assoli');
+  check('assegnarla la fa contare',
+        (await store.allCategories())[0], { nome: 'Assoli', quanti: 1 });
+
+  await store.renameCategory('assoli', 'Assoli lunghi');
+  check('rinominare cambia il nome sui preset',
+        (await store.get(idShine)).tags, ['Gilmour', 'pink floyd', 'Assoli lunghi']);
+  check('e anche nell\'elenco', (await store.allCategories())[0].nome, 'Assoli lunghi');
+
+  await store.removeCategory('GILMOUR');
+  check('eliminare una categoria la toglie dai preset, senza badare al maiuscolo',
+        (await store.get(idShine)).tags, ['pink floyd', 'Assoli lunghi']);
+
+  const azzerate = await store.clearCategories();
+  check('azzerare le conta tutte, dichiarate e no', azzerate, 5);
+  check('dopo l\'azzeramento non ne resta nessuna', (await store.allCategories()).length, 0);
+  check('e nessun preset ne porta più',
+        (await store.all()).every(r => r.tags.length === 0), true);
+  check('i preset però ci sono ancora tutti', await store.count(), 4);
+
+  /* ------------------------------------------------------------------ */
+  group('categorie del backup dell\'app ufficiale');
+
+  const conCategoria = makePreset('uuid-e', 'Blues Rig', ['Bassman']);
+  conCategoria.tags = ['Blues'];
+  await store.importFromBackup([conCategoria]);
+  check('le categorie del backup non entrano in libreria',
+        (await store.byUuid('uuid-e')).tags, []);
+
+  const voluta = makePreset('uuid-f', 'Metal Rig', ['AmericanHighGain']);
+  voluta.tags = ['Metal'];
+  await store.importFromBackup([voluta], { categorieDalBackup: true });
+  check('a richiesta invece entrano', (await store.byUuid('uuid-f')).tags, ['Metal']);
+
+  /* ------------------------------------------------------------------ */
+  group('la scaletta di prima diventa un banco');
+
+  const DB_VECCHIO = DB_NAME + '-vecchio';
+  const vecchio = await new PresetStore(DB_VECCHIO).open();
+  const v1 = await vecchio.add(makePreset('uuid-v1', 'Uno', []));
+  const v2 = await vecchio.add(makePreset('uuid-v2', 'Due', []));
+  await vecchio.addToSetlist(v2);
+  await vecchio.addToSetlist(v1);
+  await vecchio.setSetting('banchi', null);      // com'era prima che i banchi esistessero
+  vecchio.close();
+
+  const riaperto = await new PresetStore(DB_VECCHIO).open();
+  const migrati = await riaperto.getBanks();
+  check('la scaletta si ritrova come primo banco, nello stesso ordine',
+        [migrati.length, migrati[0].nome, migrati[0].posti.slice(0, 2)],
+        [1, 'Scaletta', [v2, v1]]);
+  check('e il banco ha comunque i suoi otto posti', migrati[0].posti.length, 8);
+
+  await riaperto.addBank('Aggiunto dopo');
+  riaperto.close();
+  const ancoraRiaperto = await new PresetStore(DB_VECCHIO).open();
+  check('la migrazione non si ripete a ogni apertura',
+        (await ancoraRiaperto.getBanks()).map(b => b.nome), ['Scaletta', 'Aggiunto dopo']);
+  ancoraRiaperto.close();
+  await PresetStore.deleteDatabase(DB_VECCHIO);
+
+  /* ------------------------------------------------------------------ */
   group('errori');
 
   let mancante = null;

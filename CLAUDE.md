@@ -6,14 +6,14 @@ Web app / PWA, HTML+JS vanilla, zero dipendenze, Web Bluetooth.
 ## Struttura
 
 ```
-index.html               tutta l'app: vista libreria e vista live, nello stesso documento
+index.html               tutta l'app: sezione Preset e sezione Live, nello stesso documento
 live.html                rimando a index.html#live, per le scorciatoie già installate
 manifest.webmanifest     identità della PWA: nome, icone, scorciatoia alla vista live
 sw.js                    service worker: guscio in cache, app utilizzabile offline
 icons/                   icone PNG generate con lo script PowerShell in tools/
 src/spark-protocol.js    encoder/decoder puro, senza I/O — il cuore del progetto
 src/spark-transport.js   connessione BLE, coda di invio, attesa risposte, lettura preset
-src/preset-store.js      libreria su IndexedDB, import dall'ampli, backup, scaletta
+src/preset-store.js      libreria su IndexedDB, import dall'ampli, backup, banchi, categorie
 src/spark-backup.js      legge preset_backup.zip dell'app ufficiale, senza librerie
 src/pwa.js               registra il service worker, «installa» e «versione nuova»
 tools/serve.ps1          server statico su localhost, per provare la PWA senza pubblicarla
@@ -24,7 +24,7 @@ tools/explorer.html      tool diagnostico, congelato — single-file, apribile d
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
 test/protocol-test.html  53 test del protocollo contro catture reali
 test/transport-test.html 47 test del trasporto, con send finto e catture reali
-test/store-test.html     52 test della libreria, su un database temporaneo
+test/store-test.html     80 test della libreria, su un database temporaneo
 test/backup-test.html    26 test del lettore zip e della conversione dal formato ufficiale
 test/fixtures/preset0.js catture condivise fra le suite: preset salvato e stato live
 docs/                    handoff report con la ricerca iniziale sul protocollo
@@ -105,6 +105,14 @@ ricarica niente e le modifiche al CSS non si vedono. Serve `location.reload()`. 
 `unregister()` più `caches.delete()` lasciano il worker vecchio a controllare la scheda
 finché non la si chiude: per una prova pulita conviene aprire una scheda nuova.
 
+**Il 12 agosto 2026 la registrazione del service worker su `serve.ps1` ha smesso di
+funzionare**: `An unknown error occurred when fetching the script`, mentre lo stesso
+`sw.js` si scarica benissimo con una fetch normale (200, `text/javascript`, lunghezza
+giusta) e su un'altra porta fa lo stesso. Prima nella stessa sessione aveva funzionato.
+Non tocca l'app pubblicata — su https il worker si registra — quindi il banco di prova
+locale resta buono per tutto il resto, ma **il service worker va verificato sul sito
+vero**, non qui. Da riprendere se serve provare la cache offline senza pubblicare.
+
 **Pubblicata il 12 agosto 2026** su `https://mazzrelaz.github.io/SparklingTones/`
 (repo `mazzrelaz/SparklingTones`, GitHub Pages da `main` / root). Verificato sul sito
 vero: manifest servito come `application/manifest+json`, service worker attivo con scope
@@ -151,21 +159,58 @@ Provato sul backup reale l'11 agosto 2026: 105 preset importati, e uno di quelli
 rileggendolo**. Gli effetti che compaiono solo nel backup — `UniVibe`, `Comp76`,
 `Preamp73`, i `Vocal*` — sono quindi accettati dall'ampli.
 
-## Vista live
+## Sezione Preset
 
-La vista live serve a suonare, non a catalogare: scaletta di preset presi dalla libreria,
-un pulsantone per ciascuno. Il compromesso che la governa: un preset che sta già in uno
+Due elenchi separati, ed è la richiesta che governa tutto il resto: **gli otto preset
+caricati sull'ampli stanno per conto loro**, sopra, con l'etichetta A1…B4 e i colori dei
+LED (rosso il banco A, verde il B). Tutti gli altri stanno sotto. Un preset non compare
+mai in tutti e due i posti.
+
+`store.hardware()` restituisce sempre otto posti, con `null` dove non sappiamo ancora
+cosa ci sia: la libreria conosce uno slot solo dopo averlo letto o scritto, e gli otto
+riquadri tratteggiati lo dicono senza mentire. Nel disegnare la sezione «In libreria» il
+confronto va fatto **per id**, non per oggetto: `hardware()` rilegge dal database e
+restituisce copie diverse dagli stessi record che stanno in `tutti`.
+
+### Categorie
+
+Le categorie sono le stesse etichette del campo `tags`, con accanto un elenco governato
+dall'utente in `settings.categorie`. L'elenco mostrato è **l'unione** fra quello salvato
+e quelle davvero in uso: si può creare una categoria prima di avere qualcosa da metterci,
+e una che arriva da un import compare lo stesso senza doverla registrare a parte.
+
+`renameCategory` e `removeCategory` agiscono anche su tutti i preset che la portano;
+`clearCategories` azzera tutto e serve a ripartire da zero. I preset non si toccano mai:
+perdono l'etichetta, non esistono di meno.
+
+**Le categorie del backup dell'app ufficiale non entrano più in libreria.** `parseBackup`
+continua a riportarle perché stanno nel file, ma `importFromBackup` le scarta: arrivavano
+decine di nomi mai scelti da nessuno. Chi le rivuole passa `{categorieDalBackup: true}`.
+
+## Sezione Live
+
+Si suona, non si cataloga. Il compromesso che la governa: un preset che sta già in uno
 slot dell'ampli si attiva **istantaneamente** con `0x0138`, uno che non c'è va trasmesso
-per intero e ci mette circa un secondo. Il pulsante dice quale dei due casi è, e
-**Prepara** scrive i primi 8 della scaletta negli slot così durante il concerto sono
-tutti istantanei.
+per intero e ci mette circa un secondo. Il pulsante dice sempre quale dei due casi è.
 
-La scaletta sta in IndexedDB fra le preferenze (`settings`, aggiunto nella versione 2 del
-database). `getSetlist` scarta gli id di preset cancellati, così non restano pulsanti
-morti. Dopo **Prepara**, `assignSlots` aggiorna quale preset sta in quale slot e toglie
-lo slot a chi è stato sovrascritto.
+**Banchi da otto, quattro a sinistra e quattro a destra**, come i due banchi di LED
+dell'ampli. La griglia è `grid-auto-flow: column` con quattro righe: senza, il riempimento
+sarebbe per riga e i posti 1–4 finirebbero a zigzag invece che tutti a sinistra.
 
-### Perché libreria e live stanno nello stesso file
+- Il banco **«Ampli» non è salvato da nessuna parte**: si ricava dal campo `slot` dei
+  record. Così non può divergere da quello che c'è davvero sull'ampli, e non esiste il
+  problema di tenerlo sincronizzato. Si cambia scrivendo un preset in uno slot dalla
+  sezione Preset, non da qui.
+- I banchi inventati dall'utente stanno in `settings.banchi`. **Non scrivono mai
+  sull'ampli**: scelta esplicita dell'utente, i loro preset si caricano al momento
+  (~1s). Per questo non c'è più nessun «Prepara» — se lo scrivesse, sovrascriverebbe
+  proprio il banco fisso.
+
+`getBanks` sostituisce con `null` gli id di preset cancellati, come faceva `getSetlist`:
+meglio un posto vuoto che un pulsante morto. La scaletta di prima viene convertita in un
+banco «Scaletta» alla prima apertura (`_migraScalettaInBanco`), una volta sola.
+
+### Perché Preset e Live stanno nello stesso file
 
 **La connessione BLE vive nel documento.** Finché erano due pagine, passare da libreria a
 live era una navigazione: il browser buttava via tutto e all'ampli toccava riconnettersi
@@ -178,22 +223,25 @@ una classe sul `body`, quindi `spark` resta lo stesso oggetto.
 l'ampli connesso si passa fra libreria e live avanti e indietro e la connessione non
 cade. Prima di questa modifica cadeva a ogni passaggio, quindi la prova distingue.
 
-Il passaggio è sull'hash (`#live` / `#libreria`) e non su una variabile: così il tasto
-indietro di Android torna alla libreria invece di chiudere l'app, e la scorciatoia
-«Live» del manifest può puntare dritta a `index.html#live`. `live.html` è rimasto come
-rimando, perché la scorciatoia vecchia può essere già installata sul telefono.
+Il passaggio è sull'hash (`#live` / `#preset`) e non su una variabile: così il tasto
+indietro di Android torna ai preset invece di chiudere l'app, e la scorciatoia «Live»
+del manifest può puntare dritta a `index.html#live`. `live.html` è rimasto come rimando,
+perché la scorciatoia vecchia può essere già installata sul telefono.
 
-Attenzione toccando il CSS: le due viste condividono un solo `<style>`. Le regole della
-libreria vanno sotto `body:not(.vista-live)` e quelle live sotto `body.vista-live`,
+Attenzione toccando il CSS: le due sezioni condividono un solo `<style>`. Le regole dei
+preset vanno sotto `body:not(.vista-live)` e quelle live sotto `body.vista-live`,
 comprese le variabili di colore — la vista live è più scura — e la media query del
-telefono, dove nella libreria il titolo si prende una riga sua e nella live no.
+telefono, dove nei preset il titolo si prende una riga sua e nella live sparisce del
+tutto, perché ogni riga di header è spazio tolto ai pulsantoni.
 
 Ancora da fare, in ordine di utilità discussa con l'utente:
 
 1. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
-   (`0x0104`, `0x0115`, `0x0106`) sono già verificati: è lavoro di interfaccia.
+   (`0x0104`, `0x0115`, `0x0106`) sono già verificati: è lavoro di interfaccia. È il
+   prossimo passo concordato, dopo Preset e Live.
 2. **`slot` come lista** invece che campo singolo, così un preset copiato in più slot li
-   mostra tutti.
+   mostra tutti. Con la sezione Preset divisa in due elenchi questo si vede di più: un
+   preset scritto in due slot compare una volta sola, all'ultimo letto.
 
 `loadPreset` e `storePreset` sono **entrambi verificati sull'hardware** (11 agosto 2026).
 

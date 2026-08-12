@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Spark 2 — libreria e live</title>
+<title>Spark 2 — preset e live</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#14161a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -17,7 +17,7 @@
   :root {
     --bg:#14161a; --panel:#181a1f; --line:#24272c; --line-soft:#1f2228;
     --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
-    --accent:#ff6a3d; --green:#7fe08a; --gold:#f0c040;
+    --accent:#ff6a3d; --green:#7fe08a; --gold:#f0c040; --rosso:#ff8080;
   }
   html { height:100%; }
   body { margin:0; min-height:100%; background:var(--bg); color:var(--text);
@@ -31,7 +31,7 @@
     -webkit-user-select:none; user-select:none;
   }
 
-  body.vista-live .solo-libreria { display:none; }
+  body.vista-live .solo-preset { display:none; }
   body:not(.vista-live) .solo-live { display:none; }
 
   header { position:sticky; top:0; z-index:5; background:var(--bg);
@@ -39,10 +39,10 @@
            padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
                    10px calc(16px + env(safe-area-inset-left)); }
   body.vista-live header { position:static; flex:none; padding-bottom:8px; }
-  .titlebar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .titlebar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   h1 { font-size:1.05rem; margin:0; flex:1; }
   .status { padding:3px 9px; border-radius:11px; font-size:0.74rem; font-weight:600; white-space:nowrap; }
-  .status.off { background:#3a2020; color:#ff8080; }
+  .status.off { background:#3a2020; color:var(--rosso); }
   .status.on  { background:#1f3a24; color:var(--green); }
   .status.wait{ background:#3a3520; color:#f0d060; }
 
@@ -53,52 +53,79 @@
   button.icon { background:none; padding:5px 7px; font-size:1rem; line-height:1; color:var(--faint); }
   button.icon:hover { color:var(--text); }
   button.icon.on { color:var(--gold); }
+  button.piccolo { font-size:0.76rem; padding:5px 9px; }
+  button.pericolo { background:#3a2020; color:var(--rosso); }
   #btnVista { background:none; color:var(--accent); padding:8px 4px; }
 
-  .toolbar { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
   input[type=text], input[type=search], select, textarea {
     background:#1e2126; border:1px solid #34383f; color:var(--text);
     padding:8px 10px; border-radius:8px; font:inherit; font-size:0.85rem;
   }
-  #search { flex:1; min-width:150px; }
   textarea { width:100%; resize:vertical; min-height:60px; }
 
-  /* ---- vista libreria ------------------------------------------------ */
+  /* ---- ricerca ------------------------------------------------------- */
 
-  #vistaLibreria { padding:14px 16px 60px; max-width:900px; margin:0 auto; }
-  body.vista-live #vistaLibreria { display:none; }
-  .empty { color:var(--dim); text-align:center; padding:50px 20px; line-height:1.7; }
+  .cerca { display:flex; gap:8px; align-items:center; margin-top:10px; }
+  .cerca input { flex:1; min-width:0; font-size:1rem; padding:10px 12px; }
+
+  /* Le categorie sono pastiglie da toccare, non una tendina: sul telefono
+     una tendina costa due gesti e nasconde quello che c'è. */
+  .pastiglie { display:flex; gap:6px; margin-top:8px; overflow-x:auto;
+               padding-bottom:2px; scrollbar-width:none; }
+  .pastiglie::-webkit-scrollbar { display:none; }
+  .pastiglia { flex:none; background:#23262c; color:#b6bbc3; font-size:0.78rem;
+               padding:5px 11px; border-radius:14px; cursor:pointer; white-space:nowrap; }
+  .pastiglia:hover { background:#2e323a; color:var(--text); }
+  .pastiglia.attiva { background:var(--accent); color:#fff; }
+  .pastiglia .quanti { opacity:0.6; font-size:0.72rem; margin-left:3px; }
+
+  /* ---- vista preset -------------------------------------------------- */
+
+  #vistaPreset { padding:14px 16px 60px; max-width:900px; margin:0 auto; }
+  body.vista-live #vistaPreset { display:none; }
+
+  .sezione { margin-bottom:22px; }
+  .sezione > h2 { font-size:0.76rem; color:var(--dim); text-transform:uppercase;
+                  letter-spacing:0.06em; margin:0 0 8px; font-weight:700;
+                  display:flex; align-items:baseline; gap:8px; }
+  .sezione > h2 .nota { text-transform:none; letter-spacing:0; font-weight:400;
+                        color:var(--faint); font-size:0.72rem; }
+  .vuoto-sezione { color:var(--faint); font-size:0.8rem; padding:6px 2px; }
 
   .row { background:var(--panel); border:1px solid var(--line); border-radius:10px;
          margin-bottom:8px; overflow:hidden; }
-  .row.dragging { opacity:0.45; }
-  .row.drop-target { border-color:var(--accent); }
-  .head { display:flex; align-items:center; gap:9px; padding:10px 12px; }
-  .grip { color:var(--faint); cursor:grab; font-size:1rem; padding:2px 3px;
-          touch-action:none; user-select:none; }
-  .grip:active { cursor:grabbing; }
+  .row.libero { border-style:dashed; background:none; }
+  .head { display:flex; align-items:center; gap:9px; padding:10px 12px; cursor:pointer; }
   .naming { flex:1; min-width:0; }
   .name { font-weight:600; font-size:0.93rem; }
+  .row.libero .name { color:var(--faint); font-weight:400; }
   .chain { color:var(--dim); font-size:0.75rem; margin-top:2px;
            white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .slot { color:var(--faint); font-size:0.7rem; font-family:'SF Mono',Consolas,monospace;
-          border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
+  .slot { color:var(--faint); font-size:0.72rem; font-family:'SF Mono',Consolas,monospace;
+          border:1px solid var(--line); border-radius:5px; padding:2px 6px; flex:none; }
+  .slot.a { color:#ff9b9b; border-color:#4a2a2a; }
+  .slot.b { color:#9be0a8; border-color:#2a4a32; }
 
   .tags { display:flex; gap:5px; flex-wrap:wrap; padding:0 12px 9px 12px; }
   .tag { background:#23262c; color:#b6bbc3; font-size:0.71rem; padding:2px 8px;
          border-radius:9px; cursor:pointer; }
   .tag:hover { background:#2e323a; color:var(--text); }
-  .tag.active { background:var(--accent); color:#fff; }
+  .tag.attiva { background:var(--accent); color:#fff; }
 
-  .detail { border-top:1px solid var(--line-soft); padding:12px; display:grid; gap:10px; }
+  .detail { border-top:1px solid var(--line-soft); padding:12px; display:grid; gap:12px; }
   .detail label { display:block; font-size:0.72rem; color:var(--dim);
                   text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
+  .detail input[type=text] { width:100%; }
   .fxlist { display:grid; gap:2px; }
   .fx { display:flex; gap:9px; font-size:0.78rem; align-items:baseline; }
   .fx .fxname { min-width:130px; }
   .fx .fxname.off { color:var(--faint); text-decoration:line-through; }
   .fx .vals { color:var(--dim); font-family:'SF Mono',Consolas,monospace; font-size:0.72rem; }
-  .detail .actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .azioni { display:flex; gap:8px; flex-wrap:wrap; }
+  .scelte { display:flex; gap:6px; flex-wrap:wrap; }
+  .scelta { background:#23262c; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
+            border-radius:12px; cursor:pointer; border:1px solid transparent; }
+  .scelta.dentro { background:#2f3a2f; color:var(--green); border-color:#3d5540; }
 
   #log { color:var(--faint); font-size:0.74rem; font-family:'SF Mono',Consolas,monospace;
          margin-top:20px; white-space:pre-wrap; }
@@ -106,64 +133,77 @@
   /* ---- vista live ---------------------------------------------------- */
 
   #vistaLive { display:none; }
-  body.vista-live #vistaLive { display:flex; flex-direction:column;
-                               flex:1; min-height:0; }
+  body.vista-live #vistaLive { display:flex; flex-direction:column; flex:1; min-height:0; }
 
-  /* Pulsanti grandi ma non stirati: con pochi preset in scaletta una riga
-     1fr li farebbe alti quanto mezzo schermo. */
-  #pads { flex:1; display:grid; gap:10px; overflow-y:auto;
-          padding:12px calc(12px + env(safe-area-inset-right))
-                  12px calc(12px + env(safe-area-inset-left));
-          grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
-          grid-auto-rows:minmax(92px, 120px); align-content:start; }
+  #banchi { display:flex; gap:6px; overflow-x:auto; flex:none;
+            padding:0 calc(12px + env(safe-area-inset-right)) 8px
+                    calc(12px + env(safe-area-inset-left));
+            scrollbar-width:none; }
+  #banchi::-webkit-scrollbar { display:none; }
+  .banco { flex:none; background:#23262c; color:#b6bbc3; font-size:0.8rem; font-weight:600;
+           padding:6px 13px; border-radius:14px; cursor:pointer; white-space:nowrap; }
+  .banco.attivo { background:var(--accent); color:#fff; }
+  .banco.aggiungi { color:var(--faint); }
+
+  /* Quattro a sinistra e quattro a destra, come i due banchi di LED
+     dell'ampli: il pollice sinistro copre i primi quattro, il destro gli
+     altri. Riempimento per colonna, altrimenti la griglia alternerebbe. */
+  #pads { flex:1; min-height:0; display:grid; gap:10px;
+          grid-template-columns:repeat(2, 1fr); grid-template-rows:repeat(4, 1fr);
+          grid-auto-flow:column;
+          padding:0 calc(12px + env(safe-area-inset-right)) 10px
+                    calc(12px + env(safe-area-inset-left)); }
 
   .pad { position:relative; background:var(--panel); border:2px solid var(--line);
-         border-radius:14px; padding:12px 14px; text-align:left; overflow:hidden;
-         display:flex; flex-direction:column; justify-content:center; gap:5px;
-         font-size:1.05rem; font-weight:700; line-height:1.25; }
+         border-radius:14px; padding:10px 12px; text-align:left; overflow:hidden;
+         display:flex; flex-direction:column; justify-content:center; gap:4px;
+         font-size:1rem; font-weight:700; line-height:1.2; min-height:0; }
   .pad:active { transform:scale(0.985); }
-  .pad .n { position:absolute; top:8px; right:12px; font-size:0.72rem;
+  .pad .n { position:absolute; top:6px; right:10px; font-size:0.7rem;
             color:var(--faint); font-weight:700; }
-  .pad .sub { font-size:0.72rem; font-weight:600; color:var(--dim); }
+  .pad .sub { font-size:0.7rem; font-weight:600; color:var(--dim); }
   .pad .sub .istantaneo { color:var(--green); }
   .pad .sub .caricamento { color:var(--gold); }
   .pad.attivo { border-color:var(--accent); background:#241a16; }
   .pad.occupato { opacity:0.55; }
+  .pad.libero { border-style:dashed; background:none; color:var(--faint); font-weight:400; }
+  .pad.inModifica { border-color:var(--gold); border-style:dashed; }
   .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
                 background:var(--accent); transition:width 0.12s linear; }
-
-  .vuoto { color:var(--dim); text-align:center; padding:40px 20px; line-height:1.7;
-           grid-column:1/-1; }
 
   #logLive { flex:none; padding:6px 12px calc(6px + env(safe-area-inset-bottom));
              font-family:Consolas,monospace; font-size:0.72rem; color:var(--faint);
              border-top:1px solid var(--line); min-height:1.6em;
              white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  /* composizione della scaletta */
-  /* Fondo pieno, non translucido: al buio su un palco quello che si intravede
-     sotto è solo rumore. */
-  #editor { display:none; position:fixed; inset:0; background:var(--bg);
-            padding:calc(14px + env(safe-area-inset-top)) 14px
-                    calc(14px + env(safe-area-inset-bottom));
-            overflow-y:auto; z-index:10; }
-  #editor.aperto { display:block; }
-  #editor h2 { font-size:0.95rem; margin:0 0 10px; }
-  .voce { display:flex; align-items:center; gap:10px; padding:8px 10px;
-          border-bottom:1px solid var(--line); font-size:0.88rem; }
-  .voce .nome { flex:1; }
+  /* ---- pannelli a tutto schermo -------------------------------------- */
+
+  .pannello { display:none; position:fixed; inset:0; background:var(--bg); z-index:10;
+              overflow-y:auto;
+              padding:calc(14px + env(safe-area-inset-top))
+                      calc(14px + env(safe-area-inset-right))
+                      calc(14px + env(safe-area-inset-bottom))
+                      calc(14px + env(safe-area-inset-left)); }
+  .pannello.aperto { display:block; }
+  .pannello h2 { font-size:1rem; margin:0 0 4px; }
+  .pannello .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px;
+                          flex-wrap:wrap; }
+  .pannello .spiega { color:var(--dim); font-size:0.8rem; margin:0 0 12px; }
+  .voce { display:flex; align-items:center; gap:10px; padding:9px 10px;
+          border-bottom:1px solid var(--line); font-size:0.9rem; }
+  .voce .nome { flex:1; min-width:0; }
   .voce .badge { font-size:0.68rem; color:var(--faint); font-family:Consolas,monospace;
                  border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
+  .voce input[type=text] { flex:1; min-width:0; }
 
-  /* Sul telefono l'header della libreria va a capo su tre righe: sticky
-     mangerebbe un quarto dello schermo, quindi lo si lascia scorrere via.
-     Nella vista live invece resta, perché lì non si scorre. */
   @media (max-width: 600px) {
     body:not(.vista-live) header { position:static; }
-    #vistaLibreria { padding:12px 12px 40px; }
-    /* Solo nella libreria il titolo si prende una riga tutta sua: nella vista
-       live ogni riga di header è spazio tolto ai pulsantoni. */
+    #vistaPreset { padding:12px 12px 40px; }
+    /* Solo nella vista preset il titolo si prende una riga sua. Nella live
+       sparisce del tutto: ogni riga di header è spazio tolto ai pulsantoni,
+       e che si stia suonando lo dicono già i pulsantoni stessi. */
     body:not(.vista-live) h1 { flex-basis:100%; }
+    body.vista-live h1 { display:none; }
   }
 </style>
 </head>
@@ -171,45 +211,90 @@
 
 <header>
   <div class="titlebar">
-    <h1 id="titolo">Libreria Spark 2</h1>
+    <h1 id="titolo">Preset</h1>
     <span id="status" class="status off">non connesso</span>
     <button id="btnConnect" class="primary">Connetti</button>
-    <button id="btnRead" class="solo-libreria" disabled>Leggi dall'ampli</button>
-    <button id="btnLive" class="solo-libreria" disabled
-            title="legge il suono attivo, senza scrivere nulla">Suono corrente</button>
-    <button id="btnPrepara" class="solo-live" disabled
-            title="scrive i primi 8 della scaletta negli slot dell'ampli">Prepara</button>
-    <button id="btnEdit" class="solo-live">Scaletta</button>
+    <button id="btnRead" class="solo-preset" disabled>Leggi dall'ampli</button>
+    <button id="btnCategorie" class="solo-preset">Categorie</button>
+    <button id="btnAltro" class="solo-preset">Altro</button>
+    <button id="btnModifica" class="solo-live">Modifica</button>
     <button id="btnVista">Live →</button>
   </div>
-  <div class="toolbar solo-libreria">
-    <input type="search" id="search" placeholder="cerca fra nomi, effetti, tag, note…">
+  <div class="cerca solo-preset">
+    <input type="search" id="search" placeholder="cerca un preset…">
     <button id="btnFav" class="icon" title="solo preferiti">★</button>
-    <select id="tagFilter"><option value="">tutti i tag</option></select>
-    <button id="btnExport">Esporta</button>
-    <button id="btnImport">Importa</button>
-    <input type="file" id="fileInput" accept=".json,.zip" hidden>
   </div>
+  <div class="pastiglie solo-preset" id="filtriCategoria"></div>
 </header>
 
-<main id="vistaLibreria">
-  <div id="list"></div>
+<main id="vistaPreset">
+  <div class="sezione" id="sezAmpli">
+    <h2>Sull'ampli <span class="nota">gli otto slot, istantanei</span></h2>
+    <div id="listaAmpli"></div>
+  </div>
+  <div class="sezione" id="sezLibreria">
+    <h2>In libreria <span class="nota" id="quantiLibreria"></span></h2>
+    <div id="listaLibreria"></div>
+  </div>
   <div id="log"></div>
 </main>
 
 <div id="vistaLive">
+  <div id="banchi"></div>
   <div id="pads"></div>
   <div id="logLive"></div>
 </div>
 
-<div id="editor">
-  <h2>Componi la scaletta</h2>
-  <div style="margin-bottom:12px">
-    <button id="btnChiudi" class="primary">Fatto</button>
-    <span style="color:var(--dim);font-size:0.8rem;margin-left:8px">
-      tocca un preset per aggiungerlo o toglierlo</span>
+<!-- gestione delle categorie -->
+<div class="pannello" id="pannelloCategorie">
+  <div class="barra-alta">
+    <h2>Categorie</h2>
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloCategorie">Fatto</button>
   </div>
-  <div id="elenco"></div>
+  <p class="spiega">Le categorie sono tue: quelle dell'app ufficiale non entrano più in
+    libreria. Eliminarne una la toglie dai preset, i preset restano.</p>
+  <div class="barra-alta">
+    <input type="text" id="nuovaCategoria" placeholder="nuova categoria" style="flex:1">
+    <button id="btnAggiungiCategoria" class="primary">Aggiungi</button>
+  </div>
+  <div id="elencoCategorie"></div>
+  <div style="margin-top:18px">
+    <button id="btnAzzeraCategorie" class="pericolo piccolo">Azzera tutte le categorie</button>
+  </div>
+</div>
+
+<!-- esporta, importa, diagnostica -->
+<div class="pannello" id="pannelloAltro">
+  <div class="barra-alta">
+    <h2>Altro</h2>
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloAltro">Fatto</button>
+  </div>
+  <p class="spiega">La libreria vive in questo browser: l'esportazione è l'unico modo di
+    portarla su un altro apparecchio o di metterla al sicuro.</p>
+  <div class="azioni">
+    <button id="btnExport">Esporta la libreria</button>
+    <button id="btnImport">Importa un file</button>
+    <button id="btnLive" disabled title="legge il suono attivo, senza scrivere nulla">Leggi il suono corrente</button>
+    <input type="file" id="fileInput" accept=".json,.zip" hidden>
+  </div>
+  <p class="spiega" style="margin-top:12px">Si importano sia i backup di quest'app (.json)
+    sia il <code>preset_backup.zip</code> dell'app ufficiale.</p>
+</div>
+
+<!-- scelta di un preset da mettere in un posto del banco -->
+<div class="pannello" id="pannelloScegli">
+  <div class="barra-alta">
+    <h2 id="titoloScegli">Scegli un preset</h2>
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloScegli">Annulla</button>
+  </div>
+  <div class="barra-alta">
+    <input type="search" id="cercaScegli" placeholder="cerca…" style="flex:1">
+    <button id="btnSvuotaPosto" class="piccolo">Svuota il posto</button>
+  </div>
+  <div id="elencoScegli"></div>
 </div>
 
 <script src="src/spark-protocol.js"></script>
@@ -221,10 +306,12 @@
 'use strict';
 
 /*
- * Libreria e vista live stanno nella stessa pagina, e non è un dettaglio di
- * comodità: la connessione BLE vive nel documento: navigare su un altro file
- * la butta via, e all'ampli tocca riconnettersi ogni volta. Finché si cambia
- * solo vista, `spark` resta lo stesso oggetto e la connessione regge.
+ * Due sezioni, Preset e Live, nello stesso documento.
+ *
+ * Stare nello stesso documento non è una scelta di comodità: la connessione
+ * BLE vive nella pagina, quindi navigare su un altro file la butterebbe via e
+ * all'ampli toccherebbe riconnettersi a ogni passaggio. Cambiando solo una
+ * classe sul body, `spark` resta lo stesso oggetto.
  */
 
 const $ = id => document.getElementById(id);
@@ -238,307 +325,687 @@ const spark = new SparkTransport({
     $('btnConnect').disabled = state === 'connected';
     $('btnRead').disabled    = state !== 'connected';
     $('btnLive').disabled    = state !== 'connected';
-    $('btnPrepara').disabled = state !== 'connected';
-    render();
-    disegna();
+    disegnaPreset();
+    disegnaLive();
   },
   onLog: msg => logLine(msg),
 });
 
 /* ====================================================================
+   Stato in memoria
+   ==================================================================== */
+
+let tutti      = [];      // tutti i record, nell'ordine dell'utente
+let suAmpli    = [];      // otto posti: il record che sta in quello slot, o null
+let categorie  = [];      // {nome, quanti}
+let banchi     = [];      // banchi salvati, quelli inventati dall'utente
+
+const vista = { cerca: '', categoria: '', soloPreferiti: false, aperto: null };
+const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false };
+
+/** Il banco fisso non è salvato da nessuna parte: è quello che c'è sull'ampli. */
+const BANCO_AMPLI = 'ampli';
+
+async function ricarica() {
+  tutti     = await store.all();
+  suAmpli   = await store.hardware();
+  categorie = await store.allCategories();
+  banchi    = await store.getBanks();
+  if (live.banco !== BANCO_AMPLI && !banchi.some(b => b.id === live.banco)) {
+    live.banco = BANCO_AMPLI;
+  }
+}
+
+const perId = id => tutti.find(r => r.id === id) || null;
+
+/* ====================================================================
    Le due viste
    Il passaggio va sull'hash invece che su una variabile: così il tasto
-   indietro di Android torna alla libreria invece di chiudere l'app, e la
+   indietro di Android torna ai preset invece di chiudere l'app, e la
    scorciatoia «Live» del telefono può puntare dritta qui.
    ==================================================================== */
 
 const inLive = () => location.hash === '#live';
 
 async function applicaVista() {
-  const live = inLive();
-  document.body.classList.toggle('vista-live', live);
-  $('titolo').textContent = live ? 'Live' : 'Libreria Spark 2';
-  $('btnVista').textContent = live ? '← Libreria' : 'Live →';
+  const live_ = inLive();
+  document.body.classList.toggle('vista-live', live_);
+  $('titolo').textContent = live_ ? 'Live' : 'Preset';
+  $('btnVista').textContent = live_ ? '← Preset' : 'Live →';
+  if (!live_) chiudiPannelli();
 
-  if (live) {
-    await ricarica();
-    disegna();
-  } else {
-    $('editor').classList.remove('aperto');
-    await refresh();
-  }
+  await ricarica();
+  disegnaPreset();
+  disegnaLive();
 }
 
 window.addEventListener('hashchange', () => { applicaVista(); });
 $('btnVista').addEventListener('click', () => {
-  location.hash = inLive() ? 'libreria' : 'live';
+  location.hash = inLive() ? 'preset' : 'live';
 });
 
 /* ====================================================================
    Log
    ==================================================================== */
 
-// Il log della libreria tiene le ultime righe: i messaggi del trasporto sono
-// spesso la parte diagnostica più utile e non devono sparire sotto quello
-// successivo. Quello della vista live è invece una riga sola: lì si suona.
-const logLines = [];
-let logTransient = false;
+// Nella vista preset il log tiene le ultime righe: i messaggi del trasporto
+// sono spesso la parte diagnostica più utile. Nella live è una riga sola:
+// lì si suona, non si legge.
+const righeLog = [];
+let logProvvisorio = false;
 
 function logLine(msg) {
-  if (logTransient) logLines.pop();
-  logTransient = false;
-  logLines.push(msg);
-  if (logLines.length > 8) logLines.shift();
-  $('log').textContent = logLines.join('\n');
+  if (logProvvisorio) righeLog.pop();
+  logProvvisorio = false;
+  righeLog.push(msg);
+  if (righeLog.length > 8) righeLog.shift();
+  $('log').textContent = righeLog.join('\n');
   $('logLive').textContent = msg;
 }
 
 /** Riga di avanzamento: la successiva la sostituisce invece di accodarsi. */
 function logProgress(msg) {
-  if (logTransient) logLines.pop();
-  logLines.push(msg);
-  logTransient = true;
-  $('log').textContent = logLines.join('\n');
+  if (logProvvisorio) righeLog.pop();
+  righeLog.push(msg);
+  logProvvisorio = true;
+  $('log').textContent = righeLog.join('\n');
   $('logLive').textContent = msg;
 }
 
 /* ====================================================================
-   Vista libreria — rendering
+   Pannelli
    ==================================================================== */
 
-const view = { query: '', tag: '', favoritesOnly: false, expanded: null };
-let records = [];
-
-async function refresh() {
-  records = await store.search(view.query, { tag: view.tag, favoritesOnly: view.favoritesOnly });
-  await refreshTagFilter();
-  render();
+function apriPannello(id) {
+  chiudiPannelli();
+  $(id).classList.add('aperto');
 }
 
-async function refreshTagFilter() {
-  const tags = await store.allTags();
-  const select = $('tagFilter');
-  const current = select.value;
-  select.innerHTML = '<option value="">tutti i tag</option>';
-  for (const { tag, count } of tags) {
-    const option = document.createElement('option');
-    option.value = tag;
-    option.textContent = `${tag} (${count})`;
-    select.appendChild(option);
+function chiudiPannelli() {
+  document.querySelectorAll('.pannello.aperto').forEach(p => p.classList.remove('aperto'));
+}
+
+document.querySelectorAll('[data-chiudi]').forEach(b => {
+  b.addEventListener('click', () => {
+    chiudiPannelli();
+    if (b.dataset.chiudi === 'pannelloScegli') sceltaInCorso = null;
+  });
+});
+
+/* ====================================================================
+   Vista preset
+   ==================================================================== */
+
+/** Il preset passa il filtro di ricerca, categoria e preferiti? */
+function passaIlFiltro(record) {
+  if (vista.soloPreferiti && !record.favorite) return false;
+  if (vista.categoria &&
+      !(record.tags || []).some(t => t.toLowerCase() === vista.categoria.toLowerCase())) {
+    return false;
   }
-  select.value = tags.some(t => t.tag === current) ? current : '';
+  const termini = vista.cerca.toLowerCase().split(/\s+/).filter(Boolean);
+  if (termini.length === 0) return true;
+  const pagliaio = [
+    record.name, record.description, record.notes,
+    (record.tags || []).join(' '),
+    (record.effects || []).map(e => e.name).join(' '),
+  ].join(' ').toLowerCase();
+  return termini.every(t => pagliaio.includes(t));
 }
 
-function render() {
-  const list = $('list');
-  list.innerHTML = '';
+const filtroAttivo = () => !!(vista.cerca || vista.categoria || vista.soloPreferiti);
 
-  if (records.length === 0) {
-    const div = document.createElement('div');
-    div.className = 'empty';
-    div.textContent = view.query || view.tag || view.favoritesOnly
-      ? 'Nessun preset corrisponde ai filtri.'
-      : 'La libreria è vuota. Connetti l\'ampli e premi «Leggi dall\'ampli».';
-    list.appendChild(div);
+function disegnaPreset() {
+  disegnaFiltriCategoria();
+
+  const ampli = $('listaAmpli');
+  ampli.innerHTML = '';
+  let mostratiSuAmpli = 0;
+  suAmpli.forEach((record, slot) => {
+    if (record && !passaIlFiltro(record)) return;
+    if (!record && filtroAttivo()) return;
+    mostratiSuAmpli++;
+    ampli.appendChild(record ? rigaPreset(record, slot) : rigaSlotVuoto(slot));
+  });
+  $('sezAmpli').style.display = mostratiSuAmpli === 0 && filtroAttivo() ? 'none' : '';
+
+  const libreria = $('listaLibreria');
+  libreria.innerHTML = '';
+  // Per id e non per oggetto: `hardware()` rilegge dal database, quindi
+  // restituisce copie diverse dagli stessi record che stanno in `tutti`.
+  const sullAmpli = new Set(suAmpli.filter(Boolean).map(r => r.id));
+  const altri = tutti.filter(r => !sullAmpli.has(r.id));
+  const visibili = altri.filter(passaIlFiltro);
+  visibili.forEach(record => libreria.appendChild(rigaPreset(record, null)));
+
+  $('quantiLibreria').textContent = filtroAttivo()
+    ? `${visibili.length} di ${altri.length}`
+    : `${altri.length}`;
+
+  if (visibili.length === 0) {
+    const vuoto = document.createElement('div');
+    vuoto.className = 'vuoto-sezione';
+    vuoto.textContent = altri.length === 0
+      ? 'Nessun preset oltre a quelli sull\'ampli. Connetti e premi «Leggi dall\'ampli», ' +
+        'oppure importa un backup da «Altro».'
+      : 'Nessun preset corrisponde alla ricerca.';
+    libreria.appendChild(vuoto);
+  }
+}
+
+function disegnaFiltriCategoria() {
+  const barra = $('filtriCategoria');
+  barra.innerHTML = '';
+  if (categorie.length === 0) {
+    barra.style.display = 'none';
     return;
   }
-  records.forEach(record => list.appendChild(renderRow(record)));
+  barra.style.display = '';
+
+  const tutte = document.createElement('span');
+  tutte.className = 'pastiglia' + (vista.categoria ? '' : ' attiva');
+  tutte.textContent = 'tutte';
+  tutte.addEventListener('click', () => { vista.categoria = ''; disegnaPreset(); });
+  barra.appendChild(tutte);
+
+  for (const { nome, quanti } of categorie) {
+    const p = document.createElement('span');
+    p.className = 'pastiglia' + (vista.categoria === nome ? ' attiva' : '');
+    p.innerHTML = '';
+    p.append(nome);
+    const q = document.createElement('span');
+    q.className = 'quanti';
+    q.textContent = quanti;
+    p.appendChild(q);
+    p.addEventListener('click', () => {
+      vista.categoria = vista.categoria === nome ? '' : nome;
+      disegnaPreset();
+    });
+    barra.appendChild(p);
+  }
 }
 
-function renderRow(record) {
-  const row = document.createElement('div');
-  row.className = 'row';
-  row.dataset.id = record.id;
+/** Uno slot dell'ampli di cui non sappiamo ancora cosa contenga. */
+function rigaSlotVuoto(slot) {
+  const riga = document.createElement('div');
+  riga.className = 'row libero';
+  const head = document.createElement('div');
+  head.className = 'head';
+  head.style.cursor = 'default';
+
+  const naming = document.createElement('div');
+  naming.className = 'naming';
+  const nome = document.createElement('div');
+  nome.className = 'name';
+  nome.textContent = 'non ancora letto';
+  naming.appendChild(nome);
+
+  head.append(naming, etichettaSlot(slot));
+  riga.appendChild(head);
+  return riga;
+}
+
+function etichettaSlot(slot) {
+  const posizione = Spark.slotLabel(slot);
+  const el = document.createElement('span');
+  el.className = 'slot ' + (posizione.color === 'rosso' ? 'a' : 'b');
+  el.textContent = posizione.label;
+  el.title = `slot ${slot} — LED ${posizione.color} numero ${posizione.position}`;
+  return el;
+}
+
+function rigaPreset(record, slot) {
+  const riga = document.createElement('div');
+  riga.className = 'row';
+  riga.dataset.id = record.id;
 
   const head = document.createElement('div');
   head.className = 'head';
 
-  const grip = document.createElement('span');
-  grip.className = 'grip';
-  grip.textContent = '⠿';
-  grip.title = 'trascina per riordinare';
-  grip.addEventListener('pointerdown', event => startDrag(event, row));
-
-  const star = document.createElement('button');
-  star.className = 'icon' + (record.favorite ? ' on' : '');
-  star.textContent = record.favorite ? '★' : '☆';
-  star.title = 'preferito';
-  star.addEventListener('click', async event => {
+  const stella = document.createElement('button');
+  stella.className = 'icon' + (record.favorite ? ' on' : '');
+  stella.textContent = record.favorite ? '★' : '☆';
+  stella.title = 'preferito';
+  stella.addEventListener('click', async event => {
     event.stopPropagation();
     await store.toggleFavorite(record.id);
-    refresh();
+    await ricarica();
+    disegnaPreset();
   });
 
   const naming = document.createElement('div');
   naming.className = 'naming';
-  const name = document.createElement('div');
-  name.className = 'name';
-  name.textContent = record.name || '(senza nome)';
-  const chain = document.createElement('div');
-  chain.className = 'chain';
-  chain.textContent = (record.effects || [])
+  const nome = document.createElement('div');
+  nome.className = 'name';
+  nome.textContent = record.name || '(senza nome)';
+  const catena = document.createElement('div');
+  catena.className = 'chain';
+  catena.textContent = (record.effects || [])
     .filter(e => e.enabled).map(e => e.name).join(' · ');
-  naming.append(name, chain);
+  naming.append(nome, catena);
 
-  head.append(grip, star, naming);
-
-  if (record.slot !== undefined && record.slot !== null) {
-    const posizione = Spark.slotLabel(record.slot);
-    const slot = document.createElement('span');
-    slot.className = 'slot';
-    slot.textContent = posizione.label;
-    slot.title = `slot ${record.slot} — LED ${posizione.color} numero ${posizione.position}`;
-    head.appendChild(slot);
-  }
+  head.append(stella, naming);
+  if (slot !== null) head.appendChild(etichettaSlot(slot));
 
   head.addEventListener('click', () => {
-    view.expanded = view.expanded === record.id ? null : record.id;
-    render();
+    vista.aperto = vista.aperto === record.id ? null : record.id;
+    disegnaPreset();
   });
+  riga.appendChild(head);
 
-  row.appendChild(head);
-
-  if (record.tags.length) {
+  if ((record.tags || []).length) {
     const tags = document.createElement('div');
     tags.className = 'tags';
     for (const tag of record.tags) {
       const chip = document.createElement('span');
-      chip.className = 'tag' + (view.tag === tag ? ' active' : '');
+      chip.className = 'tag' + (vista.categoria === tag ? ' attiva' : '');
       chip.textContent = tag;
       chip.addEventListener('click', event => {
         event.stopPropagation();
-        view.tag = view.tag === tag ? '' : tag;
-        $('tagFilter').value = view.tag;
-        refresh();
+        vista.categoria = vista.categoria === tag ? '' : tag;
+        disegnaPreset();
       });
       tags.appendChild(chip);
     }
-    row.appendChild(tags);
+    riga.appendChild(tags);
   }
 
-  if (view.expanded === record.id) row.appendChild(renderDetail(record));
-  return row;
+  if (vista.aperto === record.id) riga.appendChild(dettaglio(record, slot));
+  return riga;
 }
 
-function renderDetail(record) {
-  const detail = document.createElement('div');
-  detail.className = 'detail';
+function dettaglio(record, slot) {
+  const det = document.createElement('div');
+  det.className = 'detail';
 
-  const fxBox = document.createElement('div');
-  fxBox.innerHTML = '<label>catena effetti</label>';
-  const fxList = document.createElement('div');
-  fxList.className = 'fxlist';
-  for (const effect of record.effects || []) {
-    const line = document.createElement('div');
-    line.className = 'fx';
-    const fxname = document.createElement('span');
-    fxname.className = 'fxname' + (effect.enabled ? '' : ' off');
-    fxname.textContent = effect.name;
-    const vals = document.createElement('span');
-    vals.className = 'vals';
-    vals.textContent = effect.params.map(p => p.value.toFixed(2)).join('  ');
-    line.append(fxname, vals);
-    fxList.appendChild(line);
-  }
-  fxBox.appendChild(fxList);
-
-  const tagBox = document.createElement('div');
-  tagBox.innerHTML = '<label>tag, separati da virgola</label>';
-  const tagInput = document.createElement('input');
-  tagInput.type = 'text';
-  tagInput.style.width = '100%';
-  tagInput.value = record.tags.join(', ');
-  tagInput.addEventListener('change', async () => {
-    await store.setTags(record.id, tagInput.value.split(','));
-    refresh();
+  /* nome ---------------------------------------------------------- */
+  const boxNome = document.createElement('div');
+  boxNome.innerHTML = '<label>nome</label>';
+  const campoNome = document.createElement('input');
+  campoNome.type = 'text';
+  campoNome.value = record.name || '';
+  campoNome.addEventListener('change', async () => {
+    const nuovo = campoNome.value.trim();
+    if (!nuovo || nuovo === record.name) { campoNome.value = record.name; return; }
+    await store.setName(record.id, nuovo);
+    logLine(`rinominato in «${nuovo}». Sull'ampli il nome resta quello vecchio ` +
+            'finché non lo riscrivi in uno slot.');
+    await ricarica();
+    disegnaPreset();
   });
-  tagBox.appendChild(tagInput);
+  boxNome.appendChild(campoNome);
 
-  const noteBox = document.createElement('div');
-  noteBox.innerHTML = '<label>note</label>';
-  const notes = document.createElement('textarea');
-  notes.value = record.notes;
-  notes.placeholder = 'come suona, quando usarlo, cosa cambiare…';
-  notes.addEventListener('change', async () => {
-    await store.setNotes(record.id, notes.value);
-    refresh();
-  });
-  noteBox.appendChild(notes);
+  /* categorie ----------------------------------------------------- */
+  const boxCat = document.createElement('div');
+  boxCat.innerHTML = '<label>categorie</label>';
+  const scelte = document.createElement('div');
+  scelte.className = 'scelte';
+  const sue = new Set((record.tags || []).map(t => t.toLowerCase()));
 
-  const actions = document.createElement('div');
-  actions.className = 'actions';
-
-  if (record.slot !== undefined && record.slot !== null) {
-    const activate = document.createElement('button');
-    activate.textContent = 'Attiva ' + Spark.slotLabel(record.slot).label;
-    activate.title = 'seleziona lo slot sull\'ampli, senza scrivere nulla';
-    activate.disabled = !spark.connected;
-    activate.addEventListener('click', async () => {
-      await spark.send(Spark.commands.changePreset(record.slot));
-      logLine(`selezionato ${nomeSlot(record.slot)}`);
+  for (const { nome } of categorie) {
+    const s = document.createElement('span');
+    s.className = 'scelta' + (sue.has(nome.toLowerCase()) ? ' dentro' : '');
+    s.textContent = (sue.has(nome.toLowerCase()) ? '✓ ' : '＋ ') + nome;
+    s.addEventListener('click', async () => {
+      if (sue.has(nome.toLowerCase())) await store.removeTag(record.id, nome);
+      else                             await store.addTag(record.id, nome);
+      await ricarica();
+      disegnaPreset();
     });
-    actions.appendChild(activate);
+    scelte.appendChild(s);
+  }
+
+  const nuova = document.createElement('span');
+  nuova.className = 'scelta';
+  nuova.textContent = '＋ nuova…';
+  nuova.addEventListener('click', async () => {
+    const nome = prompt('Nome della nuova categoria:');
+    if (!nome || !nome.trim()) return;
+    await store.addCategory(nome);
+    await store.addTag(record.id, nome.trim());
+    await ricarica();
+    disegnaPreset();
+  });
+  scelte.appendChild(nuova);
+  boxCat.appendChild(scelte);
+
+  /* note ---------------------------------------------------------- */
+  const boxNote = document.createElement('div');
+  boxNote.innerHTML = '<label>note</label>';
+  const note = document.createElement('textarea');
+  note.value = record.notes || '';
+  note.placeholder = 'come suona, quando usarlo, cosa cambiare…';
+  note.addEventListener('change', async () => {
+    await store.setNotes(record.id, note.value);
+    await ricarica();
+  });
+  boxNote.appendChild(note);
+
+  /* catena effetti ------------------------------------------------ */
+  const boxFx = document.createElement('div');
+  boxFx.innerHTML = '<label>catena effetti</label>';
+  const lista = document.createElement('div');
+  lista.className = 'fxlist';
+  for (const effetto of record.effects || []) {
+    const linea = document.createElement('div');
+    linea.className = 'fx';
+    const nomeFx = document.createElement('span');
+    nomeFx.className = 'fxname' + (effetto.enabled ? '' : ' off');
+    nomeFx.textContent = effetto.name;
+    const valori = document.createElement('span');
+    valori.className = 'vals';
+    valori.textContent = effetto.params.map(p => p.value.toFixed(2)).join('  ');
+    linea.append(nomeFx, valori);
+    lista.appendChild(linea);
+  }
+  boxFx.appendChild(lista);
+
+  /* azioni -------------------------------------------------------- */
+  const azioni = document.createElement('div');
+  azioni.className = 'azioni';
+
+  if (slot !== null) {
+    const attiva = document.createElement('button');
+    attiva.textContent = 'Attiva ' + Spark.slotLabel(slot).label;
+    attiva.title = 'seleziona lo slot sull\'ampli, senza scrivere nulla';
+    attiva.disabled = !spark.connected;
+    attiva.addEventListener('click', async () => {
+      await spark.send(Spark.commands.changePreset(slot));
+      logLine(`selezionato ${nomeSlot(slot)}`);
+    });
+    azioni.appendChild(attiva);
   }
 
   // Caricare nel suono corrente non tocca nulla di salvato: è il modo
-  // sicuro di provare un preset della libreria che non sta sull'ampli.
-  const toLive = document.createElement('button');
-  toLive.className = 'primary';
-  toLive.textContent = 'Carica nel suono corrente';
-  toLive.title = 'manda il preset all\'ampli senza sovrascrivere nessuno slot';
-  toLive.disabled = !spark.connected;
-  toLive.addEventListener('click', () => sendPreset(record, null));
-  actions.appendChild(toLive);
+  // sicuro di provare un preset che sull'ampli non c'è.
+  const prova = document.createElement('button');
+  prova.className = 'primary';
+  prova.textContent = 'Prova adesso';
+  prova.title = 'manda il preset all\'ampli senza sovrascrivere nessuno slot';
+  prova.disabled = !spark.connected;
+  prova.addEventListener('click', () => mandaPreset(record, null));
+  azioni.appendChild(prova);
 
-  const slotPicker = document.createElement('select');
-  slotPicker.title = 'slot di destinazione';
+  const scelta = document.createElement('select');
+  scelta.title = 'slot di destinazione';
   for (let i = 0; i < 8; i++) {
     const posizione = Spark.slotLabel(i);
-    const option = document.createElement('option');
-    option.value = i;
-    option.textContent = `${posizione.label} — LED ${posizione.color} ${posizione.position}`;
-    slotPicker.appendChild(option);
+    const opzione = document.createElement('option');
+    opzione.value = i;
+    opzione.textContent = `${posizione.label} — LED ${posizione.color} ${posizione.position}`;
+    scelta.appendChild(opzione);
   }
-  if (record.slot !== undefined && record.slot !== null) slotPicker.value = record.slot;
+  if (slot !== null) scelta.value = slot;
 
-  const write = document.createElement('button');
-  write.textContent = 'Scrivi';
-  write.title = 'sovrascrive il preset presente in quello slot';
-  write.disabled = !spark.connected;
-  write.addEventListener('click', () => {
-    const slot = Number(slotPicker.value);
-    const occupante = records.find(r => r.slot === slot && r.id !== record.id);
-    const avviso = `Scrivere «${record.name}» in ${nomeSlot(slot)} sull'ampli?\n\n` +
-      (occupante ? `Sovrascrive «${occupante.name}», che è già lì.\n` : '') +
+  const scrivi = document.createElement('button');
+  scrivi.textContent = 'Scrivi';
+  scrivi.title = 'sovrascrive il preset presente in quello slot';
+  scrivi.disabled = !spark.connected;
+  scrivi.addEventListener('click', () => {
+    const dove = Number(scelta.value);
+    const chiCera = suAmpli[dove];
+    const avviso = `Scrivere «${record.name}» in ${nomeSlot(dove)} sull'ampli?\n\n` +
+      (chiCera && chiCera.id !== record.id ? `Sovrascrive «${chiCera.name}», che è già lì.\n` : '') +
       'La copia in libreria resta comunque al sicuro.';
     if (!confirm(avviso)) return;
-    sendPreset(record, slot);
+    mandaPreset(record, dove);
   });
+  azioni.append(scelta, scrivi);
 
-  actions.append(slotPicker, write);
-
-  const remove = document.createElement('button');
-  remove.textContent = 'Elimina dalla libreria';
-  remove.addEventListener('click', async () => {
+  const elimina = document.createElement('button');
+  elimina.className = 'pericolo';
+  elimina.textContent = 'Elimina';
+  elimina.addEventListener('click', async () => {
     if (!confirm(`Eliminare «${record.name}» dalla libreria? L'ampli non viene toccato.`)) return;
     await store.remove(record.id);
-    view.expanded = null;
-    refresh();
+    vista.aperto = null;
+    logLine(`«${record.name}» eliminato dalla libreria`);
+    await ricarica();
+    disegnaPreset();
+    disegnaLive();
   });
-  actions.appendChild(remove);
+  azioni.appendChild(elimina);
 
   const meta = document.createElement('div');
   meta.style.cssText = 'color:var(--faint);font-size:0.7rem;font-family:Consolas,monospace';
   meta.textContent = `${record.uuid} · ${record.bpm} BPM`;
 
-  detail.append(fxBox, tagBox, noteBox, actions, meta);
-  return detail;
+  det.append(boxNome, boxCat, boxNote, boxFx, azioni, meta);
+  return det;
 }
 
 /** Nome dello slot come lo mostra l'ampli: "B2 (slot 5)". */
 function nomeSlot(n) {
   return `${Spark.slotLabel(n).label} (slot ${n})`;
 }
+
+/* ====================================================================
+   Vista live
+   ==================================================================== */
+
+function bancoCorrente() {
+  if (live.banco === BANCO_AMPLI) return null;
+  return banchi.find(b => b.id === live.banco) || null;
+}
+
+/** Gli otto record del banco mostrato: dall'ampli o dal banco salvato. */
+function postiDelBanco() {
+  const banco = bancoCorrente();
+  if (!banco) return suAmpli.slice();
+  return banco.posti.map(id => (id === null ? null : perId(id)));
+}
+
+function disegnaLive() {
+  disegnaBanchi();
+
+  const griglia = $('pads');
+  griglia.innerHTML = '';
+  const banco = bancoCorrente();
+  const posti = postiDelBanco();
+
+  posti.forEach((record, posto) => {
+    const pad = document.createElement('button');
+    const vuoto = !record;
+
+    pad.className = 'pad'
+      + (vuoto ? ' libero' : '')
+      + (record && record.id === live.attivo ? ' attivo' : '')
+      + (live.occupato ? ' occupato' : '')
+      + (live.modifica && banco ? ' inModifica' : '');
+
+    const numero = document.createElement('span');
+    numero.className = 'n';
+    numero.textContent = banco ? posto + 1 : Spark.slotLabel(posto).label;
+
+    const nome = document.createElement('span');
+    nome.textContent = vuoto
+      ? (banco ? (live.modifica ? 'tocca per scegliere' : 'vuoto') : 'non letto')
+      : record.name;
+
+    const sub = document.createElement('span');
+    sub.className = 'sub';
+    if (!vuoto && !residente(record)) {
+      sub.innerHTML = '<span class="caricamento">● da caricare</span> · ~1s';
+    } else if (!vuoto) {
+      // Nel banco fisso lo slot è già scritto nell'angolo: ripeterlo è rumore.
+      sub.innerHTML = '<span class="istantaneo">● istantaneo</span>' +
+        (banco ? ` · ${Spark.slotLabel(record.slot).label}` : '');
+    }
+
+    const barra = document.createElement('span');
+    barra.className = 'barra';
+
+    pad.append(numero, nome, sub, barra);
+
+    if (live.modifica && banco) {
+      pad.disabled = false;
+      pad.addEventListener('click', () => scegliPer(banco, posto));
+    } else {
+      pad.disabled = vuoto || !spark.connected || live.occupato;
+      if (!vuoto) pad.addEventListener('click', () => attiva(record, barra));
+    }
+    griglia.appendChild(pad);
+  });
+
+  $('btnModifica').textContent = live.modifica ? 'Fatto' : 'Modifica';
+  $('btnModifica').className = 'solo-live' + (live.modifica ? ' primary' : '');
+}
+
+function disegnaBanchi() {
+  const barra = $('banchi');
+  barra.innerHTML = '';
+
+  const ampli = document.createElement('span');
+  ampli.className = 'banco' + (live.banco === BANCO_AMPLI ? ' attivo' : '');
+  ampli.textContent = 'Ampli';
+  ampli.title = 'gli otto preset caricati sull\'ampli: sempre istantanei';
+  ampli.addEventListener('click', () => {
+    live.banco = BANCO_AMPLI;
+    live.modifica = false;
+    disegnaLive();
+  });
+  barra.appendChild(ampli);
+
+  for (const banco of banchi) {
+    const b = document.createElement('span');
+    b.className = 'banco' + (live.banco === banco.id ? ' attivo' : '');
+    b.textContent = banco.nome;
+    b.addEventListener('click', () => {
+      if (live.banco === banco.id && live.modifica) { rinominaOElimina(banco); return; }
+      live.banco = banco.id;
+      disegnaLive();
+    });
+    barra.appendChild(b);
+  }
+
+  const piu = document.createElement('span');
+  piu.className = 'banco aggiungi';
+  piu.textContent = '＋ banco';
+  piu.addEventListener('click', async () => {
+    const nome = prompt('Nome del nuovo banco:', `Banco ${banchi.length + 1}`);
+    if (nome === null) return;
+    const banco = await store.addBank(nome);
+    await ricarica();
+    live.banco = banco.id;
+    live.modifica = true;
+    disegnaLive();
+  });
+  barra.appendChild(piu);
+}
+
+async function rinominaOElimina(banco) {
+  const nome = prompt(`Nome del banco (vuoto per eliminarlo):`, banco.nome);
+  if (nome === null) return;
+  if (!nome.trim()) {
+    if (!confirm(`Eliminare il banco «${banco.nome}»? I preset restano in libreria.`)) return;
+    await store.removeBank(banco.id);
+    live.banco = BANCO_AMPLI;
+  } else {
+    await store.renameBank(banco.id, nome);
+  }
+  await ricarica();
+  disegnaLive();
+}
+
+/** Un preset è istantaneo se sappiamo che sta già in uno slot dell'ampli. */
+const residente = record => record.slot !== null && record.slot !== undefined;
+
+async function attiva(record, barra) {
+  if (live.occupato || !spark.connected) return;
+  live.occupato = true;
+  live.attivo = record.id;
+  disegnaLive();
+
+  try {
+    if (residente(record)) {
+      await spark.send(Spark.commands.changePreset(record.slot));
+      logLine(`${record.name} — ${Spark.slotLabel(record.slot).label}`);
+    } else {
+      await spark.loadPreset(record, (i, total) => {
+        barra.style.width = Math.round(((i + 1) / total) * 100) + '%';
+      });
+      logLine(`${record.name} — caricato nel preset software`);
+    }
+  } catch (err) {
+    logLine('errore: ' + err.message);
+    live.attivo = null;
+  }
+  live.occupato = false;
+  disegnaLive();
+}
+
+/* ---- scelta del preset per un posto del banco ---------------------- */
+
+let sceltaInCorso = null;   // {bancoId, posto}
+
+function scegliPer(banco, posto) {
+  sceltaInCorso = { bancoId: banco.id, posto };
+  $('titoloScegli').textContent = `${banco.nome} — posto ${posto + 1}`;
+  $('cercaScegli').value = '';
+  disegnaElencoScelta();
+  apriPannello('pannelloScegli');
+}
+
+function disegnaElencoScelta() {
+  const elenco = $('elencoScegli');
+  elenco.innerHTML = '';
+  const termine = $('cercaScegli').value.trim().toLowerCase();
+  const candidati = tutti.filter(r => !termine || (r.name || '').toLowerCase().includes(termine));
+
+  if (candidati.length === 0) {
+    elenco.innerHTML = '<div class="vuoto-sezione">Nessun preset.</div>';
+    return;
+  }
+
+  for (const record of candidati) {
+    const voce = document.createElement('div');
+    voce.className = 'voce';
+    const nome = document.createElement('span');
+    nome.className = 'nome';
+    nome.textContent = record.name;
+    voce.appendChild(nome);
+    if (residente(record)) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = Spark.slotLabel(record.slot).label;
+      voce.appendChild(badge);
+    }
+    voce.addEventListener('click', async () => {
+      if (!sceltaInCorso) return;
+      await store.setBankSlot(sceltaInCorso.bancoId, sceltaInCorso.posto, record.id);
+      sceltaInCorso = null;
+      chiudiPannelli();
+      await ricarica();
+      disegnaLive();
+    });
+    elenco.appendChild(voce);
+  }
+}
+
+$('cercaScegli').addEventListener('input', disegnaElencoScelta);
+
+$('btnSvuotaPosto').addEventListener('click', async () => {
+  if (!sceltaInCorso) return;
+  await store.setBankSlot(sceltaInCorso.bancoId, sceltaInCorso.posto, null);
+  sceltaInCorso = null;
+  chiudiPannelli();
+  await ricarica();
+  disegnaLive();
+});
+
+$('btnModifica').addEventListener('click', () => {
+  if (live.banco === BANCO_AMPLI) {
+    logLine('Il banco «Ampli» rispecchia gli otto slot dell\'ampli: per cambiarlo ' +
+            'scrivi un preset in uno slot dalla sezione Preset.');
+    return;
+  }
+  live.modifica = !live.modifica;
+  disegnaLive();
+});
+
+/* ====================================================================
+   Invio di un preset all'ampli
+   ==================================================================== */
 
 /**
  * Salva il payload che non siamo riusciti a interpretare, in esadecimale.
@@ -569,13 +1036,13 @@ function scaricaDiagnostica() {
  *
  * @param slot numero dello slot, oppure null per farlo suonare e basta
  */
-async function sendPreset(record, slot) {
-  const live = slot === null;
-  const dove = live ? 'suono corrente' : nomeSlot(slot);
+async function mandaPreset(record, slot) {
+  const soloProva = slot === null;
+  const dove = soloProva ? 'suono corrente' : nomeSlot(slot);
   try {
     const avanzamento = (i, total) =>
       logProgress(`invio «${record.name}» → ${dove}: chunk ${i + 1} di ${total}…`);
-    const esito = live
+    const esito = soloProva
       ? await spark.loadPreset(record, avanzamento)
       : await spark.storePreset(record, slot, avanzamento);
     if (!esito.ok) {
@@ -603,13 +1070,13 @@ async function sendPreset(record, slot) {
       return;
     }
 
-    const letto = live ? await spark.readLiveState() : await spark.readPreset(slot);
+    const letto = soloProva ? await spark.readLiveState() : await spark.readPreset(slot);
 
     if (!letto && spark.lastFailedPayload) {
       scaricaDiagnostica();
       logLine(`${inviato}, ma non so leggere quello che l'ampli risponde: ` +
               'ho scaricato il payload grezzo nei Download.');
-    } else if (!letto && live) {
+    } else if (!letto && soloProva) {
       logLine(`${inviato}, ma non riesco a rileggere il suono corrente per verificare. ` +
               'Ascolta: il suono è cambiato?');
     } else if (!letto) {
@@ -617,8 +1084,14 @@ async function sendPreset(record, slot) {
               `${nomeSlot(slot)}.`);
     } else if (letto.uuid === record.uuid) {
       logLine(`«${record.name}» è ora sul ${dove}. Verificato rileggendolo.` +
-              (live ? ' Il LED lampeggia perché l\'ampli sta suonando il preset ' +
-                      'software, che non è nessuno degli otto slot.' : ''));
+              (soloProva ? ' Il LED lampeggia perché l\'ampli sta suonando il preset ' +
+                           'software, che non è nessuno degli otto slot.' : ''));
+      if (!soloProva) {
+        await store.assignSlots({ [record.id]: slot });
+        await ricarica();
+        disegnaPreset();
+        disegnaLive();
+      }
     } else {
       logLine(`${inviato}, ma l'ampli continua a riportare «${letto.name}»: ` +
               'il preset non è stato applicato.');
@@ -629,224 +1102,94 @@ async function sendPreset(record, slot) {
 }
 
 /* ====================================================================
-   Riordino per trascinamento
-   Pointer Events invece del drag-and-drop HTML5: quello sui touch non
-   funziona, e il bersaglio è anche il telefono.
+   Categorie
    ==================================================================== */
 
-let drag = null;
-
-function startDrag(event, row) {
-  if (view.query || view.tag || view.favoritesOnly) {
-    logLine('per riordinare, azzera prima i filtri');
-    return;
-  }
-  event.preventDefault();
-  drag = { row, id: Number(row.dataset.id) };
-  row.classList.add('dragging');
-  event.target.setPointerCapture(event.pointerId);
-  event.target.addEventListener('pointermove', onDragMove);
-  event.target.addEventListener('pointerup', onDragEnd, { once: true });
-  event.target.addEventListener('pointercancel', onDragEnd, { once: true });
-}
-
-function onDragMove(event) {
-  if (!drag) return;
-  const rows = [...$('list').children];
-  const over = rows.find(other => {
-    if (other === drag.row) return false;
-    const box = other.getBoundingClientRect();
-    return event.clientY >= box.top && event.clientY <= box.bottom;
-  });
-  if (!over) return;
-
-  const box = over.getBoundingClientRect();
-  const after = event.clientY > box.top + box.height / 2;
-  over.parentNode.insertBefore(drag.row, after ? over.nextSibling : over);
-}
-
-async function onDragEnd(event) {
-  if (!drag) return;
-  const { row, id } = drag;
-  drag = null;
-  row.classList.remove('dragging');
-  event.target.removeEventListener('pointermove', onDragMove);
-
-  const target = [...$('list').children].indexOf(row);
-  await store.move(id, target);
-  refresh();
-}
-
-/* ====================================================================
-   Vista live — i pulsantoni della scaletta
-   ==================================================================== */
-
-let scaletta = [];        // record dei preset, in ordine
-let libreria = [];
-let attivo   = null;      // id del preset attualmente mandato all'ampli
-let occupato = false;     // un caricamento è in corso
-
-function disegna() {
-  const pads = $('pads');
-  pads.innerHTML = '';
-
-  if (scaletta.length === 0) {
-    const vuoto = document.createElement('div');
-    vuoto.className = 'vuoto';
-    vuoto.textContent = 'Nessun preset in scaletta. Premi «Scaletta» per comporla.';
-    pads.appendChild(vuoto);
-    return;
-  }
-
-  scaletta.forEach((record, i) => {
-    const pad = document.createElement('button');
-    pad.className = 'pad'
-      + (record.id === attivo ? ' attivo' : '')
-      + (occupato ? ' occupato' : '');
-    pad.disabled = !spark.connected || occupato;
-
-    const numero = document.createElement('span');
-    numero.className = 'n';
-    numero.textContent = i + 1;
-
-    const nome = document.createElement('span');
-    nome.textContent = record.name || '(senza nome)';
-
-    const sub = document.createElement('span');
-    sub.className = 'sub';
-    if (residente(record)) {
-      sub.innerHTML = `<span class="istantaneo">● istantaneo</span> · ${Spark.slotLabel(record.slot).label}`;
-    } else {
-      sub.innerHTML = '<span class="caricamento">● da caricare</span> · ~1s';
-    }
-
-    const barra = document.createElement('span');
-    barra.className = 'barra';
-
-    pad.append(numero, nome, sub, barra);
-    pad.addEventListener('click', () => attiva(record, barra));
-    pads.appendChild(pad);
-  });
-}
-
-/** Un preset è istantaneo se sappiamo che sta già in uno slot dell'ampli. */
-const residente = record => record.slot !== null && record.slot !== undefined;
-
-async function attiva(record, barra) {
-  if (occupato || !spark.connected) return;
-  occupato = true;
-  attivo = record.id;
-  disegna();
-
-  try {
-    if (residente(record)) {
-      await spark.send(Spark.commands.changePreset(record.slot));
-      logLine(`${record.name} — ${Spark.slotLabel(record.slot).label}`);
-    } else {
-      await spark.loadPreset(record, (i, total) => {
-        barra.style.width = Math.round(((i + 1) / total) * 100) + '%';
-      });
-      logLine(`${record.name} — caricato nel preset software`);
-    }
-  } catch (err) {
-    logLine('errore: ' + err.message);
-    attivo = null;
-  }
-  occupato = false;
-  disegna();
-}
-
-/* ---- preparazione: i primi 8 della scaletta finiscono negli slot ---- */
-
-$('btnPrepara').addEventListener('click', async () => {
-  const quanti = Math.min(8, scaletta.length);
-  if (quanti === 0) return;
-
-  const elenco = scaletta.slice(0, quanti)
-    .map((r, i) => `  ${Spark.slotLabel(i).label}  ${r.name}`).join('\n');
-  if (!confirm(`Scrivere i primi ${quanti} preset della scaletta negli slot dell'ampli?\n\n` +
-               elenco + '\n\nI preset che sono lì adesso vengono sovrascritti. ' +
-               'Le copie in libreria restano.')) return;
-
-  occupato = true;
-  disegna();
-  const assegnazioni = {};
-  for (let i = 0; i < quanti; i++) {
-    const record = scaletta[i];
-    logLine(`scrivo «${record.name}» in ${Spark.slotLabel(i).label}…`);
-    const esito = await spark.storePreset(record, i, null, { activate: false });
-    if (!esito.ok) {
-      logLine(`interrotto su ${Spark.slotLabel(i).label}: ${esito.error}`);
-      break;
-    }
-    assegnazioni[record.id] = i;
-  }
-
-  await store.assignSlots(assegnazioni);
-  await ricarica();
-  occupato = false;
-  disegna();
-  logLine(`scaletta preparata: ${Object.keys(assegnazioni).length} preset negli slot`);
+$('btnCategorie').addEventListener('click', () => {
+  disegnaElencoCategorie();
+  apriPannello('pannelloCategorie');
 });
 
-/* ---- composizione della scaletta ------------------------------------ */
-
-$('btnEdit').addEventListener('click', () => { $('editor').classList.add('aperto'); disegnaElenco(); });
-$('btnChiudi').addEventListener('click', async () => {
-  $('editor').classList.remove('aperto');
-  await ricarica();
-  disegna();
-});
-
-function disegnaElenco() {
-  const elenco = $('elenco');
+function disegnaElencoCategorie() {
+  const elenco = $('elencoCategorie');
   elenco.innerHTML = '';
-  if (libreria.length === 0) {
-    elenco.innerHTML = '<div class="vuoto">La libreria è vuota: leggi prima i preset dall\'ampli.</div>';
+  if (categorie.length === 0) {
+    elenco.innerHTML = '<div class="vuoto-sezione">Nessuna categoria. ' +
+                       'Creane una qui sopra, o dal dettaglio di un preset.</div>';
     return;
   }
-  const inScaletta = new Set(scaletta.map(r => r.id));
 
-  for (const record of libreria) {
+  for (const { nome, quanti } of categorie) {
     const voce = document.createElement('div');
     voce.className = 'voce';
 
-    const segno = document.createElement('span');
-    segno.textContent = inScaletta.has(record.id) ? '✓' : '＋';
-    segno.style.color = inScaletta.has(record.id) ? 'var(--green)' : 'var(--faint)';
-    segno.style.width = '1.2em';
-
-    const nome = document.createElement('span');
-    nome.className = 'nome';
-    nome.textContent = record.name;
-
-    voce.append(segno, nome);
-
-    if (residente(record)) {
-      const badge = document.createElement('span');
-      badge.className = 'badge';
-      badge.textContent = Spark.slotLabel(record.slot).label;
-      voce.appendChild(badge);
-    }
-
-    voce.addEventListener('click', async () => {
-      if (inScaletta.has(record.id)) await store.removeFromSetlist(record.id);
-      else                           await store.addToSetlist(record.id);
-      scaletta = await store.getSetlist();
-      disegnaElenco();
+    const campo = document.createElement('input');
+    campo.type = 'text';
+    campo.value = nome;
+    campo.addEventListener('change', async () => {
+      const nuovo = campo.value.trim();
+      if (!nuovo || nuovo === nome) { campo.value = nome; return; }
+      await store.renameCategory(nome, nuovo);
+      await ricarica();
+      disegnaElencoCategorie();
+      disegnaPreset();
     });
+
+    const conta = document.createElement('span');
+    conta.className = 'badge';
+    conta.textContent = quanti === 1 ? '1 preset' : `${quanti} preset`;
+
+    const via = document.createElement('button');
+    via.className = 'icon';
+    via.textContent = '✕';
+    via.title = 'elimina la categoria';
+    via.addEventListener('click', async () => {
+      const avviso = quanti === 0
+        ? `Eliminare la categoria «${nome}»?`
+        : `Eliminare «${nome}»? La perdono ${quanti} preset, che restano in libreria.`;
+      if (!confirm(avviso)) return;
+      await store.removeCategory(nome);
+      await ricarica();
+      disegnaElencoCategorie();
+      disegnaPreset();
+    });
+
+    voce.append(campo, conta, via);
     elenco.appendChild(voce);
   }
 }
 
-async function ricarica() {
-  libreria = await store.all();
-  scaletta = await store.getSetlist();
-}
+$('btnAggiungiCategoria').addEventListener('click', async () => {
+  const nome = $('nuovaCategoria').value.trim();
+  if (!nome) return;
+  await store.addCategory(nome);
+  $('nuovaCategoria').value = '';
+  await ricarica();
+  disegnaElencoCategorie();
+  disegnaPreset();
+});
+
+$('nuovaCategoria').addEventListener('keydown', event => {
+  if (event.key === 'Enter') $('btnAggiungiCategoria').click();
+});
+
+$('btnAzzeraCategorie').addEventListener('click', async () => {
+  if (categorie.length === 0) return;
+  if (!confirm(`Togliere tutte e ${categorie.length} le categorie?\n\n` +
+               'I preset restano tutti, perdono solo l\'etichetta. ' +
+               'Serve a ripartire da zero dopo un import.')) return;
+  const quante = await store.clearCategories();
+  logLine(`tolte ${quante} categorie: i preset sono tutti al loro posto`);
+  await ricarica();
+  disegnaElencoCategorie();
+  disegnaPreset();
+});
 
 /* ====================================================================
    Azioni comuni
    ==================================================================== */
+
+$('btnAltro').addEventListener('click', () => apriPannello('pannelloAltro'));
 
 $('btnConnect').addEventListener('click', async () => {
   try {
@@ -866,7 +1209,9 @@ $('btnRead').addEventListener('click', async () => {
   const { added, updated } = await store.importFromAmp(presets);
   logLine(`letti ${presets.length} preset: ${added} nuovi, ${updated} aggiornati`);
   $('btnRead').disabled = !spark.connected;
-  refresh();
+  await ricarica();
+  disegnaPreset();
+  disegnaLive();
 });
 
 // Legge il suono attivo senza toccare nulla: serve sia a sapere cosa sta
@@ -874,10 +1219,10 @@ $('btnRead').addEventListener('click', async () => {
 $('btnLive').addEventListener('click', async () => {
   $('btnLive').disabled = true;
   spark.lastFailedPayload = null;
-  const live = await spark.readLiveState();
-  if (live) {
-    const catena = live.effects.filter(e => e.enabled).map(e => e.name).join(' · ');
-    logLine(`suono corrente: «${live.name}» — ${catena}`);
+  const corrente = await spark.readLiveState();
+  if (corrente) {
+    const catena = corrente.effects.filter(e => e.enabled).map(e => e.name).join(' · ');
+    logLine(`suono corrente: «${corrente.name}» — ${catena}`);
   } else if (spark.lastFailedPayload) {
     scaricaDiagnostica();
     logLine('non so leggere il suono corrente: payload grezzo scaricato nei Download.');
@@ -888,19 +1233,14 @@ $('btnLive').addEventListener('click', async () => {
 });
 
 $('search').addEventListener('input', event => {
-  view.query = event.target.value;
-  refresh();
-});
-
-$('tagFilter').addEventListener('change', event => {
-  view.tag = event.target.value;
-  refresh();
+  vista.cerca = event.target.value;
+  disegnaPreset();
 });
 
 $('btnFav').addEventListener('click', () => {
-  view.favoritesOnly = !view.favoritesOnly;
-  $('btnFav').classList.toggle('on', view.favoritesOnly);
-  refresh();
+  vista.soloPreferiti = !vista.soloPreferiti;
+  $('btnFav').classList.toggle('on', vista.soloPreferiti);
+  disegnaPreset();
 });
 
 $('btnExport').addEventListener('click', async () => {
@@ -921,7 +1261,9 @@ $('fileInput').addEventListener('change', async event => {
   try {
     if (file.name.toLowerCase().endsWith('.zip')) await importaBackupUfficiale(file);
     else                                          await importaBackupNostro(file);
-    refresh();
+    await ricarica();
+    disegnaPreset();
+    disegnaLive();
   } catch (err) {
     logLine('importazione fallita: ' + err.message);
   }
@@ -934,14 +1276,15 @@ async function importaBackupNostro(file) {
   logLine(`importati ${quanti} preset da ${file.name}`);
 }
 
-/** preset_backup.zip dell'app ufficiale: le categorie diventano tag. */
+/** preset_backup.zip dell'app ufficiale: le sue categorie restano fuori. */
 async function importaBackupUfficiale(file) {
   logLine(`leggo ${file.name}…`);
-  const { presets, categorie, saltati } = await SparkBackup.parseBackup(await file.arrayBuffer());
+  const { presets, saltati } = await SparkBackup.parseBackup(await file.arrayBuffer());
 
   const { added, updated } = await store.importFromBackup(presets);
   logLine(`${presets.length} preset dal backup dell'app: ${added} nuovi, ${updated} aggiornati`);
-  logLine(`categorie diventate tag: ${categorie.join(', ')}`);
+  logLine('le categorie dell\'app ufficiale non sono state importate: ' +
+          'le tue le fai da «Categorie».');
   if (saltati.length) {
     logLine(`${saltati.length} preset saltati: ${saltati[0].motivo}`);
   }
@@ -951,7 +1294,6 @@ async function importaBackupUfficiale(file) {
 
 (async function start() {
   await store.open();
-  await ricarica();
   await applicaVista();
   if (!navigator.bluetooth) {
     $('btnConnect').disabled = true;
