@@ -1213,10 +1213,63 @@ async function provaVariantiSalvataggio(record, slot, cera) {
     }
   }
 
-  logLine(`nessuna delle ${varianti.length} forme di 0x0127 salva in ${nomeSlot(slot)}: ` +
-          `lì c'è ancora «${cera.name}». Il preset però è nel buffer e suona, ` +
-          'quindi il trasferimento non è in discussione.');
-  return false;
+  logLine(`nessuna delle ${varianti.length} forme di 0x0127 salva in ${nomeSlot(slot)}. ` +
+          'Provo a scrivere direttamente nello slot, come fa il codice di riferimento…');
+  return provaScritturaDiretta(record, slot, cera);
+}
+
+/**
+ * L'altra strada, presa da `Spark.ino:113-124` del riferimento: il preset si
+ * manda con `0x0101` **indirizzato allo slot** invece che al buffer `0x7f`, e
+ * subito dopo si cambia preset e si torna indietro.
+ *
+ * Il doppio `0x0138` non è decorazione: nel riferimento è scritto proprio così,
+ * e ha l'aria di servire a far ricaricare allo slot quello che si è appena
+ * scritto. Nei nostri appunti la scrittura diretta risultava senza effetto, ma
+ * era stata provata **senza** questo passaggio — e senza, la rilettura mostra
+ * il contenuto vecchio anche se la scrittura è andata a buon fine.
+ */
+async function provaScritturaDiretta(record, slot, cera) {
+  try {
+    const esito = await spark.writePreset(record, Spark.slotTarget(slot), (i, total) =>
+      logProgress(`scrittura diretta in ${nomeSlot(slot)}: chunk ${i + 1} di ${total}…`));
+    if (!esito.ok) {
+      logLine(`scrittura diretta interrotta: ${esito.error}`);
+      return false;
+    }
+
+    await new Promise(r => setTimeout(r, 300));
+    const altrove = slot === 0 ? 1 : 0;
+    await spark.send(Spark.commands.changePreset(altrove));
+    await new Promise(r => setTimeout(r, 300));
+    await spark.send(Spark.commands.changePreset(slot));
+    await new Promise(r => setTimeout(r, 500));
+
+    if (!spark.connected) {
+      logLine('l\'ampli si è disconnesso durante la scrittura diretta nello slot.');
+      return false;
+    }
+
+    const adesso = await spark.readPreset(slot);
+    if (adesso && adesso.uuid === record.uuid) {
+      logLine(`FUNZIONA: «${record.name}» è in ${nomeSlot(slot)}, scritto direttamente ` +
+              'nello slot con 0x0101 e un cambio preset via e ritorno. ' +
+              'Verificato rileggendo lo slot.');
+      await store.assignSlots({ [record.id]: slot });
+      await ricarica();
+      disegnaPreset();
+      disegnaLive();
+      return true;
+    }
+
+    logLine(`niente da fare: né 0x0127 in quattro forme né la scrittura diretta ` +
+            `mettono «${record.name}» in ${nomeSlot(slot)}, dove resta «${cera.name}». ` +
+            'Il preset si trasferisce e suona: è solo il salvataggio a non passare.');
+    return false;
+  } catch (err) {
+    logLine('scrittura diretta fallita: ' + err.message);
+    return false;
+  }
 }
 
 /* ====================================================================

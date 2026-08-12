@@ -449,13 +449,39 @@ di nuovo `[0x00, n]`, ma stavolta **col preset software attivo** — a quel punt
 è già passata per la diagnosi, e «salva quello che stai suonando» è un'ipotesi che vale
 quanto le altre.
 
+**Tutte e quattro rifiutate, provate sull'ampli il 12 agosto 2026.** Ack regolare per
+ognuna, lo slot invariato. `0x0127` non è la strada, o non lo è da solo.
+
+### La scrittura diretta nello slot, da riprovare come si deve
+
+Nel riferimento un preset entra in uno slot **senza passare dal buffer**:
+`create_preset` scrive `[0x00, preset_num]` come primi due byte, cioè indirizza
+direttamente lo slot (`SparkIO.ino:1025-1026`). E subito dopo (`Spark.ino:113-124`):
+
+```
+create_preset(preset con preset_num = 3)
+delay(100)
+change_hardware_preset(0x00, 0x00)     ← via
+change_hardware_preset(0x00, 0x03)     ← e ritorno
+```
+
+Il doppio cambio preset non è decorazione: ha l'aria di far ricaricare allo slot quello
+che si è appena scritto. **Nei nostri appunti la scrittura diretta risultava senza
+effetto, ma era stata provata senza questo passaggio** — e senza, rileggere lo slot
+mostra il contenuto vecchio anche se la scrittura fosse riuscita. È esattamente lo stesso
+errore di metodo in cui sono cascato con il suono corrente.
+
+`provaScritturaDiretta` fa questo giro completo e verifica rileggendo. Se funziona,
+`storePreset` va riscritto così e `0x0127` esce di scena.
+
 `transport.loadPreset()` e `transport.storePreset()` fanno esattamente questo. Il secondo
 comando **non è opzionale**: senza, il risultato è indistinguibile da un fallimento.
 
-Scrivere `0x0101` direttamente su uno slot o su `[0x01, 0x00]` produce ack regolari e
-nessun effetto: sono indirizzi validi in **lettura**, non in scrittura. In lettura infatti
-`0x0201` con `[0x00, n]` legge lo slot n e con `[0x01, 0x00]` il suono attivo
-(`Spark.slotTarget(n)` e `Spark.LIVE_TARGET`).
+Scrivere `0x0101` direttamente su uno slot sembrava produrre ack regolari e nessun
+effetto — **ma quella prova era incompleta**, perché non faceva seguire il cambio preset
+via e ritorno che il riferimento mette lì apposta. Da rifare, vedi sopra. In lettura
+`[0x00, n]` e `[0x01, 0x00]` sono comunque indirizzi validi: `0x0201` con il primo legge
+lo slot n, col secondo il suono attivo (`Spark.slotTarget(n)` e `Spark.LIVE_TARGET`).
 
 `loadPreset` non sovrascrive nessuno slot salvato: è il modo sicuro di provare un preset,
 ed è l'azione principale offerta dalla UI.
