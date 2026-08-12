@@ -2,8 +2,16 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Spark 2 — live</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e0f12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spark 2">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
   * { box-sizing: border-box; }
   :root {
@@ -16,8 +24,12 @@
          font-family:-apple-system,'Segoe UI',Roboto,sans-serif;
          display:flex; flex-direction:column; -webkit-user-select:none; user-select:none; }
 
-  header { display:flex; align-items:center; gap:10px; padding:8px 12px;
-           border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  /* Installata a schermo intero la pagina arriva sotto la tacca e sotto la
+     barra dei gesti: le insets tengono header e pulsanti dove si toccano. */
+  header { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+           padding:calc(8px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right))
+                   8px calc(12px + env(safe-area-inset-left));
+           border-bottom:1px solid var(--line); }
   h1 { font-size:0.95rem; margin:0; margin-right:auto; }
   .status { padding:3px 9px; border-radius:11px; font-size:0.72rem; font-weight:700; }
   .status.off { background:#3a2020; color:#ff8080; }
@@ -33,7 +45,9 @@
 
   /* Pulsanti grandi ma non stirati: con pochi preset in scaletta una riga
      1fr li farebbe alti quanto mezzo schermo. */
-  main { flex:1; display:grid; gap:10px; padding:12px; overflow-y:auto;
+  main { flex:1; display:grid; gap:10px; overflow-y:auto;
+         padding:12px calc(12px + env(safe-area-inset-right))
+                 12px calc(12px + env(safe-area-inset-left));
          grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
          grid-auto-rows:minmax(92px, 120px); align-content:start; }
 
@@ -65,7 +79,8 @@
   .voce .nome { flex:1; }
   .voce .badge { font-size:0.68rem; color:var(--faint); font-family:Consolas,monospace;
                  border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
-  #log { padding:6px 12px; font-family:Consolas,monospace; font-size:0.72rem;
+  #log { padding:6px 12px calc(6px + env(safe-area-inset-bottom));
+         font-family:Consolas,monospace; font-size:0.72rem;
          color:var(--faint); border-top:1px solid var(--line); min-height:1.6em;
          white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 </style>
@@ -97,6 +112,7 @@
 <script src="src/spark-protocol.js"></script>
 <script src="src/spark-transport.js"></script>
 <script src="src/preset-store.js"></script>
+<script src="src/pwa.js"></script>
 <script>
 'use strict';
 

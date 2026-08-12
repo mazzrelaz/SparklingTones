@@ -8,10 +8,16 @@ Web app / PWA, HTML+JS vanilla, zero dipendenze, Web Bluetooth.
 ```
 index.html               libreria: ricerca, tag, note, preferiti, riordino, scrittura
 live.html                vista live: pulsantoni per una scaletta, per suonare
+manifest.webmanifest     identità della PWA: nome, icone, scorciatoia alla vista live
+sw.js                    service worker: guscio in cache, app utilizzabile offline
+icons/                   icone PNG generate con lo script PowerShell in tools/
 src/spark-protocol.js    encoder/decoder puro, senza I/O — il cuore del progetto
 src/spark-transport.js   connessione BLE, coda di invio, attesa risposte, lettura preset
 src/preset-store.js      libreria su IndexedDB, import dall'ampli, backup, scaletta
 src/spark-backup.js      legge preset_backup.zip dell'app ufficiale, senza librerie
+src/pwa.js               registra il service worker, «installa» e «versione nuova»
+tools/serve.ps1          server statico su localhost, per provare la PWA senza pubblicarla
+tools/make-icons.ps1     rigenera le icone di icons/ con System.Drawing
 tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
@@ -37,8 +43,7 @@ con quelli che hanno davvero avuto effetto sull'ampli, byte per byte.
 
 IndexedDB funziona da `file://` su Chrome desktop (verificato). Attenzione però: su
 `file://` tutte le pagine condividono la stessa origine opaca, quindi non c'è isolamento
-fra i database, e il browser può ripulirli più facilmente. Per installare l'app come PWA
-su Android servirà comunque servirla via https — GitHub Pages basta.
+fra i database, e il browser può ripulirli più facilmente.
 
 `tools/explorer.html` contiene una copia propria del codice di protocollo, perché deve
 restare single-file per essere copiato sul telefono. È **congelato**: le modifiche vanno
@@ -47,6 +52,47 @@ in `src/`, non lì.
 La libreria non perde mai il lavoro dell'utente: `importFromAmp` riconosce i preset per
 UUID e riscrive solo la parte sonora, lasciando intatti tag, note, preferiti e ordine.
 È il comportamento più importante di `preset-store.js` ed è coperto da test.
+
+## PWA
+
+`manifest.webmanifest` + `sw.js` + `src/pwa.js`. Verificato su localhost il 12 agosto 2026:
+service worker attivo, guscio in cache, e **con il server spento `live.html` si apre lo
+stesso, con tutti gli script**. È la prova che conta: a un concerto la rete non c'è.
+
+Percorsi **tutti relativi** (`./`), così l'app funziona sia in root sia in un
+sottopercorso tipo `utente.github.io/spark/`, senza toccare niente.
+
+**Strategia di cache: stale-while-revalidate.** Si risponde sempre dalla copia salvata e
+si riscarica in sottofondo per la volta dopo. Cache-first puro rischia di restare
+inchiodato a una versione vecchia se ci si dimentica di alzare `VERSIONE` in `sw.js`;
+network-first fa aspettare la rete proprio quando non c'è. `VERSIONE` va comunque alzata
+a ogni rilascio: è quello che ripulisce le cache vecchie e fa comparire l'avviso.
+
+**L'aggiornamento non si applica mai da solo.** Il nuovo worker resta in attesa e la
+pagina mostra una striscia «C'è una versione nuova — Aggiorna»; solo premendo lì parte
+`skipWaiting` e il ricaricamento. Un reload a sorpresa fra due pezzi sarebbe il peggio
+che possa capitare. Provato tutto il giro su localhost: striscia, click, cache vecchia
+rimossa.
+
+Trappola già inciampata e risolta: alla primissima visita `clients.claim()` fa scattare
+`controllerchange` senza che ci sia niente da aggiornare. `pwa.js` guarda se la pagina
+*era già controllata* al caricamento, altrimenti ricaricherebbe da sola ogni prima visita.
+
+Da `file://` `pwa.js` non fa niente (i service worker vogliono un'origine sicura), quindi
+lo sviluppo aprendo i file resta identico a prima e nessuna cache si mette in mezzo.
+
+**Passando da `file://` a https la libreria non viene dietro**: è un'altra origine, quindi
+un altro IndexedDB. Va esportata in JSON da `file://` e reimportata sul sito. Vale la pena
+ricordarlo prima di pubblicare, non dopo.
+
+`live.html` usa `viewport-fit=cover` e le `env(safe-area-inset-*)`: installata a schermo
+intero, senza, header e log finirebbero sotto la tacca e sotto la barra dei gesti.
+
+Per provare: `powershell -ExecutionPolicy Bypass -File tools\serve.ps1`, poi
+`http://localhost:8099/` — localhost conta come origine sicura, quindi service worker e
+Web Bluetooth funzionano entrambi.
+
+Resta da fare la pubblicazione su GitHub Pages: il repo non ha ancora un remote.
 
 ## Importazione dall'app ufficiale
 
@@ -99,9 +145,8 @@ lo slot a chi è stato sovrascritto.
 
 Ancora da fare, in ordine di utilità discussa con l'utente:
 
-1. **PWA** — manifest, service worker, pubblicazione su https (GitHub Pages). Serve
-   davvero: un sistema live vuole il telefono accanto all'ampli, non il PC. Oggi l'app
-   gira da `file://`, dove la libreria vive in un'origine fragile.
+1. **Pubblicazione su https** — il codice è già una PWA installabile (vedi sopra), manca
+   solo metterlo online: il repo non ha un remote e GitHub Pages basta.
 2. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
    (`0x0104`, `0x0115`, `0x0106`) sono già verificati: è lavoro di interfaccia.
 3. **`slot` come lista** invece che campo singolo, così un preset copiato in più slot li
