@@ -21,6 +21,7 @@ tools/serve.ps1          server statico su localhost, per provare la PWA senza p
 tools/make-icons.ps1     rigenera le icone di icons/ con System.Drawing
 tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
+tools/model-probe.html   idem per 0x0106, il cambio modello che non ha effetto
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
 test/protocol-test.html  87 test del protocollo contro catture reali
@@ -361,6 +362,26 @@ Cosa siano resta aperto. L'ipotesi più semplice — preset nati sul firmware nu
 preset vecchi importati — spiegherebbe perché cambino da preset a preset e non da effetto
 a effetto.
 
+### Il tipo di riverbero è il settimo parametro
+
+Non è un modello: nell'elenco dei modelli il riverbero è uno solo, `bias.reverb`, e chi
+cerca sala, molla o piastra lì non li trova. Non è un difetto dell'elenco — **l'ampli ha
+un solo effetto riverbero per tutti i tipi** (docs §3.10), quindi il tipo per forza è un
+parametro. Che sia il settimo lo dicono i valori: negli otto preset letti dall'ampli vale
+0, 0.1, 0.2 o 0.3, sempre un multiplo esatto di un decimo, e nessun'altra manopola di
+nessun altro effetto si comporta così. I tipi sono nove, quanti sono i `bias.reverb.N`
+di Soundshed.
+
+Prima era lasciato senza nome perché «quasi certamente» non basta per scriverci
+un'etichetta sopra. Adesso si chiama *Tipo* lo stesso, per due motivi: è in corsivo come
+tutte le proposte della tabella, quindi lo dichiara già; e lasciarlo numerato rendeva i
+tipi di riverbero irraggiungibili, che è il difetto vero. Il campo `scelte` della tabella
+gli fa fare un elenco a tendina invece di un cursore — con un cursore continuo azzeccare
+la posizione giusta sarebbe un terno al lotto.
+
+**I nomi dei nove tipi non li sappiamo**, e infatti si leggono «Tipo 1»…«Tipo 9». Vanno
+riconosciuti a orecchio, una posizione alla volta.
+
 `MODELLI` sta nello stesso file e viene dallo stesso catalogo, più i modelli che
 compaiono nei preset dell'utente ma che lì non ci sono (`JH.FuzzTone`, `Comp76`,
 `Preamp73`, gli altri `JH.*`): di quelli non sappiamo i nomi delle manopole e restano
@@ -393,6 +414,16 @@ altri che nessuna fonte elenca — quindi c'è sempre «Scrivilo a mano».
 Dopo il cambio **i parametri sono altri**: cambiano di numero e di significato, e i valori
 di prima non vogliono dire più niente. Perciò si rilegge la catena dall'ampli invece di
 indovinare, e si controlla che il modello nuovo sia davvero lì — ack o no.
+
+**Sull'hardware non funziona** (riferito dall'utente il 12 agosto 2026, su ampli e drive):
+si sceglie il modello e non succede niente. Il messaggio è quello del riferimento —
+due stringhe prefissate (`SparkIO.ino:900`, docs §3.10) — più il byte `0x00` finale che
+sullo Spark 2 serve a `0x0115` e `0x0104`, ma quel byte lì **non è mai stato verificato**:
+è stato messo per analogia. È la stessa forma di fallimento di `0x0127` e dei comandi
+sugli effetti prima che si scoprisse il byte finale, e si affronta allo stesso modo —
+`tools/model-probe.html` prova dieci varianti del messaggio una alla volta e **verifica
+ognuna rileggendo la catena**, senza bisogno di ascoltare. Da rifare appena l'ampli è a
+portata; finché non lo si sa, non spostare il codice a indovinare.
 
 **Il cursore va strozzato.** Un trascinamento genera decine di eventi al secondo e ogni
 comando è una scrittura BLE: mandarli tutti intasa la coda e il suono arriva in ritardo

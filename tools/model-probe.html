@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — prova di cambio modello (0x0106)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:#14161a; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:14px; }
+  h1 { font-size:1.1rem; margin:0 0 2px; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:72ch; line-height:1.5; }
+  .status { display:inline-block; padding:3px 9px; border-radius:11px;
+            font-size:0.75rem; font-weight:600; }
+  .status.off { background:#3a2020; color:#ff8080; }
+  .status.on  { background:#1f3a24; color:#7fe08a; }
+  .status.wait{ background:#3a3520; color:#f0d060; }
+  button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
+           background:#2a2d33; color:#e8e8ea; padding:8px 13px; border-radius:8px;
+           margin-right:6px; margin-bottom:6px; }
+  button.primary { background:#ff6a3d; color:#fff; }
+  button:disabled { background:#26282d; color:#5a5f68; cursor:not-allowed; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  label { color:#8a8f98; font-size:0.82rem; }
+  select, input[type=text] { background:#1e2126; border:1px solid #34383f; color:#e8e8ea;
+           padding:8px; border-radius:8px; font:inherit; font-size:0.85rem; }
+  table { width:100%; border-collapse:collapse; font-size:0.8rem; margin-top:6px; }
+  td { padding:5px 6px; border-bottom:1px solid #24272c; vertical-align:middle; }
+  td.desc { color:#b0b4bb; }
+  td.esito { font-weight:700; white-space:nowrap; }
+  .ok { color:#7fe08a; } .ko { color:#ff8080; } .boh { color:#f0d060; }
+  #catena { color:#b0b4bb; font-size:0.8rem; font-family:'SF Mono',Consolas,monospace;
+            background:#0e0f12; border:1px solid #24272c; border-radius:10px;
+            padding:8px 10px; margin-bottom:12px; white-space:pre-wrap; }
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         height:30vh; overflow-y:auto; margin-top:16px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.74rem; line-height:1.5;
+         color:#8a8f98; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>Prova di cambio modello (0x0106)</h1>
+<div class="sub">Il cambio di modello non ha effetto sull'ampli: stessa forma di
+fallimento dei comandi sugli effetti prima di scoprire il byte <code>0x00</code> finale —
+l'ack arriva, il suono no. Ogni variante qui sotto cambia <b>una cosa sola</b> nel
+messaggio e <b>verifica da sé</b> rileggendo la catena dall'ampli: non serve ascoltare.
+Nessuno slot viene toccato — si lavora sul suono corrente.</div>
+
+<div class="row">
+  <span id="status" class="status off">non connesso</span>
+  <button id="btnConnect" class="primary">Connetti</button>
+  <button id="btnLeggi" disabled>Rileggi la catena</button>
+</div>
+
+<div id="catena">catena non ancora letta</div>
+
+<div class="row">
+  <label for="pos">posizione</label>
+  <select id="pos"></select>
+  <label for="nuovo">metti al suo posto</label>
+  <select id="nuovo"></select>
+  <input type="text" id="aMano" placeholder="…oppure un nome a mano" size="18">
+</div>
+
+<table id="variants"></table>
+
+<div id="log"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script src="../src/spark-effetti.js"></script>
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+let catena = [];          // gli effetti come li riporta l'ampli adesso
+
+const spark = new SparkTransport({
+  onStatus: (state, label) => {
+    const el = $('status');
+    el.className = 'status ' + (state === 'connected' ? 'on'
+                              : state === 'connecting' ? 'wait' : 'off');
+    el.textContent = state === 'connected' || state === 'connecting' ? label : 'non connesso';
+    $('btnConnect').disabled = state === 'connected';
+    $('btnLeggi').disabled   = state !== 'connected';
+    document.querySelectorAll('#variants button').forEach(b => b.disabled = state !== 'connected');
+  },
+  onLog: msg => log(msg),
+});
+
+function log(msg) {
+  $('log').textContent += `[${new Date().toTimeString().slice(0, 8)}] ${msg}\n`;
+  $('log').scrollTop = $('log').scrollHeight;
+}
+
+/* ------------------------------------------------------------------
+   Le varianti. La A è quella che l'app manda adesso; le altre tolgono
+   o aggiungono una cosa sola, per capire quale.
+   ------------------------------------------------------------------ */
+
+const P = Spark.encPrefixedString;   // [len, 0xa0+len, ascii] — «alt short string»
+const C = Spark.encShortString;      // [0xa0+len, ascii]
+
+const VARIANTI = [
+  { nome: 'A', desc: 'come adesso: prefissate + 0x00 finale',
+    dati: (v, n) => [...P(v), ...P(n), 0x00] },
+
+  { nome: 'B', desc: 'senza il byte finale, come lo Spark 40 (SparkIO.ino:900)',
+    dati: (v, n) => [...P(v), ...P(n)] },
+
+  { nome: 'C', desc: 'due byte 0x00 in coda',
+    dati: (v, n) => [...P(v), ...P(n), 0x00, 0x00] },
+
+  { nome: 'D', desc: 'stringhe corte (senza il byte di lunghezza) + 0x00',
+    dati: (v, n) => [...C(v), ...C(n), 0x00] },
+
+  { nome: 'E', desc: 'stringhe corte, senza byte finale',
+    dati: (v, n) => [...C(v), ...C(n)] },
+
+  { nome: 'F', desc: 'la posizione nella catena davanti a tutto, poi 0x00',
+    dati: (v, n, pos) => [pos & 0xff, ...P(v), ...P(n), 0x00] },
+
+  { nome: 'G', desc: 'la posizione in coda al posto dello 0x00',
+    dati: (v, n, pos) => [...P(v), ...P(n), pos & 0xff] },
+
+  { nome: 'H', desc: 'solo il nome nuovo, prefissato, + 0x00',
+    dati: (v, n) => [...P(n), 0x00] },
+
+  { nome: 'I', desc: 'come A, ma seguita da 0x0115 che riaccende il blocco',
+    dati: (v, n) => [...P(v), ...P(n), 0x00], riaccendi: true },
+
+  // Nel riferimento il primo nome è quello che c'è adesso (Spark.ino:157), ma
+  // costa poco escludere che sullo Spark 2 sia il contrario.
+  { nome: 'J', desc: 'nomi invertiti: prima il nuovo, poi il vecchio',
+    dati: (v, n) => [...P(n), ...P(v), 0x00] },
+];
+
+function costruisciTabella() {
+  const t = $('variants');
+  t.innerHTML = '';
+  for (const v of VARIANTI) {
+    const tr = document.createElement('tr');
+
+    const td1 = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.textContent = 'Prova ' + v.nome;
+    btn.disabled = !spark.connected;
+    const td3 = document.createElement('td');
+    td3.className = 'esito';
+    btn.addEventListener('click', () => provaVariante(v, td3));
+    td1.appendChild(btn);
+
+    const td2 = document.createElement('td');
+    td2.className = 'desc';
+    td2.textContent = v.desc;
+
+    tr.append(td1, td2, td3);
+    t.appendChild(tr);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+
+async function leggiCatena() {
+  const live = await spark.readLiveState();
+  if (!live) { log('non riesco a rileggere lo stato live'); return null; }
+  catena = live.effects.map(e => ({ name: e.name, enabled: e.enabled, n: e.params.length }));
+  $('catena').textContent = catena
+    .map((e, i) => `${i} ${Spark.CATENA[i].padEnd(12)} ${e.name}` +
+                   `${e.enabled ? '' : ' [spento]'}  (${e.n} parametri)`)
+    .join('\n');
+  riempiScelte();
+  return catena;
+}
+
+function riempiScelte() {
+  const pos = $('pos');
+  const scelta = Number(pos.value || 3);       // di norma l'ampli: si sente subito
+  pos.innerHTML = '';
+  catena.forEach((e, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `${i} — ${Spark.CATENA[i]} (${e.name})`;
+    pos.appendChild(o);
+  });
+  pos.value = String(Math.min(scelta, catena.length - 1));
+  riempiModelli();
+}
+
+function riempiModelli() {
+  const i = Number($('pos').value);
+  const nuovo = $('nuovo');
+  nuovo.innerHTML = '';
+  for (const m of (SparkEffetti.MODELLI[i] || [])) {
+    if (catena[i] && m === catena[i].name) continue;
+    const o = document.createElement('option');
+    o.value = m;
+    o.textContent = m;
+    nuovo.appendChild(o);
+  }
+}
+
+$('pos').addEventListener('change', riempiModelli);
+
+async function provaVariante(v, cella) {
+  const i = Number($('pos').value);
+  if (!catena[i]) { log('leggi prima la catena'); return; }
+  const vecchio = catena[i].name;
+  const nuovo   = $('aMano').value.trim() || $('nuovo').value;
+  if (!nuovo || nuovo === vecchio) { log('scegli un modello diverso da quello che c\'è'); return; }
+
+  cella.textContent = '…';
+  cella.className = 'esito boh';
+  log(`── variante ${v.nome}: ${v.desc}`);
+  log(`   posizione ${i}: ${vecchio} → ${nuovo}`);
+
+  try {
+    await spark.send({ cmd: Spark.CMD_ACTION, sub: 0x06, data: v.dati(vecchio, nuovo, i) });
+    if (v.riaccendi) {
+      await new Promise(r => setTimeout(r, 200));
+      await spark.send(Spark.commands.effectOnOff(nuovo, true));
+    }
+  } catch (err) {
+    cella.textContent = 'invio fallito';
+    cella.className = 'esito ko';
+    log('errore: ' + err.message);
+    return;
+  }
+
+  await new Promise(r => setTimeout(r, 600));
+
+  if (!spark.connected) {
+    cella.textContent = 'disconnesso';
+    cella.className = 'esito ko';
+    return;
+  }
+
+  const dopo = await leggiCatena();
+  if (!dopo) {
+    cella.textContent = 'non verificabile';
+    cella.className = 'esito boh';
+    return;
+  }
+
+  if (dopo[i] && dopo[i].name === nuovo) {
+    cella.textContent = 'FUNZIONA';
+    cella.className = 'esito ok';
+    log(`variante ${v.nome}: il modello è cambiato davvero. È questa.`);
+  } else {
+    cella.textContent = 'nessun effetto';
+    cella.className = 'esito ko';
+    log(`variante ${v.nome}: la catena riporta ancora ${dopo[i] ? dopo[i].name : '?'}.`);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+
+$('btnConnect').addEventListener('click', async () => {
+  try {
+    await spark.connect();
+    await spark.identify();
+    await leggiCatena();
+  } catch (err) { log('errore: ' + err.message); }
+});
+
+$('btnLeggi').addEventListener('click', leggiCatena);
+
+costruisciTabella();
+if (!navigator.bluetooth) {
+  $('btnConnect').disabled = true;
+  log('Web Bluetooth non disponibile in questo browser.');
+}
+</script>
+</body>
+</html>

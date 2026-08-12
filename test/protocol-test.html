@@ -364,6 +364,26 @@ check('i nomi non si spostano per via del parametro in più',
       [SparkEffetti.manopola('bias.noisegate', 0, 3),
        SparkEffetti.manopola('bias.noisegate', 1, 3)], ['Threshold', 'Decay']);
 
+/* ---------- il tipo di riverbero ----------
+   L'ampli ha un solo `bias.reverb` per tutti i tipi, quindi il tipo è per forza
+   un parametro; ed è il settimo, perché è l'unico che nei preset veri vale
+   sempre un multiplo esatto di un decimo. Un cursore continuo non lo
+   azzeccherebbe mai: la UI ci mette un elenco di nove posizioni. */
+
+check('il tipo di riverbero è una scelta fra nove, non una manopola continua',
+      SparkEffetti.posizioni('bias.reverb', 6), 9);
+check('le altre manopole del riverbero restano continue',
+      [SparkEffetti.posizioni('bias.reverb', 0), SparkEffetti.posizioni('Twin', 0)], [0, 0]);
+check('le posizioni valgono un decimo per volta',
+      [SparkEffetti.valorePosizione(0), SparkEffetti.valorePosizione(3)], [0, 0.3]);
+check('il valore del riverbero della cattura reale cade su una posizione',
+      SparkEffetti.posizioneDi(preset.effects[6].params[6].value, 9), 2);
+check('un valore che non è nessuna posizione non ci viene spinto dentro',
+      [SparkEffetti.posizioneDi(0.55, 9), SparkEffetti.posizioneDi(0.9, 9)], [-1, -1]);
+// Il float32 dell'ampli non è mai il decimale esatto: 0.2 arriva come 0.20000000298.
+check('e il float dell\'ampli conta come la posizione giusta lo stesso',
+      SparkEffetti.posizioneDi(0.20000000298023224, 9), 2);
+
 check('ogni posizione della catena ha i suoi modelli',
       SparkEffetti.MODELLI.length, Spark.CATENA.length);
 check('i modelli della cattura reale sono tutti offerti nella loro posizione',

@@ -220,6 +220,9 @@
   .blocco .cambia { font-size:0.72rem; padding:4px 10px; border-radius:12px;
                     background:#2a2d33; color:var(--dim); }
   .manopola input[type=range] { flex:1; min-width:0; accent-color:var(--accent); }
+  .manopola select.scelta { flex:1; min-width:0; background:#1e2126; color:var(--text);
+                            border:1px solid var(--line); border-radius:7px;
+                            padding:4px 6px; font:inherit; font-size:0.78rem; }
   .manopola .valore { width:3.2em; text-align:right; color:var(--dim);
                       font-size:0.74rem; font-family:Consolas,monospace; }
   .avviso-spento { color:var(--gold); font-size:0.72rem; margin-top:6px; }
@@ -342,6 +345,7 @@
   </div>
   <p class="spiega">Cambiare modello azzera i parametri di quel blocco: l'ampli li
     rimanda suoi, e l'editor li rilegge.</p>
+  <p class="spiega" id="notaModelli" hidden></p>
   <div class="barra-alta">
     <input type="search" id="cercaModello" placeholder="cerca…" style="flex:1">
     <button id="btnModelloAMano" class="piccolo">Scrivilo a mano</button>
@@ -1348,14 +1352,48 @@ function disegnaCatena() {
         disegnaCatena();
       });
 
+      const valore = document.createElement('span');
+      valore.className = 'valore';
+      valore.textContent = param.value.toFixed(2);
+
+      // Certi parametri scelgono fra cose invece di scorrere — il tipo di
+      // riverbero è l'unico che conosciamo. Con un cursore continuo azzeccare
+      // la posizione sarebbe un terno al lotto, quindi lì ci va un elenco.
+      const quante = SparkEffetti.posizioni(effetto.name, param.index);
+      if (quante) {
+        const scelta = document.createElement('select');
+        scelta.className = 'scelta';
+        for (let n = 0; n < quante; n++) {
+          const opzione = document.createElement('option');
+          opzione.value = SparkEffetti.valorePosizione(n);
+          opzione.textContent = (dato || proposto || 'posizione') + ' ' + (n + 1);
+          scelta.appendChild(opzione);
+        }
+        const dove = SparkEffetti.posizioneDi(param.value, quante);
+        if (dove === -1) {
+          // L'ampli riporta un valore che non è nessuna delle posizioni note:
+          // si aggiunge invece di spostarlo di nascosto su quella più vicina.
+          const suo = document.createElement('option');
+          suo.value = param.value;
+          suo.textContent = 'valore dell\'ampli (' + param.value.toFixed(2) + ')';
+          scelta.appendChild(suo);
+          scelta.value = String(param.value);
+        } else {
+          scelta.value = String(SparkEffetti.valorePosizione(dove));
+        }
+        scelta.addEventListener('change', () => {
+          param.value = Number(scelta.value);
+          valore.textContent = param.value.toFixed(2);
+          mandaParametro(effetto.name, param.index, param.value);
+        });
+        riga.append(numero, scelta, valore);
+        return riga;
+      }
+
       const cursore = document.createElement('input');
       cursore.type = 'range';
       cursore.min = 0; cursore.max = 1; cursore.step = 0.01;
       cursore.value = param.value;
-
-      const valore = document.createElement('span');
-      valore.className = 'valore';
-      valore.textContent = param.value.toFixed(2);
 
       const muovi = () => {
         param.value = Number(cursore.value);
@@ -1410,6 +1448,19 @@ function scegliModello(posizione, effetto) {
   modelloInCorso = { posizione, vecchio: effetto.name };
   $('titoloModelli').textContent = `${Spark.CATENA[posizione]} — ora c'è ${effetto.name}`;
   $('cercaModello').value = '';
+
+  // Il riverbero qui è uno solo, e chi si aspetta di trovare i tipi di
+  // riverbero — sala, molla, piastra — lì non li trova mai. Non sono modelli:
+  // sono le nove posizioni della manopola «Tipo», e conviene dirlo qui.
+  const nota = $('notaModelli');
+  const unico = (SparkEffetti.MODELLI[posizione] || []).length === 1;
+  nota.hidden = !unico || !SparkEffetti.posizioni(effetto.name, 6);
+  if (!nota.hidden) {
+    nota.innerHTML = 'Di riverberi l\'ampli ne ha <strong>uno solo</strong>: sala, molla, ' +
+      'piastra e gli altri non sono modelli diversi, sono le posizioni della manopola ' +
+      '<em>Tipo</em>. Chiudi e cambiala lì.';
+  }
+
   disegnaElencoModelli();
   apriPannello('pannelloModelli');
 }

@@ -40,6 +40,11 @@ window.SparkEffetti = (function () {
    *            può essere **meno** dei parametri che l'ampli manda: quelli in
    *            più non sono manopole e la UI li mette da parte. Assente vuol
    *            dire che non lo sappiamo, e allora nessun parametro si tocca.
+   * scelte   = { indice: quante posizioni } per i parametri che scelgono fra
+   *            cose, invece di scorrere. Il tipo di riverbero è l'unico che
+   *            conosciamo: un cursore continuo lo renderebbe quasi impossibile
+   *            da azzeccare, quindi la UI ci mette un elenco. Le posizioni
+   *            valgono 0, 0.1, 0.2 … com'è nei preset veri.
    */
   const TABELLA = {
     /* ---- Noise gate ----
@@ -189,11 +194,19 @@ window.SparkEffetti = (function () {
        Il parametro 0 è confermato da un'altra parte: girando la manopola fisica
        del riverbero l'ampli manda `bias.reverb` parametro 0 (docs §3.6).
 
+       **Il settimo è il tipo di riverbero**, e non c'è altro modo di cambiarlo:
+       l'ampli ha un solo `bias.reverb` per tutti i tipi (docs §3.10), quindi il
+       tipo per forza è un parametro. Che sia questo lo dicono i valori: negli
+       otto preset letti dall'ampli vale 0, 0.1, 0.2 o 0.3 — sempre un multiplo
+       esatto di un decimo, cosa che nessun'altra manopola fa. Nove i tipi,
+       quanti sono i `bias.reverb.N` di Soundshed. Il nome resta una proposta
+       come gli altri, in corsivo, da verificare a orecchio.
+
        L'ottavo, quando c'è, è un'altra cosa ancora: compare negli stessi cinque
        preset che hanno il terzo parametro del noise gate e vale sempre
-       esattamente 1. Come quello, non è una manopola — da qui `quante: 7`. */
-    'bias.reverb': { nome: 'Riverbero', quante: 7,
-      manopole: ['Level', 'Damping', 'Low Cut', 'High Cut', 'Dwell', 'Time'] },
+       esattamente 1. Quello non è una manopola — da qui `quante: 7`. */
+    'bias.reverb': { nome: 'Riverbero', quante: 7, scelte: { 6: 9 },
+      manopole: ['Level', 'Damping', 'Low Cut', 'High Cut', 'Dwell', 'Time', 'Tipo'] },
   };
 
   /**
@@ -275,6 +288,26 @@ window.SparkEffetti = (function () {
     return !!voce && voce.quante !== undefined && indice >= voce.quante;
   }
 
+  /**
+   * Quante posizioni ha questo parametro, se sceglie fra cose invece di
+   * scorrere; 0 se è una manopola normale o se non ne sappiamo niente.
+   */
+  function posizioni(id, indice) {
+    const voce = TABELLA[id];
+    return (voce && voce.scelte && voce.scelte[indice]) || 0;
+  }
+
+  /** Il valore della posizione n: un decimo per volta, com'è nei preset veri. */
+  function valorePosizione(n) {
+    return n / 10;
+  }
+
+  /** A quale posizione corrisponde un valore letto dall'ampli, o -1. */
+  function posizioneDi(valore, quante) {
+    const n = Math.round(valore * 10);
+    return n >= 0 && n < quante && Math.abs(valore - n / 10) < 0.02 ? n : -1;
+  }
+
   /** La riga della tabella è compatibile con quello che manda l'ampli? */
   function affidabile(id, quantiVeri) {
     const voce = TABELLA[id];
@@ -287,5 +320,6 @@ window.SparkEffetti = (function () {
     return Object.keys(TABELLA).length;
   }
 
-  return { TABELLA, MODELLI, nome, manopola, extra, affidabile, quantiConosciuti };
+  return { TABELLA, MODELLI, nome, manopola, extra, affidabile, quantiConosciuti,
+           posizioni, valorePosizione, posizioneDi };
 })();
