@@ -92,7 +92,16 @@ Per provare: `powershell -ExecutionPolicy Bypass -File tools\serve.ps1`, poi
 `http://localhost:8099/` — localhost conta come origine sicura, quindi service worker e
 Web Bluetooth funzionano entrambi.
 
-Resta da fare la pubblicazione su GitHub Pages: il repo non ha ancora un remote.
+**Pubblicata il 12 agosto 2026** su `https://mazzrelaz.github.io/SparklingTones/`
+(repo `mazzrelaz/SparklingTones`, GitHub Pages da `main` / root). Verificato sul sito
+vero: manifest servito come `application/manifest+json`, service worker attivo con scope
+`/SparklingTones/`, quindici voci in cache, `navigator.bluetooth` disponibile. I percorsi
+relativi hanno retto il sottopercorso senza una modifica.
+
+Il push non parte dalla mia shell, che è non interattiva: Git Credential Manager non
+riesce a chiedere le credenziali e git muore con *terminal prompts disabled*. Funziona
+lanciandolo con `GIT_TERMINAL_PROMPT=1`, `GCM_INTERACTIVE=true` e `GCM_GUI_PROMPT=true`,
+che gli fanno aprire la finestra grafica sul desktop dell'utente.
 
 ## Importazione dall'app ufficiale
 
@@ -145,11 +154,9 @@ lo slot a chi è stato sovrascritto.
 
 Ancora da fare, in ordine di utilità discussa con l'utente:
 
-1. **Pubblicazione su https** — il codice è già una PWA installabile (vedi sopra), manca
-   solo metterlo online: il repo non ha un remote e GitHub Pages basta.
-2. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
+1. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
    (`0x0104`, `0x0115`, `0x0106`) sono già verificati: è lavoro di interfaccia.
-3. **`slot` come lista** invece che campo singolo, così un preset copiato in più slot li
+2. **`slot` come lista** invece che campo singolo, così un preset copiato in più slot li
    mostra tutti.
 
 `loadPreset` e `storePreset` sono **entrambi verificati sull'hardware** (11 agosto 2026).
