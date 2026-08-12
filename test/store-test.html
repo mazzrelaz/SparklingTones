@@ -170,7 +170,7 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('i tag dell\'utente sopravvivono all\'import', dopo.tags, ['Gilmour', 'pink floyd']);
   check('le note sopravvivono all\'import', dopo.notes, 'usare col manico, volume a 7');
   check('l\'ordine manuale sopravvive all\'import', dopo.order, 0);
-  check('lo slot sull\'ampli viene registrato', dopo.slot, 0);
+  check('lo slot sull\'ampli viene registrato, come lista', dopo.slots, [0]);
 
   const ancora = await store.importFromAmp([modificato, nuovo]);
   check('reimportare gli stessi preset non ne aggiunge altri', ancora, { added: 0, updated: 2 });
@@ -212,9 +212,11 @@ const DB_NAME = 'spark-test-' + Date.now();
   // idA sta nello slot 0; se ci mettiamo idC, idA non deve restare lì
   await store.assignSlots({ [idC]: 0, [idB]: 1 });
   check('gli slot richiesti vengono assegnati',
-        [(await store.get(idC)).slot, (await store.get(idB)).slot], [0, 1]);
+        [(await store.get(idC)).slots, (await store.get(idB)).slots], [[0], [1]]);
   check('chi occupava uno slot riassegnato lo perde',
-        (await store.get(idA)).slot, null);
+        (await store.get(idA)).slots, []);
+  check('gli slot non toccati restano dove sono',
+        (await store.byUuid('uuid-d')).slots, [5]);
 
   /* ------------------------------------------------------------------ */
   group('backup');
@@ -248,6 +250,33 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('ogni preset sta al suo slot, i posti ignoti restano vuoti',
         suAmpli.map(r => (r ? r.name : null)),
         ['Nylon Reverb', 'Hey Jimi', null, null, null, 'Europa', null, null]);
+
+  /* ------------------------------------------------------------------ */
+  group('lo stesso preset in più slot');
+
+  // Il caso vero: sull'ampli lo stesso suono è copiato in due posti. Con un
+  // campo `slot` singolo l'ultimo letto vinceva e l'altro sembrava vuoto.
+  const copiato = s => Object.assign(makePreset('uuid-c', 'Nylon Reverb', ['FatAcousticV2']),
+                                     { slot: s });
+  await store.importFromAmp([copiato(0), copiato(3)]);
+  check('lo stesso preset letto in due slot se li tiene tutti e due',
+        (await store.byUuid('uuid-c')).slots, [0, 3]);
+
+  const inDuePosti = await store.hardware();
+  check('e compare in tutti e due i posti dell\'ampli',
+        [inDuePosti[0] && inDuePosti[0].name, inDuePosti[3] && inDuePosti[3].name],
+        ['Nylon Reverb', 'Nylon Reverb']);
+
+  // ora in A4 c'è un altro preset: il doppione perde quello slot, non l'altro
+  await store.importFromAmp([Object.assign(makePreset('uuid-b', 'Hey Jimi', []), { slot: 3 })]);
+  check('chi perde uno slot tiene gli altri', (await store.byUuid('uuid-c')).slots, [0]);
+  check('e chi lo prende lo aggiunge ai suoi',
+        (await store.byUuid('uuid-b')).slots, [1, 3]);
+
+  // una lettura che fallisce su qualche slot non deve cancellare il resto
+  await store.importFromAmp([copiato(0)]);
+  check('una lettura parziale lascia in pace gli slot che non ha visto',
+        (await store.byUuid('uuid-b')).slots, [1, 3]);
 
   /* ------------------------------------------------------------------ */
   group('banchi');
@@ -368,6 +397,29 @@ const DB_NAME = 'spark-test-' + Date.now();
         (await ancoraRiaperto.getBanks()).map(b => b.nome), ['Scaletta', 'Aggiunto dopo']);
   ancoraRiaperto.close();
   await PresetStore.deleteDatabase(DB_VECCHIO);
+
+  /* ------------------------------------------------------------------ */
+  group('da slot singolo a lista');
+
+  const DB_SLOT = DB_NAME + '-slot';
+  const primaDellaLista = await new PresetStore(DB_SLOT).open();
+  const idVecchio = await primaDellaLista.add(makePreset('uuid-old', 'Vecchio stile', []));
+  const grezzo = await primaDellaLista.get(idVecchio);
+  delete grezzo.slots;                 // com'erano i record prima della lista
+  grezzo.slot = 4;
+  await primaDellaLista.put(grezzo);
+  await primaDellaLista.setSetting('slotComeLista', false);
+  primaDellaLista.close();
+
+  const conLista = await new PresetStore(DB_SLOT).open();
+  const convertito = await conLista.get(idVecchio);
+  check('il vecchio campo slot diventa una lista', convertito.slots, [4]);
+  check('e il campo singolo sparisce, per non avere due verità',
+        'slot' in convertito, false);
+  check('il preset finisce al posto giusto fra gli otto',
+        (await conLista.hardware()).map(r => (r ? r.name : null))[4], 'Vecchio stile');
+  conLista.close();
+  await PresetStore.deleteDatabase(DB_SLOT);
 
   /* ------------------------------------------------------------------ */
   group('errori');

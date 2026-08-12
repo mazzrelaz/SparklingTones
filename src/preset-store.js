@@ -21,6 +21,27 @@ window.PresetStore = (function () {
   /** Un banco ha gli stessi otto posti degli slot dell'ampli: 4 e 4. */
   const POSTI_PER_BANCO = 8;
 
+  /**
+   * Gli slot dell'ampli in cui sta un preset, come lista ordinata.
+   *
+   * È una lista e non un numero perché lo stesso preset può stare in più
+   * slot: capita appena si copia un suono in due posti, e con un campo solo
+   * l'ultimo letto vinceva e l'altro slot sembrava vuoto. Accetta anche i
+   * record vecchi, che avevano `slot` singolo, e li converte.
+   */
+  function normalizzaSlots(record) {
+    const grezzi = Array.isArray(record.slots)
+      ? record.slots
+      : (record.slot === null || record.slot === undefined ? [] : [record.slot]);
+
+    record.slots = [...new Set(grezzi)]
+      .filter(s => Number.isInteger(s) && s >= 0 && s < POSTI_PER_BANCO)
+      .sort((a, b) => a - b);
+
+    delete record.slot;    // una sola verità: due campi divergerebbero
+    return record;
+  }
+
   /** Campi che descrivono il suono: arrivano dall'ampli e vengono sovrascritti. */
   const SOUND_FIELDS = ['name', 'version', 'description', 'icon', 'bpm',
                         'effects', 'tail', 'checksum'];
@@ -57,6 +78,7 @@ window.PresetStore = (function () {
       };
       this.db = await promisify(request);
       await this._migraScalettaInBanco();
+      await this._migraSlotInLista();
       return this;
     },
 
@@ -197,12 +219,24 @@ window.PresetStore = (function () {
     async hardware() {
       const posti = new Array(POSTI_PER_BANCO).fill(null);
       for (const record of await this.all()) {
-        if (record.slot !== null && record.slot !== undefined &&
-            record.slot >= 0 && record.slot < POSTI_PER_BANCO) {
-          posti[record.slot] = record;
-        }
+        for (const slot of normalizzaSlots(record).slots) posti[slot] = record;
       }
       return posti;
+    },
+
+    /**
+     * I record vecchi avevano `slot` singolo: diventa una lista, una volta
+     * sola. Senza, un preset copiato in due slot ne mostrerebbe uno solo e
+     * l'altro sembrerebbe vuoto — che è esattamente il difetto che la lista
+     * risolve.
+     */
+    async _migraSlotInLista() {
+      if (await this.getSetting('slotComeLista', false)) return;
+      for (const record of await this.all()) {
+        if (Array.isArray(record.slots) && record.slot === undefined) continue;
+        await this.put(normalizzaSlots(record));
+      }
+      await this.setSetting('slotComeLista', true);
     },
 
     /**
@@ -222,14 +256,14 @@ window.PresetStore = (function () {
     /** Aggiunge un preset, completandolo con i campi di organizzazione. */
     async add(preset) {
       const now = Date.now();
-      const record = Object.assign({}, preset, {
+      const record = normalizzaSlots(Object.assign({}, preset, {
         tags:     normalizeTags(preset.tags || []),
         notes:    preset.notes    || '',
         favorite: preset.favorite || false,
         order:    preset.order !== undefined ? preset.order : await this._nextOrder(),
         createdAt: now,
         updatedAt: now,
-      });
+      }));
       delete record.id;
       record.id = await promisify(this._tx('readwrite').add(record));
       return record.id;
@@ -275,21 +309,56 @@ window.PresetStore = (function () {
      */
     async importFromAmp(presets) {
       let added = 0, updated = 0;
+      const visti = new Map();          // slot letto → uuid che ci sta
+
       for (const preset of presets) {
+        if (preset.slot !== null && preset.slot !== undefined) {
+          visti.set(preset.slot, preset.uuid);
+        }
         const existing = preset.uuid ? await this.byUuid(preset.uuid) : null;
         if (existing) {
           for (const field of SOUND_FIELDS) {
             if (preset[field] !== undefined) existing[field] = preset[field];
           }
-          existing.slot = preset.slot;
           await this.put(existing);
           updated++;
         } else {
-          await this.add(preset);
+          await this.add(Object.assign({}, preset, { slots: [], slot: undefined }));
           added++;
         }
       }
+
+      await this._sistemaSlot(visti);
       return { added, updated };
+    },
+
+    /**
+     * Riscrive gli slot a partire da quelli appena osservati sull'ampli.
+     *
+     * Si toccano **solo gli slot osservati**: se la lettura di uno è fallita
+     * non sappiamo cosa ci sia, e cancellarlo lo farebbe sparire dalla
+     * libreria per un timeout. Chi teneva uno slot osservato che ora è di un
+     * altro lo perde; chi lo ha appena preso lo acquista.
+     *
+     * @param visti Map da numero di slot all'uuid che ci sta adesso
+     */
+    async _sistemaSlot(visti) {
+      if (visti.size === 0) return;
+      const osservati = new Set(visti.keys());
+
+      for (const record of await this.all()) {
+        normalizzaSlots(record);
+        const restano = record.slots.filter(s => !osservati.has(s));
+        const suoi    = [...visti.entries()]
+          .filter(([, uuid]) => uuid && uuid === record.uuid)
+          .map(([slot]) => slot);
+
+        const nuovi = [...new Set(restano.concat(suoi))].sort((a, b) => a - b);
+        if (nuovi.join(',') !== record.slots.join(',')) {
+          record.slots = nuovi;
+          await this.put(record);
+        }
+      }
     },
 
     /**
@@ -328,23 +397,18 @@ window.PresetStore = (function () {
     },
 
     /**
-     * Registra quali preset stanno adesso negli slot dell'ampli.
-     * A chi teneva uno slot che è stato riassegnato lo slot viene tolto,
+     * Registra quali preset stanno adesso negli slot dell'ampli, dopo averli
+     * scritti. A chi teneva uno slot riassegnato lo slot viene tolto,
      * altrimenti la libreria mostrerebbe due preset nello stesso posto.
      * @param assegnazioni oggetto {idPreset: slot}
      */
     async assignSlots(assegnazioni) {
-      const occupati = Object.values(assegnazioni);
-      for (const record of await this.all()) {
-        const nuovo = assegnazioni[record.id];
-        if (nuovo !== undefined) {
-          if (record.slot !== nuovo) { record.slot = nuovo; await this.put(record); }
-        } else if (record.slot !== null && record.slot !== undefined &&
-                   occupati.includes(record.slot)) {
-          record.slot = null;
-          await this.put(record);
-        }
+      const visti = new Map();
+      for (const [id, slot] of Object.entries(assegnazioni)) {
+        const record = await this.get(Number(id));
+        if (record) visti.set(slot, record.uuid);
       }
+      await this._sistemaSlot(visti);
     },
 
     /* ----------------------------------------------------------------
@@ -636,6 +700,7 @@ window.PresetStore = (function () {
   PresetStore.SOUND_FIELDS    = SOUND_FIELDS;
   PresetStore.USER_FIELDS     = USER_FIELDS;
   PresetStore.POSTI_PER_BANCO = POSTI_PER_BANCO;
+  PresetStore.normalizzaSlots = normalizzaSlots;
 
   return PresetStore;
 })();

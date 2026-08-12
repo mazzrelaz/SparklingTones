@@ -24,7 +24,7 @@ tools/explorer.html      tool diagnostico, congelato — single-file, apribile d
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
 test/protocol-test.html  53 test del protocollo contro catture reali
 test/transport-test.html 47 test del trasporto, con send finto e catture reali
-test/store-test.html     80 test della libreria, su un database temporaneo
+test/store-test.html     89 test della libreria, su un database temporaneo
 test/backup-test.html    26 test del lettore zip e della conversione dal formato ufficiale
 test/fixtures/preset0.js catture condivise fra le suite: preset salvato e stato live
 docs/                    handoff report con la ricerca iniziale sul protocollo
@@ -35,6 +35,10 @@ captures/                log grezzi dall'ampli
 Niente build step, niente server: tutto si apre da `file://`. Per questo i moduli sono
 classic script che espongono `window.Spark` e `window.SparkTransport` invece di ES module,
 che su `file://` sono bloccati dal CORS.
+
+Trappola nel far girare le suite da un browser pilotato: **in una scheda in secondo piano
+i timer vengono strozzati**, e una suite che ci mette un secondo sembra piantata a metà
+per minuti. Non è un test che si blocca: basta portare la scheda in primo piano.
 
 **Dopo ogni modifica a `src/`, apri le tre pagine in `test/` e verifica che il riepilogo
 sia verde.** Girano contro catture reali dell'ampli, quindi intercettano una regressione
@@ -172,6 +176,30 @@ riquadri tratteggiati lo dicono senza mentire. Nel disegnare la sezione «In lib
 confronto va fatto **per id**, non per oggetto: `hardware()` rilegge dal database e
 restituisce copie diverse dagli stessi record che stanno in `tutti`.
 
+### `slots` è una lista, non un numero
+
+Lo stesso preset può stare in **più slot dell'ampli**, e capita davvero: sul Spark
+dell'utente due slot contenevano lo stesso suono. Con un campo `slot` singolo l'ultimo
+letto vinceva e l'altro slot compariva come «non ancora letto» — è così che il difetto è
+venuto fuori, il 12 agosto 2026, guardando A3 vuoto quando non lo era.
+
+`normalizzaSlots` tiene una sola verità: costruisce `record.slots` ordinato e **cancella
+il vecchio `slot`**, così due campi non possono divergere. Converte da sola i record
+vecchi, e `_migraSlotInLista` passa una volta su tutta la libreria alla prima apertura
+(flag `slotComeLista` fra le preferenze).
+
+`_sistemaSlot(visti)` è il cuore, condiviso fra `importFromAmp` e `assignSlots`. Riceve
+una mappa *slot osservato → uuid* e per ogni record calcola
+`(slot vecchi meno quelli osservati) ∪ (osservati che sono suoi)`.
+
+**Si toccano solo gli slot osservati**, ed è la parte che conta: `readLibrary` salta gli
+slot che non rispondono, e cancellare uno slot mai visto farebbe sparire un preset dalla
+libreria per un timeout. Un test lo verifica passando una lettura parziale.
+
+Nella UI un preset in due slot compare **due volte** nella sezione «Sull'ampli», una per
+slot, e il dettaglio avvisa dov'è l'altra copia. La chiave di apertura del dettaglio è
+`id:slot` e non `id`, altrimenti toccarne una aprirebbe tutte e due.
+
 ### Categorie
 
 Le categorie sono le stesse etichette del campo `tags`, con accanto un elenco governato
@@ -236,12 +264,17 @@ tutto, perché ogni riga di header è spazio tolto ai pulsantoni.
 
 Ancora da fare, in ordine di utilità discussa con l'utente:
 
-1. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
+1. **Scrivere un preset in uno slot non attecchisce** (12 agosto 2026, dall'utente): i 17
+   chunk vengono tutti confermati, ma rileggendo lo slot c'è ancora il preset di prima.
+   `storePreset` era verificato sull'hardware l'11 agosto, quindi o è cambiato qualcosa
+   nel contesto o il caso è più stretto di come lo conoscevamo. L'utente riferisce anche
+   una disconnessione. Per distinguere il fallimento del trasferimento (`0x0101`) da
+   quello del salvataggio (`0x0127`), dopo una verifica fallita l'app ora rilegge anche
+   lo stato live: se il buffer contiene il preset nuovo, è passato solo il primo comando.
+   **Da riprendere con quel dato in mano.**
+2. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
    (`0x0104`, `0x0115`, `0x0106`) sono già verificati: è lavoro di interfaccia. È il
-   prossimo passo concordato, dopo Preset e Live.
-2. **`slot` come lista** invece che campo singolo, così un preset copiato in più slot li
-   mostra tutti. Con la sezione Preset divisa in due elenchi questo si vede di più: un
-   preset scritto in due slot compare una volta sola, all'ultimo letto.
+   passo concordato dopo Preset e Live.
 
 `loadPreset` e `storePreset` sono **entrambi verificati sull'hardware** (11 agosto 2026).
 
@@ -411,10 +444,6 @@ corrispondeva sempre, era la lettura del pannello a essere diversa.
   probabilmente non esiste sullo Spark 2.
 - `0x031a`, non documentato, emesso durante il movimento delle manopole: decodifica come
   `array[1] 0 <preset corrente> true`.
-- Nella libreria `slot` è un campo singolo, ma lo stesso preset può stare in più slot da
-  quando si possono copiare: `importFromAmp` riconosce per UUID e l'ultimo slot letto
-  sovrascrive il precedente. I dati dell'utente non si perdono, ma lo slot mostrato
-  diventa inaffidabile. Andrebbe trasformato in una lista.
 
 `writeWithoutResponse` è l'unica modalità supportata da 0xFFC1, quindi ogni scrittura
 sembra riuscire lato browser anche quando l'ampli la scarta. **L'assenza di errori non

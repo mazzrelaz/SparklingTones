@@ -358,6 +358,12 @@ async function ricarica() {
 
 const perId = id => tutti.find(r => r.id === id) || null;
 
+/** Gli slot dell'ampli occupati da un preset: sono una lista, non un numero. */
+const slotsDi   = record => (record && record.slots) || [];
+const residente = record => slotsDi(record).length > 0;
+const etichetteSlot = record =>
+  slotsDi(record).map(s => Spark.slotLabel(s).label).join(' ');
+
 /* ====================================================================
    Le due viste
    Il passaggio va sull'hash invece che su una variabile: così il tasto
@@ -587,8 +593,11 @@ function rigaPreset(record, slot) {
   head.append(stella, naming);
   if (slot !== null) head.appendChild(etichettaSlot(slot));
 
+  // La chiave comprende lo slot: lo stesso preset copiato in due slot compare
+  // due volte, e toccarne uno non deve aprire anche l'altro.
+  const chiave = record.id + ':' + slot;
   head.addEventListener('click', () => {
-    vista.aperto = vista.aperto === record.id ? null : record.id;
+    vista.aperto = vista.aperto === chiave ? null : chiave;
     disegnaPreset();
   });
   riga.appendChild(head);
@@ -610,7 +619,7 @@ function rigaPreset(record, slot) {
     riga.appendChild(tags);
   }
 
-  if (vista.aperto === record.id) riga.appendChild(dettaglio(record, slot));
+  if (vista.aperto === chiave) riga.appendChild(dettaglio(record, slot));
   return riga;
 }
 
@@ -704,7 +713,16 @@ function dettaglio(record, slot) {
   const azioni = document.createElement('div');
   azioni.className = 'azioni';
 
+  let avvisoAltriSlot = null;
   if (slot !== null) {
+    const altri = slotsDi(record).filter(s => s !== slot);
+    if (altri.length) {
+      avvisoAltriSlot = document.createElement('div');
+      avvisoAltriSlot.style.cssText = 'color:var(--dim);font-size:0.76rem';
+      avvisoAltriSlot.textContent = 'Lo stesso preset sta anche in ' +
+        altri.map(s => Spark.slotLabel(s).label).join(', ') + '.';
+    }
+
     const attiva = document.createElement('button');
     attiva.textContent = 'Attiva ' + Spark.slotLabel(slot).label;
     attiva.title = 'seleziona lo slot sull\'ampli, senza scrivere nulla';
@@ -770,7 +788,9 @@ function dettaglio(record, slot) {
   meta.style.cssText = 'color:var(--faint);font-size:0.7rem;font-family:Consolas,monospace';
   meta.textContent = `${record.uuid} · ${record.bpm} BPM`;
 
-  det.append(boxNome, boxCat, boxNote, boxFx, azioni, meta);
+  det.append(boxNome, boxCat, boxNote, boxFx, azioni);
+  if (avvisoAltriSlot) det.appendChild(avvisoAltriSlot);
+  det.appendChild(meta);
   return det;
 }
 
@@ -829,7 +849,7 @@ function disegnaLive() {
     } else if (!vuoto) {
       // Nel banco fisso lo slot è già scritto nell'angolo: ripeterlo è rumore.
       sub.innerHTML = '<span class="istantaneo">● istantaneo</span>' +
-        (banco ? ` · ${Spark.slotLabel(record.slot).label}` : '');
+        (banco ? ` · ${etichetteSlot(record)}` : '');
     }
 
     const barra = document.createElement('span');
@@ -907,9 +927,6 @@ async function rinominaOElimina(banco) {
   disegnaLive();
 }
 
-/** Un preset è istantaneo se sappiamo che sta già in uno slot dell'ampli. */
-const residente = record => record.slot !== null && record.slot !== undefined;
-
 async function attiva(record, barra) {
   if (live.occupato || !spark.connected) return;
   live.occupato = true;
@@ -918,8 +935,10 @@ async function attiva(record, barra) {
 
   try {
     if (residente(record)) {
-      await spark.send(Spark.commands.changePreset(record.slot));
-      logLine(`${record.name} — ${Spark.slotLabel(record.slot).label}`);
+      // Se sta in più slot va bene il primo: il suono è lo stesso.
+      const slot = slotsDi(record)[0];
+      await spark.send(Spark.commands.changePreset(slot));
+      logLine(`${record.name} — ${Spark.slotLabel(slot).label}`);
     } else {
       await spark.loadPreset(record, (i, total) => {
         barra.style.width = Math.round(((i + 1) / total) * 100) + '%';
@@ -967,7 +986,7 @@ function disegnaElencoScelta() {
     if (residente(record)) {
       const badge = document.createElement('span');
       badge.className = 'badge';
-      badge.textContent = Spark.slotLabel(record.slot).label;
+      badge.textContent = etichetteSlot(record);
       voce.appendChild(badge);
     }
     voce.addEventListener('click', async () => {
@@ -1092,9 +1111,23 @@ async function mandaPreset(record, slot) {
         disegnaPreset();
         disegnaLive();
       }
-    } else {
+    } else if (soloProva) {
       logLine(`${inviato}, ma l'ampli continua a riportare «${letto.name}»: ` +
               'il preset non è stato applicato.');
+    } else {
+      // Scrivere in uno slot sono due comandi: 0x0101 riempie il preset
+      // software, 0x0127 lo salva nello slot. Se il buffer contiene il preset
+      // nuovo, il primo è andato a segno e si è fermato il secondo — sapere
+      // quale dei due è fallito è metà del lavoro.
+      const buffer = await spark.readLiveState();
+      if (buffer && buffer.uuid === record.uuid) {
+        logLine(`${inviato}, e l'ampli lo sta suonando, ma ${nomeSlot(slot)} contiene ` +
+                `ancora «${letto.name}»: il trasferimento è riuscito, il salvataggio ` +
+                'nello slot no.');
+      } else {
+        logLine(`${inviato}, ma ${nomeSlot(slot)} contiene ancora «${letto.name}» ` +
+                'e nemmeno il suono corrente è cambiato: il preset non è arrivato.');
+      }
     }
   } catch (err) {
     logLine('invio fallito: ' + err.message);
