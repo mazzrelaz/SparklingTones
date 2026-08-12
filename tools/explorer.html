@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark BLE Explorer v2</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 14px;
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #14161a; color: #e8e8ea;
+  }
+  h1 { font-size: 1.15rem; margin: 0 0 2px; }
+  .sub { color: #8a8f98; font-size: 0.82rem; margin-bottom: 14px; }
+  .status { display:inline-block; padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:600; }
+  .status.disconnected { background:#3a2020; color:#ff8080; }
+  .status.connected    { background:#1f3a24; color:#7fe08a; }
+  .status.connecting   { background:#3a3520; color:#f0d060; }
+  button {
+    background:#ff6a3d; color:#fff; border:none; padding:10px 16px;
+    border-radius:9px; font-size:0.9rem; font-weight:600; cursor:pointer;
+    margin-right:6px; margin-bottom:6px;
+  }
+  button:disabled { background:#3a3d42; color:#7a7d82; cursor:not-allowed; }
+  button.secondary { background:#2a2d33; }
+  button.small { padding:6px 11px; font-size:0.8rem; }
+  input[type=text], input[type=number] {
+    background:#1e2126; border:1px solid #34383f; color:#e8e8ea;
+    padding:9px; border-radius:8px;
+    font-family:'SF Mono', Consolas, monospace; font-size:0.84rem; width:100%;
+  }
+  .row { display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap; }
+  .row > input { flex:1; min-width:90px; }
+  fieldset {
+    border:1px solid #24272c; border-radius:10px; padding:12px 14px;
+    margin:0 0 14px; background:#181a1f;
+  }
+  legend { font-size:0.85rem; color:#b0b4bb; font-weight:600; padding:0 6px; }
+  label.chk { font-size:0.82rem; color:#c0c4cb; display:inline-flex; align-items:center; gap:6px; margin-right:16px; }
+  #log {
+    background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+    height:42vh; overflow-y:auto;
+    font-family:'SF Mono', Consolas, monospace; font-size:0.76rem; line-height:1.5;
+  }
+  .entry { margin-bottom:5px; white-space:pre-wrap; word-break:break-all; }
+  .entry .t { color:#6a6f78; }
+  .entry .tag { font-weight:700; margin-right:6px; }
+  .entry.rx  .hex { color:#5c8f6a; }
+  .entry.tx  .hex { color:#f0a860; }
+  .entry.msg { border-left:3px solid #4a9eff; padding-left:8px; margin:5px 0; }
+  .entry.msg .hex { color:#7fe08a; }
+  .entry.warn { color:#f0d060; }
+  .entry.err  { color:#ff8080; }
+  .entry.step { color:#c080ff; font-weight:600; margin-top:8px; }
+  small { color:#6a6f78; display:block; margin-top:4px; font-size:0.76rem; }
+  .hint { color:#8a8f98; font-size:0.78rem; margin:6px 0 0; }
+  table.variants { width:100%; border-collapse:collapse; font-size:0.78rem; }
+  table.variants td { padding:4px 6px; border-bottom:1px solid #24272c; vertical-align:middle; }
+  table.variants td.desc { color:#b0b4bb; }
+</style>
+</head>
+<body>
+
+<h1>Spark BLE Explorer v2</h1>
+<div class="sub">Diagnostica protocollo Positive Grid Spark 2 &mdash; service 0xFFC0, write 0xFFC1, notify 0xFFC2.</div>
+
+<div class="row">
+  <span id="status" class="status disconnected">Disconnesso</span>
+  <span id="ampInfo" class="hint"></span>
+</div>
+<div class="row">
+  <button id="btnConnect">Connetti</button>
+  <button id="btnDisconnect" class="secondary" disabled>Disconnetti</button>
+  <button id="btnClear" class="secondary">Pulisci log</button>
+  <button id="btnDownload" class="secondary">Scarica log</button>
+</div>
+
+<fieldset>
+  <legend>Opzioni di invio (si applicano a tutti i comandi qui sotto)</legend>
+  <div>
+    <label class="chk"><input type="checkbox" id="optBlockHeader"> Block header 16 byte</label>
+    <label class="chk"><input type="checkbox" id="optSingleWrite" checked> Write BLE singola (no split 20B)</label>
+    <label class="chk"><input type="checkbox" id="optSyncSeq"> Seq sincronizzato con RX</label>
+    <label class="chk"><input type="checkbox" id="optTrailZero" checked> Byte 0x00 finale nei dati</label>
+  </div>
+  <p class="hint">Il byte <code>0x00</code> finale &egrave; <b>necessario</b> sullo Spark 2 per i comandi
+  sugli effetti: senza, l'ampli conferma con un ack ma non applica il comando. Non &egrave;
+  documentato n&eacute; da Hamshere n&eacute; da paulhamsh, entrambi riferiti allo Spark 40.</p>
+</fieldset>
+
+<fieldset>
+  <legend>1 &mdash; Cambio preset hardware (0x0138)</legend>
+  <div class="row">
+    <span class="hint">byte 0:</span>
+    <input type="number" id="presetByte0" value="0" min="0" max="127" style="max-width:80px;">
+    <span class="hint">target:</span>
+    <input type="number" id="presetNum" value="1" min="0" max="7" style="max-width:80px;">
+    <button id="btnPreset">Cambia preset</button>
+    <span class="hint">l'ampli riporta: <b id="currPreset">?</b></span>
+  </div>
+  <div class="row">
+    <button id="btnMapPresets" class="secondary">Mappa preset 0→7</button>
+    <span class="hint">manda ogni target e richiede subito quale preset risulta attivo</span>
+  </div>
+  <small>Payload <code>[byte0, target]</code>. In paulhamsh/Spark byte0 &egrave; sempre <code>0</code>
+  (<code>change_hardware_preset(0, pres_num)</code>, Spark.ino:319) &mdash; non &egrave; il preset corrente.</small>
+</fieldset>
+
+<fieldset>
+  <legend>2 &mdash; Effetto on/off (0x0115)</legend>
+  <div class="row">
+    <input type="text" id="fxName" value="bias.reverb" style="flex:2;">
+    <button id="btnFxOn">ON</button>
+    <button id="btnFxOff" class="secondary">OFF</button>
+  </div>
+  <small>Lunghezza intermedia (~22 byte), effetto udibile immediato. Utile per trovare la soglia di lunghezza.</small>
+</fieldset>
+
+<fieldset>
+  <legend>3 &mdash; Cambio parametro effetto (0x0104)</legend>
+  <div class="row">
+    <input type="text" id="paramFx" value="bias.reverb" style="flex:2;">
+    <input type="number" id="paramNum" value="0" min="0" max="9" style="max-width:80px;">
+    <input type="number" id="paramVal" value="0.9" min="0" max="1" step="0.05" style="max-width:100px;">
+    <button id="btnParam">Invia</button>
+  </div>
+  <small>~29 byte senza header, ~45 con. &Egrave; il comando che finora non ha mai funzionato.</small>
+</fieldset>
+
+<fieldset>
+  <legend>4 &mdash; Batteria diagnostica</legend>
+  <p class="hint">Invia lo stesso comando logico in varianti diverse, <b>una per volta</b>.
+  Premi un pulsante, ascolta/guarda l'ampli, poi passa al successivo. Il log registra quale variante hai inviato.</p>
+  <div class="row">
+    <span class="hint">comando:</span>
+    <select id="batteryCmd" style="background:#1e2126;border:1px solid #34383f;color:#e8e8ea;padding:8px;border-radius:8px;">
+      <option value="preset">cambio preset (0x0138)</option>
+      <option value="fxoff">reverb OFF (0x0115)</option>
+      <option value="param">reverb param 0 = 0.9 (0x0104)</option>
+    </select>
+  </div>
+  <table class="variants" id="variantTable"></table>
+</fieldset>
+
+<fieldset>
+  <legend>5 &mdash; Byte grezzi</legend>
+  <div class="row">
+    <input type="text" id="txRaw" placeholder="f0 01 01 00 02 11 f7" style="flex:3;">
+    <button id="btnRaw" disabled>Invia</button>
+  </div>
+  <small>Inviati esattamente come scritti, nessuna elaborazione. Rispetta l'opzione "write singola".</small>
+</fieldset>
+
+<fieldset>
+  <legend>6 &mdash; Interrogazioni (funzionano gi&agrave;)</legend>
+  <div class="row">
+    <button id="btnGetName" class="secondary small">Nome</button>
+    <button id="btnGetSerial" class="secondary small">Seriale</button>
+    <button id="btnGetFw" class="secondary small">Firmware</button>
+    <button id="btnGetCurr" class="secondary small">Preset corrente</button>
+    <button id="btnGetLive" class="secondary small">Stato live</button>
+    <button id="btnHandshake" class="secondary small">Handshake completo</button>
+  </div>
+  <div class="row">
+    <button id="btnLengthSweep">Sweep lunghezza</button>
+    <span class="hint">allunga <code>0x0201</code> con padding legittimo e rileva a che lunghezza sparisce la risposta</span>
+  </div>
+  <small>&Egrave; l'unico test con esito oggettivo: le letture rispondono, le scritture no.
+  Rilancialo cambiando "write singola" per confrontare le due strategie di invio.</small>
+</fieldset>
+
+<fieldset>
+  <legend>7 &mdash; Test mirati</legend>
+  <p class="hint">Eseguili <b>in ordine</b>. A e B hanno esito oggettivo (risposta s&igrave;/no nel log),
+  gli altri vanno ascoltati sull'ampli.</p>
+  <table class="variants" id="targetedTable"></table>
+</fieldset>
+
+<fieldset>
+  <legend>Log</legend>
+  <div class="row">
+    <label class="chk"><input type="checkbox" id="filterFrag"> Mostra anche i frammenti BLE grezzi</label>
+  </div>
+  <div id="log"></div>
+</fieldset>
+
+<script>
+'use strict';
+
+/* ==========================================================================
+   PROTOCOLLO
+   Riferimento: Spark Protocol Description v3.x (Paul Hamshere) +
+   paulhamsh/Spark SparkESP32/SparkIO.ino (implementazione BLE funzionante).
+   ========================================================================== */
+
+const SERVICE_UUID     = 0xffc0;
+const CHAR_WRITE_UUID  = 0xffc1;  // app -> ampli
+const CHAR_NOTIFY_UUID = 0xffc2;  // ampli -> app
+
+// --- codifica 7bit/8bit (stile SysEx) ------------------------------------
+// Ogni gruppo di 7 byte reali e' preceduto da un byte "bits8" che raccoglie
+// gli MSB mancanti, ordine LSB-first (bit i = MSB del byte i del gruppo).
+// Verificato contro SparkIO.ino:1069-1083 e contro catture reali.
+function pack7bit8bit(data) {
+  const out = [];
+  for (let i = 0; i < data.length; i += 7) {
+    const group = data.slice(i, i + 7);
+    let bits8 = 0;
+    const stripped = group.map((b, idx) => {
+      if (b & 0x80) { bits8 |= (1 << idx); return b & 0x7f; }
+      return b;
+    });
+    out.push(bits8, ...stripped);
+  }
+  return out;
+}
+
+function unpack7bit8bit(packed) {
+  const out = [];
+  for (let i = 0; i < packed.length; i += 8) {
+    const bits8 = packed[i];
+    const group = packed.slice(i + 1, i + 8);
+    group.forEach((b, idx) => out.push((bits8 & (1 << idx)) ? (b | 0x80) : b));
+  }
+  return out;
+}
+
+// XOR a 8 bit dei soli byte dati gia' impacchettati (bits8 inclusi).
+function xorChecksum(bytes) {
+  let cs = 0;
+  for (const b of bytes) cs ^= b;
+  return cs & 0xff;
+}
+
+// --- tipi dati (msgpack "rotto") -----------------------------------------
+function encFloat(v) {
+  const dv = new DataView(new ArrayBuffer(4));
+  dv.setFloat32(0, v, false);            // big endian
+  return [0xca, dv.getUint8(0), dv.getUint8(1), dv.getUint8(2), dv.getUint8(3)];
+}
+
+// "alternative short string": [len, 0xa0+len, ascii...]
+// = write_prefixed_string() in SparkIO.ino:825
+function encPrefixedString(s) {
+  const out = [s.length, 0xa0 + s.length];
+  for (let i = 0; i < s.length; i++) out.push(s.charCodeAt(i));
+  return out;
+}
+
+// "short string" semplice: [0xa0+len, ascii...] = write_string() in SparkIO.ino:836
+function encShortString(s) {
+  const out = [0xa0 + s.length];
+  for (let i = 0; i < s.length; i++) out.push(s.charCodeAt(i));
+  return out;
+}
+
+const encByte  = b => [b & 0xff];
+const encOnOff = on => [on ? 0xc3 : 0xc2];
+
+// Decoder: prende i byte dati gia' spacchettati e li interpreta.
+function decodeValues(data) {
+  const out = [];
+  let i = 0;
+  while (i < data.length) {
+    const b = data[i];
+    if (b <= 0x7f)                      { out.push(String(b)); i++; }
+    else if (b >= 0xa0 && b <= 0xbf)    {
+      const len = b - 0xa0;
+      out.push('"' + String.fromCharCode(...data.slice(i + 1, i + 1 + len)) + '"');
+      i += 1 + len;
+    }
+    else if (b >= 0x90 && b <= 0x9f)    { out.push('array[' + (b - 0x90) + ']'); i++; }
+    else if (b === 0xc2)                { out.push('false'); i++; }
+    else if (b === 0xc3)                { out.push('true'); i++; }
+    else if (b === 0xca)                {
+      const dv = new DataView(new ArrayBuffer(4));
+      for (let k = 0; k < 4; k++) dv.setUint8(k, data[i + 1 + k] || 0);
+      out.push(dv.getFloat32(0, false).toFixed(6));
+      i += 5;
+    }
+    else if (b === 0xcc)                { out.push(String(data[i + 1])); i += 2; }
+    else if (b === 0xcd)                { out.push(String((data[i+1] << 8) | data[i+2])); i += 3; }
+    else if (b === 0xce)                {
+      out.push(String(((data[i+1]<<24)>>>0) + (data[i+2]<<16) + (data[i+3]<<8) + data[i+4]));
+      i += 5;
+    }
+    else if (b === 0xd9)                {
+      const len = data[i + 1];
+      out.push('"' + String.fromCharCode(...data.slice(i + 2, i + 2 + len)) + '"');
+      i += 2 + len;
+    }
+    else                                { out.push('?' + hex1(b)); i++; }
+  }
+  return out;
+}
+
+// --- costruzione messaggi -------------------------------------------------
+// chunk: F0 01 <seq> <checksum> <cmd> <sub> <dati impacchettati> F7
+function buildChunk(cmd, sub, rawData, seq) {
+  const packed = pack7bit8bit(rawData);
+  return [0xf0, 0x01, seq & 0xff, xorChecksum(packed), cmd, sub, ...packed, 0xf7];
+}
+
+// block header 16 byte, byte 6 = lunghezza totale del blocco
+// = BlockOut::process() in SparkIO.ino:1202, sempre usato anche su BLE
+function wrapBlock(chunk) {
+  const total = (16 + chunk.length) & 0xff;
+  return [0x01, 0xfe, 0x00, 0x00, 0x53, 0xfe, total,
+          0, 0, 0, 0, 0, 0, 0, 0, 0, ...chunk];
+}
+
+/* ==========================================================================
+   TRASPORTO
+   ========================================================================== */
+
+let device = null, writeChar = null, notifyChar = null;
+let txSeq = 0x01;          // contatore proprio, come oc_seq in SparkIO.ino
+let lastRxSeq = null;
+let currentPreset = null;  // aggiornato dai messaggi 0x0310 / 0x0338
+
+const $ = id => document.getElementById(id);
+const hex1 = b => b.toString(16).padStart(2, '0');
+const hex  = bytes => Array.from(bytes).map(hex1).join(' ');
+
+function opts() {
+  return {
+    blockHeader: $('optBlockHeader').checked,
+    singleWrite: $('optSingleWrite').checked,
+    syncSeq:     $('optSyncSeq').checked,
+    trailZero:   $('optTrailZero').checked,
+  };
+}
+
+function nextSeq(o) {
+  if (o.syncSeq && lastRxSeq !== null) return (lastRxSeq + 1) & 0xff;
+  const s = txSeq;
+  txSeq = (txSeq + 1) & 0xff;
+  return s;
+}
+
+/**
+ * Invia un comando logico applicando le opzioni correnti.
+ * @param override opzioni che sovrascrivono quelle della UI (usato dalla batteria)
+ */
+async function sendCommand(cmd, sub, rawData, label, override) {
+  if (!writeChar) { logLine('err', 'Non connesso.'); return; }
+  const o = Object.assign(opts(), override || {});
+
+  const data  = o.trailZero ? [...rawData, 0x00] : rawData.slice();
+  const seq   = nextSeq(o);
+  const chunk = buildChunk(cmd, sub, data, seq);
+  const bytes = o.blockHeader ? wrapBlock(chunk) : chunk;
+
+  const flags = [
+    o.blockHeader ? 'header' : 'no-header',
+    o.singleWrite ? 'write-singola' : 'split-20B',
+    o.syncSeq ? 'seq-sync' : 'seq-proprio',
+    o.trailZero ? '+0x00' : null,
+  ].filter(Boolean).join(', ');
+
+  logLine('step', `TX ${label} — 0x${hex1(cmd)}${hex1(sub)}, ${bytes.length} byte, seq=0x${hex1(seq)} [${flags}]`);
+
+  try {
+    await writeBytes(bytes, o.singleWrite);
+    logEntry('tx', bytes);
+  } catch (err) {
+    logLine('err', 'Errore GATT: ' + err.message);
+  }
+  return bytes.length;
+}
+
+// --- attesa risposta ------------------------------------------------------
+// Le letture producono una risposta osservabile: sono l'unico modo oggettivo
+// di misurare a che lunghezza l'ampli smette di accettare un messaggio.
+let waiters = [];
+
+function waitForReply(pred, ms) {
+  return new Promise(resolve => {
+    const w = { pred, resolve };
+    waiters.push(w);
+    setTimeout(() => {
+      if (waiters.includes(w)) { waiters = waiters.filter(x => x !== w); resolve(false); }
+    }, ms);
+  });
+}
+
+function notifyWaiters(cmd, sub) {
+  waiters = waiters.filter(w => {
+    if (w.pred(cmd, sub)) { w.resolve(true); return false; }
+    return true;
+  });
+}
+
+async function writeBytes(bytes, single) {
+  const buf = new Uint8Array(bytes);
+  if (single) {
+    await gattWrite(buf);
+    return;
+  }
+  for (let i = 0; i < buf.length; i += 20) {
+    await gattWrite(buf.slice(i, i + 20));
+    if (i + 20 < buf.length) await sleep(30);
+  }
+}
+
+async function gattWrite(chunk) {
+  if (writeChar.properties.writeWithoutResponse) {
+    await writeChar.writeValueWithoutResponse(chunk);
+  } else {
+    await writeChar.writeValueWithResponse(chunk);
+  }
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function connect() {
+  try {
+    setStatus('connecting', 'Ricerca dispositivo...');
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [SERVICE_UUID] }],
+      optionalServices: [SERVICE_UUID],
+    });
+    logLine('', 'Dispositivo: ' + device.name);
+    device.addEventListener('gattserverdisconnected', onDisconnected);
+
+    setStatus('connecting', 'Connessione GATT...');
+    const server  = await device.gatt.connect();
+    const service = await server.getPrimaryService(SERVICE_UUID);
+    writeChar  = await service.getCharacteristic(CHAR_WRITE_UUID);
+    notifyChar = await service.getCharacteristic(CHAR_NOTIFY_UUID);
+
+    const p = writeChar.properties;
+    logLine('', `0xFFC1: write=${p.write} writeWithoutResponse=${p.writeWithoutResponse}`);
+
+    await notifyChar.startNotifications();
+    notifyChar.addEventListener('characteristicvaluechanged', e => {
+      const bytes = new Uint8Array(e.target.value.buffer);
+      if ($('filterFrag').checked) logEntry('rx', bytes);
+      feedFragment(bytes);
+    });
+
+    setStatus('connected', 'Connesso: ' + device.name);
+    setConnectedUI(true);
+    logLine('', 'In ascolto su 0xFFC2. Gira una manopola per generare traffico.');
+    await sleep(300);
+    await getCurrentPreset();
+  } catch (err) {
+    setStatus('disconnected', 'Disconnesso');
+    logLine('err', 'Errore: ' + err.message);
+  }
+}
+
+function onDisconnected() {
+  setStatus('disconnected', 'Disconnesso');
+  setConnectedUI(false);
+  writeChar = notifyChar = null;
+  logLine('warn', 'Connessione persa.');
+}
+
+function setConnectedUI(on) {
+  $('btnConnect').disabled = on;
+  $('btnDisconnect').disabled = !on;
+  $('btnRaw').disabled = !on;
+}
+
+function setStatus(state, label) {
+  $('status').className = 'status ' + state;
+  $('status').textContent = label;
+}
+
+/* ==========================================================================
+   RIASSEMBLAGGIO E DECODIFICA RX
+   ========================================================================== */
+
+let rxBuffer = [];
+
+function feedFragment(bytes) {
+  for (const b of bytes) {
+    if (rxBuffer.length === 0) {
+      if (b === 0xf0) rxBuffer.push(b);
+      continue;                       // scarta byte orfani prima di F0
+    }
+    rxBuffer.push(b);
+    if (b === 0xf7) { onMessage(new Uint8Array(rxBuffer)); rxBuffer = []; }
+  }
+}
+
+function onMessage(msg) {
+  if (msg.length < 7) { logLine('warn', 'Messaggio troppo corto: ' + hex(msg)); return; }
+
+  const seq = msg[2], declaredCs = msg[3], cmd = msg[4], sub = msg[5];
+  const packed = Array.from(msg.slice(6, msg.length - 1));
+  const data   = unpack7bit8bit(packed);
+  const csOk   = xorChecksum(packed) === declaredCs;
+
+  lastRxSeq = seq;
+
+  const div = document.createElement('div');
+  div.className = 'entry msg';
+  let html = `<span class="t">[${now()}]</span> <span class="tag" style="color:#4a9eff">0x${hex1(cmd)}${hex1(sub)}</span>`;
+  html += ` ${msg.length}B seq=0x${hex1(seq)} cs=${csOk ? 'ok' : '<span style="color:#ff8080">ERRATO</span>'}`;
+  html += `<br><span class="hex">${hex(msg)}</span>`;
+  html += `<br><span style="color:#f0d060">→ ${decodeValues(data).join('  ')}</span>`;
+  div.innerHTML = html;
+  appendLog(div);
+
+  trackState(cmd, sub, data);
+  notifyWaiters(cmd, sub);
+}
+
+// L'ampli riporta il preset corrente in 0x0310 e lo cambia con 0x0338.
+// Serve per il primo byte di 0x0138 (write_byte(curr_preset) in SparkIO.ino:915).
+function trackState(cmd, sub, data) {
+  if (cmd === 0x03 && (sub === 0x10 || sub === 0x38)) {
+    const v = data[data.length - 1];
+    if (typeof v === 'number') {
+      currentPreset = v;
+      $('currPreset').textContent = v;
+    }
+  }
+  if (cmd === 0x03 && sub === 0x11) {
+    $('ampInfo').textContent = decodeValues(data).join(' ');
+  }
+}
+
+/* ==========================================================================
+   COMANDI
+   ========================================================================== */
+
+// 0x0138 — payload [byte0, preset_target]
+// byte0 è sempre 0 in paulhamsh/Spark (Spark.ino:319, 333): indica il banco,
+// non il preset corrente. La UI lo espone comunque per poterlo variare.
+const cmdPreset = (target, ov, byte0) => {
+  const b0 = byte0 !== undefined ? byte0 : (parseInt($('presetByte0').value, 10) || 0);
+  return sendCommand(0x01, 0x38, [...encByte(b0), ...encByte(target)],
+                     `preset → ${target} (byte0=${b0})`, ov);
+};
+
+// Manda ogni target e richiede subito quale preset l'ampli considera attivo,
+// così la corrispondenza numero inviato → preset reale emerge dal log.
+async function mapPresets() {
+  logLine('step', '── mappatura preset: confronta "preset → N" con il 0x0310 che segue');
+  for (let n = 0; n <= 7; n++) {
+    await cmdPreset(n, undefined, 0x00);
+    await sleep(500);
+    await cmdGet(0x10, [], `verifica dopo target ${n}`);
+    await sleep(500);
+  }
+  logLine('step', '── mappatura completata');
+}
+
+// Sweep di lunghezza su 0x0201 (leggi preset), che per documentazione ammette
+// fino a 30 byte di padding a zero. Ogni messaggio è legittimo: se la risposta
+// smette di arrivare oltre una certa lunghezza, la soglia è del trasporto.
+async function lengthSweep() {
+  const o = opts();
+  logLine('step', `── sweep lunghezza su 0x0201 [${o.singleWrite ? 'write singola' : 'split 20B'}, ${o.blockHeader ? 'header' : 'no-header'}]`);
+  const results = [];
+  for (const pad of [0, 4, 8, 11, 12, 13, 14, 16, 20, 24, 30]) {
+    const data = [0x00, 0x00, ...new Array(pad).fill(0x00)];
+    const len  = await sendCommand(0x02, 0x01, data, `get preset 0, padding ${pad}`);
+    const ok   = await waitForReply((c, s) => c === 0x03 && s === 0x01, 1500);
+    results.push({ pad, len, ok });
+    logLine(ok ? '' : 'warn', `   padding ${String(pad).padStart(2)} → chunk ${len}B → risposta: ${ok ? 'SÌ' : 'NO'}`);
+    await sleep(400);
+  }
+  const last = results.filter(r => r.ok).pop();
+  const first = results.filter(r => !r.ok)[0];
+  if (first && last) {
+    logLine('step', `── soglia tra ${last.len}B (ok) e ${first.len}B (nessuna risposta)`);
+  } else if (!first) {
+    logLine('step', '── tutte le lunghezze hanno risposto: la lunghezza NON è il problema');
+  } else {
+    logLine('step', '── nessuna risposta a nessuna lunghezza: controlla la connessione');
+  }
+}
+
+const cmdFxOnOff = (name, on, ov) =>
+  sendCommand(0x01, 0x15, [...encPrefixedString(name), ...encOnOff(on)],
+              `${name} ${on ? 'ON' : 'OFF'}`, ov);
+
+const cmdParam = (name, num, val, ov) =>
+  sendCommand(0x01, 0x04, [...encPrefixedString(name), ...encByte(num), ...encFloat(val)],
+              `${name} p${num}=${val}`, ov);
+
+const cmdGet = (sub, data, label) =>
+  sendCommand(0x02, sub, data || [], label, { blockHeader: opts().blockHeader });
+
+async function getCurrentPreset() { await cmdGet(0x10, [], 'get preset corrente'); }
+
+/* ==========================================================================
+   BATTERIA DIAGNOSTICA
+   ========================================================================== */
+
+// Ordinate per plausibilita' decrescente, in base al confronto con
+// paulhamsh/Spark (implementazione BLE nota funzionante).
+const VARIANTS = [
+  { desc: 'write singola, senza header  (= explorer v1 per msg corti)', o: { blockHeader:false, singleWrite:true,  trailZero:false } },
+  { desc: 'write singola, CON header    (= paulhamsh/Spark)',            o: { blockHeader:true,  singleWrite:true,  trailZero:false } },
+  { desc: 'split 20B, CON header',                                       o: { blockHeader:true,  singleWrite:false, trailZero:false } },
+  { desc: 'split 20B, senza header      (= explorer v1 per msg lunghi)', o: { blockHeader:false, singleWrite:false, trailZero:false } },
+  { desc: 'write singola, senza header, + 0x00 finale',                  o: { blockHeader:false, singleWrite:true,  trailZero:true  } },
+  { desc: 'write singola, CON header, seq sincronizzato',                o: { blockHeader:true,  singleWrite:true,  syncSeq:true    } },
+];
+
+function runVariant(i) {
+  const v = VARIANTS[i];
+  const which = $('batteryCmd').value;
+  logLine('step', `── variante ${i + 1}: ${v.desc}`);
+  if (which === 'preset') return cmdPreset(parseInt($('presetNum').value, 10) || 0, v.o);
+  if (which === 'fxoff') return cmdFxOnOff('bias.reverb', false, v.o);
+  return cmdParam('bias.reverb', 0, 0.9, v.o);
+}
+
+function buildVariantTable() {
+  const t = $('variantTable');
+  t.innerHTML = '';
+  VARIANTS.forEach((v, i) => {
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'small';
+    btn.textContent = 'Variante ' + (i + 1);
+    btn.addEventListener('click', () => runVariant(i));
+    td1.appendChild(btn);
+    const td2 = document.createElement('td');
+    td2.className = 'desc';
+    td2.textContent = v.desc;
+    tr.append(td1, td2);
+    t.appendChild(tr);
+  });
+}
+
+/* ==========================================================================
+   TEST MIRATI
+   Il pattern osservato: tutto ciò che funziona ha payload con bits8 = 0,
+   cioè non esercita mai davvero la codifica 7/8 bit. A e B lo verificano
+   con un comando di lettura, che ha esito osservabile.
+   ========================================================================== */
+
+async function probeChecksums(withFixarray) {
+  const raw = withFixarray ? [0x94, 0x00, 0x01, 0x02, 0x03] : [0x00, 0x01, 0x02, 0x03];
+  const bits8 = pack7bit8bit(raw)[0];
+  await sendCommand(0x02, 0x2a, raw,
+    `get checksum preset ${withFixarray ? 'CON' : 'senza'} fixarray 0x94 (bits8=0x${hex1(bits8)})`);
+  const ok = await waitForReply((c, s) => c === 0x03 && s === 0x2a, 2000);
+  logLine(ok ? 'step' : 'warn', `   → risposta: ${ok ? 'SÌ' : 'NO'}`);
+  return ok;
+}
+
+const TARGETED = [
+  { label: 'A — 0x022a CON fixarray 0x94 → bits8 ≠ 0, esito oggettivo',
+    run: () => probeChecksums(true) },
+
+  { label: 'B — 0x022a senza fixarray → bits8 = 0, controllo',
+    run: () => probeChecksums(false) },
+
+  { label: 'C — reverb OFF (0x0115), payload con 0xab e 0xc2 → ascolta',
+    run: () => cmdFxOnOff('bias.reverb', false) },
+
+  { label: 'D — 0x0104 con short string semplice invece di prefixed → ascolta',
+    run: () => sendCommand(0x01, 0x04,
+      [...encShortString('bias.reverb'), ...encByte(0), ...encFloat(0.9)],
+      'param con short string semplice') },
+
+  { label: 'E — sub-comando 0x37 invece di 0x04 → ascolta',
+    run: () => sendCommand(0x01, 0x37,
+      [...encPrefixedString('bias.reverb'), ...encByte(0), ...encFloat(0.9)],
+      'param via 0x0137') },
+
+  { label: 'F — seleziona preset software 0x7f, poi 0x0104 → ascolta',
+    run: async () => {
+      await cmdPreset(0x7f, undefined, 0x00);
+      await sleep(600);
+      await cmdParam('bias.reverb', 0, 0.9);
+    } },
+];
+
+function buildTargetedTable() {
+  const t = $('targetedTable');
+  TARGETED.forEach((test, i) => {
+    const tr  = document.createElement('tr');
+    const td1 = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.className = 'small';
+    btn.textContent = 'Test ' + 'ABCDEF'[i];
+    btn.addEventListener('click', () => {
+      logLine('step', `── ${test.label}`);
+      test.run();
+    });
+    td1.appendChild(btn);
+    const td2 = document.createElement('td');
+    td2.className = 'desc';
+    td2.textContent = test.label;
+    tr.append(td1, td2);
+    t.appendChild(tr);
+  });
+}
+
+/* ==========================================================================
+   LOG
+   ========================================================================== */
+
+function now() {
+  const d = new Date();
+  return d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0');
+}
+
+function appendLog(node) {
+  const el = $('log');
+  el.appendChild(node);
+  el.scrollTop = el.scrollHeight;
+}
+
+function logLine(cls, msg) {
+  const div = document.createElement('div');
+  div.className = 'entry ' + cls;
+  div.innerHTML = `<span class="t">[${now()}]</span> ${msg}`;
+  appendLog(div);
+}
+
+function logEntry(dir, bytes) {
+  const div = document.createElement('div');
+  div.className = 'entry ' + dir;
+  const tag = dir === 'rx' ? 'RX ←' : 'TX →';
+  div.innerHTML = `<span class="t">[${now()}]</span> <span class="tag">${tag}</span><span class="hex">${hex(bytes)}</span>`;
+  appendLog(div);
+}
+
+function downloadLog() {
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const blob = new Blob([$('log').innerText], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `spark-log-${stamp}.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ==========================================================================
+   BINDING UI
+   ========================================================================== */
+
+$('btnConnect').addEventListener('click', connect);
+$('btnDisconnect').addEventListener('click', () => device?.gatt.connected && device.gatt.disconnect());
+$('btnClear').addEventListener('click', () => { $('log').innerHTML = ''; rxBuffer = []; });
+$('btnDownload').addEventListener('click', downloadLog);
+
+$('btnPreset').addEventListener('click', () => cmdPreset(parseInt($('presetNum').value, 10) || 0));
+$('btnMapPresets').addEventListener('click', mapPresets);
+$('btnFxOn').addEventListener('click',  () => cmdFxOnOff($('fxName').value.trim(), true));
+$('btnFxOff').addEventListener('click', () => cmdFxOnOff($('fxName').value.trim(), false));
+$('btnParam').addEventListener('click', () => cmdParam(
+  $('paramFx').value.trim(),
+  parseInt($('paramNum').value, 10) || 0,
+  Math.max(0, Math.min(1, parseFloat($('paramVal').value) || 0))
+));
+
+$('btnGetName').addEventListener('click',   () => cmdGet(0x11, [], 'get nome'));
+$('btnGetSerial').addEventListener('click', () => cmdGet(0x23, [], 'get seriale'));
+$('btnGetFw').addEventListener('click',     () => cmdGet(0x2f, [], 'get firmware'));
+$('btnGetCurr').addEventListener('click',   () => getCurrentPreset());
+$('btnGetLive').addEventListener('click',   () => cmdGet(0x01, [0x01, 0x00], 'get stato live'));
+$('btnLengthSweep').addEventListener('click', lengthSweep);
+
+$('btnHandshake').addEventListener('click', async () => {
+  const steps = [
+    [0x11, [],           'nome'],
+    [0x23, [],           'seriale'],
+    [0x01, [0x00, 0x00], 'preset 0'],
+    [0x01, [0x00, 0x01], 'preset 1'],
+    [0x01, [0x00, 0x02], 'preset 2'],
+    [0x01, [0x00, 0x03], 'preset 3'],
+    [0x10, [],           'preset corrente'],
+    [0x2f, [],           'firmware'],
+    [0x01, [0x01, 0x00], 'stato live'],
+  ];
+  for (const [sub, data, label] of steps) {
+    await cmdGet(sub, data, 'handshake: ' + label);
+    await sleep(250);
+  }
+  logLine('step', 'Handshake completato.');
+});
+
+$('btnRaw').addEventListener('click', async () => {
+  const bytes = $('txRaw').value.trim().split(/\s+/).filter(Boolean).map(h => parseInt(h, 16));
+  if (!bytes.length || bytes.some(isNaN)) { logLine('err', 'Hex non valido.'); return; }
+  try {
+    await writeBytes(bytes, opts().singleWrite);
+    logEntry('tx', bytes);
+  } catch (err) { logLine('err', 'Errore GATT: ' + err.message); }
+});
+
+$('batteryCmd').addEventListener('change', buildVariantTable);
+buildVariantTable();
+buildTargetedTable();
+
+if (!navigator.bluetooth) {
+  setStatus('disconnected', 'Web Bluetooth non disponibile');
+  logLine('err', 'Serve Chrome/Edge su Windows o Android, in contesto sicuro (https o localhost).');
+  $('btnConnect').disabled = true;
+}
+</script>
+
+</body>
+</html>

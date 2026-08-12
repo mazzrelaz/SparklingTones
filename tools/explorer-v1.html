@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark BLE Explorer</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #14161a;
+    color: #e8e8ea;
+    padding: 16px;
+  }
+  h1 { font-size: 1.2rem; margin: 0 0 4px; }
+  .sub { color: #8a8f98; font-size: 0.85rem; margin-bottom: 16px; }
+  .status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .status.disconnected { background: #3a2020; color: #ff8080; }
+  .status.connected { background: #1f3a24; color: #7fe08a; }
+  .status.connecting { background: #3a3520; color: #f0d060; }
+  button {
+    background: #ff6a3d;
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 8px;
+    margin-bottom: 10px;
+  }
+  button:disabled { background: #3a3d42; color: #7a7d82; cursor: not-allowed; }
+  button.secondary { background: #2a2d33; }
+  input[type=text] {
+    background: #1e2126;
+    border: 1px solid #34383f;
+    color: #e8e8ea;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'SF Mono', Consolas, monospace;
+    font-size: 0.85rem;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .row input { flex: 1; margin-bottom: 0; }
+  #log {
+    background: #0e0f12;
+    border: 1px solid #24272c;
+    border-radius: 10px;
+    padding: 10px;
+    height: 45vh;
+    overflow-y: auto;
+    font-family: 'SF Mono', Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+  .entry { margin-bottom: 6px; white-space: pre-wrap; word-break: break-all; }
+  .entry .t { color: #6a6f78; }
+  .entry.rx .hex { color: #7fe08a; }
+  .entry.tx .hex { color: #f0a860; }
+  .entry .tag { font-weight: 700; margin-right: 6px; }
+  .section { margin-top: 18px; }
+  .section h2 { font-size: 0.9rem; color: #b0b4bb; margin-bottom: 8px; }
+  small { color: #6a6f78; display: block; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<h1>Spark BLE Explorer</h1>
+<div class="sub">Strumento diagnostico — connette al Positive Grid Spark via Web Bluetooth e logga i messaggi grezzi (hex) scambiati sulle characteristic 0xFFC1 / 0xFFC2.</div>
+
+<div id="status" class="status disconnected">Disconnesso</div>
+<br>
+<button id="btnConnect">Connetti allo Spark</button>
+<button id="btnDisconnect" class="secondary" disabled>Disconnetti</button>
+<button id="btnClear" class="secondary">Pulisci log</button>
+<button id="btnCopy" class="secondary">Copia log</button>
+
+<div class="section">
+  <h2>Invia bytes grezzi (hex, separati da spazio)</h2>
+  <div class="row">
+    <input type="text" id="txInput" placeholder="es. 01 fe 00 00 53 fe ...">
+    <button id="btnSend" disabled>Invia</button>
+  </div>
+  <div class="row">
+    <label style="font-size:0.8rem; color:#b0b4bb;">
+      <input type="checkbox" id="chkAutoSeq" checked style="vertical-align:middle;">
+      Sostituisci automaticamente il byte di sequenza (3° byte) con l'ultimo visto + 1
+    </label>
+  </div>
+  <small>Usa questo per sperimentare comandi mentre confrontiamo con la documentazione del protocollo.</small>
+</div>
+
+<div class="section">
+  <h2>Cambia parametro effetto (comando 0x0104 — corretto)</h2>
+  <div class="row">
+    <input type="text" id="effName" placeholder="nome effetto, es. bias.reverb" value="bias.reverb">
+  </div>
+  <div class="row">
+    <input type="text" id="paramNum" placeholder="numero parametro (0-6)" value="0" style="max-width:120px;">
+    <input type="text" id="paramVal" placeholder="valore 0.0 - 1.0" value="0.5" style="max-width:150px;">
+    <button id="btnSendParam">Invia parametro</button>
+  </div>
+  <div class="row">
+    <label style="font-size:0.8rem; color:#b0b4bb;">
+      <input type="checkbox" id="chkBlockHeader" style="vertical-align:middle;">
+      Aggiungi header di blocco (01 fe 00 00 53 fe ...) prima del chunk
+    </label>
+  </div>
+  <small>Costruisce un messaggio 0x0104 vero (con codifica 7bit/8bit corretta) e lo invia via writeWithoutResponse.</small>
+</div>
+
+<div class="section">
+  <h2>TEST DIAGNOSTICO: cambia preset (comando 0x0138)</h2>
+  <div class="row">
+    <input type="text" id="presetNum" placeholder="preset 0-3" value="1" style="max-width:120px;">
+    <button id="btnSendPreset">Cambia preset</button>
+  </div>
+  <small>Messaggio cortissimo (10 byte) con effetto VISIBILE sull'ampli (LED preset). Se questo funziona, la scrittura è ok e il problema riguarda solo i messaggi lunghi.</small>
+</div>
+
+<div class="section">
+  <h2>Handshake iniziale (sequenza che l'app ufficiale manda alla connessione)</h2>
+  <div class="row">
+    <button id="btnHandshake">Invia handshake</button>
+  </div>
+  <small>Manda le richieste GET che l'app ufficiale invia appena connessa (nome, seriale, preset, firmware...), nel tentativo di "inizializzare" la sessione prima di scrivere parametri.</small>
+
+<div class="section">
+  <h2>Log messaggi</h2>
+  <div id="log"></div>
+</div>
+
+<script>
+const SERVICE_UUID = 0xffc0;
+const CHAR_WRITE_UUID = 0xffc1;  // verso l'ampli
+const CHAR_NOTIFY_UUID = 0xffc2; // dall'ampli
+
+let device, server, service, writeChar, notifyChar;
+
+const statusEl = document.getElementById('status');
+const logEl = document.getElementById('log');
+const btnConnect = document.getElementById('btnConnect');
+const btnDisconnect = document.getElementById('btnDisconnect');
+const btnClear = document.getElementById('btnClear');
+const btnCopy = document.getElementById('btnCopy');
+const btnSendParam = document.getElementById('btnSendParam');
+const btnSend = document.getElementById('btnSend');
+const txInput = document.getElementById('txInput');
+
+function setStatus(state, label) {
+  statusEl.className = 'status ' + state;
+  statusEl.textContent = label;
+}
+
+function nowStr() {
+  const d = new Date();
+  return d.toTimeString().split(' ')[0] + '.' + String(d.getMilliseconds()).padStart(3, '0');
+}
+
+function bytesToHex(bytes) {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+}
+
+function hexToBytes(hexStr) {
+  const clean = hexStr.trim().split(/\s+/).filter(Boolean);
+  return new Uint8Array(clean.map(h => parseInt(h, 16)));
+}
+
+function logEntry(direction, bytes) {
+  const div = document.createElement('div');
+  div.className = 'entry ' + direction;
+  const tag = direction === 'rx' ? 'RX ←' : 'TX →';
+  div.innerHTML = `<span class="t">[${nowStr()}]</span> <span class="tag">${tag}</span><span class="hex">${bytesToHex(bytes)}</span>`;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function logInfo(msg) {
+  const div = document.createElement('div');
+  div.className = 'entry';
+  div.innerHTML = `<span class="t">[${nowStr()}]</span> ${msg}`;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// --- Riassemblaggio messaggi frammentati (BLE MTU spezza i pacchetti lunghi) ---
+let msgBuffer = [];
+let lastSeenSeq = null;
+let txSeqCounter = null; // contatore di sequenza indipendente per i nostri invii
+
+function handleFragment(bytes) {
+  for (const b of bytes) {
+    // Se il buffer è vuoto, aspettiamo l'inizio F0
+    if (msgBuffer.length === 0) {
+      if (b === 0xf0) msgBuffer.push(b);
+      // altrimenti scartiamo byte orfani prima di un F0
+      continue;
+    }
+    msgBuffer.push(b);
+    if (b === 0xf7) {
+      // messaggio completo
+      onCompleteMessage(new Uint8Array(msgBuffer));
+      msgBuffer = [];
+    }
+  }
+}
+
+function extractAsciiRuns(bytes, minLen = 3) {
+  const runs = [];
+  let current = '';
+  for (const b of bytes) {
+    if (b >= 0x20 && b <= 0x7e) {
+      current += String.fromCharCode(b);
+    } else {
+      if (current.length >= minLen) runs.push(current);
+      current = '';
+    }
+  }
+  if (current.length >= minLen) runs.push(current);
+  return runs;
+}
+
+function onCompleteMessage(bytes) {
+  const div = document.createElement('div');
+  div.className = 'entry rx';
+  div.style.borderLeft = '3px solid #4a9eff';
+  div.style.paddingLeft = '8px';
+  div.style.marginTop = '4px';
+
+  const seq = bytes.length > 2 ? bytes[2] : null;
+  const cmd = bytes.length > 5 ? bytes[5] : null;
+  const ascii = extractAsciiRuns(bytes);
+
+  if (seq !== null) {
+    lastSeenSeq = seq; // teniamo traccia dell'ultimo numero di sequenza visto dall'ampli
+    txSeqCounter = (seq + 1) & 0xff; // sincronizziamo anche il contatore TX
+  }
+
+  let html = `<span class="t">[${nowStr()}]</span> <span class="tag" style="color:#4a9eff">MSG completo</span> `;
+  html += `len=${bytes.length}`;
+  if (seq !== null) html += ` seq=0x${seq.toString(16)}`;
+  if (cmd !== null) html += ` cmd(ipotesi)=0x${cmd.toString(16)}`;
+  html += `<br><span class="hex" style="color:#7fe08a">${bytesToHex(bytes)}</span>`;
+  if (ascii.length > 0) {
+    html += `<br><span style="color:#f0d060">testo estratto: ${ascii.map(s => '"' + s.replace(/</g,'&lt;') + '"').join(', ')}</span>`;
+  }
+  // Ipotesi: nei messaggi cmd 0x37, i 4 byte immediatamente prima di "00 f7" finale
+  // sembrano codificare un parametro come float32 big-endian (range 0.0-1.0)
+  if (cmd === 0x37 && bytes.length >= 8 && bytes[bytes.length - 2] === 0x00 && bytes[bytes.length - 1] === 0xf7) {
+    const fbytes = bytes.slice(bytes.length - 6, bytes.length - 2);
+    if (fbytes.length === 4) {
+      const buf = new ArrayBuffer(4);
+      const dv = new DataView(buf);
+      fbytes.forEach((b, i) => dv.setUint8(i, b));
+      const floatVal = dv.getFloat32(0, false); // big-endian
+      html += `<br><span style="color:#c080ff">float32 ipotizzato (byte ${bytesToHex(fbytes)}): ${floatVal.toFixed(6)}</span>`;
+    }
+  }
+  div.innerHTML = html;
+  logEl.appendChild(div);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+async function connect() {
+  try {
+    setStatus('connecting', 'Ricerca dispositivo...');
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [SERVICE_UUID] }],
+      optionalServices: [SERVICE_UUID]
+    });
+
+    logInfo('Dispositivo selezionato: ' + device.name);
+    device.addEventListener('gattserverdisconnected', onDisconnected);
+
+    setStatus('connecting', 'Connessione GATT...');
+    server = await device.gatt.connect();
+
+    service = await server.getPrimaryService(SERVICE_UUID);
+    writeChar = await service.getCharacteristic(CHAR_WRITE_UUID);
+    notifyChar = await service.getCharacteristic(CHAR_NOTIFY_UUID);
+
+    logInfo('Proprietà characteristic scrittura (0xFFC1): write=' + writeChar.properties.write +
+      ', writeWithoutResponse=' + writeChar.properties.writeWithoutResponse);
+
+    await notifyChar.startNotifications();
+    notifyChar.addEventListener('characteristicvaluechanged', (event) => {
+      const bytes = new Uint8Array(event.target.value.buffer);
+      logEntry('rx', bytes);
+      handleFragment(bytes);
+    });
+
+    setStatus('connected', 'Connesso: ' + device.name);
+    btnConnect.disabled = true;
+    btnDisconnect.disabled = false;
+    btnSend.disabled = false;
+    logInfo('Sottoscritto alle notifiche su 0xFFC2. In ascolto...');
+    logInfo('Suggerimento: cambia preset o parametro sull\'ampli fisico per vedere i messaggi generati.');
+  } catch (err) {
+    setStatus('disconnected', 'Disconnesso');
+    logInfo('Errore: ' + err.message);
+  }
+}
+
+function onDisconnected() {
+  setStatus('disconnected', 'Disconnesso');
+  btnConnect.disabled = false;
+  btnDisconnect.disabled = true;
+  btnSend.disabled = true;
+  logInfo('Connessione persa.');
+}
+
+async function disconnect() {
+  if (device && device.gatt.connected) {
+    device.gatt.disconnect();
+  }
+}
+
+async function sendRaw() {
+  if (!writeChar) return;
+  try {
+    const bytes = hexToBytes(txInput.value);
+    if (bytes.length === 0) return;
+
+    const autoSeq = document.getElementById('chkAutoSeq').checked;
+    if (autoSeq && bytes.length > 2 && lastSeenSeq !== null) {
+      bytes[2] = (lastSeenSeq + 1) & 0xff;
+      logInfo('Byte sequenza sostituito con 0x' + bytes[2].toString(16) + ' (ultimo visto 0x' + lastSeenSeq.toString(16) + ' + 1)');
+    }
+
+    if (writeChar.properties.write) {
+      await writeChar.writeValueWithResponse(bytes);
+      logInfo('Scrittura confermata (writeWithResponse) senza errori GATT.');
+    } else if (writeChar.properties.writeWithoutResponse) {
+      await writeChar.writeValueWithoutResponse(bytes);
+      logInfo('Inviato senza risposta (writeWithoutResponse) — nessuna conferma a livello GATT.');
+    } else {
+      await writeChar.writeValue(bytes);
+    }
+    logEntry('tx', bytes);
+  } catch (err) {
+    logInfo('Errore invio (GATT): ' + err.message);
+  }
+}
+
+btnConnect.addEventListener('click', connect);
+btnDisconnect.addEventListener('click', disconnect);
+btnClear.addEventListener('click', () => { logEl.innerHTML = ''; msgBuffer = []; });
+
+async function copyLog() {
+  const text = logEl.innerText;
+  const originalLabel = btnCopy.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    btnCopy.textContent = 'Copiato!';
+  } catch (err) {
+    // fallback per contesti senza clipboard API (es. non-https)
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      btnCopy.textContent = 'Copiato!';
+    } catch (e2) {
+      btnCopy.textContent = 'Errore copia';
+    }
+    document.body.removeChild(ta);
+  }
+  setTimeout(() => { btnCopy.textContent = originalLabel; }, 1500);
+}
+btnCopy.addEventListener('click', copyLog);
+
+// --- Encoder per messaggi in scrittura (comando 0x0104 - change effect parameter) ---
+// Basato su: Spark Protocol Description v3.1 (Paul Hamshere)
+
+function floatToBytesBE(val) {
+  const buf = new ArrayBuffer(4);
+  const dv = new DataView(buf);
+  dv.setFloat32(0, val, false); // big-endian
+  const out = [];
+  for (let i = 0; i < 4; i++) out.push(dv.getUint8(i));
+  return out;
+}
+
+// Codifica "alternative short string": [len, len+0xa0, ...ascii bytes]
+function encodeAltShortString(str) {
+  const len = str.length;
+  const bytes = [len, len + 0xa0];
+  for (let i = 0; i < str.length; i++) bytes.push(str.charCodeAt(i));
+  return bytes;
+}
+
+// Applica la codifica 7bit/8bit stile SysEx: ogni 7 byte di dati reali
+// sono preceduti da un byte "bits8" con gli ottavi bit mancanti
+function pack7bit8bit(dataBytes) {
+  const out = [];
+  for (let i = 0; i < dataBytes.length; i += 7) {
+    const group = dataBytes.slice(i, i + 7);
+    let bits8 = 0;
+    const stripped = group.map((b, idx) => {
+      if (b & 0x80) {
+        bits8 |= (1 << idx);
+        return b & 0x7f;
+      }
+      return b;
+    });
+    out.push(bits8, ...stripped);
+  }
+  return out;
+}
+
+function xorChecksum(bytes) {
+  let cs = 0;
+  for (const b of bytes) cs ^= b;
+  return cs & 0xff;
+}
+
+function buildChangeParamMessage(effectName, paramNum, floatVal, seq) {
+  // Costruisce i dati logici: nome effetto + numero parametro + valore float
+  const rawData = [
+    ...encodeAltShortString(effectName),
+    paramNum & 0x7f,          // Short Integer (0x00-0x7f)
+    0xca, ...floatToBytesBE(floatVal)  // Float: prefisso 0xca + 4 byte big-endian
+  ];
+
+  const packedData = pack7bit8bit(rawData);
+  const checksum = xorChecksum(packedData);
+
+  // Chunk: f0 01 <seq> <checksum> 01 04 <packedData> f7
+  const chunk = [0xf0, 0x01, seq & 0xff, checksum, 0x01, 0x04, ...packedData, 0xf7];
+
+  // Header di blocco (documentato per il trasporto seriale classico):
+  // 01 fe 00 00 | direzione (53 fe = verso l'ampli) | dimensione blocco | 9 zeri
+  const blockSize = (16 + chunk.length) & 0xff; // 16 byte header + lunghezza chunk
+  const blockHeader = [0x01, 0xfe, 0x00, 0x00, 0x53, 0xfe, blockSize, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+
+  return { withBlockHeader: [...blockHeader, ...chunk], chunkOnly: chunk };
+}
+
+async function sendParamChange() {
+  if (!writeChar) {
+    logInfo('Non connesso.');
+    return;
+  }
+  const effName = document.getElementById('effName').value.trim();
+  const paramNum = parseInt(document.getElementById('paramNum').value, 10) || 0;
+  let paramVal = parseFloat(document.getElementById('paramVal').value);
+  if (!effName || isNaN(paramVal)) {
+    logInfo('Compila nome effetto e valore validi.');
+    return;
+  }
+  // Il protocollo accetta solo valori 0.0-1.0 (1.0 = "10" nell'interfaccia utente)
+  if (paramVal < 0 || paramVal > 1) {
+    const clamped = Math.max(0, Math.min(1, paramVal));
+    logInfo(`ATTENZIONE: valore ${paramVal} fuori range (ammesso 0.0-1.0). Uso ${clamped}.`);
+    paramVal = clamped;
+  }
+
+  const seq = (txSeqCounter !== null ? txSeqCounter : (lastSeenSeq !== null ? lastSeenSeq + 1 : 1)) & 0xff;
+  txSeqCounter = (seq + 1) & 0xff;
+  const msg = buildChangeParamMessage(effName, paramNum, paramVal, seq);
+  const useBlockHeader = document.getElementById('chkBlockHeader').checked;
+  const fullBytes = useBlockHeader ? msg.withBlockHeader : msg.chunkOnly;
+
+  try {
+    await sendInMtuChunks(fullBytes);
+    logInfo(`Inviato cmd 0x0104 (${useBlockHeader ? 'con' : 'senza'} header blocco, spezzato in pacchetti da max 20 byte): effetto="${effName}" param=${paramNum} valore=${paramVal} (seq=0x${seq.toString(16)})`);
+    logEntry('tx', new Uint8Array(fullBytes));
+  } catch (err) {
+    logInfo('Errore invio parametro: ' + err.message);
+  }
+}
+btnSendParam.addEventListener('click', sendParamChange);
+
+// Spezza un array di byte in scritture BLE separate da max 20 byte ciascuna,
+// per evitare il troncamento silenzioso dovuto all'MTU di default
+async function sendInMtuChunks(byteArray, maxChunk = 20) {
+  for (let i = 0; i < byteArray.length; i += maxChunk) {
+    const slice = new Uint8Array(byteArray.slice(i, i + maxChunk));
+    if (writeChar.properties.write) {
+      await writeChar.writeValueWithResponse(slice);
+    } else {
+      await writeChar.writeValueWithoutResponse(slice);
+    }
+    logInfo(`  → pacchetto BLE inviato (${slice.length} byte): ${bytesToHex(slice)}`);
+    // piccola pausa: writeWithoutResponse non ha controllo di flusso,
+    // pacchetti troppo ravvicinati possono essere persi
+    if (i + maxChunk < byteArray.length) await new Promise(r => setTimeout(r, 30));
+  }
+}
+
+// TEST DIAGNOSTICO: cambio preset hardware (comando 0x0138)
+// Messaggio molto corto, effetto visibile sul LED dell'ampli
+async function sendPresetChange() {
+  if (!writeChar) {
+    logInfo('Non connesso.');
+    return;
+  }
+  const presetNum = parseInt(document.getElementById('presetNum').value, 10);
+  if (isNaN(presetNum) || presetNum < 0 || presetNum > 3) {
+    logInfo('Inserisci un numero di preset valido (0-3).');
+    return;
+  }
+
+  const seq = (txSeqCounter !== null ? txSeqCounter : (lastSeenSeq !== null ? lastSeenSeq + 1 : 1)) & 0xff;
+  txSeqCounter = (seq + 1) & 0xff;
+
+  // Dati: Integer 0x00, poi numero del preset
+  const rawData = [0x00, presetNum & 0x7f];
+  const packedData = pack7bit8bit(rawData);
+  const checksum = xorChecksum(packedData);
+  const msg = [0xf0, 0x01, seq & 0xff, checksum, 0x01, 0x38, ...packedData, 0xf7];
+  const bytes = new Uint8Array(msg);
+
+  try {
+    if (writeChar.properties.write) {
+      await writeChar.writeValueWithResponse(bytes);
+    } else {
+      await writeChar.writeValueWithoutResponse(bytes);
+    }
+    logInfo(`Inviato cmd 0x0138: cambio a preset ${presetNum} (seq=0x${seq.toString(16)}, ${bytes.length} byte)`);
+    logEntry('tx', bytes);
+    logInfo('Attesa risposta dall\'ampli (dovrebbe arrivare un ack 0x0438)...');
+  } catch (err) {
+    logInfo('Errore invio preset: ' + err.message);
+  }
+}
+document.getElementById('btnSendPreset').addEventListener('click', sendPresetChange);
+
+// --- Handshake iniziale: sequenza di messaggi GET che l'app ufficiale manda alla connessione ---
+function buildSimpleGetMessage(cmd, subcmd, dataBytes, seq) {
+  const data = dataBytes || [];
+  const packedData = pack7bit8bit(data);
+  const checksum = xorChecksum(packedData);
+  return [0xf0, 0x01, seq & 0xff, checksum, cmd, subcmd, ...packedData, 0xf7];
+}
+
+async function sendHandshake() {
+  if (!writeChar) {
+    logInfo('Non connesso.');
+    return;
+  }
+  // Sequenza ispirata all'Appendice 3 del documento di protocollo
+  const steps = [
+    { cmd: 0x02, sub: 0x11, data: [], desc: 'Get amp name' },
+    { cmd: 0x02, sub: 0x2a, data: [0x00, 0x01, 0x02, 0x03], desc: 'Get preset checksums' },
+    { cmd: 0x02, sub: 0x23, data: [], desc: 'Get serial number' },
+    { cmd: 0x02, sub: 0x01, data: [0x00, 0x00], desc: 'Get preset 0' },
+    { cmd: 0x02, sub: 0x01, data: [0x00, 0x01], desc: 'Get preset 1' },
+    { cmd: 0x02, sub: 0x01, data: [0x00, 0x02], desc: 'Get preset 2' },
+    { cmd: 0x02, sub: 0x01, data: [0x00, 0x03], desc: 'Get preset 3' },
+    { cmd: 0x02, sub: 0x10, data: [], desc: 'Get current hardware preset' },
+    { cmd: 0x02, sub: 0x2f, data: [], desc: 'Get firmware version' },
+    { cmd: 0x02, sub: 0x01, data: [0x01, 0x00], desc: 'Get current amp settings (live state)' },
+  ];
+
+  for (const step of steps) {
+    const seq = (txSeqCounter !== null ? txSeqCounter : (lastSeenSeq !== null ? lastSeenSeq + 1 : 1)) & 0xff;
+    txSeqCounter = (seq + 1) & 0xff;
+    const bytes = new Uint8Array(buildSimpleGetMessage(step.cmd, step.sub, step.data, seq));
+    try {
+      if (writeChar.properties.write) {
+        await writeChar.writeValueWithResponse(bytes);
+      } else {
+        await writeChar.writeValueWithoutResponse(bytes);
+      }
+      logInfo(`Handshake: inviato "${step.desc}" (seq=0x${seq.toString(16)})`);
+      logEntry('tx', bytes);
+    } catch (err) {
+      logInfo(`Handshake: errore su "${step.desc}": ` + err.message);
+    }
+    await new Promise(r => setTimeout(r, 200)); // piccola pausa tra i messaggi
+  }
+  logInfo('Handshake completato. Prova ora "Invia parametro".');
+}
+document.getElementById('btnHandshake').addEventListener('click', sendHandshake);
+btnSend.addEventListener('click', sendRaw);
+txInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendRaw(); });
+
+if (!navigator.bluetooth) {
+  setStatus('disconnected', 'Web Bluetooth non disponibile');
+  logInfo('Questo browser non supporta Web Bluetooth. Serve Chrome per Android aggiornato.');
+  btnConnect.disabled = true;
+}
+</script>
+
+</body>
+</html>

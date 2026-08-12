@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Test preset-store</title>
+<style>
+  body { font-family:'SF Mono',Consolas,monospace; background:#14161a; color:#e8e8ea;
+         padding:20px; font-size:0.85rem; line-height:1.6; }
+  h1 { font-size:1.1rem; font-family:-apple-system,'Segoe UI',sans-serif; }
+  .pass { color:#7fe08a; }
+  .fail { color:#ff8080; }
+  .group { color:#8a8f98; margin-top:14px; font-weight:700; }
+  .detail { color:#8a8f98; margin-left:22px; white-space:pre-wrap; }
+  #summary { margin:18px 0; padding:10px 14px; border-radius:8px; font-weight:700;
+             font-family:-apple-system,'Segoe UI',sans-serif; }
+  #summary.ok  { background:#1f3a24; color:#7fe08a; }
+  #summary.bad { background:#3a2020; color:#ff8080; }
+</style>
+</head>
+<body>
+<h1>Test preset-store.js</h1>
+<p class="detail" style="margin-left:0">Ogni esecuzione usa un database temporaneo, che
+viene cancellato alla fine.</p>
+<div id="summary">esecuzione…</div>
+<div id="out"></div>
+
+<script src="../src/preset-store.js"></script>
+<script>
+'use strict';
+
+let passed = 0, failed = 0;
+
+function check(name, actual, expected) {
+  const a = JSON.stringify(actual), e = JSON.stringify(expected);
+  const ok = a === e;
+  ok ? passed++ : failed++;
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="${ok ? 'pass' : 'fail'}">${ok ? '✓' : '✗'} ${name}</span>`;
+  if (!ok) div.innerHTML += `<div class="detail">atteso:  ${e}\nottenuto: ${a}</div>`;
+  document.getElementById('out').appendChild(div);
+}
+
+function group(title) {
+  const div = document.createElement('div');
+  div.className = 'group';
+  div.textContent = title;
+  document.getElementById('out').appendChild(div);
+}
+
+/** Preset minimale con la forma prodotta da Spark.parsePreset. */
+function makePreset(uuid, name, effectNames, bpm) {
+  return {
+    bank: 0, number: 0, uuid, name,
+    version: '0.7', description: '', icon: 'icon.png',
+    bpm: bpm || 120,
+    effects: (effectNames || []).map(n => ({
+      name: n, enabled: true, params: [{ index: 0, value: 0.5 }],
+    })),
+    tail: [9990, 0.5], checksum: 0xe0,
+  };
+}
+
+const DB_NAME = 'spark-test-' + Date.now();
+
+(async function run() {
+  const store = await new PresetStore(DB_NAME).open();
+
+  /* ------------------------------------------------------------------ */
+  group('inserimento e lettura');
+
+  const idA = await store.add(makePreset('uuid-a', 'Shine On', ['Twin', 'DelayRe201']));
+  const idB = await store.add(makePreset('uuid-b', 'Hey Jimi', ['JH.JTM45', 'JH.FuzzTone']));
+  const idC = await store.add(makePreset('uuid-c', 'Nylon Reverb', ['FatAcousticV2']));
+
+  check('count dopo tre inserimenti', await store.count(), 3);
+  check('gli ordini sono progressivi', (await store.all()).map(r => r.order), [0, 1, 2]);
+  check('get restituisce il preset giusto', (await store.get(idB)).name, 'Hey Jimi');
+  check('byUuid trova per UUID', (await store.byUuid('uuid-c')).name, 'Nylon Reverb');
+
+  const fresh = await store.get(idA);
+  check('i campi utente sono inizializzati',
+        [fresh.tags, fresh.notes, fresh.favorite], [[], '', false]);
+
+  /* ------------------------------------------------------------------ */
+  group('tag');
+
+  await store.setTags(idA, ['  Gilmour ', 'clean', 'gilmour', '', 'Clean']);
+  check('i tag vengono ripuliti e deduplicati senza badare al maiuscolo',
+        (await store.get(idA)).tags, ['Gilmour', 'clean']);
+
+  await store.addTag(idA, 'pink floyd');
+  check('addTag aggiunge in coda', (await store.get(idA)).tags, ['Gilmour', 'clean', 'pink floyd']);
+
+  await store.addTag(idA, 'CLEAN');
+  check('addTag non duplica un tag già presente',
+        (await store.get(idA)).tags, ['Gilmour', 'clean', 'pink floyd']);
+
+  await store.removeTag(idA, 'CLEAN');
+  check('removeTag ignora il maiuscolo', (await store.get(idA)).tags, ['Gilmour', 'pink floyd']);
+
+  await store.setTags(idB, ['hendrix', 'fuzz']);
+  await store.setTags(idC, ['acustica']);
+  check('allTags conta gli usi e a parità ordina alfabeticamente, maiuscole comprese',
+        (await store.allTags()).map(t => t.tag + ':' + t.count).join(' '),
+        'acustica:1 fuzz:1 Gilmour:1 hendrix:1 pink floyd:1');
+
+  await store.addTag(idB, 'clean');
+  await store.addTag(idC, 'clean');
+  check('il tag più usato viene per primo', (await store.allTags())[0], { tag: 'clean', count: 2 });
+  await store.removeTag(idB, 'clean');
+  await store.removeTag(idC, 'clean');
+
+  /* ------------------------------------------------------------------ */
+  group('preferiti e note');
+
+  check('toggleFavorite accende', await store.toggleFavorite(idB), true);
+  check('toggleFavorite spegne',  await store.toggleFavorite(idB), false);
+  await store.toggleFavorite(idB);
+
+  await store.setNotes(idA, 'usare col manico, volume a 7');
+  check('le note vengono salvate', (await store.get(idA)).notes, 'usare col manico, volume a 7');
+
+  /* ------------------------------------------------------------------ */
+  group('ricerca');
+
+  check('ricerca per nome',        (await store.search('jimi')).map(r => r.name), ['Hey Jimi']);
+  check('ricerca per effetto',     (await store.search('delayre201')).map(r => r.name), ['Shine On']);
+  check('ricerca per tag',         (await store.search('hendrix')).map(r => r.name), ['Hey Jimi']);
+  check('ricerca nelle note',      (await store.search('manico')).map(r => r.name), ['Shine On']);
+  check('più termini vanno in AND', (await store.search('jimi fuzz')).map(r => r.name), ['Hey Jimi']);
+  check('termini in AND non correlati non trovano nulla',
+        (await store.search('jimi gilmour')).length, 0);
+  check('query vuota restituisce tutto', (await store.search('')).length, 3);
+  check('filtro preferiti',
+        (await store.search('', { favoritesOnly: true })).map(r => r.name), ['Hey Jimi']);
+  check('filtro per tag esatto',
+        (await store.search('', { tag: 'ACUSTICA' })).map(r => r.name), ['Nylon Reverb']);
+
+  /* ------------------------------------------------------------------ */
+  group('ordinamento manuale');
+
+  check('sposto l\'ultimo in cima',
+        (await store.move(idC, 0)) .length, 3);
+  check('il nuovo ordine è quello atteso',
+        (await store.all()).map(r => r.name), ['Nylon Reverb', 'Shine On', 'Hey Jimi']);
+  check('gli ordini restano 0..n-1 senza buchi',
+        (await store.all()).map(r => r.order), [0, 1, 2]);
+
+  await store.move(idC, 99);
+  check('un indice fuori scala finisce in fondo',
+        (await store.all()).map(r => r.name), ['Shine On', 'Hey Jimi', 'Nylon Reverb']);
+
+  /* ------------------------------------------------------------------ */
+  group('import dall\'ampli');
+
+  // stesso UUID di "Shine On": è lo stesso preset, modificato sull'ampli
+  const modificato = makePreset('uuid-a', 'Shine On v2', ['Twin', 'DelayMono'], 132);
+  modificato.slot = 0;
+  const nuovo = makePreset('uuid-d', 'Europa', ['AmericanHighGain']);
+  nuovo.slot = 5;
+
+  const esito = await store.importFromAmp([modificato, nuovo]);
+  check('import: uno aggiunto, uno aggiornato', esito, { added: 1, updated: 1 });
+  check('la libreria è cresciuta di uno', await store.count(), 4);
+
+  const dopo = await store.get(idA);
+  check('la parte sonora viene aggiornata',
+        [dopo.name, dopo.bpm, dopo.effects.map(e => e.name).join(',')],
+        ['Shine On v2', 132, 'Twin,DelayMono']);
+  check('i tag dell\'utente sopravvivono all\'import', dopo.tags, ['Gilmour', 'pink floyd']);
+  check('le note sopravvivono all\'import', dopo.notes, 'usare col manico, volume a 7');
+  check('l\'ordine manuale sopravvive all\'import', dopo.order, 0);
+  check('lo slot sull\'ampli viene registrato', dopo.slot, 0);
+
+  const ancora = await store.importFromAmp([modificato, nuovo]);
+  check('reimportare gli stessi preset non ne aggiunge altri', ancora, { added: 0, updated: 2 });
+
+  /* ------------------------------------------------------------------ */
+  group('scaletta');
+
+  check('la scaletta parte vuota', (await store.getSetlist()).length, 0);
+
+  await store.addToSetlist(idB);
+  await store.addToSetlist(idA);
+  check('la scaletta conserva l\'ordine di inserimento',
+        (await store.getSetlist()).map(r => r.name), ['Hey Jimi', 'Shine On v2']);
+
+  await store.addToSetlist(idB);
+  check('aggiungere due volte lo stesso preset non lo duplica',
+        (await store.getSetlist()).length, 2);
+
+  await store.removeFromSetlist(idB);
+  check('si può togliere un preset dalla scaletta',
+        (await store.getSetlist()).map(r => r.name), ['Shine On v2']);
+
+  // un preset cancellato non deve lasciare un pulsante morto
+  const usaEGetta = await store.add(makePreset('uuid-tmp', 'Temporaneo', []));
+  await store.addToSetlist(usaEGetta);
+  check('il preset appena aggiunto è in scaletta', (await store.getSetlist()).length, 2);
+  await store.remove(usaEGetta);
+  check('cancellare un preset lo toglie di fatto dalla scaletta',
+        (await store.getSetlist()).map(r => r.name), ['Shine On v2']);
+
+  await store.setSetting('prova', { a: 1 });
+  check('le preferenze si rileggono', await store.getSetting('prova'), { a: 1 });
+  check('una preferenza mancante restituisce il valore di ripiego',
+        await store.getSetting('inesistente', 'ripiego'), 'ripiego');
+
+  /* ------------------------------------------------------------------ */
+  group('assegnazione degli slot');
+
+  // idA sta nello slot 0; se ci mettiamo idC, idA non deve restare lì
+  await store.assignSlots({ [idC]: 0, [idB]: 1 });
+  check('gli slot richiesti vengono assegnati',
+        [(await store.get(idC)).slot, (await store.get(idB)).slot], [0, 1]);
+  check('chi occupava uno slot riassegnato lo perde',
+        (await store.get(idA)).slot, null);
+
+  /* ------------------------------------------------------------------ */
+  group('backup');
+
+  const backup = await store.exportAll();
+  check('il backup ha il formato atteso',
+        [backup.format, backup.version, backup.presets.length],
+        ['spark-controller-library', 1, 4]);
+
+  await store.clear();
+  check('clear svuota la libreria', await store.count(), 0);
+
+  const reimportati = await store.importBackup(backup, { replace: true });
+  check('il backup viene reimportato per intero', reimportati, 4);
+  check('i preset tornano nello stesso ordine',
+        (await store.all()).map(r => r.name),
+        backup.presets.map(r => r.name));
+  check('i tag sopravvivono al giro di backup',
+        (await store.byUuid('uuid-a')).tags, ['Gilmour', 'pink floyd']);
+
+  let errore = null;
+  try { await store.importBackup({ format: 'qualcos-altro' }); }
+  catch (e) { errore = e.message; }
+  check('un file estraneo viene rifiutato', errore, 'il file non è un backup della libreria');
+
+  /* ------------------------------------------------------------------ */
+  group('errori');
+
+  let mancante = null;
+  try { await store.setNotes(99999, 'x'); } catch (e) { mancante = e.message; }
+  check('modificare un preset inesistente è un errore', mancante, 'preset 99999 inesistente');
+
+  /* ------------------------------------------------------------------ */
+  store.close();
+  await PresetStore.deleteDatabase(DB_NAME);
+
+  const s = document.getElementById('summary');
+  s.className = failed === 0 ? 'ok' : 'bad';
+  s.textContent = `${passed} passati, ${failed} falliti`;
+})().catch(err => {
+  const s = document.getElementById('summary');
+  s.className = 'bad';
+  s.textContent = 'errore fatale: ' + err.message;
+  console.error(err);
+});
+</script>
+</body>
+</html>

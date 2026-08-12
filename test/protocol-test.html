@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Test spark-protocol</title>
+<style>
+  body { font-family: 'SF Mono', Consolas, monospace; background:#14161a; color:#e8e8ea;
+         padding:20px; font-size:0.85rem; line-height:1.6; }
+  h1 { font-size:1.1rem; font-family:-apple-system,'Segoe UI',sans-serif; }
+  .pass { color:#7fe08a; }
+  .fail { color:#ff8080; }
+  .detail { color:#8a8f98; margin-left:22px; white-space:pre-wrap; }
+  #summary { margin:18px 0; padding:10px 14px; border-radius:8px; font-weight:700;
+             font-family:-apple-system,'Segoe UI',sans-serif; }
+  #summary.ok  { background:#1f3a24; color:#7fe08a; }
+  #summary.bad { background:#3a2020; color:#ff8080; }
+</style>
+</head>
+<body>
+<h1>Test spark-protocol.js</h1>
+<div id="summary"></div>
+<div id="out"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="fixtures/preset0.js"></script>
+<script>
+'use strict';
+
+const PRESET0_CHUNKS  = FIXTURE_PRESET0;
+const KNOB_REVERB     = FIXTURE_KNOB_REVERB;
+const WORKING_FX_OFF  = FIXTURE_WORKING.fxOff;
+const WORKING_PRESET  = FIXTURE_WORKING.preset;
+function toHex(a) { return Array.from(a).map(b => b.toString(16).padStart(2, '0')).join(' '); }
+function hexToBytes(s) { return s.trim().split(/\s+/).map(h => parseInt(h, 16)); }
+
+let passed = 0, failed = 0;
+
+function check(name, actual, expected) {
+  const a = JSON.stringify(actual), e = JSON.stringify(expected);
+  const ok = a === e;
+  ok ? passed++ : failed++;
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="${ok ? 'pass' : 'fail'}">${ok ? '✓' : '✗'} ${name}</span>`;
+  if (!ok) {
+    div.innerHTML += `<div class="detail">atteso:  ${e}\nottenuto: ${a}</div>`;
+  }
+  document.getElementById('out').appendChild(div);
+}
+
+function show(label, value) {
+  const div = document.createElement('div');
+  div.className = 'detail';
+  div.textContent = label + ': ' + value;
+  document.getElementById('out').appendChild(div);
+}
+
+/* ---------- codifica 7/8 bit ---------- */
+
+const knob = Spark.parseMessage(KNOB_REVERB);
+check('parseMessage: checksum della cattura valido', knob.checksumOk, true);
+check('parseMessage: cmd/sub', [knob.cmd, knob.sub], [0x03, 0x37]);
+check('unpack → pack è l\'identità sulla cattura',
+      Spark.pack7bit8bit(knob.data), Array.from(KNOB_REVERB.slice(6, -1)));
+
+/* ---------- l'encoder riproduce il payload dell'ampli ---------- */
+
+const rebuilt = [
+  ...Spark.encPrefixedString('bias.reverb'),
+  ...Spark.encByte(0),
+  ...Spark.encFloat(0.8598611354827881),
+  0x00,
+];
+check('encoder riproduce il payload di 0x0337 byte per byte', rebuilt, knob.data);
+
+/* ---------- stringhe prefixed ---------- */
+
+check('prefixedString rilegge ciò che encPrefixedString scrive',
+      new Spark.Reader(Spark.encPrefixedString('Spark 2')).prefixedString(), 'Spark 2');
+
+// Cattura reale del nome ampli (0x0311), da docs/HANDOFF-2026-08-10.md
+const nameMsg = Spark.parseMessage(hexToBytes('f0 01 01 6b 03 11 02 07 27 53 70 61 72 6b 00 20 32 f7'));
+check('nome ampli letto da cattura reale',
+      new Spark.Reader(nameMsg.data).prefixedString(), 'Spark 2');
+
+// Cattura reale del numero di seriale (0x0323)
+const serialMsg = Spark.parseMessage(hexToBytes(
+  'f0 01 02 02 03 23 02 0f 2f 53 35 30 31 31 00 47 31 34 38 31 34 33 00 39 37 34 f7'));
+check('seriale letto da cattura reale',
+      new Spark.Reader(serialMsg.data).prefixedString(), 'S5011G148143974');
+
+/* ---------- messaggi confermati sull'hardware ---------- */
+
+check('0x0115 reverb OFF = messaggio che ha funzionato',
+      toHex(Spark.encode(Spark.commands.effectOnOff('bias.reverb', false), 0x05, false)),
+      WORKING_FX_OFF);
+
+check('0x0138 cambio preset = messaggio che ha funzionato',
+      toHex(Spark.encode(Spark.commands.changePreset(1), 0x01, false)),
+      WORKING_PRESET);
+
+check('changeParam limita i valori fuori range a 0..1',
+      Spark.commands.changeParam('x', 0, 5).data.slice(-6, -1),
+      Spark.encFloat(1.0));
+
+/* ---------- riassemblaggio frammenti ---------- */
+
+const received = [];
+const asm = new Spark.MessageAssembler(m => received.push(m));
+// spezza la cattura in pacchetti da 20 byte, come fa il BLE
+for (let i = 0; i < KNOB_REVERB.length; i += 20) asm.feed(KNOB_REVERB.slice(i, i + 20));
+check('MessageAssembler ricompone un messaggio spezzato', received.length, 1);
+check('MessageAssembler: contenuto identico', received[0] && received[0].raw, KNOB_REVERB);
+
+const asm2 = new Spark.MessageAssembler(m => received.push(m));
+asm2.feed([0x11, 0x22, 0x33]);                  // byte orfani prima di F0
+check('MessageAssembler scarta i byte orfani', received.length, 1);
+
+/* ---------- preset ---------- */
+
+const messages = PRESET0_CHUNKS.map(Spark.parseMessage);
+check('tutti i chunk del preset hanno checksum valido',
+      messages.every(m => m.checksumOk), true);
+
+const asmPreset = Spark.assemblePresetPayload(messages);
+check('assemblePresetPayload: 16 chunk, completo',
+      [asmPreset.total, asmPreset.received, asmPreset.complete], [16, 16, true]);
+
+const preset = Spark.parsePreset(asmPreset.payload);
+
+check('preset: banco e numero',   [preset.bank, preset.number], [0, 0]);
+check('preset: UUID lungo 36',    preset.uuid.length, 36);
+check('preset: BPM',              preset.bpm, 120);
+check('preset: 7 effetti',        preset.effects.length, 7);
+check('preset: catena effetti',   preset.effects.map(e => e.name),
+      ['bias.noisegate', 'LA2AComp', 'ProCoRat', 'Twin', 'ChorusAnalog', 'DelayRe201', 'bias.reverb']);
+check('preset: tutti gli effetti hanno almeno un parametro',
+      preset.effects.every(e => e.params.length > 0), true);
+check('preset: parametri tutti in 0..1',
+      preset.effects.every(e => e.params.every(p => p.value >= 0 && p.value <= 1)), true);
+check('preset: checksum finale',  preset.checksum, 0xe0);
+check('preset: coda di due float', preset.tail.map(v => +v.toFixed(3)), [9990, 0.5]);
+
+// Verifica strutturale: se la ri-serializzazione riproduce i byte originali,
+// l'interpretazione è corretta anche dove il significato dei campi è ignoto.
+check('serializePreset ricostruisce il payload byte per byte',
+      Spark.serializePreset(preset), asmPreset.payload);
+
+check('presetChecksum riproduce quello dichiarato dall\'ampli',
+      Spark.presetChecksum(asmPreset.payload.slice(0, -1)), 0xe0);
+
+/* ---------- corrispondenza slot ↔ LED del pannello ---------- */
+
+// 4 LED bicolore: rosso = banco A (slot 0-3), verde = banco B (slot 4-7).
+check('gli slot 0-7 si mappano sui quattro LED bicolore',
+      [0, 3, 4, 5, 7].map(n => Spark.slotLabel(n).label), ['A1', 'A4', 'B1', 'B2', 'B4']);
+check('lo slot 5 è il secondo LED verde — verificato sull\'ampli',
+      Spark.slotLabel(5), { bank: 'B', position: 2, color: 'verde', label: 'B2' });
+check('il banco A è rosso', Spark.slotLabel(0).color, 'rosso');
+
+/* ---------- stato live: stesso formato, coda diversa ---------- */
+
+const live = Spark.parsePreset(FIXTURE_LIVE_PAYLOAD);
+check('lo stato live si indirizza al bank 1', [live.bank, live.number], [1, 0]);
+check('stato live: nome',    live.name, 'Clean Tube ');
+check('stato live: effetti', live.effects.map(e => e.name),
+      ['bias.noisegate', 'LA2AComp', 'DistortionTS9', 'AcousticAmpV2',
+       'GuitarEQ6', 'DelayRe201', 'bias.reverb']);
+check('stato live: gli effetti spenti restano spenti',
+      live.effects.filter(e => !e.enabled).map(e => e.name),
+      ['DistortionTS9', 'DelayRe201']);
+check('lo stato live non ha float di coda', live.tail, []);
+check('stato live: checksum', live.checksum, 0x4c);
+check('serializePreset ricostruisce anche lo stato live byte per byte',
+      Spark.serializePreset(live, Spark.LIVE_TARGET), FIXTURE_LIVE_PAYLOAD);
+
+check('un preset salvato ha invece due float di coda', preset.tail.length, 2);
+
+/* ---------- invio di un preset (0x0101) ---------- */
+
+const perSlot3 = Spark.serializePreset(preset, 3);
+check('un numero indica uno slot nel bank 0', perSlot3.slice(0, 2), [0, 3]);
+check('cambiare slot cambia solo quei byte, non il resto',
+      perSlot3.slice(2, -1), asmPreset.payload.slice(2, -1));
+check('il checksum non dipende dai primi due byte',
+      perSlot3[perSlot3.length - 1], 0xe0);
+
+// Il suono corrente si indirizza come in lettura: bank 1, numero 0.
+check('LIVE_TARGET scrive nel bank 1',
+      Spark.serializePreset(preset, Spark.LIVE_TARGET).slice(0, 2), [1, 0]);
+check('l\'indirizzo coincide con quello di getLiveState',
+      Spark.serializePreset(preset, Spark.LIVE_TARGET).slice(0, 2),
+      Spark.commands.getLiveState().data);
+check('slotTarget(n) coincide con getPreset(n)',
+      Spark.serializePreset(preset, Spark.slotTarget(6)).slice(0, 2),
+      Spark.commands.getPreset(6).data);
+
+// In scrittura la coda non si manda: create_preset non la scrive, e lo stato
+// live dell'ampli non la contiene.
+const senzaCoda = Spark.serializePreset(preset, Spark.LIVE_TARGET, { omitTail: true });
+check('omitTail toglie i dieci byte dei due float',
+      asmPreset.payload.length - senzaCoda.length, 10);
+check('e il checksum viene ricalcolato di conseguenza',
+      senzaCoda[senzaCoda.length - 1], Spark.presetChecksum(senzaCoda.slice(0, -1)));
+check('togliere la coda non tocca il resto del preset',
+      senzaCoda.slice(2, -1), asmPreset.payload.slice(2, -11));
+
+const liveChunks = Spark.splitPresetIntoChunks(
+  Spark.serializePreset(preset, Spark.LIVE_TARGET));
+check('spezziamo il preset come fa l\'ampli: 16 chunk', liveChunks.length, 16);
+check('i sub-header dichiarano totale, indice e dimensione',
+      [liveChunks[0].slice(0, 3), liveChunks[15].slice(0, 3)], [[16, 0, 25], [16, 15, 8]]);
+check('le dimensioni dichiarate coincidono con quelle reali',
+      liveChunks.every(c => c[2] === c.length - 3), true);
+
+// I messaggi che generiamo devono essere grandi quanto quelli dell'ampli:
+// oltre una certa soglia lo Spark 2 si disconnette invece di rispondere.
+check('i chunk generati sono da 39 byte, come quelli dell\'ampli',
+      liveChunks.slice(0, 15).map(c => Spark.buildChunk(0x01, 0x01, c, 1).length),
+      new Array(15).fill(39));
+check('nessun chunk supera la lunghezza dei messaggi dell\'ampli',
+      Math.max(...PRESET0_CHUNKS.map(c => c.length)), 39);
+
+// Giro completo: quello che generiamo, riletto come se venisse dall'ampli.
+const asMessages = liveChunks.map((data, i) => Spark.parseMessage(Spark.buildChunk(0x01, 0x01, data, i + 1)));
+check('i chunk generati si riassemblano nel payload di partenza',
+      Spark.assemblePresetPayload(asMessages).payload,
+      Spark.serializePreset(preset, Spark.LIVE_TARGET));
+
+check('un payload multiplo esatto della dimensione non genera un chunk vuoto',
+      Spark.splitPresetIntoChunks(new Array(256).fill(0), 128).map(c => c[2]), [128, 128]);
+
+show('nome preset', JSON.stringify(preset.name));
+show('uuid', preset.uuid);
+show('icona', JSON.stringify(preset.icon));
+show('versione', JSON.stringify(preset.version));
+show('descrizione', JSON.stringify(preset.description));
+preset.effects.forEach(e => show('  ' + e.name + (e.enabled ? ' [on]' : ' [off]'),
+  e.params.map(p => p.index + '=' + p.value.toFixed(3)).join(' ')));
+
+/* ---------- riepilogo ---------- */
+
+const s = document.getElementById('summary');
+s.className = failed === 0 ? 'ok' : 'bad';
+s.textContent = `${passed} passati, ${failed} falliti`;
+</script>
+</body>
+</html>

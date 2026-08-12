@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Spark 2 — live</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg:#0e0f12; --panel:#1a1d22; --line:#2a2e35;
+    --text:#f0f0f2; --dim:#8a8f98; --faint:#5a5f68;
+    --accent:#ff6a3d; --green:#7fe08a; --gold:#f0c040;
+  }
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--text); overflow:hidden;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif;
+         display:flex; flex-direction:column; -webkit-user-select:none; user-select:none; }
+
+  header { display:flex; align-items:center; gap:10px; padding:8px 12px;
+           border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  h1 { font-size:0.95rem; margin:0; margin-right:auto; }
+  .status { padding:3px 9px; border-radius:11px; font-size:0.72rem; font-weight:700; }
+  .status.off { background:#3a2020; color:#ff8080; }
+  .status.on  { background:#1f3a24; color:var(--green); }
+  .status.wait{ background:#3a3520; color:#f0d060; }
+  button { font:inherit; font-weight:600; border:none; cursor:pointer;
+           background:#2a2d33; color:var(--text); padding:7px 12px;
+           border-radius:8px; font-size:0.8rem; }
+  button.primary { background:var(--accent); color:#fff; }
+  button:disabled { background:#232529; color:#5a5f68; cursor:not-allowed; }
+  a.link { color:var(--dim); font-size:0.8rem; text-decoration:none; padding:7px 4px; }
+  a.link:hover { color:var(--text); }
+
+  /* Pulsanti grandi ma non stirati: con pochi preset in scaletta una riga
+     1fr li farebbe alti quanto mezzo schermo. */
+  main { flex:1; display:grid; gap:10px; padding:12px; overflow-y:auto;
+         grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+         grid-auto-rows:minmax(92px, 120px); align-content:start; }
+
+  .pad { position:relative; background:var(--panel); border:2px solid var(--line);
+         border-radius:14px; padding:12px 14px; text-align:left; overflow:hidden;
+         display:flex; flex-direction:column; justify-content:center; gap:5px;
+         font-size:1.05rem; font-weight:700; line-height:1.25; }
+  .pad:active { transform:scale(0.985); }
+  .pad .n { position:absolute; top:8px; right:12px; font-size:0.72rem;
+            color:var(--faint); font-weight:700; }
+  .pad .sub { font-size:0.72rem; font-weight:600; color:var(--dim); }
+  .pad .sub .istantaneo { color:var(--green); }
+  .pad .sub .caricamento { color:var(--gold); }
+  .pad.attivo { border-color:var(--accent); background:#241a16; }
+  .pad.occupato { opacity:0.55; }
+  .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
+                background:var(--accent); transition:width 0.12s linear; }
+
+  .vuoto { color:var(--dim); text-align:center; padding:40px 20px; line-height:1.7;
+           grid-column:1/-1; }
+
+  /* composizione della scaletta */
+  #editor { display:none; position:absolute; inset:0; background:rgba(14,15,18,0.97);
+            padding:14px; overflow-y:auto; z-index:10; }
+  #editor.aperto { display:block; }
+  #editor h2 { font-size:0.95rem; margin:0 0 10px; }
+  .voce { display:flex; align-items:center; gap:10px; padding:8px 10px;
+          border-bottom:1px solid var(--line); font-size:0.88rem; }
+  .voce .nome { flex:1; }
+  .voce .badge { font-size:0.68rem; color:var(--faint); font-family:Consolas,monospace;
+                 border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
+  #log { padding:6px 12px; font-family:Consolas,monospace; font-size:0.72rem;
+         color:var(--faint); border-top:1px solid var(--line); min-height:1.6em;
+         white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Live</h1>
+  <span id="status" class="status off">non connesso</span>
+  <button id="btnConnect" class="primary">Connetti</button>
+  <button id="btnPrepara" disabled title="scrive i primi 8 della scaletta negli slot dell'ampli">Prepara</button>
+  <button id="btnEdit">Scaletta</button>
+  <a class="link" href="index.html">Libreria</a>
+</header>
+
+<main id="pads"></main>
+<div id="log"></div>
+
+<div id="editor">
+  <h2>Componi la scaletta</h2>
+  <div style="margin-bottom:12px">
+    <button id="btnChiudi" class="primary">Fatto</button>
+    <span style="color:var(--dim);font-size:0.8rem;margin-left:8px">
+      tocca un preset per aggiungerlo o toglierlo</span>
+  </div>
+  <div id="elenco"></div>
+</div>
+
+<script src="src/spark-protocol.js"></script>
+<script src="src/spark-transport.js"></script>
+<script src="src/preset-store.js"></script>
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+const store = new PresetStore();
+
+let scaletta  = [];       // record dei preset, in ordine
+let libreria  = [];
+let attivo    = null;     // id del preset attualmente mandato all'ampli
+let occupato  = false;    // un caricamento è in corso
+
+const spark = new SparkTransport({
+  onStatus: (state, label) => {
+    const el = $('status');
+    el.className = 'status ' + (state === 'connected' ? 'on' : state === 'connecting' ? 'wait' : 'off');
+    el.textContent = state === 'connected' ? label : state === 'connecting' ? label : 'non connesso';
+    $('btnConnect').disabled = state === 'connected';
+    $('btnPrepara').disabled = state !== 'connected';
+    disegna();
+  },
+  onLog: msg => { $('log').textContent = msg; },
+});
+
+/* ====================================================================
+   Pulsanti
+   ==================================================================== */
+
+function disegna() {
+  const main = $('pads');
+  main.innerHTML = '';
+
+  if (scaletta.length === 0) {
+    const vuoto = document.createElement('div');
+    vuoto.className = 'vuoto';
+    vuoto.textContent = 'Nessun preset in scaletta. Premi «Scaletta» per comporla.';
+    main.appendChild(vuoto);
+    return;
+  }
+
+  scaletta.forEach((record, i) => {
+    const pad = document.createElement('button');
+    pad.className = 'pad'
+      + (record.id === attivo ? ' attivo' : '')
+      + (occupato ? ' occupato' : '');
+    pad.disabled = !spark.connected || occupato;
+
+    const numero = document.createElement('span');
+    numero.className = 'n';
+    numero.textContent = i + 1;
+
+    const nome = document.createElement('span');
+    nome.textContent = record.name || '(senza nome)';
+
+    const sub = document.createElement('span');
+    sub.className = 'sub';
+    if (residente(record)) {
+      sub.innerHTML = `<span class="istantaneo">● istantaneo</span> · ${Spark.slotLabel(record.slot).label}`;
+    } else {
+      sub.innerHTML = '<span class="caricamento">● da caricare</span> · ~1s';
+    }
+
+    const barra = document.createElement('span');
+    barra.className = 'barra';
+
+    pad.append(numero, nome, sub, barra);
+    pad.addEventListener('click', () => attiva(record, barra));
+    main.appendChild(pad);
+  });
+}
+
+/** Un preset è istantaneo se sappiamo che sta già in uno slot dell'ampli. */
+const residente = record => record.slot !== null && record.slot !== undefined;
+
+async function attiva(record, barra) {
+  if (occupato || !spark.connected) return;
+  occupato = true;
+  attivo = record.id;
+  disegna();
+
+  try {
+    if (residente(record)) {
+      await spark.send(Spark.commands.changePreset(record.slot));
+      $('log').textContent = `${record.name} — ${Spark.slotLabel(record.slot).label}`;
+    } else {
+      await spark.loadPreset(record, (i, total) => {
+        barra.style.width = Math.round(((i + 1) / total) * 100) + '%';
+      });
+      $('log').textContent = `${record.name} — caricato nel preset software`;
+    }
+  } catch (err) {
+    $('log').textContent = 'errore: ' + err.message;
+    attivo = null;
+  }
+  occupato = false;
+  disegna();
+}
+
+/* ====================================================================
+   Preparazione: i primi 8 della scaletta finiscono negli slot dell'ampli
+   ==================================================================== */
+
+$('btnPrepara').addEventListener('click', async () => {
+  const quanti = Math.min(8, scaletta.length);
+  if (quanti === 0) return;
+
+  const elenco = scaletta.slice(0, quanti)
+    .map((r, i) => `  ${Spark.slotLabel(i).label}  ${r.name}`).join('\n');
+  if (!confirm(`Scrivere i primi ${quanti} preset della scaletta negli slot dell'ampli?\n\n` +
+               elenco + '\n\nI preset che sono lì adesso vengono sovrascritti. ' +
+               'Le copie in libreria restano.')) return;
+
+  occupato = true;
+  disegna();
+  const assegnazioni = {};
+  for (let i = 0; i < quanti; i++) {
+    const record = scaletta[i];
+    $('log').textContent = `scrivo «${record.name}» in ${Spark.slotLabel(i).label}…`;
+    const esito = await spark.storePreset(record, i, null, { activate: false });
+    if (!esito.ok) {
+      $('log').textContent = `interrotto su ${Spark.slotLabel(i).label}: ${esito.error}`;
+      break;
+    }
+    assegnazioni[record.id] = i;
+  }
+
+  await store.assignSlots(assegnazioni);
+  await ricarica();
+  occupato = false;
+  disegna();
+  $('log').textContent = `scaletta preparata: ${Object.keys(assegnazioni).length} preset negli slot`;
+});
+
+/* ====================================================================
+   Composizione della scaletta
+   ==================================================================== */
+
+$('btnEdit').addEventListener('click', () => { $('editor').classList.add('aperto'); disegnaElenco(); });
+$('btnChiudi').addEventListener('click', async () => {
+  $('editor').classList.remove('aperto');
+  await ricarica();
+  disegna();
+});
+
+function disegnaElenco() {
+  const elenco = $('elenco');
+  elenco.innerHTML = '';
+  if (libreria.length === 0) {
+    elenco.innerHTML = '<div class="vuoto">La libreria è vuota: leggi prima i preset dall\'ampli.</div>';
+    return;
+  }
+  const inScaletta = new Set(scaletta.map(r => r.id));
+
+  for (const record of libreria) {
+    const voce = document.createElement('div');
+    voce.className = 'voce';
+
+    const segno = document.createElement('span');
+    segno.textContent = inScaletta.has(record.id) ? '✓' : '＋';
+    segno.style.color = inScaletta.has(record.id) ? 'var(--green)' : 'var(--faint)';
+    segno.style.width = '1.2em';
+
+    const nome = document.createElement('span');
+    nome.className = 'nome';
+    nome.textContent = record.name;
+
+    voce.append(segno, nome);
+
+    if (residente(record)) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = Spark.slotLabel(record.slot).label;
+      voce.appendChild(badge);
+    }
+
+    voce.addEventListener('click', async () => {
+      if (inScaletta.has(record.id)) await store.removeFromSetlist(record.id);
+      else                           await store.addToSetlist(record.id);
+      scaletta = await store.getSetlist();
+      disegnaElenco();
+    });
+    elenco.appendChild(voce);
+  }
+}
+
+/* ==================================================================== */
+
+$('btnConnect').addEventListener('click', async () => {
+  try { await spark.connect(); await spark.identify(); }
+  catch (err) { $('log').textContent = 'errore: ' + err.message; }
+});
+
+async function ricarica() {
+  libreria = await store.all();
+  scaletta = await store.getSetlist();
+}
+
+(async function start() {
+  await store.open();
+  await ricarica();
+  disegna();
+  if (!navigator.bluetooth) {
+    $('btnConnect').disabled = true;
+    $('log').textContent = 'Web Bluetooth non disponibile in questo browser.';
+  }
+})();
+</script>
+</body>
+</html>

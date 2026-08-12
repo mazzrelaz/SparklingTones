@@ -1,0 +1,121 @@
+[16:09:04.004] Dispositivo: Spark 2 BLE
+[16:09:04.010] 0xFFC1: write=false writeWithoutResponse=true
+[16:09:04.012] In ascolto su 0xFFC2. Gira una manopola per generare traffico.
+[16:09:04.316] TX get preset corrente — 0x0210, 7 byte, seq=0x01 [no-header, write-singola, seq-proprio]
+[16:09:04.330] TX →f0 01 01 00 02 10 f7
+[16:09:04.387] 0x0310 10B seq=0x01 cs=ok
+f0 01 01 06 03 10 00 00 06 f7
+→ 0  6
+[16:09:26.734] ── A — 0x022a CON fixarray 0x94 → bits8 ≠ 0, esito oggettivo
+[16:09:26.735] TX get checksum preset CON fixarray 0x94 (bits8=0x01) — 0x022a, 13 byte, seq=0x02 [no-header, write-singola, seq-proprio]
+[16:09:26.738] TX →f0 01 02 15 02 2a 01 14 00 01 02 03 f7
+[16:09:28.752]    → risposta: NO
+[16:09:31.339] ── B — 0x022a senza fixarray → bits8 = 0, controllo
+[16:09:31.339] TX get checksum preset senza fixarray 0x94 (bits8=0x00) — 0x022a, 12 byte, seq=0x03 [no-header, write-singola, seq-proprio]
+[16:09:31.342] TX →f0 01 03 00 02 2a 00 00 01 02 03 f7
+[16:09:33.346]    → risposta: NO
+[16:10:05.651] 0x031a 12B seq=0x52 cs=ok
+f0 01 52 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true
+[16:10:05.653] 0x0337 30B seq=0x53 cs=ok
+f0 01 53 03 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 15 4a 3d 26 60 26 00 f7
+→ 11  "bias.reverb"  0  0.081239  0
+[16:10:05.702] 0x0315 25B seq=0x54 cs=ok
+f0 01 54 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:10:05.777] 0x031a 12B seq=0x55 cs=ok
+f0 01 55 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true
+[16:10:05.814] 0x0337 30B seq=0x56 cs=ok
+f0 01 56 4a 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 15 4a 3e 33 2a 33 00 f7
+→ 11  "bias.reverb"  0  0.349935  0
+[16:10:05.815] 0x0315 25B seq=0x57 cs=ok
+f0 01 57 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:10:05.852] 0x0337 30B seq=0x58 cs=ok
+f0 01 58 3b 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 1d 4a 3e 3d 50 3e 00 f7
+→ 11  "bias.reverb"  0  0.370733  0
+[16:10:05.889] 0x0315 25B seq=0x59 cs=ok
+f0 01 59 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:10:06.002] 0x031a 12B seq=0x5a cs=ok
+f0 01 5a 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true
+[16:10:06.040] 0x0337 30B seq=0x5b cs=ok
+f0 01 5b 7f 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 11 4a 3f 05 1a 05 00 f7
+→ 11  "bias.reverb"  0  0.519936  0
+[16:10:06.077] 0x0315 25B seq=0x5c cs=ok
+f0 01 5c 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:10:06.152] 0x031a 12B seq=0x5d cs=ok
+f0 01 5d 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true
+[16:10:06.190] 0x0337 30B seq=0x5e cs=ok
+f0 01 5e 5d 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 19 4a 3f 56 31 57 00 f7
+→ 11  "bias.reverb"  0  0.838651  0
+[16:10:06.227] 0x0315 25B seq=0x5f cs=ok
+f0 01 5f 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:10:06.265] 0x0337 30B seq=0x60 cs=ok
+f0 01 60 42 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 19 4a 3f 5b 28 5c 00 f7
+→ 11  "bias.reverb"  0  0.858045  0
+[16:10:06.302] 0x0315 25B seq=0x61 cs=ok
+f0 01 61 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:10:06.376] 0x031a 12B seq=0x62 cs=ok
+f0 01 62 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true
+[16:10:06.415] 0x0337 30B seq=0x63 cs=ok
+f0 01 63 30 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 19 4a 3f 57 52 58 00 f7
+→ 11  "bias.reverb"  0  0.843061  0
+[16:10:06.452] 0x0315 25B seq=0x64 cs=ok
+f0 01 64 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:10:06.489] 0x031a 12B seq=0x65 cs=ok
+f0 01 65 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true
+[16:10:06.490] 0x0337 30B seq=0x66 cs=ok
+f0 01 66 7a 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 09 4a 3f 7f 78 00 00 f7
+→ 11  "bias.reverb"  0  0.999878  0
+[16:10:06.527] 0x0315 25B seq=0x67 cs=ok
+f0 01 67 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:10:09.568] ── C — reverb OFF (0x0115), payload con 0xab e 0xc2 → ascolta
+[16:10:09.569] TX bias.reverb OFF — 0x0115, 23 byte, seq=0x04 [no-header, write-singola, seq-proprio]
+[16:10:09.573] TX →f0 01 04 03 01 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 42 f7
+[16:10:09.676] 0x0415 7B seq=0x04 cs=ok
+f0 01 04 00 04 15 f7
+→ 
+[16:12:04.815] ── C — reverb OFF (0x0115), payload con 0xab e 0xc2 → ascolta
+[16:12:04.816] TX bias.reverb OFF — 0x0115, 25 byte, seq=0x05 [no-header, write-singola, seq-proprio, +0x00]
+[16:12:04.820] TX →f0 01 05 03 01 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 42 00 00 f7
+[16:12:04.923] 0x0415 7B seq=0x05 cs=ok
+f0 01 05 00 04 15 f7
+→ 
+[16:12:04.960] 0x031a 12B seq=0x68 cs=ok
+f0 01 68 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true
+[16:12:12.447] 0x0337 30B seq=0x69 cs=ok
+f0 01 69 3a 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 19 4a 3f 3c 56 3d 00 f7
+→ 11  "bias.reverb"  0  0.737652  0
+[16:12:12.450] 0x0315 25B seq=0x6a cs=ok
+f0 01 6a 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:12:12.534] 0x031a 12B seq=0x6b cs=ok
+f0 01 6b 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true
+[16:12:12.574] 0x0337 30B seq=0x6c cs=ok
+f0 01 6c 7b 03 37 02 0b 2b 62 69 61 73 2e 00 72 65 76 65 72 62 00 09 4a 3f 7f 79 00 00 f7
+→ 11  "bias.reverb"  0  0.999893  0
+[16:12:12.611] 0x0315 25B seq=0x6d cs=ok
+f0 01 6d 02 03 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 43 00 00 f7
+→ 11  "bias.reverb"  true  0
+[16:12:15.774] ── C — reverb OFF (0x0115), payload con 0xab e 0xc2 → ascolta
+[16:12:15.775] TX bias.reverb OFF — 0x0115, 25 byte, seq=0x06 [no-header, write-singola, seq-proprio, +0x00]
+[16:12:15.778] TX →f0 01 06 03 01 15 02 0b 2b 62 69 61 73 2e 40 72 65 76 65 72 62 42 00 00 f7
+[16:12:15.910] 0x0415 7B seq=0x06 cs=ok
+f0 01 06 00 04 15 f7
+→ 
+[16:12:15.986] 0x031a 12B seq=0x6e cs=ok
+f0 01 6e 5d 03 1a 09 11 00 06 43 f7
+→ array[1]  0  6  true

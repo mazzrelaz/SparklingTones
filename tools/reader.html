@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — lettura libreria</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:#14161a; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; }
+  h1 { font-size:1.15rem; margin:0 0 2px; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; }
+  .status { display:inline-block; padding:4px 10px; border-radius:12px;
+            font-size:0.8rem; font-weight:600; }
+  .status.disconnected { background:#3a2020; color:#ff8080; }
+  .status.connected    { background:#1f3a24; color:#7fe08a; }
+  .status.connecting   { background:#3a3520; color:#f0d060; }
+  button { background:#ff6a3d; color:#fff; border:none; padding:10px 16px;
+           border-radius:9px; font-size:0.9rem; font-weight:600; cursor:pointer;
+           margin-right:6px; margin-bottom:6px; }
+  button:disabled { background:#3a3d42; color:#7a7d82; cursor:not-allowed; }
+  button.secondary { background:#2a2d33; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  .hint { color:#8a8f98; font-size:0.8rem; }
+
+  .presets { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); }
+  .card { background:#181a1f; border:1px solid #24272c; border-radius:10px; padding:12px 14px; }
+  .card h2 { font-size:0.95rem; margin:0 0 2px; }
+  .card .meta { color:#6a6f78; font-size:0.72rem; margin-bottom:10px;
+                font-family:'SF Mono',Consolas,monospace; }
+  .fx { display:flex; align-items:baseline; gap:8px; font-size:0.78rem;
+        padding:3px 0; border-top:1px solid #1f2228; }
+  .fx .name { color:#e8e8ea; min-width:118px; font-weight:600; }
+  .fx .name.off { color:#5a5f68; text-decoration:line-through; }
+  .fx .vals { color:#8a8f98; font-family:'SF Mono',Consolas,monospace; font-size:0.72rem; }
+
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         max-height:22vh; overflow-y:auto; margin-top:16px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.74rem; line-height:1.5;
+         color:#8a8f98; }
+</style>
+</head>
+<body>
+
+<h1>Lettura libreria Spark 2</h1>
+<div class="sub">Legge i preset dall'ampli, li mostra e li esporta in JSON.</div>
+
+<div class="row">
+  <span id="status" class="status disconnected">Disconnesso</span>
+  <span id="ampInfo" class="hint"></span>
+</div>
+
+<div class="row">
+  <button id="btnConnect">Connetti</button>
+  <button id="btnRead" disabled>Leggi libreria</button>
+  <button id="btnExport" class="secondary" disabled>Esporta JSON</button>
+  <button id="btnDisconnect" class="secondary" disabled>Disconnetti</button>
+  <span id="progress" class="hint"></span>
+</div>
+
+<div class="presets" id="presets"></div>
+<div id="log"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+let presets = [];
+
+const spark = new SparkTransport({
+  onStatus: (state, label) => {
+    $('status').className = 'status ' + state;
+    $('status').textContent = state === 'connected' ? 'Connesso: ' + label : label;
+    const on = state === 'connected';
+    $('btnConnect').disabled    = on;
+    $('btnRead').disabled       = !on;
+    $('btnDisconnect').disabled = !on;
+  },
+  onLog: msg => {
+    const div = document.createElement('div');
+    div.textContent = `[${new Date().toTimeString().slice(0, 8)}] ${msg}`;
+    $('log').appendChild(div);
+    $('log').scrollTop = $('log').scrollHeight;
+  },
+});
+
+$('btnConnect').addEventListener('click', async () => {
+  try {
+    await spark.connect();
+    const state = await spark.identify();
+    $('ampInfo').textContent =
+      [state.name, state.serial, state.currentPreset !== null ? 'preset ' + state.currentPreset : null]
+        .filter(Boolean).join(' · ');
+  } catch (err) {
+    spark.onLog('errore: ' + err.message);
+  }
+});
+
+$('btnDisconnect').addEventListener('click', () => spark.disconnect());
+
+$('btnRead').addEventListener('click', async () => {
+  $('btnRead').disabled = true;
+  $('presets').innerHTML = '';
+  presets = await spark.readLibrary(8, (i, max) => {
+    $('progress').textContent = `lettura slot ${i + 1} di ${max}…`;
+  });
+  $('progress').textContent = `${presets.length} preset letti`;
+  $('btnRead').disabled = !spark.connected;
+  $('btnExport').disabled = presets.length === 0;
+  render();
+});
+
+$('btnExport').addEventListener('click', () => {
+  const stamp = new Date().toISOString().slice(0, 10);
+  const blob = new Blob([JSON.stringify(presets, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `spark-presets-${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+function render() {
+  const container = $('presets');
+  container.innerHTML = '';
+  for (const preset of presets) {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const title = document.createElement('h2');
+    title.textContent = preset.name || '(senza nome)';
+    card.appendChild(title);
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = `slot ${preset.slot} · ${preset.bpm} BPM · ${preset.uuid}`;
+    card.appendChild(meta);
+
+    for (const fx of preset.effects) {
+      const row = document.createElement('div');
+      row.className = 'fx';
+      const name = document.createElement('span');
+      name.className = 'name' + (fx.enabled ? '' : ' off');
+      name.textContent = fx.name;
+      const vals = document.createElement('span');
+      vals.className = 'vals';
+      vals.textContent = fx.params.map(p => p.value.toFixed(2)).join('  ');
+      row.append(name, vals);
+      card.appendChild(row);
+    }
+    container.appendChild(card);
+  }
+}
+
+if (!navigator.bluetooth) {
+  spark.onStatus('disconnected', 'Web Bluetooth non disponibile');
+  $('btnConnect').disabled = true;
+}
+</script>
+</body>
+</html>

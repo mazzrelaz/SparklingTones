@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Test spark-transport</title>
+<style>
+  body { font-family:'SF Mono',Consolas,monospace; background:#14161a; color:#e8e8ea;
+         padding:20px; font-size:0.85rem; line-height:1.6; }
+  h1 { font-size:1.1rem; font-family:-apple-system,'Segoe UI',sans-serif; }
+  .pass { color:#7fe08a; }
+  .fail { color:#ff8080; }
+  .detail { color:#8a8f98; margin-left:22px; white-space:pre-wrap; }
+  #summary { margin:18px 0; padding:10px 14px; border-radius:8px; font-weight:700;
+             font-family:-apple-system,'Segoe UI',sans-serif; }
+  #summary.ok  { background:#1f3a24; color:#7fe08a; }
+  #summary.bad { background:#3a2020; color:#ff8080; }
+</style>
+</head>
+<body>
+<h1>Test spark-transport.js</h1>
+<p class="detail" style="margin-left:0">Nessun BLE: il trasporto viene istanziato con un
+<code>send</code> finto e alimentato con catture reali dell'ampli.</p>
+<div id="summary">esecuzione…</div>
+<div id="out"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script src="fixtures/preset0.js"></script>
+<script>
+'use strict';
+
+let passed = 0, failed = 0;
+
+function check(name, actual, expected) {
+  const a = JSON.stringify(actual), e = JSON.stringify(expected);
+  const ok = a === e;
+  ok ? passed++ : failed++;
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="${ok ? 'pass' : 'fail'}">${ok ? '✓' : '✗'} ${name}</span>`;
+  if (!ok) div.innerHTML += `<div class="detail">atteso:  ${e}\nottenuto: ${a}</div>`;
+  document.getElementById('out').appendChild(div);
+}
+
+/**
+ * Trasporto finto: nessun BLE. `send` non scrive niente e restituisce il
+ * sequence number che decidiamo noi, così i messaggi della cattura vengono
+ * correlati alla richiesta come farebbe l'ampli.
+ */
+function fakeTransport(seqToReturn) {
+  const t = new SparkTransport({ onLog: () => {} });
+  t.writeChar = {};                                   // basta che sia truthy
+  t.sent = [];
+  t.send = async command => {
+    t.sent.push(command);
+    return seqToReturn;
+  };
+  return t;
+}
+
+const feed = (t, chunks) => chunks.forEach(c => t._handleMessage(Spark.parseMessage(c)));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+(async function run() {
+
+  /* ---------- readPreset: raccolta multi-chunk ---------- */
+  {
+    const t = fakeTransport(FIXTURE_PRESET0_SEQ);
+    const pending = t.readPreset(0, 2000);
+    await sleep(0);                                   // lascia partire il send finto
+    feed(t, FIXTURE_PRESET0);
+    const preset = await pending;
+
+    check('readPreset restituisce un preset', preset !== null, true);
+    check('readPreset: nome',    preset && preset.name, 'DG - Shine On  clean');
+    check('readPreset: slot',    preset && preset.slot, 0);
+    check('readPreset: effetti', preset && preset.effects.length, 7);
+    check('readPreset ha inviato una sola richiesta', t.sent.length, 1);
+    check('readPreset: sub-comando corretto', t.sent[0] && t.sent[0].sub, 0x01);
+    check('nessun waiter rimasto appeso', t.waiters.length, 0);
+  }
+
+  /* ---------- readPreset: chunk con seq sbagliato ---------- */
+  {
+    const t = fakeTransport(0x02);
+    const pending = t.readPreset(0, 300);
+    await sleep(0);
+    // stessi chunk ma attribuiti a un'altra richiesta
+    const wrongSeq = FIXTURE_PRESET0.map(c => { const x = c.slice(); x[2] = 0x09; return x; });
+    feed(t, wrongSeq);
+    check('readPreset ignora i chunk di un\'altra richiesta', await pending, null);
+  }
+
+  /* ---------- readPreset: risposta incompleta ---------- */
+  {
+    const t = fakeTransport(0x02);
+    const pending = t.readPreset(0, 300);
+    await sleep(0);
+    feed(t, FIXTURE_PRESET0.slice(0, 10));            // mancano 6 chunk
+    check('readPreset scade se la risposta è incompleta', await pending, null);
+    check('il waiter scaduto viene rimosso', t.waiters.length, 0);
+  }
+
+  /* ---------- readPreset: payload illeggibile ---------- */
+  {
+    const t = fakeTransport(0x02);
+    const logged = [];
+    t.onLog = m => logged.push(m);
+    const pending = t.readPreset(0, 500);
+    await sleep(0);
+    // un solo chunk, dichiarato completo, con un payload che non è un preset
+    feed(t, [Spark.buildChunk(0x03, 0x01, [1, 0, 3, 0xff, 0xff, 0xff], 0x02)]);
+    check('readPreset restituisce null se il payload non è decodificabile', await pending, null);
+    check('l\'errore di parsing viene segnalato nel log',
+          logged.some(m => m.includes('parsing')), true);
+  }
+
+  /* ---------- request ---------- */
+  {
+    const t = fakeTransport(0x01);
+    const pending = t.request(Spark.commands.getName(),
+      m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x11, 500);
+    await sleep(0);
+    feed(t, [Spark.buildChunk(0x03, 0x11, Spark.encPrefixedString('Spark 2'), 0x01)]);
+    const msg = await pending;
+    check('request risolve sul messaggio atteso', msg && [msg.cmd, msg.sub], [0x03, 0x11]);
+    check('request popola lo stato: nome', t.state.name, 'Spark 2');
+  }
+
+  {
+    const t = fakeTransport(0x01);
+    const msg = await t.request(Spark.commands.getSerial(),
+      m => m.sub === 0x99, 200);
+    check('request restituisce null se scade', msg, null);
+  }
+
+  /* ---------- ack ---------- */
+  {
+    const t = fakeTransport(0x04);
+    const cmd = Spark.commands.effectOnOff('bias.reverb', false);
+    const pending = t.sendAndAwaitAck(cmd, 500);
+    await sleep(0);
+    feed(t, [Spark.buildChunk(0x04, 0x15, [], 0x04)]);
+    const ack = await pending;
+    check('sendAndAwaitAck riceve l\'ack', ack && ack.cmd, Spark.CMD_ACK);
+  }
+
+  /* ---------- sequence number ---------- */
+  {
+    const t = new SparkTransport({ onLog: () => {} });
+    const seqs = [];
+    for (let i = 0; i < 4; i++) seqs.push(t._nextSeq());
+    check('il sequence number avanza', seqs, [1, 2, 3, 4]);
+
+    t.seq = 0x3e;
+    check('resta sotto 0x3f, come nei messaggi app→ampli',
+          [t._nextSeq(), t._nextSeq()], [0x3e, 0x01]);
+  }
+
+  /* ---------- scrittura di un preset ---------- */
+  {
+    const preset = Spark.parsePreset(
+      Spark.assemblePresetPayload(FIXTURE_PRESET0.map(Spark.parseMessage)).payload);
+
+    // ackFino: numero di chunk a cui l'ampli risponde; oltre, silenzio
+    const transportChe = ackFino => {
+      const t = new SparkTransport({ onLog: () => {} });
+      t.writeChar = {};
+      t.sent = [];
+      t.seqs = [];
+      t.send = async (command, forcedSeq) => {
+        t.sent.push(command);
+        t.seqs.push(forcedSeq);
+        const n = t.sent.length;
+        if (n <= ackFino) setTimeout(() => feed(t, [Spark.buildChunk(0x04, 0x01, [], n)]), 0);
+        return n;
+      };
+      return t;
+    };
+
+    /* I chunk devono condividere il sequence number: è così che l'ampli manda
+       i propri preset, ed è per seq che si raggruppano i chunk in arrivo. */
+    {
+      const t = transportChe(99);
+      await t.writePreset(preset, Spark.LIVE_TARGET);
+      check('tutti i chunk usano lo stesso sequence number',
+            new Set(t.seqs).size, 1);
+      check('e il seq è stato scelto una volta sola, non lasciato al caso',
+            typeof t.seqs[0], 'number');
+    }
+
+    {
+      const t = transportChe(99);
+      await t.writePreset(preset, Spark.LIVE_TARGET, null, { incrementSeq: true });
+      check('con incrementSeq ogni chunk prende il seq successivo',
+            t.seqs.every(s => s === undefined), true);
+    }
+
+    {
+      const t = transportChe(99);
+      const avanzamento = [];
+      const esito = await t.writePreset(preset, Spark.LIVE_TARGET,
+                                        (i, tot) => avanzamento.push(`${i + 1}/${tot}`));
+      // Senza i float di coda il payload è di 10 byte più corto: 15 chunk.
+      check('writePreset completa quando ogni chunk riceve l\'ack',
+            esito, { ok: true, sent: 15, total: 15, acks: 15 });
+      check('ogni chunk è un 0x0101',
+            t.sent.every(c => c.cmd === 1 && c.sub === 1), true);
+      check('i sub-header sono progressivi',
+            [t.sent[0].data.slice(0, 3), t.sent[14].data.slice(0, 3)],
+            [[15, 0, 25], [15, 14, 23]]);
+      check('l\'avanzamento parte da 1 e arriva al totale',
+            [avanzamento[0], avanzamento[14]], ['1/15', '15/15']);
+      check('la coda non viene mandata in scrittura',
+            t.sent.reduce((n, c) => n + c.data[2], 0),
+            Spark.serializePreset(preset, Spark.LIVE_TARGET, { omitTail: true }).length);
+      check('l\'indirizzo del suono corrente finisce nel primo chunk',
+            t.sent[0].data.slice(3, 5), [1, 0]);
+      check('nessun messaggio supera la soglia oltre cui l\'ampli si disconnette',
+            Math.max(...t.sent.map(c => Spark.encode(c, 1, false).length)) <= 44, true);
+    }
+
+    {
+      // Un ack mancante non deve fermare l'invio: anche il firmware si sblocca
+      // da solo dopo mezzo secondo, e interrompersi lascerebbe il preset a metà.
+      const t = transportChe(1);
+      const esito = await t.writePreset(preset, 3, null, { ackTimeout: 20 });
+      check('un ack mancante non interrompe l\'invio',
+            [esito.ok, esito.sent, esito.total], [true, 15, 15]);
+      check('ma viene contato quanti ack sono arrivati', esito.acks, 1);
+      check('tutti i chunk vengono comunque mandati', t.sent.length, 15);
+    }
+
+    {
+      const t = new SparkTransport({ onLog: () => {} });
+      t.writeChar = {};
+      t.sent = [];
+      t.send = async () => { throw new Error('GATT operation failed'); };
+      const esito = await t.writePreset(preset, 3);
+      check('un errore GATT interrompe subito', [esito.ok, esito.sent], [false, 0]);
+      check('e viene riportato', esito.error,
+            'errore GATT al chunk 1 di 15: GATT operation failed');
+    }
+
+    {
+      const t = transportChe(99);
+      await t.writePreset(preset, 5);
+      check('lo slot richiesto viene scritto nel payload', t.sent[0].data.slice(3, 5), [0, 5]);
+    }
+
+    /* ---------- loadPreset e storePreset ----------
+       Il preset va scritto nel buffer software e poi attivato: senza il
+       secondo comando l'ampli conferma tutto e continua a suonare quello
+       di prima. Verificato sull'hardware. */
+    {
+      const t = transportChe(99);
+      await t.loadPreset(preset);
+      const ultimo = t.sent[t.sent.length - 1];
+      check('loadPreset scrive nel preset software',
+            t.sent[0].data.slice(3, 5), [0x00, 0x7f]);
+      check('e chiude passando al preset software',
+            [ultimo.cmd, ultimo.sub, ultimo.data], [0x01, 0x38, [0x00, 0x7f]]);
+      check('un solo comando di coda dopo i chunk',
+            t.sent.filter(c => c.sub !== 0x01).length, 1);
+    }
+
+    {
+      const t = transportChe(99);
+      await t.storePreset(preset, 4);
+      const coda = t.sent.filter(c => c.sub !== 0x01);
+      check('storePreset passa anch\'esso dal preset software',
+            t.sent[0].data.slice(3, 5), [0x00, 0x7f]);
+      check('poi salva nello slot e lo seleziona',
+            coda.map(c => [c.sub, c.data]), [[0x27, [0x00, 4]], [0x38, [0x00, 4]]]);
+    }
+
+    {
+      const t = transportChe(99);
+      await t.storePreset(preset, 4, null, { activate: false });
+      check('con activate:false non seleziona lo slot',
+            t.sent.filter(c => c.sub !== 0x01).map(c => c.sub), [0x27]);
+    }
+
+    {
+      const t = new SparkTransport({ onLog: () => {} });
+      t.writeChar = {};
+      t.sent = [];
+      t.send = async () => { throw new Error('GATT operation failed'); };
+      await t.loadPreset(preset);
+      check('se l\'invio fallisce non si manda il comando di attivazione',
+            t.sent.length, 0);
+    }
+
+    /* ---------- rilettura del suono corrente ---------- */
+    {
+      const t = fakeTransport(0x02);
+      const pending = t.readLiveState(2000);
+      await sleep(0);
+      feed(t, FIXTURE_PRESET0);
+      const live = await pending;
+      check('readLiveState decodifica il preset', live && live.name, 'DG - Shine On  clean');
+      check('readLiveState interroga il bank 1', t.sent[0].data, [1, 0]);
+      check('e non attribuisce uno slot', live && live.slot, undefined);
+    }
+  }
+
+  /* ---------- stato ---------- */
+  {
+    const t = fakeTransport(0x01);
+    feed(t, [Spark.buildChunk(0x03, 0x10, [0x00, 0x06], 0x01)]);
+    check('lo stato traccia il preset corrente', t.state.currentPreset, 6);
+
+    // un messaggio malformato non deve far cadere il trasporto
+    feed(t, [Spark.buildChunk(0x03, 0x23, [0xff, 0xff], 0x02)]);
+    check('un messaggio illeggibile non azzera lo stato', t.state.currentPreset, 6);
+    check('il seriale resta nullo se non decodificabile', t.state.serial, null);
+  }
+
+  /* ---------- riepilogo ---------- */
+  const s = document.getElementById('summary');
+  s.className = failed === 0 ? 'ok' : 'bad';
+  s.textContent = `${passed} passati, ${failed} falliti`;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Permessi e preferenze locali della macchina, non del progetto
+.claude/settings.local.json
+
+# Roba di sistema
+Thumbs.db
+desktop.ini
+.DS_Store

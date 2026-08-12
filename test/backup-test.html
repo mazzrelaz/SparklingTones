@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Test spark-backup</title>
+<style>
+  body { font-family:'SF Mono',Consolas,monospace; background:#14161a; color:#e8e8ea;
+         padding:20px; font-size:0.85rem; line-height:1.6; }
+  h1 { font-size:1.1rem; font-family:-apple-system,'Segoe UI',sans-serif; }
+  .pass { color:#7fe08a; } .fail { color:#ff8080; }
+  .group { color:#8a8f98; margin-top:14px; font-weight:700; }
+  .detail { color:#8a8f98; margin-left:22px; white-space:pre-wrap; }
+  #summary { margin:18px 0; padding:10px 14px; border-radius:8px; font-weight:700;
+             font-family:-apple-system,'Segoe UI',sans-serif; }
+  #summary.ok { background:#1f3a24; color:#7fe08a; }
+  #summary.bad{ background:#3a2020; color:#ff8080; }
+</style>
+</head>
+<body>
+<h1>Test spark-backup.js</h1>
+<p class="detail" style="margin-left:0">Lo zip di prova viene costruito qui dentro, con
+voci sia compresse sia non compresse. Il preset di esempio è preso tale e quale dal
+backup reale dell'app ufficiale.</p>
+<div id="summary">esecuzione…</div>
+<div id="out"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-backup.js"></script>
+<script>
+'use strict';
+
+let passed = 0, failed = 0;
+function check(name, actual, expected) {
+  const a = JSON.stringify(actual), e = JSON.stringify(expected);
+  const ok = a === e;
+  ok ? passed++ : failed++;
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="${ok ? 'pass' : 'fail'}">${ok ? '✓' : '✗'} ${name}</span>`;
+  if (!ok) div.innerHTML += `<div class="detail">atteso:  ${e}\nottenuto: ${a}</div>`;
+  document.getElementById('out').appendChild(div);
+}
+function group(t) {
+  const d = document.createElement('div');
+  d.className = 'group'; d.textContent = t;
+  document.getElementById('out').appendChild(d);
+}
+
+/* Preset reale dal backup: preset_backup/Presets/Alternative/94109418-…/preset.json
+   Contiene un parametro booleano (UniVibe, indice 1), che è il caso limite
+   interessante: l'ampli vuole comunque un float. */
+const PRESET_REALE = {"bpm":120,"type":"jamup_speaker","meta":{"id":"94109418-E7D9-4B99-83F7-DDB11CA5847D","description":"Description for Alternative Preset 1","version":"0.7","icon":"icon.png","name":"Spooky Melody"},"sigpath":[{"params":[{"value":0.5,"index":0},{"value":1,"index":1}],"active":true,"dspId":"bias.noisegate","type":"speaker_fx"},{"params":[{"value":0.35169140497843426,"index":0},{"index":1,"value":0.35416668653488159}],"active":true,"dspId":"Compressor","type":"speaker_fx"},{"dspId":"DistortionTS9","active":false,"type":"speaker_fx","params":[{"index":0,"value":0.27217028977462598},{"index":1,"value":0.64238410596026485},{"index":2,"value":0.59592363287730765}]},{"dspId":"Twin","active":true,"type":"speaker_fx","params":[{"index":0,"value":0.61343339472622072},{"index":1,"value":0.48936181793025896},{"index":2,"value":0.45316683859020085},{"index":3,"value":0.50509119501300881},{"index":4,"value":0.57999999999999996}]},{"dspId":"UniVibe","active":true,"type":"speaker_fx","params":[{"index":0,"value":0.63659793937329168},{"index":1,"value":false},{"index":2,"value":0.49381442106876178}]},{"type":"speaker_fx","active":true,"params":[{"index":0,"value":0.23185778306080745},{"index":1,"value":0.55504142504471998},{"index":2,"value":0.52905450770460027},{"index":3,"value":0.30881356384794589},{"index":4,"value":0}],"dspId":"DelayEchoFilt"},{"type":"speaker_fx","active":true,"params":[{"index":0,"value":0.96304349018179858},{"index":1,"value":0.23208236435185309},{"index":2,"value":0.17639752574588941},{"index":3,"value":0.22476705520049384},{"index":4,"value":0.22816711145898572},{"index":5,"value":0.35714286821229119},{"index":6,"value":0.5}],"dspId":"bias.reverb"}]};
+
+/* ------------------------------------------------------------------
+   Costruttore di zip, solo per i test. Il CRC resta a zero: il lettore
+   non lo verifica, e implementarlo qui non proverebbe nulla di utile.
+   ------------------------------------------------------------------ */
+
+async function creaZip(voci) {
+  const enc = new TextEncoder();
+  const pezzi = [];
+  const centrali = [];
+  let offset = 0;
+
+  for (const { nome, testo, comprimi } of voci) {
+    const crudi = enc.encode(testo);
+    const dati  = comprimi ? await comprimiDeflate(crudi) : crudi;
+    const nomeB = enc.encode(nome);
+
+    const locale = new DataView(new ArrayBuffer(30));
+    locale.setUint32(0, 0x04034b50, true);
+    locale.setUint16(4, 20, true);
+    locale.setUint16(8, comprimi ? 8 : 0, true);
+    locale.setUint32(18, dati.length, true);
+    locale.setUint32(22, crudi.length, true);
+    locale.setUint16(26, nomeB.length, true);
+
+    pezzi.push(new Uint8Array(locale.buffer), nomeB, dati);
+
+    const centrale = new DataView(new ArrayBuffer(46));
+    centrale.setUint32(0, 0x02014b50, true);
+    centrale.setUint16(10, comprimi ? 8 : 0, true);
+    centrale.setUint32(20, dati.length, true);
+    centrale.setUint32(24, crudi.length, true);
+    centrale.setUint16(28, nomeB.length, true);
+    centrale.setUint32(42, offset, true);
+    centrali.push(new Uint8Array(centrale.buffer), nomeB);
+
+    offset += 30 + nomeB.length + dati.length;
+  }
+
+  const inizioCentrale = offset;
+  let dimCentrale = 0;
+  for (const c of centrali) dimCentrale += c.length;
+
+  const fine = new DataView(new ArrayBuffer(22));
+  fine.setUint32(0, 0x06054b50, true);
+  fine.setUint16(8, voci.length, true);
+  fine.setUint16(10, voci.length, true);
+  fine.setUint32(12, dimCentrale, true);
+  fine.setUint32(16, inizioCentrale, true);
+
+  const blob = new Blob([...pezzi, ...centrali, new Uint8Array(fine.buffer)]);
+  return blob.arrayBuffer();
+}
+
+async function comprimiDeflate(bytes) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+const percorso = (categoria, uuid) =>
+  `preset_backup/Presets/${categoria}/${uuid}/preset.json`;
+
+/* ------------------------------------------------------------------ */
+
+(async function run() {
+
+  group('lettura dello zip');
+  {
+    const buffer = await creaZip([
+      { nome: 'a.txt', testo: 'ciao', comprimi: false },
+      { nome: 'cartella/b.txt', testo: 'x'.repeat(500), comprimi: true },
+    ]);
+    const files = await SparkBackup.readZip(buffer);
+    const dec = new TextDecoder();
+    check('legge due voci', [...files.keys()], ['a.txt', 'cartella/b.txt']);
+    check('voce non compressa', dec.decode(files.get('a.txt')), 'ciao');
+    check('voce compressa con deflate', dec.decode(files.get('cartella/b.txt')).length, 500);
+
+    const filtrati = await SparkBackup.readZip(buffer, n => n.endsWith('b.txt'));
+    check('il filtro salta quello che non serve', [...filtrati.keys()], ['cartella/b.txt']);
+  }
+
+  {
+    let errore = null;
+    try { await SparkBackup.readZip(new TextEncoder().encode('non sono uno zip').buffer); }
+    catch (e) { errore = e.message; }
+    check('un file che non è uno zip viene rifiutato', errore, 'non sembra un file zip');
+  }
+
+  group('conversione di un preset reale');
+  {
+    const p = SparkBackup.convertiPreset(PRESET_REALE, 'Alternative');
+    check('nome e uuid',   [p.name, p.uuid],
+          ['Spooky Melody', '94109418-E7D9-4B99-83F7-DDB11CA5847D']);
+    check('la categoria diventa un tag', p.tags, ['Alternative']);
+    check('bpm',           p.bpm, 120);
+    check('sette effetti', p.effects.map(e => e.name),
+          ['bias.noisegate', 'Compressor', 'DistortionTS9', 'Twin',
+           'UniVibe', 'DelayEchoFilt', 'bias.reverb']);
+    check('gli effetti spenti restano spenti',
+          p.effects.filter(e => !e.enabled).map(e => e.name), ['DistortionTS9']);
+    check('un parametro booleano diventa un numero',
+          p.effects.find(e => e.name === 'UniVibe').params[1], { index: 1, value: 0 });
+    check('nessun parametro resta non numerico',
+          p.effects.every(e => e.params.every(x => typeof x.value === 'number')), true);
+    check('niente coda: la scriveremo noi', p.tail, []);
+    check('non è attribuito a nessuno slot', p.slot, null);
+
+    // il vero collaudo: il preset importato dev'essere spedibile all'ampli
+    const payload = Spark.serializePreset(p, Spark.LIVE_TARGET, { omitTail: true });
+    check('il preset importato si serializza per l\'ampli', payload.length > 200, true);
+    check('e si rilegge identico a com\'è stato scritto',
+          Spark.parsePreset(payload).effects.map(e => e.name),
+          p.effects.map(e => e.name));
+    check('i valori sopravvivono al giro, a meno della precisione float32',
+          Spark.parsePreset(payload).effects[3].params.map(x => +x.value.toFixed(4)),
+          p.effects[3].params.map(x => +x.value.toFixed(4)));
+  }
+
+  group('nomi lunghi');
+  {
+    // 21 preset su 105 nel backup reale superano i 31 caratteri
+    const lungo = Object.assign({}, PRESET_REALE, {
+      meta: Object.assign({}, PRESET_REALE.meta, {
+        name: 'Pink Floyd - Comfortably Numb (solo 2)',
+      }),
+    });
+    const p = SparkBackup.convertiPreset(lungo, 'Rock');
+    const payload = Spark.serializePreset(p, Spark.LIVE_TARGET, { omitTail: true });
+    check('un nome di 38 caratteri sopravvive al giro',
+          Spark.parsePreset(payload).name, 'Pink Floyd - Comfortably Numb (solo 2)');
+    check('una descrizione lunga sopravvive al giro',
+          Spark.parsePreset(payload).description, PRESET_REALE.meta.description);
+  }
+
+  group('backup completo');
+  {
+    const uno = JSON.stringify(PRESET_REALE);
+    const due = JSON.stringify(Object.assign({}, PRESET_REALE, {
+      meta: Object.assign({}, PRESET_REALE.meta, { id: 'ALTRO-UUID', name: 'Secondo' }),
+    }));
+    const buffer = await creaZip([
+      { nome: percorso('Alternative', 'aaa'), testo: uno, comprimi: true },
+      { nome: percorso('Metal', 'bbb'),       testo: due, comprimi: true },
+      { nome: 'preset_backup/Presets/Alternative/category.json', testo: '{}', comprimi: false },
+      { nome: 'preset_backup/Presets/Alternative/aaa/icon.png',  testo: 'PNG', comprimi: false },
+    ]);
+    const { presets, categorie, saltati } = await SparkBackup.parseBackup(buffer);
+    check('trova i preset e ignora icone e category.json', presets.length, 2);
+    check('raccoglie le categorie', categorie, ['Alternative', 'Metal']);
+    check('ogni preset porta la sua categoria',
+          presets.map(p => p.tags[0]).sort(), ['Alternative', 'Metal']);
+    check('nessuno saltato', saltati.length, 0);
+  }
+
+  {
+    const buffer = await creaZip([
+      { nome: percorso('Rock', 'ccc'), testo: '{"meta":{},"sigpath":[]}', comprimi: false },
+      { nome: percorso('Rock', 'ddd'), testo: JSON.stringify(PRESET_REALE), comprimi: false },
+    ]);
+    const { presets, saltati } = await SparkBackup.parseBackup(buffer);
+    check('un preset malformato viene saltato, non fa cadere tutto',
+          [presets.length, saltati.length], [1, 1]);
+    check('e se ne riporta il motivo', saltati[0].motivo, 'manca meta.id');
+  }
+
+  {
+    const buffer = await creaZip([{ nome: 'roba/altro.txt', testo: 'niente', comprimi: false }]);
+    let errore = null;
+    try { await SparkBackup.parseBackup(buffer); } catch (e) { errore = e.message; }
+    check('uno zip senza preset lo dice chiaramente', errore,
+          'nessun preset trovato: è il backup dell\'app Spark?');
+  }
+
+  const s = document.getElementById('summary');
+  s.className = failed === 0 ? 'ok' : 'bad';
+  s.textContent = `${passed} passati, ${failed} falliti`;
+})().catch(err => {
+  const s = document.getElementById('summary');
+  s.className = 'bad';
+  s.textContent = 'errore fatale: ' + err.message;
+  console.error(err);
+});
+</script>
+</body>
+</html>

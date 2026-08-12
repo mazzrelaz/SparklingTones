@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark 2 — libreria</title>
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg:#14161a; --panel:#181a1f; --line:#24272c; --line-soft:#1f2228;
+    --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
+    --accent:#ff6a3d; --green:#7fe08a; --gold:#f0c040;
+  }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:15px; }
+
+  header { position:sticky; top:0; z-index:5; background:var(--bg);
+           border-bottom:1px solid var(--line); padding:12px 16px 10px; }
+  .titlebar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  h1 { font-size:1.05rem; margin:0; flex:1; }
+  .status { padding:3px 9px; border-radius:11px; font-size:0.74rem; font-weight:600; white-space:nowrap; }
+  .status.off { background:#3a2020; color:#ff8080; }
+  .status.on  { background:#1f3a24; color:var(--green); }
+  .status.wait{ background:#3a3520; color:#f0d060; }
+
+  button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
+           background:#2a2d33; color:var(--text); padding:8px 13px; border-radius:8px; }
+  button.primary { background:var(--accent); color:#fff; }
+  button:disabled { background:#26282d; color:#5a5f68; cursor:not-allowed; }
+  button.icon { background:none; padding:5px 7px; font-size:1rem; line-height:1; color:var(--faint); }
+  button.icon:hover { color:var(--text); }
+  button.icon.on { color:var(--gold); }
+
+  .toolbar { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+  input[type=text], input[type=search], select, textarea {
+    background:#1e2126; border:1px solid #34383f; color:var(--text);
+    padding:8px 10px; border-radius:8px; font:inherit; font-size:0.85rem;
+  }
+  #search { flex:1; min-width:150px; }
+  textarea { width:100%; resize:vertical; min-height:60px; }
+
+  main { padding:14px 16px 60px; max-width:900px; margin:0 auto; }
+  .empty { color:var(--dim); text-align:center; padding:50px 20px; line-height:1.7; }
+
+  .row { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+         margin-bottom:8px; overflow:hidden; }
+  .row.dragging { opacity:0.45; }
+  .row.drop-target { border-color:var(--accent); }
+  .head { display:flex; align-items:center; gap:9px; padding:10px 12px; }
+  .grip { color:var(--faint); cursor:grab; font-size:1rem; padding:2px 3px;
+          touch-action:none; user-select:none; }
+  .grip:active { cursor:grabbing; }
+  .naming { flex:1; min-width:0; }
+  .name { font-weight:600; font-size:0.93rem; }
+  .chain { color:var(--dim); font-size:0.75rem; margin-top:2px;
+           white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .slot { color:var(--faint); font-size:0.7rem; font-family:'SF Mono',Consolas,monospace;
+          border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
+
+  .tags { display:flex; gap:5px; flex-wrap:wrap; padding:0 12px 9px 12px; }
+  .tag { background:#23262c; color:#b6bbc3; font-size:0.71rem; padding:2px 8px;
+         border-radius:9px; cursor:pointer; }
+  .tag:hover { background:#2e323a; color:var(--text); }
+  .tag.active { background:var(--accent); color:#fff; }
+
+  .detail { border-top:1px solid var(--line-soft); padding:12px; display:grid; gap:10px; }
+  .detail label { display:block; font-size:0.72rem; color:var(--dim);
+                  text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
+  .fxlist { display:grid; gap:2px; }
+  .fx { display:flex; gap:9px; font-size:0.78rem; align-items:baseline; }
+  .fx .fxname { min-width:130px; }
+  .fx .fxname.off { color:var(--faint); text-decoration:line-through; }
+  .fx .vals { color:var(--dim); font-family:'SF Mono',Consolas,monospace; font-size:0.72rem; }
+  .detail .actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+  #log { color:var(--faint); font-size:0.74rem; font-family:'SF Mono',Consolas,monospace;
+         margin-top:20px; white-space:pre-wrap; }
+
+  /* Sul telefono l'header va a capo su tre righe: sticky mangerebbe un quarto
+     dello schermo, quindi lo si lascia scorrere via. */
+  @media (max-width: 600px) {
+    header { position:static; }
+    main { padding:12px 12px 40px; }
+    h1 { flex-basis:100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="titlebar">
+    <h1>Libreria Spark 2</h1>
+    <span id="status" class="status off">non connesso</span>
+    <button id="btnConnect" class="primary">Connetti</button>
+    <button id="btnRead" disabled>Leggi dall'ampli</button>
+    <button id="btnLive" disabled title="legge il suono attivo, senza scrivere nulla">Suono corrente</button>
+  </div>
+  <div class="toolbar">
+    <input type="search" id="search" placeholder="cerca fra nomi, effetti, tag, note…">
+    <button id="btnFav" class="icon" title="solo preferiti">★</button>
+    <select id="tagFilter"><option value="">tutti i tag</option></select>
+    <button id="btnExport">Esporta</button>
+    <button id="btnImport">Importa</button>
+    <a href="live.html" style="color:#ff6a3d;font-size:0.85rem;font-weight:600;
+       text-decoration:none;padding:8px 4px">Live →</a>
+    <input type="file" id="fileInput" accept=".json,.zip" hidden>
+  </div>
+</header>
+
+<main>
+  <div id="list"></div>
+  <div id="log"></div>
+</main>
+
+<script src="src/spark-protocol.js"></script>
+<script src="src/spark-transport.js"></script>
+<script src="src/preset-store.js"></script>
+<script src="src/spark-backup.js"></script>
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+const store = new PresetStore();
+const spark = new SparkTransport({
+  onStatus: (state, label) => {
+    const el = $('status');
+    el.className = 'status ' + (state === 'connected' ? 'on' : state === 'connecting' ? 'wait' : 'off');
+    el.textContent = state === 'connected' ? label : state === 'connecting' ? label : 'non connesso';
+    $('btnConnect').disabled = state === 'connected';
+    $('btnRead').disabled    = state !== 'connected';
+    $('btnLive').disabled    = state !== 'connected';
+    render();
+  },
+  onLog: msg => logLine(msg),
+});
+
+// Il log tiene le ultime righe: i messaggi del trasporto sono spesso la parte
+// diagnostica più utile e non devono sparire sotto quello successivo.
+const logLines = [];
+let logTransient = false;
+
+function logLine(msg) {
+  if (logTransient) logLines.pop();
+  logTransient = false;
+  logLines.push(msg);
+  if (logLines.length > 8) logLines.shift();
+  $('log').textContent = logLines.join('\n');
+}
+
+/** Riga di avanzamento: la successiva la sostituisce invece di accodarsi. */
+function logProgress(msg) {
+  if (logTransient) logLines.pop();
+  logLines.push(msg);
+  logTransient = true;
+  $('log').textContent = logLines.join('\n');
+}
+
+const view = { query: '', tag: '', favoritesOnly: false, expanded: null };
+let records = [];
+
+/* ====================================================================
+   Rendering
+   ==================================================================== */
+
+async function refresh() {
+  records = await store.search(view.query, { tag: view.tag, favoritesOnly: view.favoritesOnly });
+  await refreshTagFilter();
+  render();
+}
+
+async function refreshTagFilter() {
+  const tags = await store.allTags();
+  const select = $('tagFilter');
+  const current = select.value;
+  select.innerHTML = '<option value="">tutti i tag</option>';
+  for (const { tag, count } of tags) {
+    const option = document.createElement('option');
+    option.value = tag;
+    option.textContent = `${tag} (${count})`;
+    select.appendChild(option);
+  }
+  select.value = tags.some(t => t.tag === current) ? current : '';
+}
+
+function render() {
+  const list = $('list');
+  list.innerHTML = '';
+
+  if (records.length === 0) {
+    const div = document.createElement('div');
+    div.className = 'empty';
+    div.textContent = view.query || view.tag || view.favoritesOnly
+      ? 'Nessun preset corrisponde ai filtri.'
+      : 'La libreria è vuota. Connetti l\'ampli e premi «Leggi dall\'ampli».';
+    list.appendChild(div);
+    return;
+  }
+  records.forEach(record => list.appendChild(renderRow(record)));
+}
+
+function renderRow(record) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.dataset.id = record.id;
+
+  const head = document.createElement('div');
+  head.className = 'head';
+
+  const grip = document.createElement('span');
+  grip.className = 'grip';
+  grip.textContent = '⠿';
+  grip.title = 'trascina per riordinare';
+  grip.addEventListener('pointerdown', event => startDrag(event, row));
+
+  const star = document.createElement('button');
+  star.className = 'icon' + (record.favorite ? ' on' : '');
+  star.textContent = record.favorite ? '★' : '☆';
+  star.title = 'preferito';
+  star.addEventListener('click', async event => {
+    event.stopPropagation();
+    await store.toggleFavorite(record.id);
+    refresh();
+  });
+
+  const naming = document.createElement('div');
+  naming.className = 'naming';
+  const name = document.createElement('div');
+  name.className = 'name';
+  name.textContent = record.name || '(senza nome)';
+  const chain = document.createElement('div');
+  chain.className = 'chain';
+  chain.textContent = (record.effects || [])
+    .filter(e => e.enabled).map(e => e.name).join(' · ');
+  naming.append(name, chain);
+
+  head.append(grip, star, naming);
+
+  if (record.slot !== undefined && record.slot !== null) {
+    const posizione = Spark.slotLabel(record.slot);
+    const slot = document.createElement('span');
+    slot.className = 'slot';
+    slot.textContent = posizione.label;
+    slot.title = `slot ${record.slot} — LED ${posizione.color} numero ${posizione.position}`;
+    head.appendChild(slot);
+  }
+
+  head.addEventListener('click', () => {
+    view.expanded = view.expanded === record.id ? null : record.id;
+    render();
+  });
+
+  row.appendChild(head);
+
+  if (record.tags.length) {
+    const tags = document.createElement('div');
+    tags.className = 'tags';
+    for (const tag of record.tags) {
+      const chip = document.createElement('span');
+      chip.className = 'tag' + (view.tag === tag ? ' active' : '');
+      chip.textContent = tag;
+      chip.addEventListener('click', event => {
+        event.stopPropagation();
+        view.tag = view.tag === tag ? '' : tag;
+        $('tagFilter').value = view.tag;
+        refresh();
+      });
+      tags.appendChild(chip);
+    }
+    row.appendChild(tags);
+  }
+
+  if (view.expanded === record.id) row.appendChild(renderDetail(record));
+  return row;
+}
+
+function renderDetail(record) {
+  const detail = document.createElement('div');
+  detail.className = 'detail';
+
+  const fxBox = document.createElement('div');
+  fxBox.innerHTML = '<label>catena effetti</label>';
+  const fxList = document.createElement('div');
+  fxList.className = 'fxlist';
+  for (const effect of record.effects || []) {
+    const line = document.createElement('div');
+    line.className = 'fx';
+    const fxname = document.createElement('span');
+    fxname.className = 'fxname' + (effect.enabled ? '' : ' off');
+    fxname.textContent = effect.name;
+    const vals = document.createElement('span');
+    vals.className = 'vals';
+    vals.textContent = effect.params.map(p => p.value.toFixed(2)).join('  ');
+    line.append(fxname, vals);
+    fxList.appendChild(line);
+  }
+  fxBox.appendChild(fxList);
+
+  const tagBox = document.createElement('div');
+  tagBox.innerHTML = '<label>tag, separati da virgola</label>';
+  const tagInput = document.createElement('input');
+  tagInput.type = 'text';
+  tagInput.style.width = '100%';
+  tagInput.value = record.tags.join(', ');
+  tagInput.addEventListener('change', async () => {
+    await store.setTags(record.id, tagInput.value.split(','));
+    refresh();
+  });
+  tagBox.appendChild(tagInput);
+
+  const noteBox = document.createElement('div');
+  noteBox.innerHTML = '<label>note</label>';
+  const notes = document.createElement('textarea');
+  notes.value = record.notes;
+  notes.placeholder = 'come suona, quando usarlo, cosa cambiare…';
+  notes.addEventListener('change', async () => {
+    await store.setNotes(record.id, notes.value);
+    refresh();
+  });
+  noteBox.appendChild(notes);
+
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+
+  if (record.slot !== undefined && record.slot !== null) {
+    const activate = document.createElement('button');
+    activate.textContent = 'Attiva ' + Spark.slotLabel(record.slot).label;
+    activate.title = 'seleziona lo slot sull\'ampli, senza scrivere nulla';
+    activate.disabled = !spark.connected;
+    activate.addEventListener('click', async () => {
+      await spark.send(Spark.commands.changePreset(record.slot));
+      logLine(`selezionato ${nomeSlot(record.slot)}`);
+    });
+    actions.appendChild(activate);
+  }
+
+  // Caricare nel suono corrente non tocca nulla di salvato: è il modo
+  // sicuro di provare un preset della libreria che non sta sull'ampli.
+  const toLive = document.createElement('button');
+  toLive.className = 'primary';
+  toLive.textContent = 'Carica nel suono corrente';
+  toLive.title = 'manda il preset all\'ampli senza sovrascrivere nessuno slot';
+  toLive.disabled = !spark.connected;
+  toLive.addEventListener('click', () => sendPreset(record, null));
+  actions.appendChild(toLive);
+
+  const slotPicker = document.createElement('select');
+  slotPicker.title = 'slot di destinazione';
+  for (let i = 0; i < 8; i++) {
+    const posizione = Spark.slotLabel(i);
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = `${posizione.label} — LED ${posizione.color} ${posizione.position}`;
+    slotPicker.appendChild(option);
+  }
+  if (record.slot !== undefined && record.slot !== null) slotPicker.value = record.slot;
+
+  const write = document.createElement('button');
+  write.textContent = 'Scrivi';
+  write.title = 'sovrascrive il preset presente in quello slot';
+  write.disabled = !spark.connected;
+  write.addEventListener('click', () => {
+    const slot = Number(slotPicker.value);
+    const occupante = records.find(r => r.slot === slot && r.id !== record.id);
+    const avviso = `Scrivere «${record.name}» in ${nomeSlot(slot)} sull'ampli?\n\n` +
+      (occupante ? `Sovrascrive «${occupante.name}», che è già lì.\n` : '') +
+      'La copia in libreria resta comunque al sicuro.';
+    if (!confirm(avviso)) return;
+    sendPreset(record, slot);
+  });
+
+  actions.append(slotPicker, write);
+
+  const remove = document.createElement('button');
+  remove.textContent = 'Elimina dalla libreria';
+  remove.addEventListener('click', async () => {
+    if (!confirm(`Eliminare «${record.name}» dalla libreria? L'ampli non viene toccato.`)) return;
+    await store.remove(record.id);
+    view.expanded = null;
+    refresh();
+  });
+  actions.appendChild(remove);
+
+  const meta = document.createElement('div');
+  meta.style.cssText = 'color:var(--faint);font-size:0.7rem;font-family:Consolas,monospace';
+  meta.textContent = `${record.uuid} · ${record.bpm} BPM`;
+
+  detail.append(fxBox, tagBox, noteBox, actions, meta);
+  return detail;
+}
+
+/** Nome dello slot come lo mostra l'ampli: "B2 (slot 5)". */
+function nomeSlot(n) {
+  return `${Spark.slotLabel(n).label} (slot ${n})`;
+}
+
+/**
+ * Salva il payload che non siamo riusciti a interpretare, in esadecimale.
+ * Serve a capire cosa manda l'ampli quando il parser si blocca.
+ */
+function scaricaDiagnostica() {
+  const guasto = spark.lastFailedPayload;
+  if (!guasto) return;
+  const contenuto = {
+    cosa:      guasto.label,
+    errore:    guasto.error,
+    quando:    guasto.at,
+    lunghezza: guasto.payload.length,
+    hex:       guasto.payload.map(b => b.toString(16).padStart(2, '0')).join(' '),
+  };
+  const blob = new Blob([JSON.stringify(contenuto, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `spark-payload-illeggibile-${new Date().toISOString().slice(0, 19).replace(/[:]/g, '-')}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/**
+ * Manda un preset all'ampli e verifica l'esito rileggendolo.
+ * L'ack conferma solo la ricezione: l'unica prova che il preset sia stato
+ * applicato è ritrovarlo sull'ampli.
+ *
+ * @param slot numero dello slot, oppure null per farlo suonare e basta
+ */
+async function sendPreset(record, slot) {
+  const live = slot === null;
+  const dove = live ? 'suono corrente' : nomeSlot(slot);
+  try {
+    const avanzamento = (i, total) =>
+      logProgress(`invio «${record.name}» → ${dove}: chunk ${i + 1} di ${total}…`);
+    const esito = live
+      ? await spark.loadPreset(record, avanzamento)
+      : await spark.storePreset(record, slot, avanzamento);
+    if (!esito.ok) {
+      logLine(`invio interrotto: ${esito.error}. ` +
+              'L\'ampli potrebbe essere rimasto a metà: rileggi per controllare.');
+      return;
+    }
+
+    const inviato = `inviato al ${dove} (${esito.acks}/${esito.total} confermati)`;
+    logLine(inviato + ', verifico…');
+    await new Promise(r => setTimeout(r, 400));
+
+    if (!spark.connected) {
+      logLine(`${inviato}, ma l'ampli si è disconnesso durante l'invio.`);
+      return;
+    }
+
+    // Prima una domanda semplice, di quelle che sappiamo funzionare: distingue
+    // «l'ampli è bloccato» da «l'ampli sta bene ma il preset non è arrivato».
+    const vivo = await spark.request(Spark.commands.getCurrentPreset(),
+      m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x10, 1500);
+    if (!vivo) {
+      logLine(`${inviato}, ma ora l'ampli non risponde più nemmeno a una ` +
+              'domanda semplice: l\'invio l\'ha bloccato.');
+      return;
+    }
+
+    const letto = live ? await spark.readLiveState() : await spark.readPreset(slot);
+
+    if (!letto && spark.lastFailedPayload) {
+      scaricaDiagnostica();
+      logLine(`${inviato}, ma non so leggere quello che l'ampli risponde: ` +
+              'ho scaricato il payload grezzo nei Download.');
+    } else if (!letto && live) {
+      logLine(`${inviato}, ma non riesco a rileggere il suono corrente per verificare. ` +
+              'Ascolta: il suono è cambiato?');
+    } else if (!letto) {
+      logLine(`${inviato}. L'ampli risponde alle domande semplici ma non rilegge ` +
+              `${nomeSlot(slot)}.`);
+    } else if (letto.uuid === record.uuid) {
+      logLine(`«${record.name}» è ora sul ${dove}. Verificato rileggendolo.` +
+              (live ? ' Il LED lampeggia perché l\'ampli sta suonando il preset ' +
+                      'software, che non è nessuno degli otto slot.' : ''));
+    } else {
+      logLine(`${inviato}, ma l'ampli continua a riportare «${letto.name}»: ` +
+              'il preset non è stato applicato.');
+    }
+  } catch (err) {
+    logLine('invio fallito: ' + err.message);
+  }
+}
+
+/* ====================================================================
+   Riordino per trascinamento
+   Pointer Events invece del drag-and-drop HTML5: quello sui touch non
+   funziona, e il bersaglio è anche il telefono.
+   ==================================================================== */
+
+let drag = null;
+
+function startDrag(event, row) {
+  if (view.query || view.tag || view.favoritesOnly) {
+    logLine('per riordinare, azzera prima i filtri');
+    return;
+  }
+  event.preventDefault();
+  drag = { row, id: Number(row.dataset.id) };
+  row.classList.add('dragging');
+  event.target.setPointerCapture(event.pointerId);
+  event.target.addEventListener('pointermove', onDragMove);
+  event.target.addEventListener('pointerup', onDragEnd, { once: true });
+  event.target.addEventListener('pointercancel', onDragEnd, { once: true });
+}
+
+function onDragMove(event) {
+  if (!drag) return;
+  const rows = [...$('list').children];
+  const over = rows.find(other => {
+    if (other === drag.row) return false;
+    const box = other.getBoundingClientRect();
+    return event.clientY >= box.top && event.clientY <= box.bottom;
+  });
+  if (!over) return;
+
+  const box = over.getBoundingClientRect();
+  const after = event.clientY > box.top + box.height / 2;
+  over.parentNode.insertBefore(drag.row, after ? over.nextSibling : over);
+}
+
+async function onDragEnd(event) {
+  if (!drag) return;
+  const { row, id } = drag;
+  drag = null;
+  row.classList.remove('dragging');
+  event.target.removeEventListener('pointermove', onDragMove);
+
+  const target = [...$('list').children].indexOf(row);
+  await store.move(id, target);
+  refresh();
+}
+
+/* ====================================================================
+   Azioni
+   ==================================================================== */
+
+$('btnConnect').addEventListener('click', async () => {
+  try {
+    await spark.connect();
+    await spark.identify();
+    $('status').textContent = spark.state.name || 'connesso';
+  } catch (err) {
+    logLine('errore: ' + err.message);
+  }
+});
+
+$('btnRead').addEventListener('click', async () => {
+  $('btnRead').disabled = true;
+  const presets = await spark.readLibrary(8, (i, max) => {
+    logProgress(`lettura slot ${i + 1} di ${max}…`);
+  });
+  const { added, updated } = await store.importFromAmp(presets);
+  logLine(`letti ${presets.length} preset: ${added} nuovi, ${updated} aggiornati`);
+  $('btnRead').disabled = !spark.connected;
+  refresh();
+});
+
+// Legge il suono attivo senza toccare nulla: serve sia a sapere cosa sta
+// suonando l'ampli, sia a catturare il payload quando non sappiamo leggerlo.
+$('btnLive').addEventListener('click', async () => {
+  $('btnLive').disabled = true;
+  spark.lastFailedPayload = null;
+  const live = await spark.readLiveState();
+  if (live) {
+    const catena = live.effects.filter(e => e.enabled).map(e => e.name).join(' · ');
+    logLine(`suono corrente: «${live.name}» — ${catena}`);
+  } else if (spark.lastFailedPayload) {
+    scaricaDiagnostica();
+    logLine('non so leggere il suono corrente: payload grezzo scaricato nei Download.');
+  } else {
+    logLine('nessuna risposta alla lettura del suono corrente.');
+  }
+  $('btnLive').disabled = !spark.connected;
+});
+
+$('search').addEventListener('input', event => {
+  view.query = event.target.value;
+  refresh();
+});
+
+$('tagFilter').addEventListener('change', event => {
+  view.tag = event.target.value;
+  refresh();
+});
+
+$('btnFav').addEventListener('click', () => {
+  view.favoritesOnly = !view.favoritesOnly;
+  $('btnFav').classList.toggle('on', view.favoritesOnly);
+  refresh();
+});
+
+$('btnExport').addEventListener('click', async () => {
+  const backup = await store.exportAll();
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `spark-libreria-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+$('btnImport').addEventListener('click', () => $('fileInput').click());
+
+$('fileInput').addEventListener('change', async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    if (file.name.toLowerCase().endsWith('.zip')) await importaBackupUfficiale(file);
+    else                                          await importaBackupNostro(file);
+    refresh();
+  } catch (err) {
+    logLine('importazione fallita: ' + err.message);
+  }
+  event.target.value = '';
+});
+
+async function importaBackupNostro(file) {
+  const backup = JSON.parse(await file.text());
+  const quanti = await store.importBackup(backup);
+  logLine(`importati ${quanti} preset da ${file.name}`);
+}
+
+/** preset_backup.zip dell'app ufficiale: le categorie diventano tag. */
+async function importaBackupUfficiale(file) {
+  logLine(`leggo ${file.name}…`);
+  const { presets, categorie, saltati } = await SparkBackup.parseBackup(await file.arrayBuffer());
+
+  const { added, updated } = await store.importFromBackup(presets);
+  logLine(`${presets.length} preset dal backup dell'app: ${added} nuovi, ${updated} aggiornati`);
+  logLine(`categorie diventate tag: ${categorie.join(', ')}`);
+  if (saltati.length) {
+    logLine(`${saltati.length} preset saltati: ${saltati[0].motivo}`);
+  }
+}
+
+/* ==================================================================== */
+
+(async function start() {
+  await store.open();
+  await refresh();
+  if (!navigator.bluetooth) {
+    $('btnConnect').disabled = true;
+    logLine('Web Bluetooth non disponibile: la libreria resta consultabile, ' +
+            'ma non si può leggere dall\'ampli.');
+  }
+})();
+</script>
+</body>
+</html>

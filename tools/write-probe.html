@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — prova di scrittura preset</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:#14161a; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:14px; }
+  h1 { font-size:1.1rem; margin:0 0 2px; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:70ch; line-height:1.5; }
+  .status { display:inline-block; padding:3px 9px; border-radius:11px;
+            font-size:0.75rem; font-weight:600; }
+  .status.off { background:#3a2020; color:#ff8080; }
+  .status.on  { background:#1f3a24; color:#7fe08a; }
+  .status.wait{ background:#3a3520; color:#f0d060; }
+  button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
+           background:#2a2d33; color:#e8e8ea; padding:8px 13px; border-radius:8px;
+           margin-right:6px; margin-bottom:6px; }
+  button.primary { background:#ff6a3d; color:#fff; }
+  button:disabled { background:#26282d; color:#5a5f68; cursor:not-allowed; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  select { background:#1e2126; border:1px solid #34383f; color:#e8e8ea;
+           padding:8px; border-radius:8px; font:inherit; font-size:0.85rem; }
+  table { width:100%; border-collapse:collapse; font-size:0.8rem; margin-top:6px; }
+  td { padding:5px 6px; border-bottom:1px solid #24272c; vertical-align:middle; }
+  td.desc { color:#b0b4bb; }
+  td.esito { font-weight:700; white-space:nowrap; }
+  .ok { color:#7fe08a; } .ko { color:#ff8080; } .boh { color:#f0d060; }
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         height:34vh; overflow-y:auto; margin-top:16px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.74rem; line-height:1.5;
+         color:#8a8f98; white-space:pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>Prova di scrittura preset (0x0101)</h1>
+<div class="sub">L'ampli conferma tutti i chunk ma non applica il preset. Ogni variante
+qui sotto cambia <b>una cosa sola</b> e verifica da sola l'esito rileggendo il suono
+corrente: non serve ascoltare. Prima di ogni prova viene letto lo stato di partenza.</div>
+
+<div class="row">
+  <span id="status" class="status off">non connesso</span>
+  <button id="btnConnect" class="primary">Connetti</button>
+  <button id="btnBaseline" disabled>Leggi stato attuale</button>
+</div>
+
+<div class="row">
+  <span style="color:#8a8f98;font-size:0.82rem">preset da mandare:</span>
+  <select id="pick"></select>
+</div>
+
+<table id="variants"></table>
+
+<div id="log"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script src="../src/preset-store.js"></script>
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+const store = new PresetStore();
+let libreria = [];
+
+const spark = new SparkTransport({
+  onStatus: (state, label) => {
+    const el = $('status');
+    el.className = 'status ' + (state === 'connected' ? 'on' : state === 'connecting' ? 'wait' : 'off');
+    el.textContent = state === 'connected' ? label : state === 'connecting' ? label : 'non connesso';
+    $('btnConnect').disabled  = state === 'connected';
+    $('btnBaseline').disabled = state !== 'connected';
+    document.querySelectorAll('#variants button').forEach(b => b.disabled = state !== 'connected');
+  },
+  onLog: msg => log(msg),
+});
+
+function log(msg) {
+  $('log').textContent += `[${new Date().toTimeString().slice(0, 8)}] ${msg}\n`;
+  $('log').scrollTop = $('log').scrollHeight;
+}
+
+/**
+ * Ogni variante cambia un'ipotesi sola rispetto a quella attuale, che è:
+ * bank 1, seq unico, senza block header, senza coda, chunk da 25.
+ */
+const VARIANTI = [
+  { nome: 'A', desc: 'come adesso — bank 1, seq unico, chunk 25, senza coda',
+    target: () => Spark.LIVE_TARGET, opts: {} },
+
+  { nome: 'B', desc: 'seq crescente a ogni chunk (comportamento Spark 40)',
+    target: () => Spark.LIVE_TARGET, opts: { incrementSeq: true } },
+
+  { nome: 'C', desc: 'con block header da 16 byte davanti a ogni chunk',
+    target: () => Spark.LIVE_TARGET, opts: { blockHeader: true } },
+
+  { nome: 'D', desc: 'con i due float di coda, come li manda l\'ampli',
+    target: () => Spark.LIVE_TARGET, opts: { includeTail: true } },
+
+  { nome: 'E', desc: 'verso lo slot 7 invece del suono corrente',
+    target: () => Spark.slotTarget(7), opts: {} },
+
+  { nome: 'F', desc: 'verso il preset software 0x7f, poi 0x0138 per attivarlo',
+    target: () => ({ bank: 0x00, number: 0x7f }), opts: {}, poi: 0x7f },
+
+  { nome: 'G', desc: 'chunk da 128 byte come SparkChunkOut (rischia la disconnessione)',
+    target: () => Spark.LIVE_TARGET, opts: { chunkSize: 128 } },
+];
+
+function costruisciTabella() {
+  const t = $('variants');
+  t.innerHTML = '';
+  for (const v of VARIANTI) {
+    const tr = document.createElement('tr');
+
+    const td1 = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.textContent = 'Prova ' + v.nome;
+    btn.disabled = !spark.connected;
+    btn.addEventListener('click', () => provaVariante(v, td3));
+    td1.appendChild(btn);
+
+    const td2 = document.createElement('td');
+    td2.className = 'desc';
+    td2.textContent = v.desc;
+
+    const td3 = document.createElement('td');
+    td3.className = 'esito';
+
+    tr.append(td1, td2, td3);
+    t.appendChild(tr);
+  }
+}
+
+/** Legge il suono corrente e ne restituisce l'UUID, o null. */
+async function leggiLive() {
+  spark.lastFailedPayload = null;
+  const live = await spark.readLiveState();
+  if (live) return live;
+  if (spark.lastFailedPayload) log('lo stato live non è decodificabile');
+  return null;
+}
+
+async function provaVariante(v, cella) {
+  const record = libreria.find(r => r.id === Number($('pick').value));
+  if (!record) { log('scegli un preset'); return; }
+
+  cella.textContent = '…';
+  cella.className = 'esito boh';
+  log(`── variante ${v.nome}: ${v.desc}`);
+
+  const prima = await leggiLive();
+  if (!prima) { cella.textContent = 'niente baseline'; cella.className = 'esito ko'; return; }
+  log(`prima: «${prima.name}»`);
+
+  if (prima.uuid === record.uuid) {
+    log('il preset scelto è già quello attivo: scegline un altro, altrimenti la prova non dice nulla');
+    cella.textContent = 'scegli altro preset';
+    cella.className = 'esito boh';
+    return;
+  }
+
+  const esito = await spark.writePreset(record, v.target(), null, v.opts);
+  log(`inviati ${esito.sent}/${esito.total} chunk, ${esito.acks} confermati`);
+
+  if (v.poi !== undefined) {
+    await spark.send(Spark.commands.changePreset(v.poi));
+    log(`poi 0x0138 verso ${v.poi}`);
+  }
+
+  await new Promise(r => setTimeout(r, 600));
+
+  if (!spark.connected) {
+    cella.textContent = 'disconnesso';
+    cella.className = 'esito ko';
+    log('l\'ampli si è disconnesso');
+    return;
+  }
+
+  const dopo = await leggiLive();
+  if (!dopo) {
+    cella.textContent = 'non verificabile';
+    cella.className = 'esito boh';
+    return;
+  }
+  log(`dopo: «${dopo.name}»`);
+
+  if (dopo.uuid === record.uuid) {
+    cella.textContent = 'FUNZIONA';
+    cella.className = 'esito ok';
+    log(`variante ${v.nome}: il preset è stato applicato.`);
+  } else {
+    cella.textContent = 'nessun effetto';
+    cella.className = 'esito ko';
+  }
+}
+
+/* ------------------------------------------------------------------ */
+
+$('btnConnect').addEventListener('click', async () => {
+  try { await spark.connect(); await spark.identify(); }
+  catch (err) { log('errore: ' + err.message); }
+});
+
+$('btnBaseline').addEventListener('click', async () => {
+  const live = await leggiLive();
+  if (live) log(`suono corrente: «${live.name}» — ${live.uuid}`);
+});
+
+(async function start() {
+  await store.open();
+  libreria = await store.all();
+  const pick = $('pick');
+  for (const record of libreria) {
+    const option = document.createElement('option');
+    option.value = record.id;
+    option.textContent = `${record.name} (slot ${record.slot})`;
+    pick.appendChild(option);
+  }
+  costruisciTabella();
+  if (libreria.length === 0) {
+    log('la libreria è vuota: apri prima index.html e premi «Leggi dall\'ampli».');
+  }
+  if (!navigator.bluetooth) {
+    $('btnConnect').disabled = true;
+    log('Web Bluetooth non disponibile in questo browser.');
+  }
+})();
+</script>
+</body>
+</html>
