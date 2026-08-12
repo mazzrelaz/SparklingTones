@@ -1058,6 +1058,22 @@ function scaricaDiagnostica() {
 async function mandaPreset(record, slot) {
   const soloProva = slot === null;
   const dove = soloProva ? 'suono corrente' : nomeSlot(slot);
+
+  // Prima di mandare: l'ampli conferma i chunk anche quando il payload è
+  // malformato, e poi lo ignora. Meglio accorgersene qui, dove si può dire
+  // cosa non va, che sull'ampli dove il sintomo è solo silenzio.
+  const controllo = Spark.controllaPreset(record);
+  if (controllo.errori.length) {
+    logLine(`«${record.name}» non è mandabile così com'è — ` +
+            controllo.errori.slice(0, 3).join('; ') +
+            (controllo.errori.length > 3 ? ` (e altri ${controllo.errori.length - 3})` : '') +
+            '. Non l\'ho inviato: l\'ampli avrebbe confermato i chunk e ignorato tutto. ' +
+            'Se viene dal backup dell\'app ufficiale, reimportalo: la conversione è ' +
+            'stata corretta.');
+    return;
+  }
+  if (controllo.avvisi.length) logLine(`nota su «${record.name}»: ${controllo.avvisi.join('; ')}`);
+
   try {
     const avanzamento = (i, total) =>
       logProgress(`invio «${record.name}» → ${dove}: chunk ${i + 1} di ${total}…`);
@@ -1116,17 +1132,27 @@ async function mandaPreset(record, slot) {
               'il preset non è stato applicato.');
     } else {
       // Scrivere in uno slot sono due comandi: 0x0101 riempie il preset
-      // software, 0x0127 lo salva nello slot. Se il buffer contiene il preset
-      // nuovo, il primo è andato a segno e si è fermato il secondo — sapere
-      // quale dei due è fallito è metà del lavoro.
+      // software 0x7f, 0x0127 lo salva nello slot. Sapere quale dei due si è
+      // fermato è metà del lavoro.
+      //
+      // Non basta rileggere il suono corrente: `storePreset` finisce
+      // selezionando lo slot, quindi il suono corrente *è* lo slot e
+      // riporterebbe il preset vecchio anche se il trasferimento fosse
+      // riuscito. Bisogna passare al preset software e guardare lì — senza
+      // ritrasmettere niente, il buffer è ancora quello di poco fa.
+      await spark.send(Spark.commands.changePreset(Spark.SOFTWARE_PRESET));
+      await new Promise(r => setTimeout(r, 300));
       const buffer = await spark.readLiveState();
+
       if (buffer && buffer.uuid === record.uuid) {
-        logLine(`${inviato}, e l'ampli lo sta suonando, ma ${nomeSlot(slot)} contiene ` +
-                `ancora «${letto.name}»: il trasferimento è riuscito, il salvataggio ` +
-                'nello slot no.');
+        logLine(`${inviato}: il trasferimento è riuscito — l'ampli sta suonando ` +
+                `«${record.name}» dal preset software — ma il salvataggio in ` +
+                `${nomeSlot(slot)} no, lì c'è ancora «${letto.name}».`);
       } else {
-        logLine(`${inviato}, ma ${nomeSlot(slot)} contiene ancora «${letto.name}» ` +
-                'e nemmeno il suono corrente è cambiato: il preset non è arrivato.');
+        logLine(`${inviato}, ma ${nomeSlot(slot)} contiene ancora «${letto.name}» e ` +
+                `il preset software riporta «${buffer ? buffer.name : 'niente'}»: ` +
+                'il preset non è stato accettato. L\'ampli ha confermato i chunk ' +
+                'senza usarli.');
       }
     }
   } catch (err) {

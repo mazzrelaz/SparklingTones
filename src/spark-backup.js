@@ -118,11 +118,11 @@ window.SparkBackup = (function () {
     return {
       bank:        0,
       number:      0,
-      uuid:        meta.id,
-      name:        meta.name || '(senza nome)',
-      version:     meta.version || '0.7',
-      description: meta.description || '',
-      icon:        meta.icon || 'icon.png',
+      uuid:        testo(meta.id, ''),
+      name:        testo(meta.name, '') || '(senza nome)',
+      version:     testo(meta.version, '') || '0.7',
+      description: testo(meta.description, ''),
+      icon:        testo(meta.icon, '') || 'icon.png',
       bpm:         typeof json.bpm === 'number' ? json.bpm : 120,
       effects:     json.sigpath.map(convertiEffetto),
       tail:        [],
@@ -138,7 +138,7 @@ window.SparkBackup = (function () {
       name:    fx.dspId,
       enabled: !!fx.active,
       params:  (fx.params || [])
-        .map(p => ({ index: p.index, value: numero(p.value) }))
+        .map(p => ({ index: indice(p.index), value: numero(p.value) }))
         .sort((a, b) => a.index - b.index),
     };
   }
@@ -148,6 +148,29 @@ window.SparkBackup = (function () {
     if (v === true)  return 1;
     if (v === false) return 0;
     return typeof v === 'number' ? v : 0;
+  }
+
+  /**
+   * L'indice di un parametro finisce nel payload come byte crudo: se arriva
+   * come stringa, o non arriva, produrrebbe un byte senza senso che l'ampli
+   * conferma e poi ignora.
+   */
+  function indice(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0;
+  }
+
+  /**
+   * I campi di testo del preset vanno codificati come stringhe: nel JSON
+   * dell'app possono arrivare come numeri (una `version` scritta `0.7` invece
+   * di `"0.7"`), e `encAutoString` su un numero produce byte senza senso che
+   * l'ampli conferma senza applicare. Silenzio, non errore: il peggior modo
+   * di fallire.
+   */
+  function testo(v, ripiego) {
+    if (typeof v === 'string') return v;
+    if (v === undefined || v === null) return ripiego;
+    return String(v);
   }
 
   return { readZip, parseBackup, convertiPreset };

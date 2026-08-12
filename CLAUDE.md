@@ -22,10 +22,10 @@ tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
-test/protocol-test.html  53 test del protocollo contro catture reali
+test/protocol-test.html  62 test del protocollo contro catture reali
 test/transport-test.html 47 test del trasporto, con send finto e catture reali
 test/store-test.html     89 test della libreria, su un database temporaneo
-test/backup-test.html    26 test del lettore zip e della conversione dal formato ufficiale
+test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
 test/fixtures/preset0.js catture condivise fra le suite: preset salvato e stato live
 docs/                    handoff report con la ricerca iniziale sul protocollo
 reference/paulhamsh/     sorgenti di riferimento (ESP32 + Python), BLE funzionante
@@ -150,6 +150,13 @@ Due differenze che contano, entrambe trovate sul backup reale da 105 preset:
 - **nomi e descrizioni superano i 31 caratteri** (21 preset su 105): oltre quella
   lunghezza serve la long string `0xd9`, perché `0xa0+len` sconfinerebbe in un altro
   tipo. Se ne occupa `encAutoString`.
+- **i campi di testo possono non essere testo**: una `version` scritta `0.7` invece di
+  `"0.7"`, una `description` numerica, un `index` di parametro come stringa. Passavano
+  dritti nel record e `encAutoString` su un numero produce byte senza senso, che l'ampli
+  conferma chunk per chunk e poi ignora — silenzio, non errore. `convertiPreset` ora li
+  forza con `testo()` e `indice()`. Trovato il 12 agosto 2026 cercando perché un preset
+  importato non si scriveva in uno slot; **non ancora confermato che fosse quella la
+  causa** sul preset dell'utente.
 
 Lo zip si legge senza librerie: la struttura è poca cosa e per la decompressione basta
 `DecompressionStream('deflate-raw')`, che i browser hanno già. Attenzione agli offset
@@ -264,14 +271,23 @@ tutto, perché ogni riga di header è spazio tolto ai pulsantoni.
 
 Ancora da fare, in ordine di utilità discussa con l'utente:
 
-1. **Scrivere un preset in uno slot non attecchisce** (12 agosto 2026, dall'utente): i 17
-   chunk vengono tutti confermati, ma rileggendo lo slot c'è ancora il preset di prima.
-   `storePreset` era verificato sull'hardware l'11 agosto, quindi o è cambiato qualcosa
-   nel contesto o il caso è più stretto di come lo conoscevamo. L'utente riferisce anche
-   una disconnessione. Per distinguere il fallimento del trasferimento (`0x0101`) da
-   quello del salvataggio (`0x0127`), dopo una verifica fallita l'app ora rilegge anche
-   lo stato live: se il buffer contiene il preset nuovo, è passato solo il primo comando.
-   **Da riprendere con quel dato in mano.**
+1. **Un preset importato dal backup non si scrive in uno slot** (12 agosto 2026,
+   dall'utente): tutti i chunk confermati, ma rileggendo lo slot c'è ancora il preset di
+   prima. `storePreset` era verificato sull'hardware l'11 agosto con un preset letto
+   dall'ampli, quindi il sospetto è sui dati, non sul comando.
+
+   Due mosse fatte, nessuna ancora confermata sull'hardware: `Spark.controllaPreset`
+   blocca l'invio e dice cosa non va invece di mandare byte che verranno confermati e
+   ignorati; `convertiPreset` forza a stringa i campi di testo del backup. Chi ha già
+   importato con la versione vecchia ha i record storti in libreria: **reimportare lo zip
+   li ripara**, perché `version`, `description` e `icon` stanno fra i `SOUND_FIELDS`.
+
+   **Trappola in cui sono già cascato:** per capire se si è fermato il trasferimento
+   (`0x0101`) o il salvataggio (`0x0127`) *non basta rileggere il suono corrente*, perché
+   `storePreset` finisce selezionando lo slot — quindi il suono corrente **è** lo slot, e
+   riporta il preset vecchio anche quando il trasferimento è riuscito. Bisogna prima
+   passare al preset software con `0x0138` su `0x7f` e guardare lì: il buffer è ancora
+   quello, non serve ritrasmettere. L'app adesso fa così.
 2. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
    (`0x0104`, `0x0115`, `0x0106`) sono già verificati: è lavoro di interfaccia. È il
    passo concordato dopo Preset e Live.
@@ -449,6 +465,12 @@ corrispondeva sempre, era la lettura del pannello a essere diversa.
 sembra riuscire lato browser anche quando l'ampli la scarta. **L'assenza di errori non
 è una verifica.** L'unica prova valida è l'effetto udibile/visibile sull'ampli o una
 risposta in RX.
+
+Per la stessa ragione esiste `Spark.controllaPreset`: prima di mandare un preset controlla
+che sia serializzabile — valori non numerici, campi di testo che testo non sono, array
+oltre i 15 di un fixarray, indici fuori scala. Un payload malformato viene confermato
+chunk per chunk e poi ignorato, e il sintomo è indistinguibile da una connessione rotta.
+Meglio accorgersene dove si può ancora dire *cosa* non va.
 
 ## Protocollo — fatti verificati
 

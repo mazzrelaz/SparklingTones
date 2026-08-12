@@ -229,6 +229,55 @@ check('i chunk generati si riassemblano nel payload di partenza',
 check('un payload multiplo esatto della dimensione non genera un chunk vuoto',
       Spark.splitPresetIntoChunks(new Array(256).fill(0), 128).map(c => c[2]), [128, 128]);
 
+/* ---------- controllo prima di mandare ----------
+   L'ack conferma la ricezione, non l'esecuzione: un payload malformato viene
+   confermato chunk per chunk e poi ignorato in silenzio. Questi controlli
+   servono a dire cosa non va prima di arrivare a quel silenzio. */
+
+const copia = p => JSON.parse(JSON.stringify(p));
+
+check('un preset letto dall\'ampli passa il controllo senza errori né avvisi',
+      Spark.controllaPreset(preset), { errori: [], avvisi: [] });
+
+const senzaNumero = copia(preset);
+senzaNumero.effects[0].params[0].value = null;
+check('un valore non numerico è un errore, col nome dell\'effetto',
+      Spark.controllaPreset(senzaNumero).errori.length, 1);
+check('e dice qual è il parametro',
+      Spark.controllaPreset(senzaNumero).errori[0].includes(preset.effects[0].name), true);
+
+const conNaN = copia(preset);
+conNaN.effects[1].params[0].value = 'mezzo';   // com'è un booleano non convertito
+check('anche una stringa al posto di un numero: è il caso del backup ufficiale',
+      Spark.controllaPreset(conNaN).errori.length, 1);
+
+const senzaUuid = copia(preset);
+delete senzaUuid.uuid;
+check('un preset senza UUID non è mandabile',
+      Spark.controllaPreset(senzaUuid).errori, ['manca l\'UUID']);
+
+const fuoriScala = copia(preset);
+fuoriScala.effects[0].params[0].value = 1.5;
+check('un valore fuori da 0..1 è solo un avviso: l\'ampli potrebbe digerirlo',
+      [Spark.controllaPreset(fuoriScala).errori.length,
+       Spark.controllaPreset(fuoriScala).avvisi.length], [0, 1]);
+
+const troppiEffetti = copia(preset);
+troppiEffetti.effects = new Array(16).fill(0).map(() => copia(preset.effects[0]));
+check('oltre i 15 effetti il fixarray sconfina in un altro tipo',
+      Spark.controllaPreset(troppiEffetti).errori.length, 1);
+
+const seiEffetti = copia(preset);
+seiEffetti.effects = seiEffetti.effects.slice(0, 6);
+check('un numero insolito di effetti è un avviso, non un errore',
+      [Spark.controllaPreset(seiEffetti).errori.length,
+       Spark.controllaPreset(seiEffetti).avvisi[0]], [0, '6 effetti invece dei 7 soliti']);
+
+const senzaCatena = copia(preset);
+delete senzaCatena.effects;
+check('senza catena effetti il controllo si ferma lì',
+      Spark.controllaPreset(senzaCatena).errori, ['manca la catena effetti']);
+
 show('nome preset', JSON.stringify(preset.name));
 show('uuid', preset.uuid);
 show('icona', JSON.stringify(preset.icon));

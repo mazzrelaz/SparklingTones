@@ -510,6 +510,68 @@ window.Spark = (function () {
   }
 
   /**
+   * Controlla che un preset sia serializzabile prima di mandarlo.
+   *
+   * Serve perché **l'ack non è una verifica**: l'ampli conferma la ricezione
+   * di ogni chunk anche quando il payload è malformato, e poi lo ignora in
+   * silenzio. Il risultato è indistinguibile da un guasto della connessione.
+   * Un valore non numerico, per esempio, diventa un float NaN che passa la
+   * codifica senza un lamento.
+   *
+   * Gli `errori` impediscono la codifica o producono byte senza senso; gli
+   * `avvisi` sono cose strane ma che l'ampli potrebbe digerire.
+   *
+   * @returns {{errori: string[], avvisi: string[]}}
+   */
+  function controllaPreset(preset) {
+    const errori = [], avvisi = [];
+    const numero = v => typeof v === 'number' && Number.isFinite(v);
+
+    if (!preset || typeof preset !== 'object') {
+      return { errori: ['non è un preset'], avvisi };
+    }
+    if (typeof preset.uuid !== 'string' || !preset.uuid) errori.push('manca l\'UUID');
+    else if (preset.uuid.length !== 36) avvisi.push(`UUID di ${preset.uuid.length} caratteri invece di 36`);
+
+    for (const campo of ['name', 'version', 'description', 'icon']) {
+      if (typeof preset[campo] !== 'string') errori.push(`il campo ${campo} non è testo`);
+    }
+    if (!numero(preset.bpm)) errori.push('i BPM non sono un numero');
+
+    if (!Array.isArray(preset.effects)) {
+      errori.push('manca la catena effetti');
+      return { errori, avvisi };
+    }
+    // Un fixarray arriva a 15: oltre, `ARRAY_BASE + n` sconfina in un altro tipo.
+    if (preset.effects.length > 15) errori.push(`${preset.effects.length} effetti: oltre i 15 di un fixarray`);
+    if (preset.effects.length !== 7) avvisi.push(`${preset.effects.length} effetti invece dei 7 soliti`);
+
+    preset.effects.forEach((effetto, i) => {
+      const dove = `effetto ${i + 1}`;
+      if (!effetto || typeof effetto !== 'object') { errori.push(`${dove}: non è un effetto`); return; }
+      if (typeof effetto.name !== 'string' || !effetto.name) errori.push(`${dove}: manca il nome`);
+      if (!Array.isArray(effetto.params)) { errori.push(`${dove}: mancano i parametri`); return; }
+      if (effetto.params.length > 15) {
+        errori.push(`${dove}: ${effetto.params.length} parametri, oltre i 15 di un fixarray`);
+      }
+      effetto.params.forEach((param, j) => {
+        const nome = `${effetto.name || dove}, parametro ${j + 1}`;
+        if (!param || typeof param !== 'object') { errori.push(`${nome}: non è un parametro`); return; }
+        if (!numero(param.value)) errori.push(`${nome}: il valore non è un numero (${param.value})`);
+        else if (param.value < 0 || param.value > 1) avvisi.push(`${nome}: valore ${param.value} fuori da 0..1`);
+        if (!Number.isInteger(param.index) || param.index < 0 || param.index > 127) {
+          errori.push(`${nome}: indice ${param.index} non valido`);
+        }
+      });
+    });
+
+    for (const value of preset.tail || []) {
+      if (!numero(value)) errori.push('la coda contiene un valore non numerico');
+    }
+    return { errori, avvisi };
+  }
+
+  /**
    * Byte di payload per chunk quando mandiamo un preset.
    *
    * paulhamsh usa 128 (`chunk_size` in SparkChunkOut), ma è pensato per un
@@ -555,6 +617,7 @@ window.Spark = (function () {
     buildChunk, wrapBlock, encode, commands,
     MessageAssembler, parseMessage,
     assemblePresetPayload, parsePreset, serializePreset, splitPresetIntoChunks,
+    controllaPreset,
     presetChecksum, PARAM_MARKER, PRESET_CHUNK_SIZE,
     LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET,
     slotLabel, SLOTS_PER_BANK,

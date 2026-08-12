@@ -166,6 +166,38 @@ const percorso = (categoria, uuid) =>
     check('i valori sopravvivono al giro, a meno della precisione float32',
           Spark.parsePreset(payload).effects[3].params.map(x => +x.value.toFixed(4)),
           p.effects[3].params.map(x => +x.value.toFixed(4)));
+
+    check('e passa il controllo che si fa prima di mandarlo all\'ampli',
+          Spark.controllaPreset(p).errori, []);
+  }
+
+  group('campi che nel JSON non sono testo');
+  {
+    // Nel JSON dell'app un campo può arrivare come numero invece che come
+    // stringa. encAutoString su un numero produce byte senza senso: l'ampli
+    // li conferma chunk per chunk e poi ignora tutto, in silenzio.
+    const storto = JSON.parse(JSON.stringify(PRESET_REALE));
+    storto.meta.version = 0.7;          // numero, non stringa
+    storto.meta.description = 42;
+    storto.meta.icon = 3;
+    storto.sigpath[0].params[0].index = '2';
+
+    const p = SparkBackup.convertiPreset(storto, 'Alternative');
+    check('la versione numerica diventa testo', [typeof p.version, p.version], ['string', '0.7']);
+    check('anche descrizione e icona', [p.description, p.icon], ['42', '3']);
+    check('un indice arrivato come stringa diventa un intero',
+          p.effects[0].params.map(x => x.index).every(Number.isInteger), true);
+    check('e il preset risulta mandabile', Spark.controllaPreset(p).errori, []);
+    check('si serializza senza NaN',
+          Spark.serializePreset(p, Spark.LIVE_TARGET, { omitTail: true })
+            .every(b => Number.isInteger(b) && b >= 0 && b <= 255), true);
+
+    const vuoto = JSON.parse(JSON.stringify(PRESET_REALE));
+    delete vuoto.meta.version;
+    delete vuoto.meta.description;
+    check('i campi assenti prendono il ripiego di sempre',
+          [SparkBackup.convertiPreset(vuoto, 'x').version,
+           SparkBackup.convertiPreset(vuoto, 'x').description], ['0.7', '']);
   }
 
   group('nomi lunghi');
