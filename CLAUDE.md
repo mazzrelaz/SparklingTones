@@ -22,8 +22,8 @@ tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
-test/protocol-test.html  67 test del protocollo contro catture reali
-test/transport-test.html 47 test del trasporto, con send finto e catture reali
+test/protocol-test.html  65 test del protocollo contro catture reali
+test/transport-test.html 48 test del trasporto, con send finto e catture reali
 test/store-test.html     89 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
 test/fixtures/preset0.js catture condivise fra le suite: preset salvato e stato live
@@ -271,34 +271,13 @@ tutto, perché ogni riga di header è spazio tolto ai pulsantoni.
 
 Ancora da fare, in ordine di utilità discussa con l'utente:
 
-1. **`0x0127` non salva nello slot** — vedi il dettaglio sopra, nella sezione sulla
-   scrittura. Il preset arriva e suona, è il solo salvataggio a non attecchire. In app
-   c'è la sonda che prova le quattro forme verificandole una per una: **il prossimo dato
-   utile è quale di esse funziona**, e a quel punto si fissa quella in `storePreset` e la
-   sonda diventa inutile.
-
-   Ipotesi già escluse per strada: non è il trasferimento (il preset suona), non è la
-   dimensione dei chunk (16 chunk, tutti confermati), non sono i dati del preset
-   (`controllaPreset` non trova nulla e la serializzazione è verificata dai test).
-
-   Lungo la caccia sono comunque emerse due cose che valevano da sole: `controllaPreset`
-   prima di mandare, e i campi di testo del backup forzati a stringa in `convertiPreset`
-   (una `version` numerica produceva byte senza senso). Chi ha importato con la versione
-   vecchia ripara **reimportando lo zip**, perché `version`, `description` e `icon` stanno
-   fra i `SOUND_FIELDS`.
-
-   **Trappola in cui sono già cascato:** per capire se si è fermato il trasferimento o il
-   salvataggio *non basta rileggere il suono corrente*, perché `storePreset` finisce
-   selezionando lo slot — quindi il suono corrente **è** lo slot, e riporta il preset
-   vecchio anche quando il trasferimento è riuscito. Bisogna prima passare al preset
-   software con `0x0138` su `0x7f` e guardare lì.
-2. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
+1. **Editor della catena effetti** — manopole in tempo reale. Tutti i comandi che servono
    (`0x0104`, `0x0115`, `0x0106`) sono già verificati: è lavoro di interfaccia. È il
    passo concordato dopo Preset e Live.
 
-`loadPreset` è **verificato sull'hardware** (11 agosto 2026, riconfermato il 12: il preset
-arriva e suona). `storePreset` **no**: la seconda metà, `0x0127`, non salva nello slot —
-vedi sopra.
+`loadPreset` e `storePreset` sono **entrambi verificati sull'hardware**: il primo l'11
+agosto 2026 e riconfermato il 12, il secondo il 12 agosto nella forma nuova (scrittura
+diretta nello slot più cambio preset via e ritorno).
 
 `tools/write-probe.html` resta utile se una scrittura smette di funzionare: prova varianti
 di `0x0101` una alla volta e verifica ognuna rileggendo lo stato live, senza bisogno di
@@ -306,14 +285,13 @@ ascoltare.
 
 ## Stato
 
-Il protocollo è verificato sull'ampli per: lettura dei preset, `0x0138` cambio preset,
-`0x0115` effetto on/off, `0x0104` cambio parametro, `0x0101` invio di un preset intero
-nel buffer software (che poi si fa suonare con `0x0138` su `0x7f`). `0x0115` e `0x0104`
-richiedono il byte `0x00` finale descritto sotto.
+Il protocollo è **completo e verificato sull'ampli**: lettura dei preset, `0x0138` cambio
+preset, `0x0115` effetto on/off, `0x0104` cambio parametro, `0x0101` invio di un preset
+intero — sia nel buffer software da far suonare subito, sia direttamente in uno slot per
+salvarlo. `0x0115` e `0x0104` richiedono il byte `0x00` finale descritto sotto; la
+scrittura in uno slot richiede il cambio preset via e ritorno descritto più avanti.
 
-**Resta scoperto un pezzo:** `0x0127`, che dovrebbe salvare il buffer in uno slot, riceve
-l'ack e non fa niente. È l'unica cosa che manca perché la scrittura di un preset sia
-completa.
+`0x0127` è invece escluso: riceve l'ack e non salva, in tutte e quattro le forme provate.
 
 Nessuna autenticazione è richiesta: la license key `0x0170` non è mai stata inviata.
 
@@ -419,69 +397,41 @@ Verificato sull'hardware l'11 agosto 2026.
 
 ```
 far suonare un preset   → 0x0101 su [0x00, 0x7f], poi 0x0138 con 0x7f
-salvarlo in uno slot n  → 0x0101 su [0x00, 0x7f], poi 0x0127 con [0x00, n]
+salvarlo in uno slot n  → 0x0101 su [0x00, n], poi 0x0138 su un altro slot e 0x0138 su n
 ```
 
-**Il secondo comando non funziona sullo Spark 2** — misurato il 12 agosto 2026, ed è il
-fatto più importante di quella giornata. Il trasferimento va a segno: dopo i 16 chunk
-l'ampli **suona** il preset nuovo dal buffer software. Ma `0x0127` nella forma
-`[0x00, n]` riceve l'ack e lo slot resta quello di prima. È lo stesso modo di fallire dei
-comandi sugli effetti prima di scoprire il byte `0x00` finale: ack regolare, esecuzione
-mancante.
+**Le due strade sono diverse, e questo è costato mezza giornata.** Far suonare un preset
+passa dal buffer software `0x7f`; salvarlo in uno slot **non ci passa affatto**: si
+indirizza lo slot direttamente nei primi due byte del payload, e poi si cambia preset e
+si torna indietro. Entrambe verificate sull'ampli, la seconda il 12 agosto 2026.
 
-Contraddice l'annotazione dell'11 agosto, che dava `storePreset` per verificato. Non so
-cosa fosse diverso allora; vale quello che si misura adesso, e adesso non salva.
+Il giro via e ritorno non è decorazione: senza, lo slot continua a riportare il contenuto
+vecchio. Sta scritto così anche nel riferimento (`Spark.ino:113-124`), dove
+`create_preset` indirizza `[0x00, preset_num]` (`SparkIO.ino:1025-1026`) ed è seguito da
+`delay(100)` e **due** `change_hardware_preset`. `storePreset` fa esattamente questo, con
+300 ms fra un passo e l'altro.
 
-Varianti da provare, tutte già costruibili con `Spark.commands.savePreset(slot, opzioni)`:
+**`0x0127` non funziona sullo Spark 2 ed è stato tolto dal codice.** Provate sull'ampli
+tutte e quattro le forme — `[0x00, n]`, `[0x7f, n]`, `[0x00, n, 0x00]`, `[0x7f, n, 0x00]`
+— ack regolare per ognuna e slot invariato. È lo stesso modo di fallire dei comandi sugli
+effetti prima di scoprire il byte `0x00` finale, ma qui nessun byte finale lo salva.
+L'annotazione dell'11 agosto che dava `storePreset` per verificato era sbagliata.
 
-| variante | payload | perché |
-|---|---|---|
-| Spark 40 | `[0x00, n]` | quella di `save_hardware_preset`, non salva |
-| sorgente esplicita | `[0x7f, n]` | il primo byte si chiama `curr_preset`: forse è *da dove* si copia, e la nostra sorgente è il buffer `0x7f`, non `0x00` |
-| coda zero | `[0x00, n, 0x00]` | il byte che lo Spark 2 pretende su `0x0115` e `0x0104` |
-| tutte e due | `[0x7f, n, 0x00]` | |
-
-`provaVariantiSalvataggio` in `index.html` le prova in fila **verificando ognuna con una
-rilettura dello slot**, perché l'ack non dice niente. Non ritrasmette il preset: il
-buffer è già carico, ogni tentativo è un comando corto più una rilettura, e si scrive
-solo nello slot che l'utente ha già chiesto di sovrascrivere. La prima forma provata è
-di nuovo `[0x00, n]`, ma stavolta **col preset software attivo** — a quel punto l'app ci
-è già passata per la diagnosi, e «salva quello che stai suonando» è un'ipotesi che vale
-quanto le altre.
-
-**Tutte e quattro rifiutate, provate sull'ampli il 12 agosto 2026.** Ack regolare per
-ognuna, lo slot invariato. `0x0127` non è la strada, o non lo è da solo.
-
-### La scrittura diretta nello slot, da riprovare come si deve
-
-Nel riferimento un preset entra in uno slot **senza passare dal buffer**:
-`create_preset` scrive `[0x00, preset_num]` come primi due byte, cioè indirizza
-direttamente lo slot (`SparkIO.ino:1025-1026`). E subito dopo (`Spark.ino:113-124`):
-
-```
-create_preset(preset con preset_num = 3)
-delay(100)
-change_hardware_preset(0x00, 0x00)     ← via
-change_hardware_preset(0x00, 0x03)     ← e ritorno
-```
-
-Il doppio cambio preset non è decorazione: ha l'aria di far ricaricare allo slot quello
-che si è appena scritto. **Nei nostri appunti la scrittura diretta risultava senza
-effetto, ma era stata provata senza questo passaggio** — e senza, rileggere lo slot
-mostra il contenuto vecchio anche se la scrittura fosse riuscita. È esattamente lo stesso
-errore di metodo in cui sono cascato con il suono corrente.
-
-`provaScritturaDiretta` fa questo giro completo e verifica rileggendo. Se funziona,
-`storePreset` va riscritto così e `0x0127` esce di scena.
+Come ci siamo arrivati, perché il metodo conta più della conclusione: prima si è isolato
+che il **trasferimento** funzionava (l'ampli suonava il preset nuovo dal buffer) e che
+mancava solo il salvataggio; poi si è provata una forma alla volta **verificando ognuna
+con una rilettura dello slot**, perché l'ack non dice niente. Le sonde che l'hanno
+trovato sono state tolte a risposta ottenuta.
 
 `transport.loadPreset()` e `transport.storePreset()` fanno esattamente questo. Il secondo
 comando **non è opzionale**: senza, il risultato è indistinguibile da un fallimento.
 
 Scrivere `0x0101` direttamente su uno slot sembrava produrre ack regolari e nessun
-effetto — **ma quella prova era incompleta**, perché non faceva seguire il cambio preset
-via e ritorno che il riferimento mette lì apposta. Da rifare, vedi sopra. In lettura
-`[0x00, n]` e `[0x01, 0x00]` sono comunque indirizzi validi: `0x0201` con il primo legge
-lo slot n, col secondo il suono attivo (`Spark.slotTarget(n)` e `Spark.LIVE_TARGET`).
+effetto: **quella prova era incompleta**, mancava il cambio preset via e ritorno. È
+invece la strada giusta, vedi sopra. Scrivere su `[0x01, 0x00]` resta senza effetto: è un
+indirizzo valido in lettura, non in scrittura. In lettura `0x0201` con `[0x00, n]` legge
+lo slot n e con `[0x01, 0x00]` il suono attivo (`Spark.slotTarget(n)` e
+`Spark.LIVE_TARGET`).
 
 `loadPreset` non sovrascrive nessuno slot salvato: è il modo sicuro di provare un preset,
 ed è l'azione principale offerta dalla UI.

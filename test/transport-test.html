@@ -263,21 +263,28 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
             t.sent.filter(c => c.sub !== 0x01).length, 1);
     }
 
+    /* storePreset prende un'altra strada di loadPreset: niente buffer
+       software e niente 0x0127, che sullo Spark 2 riceve l'ack e non salva.
+       Si indirizza lo slot direttamente e si cambia preset via e ritorno.
+       Verificato sull'ampli il 12 agosto 2026. */
     {
       const t = transportChe(99);
       await t.storePreset(preset, 4);
       const coda = t.sent.filter(c => c.sub !== 0x01);
-      check('storePreset passa anch\'esso dal preset software',
-            t.sent[0].data.slice(3, 5), [0x00, 0x7f]);
-      check('poi salva nello slot e lo seleziona',
-            coda.map(c => [c.sub, c.data]), [[0x27, [0x00, 4]], [0x38, [0x00, 4]]]);
+      check('storePreset indirizza direttamente lo slot, non il buffer software',
+            t.sent[0].data.slice(3, 5), [0x00, 4]);
+      check('non usa 0x0127, che sullo Spark 2 non salva',
+            coda.some(c => c.sub === 0x27), false);
+      check('e chiude con il cambio preset via e ritorno',
+            coda.map(c => [c.sub, c.data]), [[0x38, [0x00, 0]], [0x38, [0x00, 4]]]);
     }
 
     {
+      // scrivendo nello slot 0 il giro non può passare per lo slot 0 stesso
       const t = transportChe(99);
-      await t.storePreset(preset, 4, null, { activate: false });
-      check('con activate:false non seleziona lo slot',
-            t.sent.filter(c => c.sub !== 0x01).map(c => c.sub), [0x27]);
+      await t.storePreset(preset, 0);
+      check('per lo slot 0 il giro passa da un altro slot',
+            t.sent.filter(c => c.sub !== 0x01).map(c => c.data), [[0x00, 1], [0x00, 0]]);
     }
 
     {

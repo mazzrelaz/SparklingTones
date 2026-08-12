@@ -278,21 +278,15 @@ delete senzaCatena.effects;
 check('senza catena effetti il controllo si ferma lì',
       Spark.controllaPreset(senzaCatena).errori, ['manca la catena effetti']);
 
-/* ---------- varianti di 0x0127 ----------
-   La forma dello Spark 40 riceve l'ack e non salva. Queste sono le altre
-   forme da provare sull'ampli, una alla volta. */
+/* ---------- scrittura in uno slot ----------
+   0x0127 è fuori: sullo Spark 2 riceve l'ack e non salva, in tutte e quattro
+   le forme provate. Si indirizza lo slot direttamente. */
 
-check('0x0127: la forma dello Spark 40 è [0x00, slot]',
-      Spark.commands.savePreset(2).data, [0x00, 0x02]);
-check('la sorgente si può cambiare: il preset software è 0x7f',
-      Spark.commands.savePreset(2, { sorgente: Spark.SOFTWARE_PRESET }).data, [0x7f, 0x02]);
-check('e si può aggiungere il byte 0x00 che lo Spark 2 pretende sugli effetti',
-      Spark.commands.savePreset(2, { codaZero: true }).data, [0x00, 0x02, 0x00]);
-check('le due varianti si combinano',
-      Spark.commands.savePreset(7, { sorgente: 0x7f, codaZero: true }).data, [0x7f, 0x07, 0x00]);
-check('il sub-comando resta 0x27 in tutte le forme',
-      [Spark.commands.savePreset(0).sub,
-       Spark.commands.savePreset(0, { codaZero: true }).sub], [0x27, 0x27]);
+check('0x0127 non esiste più fra i comandi', Spark.commands.savePreset, undefined);
+check('lo slot si indirizza nei primi due byte del payload',
+      Spark.serializePreset(preset, Spark.slotTarget(2)).slice(0, 2), [0x00, 0x02]);
+check('e il preset software resta un indirizzo distinto',
+      Spark.serializePreset(preset, Spark.SOFTWARE_TARGET).slice(0, 2), [0x00, 0x7f]);
 
 show('nome preset', JSON.stringify(preset.name));
 show('uuid', preset.uuid);

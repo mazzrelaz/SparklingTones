@@ -371,26 +371,29 @@ window.SparkTransport = (function () {
     },
 
     /**
-     * Carica un preset e lo salva in uno slot dell'ampli, sovrascrivendolo.
-     * Stessa prima metà di loadPreset, poi `0x0127` invece di `0x0138`.
+     * Salva un preset in uno slot dell'ampli, sovrascrivendolo.
      *
-     * Alla fine seleziona lo slot appena scritto. Senza, l'ampli resterebbe
-     * sul buffer software e il LED continuerebbe a lampeggiare come se
-     * stesse suonando qualcosa di non salvato — che è vero, ma confonde.
-     * `{activate: false}` per non farlo.
+     * **Non passa dal buffer software e non usa `0x0127`.** Quella strada —
+     * `0x0101` verso `0x7f` e poi `0x0127` per salvare — sullo Spark 2 non
+     * salva: il preset arriva e suona, ma lo slot resta quello di prima.
+     * Provate tutte e quattro le forme di `0x0127`, ack regolare e nessun
+     * effetto (12 agosto 2026).
+     *
+     * Funziona invece la strada del codice di riferimento: si indirizza
+     * **direttamente lo slot** con `0x0101`, e poi si cambia preset e si
+     * torna indietro. Il giro via e ritorno non è decorazione: senza, lo slot
+     * continua a riportare il contenuto vecchio. Verificato sull'ampli.
      */
     async storePreset(preset, slot, onProgress, options) {
-      const opts  = options || {};
-      const esito = await this.writePreset(preset, Spark.SOFTWARE_TARGET, onProgress, opts);
+      const esito = await this.writePreset(preset, Spark.slotTarget(slot), onProgress, options);
       if (!esito.ok) return esito;
 
-      await this.send(Spark.commands.savePreset(slot));
-      this.onLog(`salvato nello slot ${slot}`);
-
-      if (opts.activate !== false) {
-        await this.send(Spark.commands.changePreset(slot));
-        this.onLog(`selezionato lo slot ${slot}`);
-      }
+      await sleep(300);
+      const altrove = slot === 0 ? 1 : 0;
+      await this.send(Spark.commands.changePreset(altrove));
+      await sleep(300);
+      await this.send(Spark.commands.changePreset(slot));
+      this.onLog(`scritto nello slot ${slot}, con un cambio preset via e ritorno`);
       return esito;
     },
 
