@@ -6,8 +6,8 @@ Web app / PWA, HTML+JS vanilla, zero dipendenze, Web Bluetooth.
 ## Struttura
 
 ```
-index.html               libreria: ricerca, tag, note, preferiti, riordino, scrittura
-live.html                vista live: pulsantoni per una scaletta, per suonare
+index.html               tutta l'app: vista libreria e vista live, nello stesso documento
+live.html                rimando a index.html#live, per le scorciatoie già installate
 manifest.webmanifest     identità della PWA: nome, icone, scorciatoia alla vista live
 sw.js                    service worker: guscio in cache, app utilizzabile offline
 icons/                   icone PNG generate con lo script PowerShell in tools/
@@ -68,6 +68,13 @@ inchiodato a una versione vecchia se ci si dimentica di alzare `VERSIONE` in `sw
 network-first fa aspettare la rete proprio quando non c'è. `VERSIONE` va comunque alzata
 a ogni rilascio: è quello che ripulisce le cache vecchie e fa comparire l'avviso.
 
+**L'ancora va tolta dalla chiave di cache.** L'url di una `Request` la contiene, quindi
+`index.html`, `index.html#live` e `index.html#libreria` finivano in tre voci distinte
+della stessa pagina, aggiornate ognuna per conto suo e nessuna delle quali era quella
+precaricata all'installazione. `rispondi()` normalizza la chiave a origine + percorso +
+query. Trovato subito dopo aver messo le due viste sull'hash, guardando cosa c'era
+davvero dentro `caches`.
+
 **L'aggiornamento non si applica mai da solo.** Il nuovo worker resta in attesa e la
 pagina mostra una striscia «C'è una versione nuova — Aggiorna»; solo premendo lì parte
 `skipWaiting` e il ricaricamento. Un reload a sorpresa fra due pezzi sarebbe il peggio
@@ -91,6 +98,12 @@ intero, senza, header e log finirebbero sotto la tacca e sotto la barra dei gest
 Per provare: `powershell -ExecutionPolicy Bypass -File tools\serve.ps1`, poi
 `http://localhost:8099/` — localhost conta come origine sicura, quindi service worker e
 Web Bluetooth funzionano entrambi.
+
+Due trappole nel provare, che sembrano bug dell'app e non lo sono. Navigare all'url su
+cui la pagina già si trova, ancora compresa, è una navigazione *same-document*: non
+ricarica niente e le modifiche al CSS non si vedono. Serve `location.reload()`. E
+`unregister()` più `caches.delete()` lasciano il worker vecchio a controllare la scheda
+finché non la si chiude: per una prova pulita conviene aprire una scheda nuova.
 
 **Pubblicata il 12 agosto 2026** su `https://mazzrelaz.github.io/SparklingTones/`
 (repo `mazzrelaz/SparklingTones`, GitHub Pages da `main` / root). Verificato sul sito
@@ -140,7 +153,7 @@ rileggendolo**. Gli effetti che compaiono solo nel backup — `UniVibe`, `Comp76
 
 ## Vista live
 
-`live.html` serve a suonare, non a catalogare: scaletta di preset presi dalla libreria,
+La vista live serve a suonare, non a catalogare: scaletta di preset presi dalla libreria,
 un pulsantone per ciascuno. Il compromesso che la governa: un preset che sta già in uno
 slot dell'ampli si attiva **istantaneamente** con `0x0138`, uno che non c'è va trasmesso
 per intero e ci mette circa un secondo. Il pulsante dice quale dei due casi è, e
@@ -151,6 +164,26 @@ La scaletta sta in IndexedDB fra le preferenze (`settings`, aggiunto nella versi
 database). `getSetlist` scarta gli id di preset cancellati, così non restano pulsanti
 morti. Dopo **Prepara**, `assignSlots` aggiorna quale preset sta in quale slot e toglie
 lo slot a chi è stato sovrascritto.
+
+### Perché libreria e live stanno nello stesso file
+
+**La connessione BLE vive nel documento.** Finché erano due pagine, passare da libreria a
+live era una navigazione: il browser buttava via tutto e all'ampli toccava riconnettersi
+a mano ogni volta. Nessuna API lo evita — `navigator.bluetooth.getDevices()` al più
+risparmia la finestra di scelta, ma la riconnessione resta. L'unico rimedio vero è non
+navigare: dal 12 agosto 2026 le due viste sono in `index.html` e si scambiano cambiando
+una classe sul `body`, quindi `spark` resta lo stesso oggetto. Verificato che l'istanza
+sopravviva al passaggio, in tutte e due le direzioni.
+
+Il passaggio è sull'hash (`#live` / `#libreria`) e non su una variabile: così il tasto
+indietro di Android torna alla libreria invece di chiudere l'app, e la scorciatoia
+«Live» del manifest può puntare dritta a `index.html#live`. `live.html` è rimasto come
+rimando, perché la scorciatoia vecchia può essere già installata sul telefono.
+
+Attenzione toccando il CSS: le due viste condividono un solo `<style>`. Le regole della
+libreria vanno sotto `body:not(.vista-live)` e quelle live sotto `body.vista-live`,
+comprese le variabili di colore — la vista live è più scura — e la media query del
+telefono, dove nella libreria il titolo si prende una riga sua e nella live no.
 
 Ancora da fare, in ordine di utilità discussa con l'utente:
 

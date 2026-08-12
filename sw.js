@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v1';
+const VERSIONE = 'v2';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -73,13 +73,21 @@ self.addEventListener('fetch', event => {
 async function rispondi(event) {
   const richiesta = event.request;
   const cache = await caches.open(CACHE);
-  const salvata = await cache.match(richiesta, { ignoreSearch: false });
+
+  // L'ancora fa parte dell'url di una Request, quindi finirebbe nella chiave
+  // di cache: `index.html`, `index.html#live` e `index.html#libreria` sarebbero
+  // tre voci diverse dello stesso file, aggiornate ognuna per conto suo — e
+  // nessuna sarebbe quella precaricata all'installazione. Si toglie.
+  const url = new URL(richiesta.url);
+  const chiave = url.origin + url.pathname + url.search;
+
+  const salvata = await cache.match(chiave);
 
   const dallaRete = fetch(richiesta).then(risposta => {
     // Le risposte opache o fallite non si mettono in cache: sostituirebbero
     // un file buono con un errore, e l'app resterebbe rotta anche online.
     if (risposta && risposta.ok && risposta.type === 'basic') {
-      cache.put(richiesta, risposta.clone());
+      cache.put(chiave, risposta.clone());
     }
     return risposta;
   }).catch(() => null);

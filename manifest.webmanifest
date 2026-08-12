@@ -21,7 +21,7 @@
       "name": "Vista live",
       "short_name": "Live",
       "description": "La scaletta con i pulsantoni, per suonare",
-      "url": "./live.html",
+      "url": "./index.html#live",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]

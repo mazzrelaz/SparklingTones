@@ -2,8 +2,8 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spark 2 — libreria</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spark 2 — libreria e live</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#14161a">
 <meta name="mobile-web-app-capable" content="yes">
@@ -19,11 +19,26 @@
     --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
     --accent:#ff6a3d; --green:#7fe08a; --gold:#f0c040;
   }
-  body { margin:0; background:var(--bg); color:var(--text);
+  html { height:100%; }
+  body { margin:0; min-height:100%; background:var(--bg); color:var(--text);
          font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:15px; }
 
+  /* La vista live è più scura e non scorre: schermo pieno, header fisso,
+     pulsanti che si toccano al buio. Cambia solo il vestito, non la pagina. */
+  body.vista-live {
+    --bg:#0e0f12; --panel:#1a1d22; --line:#2a2e35; --text:#f0f0f2;
+    height:100%; overflow:hidden; display:flex; flex-direction:column;
+    -webkit-user-select:none; user-select:none;
+  }
+
+  body.vista-live .solo-libreria { display:none; }
+  body:not(.vista-live) .solo-live { display:none; }
+
   header { position:sticky; top:0; z-index:5; background:var(--bg);
-           border-bottom:1px solid var(--line); padding:12px 16px 10px; }
+           border-bottom:1px solid var(--line);
+           padding:calc(12px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+                   10px calc(16px + env(safe-area-inset-left)); }
+  body.vista-live header { position:static; flex:none; padding-bottom:8px; }
   .titlebar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
   h1 { font-size:1.05rem; margin:0; flex:1; }
   .status { padding:3px 9px; border-radius:11px; font-size:0.74rem; font-weight:600; white-space:nowrap; }
@@ -38,6 +53,7 @@
   button.icon { background:none; padding:5px 7px; font-size:1rem; line-height:1; color:var(--faint); }
   button.icon:hover { color:var(--text); }
   button.icon.on { color:var(--gold); }
+  #btnVista { background:none; color:var(--accent); padding:8px 4px; }
 
   .toolbar { display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
   input[type=text], input[type=search], select, textarea {
@@ -47,7 +63,10 @@
   #search { flex:1; min-width:150px; }
   textarea { width:100%; resize:vertical; min-height:60px; }
 
-  main { padding:14px 16px 60px; max-width:900px; margin:0 auto; }
+  /* ---- vista libreria ------------------------------------------------ */
+
+  #vistaLibreria { padding:14px 16px 60px; max-width:900px; margin:0 auto; }
+  body.vista-live #vistaLibreria { display:none; }
   .empty { color:var(--dim); text-align:center; padding:50px 20px; line-height:1.7; }
 
   .row { background:var(--panel); border:1px solid var(--line); border-radius:10px;
@@ -84,12 +103,67 @@
   #log { color:var(--faint); font-size:0.74rem; font-family:'SF Mono',Consolas,monospace;
          margin-top:20px; white-space:pre-wrap; }
 
-  /* Sul telefono l'header va a capo su tre righe: sticky mangerebbe un quarto
-     dello schermo, quindi lo si lascia scorrere via. */
+  /* ---- vista live ---------------------------------------------------- */
+
+  #vistaLive { display:none; }
+  body.vista-live #vistaLive { display:flex; flex-direction:column;
+                               flex:1; min-height:0; }
+
+  /* Pulsanti grandi ma non stirati: con pochi preset in scaletta una riga
+     1fr li farebbe alti quanto mezzo schermo. */
+  #pads { flex:1; display:grid; gap:10px; overflow-y:auto;
+          padding:12px calc(12px + env(safe-area-inset-right))
+                  12px calc(12px + env(safe-area-inset-left));
+          grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+          grid-auto-rows:minmax(92px, 120px); align-content:start; }
+
+  .pad { position:relative; background:var(--panel); border:2px solid var(--line);
+         border-radius:14px; padding:12px 14px; text-align:left; overflow:hidden;
+         display:flex; flex-direction:column; justify-content:center; gap:5px;
+         font-size:1.05rem; font-weight:700; line-height:1.25; }
+  .pad:active { transform:scale(0.985); }
+  .pad .n { position:absolute; top:8px; right:12px; font-size:0.72rem;
+            color:var(--faint); font-weight:700; }
+  .pad .sub { font-size:0.72rem; font-weight:600; color:var(--dim); }
+  .pad .sub .istantaneo { color:var(--green); }
+  .pad .sub .caricamento { color:var(--gold); }
+  .pad.attivo { border-color:var(--accent); background:#241a16; }
+  .pad.occupato { opacity:0.55; }
+  .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
+                background:var(--accent); transition:width 0.12s linear; }
+
+  .vuoto { color:var(--dim); text-align:center; padding:40px 20px; line-height:1.7;
+           grid-column:1/-1; }
+
+  #logLive { flex:none; padding:6px 12px calc(6px + env(safe-area-inset-bottom));
+             font-family:Consolas,monospace; font-size:0.72rem; color:var(--faint);
+             border-top:1px solid var(--line); min-height:1.6em;
+             white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* composizione della scaletta */
+  /* Fondo pieno, non translucido: al buio su un palco quello che si intravede
+     sotto è solo rumore. */
+  #editor { display:none; position:fixed; inset:0; background:var(--bg);
+            padding:calc(14px + env(safe-area-inset-top)) 14px
+                    calc(14px + env(safe-area-inset-bottom));
+            overflow-y:auto; z-index:10; }
+  #editor.aperto { display:block; }
+  #editor h2 { font-size:0.95rem; margin:0 0 10px; }
+  .voce { display:flex; align-items:center; gap:10px; padding:8px 10px;
+          border-bottom:1px solid var(--line); font-size:0.88rem; }
+  .voce .nome { flex:1; }
+  .voce .badge { font-size:0.68rem; color:var(--faint); font-family:Consolas,monospace;
+                 border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
+
+  /* Sul telefono l'header della libreria va a capo su tre righe: sticky
+     mangerebbe un quarto dello schermo, quindi lo si lascia scorrere via.
+     Nella vista live invece resta, perché lì non si scorre. */
   @media (max-width: 600px) {
-    header { position:static; }
-    main { padding:12px 12px 40px; }
-    h1 { flex-basis:100%; }
+    body:not(.vista-live) header { position:static; }
+    #vistaLibreria { padding:12px 12px 40px; }
+    /* Solo nella libreria il titolo si prende una riga tutta sua: nella vista
+       live ogni riga di header è spazio tolto ai pulsantoni. */
+    body:not(.vista-live) h1 { flex-basis:100%; }
   }
 </style>
 </head>
@@ -97,28 +171,46 @@
 
 <header>
   <div class="titlebar">
-    <h1>Libreria Spark 2</h1>
+    <h1 id="titolo">Libreria Spark 2</h1>
     <span id="status" class="status off">non connesso</span>
     <button id="btnConnect" class="primary">Connetti</button>
-    <button id="btnRead" disabled>Leggi dall'ampli</button>
-    <button id="btnLive" disabled title="legge il suono attivo, senza scrivere nulla">Suono corrente</button>
+    <button id="btnRead" class="solo-libreria" disabled>Leggi dall'ampli</button>
+    <button id="btnLive" class="solo-libreria" disabled
+            title="legge il suono attivo, senza scrivere nulla">Suono corrente</button>
+    <button id="btnPrepara" class="solo-live" disabled
+            title="scrive i primi 8 della scaletta negli slot dell'ampli">Prepara</button>
+    <button id="btnEdit" class="solo-live">Scaletta</button>
+    <button id="btnVista">Live →</button>
   </div>
-  <div class="toolbar">
+  <div class="toolbar solo-libreria">
     <input type="search" id="search" placeholder="cerca fra nomi, effetti, tag, note…">
     <button id="btnFav" class="icon" title="solo preferiti">★</button>
     <select id="tagFilter"><option value="">tutti i tag</option></select>
     <button id="btnExport">Esporta</button>
     <button id="btnImport">Importa</button>
-    <a href="live.html" style="color:#ff6a3d;font-size:0.85rem;font-weight:600;
-       text-decoration:none;padding:8px 4px">Live →</a>
     <input type="file" id="fileInput" accept=".json,.zip" hidden>
   </div>
 </header>
 
-<main>
+<main id="vistaLibreria">
   <div id="list"></div>
   <div id="log"></div>
 </main>
+
+<div id="vistaLive">
+  <div id="pads"></div>
+  <div id="logLive"></div>
+</div>
+
+<div id="editor">
+  <h2>Componi la scaletta</h2>
+  <div style="margin-bottom:12px">
+    <button id="btnChiudi" class="primary">Fatto</button>
+    <span style="color:var(--dim);font-size:0.8rem;margin-left:8px">
+      tocca un preset per aggiungerlo o toglierlo</span>
+  </div>
+  <div id="elenco"></div>
+</div>
 
 <script src="src/spark-protocol.js"></script>
 <script src="src/spark-transport.js"></script>
@@ -127,6 +219,13 @@
 <script src="src/pwa.js"></script>
 <script>
 'use strict';
+
+/*
+ * Libreria e vista live stanno nella stessa pagina, e non è un dettaglio di
+ * comodità: la connessione BLE vive nel documento: navigare su un altro file
+ * la butta via, e all'ampli tocca riconnettersi ogni volta. Finché si cambia
+ * solo vista, `spark` resta lo stesso oggetto e la connessione regge.
+ */
 
 const $ = id => document.getElementById(id);
 
@@ -139,13 +238,49 @@ const spark = new SparkTransport({
     $('btnConnect').disabled = state === 'connected';
     $('btnRead').disabled    = state !== 'connected';
     $('btnLive').disabled    = state !== 'connected';
+    $('btnPrepara').disabled = state !== 'connected';
     render();
+    disegna();
   },
   onLog: msg => logLine(msg),
 });
 
-// Il log tiene le ultime righe: i messaggi del trasporto sono spesso la parte
-// diagnostica più utile e non devono sparire sotto quello successivo.
+/* ====================================================================
+   Le due viste
+   Il passaggio va sull'hash invece che su una variabile: così il tasto
+   indietro di Android torna alla libreria invece di chiudere l'app, e la
+   scorciatoia «Live» del telefono può puntare dritta qui.
+   ==================================================================== */
+
+const inLive = () => location.hash === '#live';
+
+async function applicaVista() {
+  const live = inLive();
+  document.body.classList.toggle('vista-live', live);
+  $('titolo').textContent = live ? 'Live' : 'Libreria Spark 2';
+  $('btnVista').textContent = live ? '← Libreria' : 'Live →';
+
+  if (live) {
+    await ricarica();
+    disegna();
+  } else {
+    $('editor').classList.remove('aperto');
+    await refresh();
+  }
+}
+
+window.addEventListener('hashchange', () => { applicaVista(); });
+$('btnVista').addEventListener('click', () => {
+  location.hash = inLive() ? 'libreria' : 'live';
+});
+
+/* ====================================================================
+   Log
+   ==================================================================== */
+
+// Il log della libreria tiene le ultime righe: i messaggi del trasporto sono
+// spesso la parte diagnostica più utile e non devono sparire sotto quello
+// successivo. Quello della vista live è invece una riga sola: lì si suona.
 const logLines = [];
 let logTransient = false;
 
@@ -155,6 +290,7 @@ function logLine(msg) {
   logLines.push(msg);
   if (logLines.length > 8) logLines.shift();
   $('log').textContent = logLines.join('\n');
+  $('logLive').textContent = msg;
 }
 
 /** Riga di avanzamento: la successiva la sostituisce invece di accodarsi. */
@@ -163,14 +299,15 @@ function logProgress(msg) {
   logLines.push(msg);
   logTransient = true;
   $('log').textContent = logLines.join('\n');
+  $('logLive').textContent = msg;
 }
+
+/* ====================================================================
+   Vista libreria — rendering
+   ==================================================================== */
 
 const view = { query: '', tag: '', favoritesOnly: false, expanded: null };
 let records = [];
-
-/* ====================================================================
-   Rendering
-   ==================================================================== */
 
 async function refresh() {
   records = await store.search(view.query, { tag: view.tag, favoritesOnly: view.favoritesOnly });
@@ -541,7 +678,174 @@ async function onDragEnd(event) {
 }
 
 /* ====================================================================
-   Azioni
+   Vista live — i pulsantoni della scaletta
+   ==================================================================== */
+
+let scaletta = [];        // record dei preset, in ordine
+let libreria = [];
+let attivo   = null;      // id del preset attualmente mandato all'ampli
+let occupato = false;     // un caricamento è in corso
+
+function disegna() {
+  const pads = $('pads');
+  pads.innerHTML = '';
+
+  if (scaletta.length === 0) {
+    const vuoto = document.createElement('div');
+    vuoto.className = 'vuoto';
+    vuoto.textContent = 'Nessun preset in scaletta. Premi «Scaletta» per comporla.';
+    pads.appendChild(vuoto);
+    return;
+  }
+
+  scaletta.forEach((record, i) => {
+    const pad = document.createElement('button');
+    pad.className = 'pad'
+      + (record.id === attivo ? ' attivo' : '')
+      + (occupato ? ' occupato' : '');
+    pad.disabled = !spark.connected || occupato;
+
+    const numero = document.createElement('span');
+    numero.className = 'n';
+    numero.textContent = i + 1;
+
+    const nome = document.createElement('span');
+    nome.textContent = record.name || '(senza nome)';
+
+    const sub = document.createElement('span');
+    sub.className = 'sub';
+    if (residente(record)) {
+      sub.innerHTML = `<span class="istantaneo">● istantaneo</span> · ${Spark.slotLabel(record.slot).label}`;
+    } else {
+      sub.innerHTML = '<span class="caricamento">● da caricare</span> · ~1s';
+    }
+
+    const barra = document.createElement('span');
+    barra.className = 'barra';
+
+    pad.append(numero, nome, sub, barra);
+    pad.addEventListener('click', () => attiva(record, barra));
+    pads.appendChild(pad);
+  });
+}
+
+/** Un preset è istantaneo se sappiamo che sta già in uno slot dell'ampli. */
+const residente = record => record.slot !== null && record.slot !== undefined;
+
+async function attiva(record, barra) {
+  if (occupato || !spark.connected) return;
+  occupato = true;
+  attivo = record.id;
+  disegna();
+
+  try {
+    if (residente(record)) {
+      await spark.send(Spark.commands.changePreset(record.slot));
+      logLine(`${record.name} — ${Spark.slotLabel(record.slot).label}`);
+    } else {
+      await spark.loadPreset(record, (i, total) => {
+        barra.style.width = Math.round(((i + 1) / total) * 100) + '%';
+      });
+      logLine(`${record.name} — caricato nel preset software`);
+    }
+  } catch (err) {
+    logLine('errore: ' + err.message);
+    attivo = null;
+  }
+  occupato = false;
+  disegna();
+}
+
+/* ---- preparazione: i primi 8 della scaletta finiscono negli slot ---- */
+
+$('btnPrepara').addEventListener('click', async () => {
+  const quanti = Math.min(8, scaletta.length);
+  if (quanti === 0) return;
+
+  const elenco = scaletta.slice(0, quanti)
+    .map((r, i) => `  ${Spark.slotLabel(i).label}  ${r.name}`).join('\n');
+  if (!confirm(`Scrivere i primi ${quanti} preset della scaletta negli slot dell'ampli?\n\n` +
+               elenco + '\n\nI preset che sono lì adesso vengono sovrascritti. ' +
+               'Le copie in libreria restano.')) return;
+
+  occupato = true;
+  disegna();
+  const assegnazioni = {};
+  for (let i = 0; i < quanti; i++) {
+    const record = scaletta[i];
+    logLine(`scrivo «${record.name}» in ${Spark.slotLabel(i).label}…`);
+    const esito = await spark.storePreset(record, i, null, { activate: false });
+    if (!esito.ok) {
+      logLine(`interrotto su ${Spark.slotLabel(i).label}: ${esito.error}`);
+      break;
+    }
+    assegnazioni[record.id] = i;
+  }
+
+  await store.assignSlots(assegnazioni);
+  await ricarica();
+  occupato = false;
+  disegna();
+  logLine(`scaletta preparata: ${Object.keys(assegnazioni).length} preset negli slot`);
+});
+
+/* ---- composizione della scaletta ------------------------------------ */
+
+$('btnEdit').addEventListener('click', () => { $('editor').classList.add('aperto'); disegnaElenco(); });
+$('btnChiudi').addEventListener('click', async () => {
+  $('editor').classList.remove('aperto');
+  await ricarica();
+  disegna();
+});
+
+function disegnaElenco() {
+  const elenco = $('elenco');
+  elenco.innerHTML = '';
+  if (libreria.length === 0) {
+    elenco.innerHTML = '<div class="vuoto">La libreria è vuota: leggi prima i preset dall\'ampli.</div>';
+    return;
+  }
+  const inScaletta = new Set(scaletta.map(r => r.id));
+
+  for (const record of libreria) {
+    const voce = document.createElement('div');
+    voce.className = 'voce';
+
+    const segno = document.createElement('span');
+    segno.textContent = inScaletta.has(record.id) ? '✓' : '＋';
+    segno.style.color = inScaletta.has(record.id) ? 'var(--green)' : 'var(--faint)';
+    segno.style.width = '1.2em';
+
+    const nome = document.createElement('span');
+    nome.className = 'nome';
+    nome.textContent = record.name;
+
+    voce.append(segno, nome);
+
+    if (residente(record)) {
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = Spark.slotLabel(record.slot).label;
+      voce.appendChild(badge);
+    }
+
+    voce.addEventListener('click', async () => {
+      if (inScaletta.has(record.id)) await store.removeFromSetlist(record.id);
+      else                           await store.addToSetlist(record.id);
+      scaletta = await store.getSetlist();
+      disegnaElenco();
+    });
+    elenco.appendChild(voce);
+  }
+}
+
+async function ricarica() {
+  libreria = await store.all();
+  scaletta = await store.getSetlist();
+}
+
+/* ====================================================================
+   Azioni comuni
    ==================================================================== */
 
 $('btnConnect').addEventListener('click', async () => {
@@ -647,7 +951,8 @@ async function importaBackupUfficiale(file) {
 
 (async function start() {
   await store.open();
-  await refresh();
+  await ricarica();
+  await applicaVista();
   if (!navigator.bluetooth) {
     $('btnConnect').disabled = true;
     logLine('Web Bluetooth non disponibile: la libreria resta consultabile, ' +
