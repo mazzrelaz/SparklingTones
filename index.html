@@ -223,6 +223,11 @@
   .manopola .valore { width:3.2em; text-align:right; color:var(--dim);
                       font-size:0.74rem; font-family:Consolas,monospace; }
   .avviso-spento { color:var(--gold); font-size:0.72rem; margin-top:6px; }
+  /* I parametri che manopole non sono: chiusi, ma a un dito di distanza. */
+  .blocco details.extra { margin-top:8px; }
+  .blocco details.extra > summary { font-size:0.7rem; color:var(--faint);
+                                    cursor:pointer; }
+  .blocco details.extra > summary:hover { color:var(--dim); }
 
   @media (max-width: 600px) {
     body:not(.vista-live) header { position:static; }
@@ -1306,7 +1311,11 @@ function disegnaCatena() {
     testa.append(nomi, cambia, interruttore);
     blocco.appendChild(testa);
 
-    for (const param of effetto.params) {
+    // L'ampli manda, su certi preset, qualche parametro che manopola non è: il
+    // terzo del noise gate e l'ottavo del riverbero, sempre esattamente 1. Non
+    // si nascondono — restano lì sotto, muovibili — ma stanno da parte, così le
+    // manopole vere si contano a colpo d'occhio e tornano con quelle dell'app.
+    const rigaDi = (param) => {
       const riga = document.createElement('div');
       riga.className = 'manopola';
 
@@ -1357,8 +1366,13 @@ function disegnaCatena() {
       cursore.addEventListener('change', muovi);
 
       riga.append(numero, cursore, valore);
-      blocco.appendChild(riga);
-    }
+      return riga;
+    };
+
+    const vere  = effetto.params.filter(p => !SparkEffetti.extra(effetto.name, p.index));
+    const fuori = effetto.params.filter(p =>  SparkEffetti.extra(effetto.name, p.index));
+
+    vere.forEach(param => blocco.appendChild(rigaDi(param)));
 
     // Trappola già pagata una volta: girare la manopola di un effetto spento
     // non produce nessun suono, e sembra che il comando non funzioni.
@@ -1367,6 +1381,21 @@ function disegnaCatena() {
       avviso.className = 'avviso-spento';
       avviso.textContent = 'È spento: le manopole non si sentono finché non lo accendi.';
       blocco.appendChild(avviso);
+    }
+
+    if (fuori.length) {
+      const cassetto = document.createElement('details');
+      cassetto.className = 'extra';
+      const titolo = document.createElement('summary');
+      titolo.textContent = fuori.length === 1
+        ? '1 parametro che non è una manopola'
+        : `${fuori.length} parametri che non sono manopole`;
+      titolo.title = `${SparkEffetti.nome(effetto.name)} ha ` +
+        `${SparkEffetti.TABELLA[effetto.name].quante} manopole, ma su certi preset ` +
+        'l\'ampli manda qualche parametro in più. Restano qui, e si possono muovere.';
+      cassetto.appendChild(titolo);
+      fuori.forEach(param => cassetto.appendChild(rigaDi(param)));
+      blocco.appendChild(cassetto);
     }
 
     catena.appendChild(blocco);

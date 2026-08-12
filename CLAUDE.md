@@ -41,6 +41,20 @@ Trappola nel far girare le suite da un browser pilotato: **in una scheda in seco
 i timer vengono strozzati**, e una suite che ci mette un secondo sembra piantata a metà
 per minuti. Non è un test che si blocca: basta portare la scheda in primo piano.
 
+**Le suite girano anche senza aprire un browser**, con Edge headless — utile perché il
+riquadro di anteprima trasforma i `file://` in istantanee statiche (gli script non
+partono) e `localhost` è bloccato:
+
+```
+& 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --headless=new --disable-gpu `
+  --no-first-run --user-data-dir="$env:TEMP\claude\edge-prof" --virtual-time-budget=20000 `
+  --dump-dom 'file:///C:/Users/massi/spark/test/protocol-test.html'
+```
+
+Poi si cerca `id="summary"` nel DOM stampato. Funziona per protocol, transport e backup.
+**Su `store-test.html` no**: con il tempo virtuale IndexedDB non avanza e la pagina resta
+a «esecuzione…» — non è un test rotto, è l'ambiente. Quella va aperta in un browser vero.
+
 **Dopo ogni modifica a `src/`, apri le tre pagine in `test/` e verifica che il riepilogo
 sia verde.** Girano contro catture reali dell'ampli, quindi intercettano una regressione
 nella codifica senza avere l'hardware a portata. Due test confrontano i messaggi generati
@@ -321,6 +335,31 @@ per tipo, tutte con le stesse sei manopole. Il nostro ampli manda un solo `bias.
 con **sette** parametri, quindi si tengono i sei nomi e il settimo — quasi certamente il
 tipo — resta un numero. Il parametro 0 è confermato da un'altra strada: girando la
 manopola fisica del riverbero l'ampli manda `bias.reverb` parametro 0 (docs §3.6).
+
+### Parametri che manopole non sono
+
+**Il numero di parametri di un effetto cambia da preset a preset.** Nelle otto catture di
+`captures/2026-08-10-libreria-8-preset.json` il noise gate ha due parametri su tre preset
+e **tre** sugli altri cinque; il riverbero sette e otto, negli stessi cinque. Il parametro
+in più è sempre l'ultimo e vale **esattamente 1**, in tutti e dieci i casi. Succede anche
+altrove (`DistortionTS9` con quattro, `SABdriver` con quattro) ma lì c'è un esempio solo a
+testa, troppo poco per dirne qualcosa.
+
+Il noise gate di manopole ne ha due, e l'utente l'ha notato subito: un cursore chiamato
+«3» in mezzo a quelli veri. Da qui il campo `quante` nella tabella: **quante manopole ha
+davvero l'effetto**. Può essere più dei nomi che sappiamo (riverbero: sette manopole, sei
+nomi) e meno dei parametri che arrivano. `SparkEffetti.extra(id, indice)` risponde sul
+singolo parametro, e senza `quante` risponde sempre no — non sapere non è un motivo per
+mettere via qualcosa.
+
+Nell'editor quei parametri **non spariscono**: finiscono in un `<details>` chiuso in fondo
+al blocco, «1 parametro che non è una manopola», e lì si muovono come tutti gli altri.
+Nasconderli sarebbe la stessa bugia di prima al rovescio, e se un domani si scopre che uno
+conta davvero è ancora lì.
+
+Cosa siano resta aperto. L'ipotesi più semplice — preset nati sul firmware nuovo contro
+preset vecchi importati — spiegherebbe perché cambino da preset a preset e non da effetto
+a effetto.
 
 `MODELLI` sta nello stesso file e viene dallo stesso catalogo, più i modelli che
 compaiono nei preset dell'utente ma che lì non ci sono (`JH.FuzzTone`, `Comp76`,

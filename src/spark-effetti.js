@@ -35,10 +35,20 @@ window.SparkEffetti = (function () {
    * chiave   = identificativo che manda l'ampli
    * nome     = come chiamarlo per chi legge
    * manopole = nomi dei parametri, **in ordine di indice**
+   * quante   = quante manopole ha davvero l'effetto, quando lo sappiamo.
+   *            Può essere **più** dei nomi (una manopola vera senza nome), e
+   *            può essere **meno** dei parametri che l'ampli manda: quelli in
+   *            più non sono manopole e la UI li mette da parte. Assente vuol
+   *            dire che non lo sappiamo, e allora nessun parametro si tocca.
    */
   const TABELLA = {
-    /* ---- Noise gate ---- */
-    'bias.noisegate': { nome: 'Noise Gate', manopole: ['Threshold', 'Decay'] },
+    /* ---- Noise gate ----
+       L'ampli manda **due o tre** parametri per il noise gate, a seconda del
+       preset: nelle otto catture di `captures/2026-08-10-libreria-8-preset.json`
+       cinque preset su otto ne hanno un terzo, e in tutti e cinque vale
+       esattamente 1. Le manopole restano due — Threshold e Decay — quindi il
+       terzo non è una manopola e non merita un cursore in mezzo agli altri. */
+    'bias.noisegate': { nome: 'Noise Gate', manopole: ['Threshold', 'Decay'], quante: 2 },
 
     /* ---- Comp / Wah ---- */
     'LA2AComp': { nome: 'LA Comp', manopole: ['Limit/Compress', 'Gain', 'Peak Reduction'] },
@@ -177,8 +187,12 @@ window.SparkEffetti = (function () {
        non basta per scriverci sopra un'etichetta, e resta un numero.
 
        Il parametro 0 è confermato da un'altra parte: girando la manopola fisica
-       del riverbero l'ampli manda `bias.reverb` parametro 0 (docs §3.6). */
-    'bias.reverb': { nome: 'Riverbero',
+       del riverbero l'ampli manda `bias.reverb` parametro 0 (docs §3.6).
+
+       L'ottavo, quando c'è, è un'altra cosa ancora: compare negli stessi cinque
+       preset che hanno il terzo parametro del noise gate e vale sempre
+       esattamente 1. Come quello, non è una manopola — da qui `quante: 7`. */
+    'bias.reverb': { nome: 'Riverbero', quante: 7,
       manopole: ['Level', 'Damping', 'Low Cut', 'High Cut', 'Dwell', 'Time'] },
   };
 
@@ -247,6 +261,20 @@ window.SparkEffetti = (function () {
     return voce.manopole[indice] || null;
   }
 
+  /**
+   * Questo parametro è uno di quelli che l'ampli manda ma che manopola non è?
+   *
+   * Serve a non mettere un cursore senza nome in mezzo a quelli veri: il noise
+   * gate ha due manopole e su certi preset l'ampli manda tre parametri. Il
+   * terzo esiste, va conservato e si può ancora muovere, ma sta da parte.
+   *
+   * Solo dove `quante` è dichiarato: senza, non sappiamo niente e non si tocca.
+   */
+  function extra(id, indice) {
+    const voce = TABELLA[id];
+    return !!voce && voce.quante !== undefined && indice >= voce.quante;
+  }
+
   /** La riga della tabella è compatibile con quello che manda l'ampli? */
   function affidabile(id, quantiVeri) {
     const voce = TABELLA[id];
@@ -259,5 +287,5 @@ window.SparkEffetti = (function () {
     return Object.keys(TABELLA).length;
   }
 
-  return { TABELLA, MODELLI, nome, manopola, affidabile, quantiConosciuti };
+  return { TABELLA, MODELLI, nome, manopola, extra, affidabile, quantiConosciuti };
 })();
