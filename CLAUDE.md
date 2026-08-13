@@ -521,6 +521,40 @@ Due strade, la prima costa niente:
    Wireshark. Dà i comandi esatti. Attenzione: mentre l'app ufficiale è connessa la
    nostra non può esserlo, quindi sono due sessioni separate.
 
+### Pedale ESP32 autonomo
+
+Chiesto il 13 agosto 2026: un pedale costruito con un ESP32, con i preset dentro, che
+comanda lo Spark da solo. **È fattibile, e la parte difficile è già in `reference/`** —
+che finora era servito solo come documentazione del protocollo. Guardandolo per questo,
+fa tre cose che valgono tutte:
+
+- **client BLE verso l'ampli** (`connect_spark`): manda `change_hardware_preset`,
+  `change_effect`, `change_effect_parameter`, `create_preset`. È il pedale autonomo.
+- **server BLE che si annuncia col servizio dell'ampli** (`pAdvertising->start()`, con
+  `app_msg_out` accanto a `spark_msg_out`): l'app ufficiale si collega *al pedale*, che
+  fa da ponte. Serve perché l'ampli accetta un padrone solo — così non si perde il
+  telefono per avere il pedale.
+- **client BLE verso una pedaliera**, con `PEDAL_SERVICE` =
+  `03b80e5a-ede8-4b33-a751-6ce34ec4c700` (`SparkComms.h:49`), che è **il servizio BLE
+  MIDI**: lo stesso che Chrome blocca in Web Bluetooth. Su ESP32 quel limite non esiste,
+  quindi la Chocolate si attacca lì senza passare da Web MIDI.
+
+Quello che un porting dovrebbe portarsi dietro sono le differenze dello Spark 2 che
+abbiamo trovato noi, tutte già scritte qui sopra e coperte da test: il byte `0x00` finale
+su `0x0115`, `0x0104` e `0x0106`; **chunk da 25 byte e non da 128** (con 128 lo Spark 2
+si disconnette, e il riferimento usa 128); `0x0127` che non salva, quindi slot indirizzato
+diretto più cambio preset via e ritorno; stesso seq per tutti i chunk di un preset; otto
+slot e non quattro. Le catture in `test/fixtures/` e `captures/` fanno da banco di prova
+per un encoder in C++ come lo fanno per quello in JS.
+
+Restano uguali le due cose fisiche: `0x0138` è istantaneo solo per gli otto slot, un
+preset intero è circa un secondo — un pedale autonomo ha lo stesso vincolo del telefono,
+e conviene che si legga gli otto slot all'accensione (`0x0201`) per sapere cosa può fare
+di scatto. Lo spazio non è un problema: un preset è qualche centinaio di byte.
+
+Primo passo se si prende questa strada, prima di saldare qualsiasi cosa: caricare lo
+sketch del riferimento con quelle differenze e vedere se si collega e cambia preset.
+
 Ancora da fare, deciso: niente. Il prossimo passo lo decide l'utente.
 
 `loadPreset` e `storePreset` sono **entrambi verificati sull'hardware**: il primo l'11
