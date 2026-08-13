@@ -414,10 +414,11 @@ Studio A, Chamber, Hall Natural, Plate Short, Hall Ambient, Plate Rich, Hall Med
 Plate Long, Room Studio B.
 
 **L'ordine però non è confermato.** Che l'elenco dell'app segua i valori del parametro è
-verosimile e niente lo contraddice, ma nessuno l'ha verificato: per questo l'editor
-scrive sempre anche il numero della posizione accanto al nome (`3 — Hall Natural`). Se
-sono sfasati basta ascoltare due tipi lontani fra loro — un Plate e un Room — e la
-correzione è una rotazione dell'elenco, non una caccia.
+verosimile e niente lo contraddice, ma nessuno l'ha verificato. Nell'elenco si legge il
+solo nome — scelta dell'utente, e il numero accanto era rumore per chi suona — mentre la
+posizione resta nel suggerimento di ogni voce. Se un giorno si scoprisse sfasato, basta
+ascoltare due tipi lontani fra loro (un Plate e un Room) e la correzione è una rotazione
+dell'elenco, non una caccia.
 
 `MODELLI` sta nello stesso file e viene dallo stesso catalogo, più i modelli che
 compaiono nei preset dell'utente ma che lì non ci sono (`JH.FuzzTone`, `Comp76`,
