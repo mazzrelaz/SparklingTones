@@ -329,6 +329,7 @@
   <div class="barra-alta">
     <h2 id="titoloEditor">Regola il suono</h2>
     <span style="flex:1"></span>
+    <button id="btnRileggi" class="piccolo">Rileggi dall'ampli</button>
     <button id="btnSalvaModifiche">Salva in libreria</button>
     <button class="primary" data-chiudi="pannelloEditor">Fatto</button>
   </div>
@@ -1678,6 +1679,23 @@ async function svuotaCoda() {
   }
   if (inAttesa.size) timerInvio = setTimeout(svuotaCoda, 60);
 }
+
+/**
+ * Ricarica la catena da quello che l'ampli ha davvero adesso, senza
+ * rimandargli il preset. Serve quando la verità può essere cambiata sotto:
+ * una manopola girata sull'ampli, l'app ufficiale, un comando che non sappiamo
+ * se ha attecchito — e serve per misurare, perché il modo di capire cos'è un
+ * parametro è scrivergli un valore e guardare cosa ci ridà l'ampli.
+ */
+$('btnRileggi').addEventListener('click', async () => {
+  if (!inModifica) return;
+  if (!spark.connected) { logLine('ampli non connesso: non c\'è niente da rileggere.'); return; }
+  logProgress('rileggo la catena dall\'ampli…');
+  const catena = await aggiornaCatenaDallAmpli();
+  logLine(catena
+    ? 'catena riletta: adesso sullo schermo c\'è quello che ha l\'ampli.'
+    : 'non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.');
+});
 
 $('btnSalvaModifiche').addEventListener('click', async () => {
   if (!inModifica) return;
