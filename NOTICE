@@ -1,0 +1,47 @@
+SparklingTones
+Copyright (c) 2026 Massimo Togni
+
+Questo prodotto include, o si basa su, software di terze parti.
+
+
+1. Soundshed — licenza MIT
+   https://github.com/soundshed/soundshed-app
+   Copyright (c) Soundshed contributors
+
+   Da `src/spork/src/devices/spark/sparkFxCatalog.ts` vengono i nomi in chiaro
+   degli effetti e delle loro manopole, riportati e adattati in
+   `src/spark-effetti.js`. L'amplificatore quei nomi non li manda: manda
+   identificativi e indici.
+
+   Testo della licenza MIT: lo stesso riportato in LICENSE, con il copyright
+   dei rispettivi autori.
+
+
+2. paulhamsh/Spark — licenza Apache 2.0
+   https://github.com/paulhamsh/Spark
+
+   In `reference/paulhamsh/` ci sono copie non modificate di alcuni sorgenti
+   di quel progetto (`SparkESP32_*.ino`, `SparkESP32_*.h`, `SparkClass_*.py`),
+   tenute come riferimento: da lì è stata capita la struttura dei messaggi
+   dell'amplificatore. Non fanno parte dell'applicazione e non vengono
+   caricate da nessuna pagina.
+
+   Copia della licenza: reference/paulhamsh/LICENSE-Apache-2.0.txt
+
+   Modifiche: nessuna. I file sono copie testuali, usate come documentazione.
+   Il codice dell'applicazione è scritto da zero in JavaScript e non riusa
+   quelle righe; dove il comportamento è stato ripreso, il commento nel
+   sorgente cita il file e la riga di origine.
+
+
+3. Documentazione del protocollo
+
+   Le note sul protocollo raccolte in `docs/` derivano da osservazione diretta
+   dell'apparecchio e da documentazione pubblica di terzi. I nomi dei modelli
+   di effetto, dei tipi di riverbero e delle manopole sono quelli che si
+   leggono sull'apparecchio e nell'applicazione ufficiale, citati per
+   identificarli.
+
+
+Nessuno dei suddetti progetti è affiliato a questo, né lo approva o lo
+supporta. Questo progetto non ha alcun rapporto con Positive Grid Inc.

@@ -290,6 +290,15 @@ al marchio. Non manca a nessuno — quale vista si ha davanti lo dicono il conte
 pulsante che porta all'altra. Il logo ha `margin-right:auto` e spinge i pulsanti dalla
 parte opposta, che è il lavoro che prima faceva il titolo con `flex:1`.
 
+**I nomi delle pagine non ci sono più da nessuna parte**, su richiesta: né in intestazione
+né in cima ai pannelli. Restano solo i titoli che dicono *su cosa* si sta lavorando — il
+nome del preset nell'editor, la posizione della catena nella scelta del modello, il posto
+del banco — che non sono nomi di pagina ma il contenuto stesso.
+
+L'app si chiama **SparklingTones** ovunque si veda: `<title>`, manifest (`name` e
+`short_name`), titolo iOS. Prima era «Spark 2 Controller», che era il nome del progetto,
+non del prodotto.
+
 **Il marchio sta in ogni schermata**, anche nei pannelli a tutto schermo. Non è ripetuto
 nel markup: `marchioNeiPannelli()` copia quello dell'intestazione in ogni
 `.pannello > .barra-alta` all'avvio, così i pannelli che si aggiungeranno ce l'hanno
@@ -655,6 +664,33 @@ lasciato. Verificato: 41 eventi diventano un comando solo, col valore finale giu
 
 Il blocco spento si vede spento e lo dice: **girare la manopola di un effetto spento non
 produce nessun suono**, ed è una trappola già pagata una volta.
+
+## Informazioni, licenze, responsabilità
+
+Il pannello «about» (`pannelloAbout`, si apre da «Altro») e i file `LICENSE` e `NOTICE`
+sono la parte legale, chiesta dall'utente il 13 agosto 2026. Quello che c'è dentro, e
+perché, così non si riscrive a caso se un domani va rivisto:
+
+- **Autore: Massimo Togni. Licenza MIT**, cioè libero utilizzo — è la forma standard di
+  «fai quello che vuoi, non garantisco niente», e contiene già l'esclusione di garanzia e
+  di responsabilità in maiuscolo che vale come clausola.
+- **Nessuna responsabilità**, detta anche in italiano e in concreto: sovrascrivere uno
+  slot non si torna indietro, e un ampli può piantarsi e volere lo stacco della corrente.
+  Sono due cose successe davvero in questo progetto, non formule.
+- **Nessun rapporto con Positive Grid Inc.**: non prodotto, approvato, sponsorizzato né
+  supportato, e non ne usa codice. I marchi sono citati per dire con cosa funziona — uso
+  descrittivo, che è quello che rende lecito nominarli.
+- **Provato solo su Spark 2**, un solo esemplare, e il protocollo è ricostruito
+  osservando, non documentazione ufficiale.
+- **Niente esce di lì**: nessun dato raccolto o inviato, la libreria sta nel browser.
+
+Le licenze di terzi sono verificate, non supposte: **Soundshed è MIT**
+(nomi di effetti e manopole, in `spark-effetti.js`) e **paulhamsh/Spark è Apache 2.0**
+(riferimento del protocollo). Quest'ultima conta più di quanto sembri, perché in
+`reference/paulhamsh/` ci sono **copie dei suoi sorgenti**: Apache 2.0 vuole
+l'attribuzione e una copia della licenza accanto a chi la ridistribuisce, e adesso c'è
+(`reference/paulhamsh/LICENSE-Apache-2.0.txt`, più `NOTICE` in radice che dice cosa e
+senza modifiche).
 
 ## Strade future chieste dall'utente (13 agosto 2026)
 

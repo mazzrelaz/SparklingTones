@@ -1,7 +1,7 @@
 {
-  "name": "Spark 2 Controller",
-  "short_name": "Spark 2",
-  "description": "Libreria e vista live per il Positive Grid Spark 2",
+  "name": "SparklingTones",
+  "short_name": "SparklingTones",
+  "description": "Libreria e vista live per amplificatore Spark 2",
   "lang": "it",
   "dir": "ltr",
   "start_url": "./index.html",

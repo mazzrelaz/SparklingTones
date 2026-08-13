@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Spark 2 — preset e live</title>
+<title>SparklingTones</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Spark 2">
+<meta name="apple-mobile-web-app-title" content="SparklingTones">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
@@ -274,6 +274,14 @@
                                      background:#17181c; border:1px solid var(--line);
                                      border-radius:7px; cursor:pointer; }
   .famiglia-voce .nome { flex:1; min-width:0; font-size:0.9rem; }
+
+  /* La pagina delle informazioni si legge, quindi righe più larghe del solito
+     e testo un filo più grande: è l'unica schermata dell'app fatta di parole. */
+  .about { max-width:70ch; font-size:0.86rem; line-height:1.65; color:var(--dim); }
+  .about p { margin:0 0 10px; }
+  .about strong { color:var(--text); }
+  .about a { color:var(--accent); }
+  .about code { font-family:'SF Mono',Consolas,monospace; font-size:0.9em; color:var(--text); }
   /* Un pannello copre tutto lo schermo, log compreso: quello che succede va
      detto qui dentro, o non lo legge nessuno. */
   .stato-pannello { font-size:0.8rem; color:var(--gold); background:var(--panel);
@@ -384,7 +392,6 @@
 <!-- come si organizza la libreria: le famiglie di suono e le categorie -->
 <div class="pannello" id="pannelloCategorie">
   <div class="barra-alta">
-    <h2>Organizza</h2>
     <span style="flex:1"></span>
     <button class="primary" data-chiudi="pannelloCategorie">Fatto</button>
   </div>
@@ -418,7 +425,6 @@
 <!-- esporta, importa, diagnostica -->
 <div class="pannello" id="pannelloAltro">
   <div class="barra-alta">
-    <h2>Altro</h2>
     <span style="flex:1"></span>
     <button class="primary" data-chiudi="pannelloAltro">Fatto</button>
   </div>
@@ -432,6 +438,94 @@
   </div>
   <p class="spiega" style="margin-top:12px">Si importano sia i backup di quest'app (.json)
     sia il <code>preset_backup.zip</code> dell'app ufficiale.</p>
+  <div style="margin-top:20px">
+    <button id="btnAbout" class="piccolo">Informazioni, licenze e responsabilità</button>
+  </div>
+</div>
+
+<!-- informazioni, licenze, responsabilità -->
+<div class="pannello" id="pannelloAbout">
+  <div class="barra-alta">
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloAbout">Fatto</button>
+  </div>
+
+  <div class="about">
+    <p><strong>SparklingTones</strong> organizza i preset di un amplificatore Spark 2 e li
+      manda all'amplificatore via Bluetooth. Gira per intero dentro il browser: non c'è un
+      server, non c'è un account, e la libreria resta sull'apparecchio che stai usando.</p>
+
+    <p>Scritto da <strong>Massimo Togni</strong>.</p>
+
+    <div class="sezione-pannello">
+      <h3>Uso libero</h3>
+      <p>Questo software è di <strong>libero utilizzo</strong>: si può usare, copiare,
+        modificare e ridistribuire, alle condizioni della licenza MIT, di cui trovi il
+        testo nel file <code>LICENSE</code> insieme al codice.</p>
+    </div>
+
+    <div class="sezione-pannello">
+      <h3>Nessuna garanzia, nessuna responsabilità</h3>
+      <p>Il software è fornito <strong>«così com'è»</strong>, senza garanzie di alcun tipo,
+        esplicite o implicite, comprese quelle di commerciabilità, idoneità a uno scopo
+        particolare e non violazione di diritti altrui.</p>
+      <p><strong>L'autore non si assume alcuna responsabilità</strong> per danni diretti o
+        indiretti derivanti dall'uso di questo software: fra questi, a titolo di esempio e
+        senza che l'elenco sia esaustivo, la perdita o l'alterazione dei preset salvati
+        nell'amplificatore o nella libreria, malfunzionamenti dell'apparecchio, e qualunque
+        conseguenza di un comando mandato via Bluetooth. <strong>Lo usi a tuo rischio.</strong></p>
+      <p>Due cose che conviene sapere prima di usarlo, non per formalità ma perché possono
+        capitare davvero: scrivere un preset in uno slot <strong>sovrascrive</strong> quello
+        che c'era, e non si torna indietro; e un amplificatore può smettere di rispondere
+        e richiedere di essere spento e riacceso. Tieni un backup dei preset a cui tieni.</p>
+    </div>
+
+    <div class="sezione-pannello">
+      <h3>Nessun rapporto con Positive Grid</h3>
+      <p>Questo software è un progetto indipendente e <strong>non ha alcun rapporto con
+        Positive Grid Inc.</strong>: non è prodotto, approvato, sponsorizzato, verificato né
+        supportato da Positive Grid, e non ne usa codice.</p>
+      <p>«Positive Grid» e «Spark» sono marchi dei rispettivi titolari, citati qui
+        unicamente per indicare con quale apparecchio questo software funziona, secondo
+        l'uso descrittivo consentito. Ogni altro marchio citato appartiene ai suoi
+        titolari.</p>
+      <p>Per l'assistenza sull'amplificatore rivolgiti a Positive Grid: di questo software
+        loro non sanno niente e non ne rispondono.</p>
+    </div>
+
+    <div class="sezione-pannello">
+      <h3>Su cosa è stato provato</h3>
+      <p>Provato <strong>solo su Spark 2</strong>, e su un solo esemplare. Su altri modelli
+        della stessa famiglia non è mai stato acceso: potrebbe funzionare, potrebbe non
+        fare niente, potrebbe comportarsi in modo imprevisto. Il protocollo è stato
+        ricostruito osservando l'apparecchio, non è documentazione ufficiale, e su un
+        firmware diverso dal mio può cambiare.</p>
+    </div>
+
+    <div class="sezione-pannello">
+      <h3>Cosa esce da qui</h3>
+      <p>Niente. Nessun dato viene raccolto né inviato: la libreria sta nel browser di
+        questo apparecchio, e l'unica cosa che il programma comunica sono i comandi
+        all'amplificatore, via Bluetooth, mentre lo stai usando.</p>
+    </div>
+
+    <div class="sezione-pannello">
+      <h3>Grazie a, e licenze</h3>
+      <p><strong>Soundshed</strong> — <em>licenza MIT</em>. Da lì vengono i nomi in chiaro
+        degli effetti e delle loro manopole, che l'amplificatore non manda:
+        <code>sparkFxCatalog.ts</code>, Copyright (c) Soundshed contributors.
+        <a href="https://github.com/soundshed/soundshed-app" target="_blank"
+           rel="noopener noreferrer">github.com/soundshed/soundshed-app</a></p>
+      <p><strong>paulhamsh/Spark</strong> — <em>licenza Apache 2.0</em>. Il riferimento
+        funzionante da cui è stata capita la struttura dei messaggi. Copie dei suoi
+        sorgenti stanno nel repository, in <code>reference/paulhamsh/</code>, con la licenza
+        accanto.
+        <a href="https://github.com/paulhamsh/Spark" target="_blank"
+           rel="noopener noreferrer">github.com/paulhamsh/Spark</a></p>
+      <p>I nomi dei tipi di riverbero e dei modelli sono quelli che si leggono nell'app
+        ufficiale, trascritti a mano per poterli riconoscere: sono citazioni, non codice.</p>
+    </div>
+  </div>
 </div>
 
 <!-- editor della catena effetti, in tempo reale sul suono che sta suonando -->
@@ -2149,6 +2243,7 @@ $('btnAzzeraCategorie').addEventListener('click', async () => {
    ==================================================================== */
 
 $('btnAltro').addEventListener('click', () => apriPannello('pannelloAltro'));
+$('btnAbout').addEventListener('click', () => apriPannello('pannelloAbout'));
 
 $('btnConnect').addEventListener('click', async () => {
   try {
