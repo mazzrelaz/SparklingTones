@@ -878,7 +878,58 @@ di scatto. Lo spazio non è un problema: un preset è qualche centinaio di byte.
 Primo passo se si prende questa strada, prima di saldare qualsiasi cosa: caricare lo
 sketch del riferimento con quelle differenze e vedere se si collega e cambia preset.
 
-Ancora da fare, deciso: niente. Il prossimo passo lo decide l'utente.
+#### La forma che l'utente vuole (13 agosto 2026)
+
+Dettata così: il pedale **si prende i preset dall'app** e poi è autonomo con lo Spark;
+dentro ha dei **blocchi selezionabili col piede**, ogni blocco coi suoi preset che spara
+diretti sull'ampli; **nessuna regolazione, solo preset**; e poi il looper. È la vista
+live del web, staccata dal telefono — non un secondo editor.
+
+**Quel «solo preset» semplifica enormemente il firmware**, e conviene sfruttarlo fino in
+fondo invece di portare l'encoder in C++:
+
+- l'app **preserializza**. `serializePreset` produce già il payload esatto, e
+  `buildChunk` il frame `f0 01 <seq> <checksum> …  f7`. Il pedale riceve **frame già
+  pronti** e li scrive tali e quali.
+- **il seq si può correggere sul posto**: sta all'indice 2 e il checksum è un XOR dei
+  soli byte impacchettati (`spark-protocol.js:220-222`), quindi **non lo copre**. Il
+  pedale patcha un byte e non ricalcola niente.
+- senza regolazione non servono `0x0104`, `0x0115`, `0x0106`, né il parser dei preset.
+  Restano `0x0101` (frame precotti), `0x0138` (tre byte) e i comandi del looper.
+
+Il porting quindi non è «l'encoder in C++»: è **una coda BLE e un patch di un byte**.
+L'encoder resta uno solo, in JS, quello già coperto da 87 test.
+
+**Come passano i preset dall'app al pedale**: il pedale fa da server GATT con un servizio
+nostro (non `0xFFC0`), e la web app ci si collega con una seconda `requestDevice` — Web
+Bluetooth regge più dispositivi insieme, quindi ampli e pedale convivono. Trentadue
+preset sono una ventina di kB, cioè qualche secondo. La SD o l'USB restano il ripiego che
+non può fallire.
+
+**Il trucco che rende i blocchi istantanei**: scegliendo un blocco il pedale ne
+**riscrive i preset negli slot dell'ampli** in sottofondo (qualche secondo, fra un pezzo
+e l'altro), e da lì i quattro tasti fanno `0x0138`, che è immediato. È l'unico modo di
+avere blocchi illimitati *e* cambio istantaneo. **Va però chiesto all'utente**: nella
+vista live i banchi inventati non scrivono mai sull'ampli, ed è una sua scelta esplicita
+— su un pedale dedicato il compromesso è diverso, ma non è una decisione da prendere al
+posto suo.
+
+**M-VAVE o interruttori sull'ESP32 non sono la stessa scelta a due livelli diversi.** La
+Chocolate è un *ingresso*; l'ESP32 è il controller intero. Se si costruisce l'ESP32, gli
+interruttori sui GPIO sono un `digitalRead` con antirimbalzo — niente accoppiamento,
+niente parsing MIDI, niente seconda radio, **niente seconda batteria da ricordarsi di
+caricare**. La Chocolate ha senso solo se si vuole la scatola di metallo già fatta, e
+allora diventa l'ingresso BLE MIDI dell'ESP32 (`PEDAL_SERVICE`, già nel riferimento).
+
+E c'è una cosa che solo l'ESP32 può fare: **l'ampli gli parla**. Le notifiche arrivano
+anche a lui, quindi un display può dire quale preset è attivo e come sta il looper. Col
+ponte via telefono quel ritorno passa comunque dallo schermo che non guardi mentre suoni.
+
+**Ancora da fare, deciso: niente.** Il prossimo passo lo decide l'utente. Ma l'ordine
+economico è chiaro: la **sessione d'ascolto sul looper** non costa niente e serve a tutte
+e due le strade; poi una **devkit ESP32 da otto euro** senza saldare niente, per vedere
+se si collega e cambia preset. Se quello funziona il progetto esiste, e non si è comprato
+un pedale per scoprirlo.
 
 `loadPreset` e `storePreset` sono **entrambi verificati sull'hardware**: il primo l'11
 agosto 2026 e riconfermato il 12, il secondo il 12 agosto nella forma nuova (scrittura
