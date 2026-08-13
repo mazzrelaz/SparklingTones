@@ -26,6 +26,7 @@ tools/make-icons.ps1     rigenera le icone di icons/ con System.Drawing
 tools/reader.html        legge la libreria dall'ampli e la esporta in JSON
 tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggendo
 tools/model-probe.html   idem per 0x0106: dieci varianti del cambio modello
+tools/looper-probe.html  ascolta l'ampli mentre si usa il looper e prova i comandi noti
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 tools/explorer-v1.html   versione precedente, tenuta per riferimento
 test/protocol-test.html  87 test del protocollo contro catture reali
@@ -816,6 +817,42 @@ Due strade, la prima costa niente:
    «Bluetooth HCI snoop log», si fa un giro di loop, si tira giù il file e si legge con
    Wireshark. Dà i comandi esatti. Attenzione: mentre l'app ufficiale è connessa la
    nostra non può esserlo, quindi sono due sessioni separate.
+
+**I comandi del looper sono già noti — non da misura nostra, ma da codice sorgente.**
+Trovato il 13 agosto 2026 mentre si cercava come comandare il looper dal pannello:
+**Ignitron** (`stangreg/Ignitron`) è un pedale ESP32 open source che comanda il looper
+interno dello Spark 2, ed è **esattamente il progetto che l'utente vuole costruire**.
+Da `SparkMessage.cpp` e `Config_Definitions.h`:
+
+| comando | forma | cosa fa |
+|---|---|---|
+| `0x0175` | un byte di payload | **il comando del looper** (valori qui sotto) |
+| `0x0176` | bpm, count, bars, tre flag, durata a 16 bit | cambia le impostazioni |
+| `0x0275` | vuoto | stato della registrazione |
+| `0x0276` | vuoto | configurazione |
+| `0x0278` | vuoto | stato del looper |
+
+Il byte di `0x0175`: `02` countin, `04` rec, `05` stop rec, `06` retry, `07` rec
+complete, `08` play, `09` stop, `0a` delete, `0b` dub, `0c` stop dub, `0d` undo,
+`0e` redo. Sotto `0x80` la codifica msgpack di un intero positivo è il byte stesso,
+quindi non c'è ambiguità su come scriverlo.
+
+**Restano candidati finché non li proviamo**: sono di terzi, e non sappiamo se `0x0175`
+voglia il **byte `0x00` finale** che sullo Spark 2 servono `0x0115`, `0x0104` e `0x0106`
+(ma non `0x0138`). Ignitron non lo mette. `tools/looper-probe.html` prova tutti e dodici
+i comandi con e senza, e in più registra cosa manda l'ampli quando il looper si comanda
+dai suoi tasti — che è la sessione d'ascolto, diventata verifica.
+
+**Lo Spark 2 ha i tasti del looper sul pannello**, quindi l'ascolto non ha bisogno
+dell'app ufficiale né dello snoop log: REC/DUB, PLAY/STOP, UNDO/REDO (tenuto = cancella
+tutto), TAP per il tempo. Cade il problema delle due sessioni separate.
+
+Ignitron vale anche oltre il looper: fa da **client verso l'ampli e da server verso l'app
+ufficiale**, ha i banchi di preset dentro, e gira su ESP32. Prima di scrivere firmware da
+zero conviene leggerlo — e valutare se il lavoro non sia configurarlo invece che
+riscriverlo. Attenzione però: è il pedale di qualcun altro, con le sue scelte; le nostre
+differenze verificate (chunk da 25 byte, byte `0x00` finale, stesso seq, `0x0127` che non
+salva) vanno confrontate con le sue, non date per allineate.
 
 **Che si possa fare è dimostrato da terzi**, ed è la scoperta che cambia il preventivo
 (13 agosto 2026, ricognizione sul web, non misura nostra):

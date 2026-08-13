@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spark — sonda del looper</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
+         background:#0a0a0b; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:14px; }
+  h1 { font-size:1.1rem; margin:0 0 2px; }
+  h2 { font-size:0.95rem; margin:22px 0 4px; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:76ch; line-height:1.55; }
+  .sub b { color:#c8ccd2; }
+  .status { display:inline-block; padding:3px 9px; border-radius:11px;
+            font-size:0.75rem; font-weight:600; }
+  .status.off { background:#3a2020; color:#ff8080; }
+  .status.on  { background:#1f3a24; color:#7fe08a; }
+  .status.wait{ background:#3a3520; color:#f0d060; }
+  button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
+           background:#212227; color:#e8e8ea; padding:9px 13px; border-radius:8px; }
+  button.primary { background:#e30613; color:#fff; }
+  button.marker  { background:#1c2b3a; color:#9ec9f0; }
+  button:disabled { background:#18191d; color:#4e535b; cursor:not-allowed; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  .griglia { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+             gap:8px; margin-bottom:10px; }
+  .griglia button { width:100%; text-align:left; }
+  .griglia button small { display:block; font-weight:400; color:#8a8f98; font-size:0.72rem;
+                          margin-top:2px; font-family:'SF Mono',Consolas,monospace; }
+  .conta { font-family:'SF Mono',Consolas,monospace; font-size:0.8rem; color:#8a8f98; }
+  .conta b { color:#e8e8ea; }
+  label.check { color:#b0b4bb; font-size:0.82rem; display:flex; align-items:center; gap:6px; }
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         height:46vh; overflow-y:auto; margin-top:10px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.74rem; line-height:1.55;
+         color:#8a8f98; white-space:pre-wrap; word-break:break-all; }
+  #log .tx  { color:#f0d060; }
+  #log .rx  { color:#7fe08a; }
+  #log .mk  { color:#7fb8ff; font-weight:700; }
+  #log .err { color:#ff8080; }
+  #log .t   { color:#4e535b; }
+</style>
+</head>
+<body>
+
+<h1>Sonda del looper</h1>
+<div class="sub">
+I codici qui sotto <b>non li abbiamo misurati noi</b>: vengono da
+<b>Ignitron</b> (<code>stangreg/Ignitron</code>), pedale ESP32 open source che dichiara di
+comandare il looper interno dello Spark&nbsp;2. Sono quindi <b>candidati molto probabili</b>,
+non fatti verificati — e questa pagina serve a trasformarli in fatti.<br><br>
+Due lavori, indipendenti:<br>
+<b>1. Ascolto.</b> Comandi il looper <b>dai tasti dell'ampli</b> (REC/DUB, PLAY/STOP,
+UNDO/REDO, TAP) e guardi cosa arriva. Prima di ogni pressione tocca il marcatore
+corrispondente qui, così nel log si vede cosa ha risposto a cosa.<br>
+<b>2. Invio.</b> Provi i dodici comandi candidati e senti se il looper fa quello che dicono.<br><br>
+Il numero <b>RX totali</b> è sempre in vista apposta: <b>0</b> vuol dire ampli muto o
+connessione morta, più di 0 vuol dire che parla ed è la nostra lettura a scartare. Senza
+quel numero i due casi si vedono uguali e portano in direzioni opposte.
+</div>
+
+<div class="row">
+  <span id="status" class="status off">non connesso</span>
+  <button id="btnConnect" class="primary">Connetti</button>
+  <span class="conta">RX totali <b id="rxTot">0</b> · scartati <b id="rxKo">0</b></span>
+  <button id="btnExport" disabled>Esporta la sessione</button>
+  <button id="btnClear">Pulisci il log</button>
+</div>
+
+<h2>1 — Ascolto: marcatori da toccare <i>prima</i> di premere sull'ampli</h2>
+<div class="griglia" id="marcatori"></div>
+
+<h2>2 — Comandi candidati &nbsp;<code style="color:#8a8f98;font-size:0.8rem">0x0175</code></h2>
+<div class="row">
+  <label class="check"><input type="checkbox" id="conZero"> aggiungi il byte <code>0x00</code> finale</label>
+  <span class="sub" style="margin:0">— sullo Spark 2 lo vogliono <code>0x0115</code>, <code>0x0104</code>
+  e <code>0x0106</code>, ma non <code>0x0138</code>. Ignitron non lo mette: se senza non
+  succede niente, riprova con.</span>
+</div>
+<div class="griglia" id="comandi"></div>
+
+<h2>3 — Interrogazioni</h2>
+<div class="griglia" id="query"></div>
+
+<div id="log"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script>
+'use strict';
+
+const $ = (id) => document.getElementById(id);
+const hex = (n) => n.toString(16).padStart(2, '0');
+const hexList = (a) => Array.from(a).map(hex).join(' ');
+
+/* I dodici valori di SPK_LOOPER_CMD_*, da Config_Definitions.h di Ignitron.
+   Il payload di 0x0175 è un byte solo: sotto 0x80 la codifica msgpack di un
+   intero positivo è il byte stesso, quindi non c'è ambiguità su come scriverlo. */
+const COMANDI = [
+  { v: 0x02, n: 'COUNTIN',       d: 'conteggio iniziale' },
+  { v: 0x04, n: 'REC',           d: 'inizia a registrare' },
+  { v: 0x05, n: 'STOP_REC',      d: 'ferma la registrazione' },
+  { v: 0x06, n: 'RETRY',         d: 'ricomincia da capo' },
+  { v: 0x07, n: 'REC_COMPLETE',  d: 'registrazione completa' },
+  { v: 0x08, n: 'PLAY',          d: 'suona il loop' },
+  { v: 0x09, n: 'STOP',          d: 'ferma il loop' },
+  { v: 0x0a, n: 'DELETE',        d: 'cancella tutto' },
+  { v: 0x0b, n: 'DUB',           d: 'sovraincidi' },
+  { v: 0x0c, n: 'STOP_DUB',      d: 'ferma la sovraincisione' },
+  { v: 0x0d, n: 'UNDO',          d: 'togli l\'ultimo strato' },
+  { v: 0x0e, n: 'REDO',          d: 'rimettilo' },
+];
+
+const QUERY = [
+  { cmd: 0x02, sub: 0x75, n: 'stato registrazione', d: 'getLooperRecordStatus' },
+  { cmd: 0x02, sub: 0x76, n: 'configurazione',      d: 'getLooperConfig' },
+  { cmd: 0x02, sub: 0x78, n: 'stato del looper',    d: 'getLooperStatus' },
+];
+
+/* I tasti fisici dello Spark 2, come li chiama il manuale. */
+const MARCATORI = [
+  'REC/DUB', 'PLAY/STOP', 'UNDO/REDO', 'CLEAR (tenuto)', 'TAP',
+  'niente — solo silenzio',
+];
+
+let rxTot = 0, rxKo = 0;
+const sessione = [];        // tutto quello che è successo, per l'esportazione
+const t0 = Date.now();
+
+const spark = new SparkTransport({
+  onStatus: (state, label) => {
+    const el = $('status');
+    el.className = 'status ' + (state === 'connected' ? 'on'
+                              : state === 'connecting' ? 'wait' : 'off');
+    el.textContent = label;
+    const giu = state !== 'connected';
+    document.querySelectorAll('button[data-invia]').forEach(b => { b.disabled = giu; });
+    $('btnExport').disabled = sessione.length === 0;
+  },
+  onMessage: (msg) => {
+    rxTot++;
+    if (!msg.checksumOk) rxKo++;
+    $('rxTot').textContent = rxTot;
+    $('rxKo').textContent = rxKo;
+    riga('rx', `RX 0x${hex(msg.cmd)}${hex(msg.sub)} seq=0x${hex(msg.seq)}` +
+               `${msg.checksumOk ? '' : ' CHECKSUM KO'}  ${hexList(msg.data)}`,
+         { cmd: msg.cmd, sub: msg.sub, seq: msg.seq, data: Array.from(msg.data),
+           checksumOk: msg.checksumOk, raw: msg.raw });
+  },
+  onLog: (t) => riga('log', t),
+});
+
+function riga(tipo, testo, extra) {
+  const ms = Date.now() - t0;
+  const stampa = String(Math.floor(ms / 1000)).padStart(3, '0') + '.' +
+                 String(ms % 1000).padStart(3, '0');
+  sessione.push(Object.assign({ ms, tipo, testo }, extra || {}));
+  const el = document.createElement('div');
+  el.className = tipo;
+  el.innerHTML = `<span class="t">${stampa}</span>  ` +
+                 testo.replace(/[<&]/g, c => c === '<' ? '&lt;' : '&amp;');
+  $('log').appendChild(el);
+  $('log').scrollTop = $('log').scrollHeight;
+  $('btnExport').disabled = false;
+}
+
+function invia(cmd, sub, data, etichetta) {
+  const payload = data.slice();
+  if (cmd === 0x01 && $('conZero').checked) payload.push(0x00);
+  riga('tx', `TX 0x${hex(cmd)}${hex(sub)} ${etichetta} — payload ${hexList(payload) || '(vuoto)'}`,
+       { cmd, sub, data: payload });
+  spark.send({ cmd, sub, data: payload })
+       .catch(err => riga('err', 'errore invio: ' + err.message));
+}
+
+/* ---- costruzione dei tre pannelli di pulsanti ---- */
+
+for (const m of MARCATORI) {
+  const b = document.createElement('button');
+  b.className = 'marker';
+  b.innerHTML = `▸ ${m}<small>marcatore</small>`;
+  b.onclick = () => riga('mk', `———— sto per premere: ${m} ————`, { marcatore: m });
+  $('marcatori').appendChild(b);
+}
+
+for (const c of COMANDI) {
+  const b = document.createElement('button');
+  b.dataset.invia = '1';
+  b.disabled = true;
+  b.innerHTML = `${c.n}<small>0x${hex(c.v)} · ${c.d}</small>`;
+  b.onclick = () => invia(0x01, 0x75, [c.v], c.n);
+  $('comandi').appendChild(b);
+}
+
+for (const q of QUERY) {
+  const b = document.createElement('button');
+  b.dataset.invia = '1';
+  b.disabled = true;
+  b.innerHTML = `${q.n}<small>0x${hex(q.cmd)}${hex(q.sub)} · ${q.d}</small>`;
+  b.onclick = () => invia(q.cmd, q.sub, [], q.n);
+  $('query').appendChild(b);
+}
+
+$('btnConnect').onclick = () => spark.connect().catch(err => riga('err', err.message));
+
+$('btnClear').onclick = () => { $('log').textContent = ''; };
+
+$('btnExport').onclick = () => {
+  const nome = `looper-${new Date().toISOString().slice(0, 10)}.json`;
+  const blob = new Blob([JSON.stringify({
+    quando: new Date().toISOString(),
+    nota: 'Sonda del looper. I codici provengono da stangreg/Ignitron, non da misura nostra.',
+    rxTotali: rxTot, rxScartati: rxKo,
+    eventi: sessione,
+  }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nome;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+riga('log', 'pronta. Connetti l\'ampli, poi parti dall\'ascolto.');
+</script>
+</body>
+</html>
