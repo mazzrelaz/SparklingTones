@@ -99,6 +99,13 @@ pronta. Questi segnaposto servono solo a separare due prove, o a marcare un sile
 <h2>3 — Interrogazioni</h2>
 <div class="griglia" id="query"></div>
 
+<h2>4 — Il click: le prove che restano</h2>
+<div class="sub" style="margin-bottom:8px"><code>0x0175</code> con <code>02</code> è
+confermato e ignorato, con e senza il byte finale. Resta da vedere se il click si accenda
+scrivendo prima le impostazioni — <code>0x0176</code> con gli stessi byte che l'ampli
+dichiara suoi.</div>
+<div class="griglia" id="prove"></div>
+
 <div id="log"></div>
 
 <script src="../src/spark-protocol.js"></script>
@@ -302,6 +309,32 @@ for (const q of QUERY) {
   b.innerHTML = `${q.n}<small>0x${hex(q.cmd)}${hex(q.sub)} · ${q.d}</small>`;
   b.onclick = () => invia(q.cmd, q.sub, [], q.n);
   $('query').appendChild(b);
+}
+
+/* Le impostazioni esatte che l'ampli ha dichiarato sue rispondendo a 0x0276 il
+   13 agosto 2026: 133 bpm, straight, quattro battute, lunghezza non libera,
+   **click acceso**, 60 s di durata massima. Rimandargliele non cambia niente di
+   quello che ha già: serve a vedere se è la scrittura in sé ad armare il click. */
+const IMPOSTAZIONI = [0xcc, 0x85, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0xcd, 0xea, 0x60];
+
+const PROVE = [
+  { n: 'scrivi impostazioni', d: '0x0176 · gli stessi byte che dichiara',
+    f: () => invia(0x01, 0x76, IMPOSTAZIONI, 'impostazioni') },
+  { n: 'impostazioni ▸ poi REC', d: '0x0176, mezzo secondo, poi 0x0175 04',
+    f: () => { invia(0x01, 0x76, IMPOSTAZIONI, 'impostazioni');
+               setTimeout(() => invia(0x01, 0x75, [0x04], 'REC'), 500); } },
+  { n: 'impostazioni ▸ poi COUNTIN', d: '0x0176, mezzo secondo, poi 0x0175 02',
+    f: () => { invia(0x01, 0x76, IMPOSTAZIONI, 'impostazioni');
+               setTimeout(() => invia(0x01, 0x75, [0x02], 'COUNTIN'), 500); } },
+];
+
+for (const p of PROVE) {
+  const b = document.createElement('button');
+  b.dataset.invia = '1';
+  b.disabled = true;
+  b.innerHTML = `${p.n}<small>${p.d}</small>`;
+  b.onclick = p.f;
+  $('prove').appendChild(b);
 }
 
 $('btnConnect').onclick = () => spark.connect().catch(err => riga('err', err.message));
