@@ -425,6 +425,37 @@ lo slot salvato resta com'era finché non lo si riscrive.
 compressore, drive, ampli, modulazione, delay, riverbero. L'ordine è documentato e
 confermato da ogni preset letto dal dispositivo — un test lo verifica sulla cattura reale.
 
+### Com'è fatto l'editor
+
+Rifatto il 13 agosto 2026 su richiesta («così fanno schifo»), e le scelte sono queste:
+
+**Il modello si cambia dalla tendina che è il nome stesso del blocco.** Prima c'era un
+pulsante «cambia» accanto, che apriva un pannello a parte con la ricerca: nessuno
+collegava quel pannello al nome che stava leggendo, e per cambiare un ampli si usciva da
+dove si stava lavorando. Il pannello dei modelli è stato tolto — la tendina nativa si
+sfoglia col pollice e sul telefono si apre a tutto schermo, quindi fa lo stesso lavoro.
+L'ultima voce è «altro modello, a mano…», perché l'elenco non è per forza completo.
+
+**L'identificativo interno non si vede più** (`Twin`, `LA2AComp`): serve nei comandi, non
+a chi sta regolando un suono, e stava sotto ogni nome a fare rumore. Resta nel
+suggerimento di ogni voce della tendina.
+
+**Il nome del preset è grande e su una riga sua**, non più accanto al marchio dove non si
+leggeva. In un pannello che cambia il suono sotto le dita, sapere *quale* suono si sta
+cambiando viene prima di tutto.
+
+**Ogni parametro si prende due righe**: nome a sinistra e valore a destra, il cursore
+sotto a tutta larghezza. Prima stavano tutti e tre in fila e al cursore restava una
+fessura — su un telefono si prendeva col pollice a fatica. Il cursore è disegnato da capo
+e **la guida si riempie fino al valore** (`--p` sull'elemento, gradiente nel CSS): senza,
+un cursore a metà e uno a zero si distinguono solo cercando la pallina. Su schermo largo
+i parametri vanno a due colonne, altrimenti cinque manopole in colonna fanno scorrere la
+pagina a ogni blocco e la catena non si vede mai intera.
+
+**La spiegazione lunga sui nomi in corsivo sta chiusa** dietro un «perché certi nomi sono
+in corsivo»: serve una volta sola, e tutti i giorni è un muro di testo fra te e le
+manopole.
+
 ### La tabella dei nomi: `src/spark-effetti.js`
 
 Nessuna fonte del progetto diceva come si chiamano gli effetti in chiaro né le loro

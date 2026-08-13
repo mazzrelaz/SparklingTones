@@ -264,6 +264,9 @@
   .pannello .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px;
                           flex-wrap:wrap; }
   .pannello .spiega { color:var(--dim); font-size:0.8rem; margin:0 0 12px; }
+  /* Un «dimmi di più» che non sembri un pulsante vero: è una nota, non un'azione. */
+  .piu { background:none; border:none; padding:0; font:inherit; font-size:0.8rem;
+         color:var(--accent); cursor:pointer; text-decoration:underline dotted; }
   /* Un pannello che fa due cose diverse le tiene separate: senza stacco
      sembrava un elenco solo, e i due assi si confondevano. */
   .sezione-pannello { border-top:1px solid var(--line); padding-top:14px; margin-top:18px; }
@@ -296,39 +299,88 @@
 
   /* ---- editor della catena ------------------------------------------- */
 
-  .blocco { background:var(--panel); border:1px solid var(--line); border-radius:10px;
-            padding:10px 12px; margin-bottom:8px; }
-  .blocco.spento { opacity:0.5; }
-  .blocco .intestazione { display:flex; align-items:center; gap:10px; }
-  .blocco .categoria { font-size:0.68rem; color:var(--faint); text-transform:uppercase;
-                       letter-spacing:0.05em; }
-  .blocco .effetto { font-weight:600; font-size:0.9rem; }
-  .blocco .interruttore { margin-left:auto; font-size:0.72rem; padding:4px 10px;
-                          border-radius:12px; background:#24262b; color:var(--dim); }
+  /* Il nome del preset che si sta regolando: la prima cosa da leggere. */
+  .titolo-grande { font-size:1.35rem; margin:0 0 4px; letter-spacing:-0.01em; }
+
+  /* Ogni blocco è un modulo della catena, e si legge come tale: la fascia in
+     alto col nome e l'interruttore, i comandi sotto. */
+  .blocco { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+            padding:0; margin-bottom:10px; overflow:hidden; }
+  .blocco.spento { opacity:0.55; }
+  .blocco .intestazione { display:flex; align-items:center; gap:10px;
+                          padding:9px 12px; background:#17181c;
+                          border-bottom:1px solid var(--line); }
+  .blocco .nomi { flex:1; min-width:0; }
+  .blocco .categoria { font-size:0.64rem; color:var(--faint); text-transform:uppercase;
+                       letter-spacing:0.09em; font-weight:700; }
+  /* Il nome è una tendina, ma non deve sembrare un campo di un modulo: niente
+     cornice, testo grande, e la freccina disegnata a mano perché quella di
+     sistema su un fondo trasparente non si vede. */
+  .blocco .nome-effetto { appearance:none; -webkit-appearance:none;
+                          background:none; border:none; padding:0 18px 0 0; margin:0;
+                          font:inherit; font-size:1.02rem; font-weight:600;
+                          color:var(--text); cursor:pointer; max-width:100%;
+                          background-image:
+                            linear-gradient(45deg, transparent 50%, var(--dim) 50%),
+                            linear-gradient(135deg, var(--dim) 50%, transparent 50%);
+                          background-position:right 6px center, right 1px center;
+                          background-size:5px 5px, 5px 5px;
+                          background-repeat:no-repeat; }
+  .blocco .nome-effetto:hover { color:#fff; }
+  .blocco .nome-effetto option { background:#17181c; color:var(--text);
+                                 font-size:0.9rem; font-weight:400; }
+  .blocco .interruttore { margin-left:auto; flex:none; font-size:0.7rem; padding:5px 12px;
+                          border-radius:12px; background:#24262b; color:var(--dim);
+                          letter-spacing:0.04em; }
   .blocco .interruttore.acceso { background:#1f3a24; color:var(--green); }
-  .manopola { display:flex; align-items:center; gap:10px; margin-top:8px; }
-  .manopola .numero { min-width:5.5em; max-width:8em; text-align:left; color:var(--dim);
+
+  /* I comandi. Due colonne quando c'è spazio: cinque manopole in fila
+     verticale fanno scorrere la pagina a ogni blocco. */
+  .parametri { padding:12px; display:grid; gap:14px 22px; }
+  @media (min-width: 620px) { .parametri { grid-template-columns:1fr 1fr; } }
+
+  .manopola .etichetta { display:flex; align-items:baseline; gap:8px; margin-bottom:6px; }
+  .manopola .numero { flex:1; min-width:0; text-align:left; color:var(--dim);
                       font-size:0.74rem; cursor:pointer; overflow:hidden;
-                      text-overflow:ellipsis; white-space:nowrap; }
+                      text-overflow:ellipsis; white-space:nowrap;
+                      text-transform:uppercase; letter-spacing:0.06em; }
   .manopola .numero:hover { color:var(--text); text-decoration:underline dotted; }
-  .manopola .numero.senzaNome { color:var(--faint); font-family:Consolas,monospace; }
+  .manopola .numero.senzaNome { color:var(--faint); font-family:Consolas,monospace;
+                                text-transform:none; letter-spacing:0; }
   .manopola .numero.daTabella { color:var(--dim); font-style:italic; }
-  .blocco .tecnico { font-size:0.68rem; color:var(--faint);
-                     font-family:'SF Mono',Consolas,monospace; margin-top:1px; }
-  .blocco .cambia { font-size:0.72rem; padding:4px 10px; border-radius:12px;
-                    background:#24262b; color:var(--dim); }
-  .manopola input[type=range] { flex:1; min-width:0; accent-color:var(--accent); }
-  .manopola select.scelta { flex:1; min-width:0; background:#17181c; color:var(--text);
-                            border:1px solid var(--line); border-radius:7px;
-                            padding:4px 6px; font:inherit; font-size:0.78rem; }
-  .manopola .valore { width:3.2em; text-align:right; color:var(--dim);
-                      font-size:0.74rem; font-family:Consolas,monospace; }
-  .manopola .spiega-extra { flex:1; min-width:0; color:var(--faint); font-size:0.74rem; }
-  .avviso-spento { color:var(--gold); font-size:0.72rem; margin-top:6px; }
+  .manopola .valore { flex:none; color:var(--text); font-size:0.78rem;
+                      font-family:'SF Mono',Consolas,monospace;
+                      font-variant-numeric:tabular-nums; }
+
+  /* Il cursore, disegnato da capo: la guida si riempie fino al valore, e la
+     pallina è grande abbastanza da prenderla col pollice. */
+  input[type=range].cursore { -webkit-appearance:none; appearance:none; width:100%;
+                              height:20px; background:none; margin:0; cursor:pointer;
+                              display:block; }
+  .cursore::-webkit-slider-runnable-track {
+    height:6px; border-radius:3px;
+    background:linear-gradient(to right, var(--accent) calc(var(--p, 0) * 100%),
+                                          #26282e calc(var(--p, 0) * 100%)); }
+  .cursore::-webkit-slider-thumb { -webkit-appearance:none; width:17px; height:17px;
+                                   margin-top:-5.5px; border-radius:50%;
+                                   background:#f2f2f4; border:1px solid #000;
+                                   box-shadow:0 1px 3px rgba(0,0,0,0.7); }
+  .cursore:active::-webkit-slider-thumb { background:#fff; transform:scale(1.08); }
+  .cursore::-moz-range-track { height:6px; border-radius:3px; background:#26282e; }
+  .cursore::-moz-range-progress { height:6px; border-radius:3px; background:var(--accent); }
+  .cursore::-moz-range-thumb { width:15px; height:15px; border-radius:50%;
+                               background:#f2f2f4; border:1px solid #000; }
+
+  .manopola select.scelta { width:100%; background:#17181c; color:var(--text);
+                            border:1px solid var(--line); border-radius:8px;
+                            padding:7px 8px; font:inherit; font-size:0.82rem; }
+  .manopola .spiega-extra { color:var(--faint); font-size:0.74rem; }
+  .avviso-spento { color:var(--gold); font-size:0.72rem; padding:0 12px 10px; }
   /* I parametri che manopole non sono: chiusi, ma a un dito di distanza. */
-  .blocco details.extra { margin-top:8px; }
+  .blocco details.extra { padding:0 12px 10px; }
   .blocco details.extra > summary { font-size:0.7rem; color:var(--faint);
                                     cursor:pointer; }
+  .blocco details.extra .manopola { margin-top:8px; }
   .blocco details.extra > summary:hover { color:var(--dim); }
 
   @media (max-width: 600px) {
@@ -531,39 +583,27 @@
 <!-- editor della catena effetti, in tempo reale sul suono che sta suonando -->
 <div class="pannello" id="pannelloEditor">
   <div class="barra-alta">
-    <h2 id="titoloEditor">Regola il suono</h2>
     <span style="flex:1"></span>
     <button id="btnRileggi" class="piccolo">Rileggi dall'ampli</button>
     <button id="btnSalvaModifiche">Salva in libreria</button>
     <button class="primary" data-chiudi="pannelloEditor">Fatto</button>
   </div>
-  <p class="spiega">Le manopole agiscono <strong>subito</strong> sul suono che l'ampli sta
-    suonando. Niente viene salvato finché non premi «Salva in libreria».<br>
-    L'ampli non manda i nomi dei parametri. Quelli <em>in corsivo</em> arrivano da una
-    tabella e sono da verificare a orecchio; quelli in chiaro li hai messi tu; i numeri
-    sono ancora da battezzare. <strong>Tocca l'etichetta per cambiarla</strong>: il nome
-    vale per quel modello, in ogni preset che lo usa.</p>
+  <!-- Il nome del preset che si sta regolando: grande, su una riga sua.
+       Accanto al marchio non si leggeva, e in un pannello che cambia il suono
+       sotto le dita sapere *quale* suono si sta cambiando è la prima cosa. -->
+  <h2 id="titoloEditor" class="titolo-grande">Regola il suono</h2>
+  <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente finché
+    non premi «Salva». Il nome del blocco è una tendina: da lì cambi il modello.
+    <button type="button" class="piu" id="btnSpiegaNomi">perché certi nomi sono in corsivo</button></p>
+  <p class="spiega" id="spiegaNomi" hidden>L'ampli i nomi dei parametri non li manda: quelli
+    <em>in corsivo</em> arrivano da una tabella e sono proposte da verificare a orecchio,
+    quelli in chiaro li hai messi tu, i numeri sono ancora da battezzare.
+    <strong>Tocca il nome di una manopola per cambiarlo</strong>: vale per quel modello, in
+    ogni preset che lo usa.</p>
   <div class="stato-pannello" hidden></div>
   <div id="catena"></div>
 </div>
 
-<!-- scelta del modello per una posizione della catena -->
-<div class="pannello" id="pannelloModelli">
-  <div class="barra-alta">
-    <h2 id="titoloModelli">Scegli il modello</h2>
-    <span style="flex:1"></span>
-    <button class="primary" data-chiudi="pannelloModelli">Annulla</button>
-  </div>
-  <p class="spiega">Cambiare modello azzera i parametri di quel blocco: l'ampli li
-    rimanda suoi, e l'editor li rilegge.</p>
-  <p class="spiega" id="notaModelli" hidden></p>
-  <div class="stato-pannello" hidden></div>
-  <div class="barra-alta">
-    <input type="search" id="cercaModello" placeholder="cerca…" style="flex:1">
-    <button id="btnModelloAMano" class="piccolo">Scrivilo a mano</button>
-  </div>
-  <div id="elencoModelli"></div>
-</div>
 
 <!-- scelta di un preset da mettere in un posto del banco -->
 <div class="pannello" id="pannelloScegli">
@@ -749,10 +789,6 @@ document.querySelectorAll('[data-chiudi]').forEach(b => {
     chiudiPannelli();
     if (b.dataset.chiudi === 'pannelloScegli') sceltaInCorso = null;
     if (b.dataset.chiudi === 'pannelloEditor') inModifica = null;
-    if (b.dataset.chiudi === 'pannelloModelli') {
-      modelloInCorso = null;
-      if (inModifica) apriPannello('pannelloEditor');   // si torna all'editor
-    }
   });
 });
 
@@ -1655,28 +1691,47 @@ function disegnaCatena() {
     const testa = document.createElement('div');
     testa.className = 'intestazione';
     const nomi = document.createElement('div');
+    nomi.className = 'nomi';
     const categoria = document.createElement('div');
     categoria.className = 'categoria';
     categoria.textContent = Spark.CATENA[posizione] || `posizione ${posizione + 1}`;
-    const nome = document.createElement('div');
-    nome.className = 'effetto';
-    // Il nome leggibile se lo conosciamo, con sotto l'identificativo vero:
-    // quello è ciò che va nei comandi, e serve saperlo quando qualcosa non torna.
-    nome.textContent = SparkEffetti.nome(effetto.name);
-    nomi.append(categoria, nome);
-    if (SparkEffetti.nome(effetto.name) !== effetto.name) {
-      const tecnico = document.createElement('div');
-      tecnico.className = 'tecnico';
-      tecnico.textContent = effetto.name;
-      nomi.appendChild(tecnico);
-    }
 
-    const cambia = document.createElement('button');
-    cambia.className = 'cambia';
-    cambia.textContent = 'cambia';
-    cambia.title = 'metti un altro modello in questa posizione';
-    cambia.style.marginLeft = 'auto';
-    cambia.addEventListener('click', () => scegliModello(posizione, effetto));
+    // Il modello si cambia dal nome stesso: era un pulsante «cambia» accanto,
+    // e nessuno lo collegava al nome che stava leggendo. L'identificativo
+    // interno (`Twin`, `LA2AComp`) non si vede più: serve a noi nei comandi,
+    // non a chi sta regolando un suono. Resta nel suggerimento della voce.
+    const scelta = document.createElement('select');
+    scelta.className = 'nome-effetto';
+    scelta.title = 'tocca per mettere un altro modello in questa posizione';
+
+    const candidati = (SparkEffetti.MODELLI[posizione] || []).slice();
+    if (!candidati.includes(effetto.name)) candidati.unshift(effetto.name);
+    for (const modello of candidati) {
+      const opzione = document.createElement('option');
+      opzione.value = modello;
+      opzione.textContent = SparkEffetti.nome(modello);
+      opzione.title = modello;
+      scelta.appendChild(opzione);
+    }
+    // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
+    // fonte elenca, e senza questa via non ci si arriverebbe mai.
+    const aMano = document.createElement('option');
+    aMano.value = ' amano';
+    aMano.textContent = 'altro modello, a mano…';
+    scelta.appendChild(aMano);
+    scelta.value = effetto.name;
+
+    scelta.addEventListener('change', () => {
+      if (scelta.value === ' amano') {
+        scelta.value = effetto.name;
+        const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
+        if (nome && nome.trim()) cambiaModello(posizione, nome.trim());
+        return;
+      }
+      cambiaModello(posizione, scelta.value);
+    });
+
+    nomi.append(categoria, scelta);
 
     const interruttore = document.createElement('button');
     interruttore.className = 'interruttore' + (effetto.enabled ? ' acceso' : '');
@@ -1701,7 +1756,7 @@ function disegnaCatena() {
       disegnaCatena();
     });
 
-    testa.append(nomi, cambia, interruttore);
+    testa.append(nomi, interruttore);
     blocco.appendChild(testa);
 
     // L'ampli manda, su certi preset, qualche parametro che manopola non è: il
@@ -1745,6 +1800,15 @@ function disegnaCatena() {
       valore.className = 'valore';
       valore.textContent = param.value.toFixed(2);
 
+      // Nome a sinistra e valore a destra su una riga loro, il comando sotto a
+      // tutta larghezza: prima stavano tutti e tre in fila e al cursore
+      // restava una fessura, che su un telefono si prende col pollice a
+      // fatica. Un parametro che si regola a orecchio merita la riga intera.
+      const etichetta = document.createElement('div');
+      etichetta.className = 'etichetta';
+      etichetta.append(numero, valore);
+      riga.appendChild(etichetta);
+
       // Il parametro in più di cui sappiamo il significato non è un cursore.
       // Sul noise gate è l'acceso/spento: un cursore lì spegnerebbe il blocco
       // di nascosto, mentre l'interruttore in cima continua a dire «acceso».
@@ -1758,10 +1822,12 @@ function disegnaCatena() {
         numero.title = `«${nomeExtra}», misurato sull'ampli: sotto 0.50 il blocco ` +
                        'è spento, sopra è acceso. È l\'interruttore qui sopra, ' +
                        'visto da un\'altra parte.';
-        const spiega = document.createElement('span');
+        const spiega = document.createElement('div');
         spiega.className = 'spiega-extra';
-        spiega.textContent = param.value >= 0.5 ? 'acceso' : 'spento';
-        riga.append(numero, spiega, valore);
+        spiega.textContent = param.value >= 0.5
+          ? 'acceso — si cambia dall\'interruttore in cima al blocco'
+          : 'spento — si cambia dall\'interruttore in cima al blocco';
+        riga.appendChild(spiega);
         return riga;
       }
 
@@ -1801,31 +1867,43 @@ function disegnaCatena() {
           valore.textContent = param.value.toFixed(2);
           mandaParametro(effetto.name, param.index, param.value);
         });
-        riga.append(numero, scelta, valore);
+        riga.appendChild(scelta);
         return riga;
       }
 
       const cursore = document.createElement('input');
       cursore.type = 'range';
+      cursore.className = 'cursore';
       cursore.min = 0; cursore.max = 1; cursore.step = 0.01;
       cursore.value = param.value;
+      // La parte già percorsa si colora: `--p` è la posizione, e il CSS ci
+      // costruisce sopra il riempimento della guida. Senza, un cursore fermo a
+      // metà e uno fermo a zero si distinguono solo cercando la pallina.
+      cursore.style.setProperty('--p', param.value);
 
       const muovi = () => {
         param.value = Number(cursore.value);
+        cursore.style.setProperty('--p', param.value);
         valore.textContent = param.value.toFixed(2);
         mandaParametro(effetto.name, param.index, param.value);
       };
       cursore.addEventListener('input', muovi);
       cursore.addEventListener('change', muovi);
 
-      riga.append(numero, cursore, valore);
+      riga.appendChild(cursore);
       return riga;
     };
 
     const vere  = effetto.params.filter(p => !SparkEffetti.extra(effetto.name, p.index));
     const fuori = effetto.params.filter(p =>  SparkEffetti.extra(effetto.name, p.index));
 
-    vere.forEach(param => blocco.appendChild(rigaDi(param)));
+    // Su schermo largo i parametri stanno a due colonne: cinque manopole in
+    // colonna singola fanno scorrere la pagina per ogni blocco, e la catena
+    // intera non si vede mai tutta.
+    const parametri = document.createElement('div');
+    parametri.className = 'parametri';
+    vere.forEach(param => parametri.appendChild(rigaDi(param)));
+    blocco.appendChild(parametri);
 
     // Trappola già pagata una volta: girare la manopola di un effetto spento
     // non produce nessun suono, e sembra che il comando non funzioni.
@@ -1857,77 +1935,13 @@ function disegnaCatena() {
   });
 }
 
-/* ---- cambio del modello in una posizione della catena --------------- */
-
-let modelloInCorso = null;   // { posizione, vecchio }
-
-function scegliModello(posizione, effetto) {
-  modelloInCorso = { posizione, vecchio: effetto.name };
-  $('titoloModelli').textContent = `${Spark.CATENA[posizione]} — ora c'è ${effetto.name}`;
-  $('cercaModello').value = '';
-
-  // Il riverbero qui è uno solo, e chi si aspetta di trovare i tipi di
-  // riverbero — sala, molla, piastra — lì non li trova mai. Non sono modelli:
-  // sono le nove posizioni della manopola «Tipo», e conviene dirlo qui.
-  const nota = $('notaModelli');
-  const unico = (SparkEffetti.MODELLI[posizione] || []).length === 1;
-  nota.hidden = !unico || !SparkEffetti.posizioni(effetto.name, 6);
-  if (!nota.hidden) {
-    nota.innerHTML = 'Di riverberi l\'ampli ne ha <strong>uno solo</strong>: sala, molla, ' +
-      'piastra e gli altri non sono modelli diversi, sono le posizioni della manopola ' +
-      '<em>Tipo</em>. Chiudi e cambiala lì.';
-  }
-
-  disegnaElencoModelli();
-  apriPannello('pannelloModelli');
-}
-
-function disegnaElencoModelli() {
-  const elenco = $('elencoModelli');
-  elenco.innerHTML = '';
-  if (!modelloInCorso) return;
-
-  const termine = $('cercaModello').value.trim().toLowerCase();
-  const candidati = (SparkEffetti.MODELLI[modelloInCorso.posizione] || [])
-    .filter(m => !termine || m.toLowerCase().includes(termine));
-
-  if (candidati.length === 0) {
-    elenco.innerHTML = '<div class="vuoto-sezione">Nessun modello con questo nome. ' +
-                       'Se sai come si chiama, scrivilo a mano.</div>';
-    return;
-  }
-
-  for (const modello of candidati) {
-    const voce = document.createElement('div');
-    voce.className = 'voce';
-    const nome = document.createElement('span');
-    nome.className = 'nome';
-    nome.textContent = SparkEffetti.nome(modello);
-    if (SparkEffetti.nome(modello) !== modello) {
-      const tecnico = document.createElement('span');
-      tecnico.className = 'badge';
-      tecnico.textContent = modello;
-      nome.appendChild(document.createTextNode(' '));
-      nome.appendChild(tecnico);
-    }
-    voce.appendChild(nome);
-    if (modello === modelloInCorso.vecchio) {
-      const badge = document.createElement('span');
-      badge.className = 'badge';
-      badge.textContent = 'attuale';
-      voce.appendChild(badge);
-    }
-    voce.addEventListener('click', () => cambiaModello(modello));
-    elenco.appendChild(voce);
-  }
-}
-
-$('cercaModello').addEventListener('input', disegnaElencoModelli);
-
-$('btnModelloAMano').addEventListener('click', () => {
-  const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
-  if (nome && nome.trim()) cambiaModello(nome.trim());
-});
+/* ---- cambio del modello in una posizione della catena ---------------
+   Si sceglie dalla tendina che è il nome stesso del blocco: prima c'era un
+   pulsante «cambia» che apriva un pannello a parte con la ricerca, e nessuno
+   collegava quel pannello al nome che stava leggendo. La ricerca serviva con
+   quaranta modelli di ampli, ma una tendina nativa si sfoglia con il pollice
+   e sul telefono si apre a tutto schermo: fa lo stesso lavoro senza portare
+   fuori da dove si sta lavorando. */
 
 /**
  * `0x0106` scambia il modello di un blocco. Dopo il cambio **i parametri sono
@@ -1943,18 +1957,17 @@ $('btnModelloAMano').addEventListener('click', () => {
  * suono cambiato dall'app ufficiale, una manopola girata sull'ampli. Bastava
  * una di queste una volta sola e da lì in poi ogni cambio falliva, sempre.
  */
-async function cambiaModello(nuovo) {
-  // Questi due «non dovrebbero mai capitare», e proprio per questo se capitano
-  // vanno detti: uscire in silenzio da qui lascia il pannello aperto e sembra
-  // che il tocco non sia nemmeno arrivato.
-  if (!modelloInCorso) { logLine('scelta scaduta: chiudi e riapri «cambia».'); return; }
-  if (!inModifica)     { logLine('l\'editor non è più aperto: riapri «Regola».'); return; }
+async function cambiaModello(posizione, nuovo) {
+  // «Non dovrebbe mai capitare», e proprio per questo se capita va detto:
+  // tornare indietro in silenzio lascia la tendina sul nome nuovo mentre
+  // l'ampli ha ancora il vecchio, che è la bugia peggiore di tutte.
+  if (!inModifica) { logLine('l\'editor non è più aperto: riapri «Regola».'); return; }
 
-  const { posizione } = modelloInCorso;
-  modelloInCorso = null;
-  apriPannello('pannelloEditor');       // si torna alle manopole
-
-  if (!spark.connected) { logLine('ampli non connesso: il cambio non è partito.'); return; }
+  if (!spark.connected) {
+    logLine('ampli non connesso: il cambio non è partito.');
+    disegnaCatena();                    // la tendina torna a dire la verità
+    return;
+  }
 
   try {
     // La catena si rilegge **solo se non ci fidiamo più** di quella che
@@ -1971,11 +1984,16 @@ async function cambiaModello(nuovo) {
       logLine('non riesco a leggere la catena dall\'ampli: senza sapere cosa ' +
               'c\'è adesso, il cambio partirebbe alla cieca. Se si ripete, ' +
               'chiudi l\'editor e riconnetti l\'ampli.');
+      disegnaCatena();
       return;
     }
 
     const vecchio = prima[posizione] && prima[posizione].name;
-    if (!vecchio)         { logLine('quel blocco non esiste nella catena letta.'); return; }
+    if (!vecchio) {
+      logLine('quel blocco non esiste nella catena letta.');
+      disegnaCatena();
+      return;
+    }
     if (nuovo === vecchio) { logLine(`${nuovo} c'era già.`); return; }
 
     logProgress(`sostituisco ${vecchio} con ${nuovo}…`);
@@ -2245,6 +2263,13 @@ $('btnAzzeraCategorie').addEventListener('click', async () => {
 $('btnAltro').addEventListener('click', () => apriPannello('pannelloAltro'));
 $('btnAbout').addEventListener('click', () => apriPannello('pannelloAbout'));
 
+// La spiegazione lunga sui nomi delle manopole serve una volta sola, poi è
+// un muro di testo fra te e le manopole: sta chiusa e si apre a richiesta.
+$('btnSpiegaNomi').addEventListener('click', () => {
+  const p = $('spiegaNomi');
+  p.hidden = !p.hidden;
+});
+
 $('btnConnect').addEventListener('click', async () => {
   try {
     await spark.connect();
@@ -2381,7 +2406,6 @@ document.addEventListener('click', evento => {
   if (!evento.target.classList.contains('logo')) return;
   chiudiPannelli();
   inModifica = null;          // il pannello si chiude: lo stato va con lui
-  modelloInCorso = null;
   sceltaInCorso = null;
   if (inLive()) location.hash = '#preset';
 });
