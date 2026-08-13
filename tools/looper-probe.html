@@ -114,8 +114,11 @@ const hexList = (a) => Array.from(a).map(hex).join(' ');
    Il payload di 0x0175 è un byte solo: sotto 0x80 la codifica msgpack di un
    intero positivo è il byte stesso, quindi non c'è ambiguità su come scriverlo. */
 const COMANDI = [
-  { v: 0x02, n: 'COUNTIN',       d: 'conteggio iniziale' },
-  { v: 0x04, n: 'REC',           d: 'inizia a registrare' },
+  /* 0x02 è quello che manda il tasto REC/DUB dell'ampli, non 0x04: il pannello
+     chiede il conteggio, e la registrazione parte da sé dopo. Mandare 0x04
+     registra subito ma **senza click**, ed è inservibile per suonarci sopra. */
+  { v: 0x02, n: 'COUNTIN ▶ usa questo', d: 'come il tasto REC/DUB — col click' },
+  { v: 0x04, n: 'REC',           d: 'registra subito, SENZA click' },
   { v: 0x05, n: 'STOP_REC',      d: 'ferma la registrazione' },
   { v: 0x06, n: 'RETRY',         d: 'ricomincia da capo' },
   { v: 0x07, n: 'REC_COMPLETE',  d: 'registrazione completa' },

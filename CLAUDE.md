@@ -887,6 +887,28 @@ umana finisce dentro lo stesso gruppo dell'evento automatico. Le raffiche 6, 11,
 contengono tutte e due le cose. Se servisse separarle, `0x0377` va escluso dal conteggio
 della pausa.
 
+#### L'invio funziona — 13 agosto 2026, verificato sull'ampli
+
+`captures/2026-08-13-looper-invio.json`. Tre comandi mandati, tre ack `0x0475`, tre
+effetti reali: `0x0175` con `04` fa partire la registrazione, con `05` la chiude e manda
+in riproduzione (`07` `08`, poi 155 messaggi di posizione, poi `09`).
+
+**`0x0175` non vuole il byte `0x00` finale.** Il payload mandato è stato un byte solo e
+ha funzionato: sta con `0x0138`, non con `0x0115`/`0x0104`/`0x0106`. La spunta della
+sonda non è servita.
+
+**Il comando che serve è `0x02` (COUNTIN), non `0x04` (REC).** È il difetto che l'utente
+ha trovato subito: con `04` la registrazione parte ma **il click non suona**, e senza
+click non ci si suona sopra. Il motivo si legge nella cattura di ascolto: **il tasto
+REC/DUB del pannello manda `02`**, e `04` arriva da solo ~1,9 s dopo, a conteggio finito.
+Mandando `04` si salta il conteggio, e con lui il click.
+
+**Regola generale, non un dettaglio del looper:** i nomi dell'enum vengono da Ignitron e
+descrivono lo *stato*, non il tasto. `REC` sembra la cosa giusta da mandare e non lo è.
+**Si replica la sequenza che produce il pannello**, che è nella cattura d'ascolto, non il
+comando che ha il nome più convincente. Le due catture insieme lo dicono: una registra
+cosa manda il pannello, l'altra prova a rimandarlo.
+
 **I messaggi dell'esempio non devono finire in una cattura.** Alla prima esportazione ci
 sono finite tre raffiche del pulsante «Mostrami un esempio», riconoscibili solo perché
 avevano `raw` vuoto. Un dato inventato dentro una prova è peggio di nessun dato: fra sei
