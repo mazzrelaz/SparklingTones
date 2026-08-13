@@ -29,6 +29,7 @@ test/transport-test.html 48 test del trasporto, con send finto e catture reali
 test/store-test.html     99 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
 test/fixtures/preset0.js catture condivise fra le suite: preset salvato e stato live
+design/proposte-preset.html  le tre proposte grafiche messe a confronto, non è l'app
 docs/                    handoff report con la ricerca iniziale sul protocollo
 reference/paulhamsh/     sorgenti di riferimento (ESP32 + Python), BLE funzionante
 captures/                log grezzi dall'ampli
@@ -229,6 +230,44 @@ libreria per un timeout. Un test lo verifica passando una lettura parziale.
 Nella UI un preset in due slot compare **due volte** nella sezione «Sull'ampli», una per
 slot, e il dettaglio avvisa dov'è l'altra copia. La chiave di apertura del dettaglio è
 `id:slot` e non `id`, altrimenti toccarne una aprirebbe tutte e due.
+
+### Il pannello dell'ampli, e le schede
+
+Rifatta il 13 agosto 2026, scegliendo fra tre proposte messe a confronto in
+`design/proposte-preset.html` (pagina a parte, non è l'app). Quello che non andava:
+**gli otto slot erano disegnati come righe di libreria qualsiasi**, mentre sono un'altra
+cosa — sono il pannello dell'ampli, sono otto e sempre otto, e hanno i colori dei LED che
+si guardano mentre si suona. E la riga riassumeva la catena con gli identificativi
+(`bias.noisegate · LA2AComp · …`), che a colpo d'occhio non dicono niente.
+
+Adesso: gli slot sono **due banchi da quattro** affiancati come sull'ampli, ognuno con il
+LED del suo banco, il nome e — al posto della catena intera — **l'ampli e il drive**, che
+sono quello che si cerca. Il dettaglio di uno slot si apre **a tutta larghezza sotto la
+griglia**: dentro una cella sfonderebbe la colonna.
+
+I preset in libreria sono schede con la catena a **pastiglie coi nomi leggibili**, dove i
+blocchi spenti si vedono spenti invece di sparire (fa parte di com'è fatto quel suono), e
+il riverbero porta il **tipo** invece della parola «Riverbero», che è sempre la stessa e
+non distingue niente. Il tasto ▶ per provare un preset è sulla scheda: era l'azione più
+frequente e stava sepolta nel dettaglio.
+
+### Famiglia di suono: un asse a parte dalle categorie
+
+Chiesta dall'utente, ed è la distinzione da non perdere: **le categorie sono lo stile**
+(Pink Floyd, jazz, il pezzo) e un preset ne può avere quante ne vuole; **la famiglia dice
+che tipo di suono è** — Clean, Drive, Acoustic — è una sola, e serve a riconoscerlo dal
+colore senza leggere niente.
+
+Tre e non di più, perché più di tre colori non si distinguono con un'occhiata. Si
+assegnano **a mano** dal dettaglio del preset: nessuno prova a indovinarle dal modello di
+ampli. **Chi non ne ha resta senza colore**, ed è deliberato — un colore inventato qui si
+legge senza pensarci, quindi è peggio di nessun colore.
+
+I colori di partenza (`FAMIGLIE` in `preset-store.js`) si cambiano con
+`setColoreFamiglia`, e finiscono in `exportAll` come i nomi dei parametri: sono scelte
+dell'utente, e `importBackup` le aggiunge senza sovrascrivere quelle più recenti.
+`importFromAmp` non tocca la famiglia — è nel record, non nella parte sonora — e un test
+lo verifica.
 
 ### Categorie
 

@@ -159,8 +159,12 @@ const DB_NAME = 'spark-test-' + Date.now();
   const nuovo = makePreset('uuid-d', 'Europa', ['AmericanHighGain']);
   nuovo.slot = 5;
 
+  await store.setFamiglia(idA, 'clean');
+
   const esito = await store.importFromAmp([modificato, nuovo]);
   check('import: uno aggiunto, uno aggiornato', esito, { added: 1, updated: 1 });
+  check('la famiglia scelta a mano sopravvive all\'import',
+        (await store.get(idA)).famiglia, 'clean');
   check('la libreria è cresciuta di uno', await store.count(), 4);
 
   const dopo = await store.get(idA);
@@ -358,6 +362,47 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('i preset però ci sono ancora tutti', await store.count(), 4);
 
   /* ------------------------------------------------------------------ */
+  group('famiglia di suono');
+
+  // Non è una categoria: le categorie sono lo stile e sono quante ne vuoi,
+  // la famiglia è che tipo di suono è, ed è una sola. Chi non ce l'ha resta
+  // senza colore, e va bene così.
+
+  check('le famiglie sono tre',
+        (await store.getFamiglie()).map(f => f.id), ['clean', 'drive', 'acoustic']);
+  check('un preset a cui non è stata data non ce l\'ha',
+        (await store.get(idJimi)).famiglia, undefined);
+
+  await store.setFamiglia(idShine, 'clean');
+  check('assegnata, resta sul record', (await store.get(idShine)).famiglia, 'clean');
+
+  await store.setFamiglia(idShine, 'DRIVE');
+  check('il maiuscolo non conta', (await store.get(idShine)).famiglia, 'drive');
+
+  let rifiutata = false;
+  try { await store.setFamiglia(idShine, 'jazz'); } catch (e) { rifiutata = true; }
+  check('una famiglia inventata viene rifiutata', rifiutata, true);
+  check('e quella di prima resta', (await store.get(idShine)).famiglia, 'drive');
+
+  await store.setFamiglia(idShine, null);
+  check('si può togliere', 'famiglia' in (await store.get(idShine)), false);
+
+  // Le categorie continuano a vivere per conto loro: i due assi non si toccano.
+  await store.setFamiglia(idShine, 'clean');
+  await store.addTag(idShine, 'notturno');
+  check('famiglia e categorie convivono senza darsi fastidio',
+        [(await store.get(idShine)).famiglia, (await store.get(idShine)).tags.includes('notturno')],
+        ['clean', true]);
+
+  const coloriDiPartenza = (await store.getFamiglie()).map(f => f.colore);
+  await store.setColoreFamiglia('clean', '#123456');
+  check('il colore si cambia', (await store.getFamiglie())[0].colore, '#123456');
+  check('e si sa che è stato scelto', (await store.getFamiglie())[0].suo, true);
+  await store.setColoreFamiglia('clean', '');
+  check('svuotarlo rimette quello di partenza',
+        (await store.getFamiglie()).map(f => f.colore), coloriDiPartenza);
+
+  /* ------------------------------------------------------------------ */
   group('nomi dei parametri');
 
   check('all\'inizio nessun parametro ha un nome', await store.getParamNames(), {});
@@ -398,6 +443,19 @@ const DB_NAME = 'spark-test-' + Date.now();
   await store.importBackup(conNomi);
   check('reimportare un backup vecchio non sovrascrive un battesimo più recente',
         await store.paramName('Twin', 4), 'Volume');
+
+  // Anche i colori delle famiglie sono scelte dell'utente, e valgono uguale.
+  await store.setColoreFamiglia('drive', '#aa0000');
+  const conColori = await store.exportAll();
+  await store.setSetting('coloriFamiglia', {});
+  await store.importBackup(conColori);
+  check('i colori scelti sopravvivono al giro di backup',
+        (await store.getFamiglie())[1].colore, '#aa0000');
+  await store.setColoreFamiglia('drive', '#bb0000');
+  await store.importBackup(conColori);
+  check('e un backup vecchio non sovrascrive un colore più recente',
+        (await store.getFamiglie())[1].colore, '#bb0000');
+  await store.setColoreFamiglia('drive', '');
 
   /* ------------------------------------------------------------------ */
   group('categorie del backup dell\'app ufficiale');

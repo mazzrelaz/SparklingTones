@@ -22,6 +22,19 @@ window.PresetStore = (function () {
   const POSTI_PER_BANCO = 8;
 
   /**
+   * Le tre famiglie di suono, con un colore di partenza ciascuna. Sono
+   * fisse: tre, non di più, perché servono a riconoscere un preset senza
+   * leggerlo — e più di tre colori non si distinguono con un'occhiata.
+   * I colori si cambiano (`setColoreFamiglia`): questi servono solo a
+   * partire da qualcosa di distinguibile sul fondo scuro.
+   */
+  const FAMIGLIE = [
+    { id: 'clean',    nome: 'Clean',    colore: '#5aa9e6' },
+    { id: 'drive',    nome: 'Drive',    colore: '#ff6a3d' },
+    { id: 'acoustic', nome: 'Acoustic', colore: '#b48be0' },
+  ];
+
+  /**
    * Gli slot dell'ampli in cui sta un preset, come lista ordinata.
    *
    * È una lista e non un numero perché lo stesso preset può stare in più
@@ -427,6 +440,60 @@ window.PresetStore = (function () {
     setNotes(id, notes) { return this._update(id, r => { r.notes = notes; }); },
     setName(id, name)   { return this._update(id, r => { r.name = name; }); },
 
+    /* ----------------------------------------------------------------
+       Famiglia di suono
+
+       **Non è una categoria come le altre, ed è il punto.** Le categorie
+       (`tags`) sono lo stile — Pink Floyd, jazz, il pezzo — e un preset ne
+       può avere quante ne vuole. La famiglia risponde a un'altra domanda:
+       *che tipo di suono è*. Sono tre, una sola per preset, e servono a
+       riconoscerlo a colpo d'occhio dal colore senza leggere niente.
+
+       Un preset senza famiglia resta senza colore: metterceli tutti per
+       forza vorrebbe dire inventare, e un colore sbagliato qui è peggio di
+       nessun colore, perché lo si legge senza pensarci.
+       ---------------------------------------------------------------- */
+
+    /**
+     * Assegna la famiglia, o la toglie con null. Un valore che non è una
+     * delle tre viene rifiutato: meglio un errore adesso che un colore che
+     * non compare e non si capisce perché.
+     */
+    setFamiglia(id, famiglia) {
+      const valore = famiglia ? String(famiglia).trim().toLowerCase() : null;
+      if (valore && !FAMIGLIE.some(f => f.id === valore)) {
+        throw new Error(`famiglia sconosciuta: ${famiglia}`);
+      }
+      return this._update(id, r => {
+        if (valore) r.famiglia = valore;
+        else        delete r.famiglia;
+      });
+    },
+
+    /** Le tre famiglie col colore in uso: quello scelto dall'utente o il nostro. */
+    async getFamiglie() {
+      const scelti = await this.getSetting('coloriFamiglia', {});
+      return FAMIGLIE.map(f => ({
+        id: f.id,
+        nome: f.nome,
+        colore: scelti[f.id] || f.colore,
+        suo: !!scelti[f.id],
+      }));
+    },
+
+    /** Cambia il colore di una famiglia. Vuoto rimette quello di partenza. */
+    async setColoreFamiglia(id, colore) {
+      const chiave = String(id).trim().toLowerCase();
+      if (!FAMIGLIE.some(f => f.id === chiave)) {
+        throw new Error(`famiglia sconosciuta: ${id}`);
+      }
+      const scelti = Object.assign({}, await this.getSetting('coloriFamiglia', {}));
+      if (colore) scelti[chiave] = String(colore);
+      else        delete scelti[chiave];
+      await this.setSetting('coloriFamiglia', scelti);
+      return this.getFamiglie();
+    },
+
     async addTag(id, tag) {
       return this._update(id, r => { r.tags = normalizeTags([...r.tags, tag]); });
     },
@@ -676,6 +743,7 @@ window.PresetStore = (function () {
         exportedAt:    new Date().toISOString(),
         categorie:     await this.getSetting('categorie', []),
         nomiParametri: await this.getParamNames(),
+        coloriFamiglia: await this.getSetting('coloriFamiglia', {}),
         presets:       await this.all(),
       };
     },
@@ -698,6 +766,11 @@ window.PresetStore = (function () {
         const elenco = await this.getSetting('categorie', []);
         await this.setSetting('categorie',
           normalizeTags(elenco.concat(backup.categorie)));
+      }
+      if (backup.coloriFamiglia && typeof backup.coloriFamiglia === 'object') {
+        const scelti = await this.getSetting('coloriFamiglia', {});
+        await this.setSetting('coloriFamiglia',
+          Object.assign({}, backup.coloriFamiglia, scelti));
       }
       if (backup.nomiParametri && typeof backup.nomiParametri === 'object') {
         const tutti = await this.getParamNames();

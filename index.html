@@ -92,10 +92,69 @@
                         color:var(--faint); font-size:0.72rem; }
   .vuoto-sezione { color:var(--faint); font-size:0.8rem; padding:6px 2px; }
 
+  /* ---- pannello dell'ampli ------------------------------------------
+     Gli otto slot non sono righe di libreria: sono due banchi da quattro,
+     disposti come i LED sull'ampli — banco A a sinistra, B a destra. */
+
+  .pannello-ampli { display:grid; grid-template-columns:1fr 1fr; gap:8px;
+                    align-items:start; }
+  .banco { display:grid; gap:8px; align-content:start; }
+  .banco-eti { font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase;
+               font-weight:700; color:var(--faint); }
+  .banco-eti.a { color:#ff9b9b; }
+  .banco-eti.b { color:#9be0a8; }
+
+  .slotcard { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+              padding:9px 10px; min-height:70px; cursor:pointer;
+              display:flex; flex-direction:column; justify-content:space-between;
+              gap:6px; position:relative; overflow:hidden; }
+  .slotcard.libero { border-style:dashed; background:none; cursor:default; }
+  .slotcard.attivo { border-color:var(--accent); }
+  .slotcard .alto { display:flex; align-items:center; gap:6px; }
+  .slotcard .sigla { font-family:'SF Mono',Consolas,monospace; font-size:0.7rem;
+                     color:var(--faint); }
+  .slotcard .stellina { margin-left:auto; color:var(--gold); font-size:0.72rem; }
+  .slotcard .nome-slot { font-size:0.84rem; font-weight:600; line-height:1.25;
+                         overflow:hidden; display:-webkit-box; -webkit-line-clamp:2;
+                         -webkit-box-orient:vertical; }
+  .slotcard.libero .nome-slot { color:var(--faint); font-weight:400; font-size:0.78rem; }
+  .slotcard .suono { font-size:0.7rem; color:var(--dim); margin-top:3px;
+                     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .led { width:8px; height:8px; border-radius:50%; flex:none; }
+  .led.a { background:#ff9b9b; box-shadow:0 0 7px rgba(255,155,155,0.5); }
+  .led.b { background:#9be0a8; box-shadow:0 0 7px rgba(155,224,168,0.5); }
+  .led.spento { background:#33373e; box-shadow:none; }
+  .aperta-sotto { margin-top:8px; }
+
+  /* ---- famiglia di suono ---------------------------------------------
+     Tre sole famiglie, un colore per una, e chi non ne ha resta senza:
+     il colore si legge senza pensarci, quindi inventarlo sarebbe peggio
+     che lasciare la scheda in grigio. */
+
+  .con-famiglia { position:relative; }
+  .con-famiglia::before { content:''; position:absolute; left:0; top:0; bottom:0;
+                          width:4px; background:var(--famiglia); }
+  .con-famiglia > .head { padding-left:16px; }
+  .slotcard.con-famiglia { padding-left:14px; }
+  .scelta.famiglia.dentro { background:var(--famiglia); color:#14161a; font-weight:700; }
+  .nota-famiglia { color:var(--faint); font-size:0.72rem; margin-top:6px; }
+
   .row { background:var(--panel); border:1px solid var(--line); border-radius:10px;
          margin-bottom:8px; overflow:hidden; }
   .row.libero { border-style:dashed; background:none; }
   .head { display:flex; align-items:center; gap:9px; padding:10px 12px; cursor:pointer; }
+
+  /* La catena a pastiglie: nomi leggibili, e i blocchi spenti si vedono spenti. */
+  .chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
+  .chip { background:#23262c; color:#b6bbc3; font-size:0.7rem; padding:2px 8px;
+          border-radius:9px; white-space:nowrap; }
+  .chip.spento { color:var(--faint); background:none; border:1px solid var(--line);
+                 text-decoration:line-through; }
+
+  /* Provare un preset è l'azione più frequente: un tasto, senza aprire nulla. */
+  .via { width:30px; height:30px; border-radius:50%; flex:none; padding:0;
+         font-size:0.7rem; background:#2a2d33; color:var(--dim); }
+  .via.pronto { background:var(--accent); color:#fff; }
   .naming { flex:1; min-width:0; }
   .name { font-weight:600; font-size:0.93rem; }
   .row.libero .name { color:var(--faint); font-weight:400; }
@@ -420,6 +479,7 @@ let suAmpli    = [];      // otto posti: il record che sta in quello slot, o nul
 let categorie  = [];      // {nome, quanti}
 let banchi     = [];      // banchi salvati, quelli inventati dall'utente
 let nomiParam  = {};      // nomi dati dall'utente ai parametri, per modello
+let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic
 
 const vista = { cerca: '', categoria: '', soloPreferiti: false, aperto: null };
 const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false };
@@ -433,6 +493,7 @@ async function ricarica() {
   categorie = await store.allCategories();
   banchi    = await store.getBanks();
   nomiParam = await store.getParamNames();
+  famiglie  = await store.getFamiglie();
   if (live.banco !== BANCO_AMPLI && !banchi.some(b => b.id === live.banco)) {
     live.banco = BANCO_AMPLI;
   }
@@ -575,15 +636,46 @@ const filtroAttivo = () => !!(vista.cerca || vista.categoria || vista.soloPrefer
 function disegnaPreset() {
   disegnaFiltriCategoria();
 
+  // Gli otto slot non sono righe di libreria: sono il pannello dell'ampli,
+  // due banchi da quattro con i colori dei LED, disposti come li vedi
+  // sull'ampli. Il dettaglio di uno slot si apre a tutta larghezza sotto la
+  // griglia, altrimenti sfonderebbe la colonna.
   const ampli = $('listaAmpli');
   ampli.innerHTML = '';
   let mostratiSuAmpli = 0;
-  suAmpli.forEach((record, slot) => {
-    if (record && !passaIlFiltro(record)) return;
-    if (!record && filtroAttivo()) return;
-    mostratiSuAmpli++;
-    ampli.appendChild(record ? rigaPreset(record, slot) : rigaSlotVuoto(slot));
-  });
+
+  const griglia = document.createElement('div');
+  griglia.className = 'pannello-ampli';
+  let apertoSlot = null;
+
+  for (const banco of [0, 1]) {
+    const colonna = document.createElement('div');
+    colonna.className = 'banco';
+
+    const eti = document.createElement('div');
+    eti.className = 'banco-eti ' + (banco === 0 ? 'a' : 'b');
+    eti.textContent = 'banco ' + (banco === 0 ? 'A' : 'B');
+    colonna.appendChild(eti);
+
+    for (let posto = 0; posto < 4; posto++) {
+      const slot = banco * 4 + posto;
+      const record = suAmpli[slot];
+      if (record && !passaIlFiltro(record)) continue;
+      if (!record && filtroAttivo()) continue;
+      mostratiSuAmpli++;
+      colonna.appendChild(schedaSlot(record, slot));
+      if (record && vista.aperto === record.id + ':' + slot) apertoSlot = { record, slot };
+    }
+    griglia.appendChild(colonna);
+  }
+  ampli.appendChild(griglia);
+
+  if (apertoSlot) {
+    const sotto = document.createElement('div');
+    sotto.className = 'row aperta-sotto';
+    sotto.appendChild(dettaglio(apertoSlot.record, apertoSlot.slot));
+    ampli.appendChild(sotto);
+  }
   $('sezAmpli').style.display = mostratiSuAmpli === 0 && filtroAttivo() ? 'none' : '';
 
   const libreria = $('listaLibreria');
@@ -642,24 +734,118 @@ function disegnaFiltriCategoria() {
   }
 }
 
-/** Uno slot dell'ampli di cui non sappiamo ancora cosa contenga. */
-function rigaSlotVuoto(slot) {
-  const riga = document.createElement('div');
-  riga.className = 'row libero';
-  const head = document.createElement('div');
-  head.className = 'head';
-  head.style.cursor = 'default';
+/**
+ * Un posto del pannello dell'ampli. Mostra poche cose apposta: il LED del
+ * banco, la sigla, il nome e — al posto della catena intera — **l'ampli e il
+ * drive**, che sono quello che si cerca guardando. Uno slot mai letto si vede
+ * tratteggiato e lo dice, invece di far finta di essere vuoto.
+ */
+function schedaSlot(record, slot) {
+  const posizione = Spark.slotLabel(slot);
+  const card = document.createElement('div');
+  card.className = 'slotcard' + (record ? '' : ' libero');
+  coloraFamiglia(card, record);
 
-  const naming = document.createElement('div');
-  naming.className = 'naming';
+  const alto = document.createElement('div');
+  alto.className = 'alto';
+  const led = document.createElement('span');
+  led.className = 'led ' + (posizione.color === 'rosso' ? 'a' : 'b') +
+                  (record ? '' : ' spento');
+  const sigla = document.createElement('span');
+  sigla.className = 'sigla';
+  sigla.textContent = posizione.label;
+  sigla.title = `slot ${slot} — LED ${posizione.color} numero ${posizione.position}`;
+  alto.append(led, sigla);
+  if (record && record.favorite) {
+    const stella = document.createElement('span');
+    stella.className = 'stellina';
+    stella.textContent = '★';
+    alto.appendChild(stella);
+  }
+  card.appendChild(alto);
+
+  const basso = document.createElement('div');
   const nome = document.createElement('div');
-  nome.className = 'name';
-  nome.textContent = 'non ancora letto';
-  naming.appendChild(nome);
+  nome.className = 'nome-slot';
+  nome.textContent = record ? (record.name || '(senza nome)') : 'non ancora letto';
+  basso.appendChild(nome);
+  if (record) {
+    const suono = document.createElement('div');
+    suono.className = 'suono';
+    suono.textContent = sommarioSuono(record);
+    basso.appendChild(suono);
+  }
+  card.appendChild(basso);
 
-  head.append(naming, etichettaSlot(slot));
-  riga.appendChild(head);
+  if (record) {
+    const chiave = record.id + ':' + slot;
+    if (vista.aperto === chiave) card.classList.add('attivo');
+    card.addEventListener('click', () => {
+      vista.aperto = vista.aperto === chiave ? null : chiave;
+      disegnaPreset();
+    });
+  }
+  return card;
+}
+
+/**
+ * La catena a pastiglie, coi nomi leggibili invece degli identificativi
+ * dell'ampli: `bias.noisegate · LA2AComp · …` a colpo d'occhio non dice
+ * niente. Si mostrano i cinque blocchi che fanno il carattere del suono —
+ * drive, ampli, modulazione, delay, riverbero — e i blocchi spenti si vedono
+ * spenti invece di sparire: fa parte di com'è fatto quel suono.
+ *
+ * Il riverbero porta il **tipo** invece della parola «Riverbero», che è
+ * sempre la stessa e non distingue niente.
+ */
+function pastiglieCatena(record) {
+  const riga = document.createElement('div');
+  riga.className = 'chips';
+  const effetti = record.effects || [];
+
+  for (let posizione = 2; posizione <= 6; posizione++) {
+    const effetto = effetti[posizione];
+    if (!effetto) continue;
+    const chip = document.createElement('span');
+    chip.className = 'chip' + (effetto.enabled ? '' : ' spento');
+    chip.textContent = nomePastiglia(effetto, posizione);
+    chip.title = Spark.CATENA[posizione] + ': ' + effetto.name;
+    riga.appendChild(chip);
+  }
   return riga;
+}
+
+function nomePastiglia(effetto, posizione) {
+  const nomi = SparkEffetti.nomiPosizioni(effetto.name, 6);
+  if (posizione === 6 && nomi) {
+    const param = (effetto.params || []).find(p => p.index === 6);
+    const dove = param
+      ? SparkEffetti.posizioneDi(param.value, SparkEffetti.posizioni(effetto.name, 6))
+      : -1;
+    if (dove !== -1) return nomi[dove];
+  }
+  return SparkEffetti.nome(effetto.name);
+}
+
+/** Ampli e drive: le due cose che dicono di che suono si tratta. */
+function sommarioSuono(record) {
+  const effetti = record.effects || [];
+  const pezzi = [];
+  if (effetti[3]) pezzi.push(SparkEffetti.nome(effetti[3].name));
+  if (effetti[2] && effetti[2].enabled) pezzi.push(SparkEffetti.nome(effetti[2].name));
+  return pezzi.join(' · ');
+}
+
+/**
+ * Il colore della famiglia di suono, se ce l'ha. Chi non ce l'ha resta senza:
+ * un colore inventato qui si legge senza pensarci, ed è peggio di nessun colore.
+ */
+function coloraFamiglia(elemento, record) {
+  const scelta = record && record.famiglia &&
+                 famiglie.find(f => f.id === record.famiglia);
+  if (!scelta) return;
+  elemento.classList.add('con-famiglia');
+  elemento.style.setProperty('--famiglia', scelta.colore);
 }
 
 function etichettaSlot(slot) {
@@ -675,6 +861,7 @@ function rigaPreset(record, slot) {
   const riga = document.createElement('div');
   riga.className = 'row';
   riga.dataset.id = record.id;
+  coloraFamiglia(riga, record);
 
   const head = document.createElement('div');
   head.className = 'head';
@@ -695,14 +882,23 @@ function rigaPreset(record, slot) {
   const nome = document.createElement('div');
   nome.className = 'name';
   nome.textContent = record.name || '(senza nome)';
-  const catena = document.createElement('div');
-  catena.className = 'chain';
-  catena.textContent = (record.effects || [])
-    .filter(e => e.enabled).map(e => e.name).join(' · ');
-  naming.append(nome, catena);
+  naming.append(nome, pastiglieCatena(record));
 
   head.append(stella, naming);
   if (slot !== null) head.appendChild(etichettaSlot(slot));
+
+  // Provare un preset è l'azione che si fa più spesso, e stava sepolta nel
+  // dettaglio: qui è un tasto solo, senza aprire niente.
+  const prova = document.createElement('button');
+  prova.className = 'via' + (spark.connected ? ' pronto' : '');
+  prova.textContent = '▶';
+  prova.title = 'manda il preset all\'ampli senza sovrascrivere nessuno slot';
+  prova.disabled = !spark.connected;
+  prova.addEventListener('click', event => {
+    event.stopPropagation();
+    mandaPreset(record, null);
+  });
+  head.appendChild(prova);
 
   // La chiave comprende lo slot: lo stesso preset copiato in due slot compare
   // due volte, e toccarne uno non deve aprire anche l'altro.
@@ -754,6 +950,36 @@ function dettaglio(record, slot) {
     disegnaPreset();
   });
   boxNome.appendChild(campoNome);
+
+  /* famiglia di suono ---------------------------------------------- */
+  // Un asse a sé, che con le categorie non c'entra: quelle sono lo stile
+  // (Pink Floyd, jazz, il pezzo), questa è *che tipo di suono è*. Una sola,
+  // scelta a mano, e si può togliere — chi non ce l'ha resta senza colore.
+  const boxFam = document.createElement('div');
+  boxFam.innerHTML = '<label>famiglia di suono</label>';
+  const scelteFam = document.createElement('div');
+  scelteFam.className = 'scelte';
+
+  for (const famiglia of famiglie) {
+    const s = document.createElement('span');
+    const sua = record.famiglia === famiglia.id;
+    s.className = 'scelta famiglia' + (sua ? ' dentro' : '');
+    s.style.setProperty('--famiglia', famiglia.colore);
+    s.textContent = famiglia.nome;
+    s.addEventListener('click', async () => {
+      await store.setFamiglia(record.id, sua ? null : famiglia.id);
+      await ricarica();
+      disegnaPreset();
+    });
+    scelteFam.appendChild(s);
+  }
+  boxFam.appendChild(scelteFam);
+  if (!record.famiglia) {
+    const nota = document.createElement('div');
+    nota.className = 'nota-famiglia';
+    nota.textContent = 'senza famiglia: resta senza colore.';
+    boxFam.appendChild(nota);
+  }
 
   /* categorie ----------------------------------------------------- */
   const boxCat = document.createElement('div');
@@ -906,7 +1132,7 @@ function dettaglio(record, slot) {
   meta.style.cssText = 'color:var(--faint);font-size:0.7rem;font-family:Consolas,monospace';
   meta.textContent = `${record.uuid} · ${record.bpm} BPM`;
 
-  det.append(boxNome, boxCat, boxNote, boxFx, azioni);
+  det.append(boxNome, boxFam, boxCat, boxNote, boxFx, azioni);
   if (avvisoAltriSlot) det.appendChild(avvisoAltriSlot);
   det.appendChild(meta);
   return det;
