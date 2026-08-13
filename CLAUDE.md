@@ -409,8 +409,15 @@ la posizione giusta sarebbe un terno al lotto.
 **Verificato sull'ampli il 13 agosto 2026**: cambiando posizione nell'elenco il riverbero
 cambia davvero. Non era più un'ipotesi da un pezzo, ma adesso è una misura.
 
-**I nomi dei nove tipi non li sappiamo**, e infatti si leggono «Tipo 1»…«Tipo 9». Vanno
-riconosciuti a orecchio, una posizione alla volta.
+**I nove nomi li ha dettati l'utente il 13 agosto 2026**, letti dall'app ufficiale: Room
+Studio A, Chamber, Hall Natural, Plate Short, Hall Ambient, Plate Rich, Hall Medium,
+Plate Long, Room Studio B.
+
+**L'ordine però non è confermato.** Che l'elenco dell'app segua i valori del parametro è
+verosimile e niente lo contraddice, ma nessuno l'ha verificato: per questo l'editor
+scrive sempre anche il numero della posizione accanto al nome (`3 — Hall Natural`). Se
+sono sfasati basta ascoltare due tipi lontani fra loro — un Plate e un Room — e la
+correzione è una rotazione dell'elenco, non una caccia.
 
 `MODELLI` sta nello stesso file e viene dallo stesso catalogo, più i modelli che
 compaiono nei preset dell'utente ma che lì non ci sono (`JH.FuzzTone`, `Comp76`,

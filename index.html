@@ -1428,10 +1428,16 @@ function disegnaCatena() {
       if (quante) {
         const scelta = document.createElement('select');
         scelta.className = 'scelta';
+        // Il numero della posizione c'è sempre, anche quando i nomi ci sono:
+        // i nomi sono quelli letti dall'app ufficiale e l'ordine è da
+        // confermare a orecchio. Col numero accanto, uno sfasamento si vede.
+        const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
         for (let n = 0; n < quante; n++) {
           const opzione = document.createElement('option');
           opzione.value = SparkEffetti.valorePosizione(n);
-          opzione.textContent = (dato || proposto || 'posizione') + ' ' + (n + 1);
+          opzione.textContent = nomi
+            ? `${n + 1} — ${nomi[n]}`
+            : (dato || proposto || 'posizione') + ' ' + (n + 1);
           scelta.appendChild(opzione);
         }
         const dove = SparkEffetti.posizioneDi(param.value, quante);

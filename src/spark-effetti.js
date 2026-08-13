@@ -40,11 +40,12 @@ window.SparkEffetti = (function () {
    *            può essere **meno** dei parametri che l'ampli manda: quelli in
    *            più non sono manopole e la UI li mette da parte. Assente vuol
    *            dire che non lo sappiamo, e allora nessun parametro si tocca.
-   * scelte   = { indice: quante posizioni } per i parametri che scelgono fra
-   *            cose, invece di scorrere. Il tipo di riverbero è l'unico che
-   *            conosciamo: un cursore continuo lo renderebbe quasi impossibile
-   *            da azzeccare, quindi la UI ci mette un elenco. Le posizioni
-   *            valgono 0, 0.1, 0.2 … com'è nei preset veri.
+   * scelte   = { indice: quante posizioni } — oppure { indice: [nomi] } — per
+   *            i parametri che scelgono fra cose invece di scorrere. Il tipo
+   *            di riverbero è l'unico che conosciamo: un cursore continuo lo
+   *            renderebbe quasi impossibile da azzeccare, quindi la UI ci
+   *            mette un elenco. Le posizioni valgono 0, 0.1, 0.2 … com'è nei
+   *            preset veri.
    */
   const TABELLA = {
     /* ---- Noise gate ----
@@ -214,7 +215,16 @@ window.SparkEffetti = (function () {
        esattamente 1, ed è **l'acceso/spento del blocco**, misurato sull'ampli
        il 13 agosto 2026 con la stessa prova fatta sul gate — stessa soglia a
        0.50. Da qui `quante: 7`. */
-    'bias.reverb': { nome: 'Riverbero', quante: 7, scelte: { 6: 9 },
+    /* I nomi dei nove tipi li ha dettati l'utente il 13 agosto 2026, letti
+       dall'app ufficiale. **L'ordine è da confermare a orecchio**: che
+       l'elenco dell'app segua i valori del parametro è verosimile, non
+       misurato. Per questo l'editor mostra sempre anche il numero della
+       posizione — se sono sfasati si vede subito e si correggono senza
+       indovinare. */
+    'bias.reverb': { nome: 'Riverbero', quante: 7,
+      scelte: { 6: ['Room Studio A', 'Chamber', 'Hall Natural', 'Plate Short',
+                    'Hall Ambient', 'Plate Rich', 'Hall Medium', 'Plate Long',
+                    'Room Studio B'] },
       manopole: ['Level', 'Damping', 'Low Cut', 'High Cut', 'Dwell', 'Time', 'Tipo'] },
   };
 
@@ -302,8 +312,15 @@ window.SparkEffetti = (function () {
    * scorrere; 0 se è una manopola normale o se non ne sappiamo niente.
    */
   function posizioni(id, indice) {
-    const voce = TABELLA[id];
-    return (voce && voce.scelte && voce.scelte[indice]) || 0;
+    const scelte = TABELLA[id] && TABELLA[id].scelte && TABELLA[id].scelte[indice];
+    if (!scelte) return 0;
+    return Array.isArray(scelte) ? scelte.length : scelte;
+  }
+
+  /** Come si chiamano le posizioni, se qualcuno ce l'ha detto; altrimenti null. */
+  function nomiPosizioni(id, indice) {
+    const scelte = TABELLA[id] && TABELLA[id].scelte && TABELLA[id].scelte[indice];
+    return Array.isArray(scelte) ? scelte : null;
   }
 
   /** Il valore della posizione n: un decimo per volta, com'è nei preset veri. */
@@ -349,5 +366,5 @@ window.SparkEffetti = (function () {
   }
 
   return { TABELLA, MODELLI, nome, manopola, extra, nomeExtra, affidabile,
-           quantiConosciuti, posizioni, valorePosizione, posizioneDi };
+           quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi };
 })();

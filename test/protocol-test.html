@@ -424,6 +424,16 @@ check('i nomi non si spostano per via del parametro in più',
 
 check('il tipo di riverbero è una scelta fra nove, non una manopola continua',
       SparkEffetti.posizioni('bias.reverb', 6), 9);
+// I nomi li ha dettati l'utente dall'app ufficiale: l'ordine è da confermare a
+// orecchio, e per questo l'editor mostra sempre anche il numero.
+check('i nove tipi hanno un nome, uno per posizione',
+      (SparkEffetti.nomiPosizioni('bias.reverb', 6) || []).length, 9);
+check('la prima e l\'ultima posizione sono quelle dettate',
+      [SparkEffetti.nomiPosizioni('bias.reverb', 6)[0],
+       SparkEffetti.nomiPosizioni('bias.reverb', 6)[8]],
+      ['Room Studio A', 'Room Studio B']);
+check('dove i nomi non ci sono, nessuno se li inventa',
+      SparkEffetti.nomiPosizioni('Twin', 0), null);
 check('le altre manopole del riverbero restano continue',
       [SparkEffetti.posizioni('bias.reverb', 0), SparkEffetti.posizioni('Twin', 0)], [0, 0]);
 check('le posizioni valgono un decimo per volta',
