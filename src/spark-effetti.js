@@ -58,9 +58,9 @@ window.SparkEffetti = (function () {
        resta il float che gli si scrive (0.50 riletto torna 0.50, non
        arrotondato), quindi è un float letto come booleano con la soglia a
        metà. E spegnendo il blocco con `0x0115` l'ampli ci scrive 0 da solo:
-       è lo stesso interruttore, visto da un'altra parte. */
-    'bias.noisegate': { nome: 'Noise Gate', manopole: ['Threshold', 'Decay'],
-      quante: 2, extraNome: 'Acceso/spento' },
+       è lo stesso interruttore, visto da un'altra parte. Non è una
+       particolarità sua: vedi `nomeExtra`. */
+    'bias.noisegate': { nome: 'Noise Gate', manopole: ['Threshold', 'Decay'], quante: 2 },
 
     /* ---- Comp / Wah ---- */
     'LA2AComp': { nome: 'LA Comp', manopole: ['Limit/Compress', 'Gain', 'Peak Reduction'] },
@@ -209,9 +209,11 @@ window.SparkEffetti = (function () {
        quanti sono i `bias.reverb.N` di Soundshed. Il nome resta una proposta
        come gli altri, in corsivo, da verificare a orecchio.
 
-       L'ottavo, quando c'è, è un'altra cosa ancora: compare negli stessi cinque
-       preset che hanno il terzo parametro del noise gate e vale sempre
-       esattamente 1. Quello non è una manopola — da qui `quante: 7`. */
+       L'ottavo, quando c'è, non è una manopola: compare negli stessi cinque
+       preset che hanno il terzo parametro del noise gate, vale sempre
+       esattamente 1, ed è **l'acceso/spento del blocco**, misurato sull'ampli
+       il 13 agosto 2026 con la stessa prova fatta sul gate — stessa soglia a
+       0.50. Da qui `quante: 7`. */
     'bias.reverb': { nome: 'Riverbero', quante: 7, scelte: { 6: 9 },
       manopole: ['Level', 'Damping', 'Low Cut', 'High Cut', 'Dwell', 'Time', 'Tipo'] },
   };
@@ -316,15 +318,22 @@ window.SparkEffetti = (function () {
   }
 
   /**
-   * Come si chiama il parametro in più, quando sappiamo cos'è.
+   * **Il parametro in più è l'acceso/spento del blocco**, e non è una
+   * particolarità di un effetto: misurato sull'ampli il 13 agosto 2026 sul
+   * noise gate e sul riverbero, uguale tutte e due le volte — sotto 0.50
+   * spento, sopra acceso — e nell'app ufficiale non compare, perché lì c'è
+   * già l'interruttore.
    *
-   * Sul noise gate è misurato: è l'acceso/spento del blocco. Nell'app
-   * ufficiale infatti quel parametro non compare — c'è già l'interruttore.
-   * Dove non lo sappiamo restituisce null e il parametro resta un numero.
+   * Vale quindi per ogni riga che dichiara `quante`: è lì che si sa quali
+   * parametri avanzano. Dove `quante` non c'è non si sa nemmeno quali siano
+   * di troppo, e allora restano numeri.
    */
+  const NOME_EXTRA = 'Acceso/spento';
+
   function nomeExtra(id) {
     const voce = TABELLA[id];
-    return (voce && voce.extraNome) || null;
+    if (!voce || voce.quante === undefined) return null;
+    return voce.extraNome || NOME_EXTRA;
   }
 
   /** La riga della tabella è compatibile con quello che manda l'ampli? */

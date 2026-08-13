@@ -358,8 +358,9 @@ al blocco, «1 parametro che non è una manopola», e lì si muovono come tutti 
 Nasconderli sarebbe la stessa bugia di prima al rovescio, e se un domani si scopre che uno
 conta davvero è ancora lì.
 
-**Sul noise gate sappiamo cos'è: l'acceso/spento del blocco.** Misurato sull'ampli il 13
-agosto 2026, ed è l'utente ad averlo intuito:
+**Sappiamo cos'è: l'acceso/spento del blocco.** Misurato sull'ampli il 13 agosto 2026 sul
+noise gate e sul riverbero, identico tutte e due le volte — ed è l'utente ad averlo
+intuito dal comportamento:
 
 - da 0.00 a 0.49 il gate non lavora, da 0.50 a 1.00 sì — soglia a metà;
 - il valore però **non viene arrotondato**: scritto 0.50, riletto 0.50. È un float
@@ -379,10 +380,14 @@ Nell'editor quel parametro quindi **non è più un cursore**: si vede, dice «ac
 blocco alle spalle dell'interruttore, che continuava a dire «acceso» — la UI mentiva. Per
 lo stesso motivo, premendo l'interruttore il parametro viene aggiornato anche in locale.
 
-**Sul riverbero l'ottavo parametro non è misurato**: stessa forma (compare negli stessi
-cinque preset, vale sempre esattamente 1) e quasi certamente la stessa cosa, ma finché
-non lo si prova resta un numero senza nome, e nell'editor resta un cursore. Si verifica in
-venti secondi: lo si porta sotto 0.5 e si sente se il riverbero sparisce.
+Non è una particolarità di un effetto, quindi `nomeExtra` non lo tiene per riga: vale per
+**ogni riga che dichiara `quante`**, perché è lì che si sa quali parametri avanzano. Dove
+`quante` non c'è non si sa nemmeno quali siano di troppo, e restano numeri.
+
+Cade con questo l'ipotesi del firmware vecchio contro nuovo: il parametro in più non è un
+residuo, è **lo stato dell'interruttore scritto anche dentro l'array dei parametri**. Il
+perché di preset che ce l'hanno e preset che no resta aperto, ma adesso è una domanda su
+come sono nati quei preset, non su cosa sia quel valore.
 
 ### Il tipo di riverbero è il settimo parametro
 

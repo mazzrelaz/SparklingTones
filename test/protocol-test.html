@@ -398,11 +398,13 @@ check('il terzo parametro del noise gate sì',
 // Misurato sull'ampli il 13 agosto 2026: sotto 0.50 il gate è spento, sopra è
 // acceso, e spegnendo il blocco l'ampli ci scrive 0 da solo. Nell'app ufficiale
 // quel parametro non compare: c'è già l'interruttore.
+// Misurato uguale sul riverbero, quindi non è una particolarità del gate: vale
+// dove sappiamo quante manopole ci sono davvero.
 check('e sappiamo cos\'è: l\'acceso/spento del blocco',
-      SparkEffetti.nomeExtra('bias.noisegate'), 'Acceso/spento');
-check('dove non lo sappiamo resta senza nome',
-      [SparkEffetti.nomeExtra('bias.reverb'), SparkEffetti.nomeExtra('Twin')],
-      [null, null]);
+      [SparkEffetti.nomeExtra('bias.noisegate'), SparkEffetti.nomeExtra('bias.reverb')],
+      ['Acceso/spento', 'Acceso/spento']);
+check('dove non sappiamo quante manopole ci sono, nessun nome',
+      SparkEffetti.nomeExtra('Twin'), null);
 check('sul riverbero il settimo resta una manopola e l\'ottavo no',
       [SparkEffetti.extra('bias.reverb', 6), SparkEffetti.extra('bias.reverb', 7)],
       [false, true]);
