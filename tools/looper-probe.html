@@ -78,6 +78,7 @@ quel numero i due casi si vedono uguali e portano in direzioni opposte.
   <span class="conta">RX totali <b id="rxTot">0</b> · scartati <b id="rxKo">0</b></span>
   <button id="btnExport" disabled>Esporta la sessione</button>
   <button id="btnClear">Pulisci il log</button>
+  <button id="btnDemo">Mostrami un esempio</button>
 </div>
 
 <h2>1 — Ascolto: usa i tasti dell'ampli, etichetta dopo</h2>
@@ -314,9 +315,11 @@ $('btnExport').onclick = () => {
 
 riga('log', 'pronta. Connetti l\'ampli, poi parti dall\'ascolto.');
 
-/* ?demo — messaggi finti, per vedere come si raggruppano senza avere l'ampli
-   sotto mano. Serve anche a provare la pagina da qui, dove il Bluetooth non c'è. */
-if (location.search.includes('demo')) {
+/* Messaggi finti, per vedere come si raggruppano senza avere l'ampli sotto mano.
+   Sta su un pulsante e non solo su `?demo`: un indirizzo con un punto interrogativo
+   in coda, su Windows, non si apre da riga di comando — `start` cerca un file che
+   si chiama così. Il pulsante non ha questo problema e per giunta si vede. */
+function dimostrazione() {
   const finto = (cmd, sub, data) => spark.onMessage(
     { cmd, sub, seq: 0x21, data, checksumOk: true, raw: [] });
   const raffiche_finte = [
@@ -324,13 +327,17 @@ if (location.search.includes('demo')) {
     [[0x03, 0x75, [0x05]], [0x03, 0x78, [0x01, 0x00]], [0x03, 0x1a, [0x91, 0x00]]],
     [[0x03, 0x75, [0x08]]],
   ];
+  riga('mk', '———— esempio con messaggi finti: non è l\'ampli ————');
   let quando = 200;
   for (const gruppo of raffiche_finte) {
     for (const m of gruppo) setTimeout(() => finto(m[0], m[1], m[2]), quando += 40);
     quando += PAUSA_RAFFICA + 400;                 // pausa fra una raffica e l'altra
   }
-  setTimeout(() => riga('log', 'fine della dimostrazione — ricarica senza ?demo'), quando);
+  setTimeout(() => riga('log', 'fine dell\'esempio — «Pulisci il log» e sei pronto'), quando);
 }
+
+$('btnDemo').onclick = dimostrazione;
+if (location.search.includes('demo')) dimostrazione();
 </script>
 </body>
 </html>
