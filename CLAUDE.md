@@ -943,12 +943,25 @@ col click**, che il pedale può farsi da sé — il bpm glielo dicono `0x0363` e
 un pedale con un led o un buzzer conta da solo. Il suono del click dell'ampli no, quello
 resta suo.
 
-**Se un giorno la si volesse riaprire, il primo passo non è una sonda ma una domanda:
-l'app ufficiale ce l'ha, un tasto che avvia il looper col conteggio?** Se sì, un comando
-esiste e lo snoop log HCI di Android lo trova (è la strada 2 mai usata). Se anche l'app
-fa partire il conteggio solo dal pannello, non c'è niente da cercare e questo capitolo
-è chiuso per sempre. È una verifica da mezzo minuto e va fatta **prima** di qualsiasi
-altra cattura.
+**L'app ufficiale avvia il looper col conteggio** — verificato dall'utente il 13 agosto
+2026. Quindi **un comando esiste**, e non è nessuno di quelli che abbiamo provato: né
+`0x0175` con uno qualsiasi dei sedici valori toccati, né `0x0176`. È l'unica domanda che
+valeva la pena fare prima di aprire un'altra sonda, e la risposta riapre il capitolo
+invece di chiuderlo.
+
+**Da qui in avanti indovinare non serve più.** Sedici valori provati su `0x0175` dicono
+che il comando sta altrove: un altro sub-comando, o `0x0175` con un payload che non è un
+byte solo. Lo spazio è troppo grande per cercarlo a tentoni, e martellare l'ampli con
+comandi inventati è proprio la cosa che una volta l'ha già piantato (serviva staccare la
+corrente). **La strada è lo snoop log HCI**, la numero 2 mai usata: opzioni sviluppatore
+di Android, «Bluetooth HCI snoop log», un giro di looper con l'app ufficiale, si tira giù
+il file e si legge con Wireshark. Dà il comando esatto, byte per byte, senza ipotesi.
+
+Attenzione a una cosa quando si farà: **l'app ufficiale e la nostra non possono essere
+connesse insieme** (a meno che non valga anche per noi quello che l'AIRSTEP fa — non
+verificato), quindi sono due sessioni separate. E lo snoop log registra *quello che il
+telefono manda*, che è esattamente ciò che ci manca: le notifiche in arrivo le sappiamo
+già leggere da soli.
 
 **Il prefisso `0xcc` sul bpm è confermato dai due lati**: a 133 il campo è `cc 85`, a 120
 è `78` nudo. Sotto 128 il fixint basta, sopra serve il prefisso — esattamente la regola
