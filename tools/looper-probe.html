@@ -322,7 +322,18 @@ const IMPOSTAZIONI = [0xcc, 0x85, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0xcd, 0xea, 0x60
    `02` viene confermato e ignorato, `04` registra senza click — ed è la coppia
    che non avevamo mai provato. Il pannello lascia 1,9 s fra i due, che a 133 bpm
    è esattamente una battuta di quattro quarti: c'è anche quella variante. */
+/* I buchi nell'elenco di Ignitron. Il loro enum va 02, 04, 05 … 0e: **01 e 03 non
+   ci sono**, e un valore mancante proprio fra «conteggio» e «registra» è dove
+   starebbe il comando che vuol dire «è stato premuto REC/DUB» — quello che fa
+   partire il conteggio col click invece di registrare e basta. Provati anche 0f e
+   10, che stanno subito oltre la fine dell'elenco. */
+const NON_ELENCATI = [0x01, 0x03, 0x0f, 0x10];
+
 const PROVE = [
+  ...NON_ELENCATI.map(v => ({
+    n: `valore ${hex(v)}`, d: 'non è nell\'elenco di Ignitron',
+    f: () => invia(0x01, 0x75, [v], `sconosciuto ${hex(v)}`),
+  })),
   { n: 'COUNTIN ▸ REC subito', d: '0x0175 02 poi 04 — come Ignitron',
     f: () => { invia(0x01, 0x75, [0x02], 'COUNTIN');
                setTimeout(() => invia(0x01, 0x75, [0x04], 'REC'), 50); } },

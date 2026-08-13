@@ -914,7 +914,25 @@ sequenza intera. **Ack senza esecuzione**: è la stessa firma di `0x0115`, `0x01
 Nel secondo caso la registrazione parte regolare — quattro battute, chiusura e
 riproduzione da sé — ma senza click. Nel terzo, ack e nulla.
 
-**La strada che resta, ed è quella buona: `02` e `04` vanno mandati tutti e due.**
+**Anche la coppia `02`+`04` è fallita** (`captures/2026-08-13-looper-coppia-02-04.json`),
+in tutte e due le distanze: attaccati come Ignitron (56 ms) e con 1,8 s in mezzo come il
+pannello. Registra regolare tutte e due le volte, nessun click. E il dato che conta:
+**in nessuna prova `02` ha mai prodotto un `0x0375` di ritorno** — solo `04` lo produce.
+`02` è confermato e buttato via, punto, in ogni contesto provato.
+
+**Resta un solo tentativo sistematico: i valori che nell'elenco non ci sono.** L'enum di
+Ignitron va `02, 04, 05 … 0e`: **`01` e `03` mancano**, e un buco proprio fra «conteggio»
+e «registra» è dove starebbe il comando che significa *«è stato premuto REC/DUB»* invece
+di *«entra in registrazione»*. Nella sonda ci sono i pulsanti per `01`, `03`, `0f`, `10`.
+Se anche quelli non danno niente, la conclusione onesta è che il click non è raggiungibile
+coi comandi che conosciamo, e per il pedale vuol dire che il conteggio se lo deve fare da
+sé — il bpm ce l'ha, glielo dicono `0x0363` e `0x0376`.
+
+**Il prefisso `0xcc` sul bpm è confermato dai due lati**: a 133 il campo è `cc 85`, a 120
+è `78` nudo. Sotto 128 il fixint basta, sopra serve il prefisso — esattamente la regola
+che Ignitron applica in scrittura.
+
+*(Ipotesi caduta, tenuta per non ripercorrerla: «`02` e `04` vanno mandati tutti e due».)*
 `sparkLooperRec()` di Ignitron manda **due** comandi, non uno: `SPK_LOOPER_CMD_COUNTIN`
 *se il click è acceso*, e subito dopo `SPK_LOOPER_CMD_REC`. Da soli non funziona né
 l'uno né l'altro, ed è esattamente la coppia che non avevamo provato — cercando ogni
