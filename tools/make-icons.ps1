@@ -1,73 +1,89 @@
-# Rigenera le icone della PWA in icons/. Le icone stanno nel repo già pronte:
-# questo script serve solo se si vuole cambiare il disegno o aggiungere una
-# misura. Disegna con System.Drawing, che Windows PowerShell ha già — nessun
-# editor grafico e nessuna dipendenza da installare.
+# Rigenera le icone della PWA in icons/, partendo dal logo dell'utente.
 #
 #   powershell -ExecutionPolicy Bypass -File tools\make-icons.ps1
+#
+# Le icone stanno nel repo già pronte: questo script serve se cambia il logo
+# o se serve una misura nuova.
+#
+# La sorgente è `icons/logo-mark.svg`, cioè il **simbolo da solo** ricavato da
+# `icons/logo.svg`: il logotipo per esteso è largo cinque volte la sua altezza
+# e dentro un quadrato diventerebbe illeggibile.
+#
+# Il disegno non viene ridisegnato a mano come prima: si fa rasterizzare l'SVG
+# a Edge in modalità headless, così l'icona è **lo stesso file** del marchio e
+# non una sua imitazione. Due cose imparate facendolo, che sembrano dettagli:
+#
+#   - headless non scende sotto una finestra di circa 500x500: chiedere uno
+#     screenshot da 192 px dà un ritaglio dell'angolo in alto a sinistra, che
+#     essendo vuoto esce **tutto nero**. Si rasterizza grande e si riduce.
+#   - l'icona «maskable» viene ritagliata dal sistema dentro un cerchio, quindi
+#     vuole più margine: il simbolo deve stare nell'80% centrale.
 
 Add-Type -AssemblyName System.Drawing
 
-$out = Join-Path (Split-Path -Parent $PSScriptRoot) 'icons'
-if (-not (Test-Path $out)) { New-Item -ItemType Directory -Path $out | Out-Null }
+$radice = Split-Path -Parent $PSScriptRoot
+$out    = Join-Path $radice 'icons'
+$marchio = Join-Path $out 'logo-mark.svg'
+if (-not (Test-Path $marchio)) { throw "manca $marchio" }
 
-function New-Icon {
-  param([int]$Size, [string]$Path, [double]$Content = 0.86, [bool]$Rounded = $true)
+$edge = 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe'
+if (-not (Test-Path $edge)) { throw "Edge non trovato in $edge" }
 
-  $bmp = New-Object System.Drawing.Bitmap($Size, $Size, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
-  $g = [System.Drawing.Graphics]::FromImage($bmp)
-  $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-  $g.Clear([System.Drawing.Color]::FromArgb(0,0,0,0))
+$temp = Join-Path $env:TEMP 'spark-icone'
+New-Item -ItemType Directory -Force -Path $temp | Out-Null
 
-  $bg = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 0x14, 0x16, 0x1a))
-  if ($Rounded) {
-    $r = [int]($Size * 0.22)
-    $shape = New-Object System.Drawing.Drawing2D.GraphicsPath
-    $shape.AddArc(0, 0, 2*$r, 2*$r, 180, 90)
-    $shape.AddArc($Size-2*$r, 0, 2*$r, 2*$r, 270, 90)
-    $shape.AddArc($Size-2*$r, $Size-2*$r, 2*$r, 2*$r, 0, 90)
-    $shape.AddArc(0, $Size-2*$r, 2*$r, 2*$r, 90, 90)
-    $shape.CloseFigure()
-    $g.FillPath($bg, $shape)
-    $shape.Dispose()
-  } else {
-    $g.FillRectangle($bg, 0, 0, $Size, $Size)
-  }
+# La paginetta che disegna il marchio a tutto quadrato, su fondo nero come
+# l'app. Il margine arriva dall'url, perché cambia fra icona normale e maskable.
+$pagina = Join-Path $temp 'icona.html'
+@"
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><style>
+  html, body { margin:0; padding:0; width:100%; height:100%; background:#000; overflow:hidden; }
+  img { display:block; width:100%; height:100%; box-sizing:border-box; }
+</style></head><body>
+<img id="m" src="file:///$($marchio -replace '\\','/')">
+<script>
+  document.getElementById('m').style.padding =
+    (new URLSearchParams(location.search).get('p') || '6') + '%';
+</script>
+</body></html>
+"@ | Set-Content -Path $pagina -Encoding UTF8
 
-  # Manopola: arco graduato con lancetta, il gesto piu' riconoscibile di un ampli.
-  $c = $Size / 2.0
-  $rad = $Size * 0.5 * $Content * 0.72      # raggio dell'arco
-  $w = $Size * $Content * 0.115             # spessore
-  $box = New-Object System.Drawing.RectangleF(($c - $rad), ($c - $rad), (2*$rad), (2*$rad))
-
-  $track = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 0x2f, 0x33, 0x3a), $w)
-  $track.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
-  $track.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
-  $g.DrawArc($track, $box, 135, 270)
-
-  $hot = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 0xff, 0x6a, 0x3d), $w)
-  $hot.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
-  $hot.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
-  $g.DrawArc($hot, $box, 135, 180)
-
-  # Lancetta puntata alla fine dell'arco acceso (315 gradi: in alto a destra).
-  $a = 315.0 * [Math]::PI / 180.0
-  $r0 = $rad * 0.10
-  $r1 = $rad * 0.60
-  $pointer = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(255, 0xff, 0x6a, 0x3d), ($w * 0.92))
-  $pointer.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
-  $pointer.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
-  $g.DrawLine($pointer,
-    [single]($c + $r0 * [Math]::Cos($a)), [single]($c + $r0 * [Math]::Sin($a)),
-    [single]($c + $r1 * [Math]::Cos($a)), [single]($c + $r1 * [Math]::Sin($a)))
-
-  $g.Dispose()
-  $bmp.Save($Path, [System.Drawing.Imaging.ImageFormat]::Png)
-  $bmp.Dispose()
-  Write-Output "$Path  ($Size px)"
+function New-Master {
+  param([int]$Margine, [string]$Destinazione)
+  $url = 'file:///' + ($pagina -replace '\\','/') + "?p=$Margine"
+  & $edge --headless=new --disable-gpu --no-first-run `
+          --user-data-dir="$temp\profilo" --allow-file-access-from-files `
+          --window-size=1024,1024 --virtual-time-budget=4000 `
+          --screenshot=$Destinazione $url 2>&1 | Out-Null
+  if (-not (Test-Path $Destinazione)) { throw "rasterizzazione fallita: $Destinazione" }
 }
 
-New-Icon -Size 192 -Path "$out\icon-192.png" -Content 0.86 -Rounded $true
-New-Icon -Size 512 -Path "$out\icon-512.png" -Content 0.86 -Rounded $true
-New-Icon -Size 512 -Path "$out\icon-maskable-512.png" -Content 0.62 -Rounded $false
-New-Icon -Size 180 -Path "$out\apple-touch-icon.png" -Content 0.80 -Rounded $false
-New-Icon -Size 32  -Path "$out\favicon-32.png" -Content 0.94 -Rounded $true
+function Riduci {
+  param([string]$Sorgente, [string]$Destinazione, [int]$Lato)
+  $src = [System.Drawing.Image]::FromFile($Sorgente)
+  $bmp = New-Object System.Drawing.Bitmap($Lato, $Lato)
+  $g   = [System.Drawing.Graphics]::FromImage($bmp)
+  $g.InterpolationMode = 'HighQualityBicubic'
+  $g.PixelOffsetMode   = 'HighQuality'
+  $g.SmoothingMode     = 'HighQuality'
+  $g.DrawImage($src, 0, 0, $Lato, $Lato)
+  $g.Dispose()
+  $bmp.Save($Destinazione, [System.Drawing.Imaging.ImageFormat]::Png)
+  $bmp.Dispose(); $src.Dispose()
+  Write-Host ("{0,-24} {1} px" -f [IO.Path]::GetFileName($Destinazione), $Lato)
+}
+
+$master     = Join-Path $temp 'master-1024.png'
+$masterMask = Join-Path $temp 'master-mask-1024.png'
+New-Master -Margine 6  -Destinazione $master
+New-Master -Margine 16 -Destinazione $masterMask
+
+Riduci $master     (Join-Path $out 'icon-512.png')          512
+Riduci $master     (Join-Path $out 'icon-192.png')          192
+Riduci $master     (Join-Path $out 'apple-touch-icon.png')  180
+Riduci $master     (Join-Path $out 'favicon-32.png')        32
+Riduci $masterMask (Join-Path $out 'icon-maskable-512.png') 512
+
+Write-Host "`nFatte. Alza VERSIONE in sw.js, altrimenti chi ha l'app installata"
+Write-Host "continua a vedere le icone vecchie dalla cache."

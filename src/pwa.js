@@ -43,7 +43,7 @@
         .pwa-barra span { flex:1; }
         .pwa-barra button { font:inherit; font-size:0.82rem; font-weight:600; border:none;
           cursor:pointer; border-radius:8px; padding:7px 12px; }
-        .pwa-barra .pwa-si { background:#e02c2c; color:#fff; }
+        .pwa-barra .pwa-si { background:#e30613; color:#fff; }
         .pwa-barra .pwa-no { background:none; color:#8a8f98; padding:7px 4px; }
       `;
       document.head.appendChild(stile);

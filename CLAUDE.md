@@ -278,8 +278,34 @@ butterebbe via scelte già fatte — ma non si vede e non filtra niente.
 neri a loro volta (`--panel:#121316`): su nero pieno una scheda si vede solo se è un filo
 più chiara, altrimenti reggono tutto i bordi e la pagina diventa un reticolo. Cambiati
 anche `theme-color`, il manifest, il rimando di `live.html` e la striscia di `pwa.js`.
-**Le icone in `icons/` sono ancora arancioni**: si rigenerano con `tools/make-icons.ps1`
-quando si decide il rosso definitivo.
+
+### Il marchio e le icone
+
+Il logo è dell'utente: `icons/logo.svg`, un **logotipo orizzontale** («SparklingTones»,
+rapporto circa 5,7:1). Sta in alto a sinistra dentro `.marca`, insieme al titolo della
+vista, e i due vanno a capo come una cosa sola sul telefono — tenerli separati
+costringeva a indovinare la larghezza del logo nel CSS. Si fissa **l'altezza** e la
+larghezza viene da sé: in un quadrato si schiaccerebbe.
+
+**L'accento dell'app è il rosso del logo** (`#e30613`) e non un rosso scelto a parte: sulla
+stessa barra il marchio e il pulsante «Connetti» si toccano, e due rossi diversi si vedono.
+
+`icons/logo-mark.svg` è il **simbolo da solo** — l'onda e le scintille, senza la scritta —
+ricavato dal file dell'utente prendendone i tracciati, non ridisegnato. Serve per le
+icone, che sono quadrate: un logotipo lungo cinque volte la sua altezza, dentro un
+quadrato, è illeggibile. Non sta nel guscio del service worker: non lo carica nessuno,
+serve solo a generare le icone.
+
+`tools/make-icons.ps1` adesso **rasterizza quell'SVG con Edge headless** invece di
+ridisegnare a mano con System.Drawing, così l'icona è lo stesso file del marchio.
+Due trappole trovate lì, che valgono ogni volta che si fa uno screenshot headless:
+
+- **headless non scende sotto una finestra di circa 500×500.** Chiedere uno screenshot da
+  192 px non ridimensiona: ritaglia l'angolo in alto a sinistra, che essendo vuoto esce
+  **tutto nero** e sembra un errore di disegno. Si rasterizza a 1024 e si riduce con
+  System.Drawing.
+- l'icona **maskable** viene ritagliata dentro un cerchio dal sistema, quindi ha un
+  margine suo (16% invece di 6%).
 
 ### Famiglia di suono: un asse a parte dalle categorie
 

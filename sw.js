@@ -34,9 +34,11 @@ const GUSCIO = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './icons/favicon-32.png',
-  // Il logo dell'intestazione va aggiunto qui **quando il file esiste**:
-  // `cache.addAll` fallisce in blocco se un solo url risponde 404, e con
-  // l'install fallito l'app non funzionerebbe più offline.
+  './icons/logo.svg',
+  // Attenzione ad aggiungere qui un file che non esiste ancora: `cache.addAll`
+  // fallisce in blocco su un solo 404, e con l'install fallito l'app non
+  // funzionerebbe più offline. `logo-mark.svg` non c'è apposta — serve solo a
+  // generare le icone, non viene mai caricato dall'app.
 ];
 
 self.addEventListener('install', event => {
