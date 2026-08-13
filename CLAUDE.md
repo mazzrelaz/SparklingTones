@@ -897,17 +897,34 @@ in riproduzione (`07` `08`, poi 155 messaggi di posizione, poi `09`).
 ha funzionato: sta con `0x0138`, non con `0x0115`/`0x0104`/`0x0106`. La spunta della
 sonda non è servita.
 
-**Il comando che serve è `0x02` (COUNTIN), non `0x04` (REC).** È il difetto che l'utente
-ha trovato subito: con `04` la registrazione parte ma **il click non suona**, e senza
-click non ci si suona sopra. Il motivo si legge nella cattura di ascolto: **il tasto
-REC/DUB del pannello manda `02`**, e `04` arriva da solo ~1,9 s dopo, a conteggio finito.
-Mandando `04` si salta il conteggio, e con lui il click.
+**Il click non parte, e `0x02` non è la soluzione — provato e smentito.** Con `04` la
+registrazione parte ma **il click non suona**, e senza click non ci si suona sopra.
+L'ipotesi era di mandare `0x02` (COUNTIN), visto che **il tasto REC/DUB del pannello
+manda `02`** e `04` arriva da solo ~1,9 s dopo, a conteggio finito.
+
+**Misurato il 13 agosto 2026, terza cattura: `0x0175` con `02` riceve l'ack `0x0475` e
+non fa assolutamente niente.** Nessun `0x0375` di ritorno, nessun evento, per diciassette
+secondi — finché l'utente non ha premuto il tasto fisico, che invece ha prodotto la
+sequenza intera. **Ack senza esecuzione**: è la stessa firma di `0x0115`, `0x0104` e
+`0x0106` prima che si scoprisse il byte `0x00` finale, e quella prova non è stata fatta
+(il payload mandato era il solo `02`).
+
+Da provare in quest'ordine, e nient'altro finché uno non risponde:
+1. `0x0175` con `02` **più il byte `0x00` finale** — è la spunta della sonda, un click.
+2. `0x0275` e `0x0278`, mai interrogati: potrebbero dire se esiste uno stato «conteggio».
+3. `0x0176` scritto da noi con `click` a vero, per vedere se il click si accende a comando.
+
+**Il click non è un'impostazione spenta**, escluso per misura: `0x0276` interrogato in
+quella stessa sessione risponde `cc 85 04 04 c2 c3 c2 cd ea 60`, cioè `click` = `c3` =
+vero, e dal pannello il click si sente. La differenza sta nel comando, non nella
+configurazione. (Nota: l'ultimo campo qui è `cd ea 60`, uint16 60000 — i 60 s di durata
+massima di Ignitron; nella prima cattura era `3c`, quindi quel campo cambia forma.)
 
 **Regola generale, non un dettaglio del looper:** i nomi dell'enum vengono da Ignitron e
-descrivono lo *stato*, non il tasto. `REC` sembra la cosa giusta da mandare e non lo è.
-**Si replica la sequenza che produce il pannello**, che è nella cattura d'ascolto, non il
-comando che ha il nome più convincente. Le due catture insieme lo dicono: una registra
-cosa manda il pannello, l'altra prova a rimandarlo.
+descrivono lo *stato in cui l'ampli è entrato*, non un tasto da premere. Che il pannello
+notifichi `02` non vuol dire che `02` si possa mandare. **Una cattura d'ascolto dice cosa
+l'ampli racconta, non cosa accetta**: le due cose vanno misurate separatamente, ed è
+costato un giro scoprirlo.
 
 **I messaggi dell'esempio non devono finire in una cattura.** Alla prima esportazione ci
 sono finite tre raffiche del pulsante «Mostrami un esempio», riconoscibili solo perché
