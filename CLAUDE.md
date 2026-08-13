@@ -454,6 +454,32 @@ Adesso il nome vecchio si **rilegge dall'ampli anche prima di mandare il comando
 non fare che fare alla cieca. È la stessa regola che l'editor già seguiva
 all'apertura — la verità è sull'ampli — applicata anche qui.
 
+### Quando l'ampli «smette di rispondere»
+
+Provata la correzione, il 13 agosto 2026: due cambi di modello riusciti, poi ogni lettura
+`0x0201` è tornata *nessuna risposta completa, 0 chunk*, per sempre, fino a riconnettere.
+
+`MessageAssembler.feed` aveva due modi di impiantarsi, tutti e due con lo stesso
+sintomo — **da quel momento non arriva più niente** — ed è il tipo di guasto che sembra
+un ampli muto:
+
+- `this.buffer = []` stava **dopo** `onMessage(...)`: se un ascoltatore sollevava
+  un'eccezione, il buffer restava lì con dentro un messaggio già consegnato e ogni byte
+  successivo ci si accodava.
+- un frammento BLE perso lasciava un messaggio mozzo che si fondeva col successivo.
+
+Adesso il buffer si svuota **prima** di consegnare, e un `f0` ricomincia sempre da capo:
+`f0` e `f7` non possono comparire dentro un messaggio, perché i byte dati sono
+impacchettati a 7 bit e stanno sotto `0x80`, `bits8` ne usa sette e il checksum è uno XOR
+di quelli. Due test lo verificano — un ascoltatore che esplode, e un troncone seguito da
+un messaggio intero.
+
+**Non è detto che fosse questa la causa di quella sera**, e per saperlo la volta dopo
+`_readPresetVia` adesso dice anche **quanti messaggi sono arrivati in tutto** durante
+l'attesa (`rxTotali`): se sono 0 l'ampli tace davvero o la connessione è morta senza
+dirlo; se sono di più sta parlando e siamo noi a scartare. Senza quel numero i due casi
+si vedono uguali e portano in direzioni opposte.
+
 L'altra metà del difetto era che **non si vedeva**: un pannello a tutto schermo copre il
 log, quindi ogni messaggio di quel percorso finiva dietro al pannello e un comando
 fallito era indistinguibile da un comando che non fa niente. Ogni pannello che parla con

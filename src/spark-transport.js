@@ -48,6 +48,12 @@ window.SparkTransport = (function () {
     this.waiters = [];
     this.sendChain = Promise.resolve();
 
+    // Quanti messaggi sono arrivati in tutto. Serve a una domanda sola, ma
+    // decisiva quando una lettura non risponde: **l'ampli tace, o siamo noi
+    // che non lo sentiamo più?** Senza questo numero i due casi si vedono
+    // uguali, e portano in due direzioni opposte.
+    this.rxTotali = 0;
+
     this.assembler = new Spark.MessageAssembler(this._handleMessage.bind(this));
 
     // stato riportato dall'ampli
@@ -171,6 +177,7 @@ window.SparkTransport = (function () {
     },
 
     _handleMessage(msg) {
+      this.rxTotali++;
       this._trackState(msg);
       // una copia: un waiter può rimuoversi mentre iteriamo
       for (const waiter of this.waiters.slice()) {
@@ -219,6 +226,7 @@ window.SparkTransport = (function () {
     async _readPresetVia(command, label, timeoutMs) {
       const timeout = timeoutMs || 4000;
       const chunks = [];
+      const rxPrima = this.rxTotali;
       let expectedSeq = null;
 
       const done = new Promise(resolve => {
@@ -239,7 +247,12 @@ window.SparkTransport = (function () {
       expectedSeq = await this.send(command);
       const last = await done;
       if (!last) {
-        this.onLog(`${label}: nessuna risposta completa (${chunks.length} chunk ricevuti)`);
+        // Il secondo numero è quello che conta: se è 0 l'ampli non ha detto
+        // niente — o non lo sentiamo più; se è maggiore di 0 sta parlando e
+        // siamo noi a scartare quello che manda.
+        const arrivati = this.rxTotali - rxPrima;
+        this.onLog(`${label}: nessuna risposta completa (${chunks.length} chunk buoni, ` +
+                   `${arrivati} messaggi arrivati in tutto)`);
         return null;
       }
 

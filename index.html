@@ -1575,7 +1575,8 @@ async function cambiaModello(nuovo) {
     const prima = await aggiornaCatenaDallAmpli();
     if (!prima) {
       logLine('non riesco a leggere la catena dall\'ampli: senza sapere cosa ' +
-              'c\'è adesso, il cambio partirebbe alla cieca.');
+              'c\'è adesso, il cambio partirebbe alla cieca. Se si ripete, ' +
+              'chiudi l\'editor e riconnetti l\'ampli.');
       return;
     }
 

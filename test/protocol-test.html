@@ -116,6 +116,30 @@ const asm2 = new Spark.MessageAssembler(m => received.push(m));
 asm2.feed([0x11, 0x22, 0x33]);                  // byte orfani prima di F0
 check('MessageAssembler scarta i byte orfani', received.length, 1);
 
+/* Le due prove che contano quando l'ampli «smette di rispondere»: se il
+   riassemblatore si impianta, ogni lettura successiva riceve zero chunk e
+   sembra un ampli muto. Da qui non si esce più senza riconnettere, quindi
+   valgono come prove di regressione più di tante altre. */
+
+const dopoLErrore = [];
+const asm3 = new Spark.MessageAssembler(m => {
+  dopoLErrore.push(m);
+  if (dopoLErrore.length === 1) throw new Error('ascoltatore rotto');
+});
+try { asm3.feed(KNOB_REVERB); } catch (e) { /* l'errore esce, ed è giusto così */ }
+asm3.feed(KNOB_REVERB);
+check('un ascoltatore che solleva un\'eccezione non blocca i messaggi dopo',
+      dopoLErrore.length, 2);
+
+const dopoIlTroncone = [];
+const asm4 = new Spark.MessageAssembler(m => dopoIlTroncone.push(m));
+asm4.feed(KNOB_REVERB.slice(0, 12));            // messaggio mozzo: frammento perso
+asm4.feed(KNOB_REVERB);                         // e subito dopo uno intero
+check('un messaggio troncato non si fonde con quello dopo',
+      dopoIlTroncone.length, 1);
+check('e quello dopo arriva intatto',
+      dopoIlTroncone[0] && dopoIlTroncone[0].raw, KNOB_REVERB);
+
 /* ---------- preset ---------- */
 
 const messages = PRESET0_CHUNKS.map(Spark.parseMessage);

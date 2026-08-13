@@ -300,16 +300,35 @@ window.Spark = (function () {
     this.onMessage = onMessage;
   }
 
+  /**
+   * Due regole che sembrano dettagli e non lo sono: **il buffer si svuota
+   * sempre**, e un `f0` che arriva a metà messaggio ricomincia da capo.
+   *
+   * `f0` e `f7` non possono comparire dentro un messaggio — i byte dati sono
+   * impacchettati a 7 bit e stanno tutti sotto `0x80`, il byte `bits8` usa
+   * sette bit e anche il checksum, che è un XOR di quelli, resta sotto. Quindi
+   * un `f0` in mezzo vuol dire una cosa sola: il messaggio di prima è arrivato
+   * mozzo (un frammento BLE perso) e questo è nuovo. Senza questa regola i due
+   * si fondono in un messaggio che non esiste.
+   *
+   * E se `onMessage` solleva un'eccezione — un ascoltatore con un difetto suo,
+   * un messaggio inatteso — il buffer va svuotato lo stesso: altrimenti resta
+   * lì per sempre con dentro un messaggio già consegnato, ogni byte successivo
+   * ci si accoda, e **da quel momento non si riceve più niente** finché non si
+   * riconnette. Un guasto in chi ascolta non deve rompere chi riceve.
+   */
   MessageAssembler.prototype.feed = function (bytes) {
     for (const b of bytes) {
-      if (this.buffer.length === 0) {
-        if (b === 0xf0) this.buffer.push(b);
-        continue;                                  // scarta byte orfani prima di F0
+      if (b === 0xf0) {
+        this.buffer = [b];                         // sempre inizio di messaggio
+        continue;
       }
+      if (this.buffer.length === 0) continue;      // scarta byte orfani prima di F0
       this.buffer.push(b);
       if (b === 0xf7) {
-        this.onMessage(parseMessage(this.buffer));
+        const messaggio = this.buffer;
         this.buffer = [];
+        this.onMessage(parseMessage(messaggio));
       }
     }
   };
