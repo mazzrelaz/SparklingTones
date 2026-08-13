@@ -131,6 +131,24 @@ asm3.feed(KNOB_REVERB);
 check('un ascoltatore che solleva un\'eccezione non blocca i messaggi dopo',
       dopoLErrore.length, 2);
 
+/* La prova che mancava, ed è quella che conta di più: un preset intero, sedici
+   messaggi di fila, spezzati come li spezza il BLE. Con un solo messaggio corto
+   un riassemblatore sbagliato passa lo stesso. */
+
+const flusso = [];
+PRESET0_CHUNKS.forEach(c => flusso.push(...c));
+for (const taglio of [1, 7, 20, 39, 100]) {
+  const arrivati = [];
+  const a = new Spark.MessageAssembler(m => arrivati.push(m));
+  for (let i = 0; i < flusso.length; i += taglio) a.feed(flusso.slice(i, i + taglio));
+  check(`sedici messaggi di fila, frammenti da ${taglio}: arrivano tutti`,
+        arrivati.length, PRESET0_CHUNKS.length);
+  check(`frammenti da ${taglio}: il preset si ricompone`,
+        Spark.assemblePresetPayload(arrivati).complete, true);
+  check(`frammenti da ${taglio}: nessun messaggio storpiato`,
+        arrivati.every(m => m.checksumOk), true);
+}
+
 const dopoIlTroncone = [];
 const asm4 = new Spark.MessageAssembler(m => dopoIlTroncone.push(m));
 asm4.feed(KNOB_REVERB.slice(0, 12));            // messaggio mozzo: frammento perso

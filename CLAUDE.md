@@ -474,11 +474,24 @@ impacchettati a 7 bit e stanno sotto `0x80`, `bits8` ne usa sette e il checksum 
 di quelli. Due test lo verificano — un ascoltatore che esplode, e un troncone seguito da
 un messaggio intero.
 
-**Non è detto che fosse questa la causa di quella sera**, e per saperlo la volta dopo
-`_readPresetVia` adesso dice anche **quanti messaggi sono arrivati in tutto** durante
-l'attesa (`rxTotali`): se sono 0 l'ampli tace davvero o la connessione è morta senza
-dirlo; se sono di più sta parlando e siamo noi a scartare. Senza quel numero i due casi
-si vedono uguali e portano in direzioni opposte.
+**Non era quella la causa di quella sera.** Il numero nuovo l'ha detto subito: alla prova
+dopo, `0 chunk buoni, 0 messaggi arrivati in tutto` — e infatti **l'ampli si era bloccato
+davvero, ed è servito staccare la corrente**. `_readPresetVia` adesso riporta sempre
+quanti messaggi sono arrivati durante l'attesa (`rxTotali`): 0 vuol dire ampli muto o
+connessione morta, più di 0 vuol dire che parla e siamo noi a scartare. Senza quel numero
+i due casi si vedono uguali e portano in direzioni opposte — è costato una serata.
+
+Il riassemblatore resta corretto e adesso è coperto sul serio: un preset intero, sedici
+messaggi di fila, spezzato a frammenti da 1, 7, 20, 39 e 100 byte. Con un solo messaggio
+corto — l'unica prova che c'era prima — un riassemblatore sbagliato passa lo stesso.
+
+**Cosa abbia bloccato l'ampli non lo sappiamo**, ma si è ridotto quello che gli si butta
+addosso. Il cambio di modello era arrivato a **due letture per cambio**: la catena si
+rilegge ora solo se non ci si fida più di quella che si ha (`inModifica.attendibile`,
+messo a falso da ogni lettura fallita), e l'attesa dopo `0x0106` è passata da 500 ms a un
+secondo. Ricostruire un blocco DSP è il comando più pesante che gli mandiamo, e la
+lettura che segue — sedici messaggi — è la risposta più impegnativa: farle a raffica è
+stata l'unica cosa nuova di quella sessione.
 
 L'altra metà del difetto era che **non si vedeva**: un pannello a tutto schermo copre il
 log, quindi ogni messaggio di quel percorso finiva dietro al pannello e un comando

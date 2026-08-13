@@ -1282,6 +1282,9 @@ async function apriEditor(record) {
 
   inModifica = {
     record,
+    // La catena viene da una lettura appena fatta: finché una lettura non
+    // fallisce, ci si può fidare senza richiederla ogni volta.
+    attendibile: true,
     effetti: attuale.effects.map(e => ({
       name: e.name,
       enabled: e.enabled,
@@ -1571,8 +1574,16 @@ async function cambiaModello(nuovo) {
   if (!spark.connected) { logLine('ampli non connesso: il cambio non è partito.'); return; }
 
   try {
-    logProgress('guardo cosa c\'è adesso in quel blocco…');
-    const prima = await aggiornaCatenaDallAmpli();
+    // La catena si rilegge **solo se non ci fidiamo più** di quella che
+    // abbiamo. Riletta a ogni cambio comunque, si raddoppiavano le letture, e
+    // ogni lettura sono sedici messaggi che l'ampli deve tirare fuori mentre
+    // sta ancora ricostruendo un blocco: l'ampli si è bloccato davvero, il 13
+    // agosto 2026, e c'è voluto staccare la corrente.
+    let prima = inModifica.effetti;
+    if (!inModifica.attendibile) {
+      logProgress('guardo cosa c\'è adesso in quel blocco…');
+      prima = await aggiornaCatenaDallAmpli();
+    }
     if (!prima) {
       logLine('non riesco a leggere la catena dall\'ampli: senza sapere cosa ' +
               'c\'è adesso, il cambio partirebbe alla cieca. Se si ripete, ' +
@@ -1586,7 +1597,10 @@ async function cambiaModello(nuovo) {
 
     logProgress(`sostituisco ${vecchio} con ${nuovo}…`);
     await spark.send(Spark.commands.changeEffectModel(vecchio, nuovo));
-    await new Promise(r => setTimeout(r, 500));
+    // Cambiare modello vuol dire ricostruire un blocco DSP: è il comando più
+    // pesante che gli mandiamo, e la lettura che segue è la più impegnativa.
+    // Un secondo di respiro costa meno di un ampli da riavviare.
+    await new Promise(r => setTimeout(r, 1000));
 
     const dopo = await aggiornaCatenaDallAmpli();
     if (!dopo) {
@@ -1615,12 +1629,19 @@ async function cambiaModello(nuovo) {
  */
 async function aggiornaCatenaDallAmpli() {
   const attuale = await spark.readLiveState();
-  if (!attuale || !inModifica) return null;
+  if (!inModifica) return null;
+  if (!attuale) {
+    // Da qui in poi non sappiamo più cosa c'è davvero sull'ampli: quello che
+    // resta sullo schermo è l'ultima cosa vista, e va trattato come tale.
+    inModifica.attendibile = false;
+    return null;
+  }
   inModifica.effetti = attuale.effects.map(e => ({
     name: e.name,
     enabled: e.enabled,
     params: e.params.map(p => ({ index: p.index, value: p.value })),
   }));
+  inModifica.attendibile = true;
   disegnaCatena();
   return inModifica.effetti;
 }
