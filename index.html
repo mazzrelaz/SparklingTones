@@ -110,6 +110,12 @@
   .sezione > h2 .nota { text-transform:none; letter-spacing:0; font-weight:400;
                         color:var(--faint); font-size:0.72rem; }
   .vuoto-sezione { color:var(--faint); font-size:0.8rem; padding:6px 2px; }
+  /* Quando manca qualcosa che non dipende da noi, si dice qui e si dice per
+     esteso: un pulsante spento senza spiegazione sembra un'app rotta. */
+  .avviso-grosso { background:#1d1a12; border:1px solid #3a3520; color:var(--gold);
+                   border-radius:10px; padding:12px 14px; margin-bottom:18px;
+                   font-size:0.82rem; line-height:1.6; }
+  .avviso-grosso strong { color:#ffdc7a; }
 
   /* ---- pannello dell'ampli ------------------------------------------
      Gli otto slot non sono righe di libreria: sono due banchi da quattro,
@@ -424,6 +430,7 @@
 </header>
 
 <main id="vistaPreset">
+  <div id="senzaBluetooth" class="avviso-grosso" hidden></div>
   <div class="sezione" id="sezAmpli">
     <h2>Sull'ampli <span class="nota">gli otto slot, istantanei</span></h2>
     <div id="listaAmpli"></div>
@@ -2430,16 +2437,51 @@ function marchioNeiPannelli() {
   else marchioNeiPannelli();
 })();
 
+/**
+ * Siamo su un apparecchio Apple da tasca o da divano? Serve solo a scegliere
+ * le parole dell'avviso, non a decidere cosa fare: quello lo decide la
+ * presenza di `navigator.bluetooth`, che è il fatto vero.
+ *
+ * `MacIntel` con più di un dito è un iPad recente: da iPadOS 13 si spaccia
+ * per un Mac, e senza quel controllo direbbe le cose di un computer.
+ */
+function mela() {
+  const p = navigator.platform || '';
+  return /iPhone|iPad|iPod/.test(p) ||
+         (p === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 /* ==================================================================== */
 
 (async function start() {
-  await store.open();
-  await applicaVista();
+  // Prima di tutto il resto: non dipende dal database, e se il database
+  // tardasse o non partisse questo si deve vedere lo stesso.
+  // Un pulsante spento e basta è la cosa peggiore: sembra un'app rotta.
+  // Su iPhone e iPad il Bluetooth dal browser non esiste — non è una scelta
+  // di Safari, è che su iOS ogni browser è obbligato a usare il motore di
+  // Apple, quindi anche Chrome lì non ce l'ha. Meglio dirlo, e dire cosa
+  // funziona lo stesso.
   if (!navigator.bluetooth) {
     $('btnConnect').disabled = true;
+    $('btnConnect').title = 'questo browser non può parlare col Bluetooth';
+    $('btnRead').title = $('btnConnect').title;
+    const avviso = $('senzaBluetooth');
+    avviso.hidden = false;
+    avviso.innerHTML = mela()
+      ? 'Su iPhone e iPad <strong>nessun browser può usare il Bluetooth</strong>: su iOS ' +
+        'anche Chrome e Firefox girano sul motore di Apple, che non lo prevede — quindi ' +
+        'l\'amplificatore da qui non si connette. La libreria però funziona tutta: ' +
+        'sfogliare, cercare, organizzare, importare ed esportare. Per suonare serve un ' +
+        'telefono o un computer con Chrome, Edge o Opera.'
+      : 'Questo browser non ha il Bluetooth per le pagine web, quindi l\'amplificatore da ' +
+        'qui non si connette. La libreria funziona tutta lo stesso. Con Chrome, Edge o ' +
+        'Opera aggiornati, su Android o su computer, si connette.';
     logLine('Web Bluetooth non disponibile: la libreria resta consultabile, ' +
             'ma non si può leggere dall\'ampli.');
   }
+
+  await store.open();
+  await applicaVista();
 })();
 </script>
 </body>

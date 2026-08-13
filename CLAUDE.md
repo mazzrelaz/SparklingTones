@@ -696,6 +696,26 @@ lasciato. Verificato: 41 eventi diventano un comando solo, col valore finale giu
 Il blocco spento si vede spento e lo dice: **girare la manopola di un effetto spento non
 produce nessun suono**, ed è una trappola già pagata una volta.
 
+## Su iPhone e iPad non si connette, e non è un difetto
+
+**Nessun browser su iOS/iPadOS ha Web Bluetooth.** Non è Safari a essere indietro: su iOS
+ogni browser è obbligato a usare il motore di Apple, quindi anche Chrome e Firefox lì non
+ce l'hanno. `navigator.bluetooth` non esiste e il pulsante «Connetti» resta spento.
+Segnalato dall'utente il 13 agosto 2026 su iPad.
+
+L'app adesso **lo dice per esteso** in cima alla vista preset invece di lasciare un
+pulsante morto — un pulsante spento senza spiegazione sembra un'app rotta — e distingue
+il caso Apple dagli altri browser senza Bluetooth. Il testo dice anche cosa funziona lo
+stesso, che è quasi tutto: sfogliare, cercare, organizzare, importare, esportare.
+
+`mela()` riconosce l'apparecchio **solo per scegliere le parole**: cosa fare lo decide la
+presenza di `navigator.bluetooth`, che è il fatto vero. Attenzione al controllo: da
+iPadOS 13 un iPad si dichiara `MacIntel`, quindi serve anche `maxTouchPoints > 1` per
+distinguerlo da un Mac.
+
+Il controllo sta **prima** di `store.open()`: non dipende dal database, e se il database
+tardasse l'avviso si deve vedere lo stesso.
+
 ## Informazioni, licenze, responsabilità
 
 Il pannello «about» (`pannelloAbout`, si apre da «Altro») e i file `LICENSE` e `NOTICE`
