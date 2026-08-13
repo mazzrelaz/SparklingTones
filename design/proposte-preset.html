@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vista Preset — tre proposte</title>
+<style>
+  * { box-sizing:border-box; }
+  :root {
+    --bg:#14161a; --panel:#181a1f; --line:#24272c; --line-soft:#1f2228;
+    --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
+    --accent:#ff6a3d; --green:#7fe08a; --gold:#f0c040; --rosso:#ff8080;
+    --rossoA:#ff9b9b; --verdeB:#9be0a8;
+  }
+  body { margin:0; background:#0b0c0e; color:var(--text);
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:15px;
+         padding:24px; }
+
+  .intro { max-width:80ch; margin:0 auto 26px; }
+  .intro h1 { font-size:1.2rem; margin:0 0 8px; }
+  .intro p { color:var(--dim); font-size:0.86rem; line-height:1.6; margin:0 0 8px; }
+
+  .campo { display:flex; gap:26px; justify-content:center; flex-wrap:wrap;
+           align-items:flex-start; }
+  .colonna { width:390px; }
+  .didascalia { margin-bottom:10px; }
+  .didascalia h2 { font-size:0.95rem; margin:0 0 4px; }
+  .didascalia .idea { color:var(--dim); font-size:0.8rem; line-height:1.55; margin:0; }
+  .didascalia .costo { color:var(--faint); font-size:0.76rem; margin:6px 0 0; }
+
+  /* il telaio del telefono: larghezza vera, altezza limitata, scorre dentro */
+  .telefono { width:390px; height:740px; overflow-y:auto; background:var(--bg);
+              border:1px solid #2c3038; border-radius:22px;
+              box-shadow:0 10px 40px rgba(0,0,0,0.5); }
+  .telefono::-webkit-scrollbar { width:0; }
+
+  /* ---------- pezzi comuni alle tre proposte ---------- */
+
+  .hdr { position:sticky; top:0; z-index:3; background:var(--bg);
+         border-bottom:1px solid var(--line); padding:12px 14px 10px; }
+  .titolo { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .titolo h3 { font-size:1.05rem; margin:0; flex:1; }
+  .stato { padding:3px 9px; border-radius:11px; font-size:0.72rem; font-weight:600;
+           background:#1f3a24; color:var(--green); white-space:nowrap; }
+  .btn { font:inherit; font-size:0.8rem; font-weight:600; border:none;
+         background:#2a2d33; color:var(--text); padding:7px 11px; border-radius:8px; }
+  .btn.primary { background:var(--accent); color:#fff; }
+  .btn.piatto { background:none; color:var(--accent); padding:7px 2px; }
+  .cerca { display:flex; gap:8px; margin-top:10px; }
+  .cerca input { flex:1; min-width:0; background:#1e2126; border:1px solid #34383f;
+                 color:var(--text); padding:9px 11px; border-radius:8px; font:inherit;
+                 font-size:0.9rem; }
+  .stella { background:none; border:none; color:var(--faint); font-size:1rem; }
+  .pills { display:flex; gap:6px; margin-top:8px; overflow-x:auto; scrollbar-width:none; }
+  .pills::-webkit-scrollbar { display:none; }
+  .pill { flex:none; background:#23262c; color:#b6bbc3; font-size:0.76rem;
+          padding:5px 11px; border-radius:14px; white-space:nowrap; }
+  .pill.on { background:var(--accent); color:#fff; }
+
+  .corpo { padding:14px; }
+  .sez > h4 { font-size:0.74rem; color:var(--dim); text-transform:uppercase;
+              letter-spacing:0.06em; margin:0 0 8px; font-weight:700;
+              display:flex; align-items:baseline; gap:7px; }
+  .sez > h4 .nota { text-transform:none; letter-spacing:0; font-weight:400;
+                    color:var(--faint); font-size:0.71rem; }
+  .sez { margin-bottom:20px; }
+
+  /* riga della libreria, com'è adesso: base di partenza per tutte e tre */
+  .riga { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+          margin-bottom:8px; padding:10px 12px; display:flex; align-items:center; gap:9px; }
+  .riga .nome { font-weight:600; font-size:0.92rem; }
+  .riga .cat { color:var(--dim); font-size:0.75rem; margin-top:2px;
+               white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .riga .naming { flex:1; min-width:0; }
+  .targhetta { color:var(--faint); font-size:0.71rem; font-family:Consolas,monospace;
+               border:1px solid var(--line); border-radius:5px; padding:2px 6px; flex:none; }
+  .targhetta.a { color:var(--rossoA); border-color:#4a2a2a; }
+  .targhetta.b { color:var(--verdeB); border-color:#2a4a32; }
+
+  /* ---------- A. pannello dell'ampli ---------- */
+
+  .pannello-ampli { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .banco-eti { font-size:0.68rem; color:var(--faint); letter-spacing:0.08em;
+               text-transform:uppercase; margin-bottom:6px; font-weight:700; }
+  .slotcard { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+              padding:9px 10px; min-height:66px; display:flex; flex-direction:column;
+              justify-content:space-between; }
+  .slotcard.attivo { border-color:var(--accent); background:#20191a; }
+  .slotcard .alto { display:flex; align-items:center; gap:6px; }
+  .led { width:8px; height:8px; border-radius:50%; flex:none; }
+  .led.a { background:var(--rossoA); box-shadow:0 0 7px #ff9b9b88; }
+  .led.b { background:var(--verdeB); box-shadow:0 0 7px #9be0a888; }
+  .led.spento { background:#33373e; box-shadow:none; }
+  .slotcard .sigla { font-family:Consolas,monospace; font-size:0.7rem; color:var(--faint); }
+  .slotcard .nome { font-size:0.82rem; font-weight:600; line-height:1.25;
+                    overflow:hidden; display:-webkit-box; -webkit-line-clamp:2;
+                    -webkit-box-orient:vertical; }
+  .slotcard .ampli { font-size:0.7rem; color:var(--dim); margin-top:4px; }
+  .slotcard.libero { border-style:dashed; background:none; }
+  .slotcard.libero .nome { color:var(--faint); font-weight:400; }
+
+  /* ---------- B. schede ---------- */
+
+  .scheda { background:var(--panel); border:1px solid var(--line); border-radius:12px;
+            margin-bottom:9px; padding:11px 12px 10px 14px; position:relative;
+            overflow:hidden; }
+  .scheda::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+                    background:var(--accent); opacity:0.85; }
+  .scheda.blu::before   { background:#5aa9e6; }
+  .scheda.verde::before { background:#7fe08a; }
+  .scheda.viola::before { background:#a98bdb; }
+  .scheda .capo { display:flex; align-items:center; gap:8px; }
+  .scheda .nome { font-weight:600; font-size:0.94rem; flex:1; min-width:0;
+                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .scheda .via { width:30px; height:30px; border-radius:50%; border:none; flex:none;
+                 background:#2a2d33; color:var(--text); font-size:0.7rem; }
+  .scheda .via.pronto { background:var(--accent); color:#fff; }
+  .chips { display:flex; gap:5px; margin-top:7px; flex-wrap:wrap; }
+  .chip { background:#23262c; color:#b6bbc3; font-size:0.7rem; padding:2px 8px;
+          border-radius:9px; }
+  .chip.spento { color:var(--faint); text-decoration:line-through; }
+
+  /* ---------- C. sobrio ---------- */
+
+  .striscia { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;
+              padding:2px 0 10px; }
+  .striscia::-webkit-scrollbar { display:none; }
+  .mini { flex:none; width:78px; border:1px solid var(--line); border-radius:9px;
+          padding:7px 8px; background:var(--panel); }
+  .mini.attivo { border-color:var(--accent); background:#20191a; }
+  .mini .sigla { font-family:Consolas,monospace; font-size:0.66rem; }
+  .mini .sigla.a { color:var(--rossoA); }
+  .mini .sigla.b { color:var(--verdeB); }
+  .mini .nome { font-size:0.72rem; margin-top:3px; line-height:1.2; height:2.4em;
+                overflow:hidden; }
+  .mini.libero .nome { color:var(--faint); }
+
+  .elenco { border-top:1px solid var(--line-soft); }
+  .voce { padding:13px 2px; border-bottom:1px solid var(--line-soft); display:flex;
+          align-items:baseline; gap:10px; }
+  .voce .nome { font-size:1rem; font-weight:500; flex:1; min-width:0;
+                white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .voce .meta { color:var(--faint); font-size:0.74rem; white-space:nowrap; }
+  .voce .stellina { color:var(--gold); font-size:0.8rem; }
+
+  @media (max-width: 900px) { body { padding:12px; } .colonna, .telefono { width:100%; } }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Vista Preset — tre proposte</h1>
+  <p>Stessi dati, stessi colori, stessa larghezza di un telefono. Cambia solo come sono
+    disposte le cose. Non ho toccato l'app: questa è una pagina a parte, da guardare.</p>
+  <p>Quello che ho cercato di risolvere in tutte e tre: <b>gli otto slot dell'ampli oggi
+    sembrano righe di libreria come le altre</b>, mentre sono un'altra cosa — sono il
+    pannello dell'ampli, sono otto e sempre otto, e hanno i colori dei LED. E la riga
+    dice la catena con i nomi tecnici, che a colpo d'occhio non aiutano: quello che si
+    cerca è l'ampli e il drive.</p>
+</div>
+
+<div class="campo">
+
+  <!-- ============================= A ============================= -->
+  <div class="colonna">
+    <div class="didascalia">
+      <h2>A · Il pannello dell'ampli</h2>
+      <p class="idea">Gli otto slot diventano quello che sono davvero: due banchi da
+        quattro, con i LED rosso e verde, come li vedi sull'ampli. La libreria sotto
+        resta l'elenco di adesso.</p>
+      <p class="costo">Cambia solo la testa della pagina. Il resto dell'app non si tocca.</p>
+    </div>
+    <div class="telefono">
+      <div class="hdr">
+        <div class="titolo">
+          <h3>Preset</h3>
+          <span class="stato">Spark 2</span>
+          <button class="btn">Leggi</button>
+          <button class="btn piatto">Live →</button>
+        </div>
+        <div class="cerca">
+          <input placeholder="cerca un preset…">
+          <button class="stella">★</button>
+        </div>
+        <div class="pills">
+          <span class="pill on">tutte</span><span class="pill">Pink Floyd</span>
+          <span class="pill">Clean</span><span class="pill">Solo</span>
+          <span class="pill">Acustica</span>
+        </div>
+      </div>
+      <div class="corpo">
+        <div class="sez">
+          <h4>Sull'ampli <span class="nota">istantanei</span></h4>
+          <div class="pannello-ampli">
+            <div>
+              <div class="banco-eti" style="color:var(--rossoA)">banco A</div>
+              <div class="slotcard attivo">
+                <div class="alto"><span class="led a"></span><span class="sigla">A1</span></div>
+                <div><div class="nome">DG · Shine On clean</div>
+                     <div class="ampli">Twin · Black Op</div></div>
+              </div>
+              <div class="slotcard" style="margin-top:8px">
+                <div class="alto"><span class="led a"></span><span class="sigla">A2</span></div>
+                <div><div class="nome">DG · Echoes</div>
+                     <div class="ampli">SwitchAxe · Tube Drive</div></div>
+              </div>
+              <div class="slotcard" style="margin-top:8px">
+                <div class="alto"><span class="led a"></span><span class="sigla">A3</span></div>
+                <div><div class="nome">SV · For the Love of God</div>
+                     <div class="ampli">Rectifier · Black Op</div></div>
+              </div>
+              <div class="slotcard" style="margin-top:8px">
+                <div class="alto"><span class="led a"></span><span class="sigla">A4</span></div>
+                <div><div class="nome">Poles Apart</div>
+                     <div class="ampli">Twin · SAB Driver</div></div>
+              </div>
+            </div>
+            <div>
+              <div class="banco-eti" style="color:var(--verdeB)">banco B</div>
+              <div class="slotcard">
+                <div class="alto"><span class="led b"></span><span class="sigla">B1</span></div>
+                <div><div class="nome">Nylon Reverb</div>
+                     <div class="ampli">FatAcoustic</div></div>
+              </div>
+              <div class="slotcard" style="margin-top:8px">
+                <div class="alto"><span class="led b"></span><span class="sigla">B2</span></div>
+                <div><div class="nome">CS · Europa</div>
+                     <div class="ampli">AmericanHighGain</div></div>
+              </div>
+              <div class="slotcard" style="margin-top:8px">
+                <div class="alto"><span class="led b"></span><span class="sigla">B3</span></div>
+                <div><div class="nome">Clean Tube</div>
+                     <div class="ampli">AcousticAmp · Tube Drive</div></div>
+              </div>
+              <div class="slotcard libero" style="margin-top:8px">
+                <div class="alto"><span class="led spento"></span><span class="sigla">B4</span></div>
+                <div><div class="nome">non ancora letto</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sez">
+          <h4>In libreria <span class="nota">104 preset</span></h4>
+          <div class="riga">
+            <span class="stella" style="color:var(--gold)">★</span>
+            <div class="naming"><div class="nome">Fingerstyle Reverb</div>
+              <div class="cat">Acustica · Clean</div></div>
+          </div>
+          <div class="riga">
+            <span class="stella">☆</span>
+            <div class="naming"><div class="nome">Spooky Melody</div>
+              <div class="cat">Alternative</div></div>
+          </div>
+          <div class="riga">
+            <span class="stella">☆</span>
+            <div class="naming"><div class="nome">Hey Jimi Solo</div>
+              <div class="cat">Hendrix · Solo</div></div>
+            <span class="targhetta b">B4</span>
+          </div>
+          <div class="riga">
+            <span class="stella">☆</span>
+            <div class="naming"><div class="nome">Blues Lead 65</div>
+              <div class="cat">Blues</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= B ============================= -->
+  <div class="colonna">
+    <div class="didascalia">
+      <h2>B · Schede a colori</h2>
+      <p class="idea">Ogni preset è una scheda con il bordo colorato secondo la categoria,
+        la catena a pastiglie leggibili (quelle spente si vedono spente) e il tasto
+        <b>suona</b> sempre a portata, senza aprire il dettaglio.</p>
+      <p class="costo">Tocca la riga di libreria, quindi anche il codice che la disegna.
+        Più colore in giro: da vedere se aiuta o distrae.</p>
+    </div>
+    <div class="telefono">
+      <div class="hdr">
+        <div class="titolo">
+          <h3>Preset</h3>
+          <span class="stato">Spark 2</span>
+          <button class="btn">Leggi</button>
+          <button class="btn piatto">Live →</button>
+        </div>
+        <div class="cerca">
+          <input placeholder="cerca un preset…">
+          <button class="stella">★</button>
+        </div>
+        <div class="pills">
+          <span class="pill on">tutte</span><span class="pill">Pink Floyd</span>
+          <span class="pill">Clean</span><span class="pill">Solo</span>
+        </div>
+      </div>
+      <div class="corpo">
+        <div class="sez">
+          <h4>Sull'ampli <span class="nota">istantanei</span></h4>
+          <div class="scheda">
+            <div class="capo">
+              <span class="targhetta a">A1</span>
+              <span class="nome">DG · Shine On clean</span>
+              <button class="via pronto">▶</button>
+            </div>
+            <div class="chips"><span class="chip">Twin</span><span class="chip">Black Op</span>
+              <span class="chip">Chorus</span><span class="chip">Echo Tape</span>
+              <span class="chip">Hall Natural</span></div>
+          </div>
+          <div class="scheda blu">
+            <div class="capo">
+              <span class="targhetta a">A2</span>
+              <span class="nome">DG · Echoes</span>
+              <button class="via pronto">▶</button>
+            </div>
+            <div class="chips"><span class="chip">SwitchAxe</span><span class="chip">Tube Drive</span>
+              <span class="chip spento">Chorus</span><span class="chip">Delay</span></div>
+          </div>
+          <div class="scheda verde">
+            <div class="capo">
+              <span class="targhetta b">B1</span>
+              <span class="nome">Nylon Reverb</span>
+              <button class="via pronto">▶</button>
+            </div>
+            <div class="chips"><span class="chip">FatAcoustic</span><span class="chip">LA Comp</span>
+              <span class="chip">Plate Short</span></div>
+          </div>
+        </div>
+
+        <div class="sez">
+          <h4>In libreria <span class="nota">104 preset</span></h4>
+          <div class="scheda viola">
+            <div class="capo">
+              <span class="nome">Fingerstyle Reverb</span>
+              <button class="via">▶</button>
+            </div>
+            <div class="chips"><span class="chip">Acoustic</span><span class="chip">Optical Comp</span>
+              <span class="chip">Room Studio A</span></div>
+          </div>
+          <div class="scheda blu">
+            <div class="capo">
+              <span class="nome">Spooky Melody</span>
+              <button class="via">▶</button>
+            </div>
+            <div class="chips"><span class="chip">Twin</span><span class="chip spento">Tube Drive</span>
+              <span class="chip">UniVibe</span><span class="chip">Hall Ambient</span></div>
+          </div>
+          <div class="scheda">
+            <div class="capo">
+              <span class="nome">Blues Lead 65</span>
+              <button class="via">▶</button>
+            </div>
+            <div class="chips"><span class="chip">Deluxe65</span><span class="chip">Over Drive</span>
+              <span class="chip">Plate Rich</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================= C ============================= -->
+  <div class="colonna">
+    <div class="didascalia">
+      <h2>C · Sobrio, da leggere</h2>
+      <p class="idea">Meno riquadri e più tipografia: i nomi grandi, il resto zitto. Gli
+        otto slot diventano una striscia in alto che resta lì mentre scorri la libreria,
+        così sai sempre cosa c'è sull'ampli.</p>
+      <p class="costo">Il cambiamento più forte come impressione, il più leggero come
+        codice: quasi tutto CSS. Meno informazioni per riga, però.</p>
+    </div>
+    <div class="telefono">
+      <div class="hdr">
+        <div class="titolo">
+          <h3>Preset</h3>
+          <span class="stato">Spark 2</span>
+          <button class="btn piatto">Live →</button>
+        </div>
+        <div class="cerca">
+          <input placeholder="cerca…">
+          <button class="stella">★</button>
+        </div>
+        <div class="striscia">
+          <div class="mini attivo"><div class="sigla a">A1</div><div class="nome">Shine On clean</div></div>
+          <div class="mini"><div class="sigla a">A2</div><div class="nome">Echoes</div></div>
+          <div class="mini"><div class="sigla a">A3</div><div class="nome">For the Love of God</div></div>
+          <div class="mini"><div class="sigla a">A4</div><div class="nome">Poles Apart</div></div>
+          <div class="mini"><div class="sigla b">B1</div><div class="nome">Nylon Reverb</div></div>
+          <div class="mini"><div class="sigla b">B2</div><div class="nome">Europa</div></div>
+          <div class="mini"><div class="sigla b">B3</div><div class="nome">Clean Tube</div></div>
+          <div class="mini libero"><div class="sigla b">B4</div><div class="nome">—</div></div>
+        </div>
+      </div>
+      <div class="corpo">
+        <div class="pills" style="margin-bottom:14px">
+          <span class="pill on">tutte</span><span class="pill">Pink Floyd</span>
+          <span class="pill">Clean</span><span class="pill">Solo</span>
+        </div>
+        <div class="sez">
+          <h4>In libreria <span class="nota">104 preset</span></h4>
+          <div class="elenco">
+            <div class="voce"><span class="stellina">★</span>
+              <span class="nome">Fingerstyle Reverb</span><span class="meta">Acustica</span></div>
+            <div class="voce"><span class="stellina" style="color:var(--faint)">☆</span>
+              <span class="nome">Spooky Melody</span><span class="meta">Alternative</span></div>
+            <div class="voce"><span class="stellina" style="color:var(--faint)">☆</span>
+              <span class="nome">Hey Jimi Solo</span><span class="meta">B4 · Solo</span></div>
+            <div class="voce"><span class="stellina" style="color:var(--faint)">☆</span>
+              <span class="nome">Blues Lead 65</span><span class="meta">Blues</span></div>
+            <div class="voce"><span class="stellina" style="color:var(--faint)">☆</span>
+              <span class="nome">Clean Tube</span><span class="meta">B3 · Clean</span></div>
+            <div class="voce"><span class="stellina" style="color:var(--faint)">☆</span>
+              <span class="nome">Comfortably Numb solo</span><span class="meta">Pink Floyd</span></div>
+            <div class="voce"><span class="stellina" style="color:var(--faint)">☆</span>
+              <span class="nome">Acustica larga</span><span class="meta">Acustica</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
