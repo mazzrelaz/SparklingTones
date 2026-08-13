@@ -29,9 +29,9 @@ window.PresetStore = (function () {
    * partire da qualcosa di distinguibile sul fondo scuro.
    */
   const FAMIGLIE = [
-    { id: 'clean',    nome: 'Clean',    colore: '#5aa9e6' },
-    { id: 'drive',    nome: 'Drive',    colore: '#ff6a3d' },
-    { id: 'acoustic', nome: 'Acoustic', colore: '#b48be0' },
+    { id: 'clean',    nome: 'Clean',    colore: '#0a84ff' },   // blu elettrico
+    { id: 'drive',    nome: 'Drive',    colore: '#ff3b30' },   // rosso
+    { id: 'acoustic', nome: 'Acoustic', colore: '#34c759' },   // verde
   ];
 
   /**

@@ -34,6 +34,9 @@ const GUSCIO = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './icons/favicon-32.png',
+  // Il logo dell'intestazione va aggiunto qui **quando il file esiste**:
+  // `cache.addAll` fallisce in blocco se un solo url risponde 404, e con
+  // l'install fallito l'app non funzionerebbe più offline.
 ];
 
 self.addEventListener('install', event => {

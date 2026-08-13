@@ -45,6 +45,11 @@
   body.vista-live header { position:static; flex:none; padding-bottom:8px; }
   .titlebar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   h1 { font-size:1.05rem; margin:0; flex:1; }
+  /* Il marchio sta in alto a sinistra, prima del titolo, e non si stringe
+     mai: è l'unica cosa della barra che deve restare riconoscibile.
+     `object-fit:contain` lo lascia intero qualunque proporzione abbia il
+     file, invece di tagliarlo o schiacciarlo. */
+  .logo { width:28px; height:28px; flex:none; display:block; object-fit:contain; }
   .status { padding:3px 9px; border-radius:11px; font-size:0.74rem; font-weight:600; white-space:nowrap; }
   .status.off { background:#3a2020; color:var(--rosso); }
   .status.on  { background:#1f3a24; color:var(--green); }
@@ -181,9 +186,6 @@
                   text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
   .detail input[type=text] { width:100%; }
   /* La catena su una riga sola: i nomi, e basta. */
-  .fxlist { font-size:0.8rem; color:var(--dim); line-height:1.7; }
-  .fxlist .fxname { color:var(--text); }
-  .fxlist .fxname.off { color:var(--faint); text-decoration:line-through; }
   .azioni { display:flex; gap:8px; flex-wrap:wrap; }
   .scelte { display:flex; gap:6px; flex-wrap:wrap; }
   .scelta { background:#1e2025; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
@@ -307,8 +309,14 @@
     /* Solo nella vista preset il titolo si prende una riga sua. Nella live
        sparisce del tutto: ogni riga di header è spazio tolto ai pulsantoni,
        e che si stia suonando lo dicono già i pulsantoni stessi. */
-    body:not(.vista-live) h1 { flex-basis:100%; }
-    body.vista-live h1 { display:none; }
+    /* Il titolo si prende la riga meno lo spazio del marchio, così i due
+       restano affiancati e tutto il resto va a capo sotto. */
+    body:not(.vista-live) h1 { flex-basis:calc(100% - 40px); order:-1; }
+    /* Nella live sparisce anche il marchio, per lo stesso motivo del titolo:
+       ogni riga di header è spazio tolto ai pulsantoni. */
+    body.vista-live h1, body.vista-live .logo { display:none; }
+    /* Il titolo si prende la riga, ma il marchio gli resta accanto. */
+    body:not(.vista-live) .logo { order:-2; width:24px; height:24px; }
   }
 </style>
 </head>
@@ -316,6 +324,12 @@
 
 <header>
   <div class="titlebar">
+    <!-- Il marchio lo mette l'utente: basta salvare il file in `icons/logo.svg`
+         (o `.png`) e compare qui, senza toccare il codice. Finché il file non
+         c'è, l'immagine si toglie da sola invece di lasciare l'icona rotta. -->
+    <img class="logo" src="icons/logo.svg" alt="Spark 2"
+         onerror="if (this.dataset.provato) { this.remove(); }
+                  else { this.dataset.provato = '1'; this.src = 'icons/logo.png'; }">
     <h1 id="titolo">Preset</h1>
     <span id="status" class="status off">non connesso</span>
     <button id="btnConnect" class="primary">Connetti</button>
@@ -939,6 +953,11 @@ function dettaglio(record, slot) {
   });
   boxNome.appendChild(campoNome);
 
+  // Le schede di libreria hanno già la catena sotto il nome, e ripeterla qui
+  // sarebbe leggerla due volte. I posti del pannello dell'ampli invece no —
+  // lì c'è solo ampli e drive — quindi la catena intera va mostrata una volta.
+  if (slot !== null) boxNome.appendChild(pastiglieCatena(record));
+
   /* famiglia di suono ---------------------------------------------- */
   // Un asse a sé, che con le categorie non c'entra: quelle sono lo stile
   // (Pink Floyd, jazz, il pezzo), questa è *che tipo di suono è*. Una sola,
@@ -1015,24 +1034,9 @@ function dettaglio(record, slot) {
   });
   boxNote.appendChild(note);
 
-  /* catena effetti ------------------------------------------------ */
-  // Una riga sola coi nomi, niente valori: qui si guarda *che catena è*, e
-  // una colonna di numeri a due decimali non la si legge — le manopole si
-  // regolano da «Regola», che è il posto dove servono davvero.
-  const boxFx = document.createElement('div');
-  boxFx.innerHTML = '<label>catena effetti</label>';
-  const lista = document.createElement('div');
-  lista.className = 'fxlist';
-  (record.effects || []).forEach((effetto, posizione) => {
-    if (posizione > 0) lista.append(' - ');
-    const nomeFx = document.createElement('span');
-    nomeFx.className = 'fxname' + (effetto.enabled ? '' : ' off');
-    nomeFx.textContent = nomePastiglia(effetto, posizione);
-    nomeFx.title = Spark.CATENA[posizione] + ': ' + effetto.name +
-                   (effetto.enabled ? '' : ' (spento)');
-    lista.appendChild(nomeFx);
-  });
-  boxFx.appendChild(lista);
+  // Niente «catena effetti» qui sotto: la catena sta già sotto il nome, in
+  // cima alla scheda, e ripeterla due volte nello stesso riquadro non
+  // aggiunge niente — la si legge una volta sola.
 
   /* azioni -------------------------------------------------------- */
   const azioni = document.createElement('div');
@@ -1120,7 +1124,7 @@ function dettaglio(record, slot) {
   meta.style.cssText = 'color:var(--faint);font-size:0.7rem;font-family:Consolas,monospace';
   meta.textContent = `${record.uuid} · ${record.bpm} BPM`;
 
-  det.append(boxNome, boxFam, boxCat, boxNote, boxFx, azioni);
+  det.append(boxNome, boxFam, boxCat, boxNote, azioni);
   if (avvisoAltriSlot) det.appendChild(avvisoAltriSlot);
   det.appendChild(meta);
   return det;
