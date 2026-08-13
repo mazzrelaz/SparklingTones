@@ -379,6 +379,9 @@ tipi di riverbero irraggiungibili, che è il difetto vero. Il campo `scelte` del
 gli fa fare un elenco a tendina invece di un cursore — con un cursore continuo azzeccare
 la posizione giusta sarebbe un terno al lotto.
 
+**Verificato sull'ampli il 13 agosto 2026**: cambiando posizione nell'elenco il riverbero
+cambia davvero. Non era più un'ipotesi da un pezzo, ma adesso è una misura.
+
 **I nomi dei nove tipi non li sappiamo**, e infatti si leggono «Tipo 1»…«Tipo 9». Vanno
 riconosciuti a orecchio, una posizione alla volta.
 
@@ -453,6 +456,11 @@ Adesso il nome vecchio si **rilegge dall'ampli anche prima di mandare il comando
 (`aggiornaCatenaDallAmpli`), e se quella lettura non riesce non si manda niente: meglio
 non fare che fare alla cieca. È la stessa regola che l'editor già seguiva
 all'apertura — la verità è sull'ampli — applicata anche qui.
+
+**Il cambio modello è verificato nell'app sull'hardware il 13 agosto 2026**: tre cambi di
+fila (`MaestroBassmaster → JH.SupaFuzz → JH.Octavia → DistortionTS9`), ognuno confermato
+rileggendo la catena, con una sola lettura per cambio. Fra i nomi che hanno funzionato ce
+ne sono di quelli che compaiono solo nel backup ufficiale.
 
 ### Quando l'ampli «smette di rispondere»
 
