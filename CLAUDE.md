@@ -755,6 +755,12 @@ e vale la regola di sempre — prima si misura, poi si scrive il codice.
 
 ### Pedaliera M-VAVE (M-Wave) Chocolate
 
+**Il modello che interessa all'utente è la Chocolate Plus**, non la Chocolate liscia, e la
+differenza conta: la Plus è **BLE MIDI *e* USB MIDI** (quattro tasti, sedici banchi,
+funzione host USB). Quindi la strada non è una sola — su PC è una porta USB MIDI, dove
+Web MIDI funziona di sicuro; da telefono è BLE MIDI, oppure USB in OTG. Se il BLE su
+Android non enumera, l'OTG è un ripiego che il pedale liscio non offriva.
+
 **Il pedale non si collega con Web Bluetooth ma con Web MIDI**, ed è la cosa che
 costerebbe mezza giornata a scoprire da soli. È una pedaliera **BLE MIDI**, e Chrome
 tiene il servizio GATT MIDI (`03b80e5a-…`) nella **blocklist di Web Bluetooth** apposta,
@@ -772,8 +778,11 @@ compare come porta MIDI. Web MIDI chiede il permesso una volta sola.
 **Il punto che decide tutto: Web MIDI su Chrome per Android.** Se da telefono non
 enumera un dispositivo BLE MIDI, la pedaliera funziona solo dal PC — e a un concerto il
 PC non c'è. Va provato per primo, prima di qualsiasi altra cosa: dieci minuti di lavoro
-che dicono se la strada esiste. Se non esiste, l'unica via di scampo è che il pedale
-abbia un modo **HID/tastiera**: allora sono `keydown` e non serve nessuna API.
+che dicono se la strada esiste. Se non esiste, le vie di scampo sono l'USB in OTG (la
+Plus ce l'ha) o un modo **HID/tastiera**, che sarebbero `keydown` senza nessuna API.
+Le fonti secondarie danno Chrome per Android come supportato sia via USB sia via BLE,
+ma è esattamente il genere di affermazione che si verifica in dieci minuti invece di
+crederci.
 
 ### Comandare i banchi col pedale
 
@@ -807,6 +816,33 @@ Due strade, la prima costa niente:
    «Bluetooth HCI snoop log», si fa un giro di loop, si tira giù il file e si legge con
    Wireshark. Dà i comandi esatti. Attenzione: mentre l'app ufficiale è connessa la
    nostra non può esserlo, quindi sono due sessioni separate.
+
+**Che si possa fare è dimostrato da terzi**, ed è la scoperta che cambia il preventivo
+(13 agosto 2026, ricognizione sul web, non misura nostra):
+
+- **Lo Spark 2 non ha nessun ingresso MIDI.** Niente DIN — quello ce l'hanno Spark EDGE
+  e Spark LIVE, non lui — e l'USB-C è solo scheda audio. Quindi **una pedaliera MIDI non
+  potrà mai parlare all'ampli direttamente**: qualunque strada passa per un ponte che
+  traduce MIDI in BLE. Non è un limite della nostra app, è del prodotto.
+- **L'AIRSTEP Spk Edition (XSONIC) comanda il looper dello Spark 2** ed è un dispositivo
+  di terzi. Vuol dire che i comandi del looper stanno nella stessa conversazione BLE e
+  sono riproducibili da un client qualsiasi: non c'è un canale privilegiato dell'app
+  ufficiale.
+- **E funziona con l'app ufficiale connessa nello stesso momento.** Se è vero anche per
+  noi, cade l'idea che «l'ampli accetta un padrone solo» — che viene dal riferimento
+  Spark 40 — e il ponte ESP32 non avrebbe più bisogno di fare da server per non far
+  perdere il telefono. **Da verificare sul nostro ampli**, è una prova da cinque minuti:
+  app ufficiale connessa, e si prova a connettersi anche con la nostra.
+- Positive Grid vende la sua **Spark Control X** a sei tasti, dove il looper si apre con
+  una pressione lunga sul tasto 1. Utile come mappatura di riferimento: dice quante
+  funzioni del looper vanno comandate davvero.
+
+**Il vincolo che nessuno di questi risolve è il tempo.** Cambiare preset con 100 ms di
+ritardo non lo nota nessuno; far partire e chiudere un loop sì, perché il punto di
+giunzione cade dove si è premuto. La catena piede → BLE MIDI → sistema → browser → GATT
+→ ampli ha due tratte radio, ognuna col suo intervallo di connessione. **Va misurata
+prima di disegnare qualsiasi interfaccia**, ed è la misura che decide fra ponte via
+browser e pedale ESP32 — non le righe di codice.
 
 ### Pedale ESP32 autonomo
 
