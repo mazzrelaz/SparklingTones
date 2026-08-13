@@ -10,7 +10,11 @@ index.html               tutta l'app: sezione Preset e sezione Live, nello stess
 live.html                rimando a index.html#live, per le scorciatoie già installate
 manifest.webmanifest     identità della PWA: nome, icone, scorciatoia alla vista live
 sw.js                    service worker: guscio in cache, app utilizzabile offline
-icons/                   icone PNG generate con lo script PowerShell in tools/
+icons/logo.svg           il marchio dell'utente, logotipo orizzontale: sta in ogni schermata
+icons/logo-mark.svg      il solo simbolo, quadrato: da lì nascono le icone dell'app
+icons/*.png              icone della PWA, rigenerate da tools/make-icons.ps1
+LICENSE                  MIT, Massimo Togni — libero utilizzo, nessuna garanzia
+NOTICE                   software di terzi: Soundshed (MIT), paulhamsh (Apache 2.0)
 src/spark-protocol.js    encoder/decoder puro, senza I/O — il cuore del progetto
 src/spark-transport.js   connessione BLE, coda di invio, attesa risposte, lettura preset
 src/preset-store.js      libreria su IndexedDB, import dall'ampli, backup, banchi, categorie
