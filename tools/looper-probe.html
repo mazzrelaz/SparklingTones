@@ -317,7 +317,18 @@ for (const q of QUERY) {
    quello che ha già: serve a vedere se è la scrittura in sé ad armare il click. */
 const IMPOSTAZIONI = [0xcc, 0x85, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0xcd, 0xea, 0x60];
 
+/* Come lo fa Ignitron: `sparkLooperRec()` manda **due** comandi, COUNTIN se il
+   click è acceso e subito dopo REC. Da soli non funzionano né l'uno né l'altro —
+   `02` viene confermato e ignorato, `04` registra senza click — ed è la coppia
+   che non avevamo mai provato. Il pannello lascia 1,9 s fra i due, che a 133 bpm
+   è esattamente una battuta di quattro quarti: c'è anche quella variante. */
 const PROVE = [
+  { n: 'COUNTIN ▸ REC subito', d: '0x0175 02 poi 04 — come Ignitron',
+    f: () => { invia(0x01, 0x75, [0x02], 'COUNTIN');
+               setTimeout(() => invia(0x01, 0x75, [0x04], 'REC'), 50); } },
+  { n: 'COUNTIN ▸ REC dopo una battuta', d: '0x0175 02, 1,8 s, poi 04 — come il pannello',
+    f: () => { invia(0x01, 0x75, [0x02], 'COUNTIN');
+               setTimeout(() => invia(0x01, 0x75, [0x04], 'REC'), 1800); } },
   { n: 'scrivi impostazioni', d: '0x0176 · gli stessi byte che dichiara',
     f: () => invia(0x01, 0x76, IMPOSTAZIONI, 'impostazioni') },
   { n: 'impostazioni ▸ poi REC', d: '0x0176, mezzo secondo, poi 0x0175 04',

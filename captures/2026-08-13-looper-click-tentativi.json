@@ -1,0 +1,3703 @@
+{
+    "quando":  "2026-08-13T18:30:48.450Z",
+    "nota":  "Quarta prova, sul click. Falliti: impostazioni-poi-REC (registra, nessun click) e impostazioni-poi-COUNTIN (ack e nulla). Due scoperte laterali: 0x0275 risponde con 0x0375 e un byte, e 0x0278 risponde cc 85 04 04 00 c2 c2 — bpm, count, battute, poi tre campi diversi da quelli di 0x0376, quindi e uno stato e non una configurazione.",
+    "rxTotali":  58,
+    "raffiche":  [
+                     {
+                         "n":  1,
+                         "ms":  39277,
+                         "quanti":  1,
+                         "etichetta":  "nessun tasto â€” arrivata da sola",
+                         "eventi":  [
+                                        {
+                                            "ms":  39277,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x40  0a",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  64,
+                                            "data":  [
+                                                         10
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        64,
+                                                        10,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        10,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  2,
+                         "ms":  40449,
+                         "quanti":  1,
+                         "etichetta":  "UNDO/REDO tenuto (cancella tutto)",
+                         "eventi":  [
+                                        {
+                                            "ms":  40449,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x41  00",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  65,
+                                            "data":  [
+                                                         0
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        65,
+                                                        0,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        0,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  3,
+                         "ms":  93066,
+                         "quanti":  4,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  93066,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0476 seq=0x01  ",
+                                            "cmd":  4,
+                                            "sub":  118,
+                                            "seq":  1,
+                                            "data":  [
+
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        1,
+                                                        0,
+                                                        4,
+                                                        118,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  93103,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0363 seq=0x42  ca 43 05 00 00",
+                                            "cmd":  3,
+                                            "sub":  99,
+                                            "seq":  66,
+                                            "data":  [
+                                                         202,
+                                                         67,
+                                                         5,
+                                                         0,
+                                                         0
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        66,
+                                                        13,
+                                                        3,
+                                                        99,
+                                                        1,
+                                                        74,
+                                                        67,
+                                                        5,
+                                                        0,
+                                                        0,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  93181,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x031a seq=0x43  91 00 06 c3",
+                                            "cmd":  3,
+                                            "sub":  26,
+                                            "seq":  67,
+                                            "data":  [
+                                                         145,
+                                                         0,
+                                                         6,
+                                                         195
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        67,
+                                                        93,
+                                                        3,
+                                                        26,
+                                                        9,
+                                                        17,
+                                                        0,
+                                                        6,
+                                                        67,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  93216,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x031a seq=0x44  91 03 00 c3",
+                                            "cmd":  3,
+                                            "sub":  26,
+                                            "seq":  68,
+                                            "data":  [
+                                                         145,
+                                                         3,
+                                                         0,
+                                                         195
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        68,
+                                                        88,
+                                                        3,
+                                                        26,
+                                                        9,
+                                                        17,
+                                                        3,
+                                                        0,
+                                                        67,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  4,
+                         "ms":  93478,
+                         "quanti":  2,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  93478,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0475 seq=0x02  ",
+                                            "cmd":  4,
+                                            "sub":  117,
+                                            "seq":  2,
+                                            "data":  [
+
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        2,
+                                                        0,
+                                                        4,
+                                                        117,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  93515,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x45  04",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  69,
+                                            "data":  [
+                                                         4
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        69,
+                                                        4,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        4,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  5,
+                         "ms":  100779,
+                         "quanti":  44,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  100779,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x46  07",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  70,
+                                            "data":  [
+                                                         7
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        70,
+                                                        7,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        7,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  100782,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x47  08",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  71,
+                                            "data":  [
+                                                         8
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        71,
+                                                        8,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        8,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  100782,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x48  ca 00 00 00 00",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  72,
+                                            "data":  [
+                                                         202,
+                                                         0,
+                                                         0,
+                                                         0,
+                                                         0
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        72,
+                                                        75,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        0,
+                                                        0,
+                                                        0,
+                                                        0,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  100903,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x49  ca 3c e4 1e 9e",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  73,
+                                            "data":  [
+                                                         202,
+                                                         60,
+                                                         228,
+                                                         30,
+                                                         158
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        73,
+                                                        7,
+                                                        3,
+                                                        119,
+                                                        21,
+                                                        74,
+                                                        60,
+                                                        100,
+                                                        30,
+                                                        30,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  101090,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x4a  ca 3d 63 4b ca",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  74,
+                                            "data":  [
+                                                         202,
+                                                         61,
+                                                         99,
+                                                         75,
+                                                         202
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        74,
+                                                        4,
+                                                        3,
+                                                        119,
+                                                        17,
+                                                        74,
+                                                        61,
+                                                        99,
+                                                        75,
+                                                        74,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  101317,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x4b  ca 3d aa 78 d8",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  75,
+                                            "data":  [
+                                                         202,
+                                                         61,
+                                                         170,
+                                                         120,
+                                                         216
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        75,
+                                                        104,
+                                                        3,
+                                                        119,
+                                                        21,
+                                                        74,
+                                                        61,
+                                                        42,
+                                                        120,
+                                                        88,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  101503,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x4c  ca 3d e3 4b ca",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  76,
+                                            "data":  [
+                                                         202,
+                                                         61,
+                                                         227,
+                                                         75,
+                                                         202
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        76,
+                                                        0,
+                                                        3,
+                                                        119,
+                                                        21,
+                                                        74,
+                                                        61,
+                                                        99,
+                                                        75,
+                                                        74,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  101730,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x4d  ca 3e 0d f5 04",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  77,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         13,
+                                                         245,
+                                                         4
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        77,
+                                                        1,
+                                                        3,
+                                                        119,
+                                                        9,
+                                                        74,
+                                                        62,
+                                                        13,
+                                                        117,
+                                                        4,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  101915,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x4e  ca 3e 2a 5e 7d",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  78,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         42,
+                                                         94,
+                                                         125
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        78,
+                                                        124,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        62,
+                                                        42,
+                                                        94,
+                                                        125,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  102103,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x4f  ca 3e 46 c7 f7",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  79,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         70,
+                                                         199,
+                                                         247
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        79,
+                                                        27,
+                                                        3,
+                                                        119,
+                                                        25,
+                                                        74,
+                                                        62,
+                                                        70,
+                                                        71,
+                                                        119,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  102290,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x50  ca 3e 63 17 15",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  80,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         99,
+                                                         23,
+                                                         21
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        80,
+                                                        20,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        62,
+                                                        99,
+                                                        23,
+                                                        21,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  102516,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x51  ca 3e 7f 80 8f",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  81,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         127,
+                                                         128,
+                                                         143
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        81,
+                                                        29,
+                                                        3,
+                                                        119,
+                                                        25,
+                                                        74,
+                                                        62,
+                                                        127,
+                                                        0,
+                                                        15,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  102708,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x52  ca 3e 8d e7 d7",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  82,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         141,
+                                                         231,
+                                                         215
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        82,
+                                                        84,
+                                                        3,
+                                                        119,
+                                                        29,
+                                                        74,
+                                                        62,
+                                                        13,
+                                                        103,
+                                                        87,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  102891,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x53  ca 3e 9c 1c 93",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  83,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         156,
+                                                         28,
+                                                         147
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        83,
+                                                        114,
+                                                        3,
+                                                        119,
+                                                        21,
+                                                        74,
+                                                        62,
+                                                        28,
+                                                        28,
+                                                        19,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  103117,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x54  ca 3e aa 51 50",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  84,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         170,
+                                                         81,
+                                                         80
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        84,
+                                                        90,
+                                                        3,
+                                                        119,
+                                                        5,
+                                                        74,
+                                                        62,
+                                                        42,
+                                                        81,
+                                                        80,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  103303,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x55  ca 3e b8 78 e0",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  85,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         184,
+                                                         120,
+                                                         224
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        85,
+                                                        65,
+                                                        3,
+                                                        119,
+                                                        21,
+                                                        74,
+                                                        62,
+                                                        56,
+                                                        120,
+                                                        96,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  103491,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x56  ca 3e c6 ad 9c",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  86,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         198,
+                                                         173,
+                                                         156
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        86,
+                                                        30,
+                                                        3,
+                                                        119,
+                                                        29,
+                                                        74,
+                                                        62,
+                                                        70,
+                                                        45,
+                                                        28,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  103716,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x57  ca 3e d4 e2 59",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  87,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         212,
+                                                         226,
+                                                         89
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        87,
+                                                        22,
+                                                        3,
+                                                        119,
+                                                        13,
+                                                        74,
+                                                        62,
+                                                        84,
+                                                        98,
+                                                        89,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  103903,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x58  ca 3e e3 09 e8",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  88,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         227,
+                                                         9,
+                                                         232
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        88,
+                                                        99,
+                                                        3,
+                                                        119,
+                                                        21,
+                                                        74,
+                                                        62,
+                                                        99,
+                                                        9,
+                                                        104,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  104131,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x59  ca 3e f1 3e a5",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  89,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         241,
+                                                         62,
+                                                         165
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        89,
+                                                        11,
+                                                        3,
+                                                        119,
+                                                        21,
+                                                        74,
+                                                        62,
+                                                        113,
+                                                        62,
+                                                        37,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  104316,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x5a  ca 3e ff 66 34",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  90,
+                                            "data":  [
+                                                         202,
+                                                         62,
+                                                         255,
+                                                         102,
+                                                         52
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        90,
+                                                        92,
+                                                        3,
+                                                        119,
+                                                        5,
+                                                        74,
+                                                        62,
+                                                        127,
+                                                        102,
+                                                        52,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  104503,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x5b  ca 3f 06 cd 79",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  91,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         6,
+                                                         205,
+                                                         121
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        91,
+                                                        78,
+                                                        3,
+                                                        119,
+                                                        9,
+                                                        74,
+                                                        63,
+                                                        6,
+                                                        77,
+                                                        121,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  104692,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x5c  ca 3f 0d e7 d7",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  92,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         13,
+                                                         231,
+                                                         215
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        92,
+                                                        81,
+                                                        3,
+                                                        119,
+                                                        25,
+                                                        74,
+                                                        63,
+                                                        13,
+                                                        103,
+                                                        87,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  104916,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x5d  ca 3f 14 fb 9f",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  93,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         20,
+                                                         251,
+                                                         159
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        93,
+                                                        28,
+                                                        3,
+                                                        119,
+                                                        25,
+                                                        74,
+                                                        63,
+                                                        20,
+                                                        123,
+                                                        31,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  105104,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x5e  ca 3f 1c 15 fd",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  94,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         28,
+                                                         21,
+                                                         253
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        94,
+                                                        16,
+                                                        3,
+                                                        119,
+                                                        17,
+                                                        74,
+                                                        63,
+                                                        28,
+                                                        21,
+                                                        125,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  105292,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x5f  ca 3f 23 30 5b",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  95,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         35,
+                                                         48,
+                                                         91
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        95,
+                                                        60,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        63,
+                                                        35,
+                                                        48,
+                                                        91,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  105517,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x60  ca 3f 2a 44 23",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  96,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         42,
+                                                         68,
+                                                         35
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        96,
+                                                        57,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        63,
+                                                        42,
+                                                        68,
+                                                        35,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  105703,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x61  ca 3f 31 5e 81",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  97,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         49,
+                                                         94,
+                                                         129
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        97,
+                                                        10,
+                                                        3,
+                                                        119,
+                                                        17,
+                                                        74,
+                                                        63,
+                                                        49,
+                                                        94,
+                                                        1,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  105928,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x62  ca 3f 38 72 49",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  98,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         56,
+                                                         114,
+                                                         73
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        98,
+                                                        119,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        63,
+                                                        56,
+                                                        114,
+                                                        73,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  106116,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x63  ca 3f 3f 8c a7",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  99,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         63,
+                                                         140,
+                                                         167
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        99,
+                                                        120,
+                                                        3,
+                                                        119,
+                                                        25,
+                                                        74,
+                                                        63,
+                                                        63,
+                                                        12,
+                                                        39,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  106303,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x64  ca 3f 46 a7 06",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  100,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         70,
+                                                         167,
+                                                         6
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        100,
+                                                        27,
+                                                        3,
+                                                        119,
+                                                        9,
+                                                        74,
+                                                        63,
+                                                        70,
+                                                        39,
+                                                        6,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  106491,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x65  ca 3f 4d ba cd",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  101,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         77,
+                                                         186,
+                                                         205
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        101,
+                                                        86,
+                                                        3,
+                                                        119,
+                                                        25,
+                                                        74,
+                                                        63,
+                                                        77,
+                                                        58,
+                                                        77,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  106716,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x66  ca 3f 54 d5 2c",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  102,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         84,
+                                                         213,
+                                                         44
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        102,
+                                                        81,
+                                                        3,
+                                                        119,
+                                                        9,
+                                                        74,
+                                                        63,
+                                                        84,
+                                                        85,
+                                                        44,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  106903,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x67  ca 3f 5b ef 8a",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  103,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         91,
+                                                         239,
+                                                         138
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        103,
+                                                        82,
+                                                        3,
+                                                        119,
+                                                        25,
+                                                        74,
+                                                        63,
+                                                        91,
+                                                        111,
+                                                        10,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  107091,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x68  ca 3f 63 03 52",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  104,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         99,
+                                                         3,
+                                                         82
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        104,
+                                                        70,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        63,
+                                                        99,
+                                                        3,
+                                                        82,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  107317,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x69  ca 3f 6a 1d b0",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  105,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         106,
+                                                         29,
+                                                         176
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        105,
+                                                        35,
+                                                        3,
+                                                        119,
+                                                        17,
+                                                        74,
+                                                        63,
+                                                        106,
+                                                        29,
+                                                        48,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  107541,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x6a  ca 3f 71 31 78",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  106,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         113,
+                                                         49,
+                                                         120
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        106,
+                                                        76,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        63,
+                                                        113,
+                                                        49,
+                                                        120,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  107729,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x6b  ca 3f 78 4b d6",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  107,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         120,
+                                                         75,
+                                                         214
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        107,
+                                                        1,
+                                                        3,
+                                                        119,
+                                                        17,
+                                                        74,
+                                                        63,
+                                                        120,
+                                                        75,
+                                                        86,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  107916,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x6c  ca 3f 7f 66 34",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  108,
+                                            "data":  [
+                                                         202,
+                                                         63,
+                                                         127,
+                                                         102,
+                                                         52
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        108,
+                                                        89,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        63,
+                                                        127,
+                                                        102,
+                                                        52,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  108141,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x6d  ca 3c ce b5 28",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  109,
+                                            "data":  [
+                                                         202,
+                                                         60,
+                                                         206,
+                                                         181,
+                                                         40
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        109,
+                                                        40,
+                                                        3,
+                                                        119,
+                                                        13,
+                                                        74,
+                                                        60,
+                                                        78,
+                                                        53,
+                                                        40,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  108329,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x6e  ca 3d 59 00 79",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  110,
+                                            "data":  [
+                                                         202,
+                                                         61,
+                                                         89,
+                                                         0,
+                                                         121
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        110,
+                                                        86,
+                                                        3,
+                                                        119,
+                                                        1,
+                                                        74,
+                                                        61,
+                                                        89,
+                                                        0,
+                                                        121,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  108516,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x6f  ca 3d a5 53 2f",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  111,
+                                            "data":  [
+                                                         202,
+                                                         61,
+                                                         165,
+                                                         83,
+                                                         47
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        111,
+                                                        43,
+                                                        3,
+                                                        119,
+                                                        5,
+                                                        74,
+                                                        61,
+                                                        37,
+                                                        83,
+                                                        47,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  108704,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0377 seq=0x70  ca 3d dd f1 6d",
+                                            "cmd":  3,
+                                            "sub":  119,
+                                            "seq":  112,
+                                            "data":  [
+                                                         202,
+                                                         61,
+                                                         221,
+                                                         241,
+                                                         109
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        112,
+                                                        59,
+                                                        3,
+                                                        119,
+                                                        13,
+                                                        74,
+                                                        61,
+                                                        93,
+                                                        113,
+                                                        109,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  108928,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x71  09",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  113,
+                                            "data":  [
+                                                         9
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        113,
+                                                        9,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        9,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  6,
+                         "ms":  110016,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  110016,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x72  0a",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  114,
+                                            "data":  [
+                                                         10
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        114,
+                                                        10,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        10,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  7,
+                         "ms":  111253,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  111253,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x73  00",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  115,
+                                            "data":  [
+                                                         0
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        115,
+                                                        0,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        0,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  8,
+                         "ms":  120628,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  120628,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0476 seq=0x03  ",
+                                            "cmd":  4,
+                                            "sub":  118,
+                                            "seq":  3,
+                                            "data":  [
+
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        3,
+                                                        0,
+                                                        4,
+                                                        118,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  9,
+                         "ms":  121078,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  121078,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0475 seq=0x04  ",
+                                            "cmd":  4,
+                                            "sub":  117,
+                                            "seq":  4,
+                                            "data":  [
+
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        4,
+                                                        0,
+                                                        4,
+                                                        117,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  10,
+                         "ms":  136792,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  136792,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x05  02",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  5,
+                                            "data":  [
+                                                         2
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        5,
+                                                        2,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        2,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  11,
+                         "ms":  140280,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  140280,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0378 seq=0x06  cc 85 04 04 00 c2 c2",
+                                            "cmd":  3,
+                                            "sub":  120,
+                                            "seq":  6,
+                                            "data":  [
+                                                         204,
+                                                         133,
+                                                         4,
+                                                         4,
+                                                         0,
+                                                         194,
+                                                         194
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        6,
+                                                        42,
+                                                        3,
+                                                        120,
+                                                        99,
+                                                        76,
+                                                        5,
+                                                        4,
+                                                        4,
+                                                        0,
+                                                        66,
+                                                        66,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     }
+                 ],
+    "eventi":  [
+                   {
+                       "ms":  1,
+                       "tipo":  "log",
+                       "testo":  "pronta. Connetti l\u0027ampli, poi parti dall\u0027ascolto."
+                   },
+                   {
+                       "ms":  15910,
+                       "tipo":  "log",
+                       "testo":  "connesso a Spark 2 BLE"
+                   },
+                   {
+                       "ms":  39277,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x40  0a",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  64,
+                       "data":  [
+                                    10
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   64,
+                                   10,
+                                   3,
+                                   117,
+                                   0,
+                                   10,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  40449,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x41  00",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  65,
+                       "data":  [
+                                    0
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   65,
+                                   0,
+                                   3,
+                                   117,
+                                   0,
+                                   0,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  92923,
+                       "tipo":  "tx",
+                       "testo":  "TX 0x0176 impostazioni â€” payload cc 85 04 04 c2 c3 c2 cd ea 60",
+                       "cmd":  1,
+                       "sub":  118,
+                       "data":  [
+                                    204,
+                                    133,
+                                    4,
+                                    4,
+                                    194,
+                                    195,
+                                    194,
+                                    205,
+                                    234,
+                                    96
+                                ]
+                   },
+                   {
+                       "ms":  92929,
+                       "tipo":  "log",
+                       "testo":  "TX 0x0176 seq=0x01 19B"
+                   },
+                   {
+                       "ms":  93066,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0476 seq=0x01  ",
+                       "cmd":  4,
+                       "sub":  118,
+                       "seq":  1,
+                       "data":  [
+
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   1,
+                                   0,
+                                   4,
+                                   118,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  93103,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0363 seq=0x42  ca 43 05 00 00",
+                       "cmd":  3,
+                       "sub":  99,
+                       "seq":  66,
+                       "data":  [
+                                    202,
+                                    67,
+                                    5,
+                                    0,
+                                    0
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   66,
+                                   13,
+                                   3,
+                                   99,
+                                   1,
+                                   74,
+                                   67,
+                                   5,
+                                   0,
+                                   0,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  93181,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x031a seq=0x43  91 00 06 c3",
+                       "cmd":  3,
+                       "sub":  26,
+                       "seq":  67,
+                       "data":  [
+                                    145,
+                                    0,
+                                    6,
+                                    195
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   67,
+                                   93,
+                                   3,
+                                   26,
+                                   9,
+                                   17,
+                                   0,
+                                   6,
+                                   67,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  93216,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x031a seq=0x44  91 03 00 c3",
+                       "cmd":  3,
+                       "sub":  26,
+                       "seq":  68,
+                       "data":  [
+                                    145,
+                                    3,
+                                    0,
+                                    195
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   68,
+                                   88,
+                                   3,
+                                   26,
+                                   9,
+                                   17,
+                                   3,
+                                   0,
+                                   67,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  93425,
+                       "tipo":  "tx",
+                       "testo":  "TX 0x0175 REC â€” payload 04",
+                       "cmd":  1,
+                       "sub":  117,
+                       "data":  [
+                                    4
+                                ]
+                   },
+                   {
+                       "ms":  93432,
+                       "tipo":  "log",
+                       "testo":  "TX 0x0175 seq=0x02 9B"
+                   },
+                   {
+                       "ms":  93478,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0475 seq=0x02  ",
+                       "cmd":  4,
+                       "sub":  117,
+                       "seq":  2,
+                       "data":  [
+
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   2,
+                                   0,
+                                   4,
+                                   117,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  93515,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x45  04",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  69,
+                       "data":  [
+                                    4
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   69,
+                                   4,
+                                   3,
+                                   117,
+                                   0,
+                                   4,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  100779,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x46  07",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  70,
+                       "data":  [
+                                    7
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   70,
+                                   7,
+                                   3,
+                                   117,
+                                   0,
+                                   7,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  100782,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x47  08",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  71,
+                       "data":  [
+                                    8
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   71,
+                                   8,
+                                   3,
+                                   117,
+                                   0,
+                                   8,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  100782,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x48  ca 00 00 00 00",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  72,
+                       "data":  [
+                                    202,
+                                    0,
+                                    0,
+                                    0,
+                                    0
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   72,
+                                   75,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   0,
+                                   0,
+                                   0,
+                                   0,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  100903,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x49  ca 3c e4 1e 9e",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  73,
+                       "data":  [
+                                    202,
+                                    60,
+                                    228,
+                                    30,
+                                    158
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   73,
+                                   7,
+                                   3,
+                                   119,
+                                   21,
+                                   74,
+                                   60,
+                                   100,
+                                   30,
+                                   30,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  101090,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x4a  ca 3d 63 4b ca",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  74,
+                       "data":  [
+                                    202,
+                                    61,
+                                    99,
+                                    75,
+                                    202
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   74,
+                                   4,
+                                   3,
+                                   119,
+                                   17,
+                                   74,
+                                   61,
+                                   99,
+                                   75,
+                                   74,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  101317,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x4b  ca 3d aa 78 d8",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  75,
+                       "data":  [
+                                    202,
+                                    61,
+                                    170,
+                                    120,
+                                    216
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   75,
+                                   104,
+                                   3,
+                                   119,
+                                   21,
+                                   74,
+                                   61,
+                                   42,
+                                   120,
+                                   88,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  101503,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x4c  ca 3d e3 4b ca",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  76,
+                       "data":  [
+                                    202,
+                                    61,
+                                    227,
+                                    75,
+                                    202
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   76,
+                                   0,
+                                   3,
+                                   119,
+                                   21,
+                                   74,
+                                   61,
+                                   99,
+                                   75,
+                                   74,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  101730,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x4d  ca 3e 0d f5 04",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  77,
+                       "data":  [
+                                    202,
+                                    62,
+                                    13,
+                                    245,
+                                    4
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   77,
+                                   1,
+                                   3,
+                                   119,
+                                   9,
+                                   74,
+                                   62,
+                                   13,
+                                   117,
+                                   4,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  101915,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x4e  ca 3e 2a 5e 7d",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  78,
+                       "data":  [
+                                    202,
+                                    62,
+                                    42,
+                                    94,
+                                    125
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   78,
+                                   124,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   62,
+                                   42,
+                                   94,
+                                   125,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  102103,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x4f  ca 3e 46 c7 f7",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  79,
+                       "data":  [
+                                    202,
+                                    62,
+                                    70,
+                                    199,
+                                    247
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   79,
+                                   27,
+                                   3,
+                                   119,
+                                   25,
+                                   74,
+                                   62,
+                                   70,
+                                   71,
+                                   119,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  102290,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x50  ca 3e 63 17 15",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  80,
+                       "data":  [
+                                    202,
+                                    62,
+                                    99,
+                                    23,
+                                    21
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   80,
+                                   20,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   62,
+                                   99,
+                                   23,
+                                   21,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  102516,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x51  ca 3e 7f 80 8f",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  81,
+                       "data":  [
+                                    202,
+                                    62,
+                                    127,
+                                    128,
+                                    143
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   81,
+                                   29,
+                                   3,
+                                   119,
+                                   25,
+                                   74,
+                                   62,
+                                   127,
+                                   0,
+                                   15,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  102708,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x52  ca 3e 8d e7 d7",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  82,
+                       "data":  [
+                                    202,
+                                    62,
+                                    141,
+                                    231,
+                                    215
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   82,
+                                   84,
+                                   3,
+                                   119,
+                                   29,
+                                   74,
+                                   62,
+                                   13,
+                                   103,
+                                   87,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  102891,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x53  ca 3e 9c 1c 93",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  83,
+                       "data":  [
+                                    202,
+                                    62,
+                                    156,
+                                    28,
+                                    147
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   83,
+                                   114,
+                                   3,
+                                   119,
+                                   21,
+                                   74,
+                                   62,
+                                   28,
+                                   28,
+                                   19,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  103117,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x54  ca 3e aa 51 50",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  84,
+                       "data":  [
+                                    202,
+                                    62,
+                                    170,
+                                    81,
+                                    80
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   84,
+                                   90,
+                                   3,
+                                   119,
+                                   5,
+                                   74,
+                                   62,
+                                   42,
+                                   81,
+                                   80,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  103303,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x55  ca 3e b8 78 e0",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  85,
+                       "data":  [
+                                    202,
+                                    62,
+                                    184,
+                                    120,
+                                    224
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   85,
+                                   65,
+                                   3,
+                                   119,
+                                   21,
+                                   74,
+                                   62,
+                                   56,
+                                   120,
+                                   96,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  103491,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x56  ca 3e c6 ad 9c",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  86,
+                       "data":  [
+                                    202,
+                                    62,
+                                    198,
+                                    173,
+                                    156
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   86,
+                                   30,
+                                   3,
+                                   119,
+                                   29,
+                                   74,
+                                   62,
+                                   70,
+                                   45,
+                                   28,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  103716,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x57  ca 3e d4 e2 59",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  87,
+                       "data":  [
+                                    202,
+                                    62,
+                                    212,
+                                    226,
+                                    89
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   87,
+                                   22,
+                                   3,
+                                   119,
+                                   13,
+                                   74,
+                                   62,
+                                   84,
+                                   98,
+                                   89,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  103903,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x58  ca 3e e3 09 e8",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  88,
+                       "data":  [
+                                    202,
+                                    62,
+                                    227,
+                                    9,
+                                    232
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   88,
+                                   99,
+                                   3,
+                                   119,
+                                   21,
+                                   74,
+                                   62,
+                                   99,
+                                   9,
+                                   104,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  104131,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x59  ca 3e f1 3e a5",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  89,
+                       "data":  [
+                                    202,
+                                    62,
+                                    241,
+                                    62,
+                                    165
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   89,
+                                   11,
+                                   3,
+                                   119,
+                                   21,
+                                   74,
+                                   62,
+                                   113,
+                                   62,
+                                   37,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  104316,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x5a  ca 3e ff 66 34",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  90,
+                       "data":  [
+                                    202,
+                                    62,
+                                    255,
+                                    102,
+                                    52
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   90,
+                                   92,
+                                   3,
+                                   119,
+                                   5,
+                                   74,
+                                   62,
+                                   127,
+                                   102,
+                                   52,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  104503,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x5b  ca 3f 06 cd 79",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  91,
+                       "data":  [
+                                    202,
+                                    63,
+                                    6,
+                                    205,
+                                    121
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   91,
+                                   78,
+                                   3,
+                                   119,
+                                   9,
+                                   74,
+                                   63,
+                                   6,
+                                   77,
+                                   121,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  104692,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x5c  ca 3f 0d e7 d7",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  92,
+                       "data":  [
+                                    202,
+                                    63,
+                                    13,
+                                    231,
+                                    215
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   92,
+                                   81,
+                                   3,
+                                   119,
+                                   25,
+                                   74,
+                                   63,
+                                   13,
+                                   103,
+                                   87,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  104916,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x5d  ca 3f 14 fb 9f",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  93,
+                       "data":  [
+                                    202,
+                                    63,
+                                    20,
+                                    251,
+                                    159
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   93,
+                                   28,
+                                   3,
+                                   119,
+                                   25,
+                                   74,
+                                   63,
+                                   20,
+                                   123,
+                                   31,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  105104,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x5e  ca 3f 1c 15 fd",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  94,
+                       "data":  [
+                                    202,
+                                    63,
+                                    28,
+                                    21,
+                                    253
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   94,
+                                   16,
+                                   3,
+                                   119,
+                                   17,
+                                   74,
+                                   63,
+                                   28,
+                                   21,
+                                   125,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  105292,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x5f  ca 3f 23 30 5b",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  95,
+                       "data":  [
+                                    202,
+                                    63,
+                                    35,
+                                    48,
+                                    91
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   95,
+                                   60,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   63,
+                                   35,
+                                   48,
+                                   91,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  105517,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x60  ca 3f 2a 44 23",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  96,
+                       "data":  [
+                                    202,
+                                    63,
+                                    42,
+                                    68,
+                                    35
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   96,
+                                   57,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   63,
+                                   42,
+                                   68,
+                                   35,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  105703,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x61  ca 3f 31 5e 81",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  97,
+                       "data":  [
+                                    202,
+                                    63,
+                                    49,
+                                    94,
+                                    129
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   97,
+                                   10,
+                                   3,
+                                   119,
+                                   17,
+                                   74,
+                                   63,
+                                   49,
+                                   94,
+                                   1,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  105928,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x62  ca 3f 38 72 49",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  98,
+                       "data":  [
+                                    202,
+                                    63,
+                                    56,
+                                    114,
+                                    73
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   98,
+                                   119,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   63,
+                                   56,
+                                   114,
+                                   73,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  106116,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x63  ca 3f 3f 8c a7",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  99,
+                       "data":  [
+                                    202,
+                                    63,
+                                    63,
+                                    140,
+                                    167
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   99,
+                                   120,
+                                   3,
+                                   119,
+                                   25,
+                                   74,
+                                   63,
+                                   63,
+                                   12,
+                                   39,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  106303,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x64  ca 3f 46 a7 06",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  100,
+                       "data":  [
+                                    202,
+                                    63,
+                                    70,
+                                    167,
+                                    6
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   100,
+                                   27,
+                                   3,
+                                   119,
+                                   9,
+                                   74,
+                                   63,
+                                   70,
+                                   39,
+                                   6,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  106491,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x65  ca 3f 4d ba cd",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  101,
+                       "data":  [
+                                    202,
+                                    63,
+                                    77,
+                                    186,
+                                    205
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   101,
+                                   86,
+                                   3,
+                                   119,
+                                   25,
+                                   74,
+                                   63,
+                                   77,
+                                   58,
+                                   77,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  106716,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x66  ca 3f 54 d5 2c",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  102,
+                       "data":  [
+                                    202,
+                                    63,
+                                    84,
+                                    213,
+                                    44
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   102,
+                                   81,
+                                   3,
+                                   119,
+                                   9,
+                                   74,
+                                   63,
+                                   84,
+                                   85,
+                                   44,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  106903,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x67  ca 3f 5b ef 8a",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  103,
+                       "data":  [
+                                    202,
+                                    63,
+                                    91,
+                                    239,
+                                    138
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   103,
+                                   82,
+                                   3,
+                                   119,
+                                   25,
+                                   74,
+                                   63,
+                                   91,
+                                   111,
+                                   10,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  107091,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x68  ca 3f 63 03 52",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  104,
+                       "data":  [
+                                    202,
+                                    63,
+                                    99,
+                                    3,
+                                    82
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   104,
+                                   70,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   63,
+                                   99,
+                                   3,
+                                   82,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  107317,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x69  ca 3f 6a 1d b0",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  105,
+                       "data":  [
+                                    202,
+                                    63,
+                                    106,
+                                    29,
+                                    176
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   105,
+                                   35,
+                                   3,
+                                   119,
+                                   17,
+                                   74,
+                                   63,
+                                   106,
+                                   29,
+                                   48,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  107541,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x6a  ca 3f 71 31 78",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  106,
+                       "data":  [
+                                    202,
+                                    63,
+                                    113,
+                                    49,
+                                    120
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   106,
+                                   76,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   63,
+                                   113,
+                                   49,
+                                   120,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  107729,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x6b  ca 3f 78 4b d6",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  107,
+                       "data":  [
+                                    202,
+                                    63,
+                                    120,
+                                    75,
+                                    214
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   107,
+                                   1,
+                                   3,
+                                   119,
+                                   17,
+                                   74,
+                                   63,
+                                   120,
+                                   75,
+                                   86,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  107916,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x6c  ca 3f 7f 66 34",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  108,
+                       "data":  [
+                                    202,
+                                    63,
+                                    127,
+                                    102,
+                                    52
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   108,
+                                   89,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   63,
+                                   127,
+                                   102,
+                                   52,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  108141,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x6d  ca 3c ce b5 28",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  109,
+                       "data":  [
+                                    202,
+                                    60,
+                                    206,
+                                    181,
+                                    40
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   109,
+                                   40,
+                                   3,
+                                   119,
+                                   13,
+                                   74,
+                                   60,
+                                   78,
+                                   53,
+                                   40,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  108329,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x6e  ca 3d 59 00 79",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  110,
+                       "data":  [
+                                    202,
+                                    61,
+                                    89,
+                                    0,
+                                    121
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   110,
+                                   86,
+                                   3,
+                                   119,
+                                   1,
+                                   74,
+                                   61,
+                                   89,
+                                   0,
+                                   121,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  108516,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x6f  ca 3d a5 53 2f",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  111,
+                       "data":  [
+                                    202,
+                                    61,
+                                    165,
+                                    83,
+                                    47
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   111,
+                                   43,
+                                   3,
+                                   119,
+                                   5,
+                                   74,
+                                   61,
+                                   37,
+                                   83,
+                                   47,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  108704,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0377 seq=0x70  ca 3d dd f1 6d",
+                       "cmd":  3,
+                       "sub":  119,
+                       "seq":  112,
+                       "data":  [
+                                    202,
+                                    61,
+                                    221,
+                                    241,
+                                    109
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   112,
+                                   59,
+                                   3,
+                                   119,
+                                   13,
+                                   74,
+                                   61,
+                                   93,
+                                   113,
+                                   109,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  108928,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x71  09",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  113,
+                       "data":  [
+                                    9
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   113,
+                                   9,
+                                   3,
+                                   117,
+                                   0,
+                                   9,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  110016,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x72  0a",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  114,
+                       "data":  [
+                                    10
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   114,
+                                   10,
+                                   3,
+                                   117,
+                                   0,
+                                   10,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  111253,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x73  00",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  115,
+                       "data":  [
+                                    0
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   115,
+                                   0,
+                                   3,
+                                   117,
+                                   0,
+                                   0,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  120508,
+                       "tipo":  "tx",
+                       "testo":  "TX 0x0176 impostazioni â€” payload cc 85 04 04 c2 c3 c2 cd ea 60",
+                       "cmd":  1,
+                       "sub":  118,
+                       "data":  [
+                                    204,
+                                    133,
+                                    4,
+                                    4,
+                                    194,
+                                    195,
+                                    194,
+                                    205,
+                                    234,
+                                    96
+                                ]
+                   },
+                   {
+                       "ms":  120511,
+                       "tipo":  "log",
+                       "testo":  "TX 0x0176 seq=0x03 19B"
+                   },
+                   {
+                       "ms":  120628,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0476 seq=0x03  ",
+                       "cmd":  4,
+                       "sub":  118,
+                       "seq":  3,
+                       "data":  [
+
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   3,
+                                   0,
+                                   4,
+                                   118,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  121024,
+                       "tipo":  "tx",
+                       "testo":  "TX 0x0175 COUNTIN â€” payload 02",
+                       "cmd":  1,
+                       "sub":  117,
+                       "data":  [
+                                    2
+                                ]
+                   },
+                   {
+                       "ms":  121031,
+                       "tipo":  "log",
+                       "testo":  "TX 0x0175 seq=0x04 9B"
+                   },
+                   {
+                       "ms":  121078,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0475 seq=0x04  ",
+                       "cmd":  4,
+                       "sub":  117,
+                       "seq":  4,
+                       "data":  [
+
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   4,
+                                   0,
+                                   4,
+                                   117,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  136657,
+                       "tipo":  "tx",
+                       "testo":  "TX 0x0275 stato registrazione â€” payload (vuoto)",
+                       "cmd":  2,
+                       "sub":  117,
+                       "data":  [
+
+                                ]
+                   },
+                   {
+                       "ms":  136661,
+                       "tipo":  "log",
+                       "testo":  "TX 0x0275 seq=0x05 7B"
+                   },
+                   {
+                       "ms":  136792,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x05  02",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  5,
+                       "data":  [
+                                    2
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   5,
+                                   2,
+                                   3,
+                                   117,
+                                   0,
+                                   2,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  140152,
+                       "tipo":  "tx",
+                       "testo":  "TX 0x0278 stato del looper â€” payload (vuoto)",
+                       "cmd":  2,
+                       "sub":  120,
+                       "data":  [
+
+                                ]
+                   },
+                   {
+                       "ms":  140155,
+                       "tipo":  "log",
+                       "testo":  "TX 0x0278 seq=0x06 7B"
+                   },
+                   {
+                       "ms":  140280,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0378 seq=0x06  cc 85 04 04 00 c2 c2",
+                       "cmd":  3,
+                       "sub":  120,
+                       "seq":  6,
+                       "data":  [
+                                    204,
+                                    133,
+                                    4,
+                                    4,
+                                    0,
+                                    194,
+                                    194
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   6,
+                                   42,
+                                   3,
+                                   120,
+                                   99,
+                                   76,
+                                   5,
+                                   4,
+                                   4,
+                                   0,
+                                   66,
+                                   66,
+                                   247
+                               ],
+                       "demo":  false
+                   }
+               ]
+}

@@ -909,10 +909,30 @@ sequenza intera. **Ack senza esecuzione**: è la stessa firma di `0x0115`, `0x01
 `0x0106` prima che si scoprisse il byte `0x00` finale, e quella prova non è stata fatta
 (il payload mandato era il solo `02`).
 
-Da provare in quest'ordine, e nient'altro finché uno non risponde:
-1. `0x0175` con `02` **più il byte `0x00` finale** — è la spunta della sonda, un click.
-2. `0x0275` e `0x0278`, mai interrogati: potrebbero dire se esiste uno stato «conteggio».
-3. `0x0176` scritto da noi con `click` a vero, per vedere se il click si accende a comando.
+**Provate e fallite, tutte** (`captures/2026-08-13-looper-click-tentativi.json`):
+`02` col byte `0x00` finale; `0x0176` scritto da noi e poi `04`; `0x0176` e poi `02`.
+Nel secondo caso la registrazione parte regolare — quattro battute, chiusura e
+riproduzione da sé — ma senza click. Nel terzo, ack e nulla.
+
+**La strada che resta, ed è quella buona: `02` e `04` vanno mandati tutti e due.**
+`sparkLooperRec()` di Ignitron manda **due** comandi, non uno: `SPK_LOOPER_CMD_COUNTIN`
+*se il click è acceso*, e subito dopo `SPK_LOOPER_CMD_REC`. Da soli non funziona né
+l'uno né l'altro, ed è esattamente la coppia che non avevamo provato — cercando ogni
+comando singolarmente non poteva saltare fuori. Nella sonda ci sono due pulsanti: uno
+li manda attaccati come Ignitron, l'altro con 1,8 s in mezzo, che a 133 bpm è la battuta
+che il pannello lascia fra `02` e `04`.
+
+**Due scoperte laterali dalla stessa cattura**, che valgono a prescindere dal click:
+
+- **`0x0275` risponde con `0x0375` e un byte**, stesso seq della richiesta. Quindi
+  `0x0375` fa due mestieri: notifica spontanea di stato *e* risposta alla domanda. Chi
+  ascolta deve distinguerli dal seq, altrimenti scambia una risposta per un evento.
+- **`0x0278` non è una configurazione ma uno stato**: risponde `cc 85 04 04 00 c2 c2`,
+  cioè bpm, count e battute come `0x0376`, ma poi tre campi diversi — dove la
+  configurazione ha `c2 c3 c2` più la durata, lo stato ha `00 c2 c2`. Il `00` è un
+  numero dove l'altro ha un booleano, quindi **i campi non sono gli stessi** e leggere
+  `0x0378` con lo schema di `0x0376` darebbe «click spento» quando è acceso. Plausibile
+  che siano battuta corrente, sta registrando, sta suonando — **da confermare**.
 
 **Il click non è un'impostazione spenta**, escluso per misura: `0x0276` interrogato in
 quella stessa sessione risponde `cc 85 04 04 c2 c3 c2 cd ea 60`, cioè `click` = `c3` =
