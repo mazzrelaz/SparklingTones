@@ -189,6 +189,11 @@
   .pannello .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px;
                           flex-wrap:wrap; }
   .pannello .spiega { color:var(--dim); font-size:0.8rem; margin:0 0 12px; }
+  /* Un pannello copre tutto lo schermo, log compreso: quello che succede va
+     detto qui dentro, o non lo legge nessuno. */
+  .stato-pannello { font-size:0.8rem; color:var(--gold); background:var(--panel);
+                    border:1px solid var(--line); border-radius:8px;
+                    padding:8px 10px; margin:0 0 12px; }
   .voce { display:flex; align-items:center; gap:10px; padding:9px 10px;
           border-bottom:1px solid var(--line); font-size:0.9rem; }
   .voce .nome { flex:1; min-width:0; }
@@ -333,6 +338,7 @@
     tabella e sono da verificare a orecchio; quelli in chiaro li hai messi tu; i numeri
     sono ancora da battezzare. <strong>Tocca l'etichetta per cambiarla</strong>: il nome
     vale per quel modello, in ogni preset che lo usa.</p>
+  <div class="stato-pannello" hidden></div>
   <div id="catena"></div>
 </div>
 
@@ -346,6 +352,7 @@
   <p class="spiega">Cambiare modello azzera i parametri di quel blocco: l'ampli li
     rimanda suoi, e l'editor li rilegge.</p>
   <p class="spiega" id="notaModelli" hidden></p>
+  <div class="stato-pannello" hidden></div>
   <div class="barra-alta">
     <input type="search" id="cercaModello" placeholder="cerca…" style="flex:1">
     <button id="btnModelloAMano" class="piccolo">Scrivilo a mano</button>
@@ -480,6 +487,7 @@ function logLine(msg) {
   if (righeLog.length > 8) righeLog.shift();
   $('log').textContent = righeLog.join('\n');
   $('logLive').textContent = msg;
+  statoDelPannello(msg);
 }
 
 /** Riga di avanzamento: la successiva la sostituisce invece di accodarsi. */
@@ -489,6 +497,28 @@ function logProgress(msg) {
   logProvvisorio = true;
   $('log').textContent = righeLog.join('\n');
   $('logLive').textContent = msg;
+  statoDelPannello(msg);
+}
+
+/**
+ * Un pannello aperto copre tutto lo schermo, log compreso: un messaggio
+ * scritto mentre si è lì dentro non lo vede nessuno, e un comando che
+ * fallisce sembra un comando che non fa niente. Ogni pannello che parla con
+ * l'ampli ha la sua riga di stato, e ci finisce l'ultimo messaggio.
+ */
+function statoDelPannello(msg) {
+  const riga = document.querySelector('.pannello.aperto .stato-pannello');
+  if (!riga) return;
+  riga.textContent = msg;
+  riga.hidden = false;
+}
+
+/** Si riparte puliti a ogni apertura: lo stato di prima non riguarda questa. */
+function pulisciStatoPannelli() {
+  document.querySelectorAll('.stato-pannello').forEach(r => {
+    r.textContent = '';
+    r.hidden = true;
+  });
 }
 
 /* ====================================================================
@@ -497,6 +527,7 @@ function logProgress(msg) {
 
 function apriPannello(id) {
   chiudiPannelli();
+  pulisciStatoPannelli();
   $(id).classList.add('aperto');
 }
 
@@ -1517,48 +1548,80 @@ $('btnModelloAMano').addEventListener('click', () => {
  * altri**: cambiano di numero e di significato, e i valori di prima non
  * vogliono dire più niente. Quindi si rilegge la catena dall'ampli invece di
  * indovinare, com'è la regola di questo editor.
+ *
+ * **Il nome vecchio si richiede all'ampli anche prima di mandare il comando**,
+ * e non si prende da quello che c'è scritto sullo schermo. Il comando dice
+ * «al posto di questo mettimi quello», quindi se il primo nome non è davvero
+ * lì l'ampli lo ignora — in silenzio, come sempre. E lo schermo può essere
+ * rimasto indietro per più di un motivo: una rilettura andata a vuoto, il
+ * suono cambiato dall'app ufficiale, una manopola girata sull'ampli. Bastava
+ * una di queste una volta sola e da lì in poi ogni cambio falliva, sempre.
  */
 async function cambiaModello(nuovo) {
-  if (!modelloInCorso || !inModifica) return;
-  const { vecchio } = modelloInCorso;
+  // Questi due «non dovrebbero mai capitare», e proprio per questo se capitano
+  // vanno detti: uscire in silenzio da qui lascia il pannello aperto e sembra
+  // che il tocco non sia nemmeno arrivato.
+  if (!modelloInCorso) { logLine('scelta scaduta: chiudi e riapri «cambia».'); return; }
+  if (!inModifica)     { logLine('l\'editor non è più aperto: riapri «Regola».'); return; }
+
+  const { posizione } = modelloInCorso;
   modelloInCorso = null;
   apriPannello('pannelloEditor');       // si torna alle manopole
-  if (nuovo === vecchio) return;
+
+  if (!spark.connected) { logLine('ampli non connesso: il cambio non è partito.'); return; }
 
   try {
+    logProgress('guardo cosa c\'è adesso in quel blocco…');
+    const prima = await aggiornaCatenaDallAmpli();
+    if (!prima) {
+      logLine('non riesco a leggere la catena dall\'ampli: senza sapere cosa ' +
+              'c\'è adesso, il cambio partirebbe alla cieca.');
+      return;
+    }
+
+    const vecchio = prima[posizione] && prima[posizione].name;
+    if (!vecchio)         { logLine('quel blocco non esiste nella catena letta.'); return; }
+    if (nuovo === vecchio) { logLine(`${nuovo} c'era già.`); return; }
+
     logProgress(`sostituisco ${vecchio} con ${nuovo}…`);
     await spark.send(Spark.commands.changeEffectModel(vecchio, nuovo));
     await new Promise(r => setTimeout(r, 500));
 
-    const attuale = await spark.readLiveState();
-    if (!attuale) {
-      logLine(`comando mandato, ma non riesco a rileggere la catena: ` +
+    const dopo = await aggiornaCatenaDallAmpli();
+    if (!dopo) {
+      logLine('comando mandato, ma non riesco a rileggere la catena: ' +
               'riapri «Regola» per vedere com\'è rimasta.');
       return;
     }
-    inModifica.effetti = attuale.effects.map(e => ({
-      name: e.name,
-      enabled: e.enabled,
-      params: e.params.map(p => ({ index: p.index, value: p.value })),
-    }));
-    disegnaCatena();
 
-    const adesso = inModifica.effetti[modelloPosizione(vecchio, nuovo)];
-    if (adesso && adesso.name === nuovo) {
+    if (dopo[posizione] && dopo[posizione].name === nuovo) {
       logLine(`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`);
     } else {
-      logLine(`l'ampli ha confermato il cambio ma la catena riporta ancora ` +
-              `${vecchio}: il modello potrebbe non esistere con questo nome.`);
+      logLine(`il comando è partito ma quel blocco riporta ancora ` +
+              `${dopo[posizione] ? dopo[posizione].name : '?'}: il modello ` +
+              'potrebbe non esistere con questo nome.');
     }
   } catch (err) {
     logLine('cambio modello fallito: ' + err.message);
   }
 }
 
-/** Dove è finito il modello nuovo, per poter dire se il cambio ha attecchito. */
-function modelloPosizione(vecchio, nuovo) {
-  const i = inModifica.effetti.findIndex(e => e.name === nuovo);
-  return i === -1 ? inModifica.effetti.findIndex(e => e.name === vecchio) : i;
+/**
+ * Rilegge la catena dall'ampli e la rimette nell'editor, disegno compreso.
+ * Restituisce gli effetti letti, o null se la lettura non è riuscita — e in
+ * quel caso **non tocca niente**: meglio un editor che dice di non sapere che
+ * uno che mostra la catena di prima come se fosse quella di adesso.
+ */
+async function aggiornaCatenaDallAmpli() {
+  const attuale = await spark.readLiveState();
+  if (!attuale || !inModifica) return null;
+  inModifica.effetti = attuale.effects.map(e => ({
+    name: e.name,
+    enabled: e.enabled,
+    params: e.params.map(p => ({ index: p.index, value: p.value })),
+  }));
+  disegnaCatena();
+  return inModifica.effetti;
 }
 
 /**

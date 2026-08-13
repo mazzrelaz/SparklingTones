@@ -437,19 +437,28 @@ prefissate** `[len, 0xa0+len, …]`, non le corte; e **il primo nome è il model
 adesso**, il secondo quello nuovo — l'ordine del riferimento (`Spark.ino:157`), non
 l'inverso.
 
-Resta quindi da spiegare perché nell'app non funzioni, mandando gli stessi byte. **Una
-differenza sola è rimasta**: nella sonda l'ampli sta suonando uno slot, mentre «Regola»
-prima manda il preset nel buffer software `0x7f` (`loadPreset`), e da lì in poi l'ampli
-non suona più uno slot. Il sospetto è che `0x0106` non abbia effetto sul buffer software —
-plausibile, perché cambiare modello vuol dire ricostruire un blocco DSP, mentre `0x0104` e
-`0x0115`, che lì funzionano, toccano solo dei valori. La sonda ha il pulsante «Mandalo nel
-buffer software, come Regola» apposta: si preme quello e si riprova la variante A. **Da
-misurare — non toccare il codice prima.**
+**Il buffer software non c'entra**, ipotesi esclusa da misura diretta il 13 agosto 2026:
+mandato un preset nel buffer `0x7f` come fa «Regola» e riprovata la variante A, il
+modello cambia lo stesso. `0x0106` funziona in tutti e due gli stati.
 
-Se il sospetto è giusto, attenzione a come si rimedia: non si può ricostruire il blocco in
-locale e rimandare il preset intero, perché **i parametri del modello nuovo non li
-sappiamo** — quanti sono e quanto valgono lo decide l'ampli, ed è per questo che dopo il
-cambio la catena si rilegge.
+Il difetto era quindi nell'app, e il comando partiva con **il nome vecchio sbagliato**.
+`0x0106` dice «al posto di questo mettimi quello»: se il primo nome non è davvero nella
+catena, l'ampli ignora tutto senza fiatare. L'editor lo prendeva da quello che aveva sullo
+schermo, e lo schermo può essere rimasto indietro per più di un motivo — una rilettura
+andata a vuoto (che lasciava la catena vecchia e non lo diceva a nessuno), il suono
+cambiato dall'app ufficiale, una manopola girata sull'ampli. **Bastava una volta sola e da
+lì in poi ogni cambio falliva, sempre**, perché lo schermo non si aggiornava mai più.
+
+Adesso il nome vecchio si **rilegge dall'ampli anche prima di mandare il comando**
+(`aggiornaCatenaDallAmpli`), e se quella lettura non riesce non si manda niente: meglio
+non fare che fare alla cieca. È la stessa regola che l'editor già seguiva
+all'apertura — la verità è sull'ampli — applicata anche qui.
+
+L'altra metà del difetto era che **non si vedeva**: un pannello a tutto schermo copre il
+log, quindi ogni messaggio di quel percorso finiva dietro al pannello e un comando
+fallito era indistinguibile da un comando che non fa niente. Ogni pannello che parla con
+l'ampli ha adesso la sua `.stato-pannello`, e `logLine`/`logProgress` ci scrivono
+l'ultimo messaggio. Vale per tutti i pannelli, non solo per questo.
 
 **Il cursore va strozzato.** Un trascinamento genera decine di eventi al secondo e ogni
 comando è una scrittura BLE: mandarli tutti intasa la coda e il suono arriva in ritardo
