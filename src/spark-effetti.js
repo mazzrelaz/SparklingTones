@@ -51,9 +51,16 @@ window.SparkEffetti = (function () {
        L'ampli manda **due o tre** parametri per il noise gate, a seconda del
        preset: nelle otto catture di `captures/2026-08-10-libreria-8-preset.json`
        cinque preset su otto ne hanno un terzo, e in tutti e cinque vale
-       esattamente 1. Le manopole restano due — Threshold e Decay — quindi il
-       terzo non è una manopola e non merita un cursore in mezzo agli altri. */
-    'bias.noisegate': { nome: 'Noise Gate', manopole: ['Threshold', 'Decay'], quante: 2 },
+       esattamente 1. Le manopole restano due — Threshold e Decay.
+
+       **Il terzo è l'acceso/spento**, misurato sull'ampli il 13 agosto 2026:
+       da 0.00 a 0.49 il gate non lavora, da 0.50 a 1.00 sì; il valore però
+       resta il float che gli si scrive (0.50 riletto torna 0.50, non
+       arrotondato), quindi è un float letto come booleano con la soglia a
+       metà. E spegnendo il blocco con `0x0115` l'ampli ci scrive 0 da solo:
+       è lo stesso interruttore, visto da un'altra parte. */
+    'bias.noisegate': { nome: 'Noise Gate', manopole: ['Threshold', 'Decay'],
+      quante: 2, extraNome: 'Acceso/spento' },
 
     /* ---- Comp / Wah ---- */
     'LA2AComp': { nome: 'LA Comp', manopole: ['Limit/Compress', 'Gain', 'Peak Reduction'] },
@@ -308,6 +315,18 @@ window.SparkEffetti = (function () {
     return n >= 0 && n < quante && Math.abs(valore - n / 10) < 0.02 ? n : -1;
   }
 
+  /**
+   * Come si chiama il parametro in più, quando sappiamo cos'è.
+   *
+   * Sul noise gate è misurato: è l'acceso/spento del blocco. Nell'app
+   * ufficiale infatti quel parametro non compare — c'è già l'interruttore.
+   * Dove non lo sappiamo restituisce null e il parametro resta un numero.
+   */
+  function nomeExtra(id) {
+    const voce = TABELLA[id];
+    return (voce && voce.extraNome) || null;
+  }
+
   /** La riga della tabella è compatibile con quello che manda l'ampli? */
   function affidabile(id, quantiVeri) {
     const voce = TABELLA[id];
@@ -320,6 +339,6 @@ window.SparkEffetti = (function () {
     return Object.keys(TABELLA).length;
   }
 
-  return { TABELLA, MODELLI, nome, manopola, extra, affidabile, quantiConosciuti,
-           posizioni, valorePosizione, posizioneDi };
+  return { TABELLA, MODELLI, nome, manopola, extra, nomeExtra, affidabile,
+           quantiConosciuti, posizioni, valorePosizione, posizioneDi };
 })();

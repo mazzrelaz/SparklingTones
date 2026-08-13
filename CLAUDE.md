@@ -358,9 +358,31 @@ al blocco, «1 parametro che non è una manopola», e lì si muovono come tutti 
 Nasconderli sarebbe la stessa bugia di prima al rovescio, e se un domani si scopre che uno
 conta davvero è ancora lì.
 
-Cosa siano resta aperto. L'ipotesi più semplice — preset nati sul firmware nuovo contro
-preset vecchi importati — spiegherebbe perché cambino da preset a preset e non da effetto
-a effetto.
+**Sul noise gate sappiamo cos'è: l'acceso/spento del blocco.** Misurato sull'ampli il 13
+agosto 2026, ed è l'utente ad averlo intuito:
+
+- da 0.00 a 0.49 il gate non lavora, da 0.50 a 1.00 sì — soglia a metà;
+- il valore però **non viene arrotondato**: scritto 0.50, riletto 0.50. È un float
+  memorizzato tale e quale e letto come booleano, non un booleano;
+- spegnendo il blocco con `0x0115` **l'ampli ci scrive 0 da solo**: è lo stesso
+  interruttore visto da un'altra parte;
+- e **nell'app ufficiale quel parametro non compare**, perché lì c'è già l'interruttore.
+
+Come si è arrivati alla misura, che è il pezzo riutilizzabile: «a zero il gate non gatta»
+non distingue un interruttore da una manopola di profondità — a zero tacciono tutti e due.
+Il modo di distinguerli è **scrivere un valore di mezzo e guardare cosa ci ridà l'ampli**:
+se l'avesse arrotondato sarebbe un interruttore. Da lì è nato il pulsante «Rileggi
+dall'ampli» nell'editor, che serve a ogni misura di questo tipo.
+
+Nell'editor quel parametro quindi **non è più un cursore**: si vede, dice «acceso» o
+«spento», e si cambia dall'interruttore in cima al blocco. Un cursore lì spegneva il
+blocco alle spalle dell'interruttore, che continuava a dire «acceso» — la UI mentiva. Per
+lo stesso motivo, premendo l'interruttore il parametro viene aggiornato anche in locale.
+
+**Sul riverbero l'ottavo parametro non è misurato**: stessa forma (compare negli stessi
+cinque preset, vale sempre esattamente 1) e quasi certamente la stessa cosa, ma finché
+non lo si prova resta un numero senza nome, e nell'editor resta un cursore. Si verifica in
+venti secondi: lo si porta sotto 0.5 e si sente se il riverbero sparisce.
 
 ### Il tipo di riverbero è il settimo parametro
 

@@ -230,6 +230,7 @@
                             padding:4px 6px; font:inherit; font-size:0.78rem; }
   .manopola .valore { width:3.2em; text-align:right; color:var(--dim);
                       font-size:0.74rem; font-family:Consolas,monospace; }
+  .manopola .spiega-extra { flex:1; min-width:0; color:var(--faint); font-size:0.74rem; }
   .avviso-spento { color:var(--gold); font-size:0.72rem; margin-top:6px; }
   /* I parametri che manopole non sono: chiusi, ma a un dito di distanza. */
   .blocco details.extra { margin-top:8px; }
@@ -1344,6 +1345,15 @@ function disegnaCatena() {
       } catch (err) {
         logLine('errore: ' + err.message);
       }
+      // L'ampli scrive lui l'acceso/spento anche nel parametro che lo
+      // rispecchia (misurato: spegnendo il blocco quel parametro va a 0).
+      // Se non lo seguiamo qui, lo schermo resta a dire il contrario finché
+      // non si rilegge.
+      if (SparkEffetti.nomeExtra(effetto.name)) {
+        effetto.params.forEach(p => {
+          if (SparkEffetti.extra(effetto.name, p.index)) p.value = effetto.enabled ? 1 : 0;
+        });
+      }
       disegnaCatena();
     });
 
@@ -1390,6 +1400,26 @@ function disegnaCatena() {
       const valore = document.createElement('span');
       valore.className = 'valore';
       valore.textContent = param.value.toFixed(2);
+
+      // Il parametro in più di cui sappiamo il significato non è un cursore.
+      // Sul noise gate è l'acceso/spento: un cursore lì spegnerebbe il blocco
+      // di nascosto, mentre l'interruttore in cima continua a dire «acceso».
+      // Si mostra e basta — cambiarlo si cambia dall'interruttore, che è
+      // esattamente quello che fa l'app ufficiale.
+      const nomeExtra = SparkEffetti.extra(effetto.name, param.index) &&
+                        SparkEffetti.nomeExtra(effetto.name);
+      if (nomeExtra) {
+        numero.className = 'numero daTabella';
+        numero.textContent = nomeExtra;
+        numero.title = `«${nomeExtra}», misurato sull'ampli: sotto 0.50 il blocco ` +
+                       'è spento, sopra è acceso. È l\'interruttore qui sopra, ' +
+                       'visto da un\'altra parte.';
+        const spiega = document.createElement('span');
+        spiega.className = 'spiega-extra';
+        spiega.textContent = param.value >= 0.5 ? 'acceso' : 'spento';
+        riga.append(numero, spiega, valore);
+        return riga;
+      }
 
       // Certi parametri scelgono fra cose invece di scorrere — il tipo di
       // riverbero è l'unico che conosciamo. Con un cursore continuo azzeccare
@@ -1460,8 +1490,10 @@ function disegnaCatena() {
       const cassetto = document.createElement('details');
       cassetto.className = 'extra';
       const titolo = document.createElement('summary');
+      const cosaSia = SparkEffetti.nomeExtra(effetto.name);
       titolo.textContent = fuori.length === 1
-        ? '1 parametro che non è una manopola'
+        ? (cosaSia ? `1 parametro che non è una manopola: ${cosaSia.toLowerCase()}`
+                   : '1 parametro che non è una manopola')
         : `${fuori.length} parametri che non sono manopole`;
       titolo.title = `${SparkEffetti.nome(effetto.name)} ha ` +
         `${SparkEffetti.TABELLA[effetto.name].quante} manopole, ma su certi preset ` +
