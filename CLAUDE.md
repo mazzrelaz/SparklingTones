@@ -460,7 +460,68 @@ lasciato. Verificato: 41 eventi diventano un comando solo, col valore finale giu
 Il blocco spento si vede spento e lo dice: **girare la manopola di un effetto spento non
 produce nessun suono**, ed è una trappola già pagata una volta.
 
-Ancora da fare: niente di concordato. Il prossimo passo lo decide l'utente.
+## Strade future chieste dall'utente (13 agosto 2026)
+
+Tre direzioni, nessuna ancora cominciata. Quello che segue è **ricognizione, non
+misura**: dove c'è scritto «da verificare» vuol dire che nessuno l'ha ancora provato,
+e vale la regola di sempre — prima si misura, poi si scrive il codice.
+
+### Pedaliera M-VAVE (M-Wave) Chocolate
+
+**Il pedale non si collega con Web Bluetooth ma con Web MIDI**, ed è la cosa che
+costerebbe mezza giornata a scoprire da soli. È una pedaliera **BLE MIDI**, e Chrome
+tiene il servizio GATT MIDI (`03b80e5a-…`) nella **blocklist di Web Bluetooth** apposta,
+perché quel traffico passa da `navigator.requestMIDIAccess()`. Cercare il pedale con
+`navigator.bluetooth.requestDevice` non lo troverà mai. **Da verificare** con una
+paginetta che elenca gli ingressi MIDI, prima di scriverci sopra qualsiasi cosa.
+
+**L'ampli resta collegato**: sono due stack diversi (GATT nostro, MIDI del sistema) e due
+connessioni BLE distinte, che telefono e PC reggono senza problemi. Non c'è niente da
+spartire fra i due.
+
+Il pedale si accoppia **prima col sistema operativo** (impostazioni Bluetooth), poi
+compare come porta MIDI. Web MIDI chiede il permesso una volta sola.
+
+**Il punto che decide tutto: Web MIDI su Chrome per Android.** Se da telefono non
+enumera un dispositivo BLE MIDI, la pedaliera funziona solo dal PC — e a un concerto il
+PC non c'è. Va provato per primo, prima di qualsiasi altra cosa: dieci minuti di lavoro
+che dicono se la strada esiste. Se non esiste, l'unica via di scampo è che il pedale
+abbia un modo **HID/tastiera**: allora sono `keydown` e non serve nessuna API.
+
+### Comandare i banchi col pedale
+
+Che cosa mandi ogni tasto **non si indovina, si impara**: una schermata «premi il tasto e
+ti dico cosa arriva» (program change o control change, e su che canale), e la
+corrispondenza si salva nelle preferenze. È la stessa regola dei nomi dei parametri.
+
+Il vincolo vero non è il MIDI, è il tempo: **solo i preset già in uno degli otto slot si
+attivano all'istante** (`0x0138`), gli altri vanno trasmessi e ci mettono circa un
+secondo. Col piede, in mezzo a un pezzo, è la differenza fra usabile e no. Quindi la
+mappatura naturale è quattro tasti = i quattro posti del banco corrente (A o B), col
+cambio banco sul tasto che il pedale già dedica a quello; e nella UI di mappatura si
+deve vedere quali sono istantanei e quali no, come già si vede nella vista live.
+
+Da provare presto anche: **lo schermo che si spegne**. Se il telefono blocca la pagina,
+BLE e timer si fermano. Serve la Wake Lock API, e la prova va fatta col pedale in mano.
+
+### Looper dello Spark 2
+
+**Nessuna fonte che abbiamo lo documenta**: il riferimento di paulhamsh è per lo Spark
+40, che il looper non ce l'ha, e il nostro handoff non lo nomina. Però l'app ufficiale lo
+comanda dalla stessa connessione BLE, quindi i comandi esistono.
+
+Due strade, la prima costa niente:
+
+1. **Guardare cosa dice l'ampli**: si comanda il looper dal pannello dell'ampli con la
+   nostra app connessa e si registra tutto quello che arriva. È così che sono saltati
+   fuori `0x031a` e il `0x0337` della manopola del riverbero. Se il looper manda
+   notifiche, i codici si leggono lì e si prova a rimandarglieli.
+2. Se l'ampli tace, **catturare l'app ufficiale**: opzioni sviluppatore di Android,
+   «Bluetooth HCI snoop log», si fa un giro di loop, si tira giù il file e si legge con
+   Wireshark. Dà i comandi esatti. Attenzione: mentre l'app ufficiale è connessa la
+   nostra non può esserlo, quindi sono due sessioni separate.
+
+Ancora da fare, deciso: niente. Il prossimo passo lo decide l'utente.
 
 `loadPreset` e `storePreset` sono **entrambi verificati sull'hardware**: il primo l'11
 agosto 2026 e riconfermato il 12, il secondo il 12 agosto nella forma nuova (scrittura
