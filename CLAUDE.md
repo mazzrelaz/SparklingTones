@@ -1146,7 +1146,25 @@ E c'è una cosa che solo l'ESP32 può fare: **l'ampli gli parla**. Le notifiche 
 anche a lui, quindi un display può dire quale preset è attivo e come sta il looper. Col
 ponte via telefono quel ritorno passa comunque dallo schermo che non guardi mentre suoni.
 
-**Ancora da fare, deciso: niente.** Il prossimo passo lo decide l'utente. Ma l'ordine
+#### Ripartire da qui — 14 agosto 2026
+
+**Il prossimo passo è deciso: lo snoop log HCI**, per trovare il comando del conteggio.
+L'utente ci aveva già provato e non trovava il file: **non è un errore suo, su Android
+moderno quel file sta in `/data/misc/bluetooth/logs/` e nessun gestore file lo apre senza
+root.** Si tira fuori col **rapporto di bug**, che Android genera da sé e che se lo porta
+dentro (`FS/data/misc/bluetooth/logs/btsnoop_hci.log`).
+
+Due punti dove si sbaglia facile, da ricordargli: il log va messo su **«Attivato»** e non
+«Filtrato», che butta via proprio i dati; e dopo averlo attivato **il Bluetooth va spento
+e riacceso**, altrimenti non registra niente ed è il motivo per cui di solito il file
+risulta vuoto. La sessione da catturare deve essere **corta**: connetti, un giro di
+looper col conteggio, chiudi.
+
+Il file lo leggo io con uno script — il formato btsnoop è banale e i nostri messaggi si
+riconoscono a vista (`f0 01 … f7` verso la caratteristica `0xFFC1`). **Niente Wireshark**,
+che era il consiglio scritto qui sopra quando la strada era solo teorica.
+
+**Ancora da fare, deciso: niente altro.** L'ordine
 economico è chiaro: la **sessione d'ascolto sul looper** non costa niente e serve a tutte
 e due le strade; poi una **devkit ESP32 da otto euro** senza saldare niente, per vedere
 se si collega e cambia preset. Se quello funziona il progetto esiste, e non si è comprato
