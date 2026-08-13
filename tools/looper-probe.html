@@ -50,6 +50,7 @@
   .raffica select { background:#0a0a0b; border:1px solid #34383f; color:#e8e8ea;
                     padding:4px 6px; border-radius:6px; font:inherit; font-size:0.75rem; }
   .raffica.senza { border-left-color:#f0d060; }
+  .raffica.finta { opacity:0.55; border-style:dashed; }
 </style>
 </head>
 <body>
@@ -173,14 +174,17 @@ const spark = new SparkTransport({
     $('btnExport').disabled = sessione.length === 0;
   },
   onMessage: (msg) => {
-    rxTot++;
-    if (!msg.checksumOk) rxKo++;
-    $('rxTot').textContent = rxTot;
-    $('rxKo').textContent = rxKo;
-    riga('rx', `RX 0x${hex(msg.cmd)}${hex(msg.sub)} seq=0x${hex(msg.seq)}` +
+    if (!msg.demo) {                    // i finti non contano: vedi sotto
+      rxTot++;
+      if (!msg.checksumOk) rxKo++;
+      $('rxTot').textContent = rxTot;
+      $('rxKo').textContent = rxKo;
+    }
+    riga('rx', `${msg.demo ? 'FINTO ' : ''}RX 0x${hex(msg.cmd)}${hex(msg.sub)} ` +
+               `seq=0x${hex(msg.seq)}` +
                `${msg.checksumOk ? '' : ' CHECKSUM KO'}  ${hexList(msg.data)}`,
          { cmd: msg.cmd, sub: msg.sub, seq: msg.seq, data: Array.from(msg.data),
-           checksumOk: msg.checksumOk, raw: msg.raw });
+           checksumOk: msg.checksumOk, raw: msg.raw, demo: !!msg.demo });
   },
   onLog: (t) => riga('log', t),
 });
@@ -194,12 +198,12 @@ const orologio = (ms) => String(Math.floor(ms / 1000)).padStart(3, '0') + '.' +
    quando succede qualcos'altro (un invio, un segnaposto). L'etichetta si mette
    dopo: chiedere di dichiararla prima vuol dire chiedere di indovinare cosa
    farà l'ampli, e quando l'ampli fa un'altra cosa il log resta a mentire. */
-function apriRaffica(ms) {
-  const gruppo = { n: raffiche.length + 1, ms, quanti: 0, etichetta: '', eventi: [] };
+function apriRaffica(ms, demo) {
+  const gruppo = { n: raffiche.length + 1, ms, quanti: 0, etichetta: '', eventi: [], demo };
   raffiche.push(gruppo);
 
   const box = document.createElement('div');
-  box.className = 'raffica senza';
+  box.className = 'raffica senza' + (demo ? ' finta' : '');
   const testa = document.createElement('div');
   testa.className = 'raffica-testa';
 
@@ -215,8 +219,12 @@ function apriRaffica(ms) {
     box.classList.toggle('senza', !sel.value);
   };
 
+  /* Il contatore ha una classe sua: senza, `.quanti b` pescava il primo <b>
+     del gruppo, che sulle raffiche finte è la scritta «FINTA» — e il numero
+     dei messaggi ci finiva sopra, cancellando proprio l'avviso che serve. */
   testa.innerHTML = `<span class="t">${orologio(ms)}</span>` +
-                    `<span class="quanti">raffica ${gruppo.n} · <b>0</b> messaggi</span>`;
+                    `<span class="quanti">${demo ? '<b style="color:#f0d060">FINTA</b> · ' : ''}` +
+                    `raffica ${gruppo.n} · <b class="n">0</b> messaggi</span>`;
   testa.appendChild(sel);
   box.appendChild(testa);
 
@@ -226,7 +234,7 @@ function apriRaffica(ms) {
   $('log').appendChild(box);
 
   gruppo.corpo = corpo;
-  gruppo.contatore = testa.querySelector('.quanti b');
+  gruppo.contatore = testa.querySelector('.quanti b.n');
   return gruppo;
 }
 
@@ -240,7 +248,8 @@ function riga(tipo, testo, extra) {
   el.innerHTML = `<span class="t">${orologio(ms)}</span>  ` + esc(testo);
 
   if (tipo === 'rx') {
-    if (!raffica || Date.now() - ultimoRx > PAUSA_RAFFICA) raffica = apriRaffica(ms);
+    if (!raffica || Date.now() - ultimoRx > PAUSA_RAFFICA || raffica.demo !== !!evento.demo)
+      raffica = apriRaffica(ms, !!evento.demo);
     ultimoRx = Date.now();
     raffica.quanti++;
     raffica.eventi.push(evento);
@@ -296,16 +305,24 @@ $('btnConnect').onclick = () => spark.connect().catch(err => riga('err', err.mes
 
 $('btnClear').onclick = () => { $('log').textContent = ''; raffica = null; };
 
+/* I messaggi dell'esempio non escono da qui. Una cattura è una prova, e un dato
+   inventato dentro una prova è peggio di nessun dato: fra sei mesi nessuno si
+   ricorda che quel giorno si era premuto «Mostrami un esempio», e quei byte si
+   leggono come se venissero dall'ampli. Successo il 13 agosto 2026. */
 $('btnExport').onclick = () => {
   const nome = `looper-${new Date().toISOString().slice(0, 10)}.json`;
+  const vere = raffiche.filter(g => !g.demo);
+  const scartate = raffiche.length - vere.length;
   const blob = new Blob([JSON.stringify({
     quando: new Date().toISOString(),
     nota: 'Sonda del looper. I codici provengono da stangreg/Ignitron, non da misura nostra.',
     rxTotali: rxTot, rxScartati: rxKo,
-    raffiche: raffiche.map(g => ({ n: g.n, ms: g.ms, quanti: g.quanti,
-                                   etichetta: g.etichetta || null, eventi: g.eventi })),
-    eventi: sessione,
+    finteEscluse: scartate,
+    raffiche: vere.map(g => ({ n: g.n, ms: g.ms, quanti: g.quanti,
+                               etichetta: g.etichetta || null, eventi: g.eventi })),
+    eventi: sessione.filter(e => !e.demo),
   }, null, 2)], { type: 'application/json' });
+  if (scartate) riga('log', `esportate ${vere.length} raffiche — ${scartate} dell'esempio escluse`);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = nome;
@@ -321,7 +338,7 @@ riga('log', 'pronta. Connetti l\'ampli, poi parti dall\'ascolto.');
    si chiama così. Il pulsante non ha questo problema e per giunta si vede. */
 function dimostrazione() {
   const finto = (cmd, sub, data) => spark.onMessage(
-    { cmd, sub, seq: 0x21, data, checksumOk: true, raw: [] });
+    { cmd, sub, seq: 0x21, data, checksumOk: true, raw: [], demo: true });
   const raffiche_finte = [
     [[0x03, 0x38, [0x00, 0x02]], [0x03, 0x75, [0x04]]],
     [[0x03, 0x75, [0x05]], [0x03, 0x78, [0x01, 0x00]], [0x03, 0x1a, [0x91, 0x00]]],

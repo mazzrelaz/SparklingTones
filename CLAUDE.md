@@ -843,6 +843,56 @@ voglia il **byte `0x00` finale** che sullo Spark 2 servono `0x0115`, `0x0104` e 
 i comandi con e senza, e in più registra cosa manda l'ampli quando il looper si comanda
 dai suoi tasti — che è la sessione d'ascolto, diventata verifica.
 
+#### Prima sessione d'ascolto — 13 agosto 2026, verificata sull'ampli
+
+`captures/2026-08-13-looper-auto-mode.json`, 120 messaggi in venti raffiche, ampli in
+**Auto Mode**. **Solo ricezione: nessun comando inviato**, quindi tutto quello che segue
+vale per la direzione ampli→noi. La direzione opposta resta da provare.
+
+**I valori di Ignitron sono confermati sul nostro hardware.** `0x0375` porta un byte solo
+e sono esattamente quelli: visti `02` countin, `04` rec, `07` rec complete, `08` play,
+`09` stop, `0a` delete, `0b` dub, `0c` stop dub. Non sono comparsi `05`, `06`, `0d` e
+`0e` — in Auto Mode non si ferma la registrazione a mano, e undo/redo non sono stati
+toccati.
+
+**`0x0375` con `00` non è nell'elenco di Ignitron.** Arriva sempre da solo, circa 1,2 s
+dopo un `0a`, tre volte su tre. È il looper che dichiara di essere **vuoto**.
+
+**`0x0377` è la posizione nel loop**, e non lo dice nessuna fonte: un float `0xca` che
+parte da 0.0 e sale **linearmente di 0,0250 ogni ~190 ms**, cioè cinque volte al secondo.
+Sedici valori di fila senza una deviazione. Su un pedale con un display è la barra di
+avanzamento del loop, gratis.
+
+**`0x0376` sono le impostazioni, e si leggono campo per campo.** `cc 85 04 04 c2 c3 c2 3c`:
+`cc 85` bpm 133 (il prefisso `0xcc` che Ignitron mette sopra i 128 — confermato),
+`04` count «straight», `04` quattro battute, `c2` freeIndicator falso, `c3` click acceso,
+`c2` il terzo flag falso, `3c` sessanta (i 60 s di durata massima). **Da qui si legge in
+quale modo è l'ampli**: `freeIndicator` falso e `click` acceso vuol dire Auto Mode, che è
+esattamente il modo in cui l'utente si è trovato quando REC/DUB non fermava la
+registrazione. Il sintomo e i byte dicono la stessa cosa.
+
+**`0x0363` è il bpm da solo**, float `0xca`: `43 05 00 00` = 133.0, poi 153.0.
+
+**Il TAP fa tre cose insieme**, quattro volte per quattro pressioni: `0x0363` il bpm,
+`0x0376` le impostazioni aggiornate, e `0x0337` — che già conoscevamo — sul parametro 4
+di `DelayRe201`. Cioè **il tap tempo guida anche il delay**, non solo il looper.
+
+Il ciclo completo in Auto Mode, misurato: premi REC/DUB → `02` `02`; dopo ~1,9 s
+**da solo** `04`; al limite delle battute **da solo** `07` + `08` e parte il flusso di
+`0x0377`; premi PLAY/STOP → `09`. La sovraincisione è `0b` `08` … `0c` `09`.
+
+**Trappola del raggruppamento**: durante la riproduzione `0x0377` arriva ogni 190 ms, che
+è meno degli 800 ms di pausa, quindi **la raffica non si chiude mai** e la pressione
+umana finisce dentro lo stesso gruppo dell'evento automatico. Le raffiche 6, 11, 12 e 17
+contengono tutte e due le cose. Se servisse separarle, `0x0377` va escluso dal conteggio
+della pausa.
+
+**I messaggi dell'esempio non devono finire in una cattura.** Alla prima esportazione ci
+sono finite tre raffiche del pulsante «Mostrami un esempio», riconoscibili solo perché
+avevano `raw` vuoto. Un dato inventato dentro una prova è peggio di nessun dato: fra sei
+mesi nessuno si ricorda di quel click. Adesso i finti sono marcati `demo`, non contano
+negli RX totali, si vedono tratteggiati con scritto FINTA, e **l'esportazione li scarta**.
+
 **Lo Spark 2 ha i tasti del looper sul pannello**, quindi l'ascolto non ha bisogno
 dell'app ufficiale né dello snoop log: REC/DUB, PLAY/STOP, UNDO/REDO (tenuto = cancella
 tutto), TAP per il tempo. Cade il problema delle due sessioni separate.
