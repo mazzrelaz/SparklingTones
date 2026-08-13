@@ -62,6 +62,16 @@ sia verde.** Girano contro catture reali dell'ampli, quindi intercettano una reg
 nella codifica senza avere l'hardware a portata. Due test confrontano i messaggi generati
 con quelli che hanno davvero avuto effetto sull'ampli, byte per byte.
 
+**Mai riscrivere un file di questo progetto con `Get-Content`/`Set-Content` di PowerShell
+5.1.** Senza BOM, `Get-Content` decodifica l'UTF-8 come ANSI e `Set-Content -Encoding UTF8`
+lo riscrive doppiamente codificato: ogni accento e ogni «—» diventano `Ã ` e `â€"`, in
+tutto il file, in silenzio. Successo il 13 agosto 2026 su `index.html`, `live.html` e
+`pwa.js` facendo un semplice replace di colori — visto solo da uno screenshot
+(«cerca un presetâ€¦»). Le modifiche vanno fatte con gli strumenti di edit, o in .NET con
+l'encoding esplicito. Se ricapita si torna indietro senza perdere il lavoro: si rilegge
+il file come UTF-8, si toglie l'eventuale `﻿` iniziale e si riscrivono i byte
+convertendo la stringa in **CP1252** — è esattamente la trasformazione inversa.
+
 IndexedDB funziona da `file://` su Chrome desktop (verificato). Attenzione però: su
 `file://` tutte le pagine condividono la stessa origine opaca, quindi non c'è isolamento
 fra i database, e il browser può ripulirli più facilmente.
@@ -250,6 +260,26 @@ blocchi spenti si vedono spenti invece di sparire (fa parte di com'è fatto quel
 il riverbero porta il **tipo** invece della parola «Riverbero», che è sempre la stessa e
 non distingue niente. Il tasto ▶ per provare un preset è sulla scheda: era l'azione più
 frequente e stava sepolta nel dettaglio.
+
+Nel dettaglio la catena è **una riga sola di nomi separati da «-», senza valori**: lì si
+guarda *che catena è*, e una colonna di numeri a due decimali non la legge nessuno — le
+manopole si regolano da «Regola», che è il posto dove servono.
+
+I nomi dei pulsanti li ha decisi l'utente: **«Attiva»** manda il preset all'ampli senza
+toccare nessuno slot (era «Prova adesso»), **«Invia a preset HW»** lo scrive in uno slot
+(era «Scrivi»). Quello che seleziona uno slot già scritto si chiama adesso «Seleziona
+A1», perché «Attiva A1» accanto ad «Attiva» erano due cose diverse con lo stesso nome.
+
+**I preferiti non ci sono più**, tolti su richiesta: via la stella dalle schede e il
+filtro dall'intestazione. Il campo `favorite` resta nei record e nello store — cancellarlo
+butterebbe via scelte già fatte — ma non si vede e non filtra niente.
+
+**Fondo nero e rosso al posto dell'arancione**, scelta dell'utente. I riquadri non sono
+neri a loro volta (`--panel:#121316`): su nero pieno una scheda si vede solo se è un filo
+più chiara, altrimenti reggono tutto i bordi e la pagina diventa un reticolo. Cambiati
+anche `theme-color`, il manifest, il rimando di `live.html` e la striscia di `pwa.js`.
+**Le icone in `icons/` sono ancora arancioni**: si rigenerano con `tools/make-icons.ps1`
+quando si decide il rosso definitivo.
 
 ### Famiglia di suono: un asse a parte dalle categorie
 

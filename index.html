@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Spark 2 — preset e live</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#14161a">
+<meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,10 +14,14 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
   * { box-sizing: border-box; }
+  /* Fondo nero e rosso al posto dell'arancione, scelta dell'utente.
+     I riquadri non sono neri anche loro: su nero pieno una scheda si vede
+     solo se è un filo più chiara, altrimenti restano i bordi a reggere
+     tutto e la pagina diventa un reticolo. */
   :root {
-    --bg:#14161a; --panel:#181a1f; --line:#24272c; --line-soft:#1f2228;
+    --bg:#000000; --panel:#121316; --line:#26282e; --line-soft:#1b1d21;
     --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
-    --accent:#ff6a3d; --green:#7fe08a; --gold:#f0c040; --rosso:#ff8080;
+    --accent:#e02c2c; --green:#7fe08a; --gold:#f0c040; --rosso:#ff8080;
   }
   html { height:100%; }
   body { margin:0; min-height:100%; background:var(--bg); color:var(--text);
@@ -26,7 +30,7 @@
   /* La vista live è più scura e non scorre: schermo pieno, header fisso,
      pulsanti che si toccano al buio. Cambia solo il vestito, non la pagina. */
   body.vista-live {
-    --bg:#0e0f12; --panel:#1a1d22; --line:#2a2e35; --text:#f0f0f2;
+    --bg:#000000; --panel:#16181c; --line:#2a2e35; --text:#f0f0f2;
     height:100%; overflow:hidden; display:flex; flex-direction:column;
     -webkit-user-select:none; user-select:none;
   }
@@ -47,7 +51,7 @@
   .status.wait{ background:#3a3520; color:#f0d060; }
 
   button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
-           background:#2a2d33; color:var(--text); padding:8px 13px; border-radius:8px; }
+           background:#24262b; color:var(--text); padding:8px 13px; border-radius:8px; }
   button.primary { background:var(--accent); color:#fff; }
   button:disabled { background:#26282d; color:#5a5f68; cursor:not-allowed; }
   button.icon { background:none; padding:5px 7px; font-size:1rem; line-height:1; color:var(--faint); }
@@ -58,7 +62,7 @@
   #btnVista { background:none; color:var(--accent); padding:8px 4px; }
 
   input[type=text], input[type=search], select, textarea {
-    background:#1e2126; border:1px solid #34383f; color:var(--text);
+    background:#17181c; border:1px solid #2e3138; color:var(--text);
     padding:8px 10px; border-radius:8px; font:inherit; font-size:0.85rem;
   }
   textarea { width:100%; resize:vertical; min-height:60px; }
@@ -73,7 +77,7 @@
   .pastiglie { display:flex; gap:6px; margin-top:8px; overflow-x:auto;
                padding-bottom:2px; scrollbar-width:none; }
   .pastiglie::-webkit-scrollbar { display:none; }
-  .pastiglia { flex:none; background:#23262c; color:#b6bbc3; font-size:0.78rem;
+  .pastiglia { flex:none; background:#1e2025; color:#b6bbc3; font-size:0.78rem;
                padding:5px 11px; border-radius:14px; cursor:pointer; white-space:nowrap; }
   .pastiglia:hover { background:#2e323a; color:var(--text); }
   .pastiglia.attiva { background:var(--accent); color:#fff; }
@@ -96,9 +100,11 @@
      Gli otto slot non sono righe di libreria: sono due banchi da quattro,
      disposti come i LED sull'ampli — banco A a sinistra, B a destra. */
 
+  /* `.banco` è già preso: nella vista live è il pulsante che sceglie il
+     banco. Qui è una colonna, e due nomi uguali si sarebbero pestati i piedi. */
   .pannello-ampli { display:grid; grid-template-columns:1fr 1fr; gap:8px;
                     align-items:start; }
-  .banco { display:grid; gap:8px; align-content:start; }
+  .colonna-banco { display:grid; gap:8px; align-content:start; }
   .banco-eti { font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase;
                font-weight:700; color:var(--faint); }
   .banco-eti.a { color:#ff9b9b; }
@@ -113,7 +119,6 @@
   .slotcard .alto { display:flex; align-items:center; gap:6px; }
   .slotcard .sigla { font-family:'SF Mono',Consolas,monospace; font-size:0.7rem;
                      color:var(--faint); }
-  .slotcard .stellina { margin-left:auto; color:var(--gold); font-size:0.72rem; }
   .slotcard .nome-slot { font-size:0.84rem; font-weight:600; line-height:1.25;
                          overflow:hidden; display:-webkit-box; -webkit-line-clamp:2;
                          -webkit-box-orient:vertical; }
@@ -136,7 +141,7 @@
                           width:4px; background:var(--famiglia); }
   .con-famiglia > .head { padding-left:16px; }
   .slotcard.con-famiglia { padding-left:14px; }
-  .scelta.famiglia.dentro { background:var(--famiglia); color:#14161a; font-weight:700; }
+  .scelta.famiglia.dentro { background:var(--famiglia); color:#000; font-weight:700; }
   .nota-famiglia { color:var(--faint); font-size:0.72rem; margin-top:6px; }
 
   .row { background:var(--panel); border:1px solid var(--line); border-radius:10px;
@@ -146,14 +151,14 @@
 
   /* La catena a pastiglie: nomi leggibili, e i blocchi spenti si vedono spenti. */
   .chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
-  .chip { background:#23262c; color:#b6bbc3; font-size:0.7rem; padding:2px 8px;
+  .chip { background:#1e2025; color:#b6bbc3; font-size:0.7rem; padding:2px 8px;
           border-radius:9px; white-space:nowrap; }
   .chip.spento { color:var(--faint); background:none; border:1px solid var(--line);
                  text-decoration:line-through; }
 
   /* Provare un preset è l'azione più frequente: un tasto, senza aprire nulla. */
   .via { width:30px; height:30px; border-radius:50%; flex:none; padding:0;
-         font-size:0.7rem; background:#2a2d33; color:var(--dim); }
+         font-size:0.7rem; background:#24262b; color:var(--dim); }
   .via.pronto { background:var(--accent); color:#fff; }
   .naming { flex:1; min-width:0; }
   .name { font-weight:600; font-size:0.93rem; }
@@ -166,7 +171,7 @@
   .slot.b { color:#9be0a8; border-color:#2a4a32; }
 
   .tags { display:flex; gap:5px; flex-wrap:wrap; padding:0 12px 9px 12px; }
-  .tag { background:#23262c; color:#b6bbc3; font-size:0.71rem; padding:2px 8px;
+  .tag { background:#1e2025; color:#b6bbc3; font-size:0.71rem; padding:2px 8px;
          border-radius:9px; cursor:pointer; }
   .tag:hover { background:#2e323a; color:var(--text); }
   .tag.attiva { background:var(--accent); color:#fff; }
@@ -175,14 +180,13 @@
   .detail label { display:block; font-size:0.72rem; color:var(--dim);
                   text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
   .detail input[type=text] { width:100%; }
-  .fxlist { display:grid; gap:2px; }
-  .fx { display:flex; gap:9px; font-size:0.78rem; align-items:baseline; }
-  .fx .fxname { min-width:130px; }
-  .fx .fxname.off { color:var(--faint); text-decoration:line-through; }
-  .fx .vals { color:var(--dim); font-family:'SF Mono',Consolas,monospace; font-size:0.72rem; }
+  /* La catena su una riga sola: i nomi, e basta. */
+  .fxlist { font-size:0.8rem; color:var(--dim); line-height:1.7; }
+  .fxlist .fxname { color:var(--text); }
+  .fxlist .fxname.off { color:var(--faint); text-decoration:line-through; }
   .azioni { display:flex; gap:8px; flex-wrap:wrap; }
   .scelte { display:flex; gap:6px; flex-wrap:wrap; }
-  .scelta { background:#23262c; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
+  .scelta { background:#1e2025; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
             border-radius:12px; cursor:pointer; border:1px solid transparent; }
   .scelta.dentro { background:#2f3a2f; color:var(--green); border-color:#3d5540; }
 
@@ -199,7 +203,7 @@
                     calc(12px + env(safe-area-inset-left));
             scrollbar-width:none; }
   #banchi::-webkit-scrollbar { display:none; }
-  .banco { flex:none; background:#23262c; color:#b6bbc3; font-size:0.8rem; font-weight:600;
+  .banco { flex:none; background:#1e2025; color:#b6bbc3; font-size:0.8rem; font-weight:600;
            padding:6px 13px; border-radius:14px; cursor:pointer; white-space:nowrap; }
   .banco.attivo { background:var(--accent); color:#fff; }
   .banco.aggiungi { color:var(--faint); }
@@ -270,7 +274,7 @@
                        letter-spacing:0.05em; }
   .blocco .effetto { font-weight:600; font-size:0.9rem; }
   .blocco .interruttore { margin-left:auto; font-size:0.72rem; padding:4px 10px;
-                          border-radius:12px; background:#2a2d33; color:var(--dim); }
+                          border-radius:12px; background:#24262b; color:var(--dim); }
   .blocco .interruttore.acceso { background:#1f3a24; color:var(--green); }
   .manopola { display:flex; align-items:center; gap:10px; margin-top:8px; }
   .manopola .numero { min-width:5.5em; max-width:8em; text-align:left; color:var(--dim);
@@ -282,9 +286,9 @@
   .blocco .tecnico { font-size:0.68rem; color:var(--faint);
                      font-family:'SF Mono',Consolas,monospace; margin-top:1px; }
   .blocco .cambia { font-size:0.72rem; padding:4px 10px; border-radius:12px;
-                    background:#2a2d33; color:var(--dim); }
+                    background:#24262b; color:var(--dim); }
   .manopola input[type=range] { flex:1; min-width:0; accent-color:var(--accent); }
-  .manopola select.scelta { flex:1; min-width:0; background:#1e2126; color:var(--text);
+  .manopola select.scelta { flex:1; min-width:0; background:#17181c; color:var(--text);
                             border:1px solid var(--line); border-radius:7px;
                             padding:4px 6px; font:inherit; font-size:0.78rem; }
   .manopola .valore { width:3.2em; text-align:right; color:var(--dim);
@@ -323,7 +327,6 @@
   </div>
   <div class="cerca solo-preset">
     <input type="search" id="search" placeholder="cerca un preset…">
-    <button id="btnFav" class="icon" title="solo preferiti">★</button>
   </div>
   <div class="pastiglie solo-preset" id="filtriCategoria"></div>
 </header>
@@ -481,7 +484,10 @@ let banchi     = [];      // banchi salvati, quelli inventati dall'utente
 let nomiParam  = {};      // nomi dati dall'utente ai parametri, per modello
 let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic
 
-const vista = { cerca: '', categoria: '', soloPreferiti: false, aperto: null };
+// Niente preferiti: tolti su richiesta dell'utente. Il campo `favorite` resta
+// nei record e nello store — cancellarlo butterebbe via delle scelte già
+// fatte — ma non si vede e non filtra più niente.
+const vista = { cerca: '', categoria: '', aperto: null };
 const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false };
 
 /** Il banco fisso non è salvato da nessuna parte: è quello che c'è sull'ampli. */
@@ -614,9 +620,8 @@ document.querySelectorAll('[data-chiudi]').forEach(b => {
    Vista preset
    ==================================================================== */
 
-/** Il preset passa il filtro di ricerca, categoria e preferiti? */
+/** Il preset passa il filtro di ricerca e categoria? */
 function passaIlFiltro(record) {
-  if (vista.soloPreferiti && !record.favorite) return false;
   if (vista.categoria &&
       !(record.tags || []).some(t => t.toLowerCase() === vista.categoria.toLowerCase())) {
     return false;
@@ -631,7 +636,7 @@ function passaIlFiltro(record) {
   return termini.every(t => pagliaio.includes(t));
 }
 
-const filtroAttivo = () => !!(vista.cerca || vista.categoria || vista.soloPreferiti);
+const filtroAttivo = () => !!(vista.cerca || vista.categoria);
 
 function disegnaPreset() {
   disegnaFiltriCategoria();
@@ -650,7 +655,7 @@ function disegnaPreset() {
 
   for (const banco of [0, 1]) {
     const colonna = document.createElement('div');
-    colonna.className = 'banco';
+    colonna.className = 'colonna-banco';
 
     const eti = document.createElement('div');
     eti.className = 'banco-eti ' + (banco === 0 ? 'a' : 'b');
@@ -756,12 +761,6 @@ function schedaSlot(record, slot) {
   sigla.textContent = posizione.label;
   sigla.title = `slot ${slot} — LED ${posizione.color} numero ${posizione.position}`;
   alto.append(led, sigla);
-  if (record && record.favorite) {
-    const stella = document.createElement('span');
-    stella.className = 'stellina';
-    stella.textContent = '★';
-    alto.appendChild(stella);
-  }
   card.appendChild(alto);
 
   const basso = document.createElement('div');
@@ -866,17 +865,6 @@ function rigaPreset(record, slot) {
   const head = document.createElement('div');
   head.className = 'head';
 
-  const stella = document.createElement('button');
-  stella.className = 'icon' + (record.favorite ? ' on' : '');
-  stella.textContent = record.favorite ? '★' : '☆';
-  stella.title = 'preferito';
-  stella.addEventListener('click', async event => {
-    event.stopPropagation();
-    await store.toggleFavorite(record.id);
-    await ricarica();
-    disegnaPreset();
-  });
-
   const naming = document.createElement('div');
   naming.className = 'naming';
   const nome = document.createElement('div');
@@ -884,7 +872,7 @@ function rigaPreset(record, slot) {
   nome.textContent = record.name || '(senza nome)';
   naming.append(nome, pastiglieCatena(record));
 
-  head.append(stella, naming);
+  head.appendChild(naming);
   if (slot !== null) head.appendChild(etichettaSlot(slot));
 
   // Provare un preset è l'azione che si fa più spesso, e stava sepolta nel
@@ -1028,22 +1016,22 @@ function dettaglio(record, slot) {
   boxNote.appendChild(note);
 
   /* catena effetti ------------------------------------------------ */
+  // Una riga sola coi nomi, niente valori: qui si guarda *che catena è*, e
+  // una colonna di numeri a due decimali non la si legge — le manopole si
+  // regolano da «Regola», che è il posto dove servono davvero.
   const boxFx = document.createElement('div');
   boxFx.innerHTML = '<label>catena effetti</label>';
   const lista = document.createElement('div');
   lista.className = 'fxlist';
-  for (const effetto of record.effects || []) {
-    const linea = document.createElement('div');
-    linea.className = 'fx';
+  (record.effects || []).forEach((effetto, posizione) => {
+    if (posizione > 0) lista.append(' - ');
     const nomeFx = document.createElement('span');
     nomeFx.className = 'fxname' + (effetto.enabled ? '' : ' off');
-    nomeFx.textContent = effetto.name;
-    const valori = document.createElement('span');
-    valori.className = 'vals';
-    valori.textContent = effetto.params.map(p => p.value.toFixed(2)).join('  ');
-    linea.append(nomeFx, valori);
-    lista.appendChild(linea);
-  }
+    nomeFx.textContent = nomePastiglia(effetto, posizione);
+    nomeFx.title = Spark.CATENA[posizione] + ': ' + effetto.name +
+                   (effetto.enabled ? '' : ' (spento)');
+    lista.appendChild(nomeFx);
+  });
   boxFx.appendChild(lista);
 
   /* azioni -------------------------------------------------------- */
@@ -1061,7 +1049,7 @@ function dettaglio(record, slot) {
     }
 
     const attiva = document.createElement('button');
-    attiva.textContent = 'Attiva ' + Spark.slotLabel(slot).label;
+    attiva.textContent = 'Seleziona ' + Spark.slotLabel(slot).label;
     attiva.title = 'seleziona lo slot sull\'ampli, senza scrivere nulla';
     attiva.disabled = !spark.connected;
     attiva.addEventListener('click', async () => {
@@ -1075,7 +1063,7 @@ function dettaglio(record, slot) {
   // sicuro di provare un preset che sull'ampli non c'è.
   const prova = document.createElement('button');
   prova.className = 'primary';
-  prova.textContent = 'Prova adesso';
+  prova.textContent = 'Attiva';
   prova.title = 'manda il preset all\'ampli senza sovrascrivere nessuno slot';
   prova.disabled = !spark.connected;
   prova.addEventListener('click', () => mandaPreset(record, null));
@@ -1100,7 +1088,7 @@ function dettaglio(record, slot) {
   if (slot !== null) scelta.value = slot;
 
   const scrivi = document.createElement('button');
-  scrivi.textContent = 'Scrivi';
+  scrivi.textContent = 'Invia a preset HW';
   scrivi.title = 'sovrascrive il preset presente in quello slot';
   scrivi.disabled = !spark.connected;
   scrivi.addEventListener('click', () => {
@@ -2137,12 +2125,6 @@ $('btnLive').addEventListener('click', async () => {
 
 $('search').addEventListener('input', event => {
   vista.cerca = event.target.value;
-  disegnaPreset();
-});
-
-$('btnFav').addEventListener('click', () => {
-  vista.soloPreferiti = !vista.soloPreferiti;
-  $('btnFav').classList.toggle('on', vista.soloPreferiti);
   disegnaPreset();
 });
 
