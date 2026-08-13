@@ -47,14 +47,16 @@
                    10px calc(16px + env(safe-area-inset-left)); }
   body.vista-live header { position:static; flex:none; padding-bottom:8px; }
   .titlebar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  h1 { font-size:1.05rem; margin:0; }
-  /* Marchio e titolo stanno insieme, in alto a sinistra: sul telefono vanno
-     a capo come una cosa sola, e i pulsanti si dispongono sotto. Tenerli in
-     due elementi separati costringeva a indovinare la larghezza del logo. */
-  .marca { display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
   /* Il logo è un logotipo orizzontale: si fissa l'altezza e la larghezza
-     viene da sé, altrimenti in un quadrato si schiaccerebbe. */
-  .logo { height:26px; width:auto; max-width:60vw; flex:none; display:block; }
+     viene da sé, altrimenti in un quadrato si schiaccerebbe. Sta in ogni
+     schermata — intestazione, vista live, e la barra di ogni pannello —
+     e `margin-right:auto` gli fa spingere i pulsanti dalla parte opposta,
+     che è il lavoro che prima faceva il titolo con `flex:1`. */
+  .logo { height:26px; width:auto; max-width:52vw; flex:none; display:block;
+          margin-right:auto; }
+  /* Nei pannelli è più piccolo: lì il titolo dice cosa si sta facendo, e il
+     marchio serve solo a non far sembrare il pannello un'altra applicazione. */
+  .pannello .logo { height:19px; margin-right:0; }
   .status { padding:3px 9px; border-radius:11px; font-size:0.74rem; font-weight:600; white-space:nowrap; }
   .status.off { background:#3a2020; color:var(--rosso); }
   .status.on  { background:#1f3a24; color:var(--green); }
@@ -314,12 +316,11 @@
     /* Solo nella vista preset il titolo si prende una riga sua. Nella live
        sparisce del tutto: ogni riga di header è spazio tolto ai pulsantoni,
        e che si stia suonando lo dicono già i pulsantoni stessi. */
-    /* Marchio e titolo si prendono una riga loro, i pulsanti vanno sotto. */
-    body:not(.vista-live) .marca { flex-basis:100%; }
-    /* Nella live sparisce tutta la marca, titolo compreso: ogni riga di
-       header è spazio tolto ai pulsantoni, e che si stia suonando lo dicono
-       già i pulsantoni stessi. */
-    body.vista-live .marca { display:none; }
+    /* Sul telefono il marchio si rimpicciolisce e lascia il resto della riga
+       ai pulsanti, che vanno a capo da soli. Nella live ancora di più: lì
+       ogni riga di header è spazio tolto ai pulsantoni. */
+    .logo { height:22px; max-width:45vw; }
+    body.vista-live .logo { height:19px; }
   }
 </style>
 </head>
@@ -330,12 +331,12 @@
     <!-- Il marchio lo mette l'utente: basta salvare il file in `icons/logo.svg`
          (o `.png`) e compare qui, senza toccare il codice. Finché il file non
          c'è, l'immagine si toglie da sola invece di lasciare l'icona rotta. -->
-    <div class="marca">
-      <img class="logo" src="icons/logo.svg" alt=""
-           onerror="if (this.dataset.provato) { this.remove(); }
-                    else { this.dataset.provato = '1'; this.src = 'icons/logo.png'; }">
-      <h1 id="titolo">Preset</h1>
-    </div>
+    <!-- Il nome della vista non c'è: lo dicono già il pulsante che porta
+         all'altra e quello che si ha davanti. Al suo posto solo il marchio,
+         che sta in ogni schermata dell'app. -->
+    <img class="logo" src="icons/logo.svg" alt="SparklingTones"
+         onerror="if (this.dataset.provato) { this.remove(); }
+                  else { this.dataset.provato = '1'; this.src = 'icons/logo.png'; }">
     <span id="status" class="status off">non connesso</span>
     <button id="btnConnect" class="primary">Connetti</button>
     <button id="btnRead" class="solo-preset" disabled>Leggi dall'ampli</button>
@@ -544,7 +545,6 @@ const inLive = () => location.hash === '#live';
 async function applicaVista() {
   const live_ = inLive();
   document.body.classList.toggle('vista-live', live_);
-  $('titolo').textContent = live_ ? 'Live' : 'Preset';
   $('btnVista').textContent = live_ ? '← Preset' : 'Live →';
   if (!live_) chiudiPannelli();
 
@@ -2183,6 +2183,29 @@ async function importaBackupUfficiale(file) {
     logLine(`${saltati.length} preset saltati: ${saltati[0].motivo}`);
   }
 }
+
+/**
+ * Il marchio va in ogni schermata, pannelli compresi. Si copia quello
+ * dell'intestazione invece di ripeterlo cinque volte nel markup: così i
+ * pannelli che si aggiungeranno ce l'hanno senza doverselo ricordare, e se
+ * il file del logo manca non si copia niente — l'originale si è già tolto
+ * da solo e non resta un'icona rotta in cima a ogni pannello.
+ */
+function marchioNeiPannelli() {
+  const logo = document.querySelector('header .logo');
+  if (!logo || !logo.complete || logo.naturalWidth === 0) return;
+  document.querySelectorAll('.pannello > .barra-alta').forEach(barra => {
+    barra.insertBefore(logo.cloneNode(false), barra.firstChild);
+  });
+}
+
+// Non aspetta l'avvio: i pannelli sono già nel documento e il marchio non
+// dipende da niente che si legga dal database.
+(function () {
+  const logo = document.querySelector('header .logo');
+  if (logo && !logo.complete) logo.addEventListener('load', marchioNeiPannelli, { once: true });
+  else marchioNeiPannelli();
+})();
 
 /* ==================================================================== */
 

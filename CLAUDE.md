@@ -282,10 +282,20 @@ anche `theme-color`, il manifest, il rimando di `live.html` e la striscia di `pw
 ### Il marchio e le icone
 
 Il logo è dell'utente: `icons/logo.svg`, un **logotipo orizzontale** («SparklingTones»,
-rapporto circa 5,7:1). Sta in alto a sinistra dentro `.marca`, insieme al titolo della
-vista, e i due vanno a capo come una cosa sola sul telefono — tenerli separati
-costringeva a indovinare la larghezza del logo nel CSS. Si fissa **l'altezza** e la
-larghezza viene da sé: in un quadrato si schiaccerebbe.
+rapporto circa 5,7:1). Si fissa **l'altezza** e la larghezza viene da sé: in un quadrato
+si schiaccerebbe.
+
+**Il nome della vista non c'è più**, tolto su richiesta: niente «Preset» o «Live» accanto
+al marchio. Non manca a nessuno — quale vista si ha davanti lo dicono il contenuto e il
+pulsante che porta all'altra. Il logo ha `margin-right:auto` e spinge i pulsanti dalla
+parte opposta, che è il lavoro che prima faceva il titolo con `flex:1`.
+
+**Il marchio sta in ogni schermata**, anche nei pannelli a tutto schermo. Non è ripetuto
+nel markup: `marchioNeiPannelli()` copia quello dell'intestazione in ogni
+`.pannello > .barra-alta` all'avvio, così i pannelli che si aggiungeranno ce l'hanno
+senza doverselo ricordare. Non aspetta il database — i pannelli sono già nel documento —
+e se il file del logo manca non copia niente, perché l'originale si è già tolto da solo
+invece di lasciare un'icona rotta in cima a ogni pannello.
 
 **L'accento dell'app è il rosso del logo** (`#e30613`) e non un rosso scelto a parte: sulla
 stessa barra il marchio e il pulsante «Connetti» si toccano, e due rossi diversi si vedono.
