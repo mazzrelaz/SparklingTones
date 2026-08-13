@@ -54,9 +54,12 @@
      che è il lavoro che prima faceva il titolo con `flex:1`. */
   .logo { height:26px; width:auto; max-width:52vw; flex:none; display:block;
           margin-right:auto; }
-  /* Nei pannelli è più piccolo: lì il titolo dice cosa si sta facendo, e il
-     marchio serve solo a non far sembrare il pannello un'altra applicazione. */
-  .pannello .logo { height:19px; margin-right:0; }
+  /* Nei pannelli ha la stessa misura di ogni altra schermata — un marchio che
+     cambia taglia da pagina a pagina si nota, e in male. Cambia solo che qui
+     non spinge niente: dopo di lui c'è il titolo del pannello. */
+  .pannello .logo { margin-right:0; }
+  /* Torna ai preset da qualunque punto dell'app. */
+  .logo { cursor:pointer; }
   .status { padding:3px 9px; border-radius:11px; font-size:0.74rem; font-weight:600; white-space:nowrap; }
   .status.off { background:#3a2020; color:var(--rosso); }
   .status.on  { background:#1f3a24; color:var(--green); }
@@ -261,6 +264,16 @@
   .pannello .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px;
                           flex-wrap:wrap; }
   .pannello .spiega { color:var(--dim); font-size:0.8rem; margin:0 0 12px; }
+  /* Un pannello che fa due cose diverse le tiene separate: senza stacco
+     sembrava un elenco solo, e i due assi si confondevano. */
+  .sezione-pannello { border-top:1px solid var(--line); padding-top:14px; margin-top:18px; }
+  .sezione-pannello:first-of-type { border-top:none; padding-top:0; margin-top:0; }
+  .sezione-pannello h3 { font-size:0.76rem; color:var(--dim); text-transform:uppercase;
+                         letter-spacing:0.06em; margin:0 0 6px; font-weight:700; }
+  .famiglia-voce input[type=color] { width:34px; height:26px; padding:2px; flex:none;
+                                     background:#17181c; border:1px solid var(--line);
+                                     border-radius:7px; cursor:pointer; }
+  .famiglia-voce .nome { flex:1; min-width:0; font-size:0.9rem; }
   /* Un pannello copre tutto lo schermo, log compreso: quello che succede va
      detto qui dentro, o non lo legge nessuno. */
   .stato-pannello { font-size:0.8rem; color:var(--gold); background:var(--panel);
@@ -316,11 +329,10 @@
     /* Solo nella vista preset il titolo si prende una riga sua. Nella live
        sparisce del tutto: ogni riga di header è spazio tolto ai pulsantoni,
        e che si stia suonando lo dicono già i pulsantoni stessi. */
-    /* Sul telefono il marchio si rimpicciolisce e lascia il resto della riga
-       ai pulsanti, che vanno a capo da soli. Nella live ancora di più: lì
-       ogni riga di header è spazio tolto ai pulsantoni. */
+    /* Sul telefono il marchio si rimpicciolisce un po' e lascia il resto
+       della riga ai pulsanti, che vanno a capo da soli — ma resta uguale in
+       tutte le schermate, vista live e pannelli compresi. */
     .logo { height:22px; max-width:45vw; }
-    body.vista-live .logo { height:19px; }
   }
 </style>
 </head>
@@ -334,7 +346,7 @@
     <!-- Il nome della vista non c'è: lo dicono già il pulsante che porta
          all'altra e quello che si ha davanti. Al suo posto solo il marchio,
          che sta in ogni schermata dell'app. -->
-    <img class="logo" src="icons/logo.svg" alt="SparklingTones"
+    <img class="logo" src="icons/logo.svg" alt="SparklingTones" title="torna ai preset"
          onerror="if (this.dataset.provato) { this.remove(); }
                   else { this.dataset.provato = '1'; this.src = 'icons/logo.png'; }">
     <span id="status" class="status off">non connesso</span>
@@ -369,22 +381,37 @@
   <div id="logLive"></div>
 </div>
 
-<!-- gestione delle categorie -->
+<!-- come si organizza la libreria: le famiglie di suono e le categorie -->
 <div class="pannello" id="pannelloCategorie">
   <div class="barra-alta">
-    <h2>Categorie</h2>
+    <h2>Organizza</h2>
     <span style="flex:1"></span>
     <button class="primary" data-chiudi="pannelloCategorie">Fatto</button>
   </div>
-  <p class="spiega">Le categorie sono tue: quelle dell'app ufficiale non entrano più in
-    libreria. Eliminarne una la toglie dai preset, i preset restano.</p>
-  <div class="barra-alta">
-    <input type="text" id="nuovaCategoria" placeholder="nuova categoria" style="flex:1">
-    <button id="btnAggiungiCategoria" class="primary">Aggiungi</button>
+
+  <!-- Due assi diversi, e tenerli distinti è il punto: la famiglia dice che
+       tipo di suono è, la categoria dice di che pezzo o di che stile. -->
+  <div class="sezione-pannello">
+    <h3>Famiglia di suono</h3>
+    <p class="spiega">Che <em>tipo</em> di suono è: una sola per preset, e si riconosce dal
+      colore senza leggere niente. Si assegna aprendo un preset. I colori sono tuoi —
+      toccali per cambiarli.</p>
+    <div id="elencoFamiglie"></div>
   </div>
-  <div id="elencoCategorie"></div>
-  <div style="margin-top:18px">
-    <button id="btnAzzeraCategorie" class="pericolo piccolo">Azzera tutte le categorie</button>
+
+  <div class="sezione-pannello">
+    <h3>Categorie</h3>
+    <p class="spiega">Lo <em>stile</em>, o il pezzo: Pink Floyd, jazz, quello che vuoi, e
+      un preset ne può avere quante ne servono. Quelle dell'app ufficiale non entrano in
+      libreria. Eliminarne una la toglie dai preset, che restano.</p>
+    <div class="barra-alta">
+      <input type="text" id="nuovaCategoria" placeholder="nuova categoria" style="flex:1">
+      <button id="btnAggiungiCategoria" class="primary">Aggiungi</button>
+    </div>
+    <div id="elencoCategorie"></div>
+    <div style="margin-top:14px">
+      <button id="btnAzzeraCategorie" class="pericolo piccolo">Azzera tutte le categorie</button>
+    </div>
   </div>
 </div>
 
@@ -1982,9 +2009,65 @@ $('btnSalvaModifiche').addEventListener('click', async () => {
    ==================================================================== */
 
 $('btnCategorie').addEventListener('click', () => {
+  disegnaElencoFamiglie();
   disegnaElencoCategorie();
   apriPannello('pannelloCategorie');
 });
+
+/**
+ * Le tre famiglie con quanti preset le portano e il colore, che qui si
+ * cambia. Il colore è una scelta dell'utente come i nomi dei parametri: si
+ * salva nelle preferenze e va nel backup.
+ */
+function disegnaElencoFamiglie() {
+  const elenco = $('elencoFamiglie');
+  elenco.innerHTML = '';
+
+  for (const famiglia of famiglie) {
+    const quanti = tutti.filter(r => r.famiglia === famiglia.id).length;
+
+    const voce = document.createElement('div');
+    voce.className = 'voce famiglia-voce';
+
+    const colore = document.createElement('input');
+    colore.type = 'color';
+    colore.value = famiglia.colore;
+    colore.title = `colore di ${famiglia.nome}`;
+    colore.addEventListener('change', async () => {
+      await store.setColoreFamiglia(famiglia.id, colore.value);
+      await ricarica();
+      disegnaElencoFamiglie();
+      disegnaPreset();
+    });
+
+    const nome = document.createElement('span');
+    nome.className = 'nome';
+    nome.textContent = famiglia.nome;
+
+    const conta = document.createElement('span');
+    conta.className = 'badge';
+    conta.textContent = quanti === 1 ? '1 preset' : `${quanti} preset`;
+
+    voce.append(colore, nome, conta);
+
+    // Il colore di partenza si può rimettere, ma solo se è stato cambiato:
+    // un pulsante che non fa niente è peggio di un pulsante che non c'è.
+    if (famiglia.suo) {
+      const rimetti = document.createElement('button');
+      rimetti.className = 'icon';
+      rimetti.textContent = '↺';
+      rimetti.title = 'rimetti il colore di partenza';
+      rimetti.addEventListener('click', async () => {
+        await store.setColoreFamiglia(famiglia.id, '');
+        await ricarica();
+        disegnaElencoFamiglie();
+        disegnaPreset();
+      });
+      voce.appendChild(rimetti);
+    }
+    elenco.appendChild(voce);
+  }
+}
 
 function disegnaElencoCategorie() {
   const elenco = $('elencoCategorie');
@@ -2191,11 +2274,32 @@ async function importaBackupUfficiale(file) {
  * il file del logo manca non si copia niente — l'originale si è già tolto
  * da solo e non resta un'icona rotta in cima a ogni pannello.
  */
+/**
+ * Il marchio riporta ai preset da dovunque ci si trovi: pannello aperto,
+ * vista live, editor. È la via d'uscita che ci si aspetta da un logo, e in
+ * un'app senza barra di navigazione è l'unica sempre presente.
+ *
+ * Il clic si ascolta sul documento invece che sui singoli loghi: le copie nei
+ * pannelli nascono da `cloneNode`, che gli ascoltatori non li porta dietro.
+ */
+document.addEventListener('click', evento => {
+  if (!evento.target.classList.contains('logo')) return;
+  chiudiPannelli();
+  inModifica = null;          // il pannello si chiude: lo stato va con lui
+  modelloInCorso = null;
+  sceltaInCorso = null;
+  if (inLive()) location.hash = '#preset';
+});
+
 function marchioNeiPannelli() {
   const logo = document.querySelector('header .logo');
   if (!logo || !logo.complete || logo.naturalWidth === 0) return;
-  document.querySelectorAll('.pannello > .barra-alta').forEach(barra => {
-    barra.insertBefore(logo.cloneNode(false), barra.firstChild);
+  // Solo la **prima** barra di ogni pannello: `.barra-alta` serve anche alle
+  // righe di mezzo (quella per aggiungere una categoria, quella per cercare
+  // un modello), e il marchio finiva anche lì — due loghi nella stessa pagina.
+  document.querySelectorAll('.pannello').forEach(pannello => {
+    const barra = pannello.querySelector(':scope > .barra-alta');
+    if (barra) barra.insertBefore(logo.cloneNode(false), barra.firstChild);
   });
 }
 
