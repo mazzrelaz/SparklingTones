@@ -847,6 +847,28 @@ dai suoi tasti — che è la sessione d'ascolto, diventata verifica.
 dell'app ufficiale né dello snoop log: REC/DUB, PLAY/STOP, UNDO/REDO (tenuto = cancella
 tutto), TAP per il tempo. Cade il problema delle due sessioni separate.
 
+**Il looper ha due modi, e in uno REC/DUB non ferma la registrazione.** Segnalato
+dall'utente alla prima prova, il 13 agosto 2026, e non è un difetto:
+
+- **Auto Mode** (click acceso): la lunghezza è fissata in battute, la registrazione parte
+  dopo una battuta di conteggio e **si chiude da sola** al numero di battute impostato.
+  Ripremere REC/DUB non la ferma — è il comportamento che l'utente ha visto.
+- **Signal Detection Mode** (click spento): lunghezza libera, parte da sé quando sente la
+  chitarra, e **lì sì che REC/DUB chiude la registrazione**.
+
+Si passa dall'uno all'altro **tenendo premuto PLAY/STOP**. Vanno catturati tutti e due:
+sono quasi certamente i flag `click` e `freeIndicator` di `LooperSetting`, quelli che
+`0x0176` scrive, quindi le due sessioni dicono anche come sono fatte le impostazioni.
+
+**Lezione sull'attrezzo, non sul looper.** La sonda chiedeva di dichiarare *prima* quale
+tasto si stava per premere. Sbagliato per lo stesso motivo di sempre: **si chiedeva di
+indovinare cosa avrebbe fatto l'ampli**, e appena l'ampli ha fatto altro il log è rimasto
+a mentire — un marcatore «REC/DUB» sopra i messaggi di uno stop. Adesso i messaggi che
+arrivano attaccati (meno di 800 ms l'uno dall'altro) si raggruppano da soli in una
+raffica, e l'etichetta si sceglie **dopo**, da una tendina, con la chitarra appoggiata.
+Vale per ogni sonda futura: si registra prima e si interpreta dopo, mai il contrario.
+`?demo` in coda all'url riempie la pagina di messaggi finti, per provarla senza ampli.
+
 Ignitron vale anche oltre il looper: fa da **client verso l'ampli e da server verso l'app
 ufficiale**, ha i banchi di preset dentro, e gira su ESP32. Prima di scrivere firmware da
 zero conviene leggerlo — e valutare se il lavoro non sia configurarlo invece che

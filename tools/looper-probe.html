@@ -41,6 +41,15 @@
   #log .mk  { color:#7fb8ff; font-weight:700; }
   #log .err { color:#ff8080; }
   #log .t   { color:#4e535b; }
+  .raffica { border:1px solid #24272c; border-left:3px solid #7fe08a; border-radius:8px;
+             margin:8px 0; overflow:hidden; }
+  .raffica-testa { background:#15181c; padding:6px 8px; display:flex; gap:8px;
+                   align-items:center; flex-wrap:wrap; }
+  .raffica-testa .quanti { color:#8a8f98; font-size:0.72rem; }
+  .raffica-corpo { padding:4px 8px; }
+  .raffica select { background:#0a0a0b; border:1px solid #34383f; color:#e8e8ea;
+                    padding:4px 6px; border-radius:6px; font:inherit; font-size:0.75rem; }
+  .raffica.senza { border-left-color:#f0d060; }
 </style>
 </head>
 <body>
@@ -53,8 +62,10 @@ comandare il looper interno dello Spark&nbsp;2. Sono quindi <b>candidati molto p
 non fatti verificati — e questa pagina serve a trasformarli in fatti.<br><br>
 Due lavori, indipendenti:<br>
 <b>1. Ascolto.</b> Comandi il looper <b>dai tasti dell'ampli</b> (REC/DUB, PLAY/STOP,
-UNDO/REDO, TAP) e guardi cosa arriva. Prima di ogni pressione tocca il marcatore
-corrispondente qui, così nel log si vede cosa ha risposto a cosa.<br>
+UNDO/REDO, TAP) e guardi cosa arriva. <b>Non devi dichiarare niente prima</b>: i messaggi
+che arrivano insieme vengono raccolti da soli in una raffica, e l'etichetta gliela metti
+<b>dopo</b>, dalla tendina, quando hai la chitarra appoggiata. Suona come ti viene — se
+l'ampli fa una cosa diversa da quella che ti aspettavi, il log resta comunque onesto.<br>
 <b>2. Invio.</b> Provi i dodici comandi candidati e senti se il looper fa quello che dicono.<br><br>
 Il numero <b>RX totali</b> è sempre in vista apposta: <b>0</b> vuol dire ampli muto o
 connessione morta, più di 0 vuol dire che parla ed è la nostra lettura a scartare. Senza
@@ -69,7 +80,9 @@ quel numero i due casi si vedono uguali e portano in direzioni opposte.
   <button id="btnClear">Pulisci il log</button>
 </div>
 
-<h2>1 — Ascolto: marcatori da toccare <i>prima</i> di premere sull'ampli</h2>
+<h2>1 — Ascolto: usa i tasti dell'ampli, etichetta dopo</h2>
+<div class="sub" style="margin-bottom:8px">Le raffiche compaiono nel log con la tendina già
+pronta. Questi segnaposto servono solo a separare due prove, o a marcare un silenzio.</div>
 <div class="griglia" id="marcatori"></div>
 
 <h2>2 — Comandi candidati &nbsp;<code style="color:#8a8f98;font-size:0.8rem">0x0175</code></h2>
@@ -119,15 +132,34 @@ const QUERY = [
   { cmd: 0x02, sub: 0x78, n: 'stato del looper',    d: 'getLooperStatus' },
 ];
 
-/* I tasti fisici dello Spark 2, come li chiama il manuale. */
-const MARCATORI = [
-  'REC/DUB', 'PLAY/STOP', 'UNDO/REDO', 'CLEAR (tenuto)', 'TAP',
-  'niente — solo silenzio',
+/* I tasti fisici dello Spark 2, come li chiama il manuale. Sono le voci della
+   tendina che etichetta una raffica: la si sceglie dopo, non prima. */
+const AZIONI = [
+  '— non etichettata —',
+  'REC/DUB', 'REC/DUB (seconda pressione)',
+  'PLAY/STOP', 'PLAY/STOP (seconda pressione)',
+  'PLAY/STOP tenuto (cambio modo)',
+  'UNDO/REDO', 'UNDO/REDO tenuto (cancella tutto)',
+  'TAP',
+  'nessun tasto — arrivata da sola',
+  'non so',
 ];
+
+/* Segnaposto: separano due prove o marcano un silenzio. Niente a che vedere
+   con l'etichettatura, che ormai è sulle raffiche. */
+const MARCATORI = ['inizio prova', 'silenzio', 'fine prova'];
+
+/* Quanto silenzio separa due raffiche. Le risposte dell'ampli a una pressione
+   arrivano tutte entro poche decine di ms; fra una pressione e l'altra passano
+   secondi. Ottocento ms stanno comodamente in mezzo. */
+const PAUSA_RAFFICA = 800;
 
 let rxTot = 0, rxKo = 0;
 const sessione = [];        // tutto quello che è successo, per l'esportazione
+const raffiche = [];        // i gruppi di messaggi, con la loro etichetta
 const t0 = Date.now();
+let raffica = null;         // quella aperta adesso, se c'è
+let ultimoRx = 0;
 
 const spark = new SparkTransport({
   onStatus: (state, label) => {
@@ -152,16 +184,72 @@ const spark = new SparkTransport({
   onLog: (t) => riga('log', t),
 });
 
+const esc = (t) => t.replace(/[<&]/g, c => (c === '<' ? '&lt;' : '&amp;'));
+const orologio = (ms) => String(Math.floor(ms / 1000)).padStart(3, '0') + '.' +
+                         String(ms % 1000).padStart(3, '0');
+
+/* Una raffica è un gruppo di messaggi arrivati attaccati, cioè la risposta a
+   una sola pressione. Si apre da sé al primo RX dopo una pausa, e si chiude
+   quando succede qualcos'altro (un invio, un segnaposto). L'etichetta si mette
+   dopo: chiedere di dichiararla prima vuol dire chiedere di indovinare cosa
+   farà l'ampli, e quando l'ampli fa un'altra cosa il log resta a mentire. */
+function apriRaffica(ms) {
+  const gruppo = { n: raffiche.length + 1, ms, quanti: 0, etichetta: '', eventi: [] };
+  raffiche.push(gruppo);
+
+  const box = document.createElement('div');
+  box.className = 'raffica senza';
+  const testa = document.createElement('div');
+  testa.className = 'raffica-testa';
+
+  const sel = document.createElement('select');
+  for (const a of AZIONI) {
+    const o = document.createElement('option');
+    o.value = a === AZIONI[0] ? '' : a;
+    o.textContent = a;
+    sel.appendChild(o);
+  }
+  sel.onchange = () => {
+    gruppo.etichetta = sel.value;
+    box.classList.toggle('senza', !sel.value);
+  };
+
+  testa.innerHTML = `<span class="t">${orologio(ms)}</span>` +
+                    `<span class="quanti">raffica ${gruppo.n} · <b>0</b> messaggi</span>`;
+  testa.appendChild(sel);
+  box.appendChild(testa);
+
+  const corpo = document.createElement('div');
+  corpo.className = 'raffica-corpo';
+  box.appendChild(corpo);
+  $('log').appendChild(box);
+
+  gruppo.corpo = corpo;
+  gruppo.contatore = testa.querySelector('.quanti b');
+  return gruppo;
+}
+
 function riga(tipo, testo, extra) {
   const ms = Date.now() - t0;
-  const stampa = String(Math.floor(ms / 1000)).padStart(3, '0') + '.' +
-                 String(ms % 1000).padStart(3, '0');
-  sessione.push(Object.assign({ ms, tipo, testo }, extra || {}));
+  const evento = Object.assign({ ms, tipo, testo }, extra || {});
+  sessione.push(evento);
+
   const el = document.createElement('div');
   el.className = tipo;
-  el.innerHTML = `<span class="t">${stampa}</span>  ` +
-                 testo.replace(/[<&]/g, c => c === '<' ? '&lt;' : '&amp;');
-  $('log').appendChild(el);
+  el.innerHTML = `<span class="t">${orologio(ms)}</span>  ` + esc(testo);
+
+  if (tipo === 'rx') {
+    if (!raffica || Date.now() - ultimoRx > PAUSA_RAFFICA) raffica = apriRaffica(ms);
+    ultimoRx = Date.now();
+    raffica.quanti++;
+    raffica.eventi.push(evento);
+    raffica.contatore.textContent = raffica.quanti;
+    raffica.corpo.appendChild(el);
+  } else {
+    raffica = null;                       // qualunque altra cosa chiude il gruppo
+    $('log').appendChild(el);
+  }
+
   $('log').scrollTop = $('log').scrollHeight;
   $('btnExport').disabled = false;
 }
@@ -180,8 +268,8 @@ function invia(cmd, sub, data, etichetta) {
 for (const m of MARCATORI) {
   const b = document.createElement('button');
   b.className = 'marker';
-  b.innerHTML = `▸ ${m}<small>marcatore</small>`;
-  b.onclick = () => riga('mk', `———— sto per premere: ${m} ————`, { marcatore: m });
+  b.innerHTML = `▸ ${m}<small>segnaposto</small>`;
+  b.onclick = () => riga('mk', `———— ${m} ————`, { marcatore: m });
   $('marcatori').appendChild(b);
 }
 
@@ -205,7 +293,7 @@ for (const q of QUERY) {
 
 $('btnConnect').onclick = () => spark.connect().catch(err => riga('err', err.message));
 
-$('btnClear').onclick = () => { $('log').textContent = ''; };
+$('btnClear').onclick = () => { $('log').textContent = ''; raffica = null; };
 
 $('btnExport').onclick = () => {
   const nome = `looper-${new Date().toISOString().slice(0, 10)}.json`;
@@ -213,6 +301,8 @@ $('btnExport').onclick = () => {
     quando: new Date().toISOString(),
     nota: 'Sonda del looper. I codici provengono da stangreg/Ignitron, non da misura nostra.',
     rxTotali: rxTot, rxScartati: rxKo,
+    raffiche: raffiche.map(g => ({ n: g.n, ms: g.ms, quanti: g.quanti,
+                                   etichetta: g.etichetta || null, eventi: g.eventi })),
     eventi: sessione,
   }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
@@ -223,6 +313,24 @@ $('btnExport').onclick = () => {
 };
 
 riga('log', 'pronta. Connetti l\'ampli, poi parti dall\'ascolto.');
+
+/* ?demo — messaggi finti, per vedere come si raggruppano senza avere l'ampli
+   sotto mano. Serve anche a provare la pagina da qui, dove il Bluetooth non c'è. */
+if (location.search.includes('demo')) {
+  const finto = (cmd, sub, data) => spark.onMessage(
+    { cmd, sub, seq: 0x21, data, checksumOk: true, raw: [] });
+  const raffiche_finte = [
+    [[0x03, 0x38, [0x00, 0x02]], [0x03, 0x75, [0x04]]],
+    [[0x03, 0x75, [0x05]], [0x03, 0x78, [0x01, 0x00]], [0x03, 0x1a, [0x91, 0x00]]],
+    [[0x03, 0x75, [0x08]]],
+  ];
+  let quando = 200;
+  for (const gruppo of raffiche_finte) {
+    for (const m of gruppo) setTimeout(() => finto(m[0], m[1], m[2]), quando += 40);
+    quando += PAUSA_RAFFICA + 400;                 // pausa fra una raffica e l'altra
+  }
+  setTimeout(() => riga('log', 'fine della dimostrazione — ricarica senza ?demo'), quando);
+}
 </script>
 </body>
 </html>
