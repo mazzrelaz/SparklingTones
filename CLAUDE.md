@@ -920,13 +920,35 @@ pannello. Registra regolare tutte e due le volte, nessun click. E il dato che co
 **in nessuna prova `02` ha mai prodotto un `0x0375` di ritorno** — solo `04` lo produce.
 `02` è confermato e buttato via, punto, in ogni contesto provato.
 
-**Resta un solo tentativo sistematico: i valori che nell'elenco non ci sono.** L'enum di
-Ignitron va `02, 04, 05 … 0e`: **`01` e `03` mancano**, e un buco proprio fra «conteggio»
-e «registra» è dove starebbe il comando che significa *«è stato premuto REC/DUB»* invece
-di *«entra in registrazione»*. Nella sonda ci sono i pulsanti per `01`, `03`, `0f`, `10`.
-Se anche quelli non danno niente, la conclusione onesta è che il click non è raggiungibile
-coi comandi che conosciamo, e per il pedale vuol dire che il conteggio se lo deve fare da
-sé — il bpm ce l'ha, glielo dicono `0x0363` e `0x0376`.
+**Anche `01`, `03`, `0f` e `10` non fanno niente** — i buchi dell'enum di Ignitron e i due
+valori subito oltre la sua fine. Provati il 13 agosto 2026, nessun effetto.
+
+#### Conclusione sul click: non è raggiungibile, e la caccia è chiusa
+
+**Tutto quello che è stato provato e ha fallito**, così non si ripercorre:
+`02` da solo; `02` col byte `0x00` finale; `0x0176` scritto da noi e poi `04`; `0x0176`
+e poi `02`; `02`+`04` attaccati (56 ms); `02`+`04` a 1,8 s di distanza; i valori fuori
+elenco `01`, `03`, `0f`, `10`. Sette forme, nessun click.
+
+**Il fatto che regge tutto: `02` non è un comando.** In nessuna delle prove ha mai
+prodotto un `0x0375` di ritorno, mentre `04` lo produce sempre entro 40 ms. Riceve l'ack
+e viene buttato via. Quindi il conteggio non si comanda: è una fase interna che l'ampli
+attraversa quando **il suo tasto** viene premuto, e `02` è il modo in cui lo *racconta*,
+non il modo in cui lo si chiede.
+
+**Non è una perdita grave, ed è importante non ricordarselo peggio di com'è.** Dal pedale
+funziona tutto il resto: registrare, chiudere, suonare, sovraincidere, annullare,
+cancellare, e sapere a che punto sta il loop (`0x0377`). Manca la **battuta di conteggio
+col click**, che il pedale può farsi da sé — il bpm glielo dicono `0x0363` e `0x0376`, e
+un pedale con un led o un buzzer conta da solo. Il suono del click dell'ampli no, quello
+resta suo.
+
+**Se un giorno la si volesse riaprire, il primo passo non è una sonda ma una domanda:
+l'app ufficiale ce l'ha, un tasto che avvia il looper col conteggio?** Se sì, un comando
+esiste e lo snoop log HCI di Android lo trova (è la strada 2 mai usata). Se anche l'app
+fa partire il conteggio solo dal pannello, non c'è niente da cercare e questo capitolo
+è chiuso per sempre. È una verifica da mezzo minuto e va fatta **prima** di qualsiasi
+altra cattura.
 
 **Il prefisso `0xcc` sul bpm è confermato dai due lati**: a 133 il campo è `cc 85`, a 120
 è `78` nudo. Sotto 128 il fixint basta, sopra serve il prefisso — esattamente la regola
