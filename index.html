@@ -74,7 +74,12 @@
   button.icon.on { color:var(--gold); }
   button.piccolo { font-size:0.76rem; padding:5px 9px; }
   button.pericolo { background:#3a2020; color:var(--rosso); }
-  #btnVista { background:none; color:var(--accent); padding:8px 4px; }
+  /* Il passaggio fra le due viste è il tasto che si preme più spesso di tutti,
+     e in mano, spesso al buio: è grosso apposta. Lo stile resta quello — solo
+     l'accento su fondo trasparente — cambia la stazza. */
+  #btnVista { background:none; color:var(--accent); padding:10px 12px;
+              font-size:1.06rem; font-weight:700; letter-spacing:0.01em;
+              border:1px solid var(--accent); border-radius:9px; }
 
   input[type=text], input[type=search], select, textarea {
     background:#17181c; border:1px solid #2e3138; color:var(--text);
@@ -191,9 +196,21 @@
   .slot.a { color:#ff9b9b; border-color:#4a2a2a; }
   .slot.b { color:#9be0a8; border-color:#2a4a32; }
 
-  .tags { display:flex; gap:5px; flex-wrap:wrap; padding:0 12px 9px 12px; }
-  .tag { background:#1e2025; color:#b6bbc3; font-size:0.71rem; padding:2px 8px;
-         border-radius:9px; cursor:pointer; }
+  /* ---- la riga di libreria è **solo il nome** -------------------------
+     Scelta dell'utente, il 14 agosto 2026: nella libreria si scorre per
+     cercare un suono che si conosce già, e per riconoscerlo basta il nome.
+     La catena a pastiglie e le categorie raddoppiavano l'altezza di ogni
+     riga senza aiutare a scorrere — restano nel dettaglio, dove si va
+     quando quel preset lo si vuole davvero guardare. Il colore a sinistra
+     resta: è l'unica cosa che si legge senza leggere. */
+  #listaLibreria .head { padding:5px 12px; gap:8px; }
+  #listaLibreria .name { font-size:1.02rem; }
+  #listaLibreria .via  { width:26px; height:26px; font-size:0.64rem; }
+  #listaLibreria .row  { margin-bottom:5px; }
+
+  /* `.tags`/`.tag` erano le categorie sotto il nome nella riga di libreria.
+     Tolte insieme alla catena il 14 agosto 2026: le categorie si vedono e si
+     cambiano dal dettaglio, e si usano per filtrare dalle pastiglie in alto. */
   .tag:hover { background:#2e323a; color:var(--text); }
   .tag.attiva { background:var(--accent); color:#fff; }
 
@@ -425,6 +442,12 @@
   </div>
   <div class="cerca solo-preset">
     <input type="search" id="search" placeholder="cerca un preset…">
+    <select id="ordina" title="come ordinare la libreria">
+      <option value="nome">nome</option>
+      <option value="aggiunto">aggiunti di recente</option>
+      <option value="modificato">modificati di recente</option>
+      <option value="famiglia">famiglia di suono</option>
+    </select>
   </div>
   <div class="pastiglie solo-preset" id="filtriCategoria"></div>
 </header>
@@ -675,7 +698,7 @@ let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic
 // Niente preferiti: tolti su richiesta dell'utente. Il campo `favorite` resta
 // nei record e nello store — cancellarlo butterebbe via delle scelte già
 // fatte — ma non si vede e non filtra più niente.
-const vista = { cerca: '', categoria: '', aperto: null };
+const vista = { cerca: '', categoria: '', aperto: null, ordine: 'nome' };
 const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false };
 
 /** Il banco fisso non è salvato da nessuna parte: è quello che c'è sull'ampli. */
@@ -688,9 +711,43 @@ async function ricarica() {
   banchi    = await store.getBanks();
   nomiParam = await store.getParamNames();
   famiglie  = await store.getFamiglie();
+  vista.ordine = await store.getSetting('ordineLibreria', 'nome');
   if (live.banco !== BANCO_AMPLI && !banchi.some(b => b.id === live.banco)) {
     live.banco = BANCO_AMPLI;
   }
+}
+
+/**
+ * L'ordine della libreria. È una scelta dell'utente e va ricordata: cambiarla
+ * a ogni ricaricamento sarebbe un fastidio quotidiano, quindi sta fra le
+ * preferenze.
+ *
+ * A parità — stessa data, stessa famiglia, nessuna famiglia — si ricade
+ * **sempre sul nome**: due preset che il criterio non distingue devono almeno
+ * restare in un ordine stabile, altrimenti l'elenco si rimescola sotto le dita
+ * a ogni ridisegno.
+ */
+function ordinaLibreria(lista) {
+  const perNome = (a, b) =>
+    (a.name || '').localeCompare(b.name || '', 'it', { sensitivity: 'base' });
+  const copia = lista.slice();
+
+  if (vista.ordine === 'aggiunto') {
+    return copia.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0) || perNome(a, b));
+  }
+  if (vista.ordine === 'modificato') {
+    return copia.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0) || perNome(a, b));
+  }
+  if (vista.ordine === 'famiglia') {
+    // Chi non ha famiglia va in fondo, non in cima: è l'assenza di una scelta,
+    // non una categoria a sé che meriti il primo posto.
+    const rango = r => {
+      const i = famiglie.findIndex(f => f.id === r.famiglia);
+      return i === -1 ? famiglie.length : i;
+    };
+    return copia.sort((a, b) => rango(a) - rango(b) || perNome(a, b));
+  }
+  return copia.sort(perNome);
 }
 
 const perId = id => tutti.find(r => r.id === id) || null;
@@ -823,6 +880,7 @@ const filtroAttivo = () => !!(vista.cerca || vista.categoria);
 
 function disegnaPreset() {
   disegnaFiltriCategoria();
+  $('ordina').value = vista.ordine;
 
   // Gli otto slot non sono righe di libreria: sono il pannello dell'ampli,
   // due banchi da quattro con i colori dei LED, disposti come li vedi
@@ -872,7 +930,7 @@ function disegnaPreset() {
   // restituisce copie diverse dagli stessi record che stanno in `tutti`.
   const sullAmpli = new Set(suAmpli.filter(Boolean).map(r => r.id));
   const altri = tutti.filter(r => !sullAmpli.has(r.id));
-  const visibili = altri.filter(passaIlFiltro);
+  const visibili = ordinaLibreria(altri.filter(passaIlFiltro));
   visibili.forEach(record => libreria.appendChild(rigaPreset(record, null)));
 
   $('quantiLibreria').textContent = filtroAttivo()
@@ -1048,12 +1106,13 @@ function rigaPreset(record, slot) {
   const head = document.createElement('div');
   head.className = 'head';
 
+  // Solo il nome, per scelta: vedi il commento nel CSS di #listaLibreria.
   const naming = document.createElement('div');
   naming.className = 'naming';
   const nome = document.createElement('div');
   nome.className = 'name';
   nome.textContent = record.name || '(senza nome)';
-  naming.append(nome, pastiglieCatena(record));
+  naming.appendChild(nome);
 
   head.appendChild(naming);
   if (slot !== null) head.appendChild(etichettaSlot(slot));
@@ -1079,23 +1138,6 @@ function rigaPreset(record, slot) {
     disegnaPreset();
   });
   riga.appendChild(head);
-
-  if ((record.tags || []).length) {
-    const tags = document.createElement('div');
-    tags.className = 'tags';
-    for (const tag of record.tags) {
-      const chip = document.createElement('span');
-      chip.className = 'tag' + (vista.categoria === tag ? ' attiva' : '');
-      chip.textContent = tag;
-      chip.addEventListener('click', event => {
-        event.stopPropagation();
-        vista.categoria = vista.categoria === tag ? '' : tag;
-        disegnaPreset();
-      });
-      tags.appendChild(chip);
-    }
-    riga.appendChild(tags);
-  }
 
   if (vista.aperto === chiave) riga.appendChild(dettaglio(record, slot));
   return riga;
@@ -2345,6 +2387,12 @@ $('btnLive').addEventListener('click', async () => {
 $('search').addEventListener('input', event => {
   vista.cerca = event.target.value;
   disegnaPreset();
+});
+
+$('ordina').addEventListener('change', async event => {
+  vista.ordine = event.target.value;
+  disegnaPreset();                       // prima si vede, poi si salva
+  await store.setSetting('ordineLibreria', vista.ordine);
 });
 
 $('btnExport').addEventListener('click', async () => {
