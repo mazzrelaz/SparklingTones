@@ -983,9 +983,22 @@ Quindi non è il comando a essere sbagliato — **è il contesto**, e il log dic
 (`01 fe 00 00 53 fe <len> 00 …`) e spezza in ATT da 20, ma manda `05` e `09` nello stesso
 identico modo e quelli a noi funzionano nudi. Quindi l'involucro non discrimina.
 
-**La prossima prova è una sola e costa dieci minuti**: interrogare `0x0278`, `0x0275`,
-`0x0276` e *subito dopo* mandare `0x0175` con `02`. Se non basta, si prova a rigiocare la
-license key catturata. Non serve altro snoop log.
+**Le interrogazioni prima non bastano** (`captures/2026-08-14-looper-contesto.json`):
+mandati `0x0278`, `0x0275`, `0x0276` — tutti e tre con risposta regolare — e 2,3 s dopo
+`0x0175` con `02`: ack e nessun effetto. L'ipotesi 2 è caduta.
+
+**La prova sulla license key invece non è valida, ed è un difetto nostro.** L'abbiamo
+mandata in **una write sola da 109 byte**, e l'ampli **non ha risposto nemmeno l'ack
+`0x0470`** — mentre all'app risponde entro 150 ms. Non è un rifiuto della chiave: è il
+messaggio che non è mai arrivato.
+
+**Da qui la scoperta che vale oltre il looper: le write BLE lunghe vanno spezzate.**
+L'app ufficiale manda ogni messaggio in **write ATT da 20 byte**, e l'ampli riassembla da
+sé cercando `f0` … `f7` — esattamente come facciamo noi in ricezione. Non è la stessa cosa
+dei chunk di `0x0101`: lì si spezza il *messaggio*, qui il messaggio resta uno e si spezza
+solo la scrittura. `transport.sendSpezzato(comando, 20)` fa questo, ed è il modo di
+mandare qualsiasi cosa più lunga dei ~44 byte verificati senza che sparisca in silenzio.
+Spiega anche perché a suo tempo i messaggi lunghi sembravano ignorati.
 
 **Da qui in avanti indovinare non serve più.** Sedici valori provati su `0x0175` dicono
 che il comando sta altrove: un altro sub-comando, o `0x0175` con un payload che non è un
