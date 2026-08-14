@@ -260,11 +260,32 @@ LED del suo banco, il nome e — al posto della catena intera — **l'ampli e il
 sono quello che si cerca. Il dettaglio di uno slot si apre **a tutta larghezza sotto la
 griglia**: dentro una cella sfonderebbe la colonna.
 
-I preset in libreria sono schede con la catena a **pastiglie coi nomi leggibili**, dove i
-blocchi spenti si vedono spenti invece di sparire (fa parte di com'è fatto quel suono), e
-il riverbero porta il **tipo** invece della parola «Riverbero», che è sempre la stessa e
-non distingue niente. Il tasto ▶ per provare un preset è sulla scheda: era l'azione più
-frequente e stava sepolta nel dettaglio.
+**La riga di libreria è solo il nome**, dal 14 agosto 2026 e su richiesta. Prima portava
+anche la catena a pastiglie e le categorie, che insieme raddoppiavano l'altezza di ogni
+riga: nella libreria però si **scorre per cercare un suono che si conosce già**, e per
+riconoscerlo basta il nome. Restano solo le tre cose che si leggono senza leggere — la
+**barra del colore della famiglia** a sinistra, il **nome** (un filo più grande) e il
+**▶** a destra. Catena e categorie non sono sparite: stanno nel dettaglio, dove si va
+quando quel preset lo si vuole davvero guardare, e le categorie filtrano dalle pastiglie
+in alto.
+
+Le regole compatte sono **agganciate a `#listaLibreria`** e non a `.row`/`.head`, che
+sono condivise col dettaglio e col resto: cambiarle globalmente rimpicciolirebbe cose che
+devono restare grandi.
+
+`pastiglieCatena` **non si tocca**: serve ancora al dettaglio degli slot dell'ampli, dove
+la catena continua ad avere senso.
+
+**La libreria si ordina**, ed è una preferenza salvata (`ordineLibreria`): per nome, per
+quando è stato aggiunto, per quando è stato modificato, o per famiglia di suono. A parità
+si ricade **sempre sul nome**, altrimenti due preset che il criterio non distingue si
+rimescolano sotto le dita a ogni ridisegno. Chi non ha famiglia va **in fondo**: è
+l'assenza di una scelta, non una categoria che meriti il primo posto. Le date c'erano già
+nei record (`createdAt`, `updatedAt`), non è stato aggiunto niente allo store.
+
+**Il tasto che porta all'altra vista è grosso**, con un bordo dell'accento: è quello che
+si preme più spesso di tutti, spesso in mano e al buio. Lo stile resta quello — accento su
+fondo trasparente — cambia solo la stazza.
 
 Nel dettaglio la catena è **una riga sola di nomi separati da «-», senza valori**: lì si
 guarda *che catena è*, e una colonna di numeri a due decimali non la legge nessuno — le
