@@ -284,6 +284,16 @@ function inviaSpezzato(cmd, sub, data, etichetta) {
        .catch(err => riga('err', 'errore invio: ' + err.message));
 }
 
+/* Come `invia` ma **non tocca mai il payload**: niente byte `0x00` finale anche se
+   la spunta è messa. Serve quando si rigioca una sequenza catturata, dove i byte
+   devono essere esattamente quelli dell'app e non quelli che vorremmo noi. */
+function inviaGrezzo(cmd, sub, data, etichetta) {
+  riga('tx', `TX 0x${hex(cmd)}${hex(sub)} ${etichetta} — payload ${hexList(data) || '(vuoto)'}`,
+       { cmd, sub, data: data.slice() });
+  spark.send({ cmd, sub, data: data.slice() })
+       .catch(err => riga('err', 'errore invio: ' + err.message));
+}
+
 function invia(cmd, sub, data, etichetta) {
   const payload = data.slice();
   if (cmd === 0x01 && $('conZero').checked) payload.push(0x00);
@@ -362,7 +372,56 @@ function interrogaLooper(poi) {
   setTimeout(poi, 2400);
 }
 
+/* L'avvio dell'app ufficiale, ricavato dallo snoop log del 14 agosto 2026 e
+   spacchettato dalla codifica 7/8 bit: `t` sono i millisecondi dal primo messaggio,
+   nell'ordine e con le distanze vere. Si ferma al conteggio.
+   Serve per **riprodurre prima e minimizzare dopo**: invece di indovinare quale
+   pezzo del contesto manchi, si rigioca tutto e poi si toglie finché non si rompe. */
+const AVVIO_APP = [
+  { t:     0, cmd:0x02, sub:0x2f, d:[] },
+  { t:    60, cmd:0x01, sub:0x70, d:LICENSE_KEY },
+  { t:   221, cmd:0x02, sub:0x2f, d:[] },
+  { t:   310, cmd:0x02, sub:0x23, d:[] },
+  { t:   405, cmd:0x02, sub:0x11, d:[] },
+  { t:   488, cmd:0x02, sub:0x23, d:[] },
+  { t:   708, cmd:0x02, sub:0x2b, d:[0x00] },
+  { t:   802, cmd:0x02, sub:0x01, d:[0x00,0x02] },
+  { t:  1734, cmd:0x02, sub:0x01, d:[0x00,0x05] },
+  { t:  2554, cmd:0x02, sub:0x01, d:[0x00,0x07] },
+  { t:  3369, cmd:0x02, sub:0x10, d:[] },
+  { t:  3457, cmd:0x02, sub:0x23, d:[] },
+  { t:  3575, cmd:0x02, sub:0x11, d:[] },
+  { t:  3668, cmd:0x02, sub:0x2f, d:[] },
+  { t:  3808, cmd:0x02, sub:0x96, d:[] },
+  { t:  3879, cmd:0x02, sub:0x10, d:[] },
+  { t:  3900, cmd:0x02, sub:0x71, d:[] },
+  { t:  3905, cmd:0x02, sub:0x71, d:[] },
+  { t:  3933, cmd:0x02, sub:0x01, d:[0x01,0x00] },
+  { t:  5897, cmd:0x02, sub:0x65, d:[] },
+  { t:  9223, cmd:0x02, sub:0x78, d:[] },
+  { t:  9352, cmd:0x02, sub:0x75, d:[] },
+  { t:  9354, cmd:0x02, sub:0x76, d:[] },
+  { t: 11749, cmd:0x01, sub:0x75, d:[0x02] },
+];
+
+function rigiocaAvvio(conChiave) {
+  const passi = AVVIO_APP.filter(p => conChiave || p.sub !== 0x70);
+  riga('mk', `———— rigioco l'avvio dell'app${conChiave ? '' : ' (senza license key)'}: ` +
+             `${passi.length} messaggi in ${(AVVIO_APP[AVVIO_APP.length-1].t/1000).toFixed(1)}s ————`);
+  for (const p of passi) {
+    setTimeout(() => {
+      const etichetta = 'avvio 0x' + hex(p.cmd) + hex(p.sub);
+      if (p.d.length > 44) inviaSpezzato(p.cmd, p.sub, p.d, etichetta);
+      else                 inviaGrezzo(p.cmd, p.sub, p.d, etichetta);
+    }, p.t);
+  }
+}
+
 const PROVE = [
+  { n: '④ rigioca l\'avvio dell\'app', d: 'tutti i 24 messaggi, con la chiave — 12 s',
+    f: () => rigiocaAvvio(true) },
+  { n: '⑤ rigioca l\'avvio senza la chiave', d: 'uguale ma senza 0x0170, che tanto e\' rifiutata',
+    f: () => rigiocaAvvio(false) },
   { n: '① interroga ▸ poi COUNTIN', d: '0x0278 0x0275 0x0276, poi 0x0175 02',
     f: () => interrogaLooper(() => invia(0x01, 0x75, [0x02], 'COUNTIN')) },
   { n: '② license key ▸ interroga ▸ COUNTIN', d: '0x0170 spezzata in write da 20, poi come sopra',
