@@ -109,6 +109,25 @@ la pagina non abbia prodotto niente. Va redirezionato su file:
 `Start-Process … -RedirectStandardOutput $file -NoNewWindow -Wait`, poi
 `[IO.File]::ReadAllText($file)`. Vale sia per `--dump-dom` sia per `--screenshot`.
 
+**L'ESP32 si programma e si legge dalla mia shell**, senza passare dall'IDE: l'Arduino IDE
+porta con sé `arduino-cli` in
+`%LOCALAPPDATA%\Programs\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe`,
+e la seriale si legge con `System.IO.Ports.SerialPort` da PowerShell. Tre trappole pagate
+il 14 agosto 2026:
+
+- **`CDCOnBoot=default` vuol dire *Disabled*, ed è il valore di fabbrica.** Con quella la
+  `Serial` esce dai pin 20/21 e il monitor sull'USB resta muto: sembra che lo sketch non
+  parta. Va compilato con `--fqbn esp32:esp32:esp32c3:CDCOnBoot=cdc`. Il segno che
+  l'impostazione **non** è cambiata è `No changed sectors found` nel log di caricamento:
+  se i flag fossero cambiati il binario sarebbe diverso.
+- **Aprire la porta seriale resetta il chip**, perché sull'USB nativo del C3 DTR/RTS
+  pilotano reset e boot. `DtrEnable=$false, RtsEnable=$false` per leggere senza toccare
+  niente; con `RTS=$true` il chip riparte **in download mode** e non esegue lo sketch.
+- **Da download mode non si esce via software.** Se il chip resta a `waiting for download`,
+  nemmeno `esptool --after hard-reset` lo tira fuori: serve staccare e riattaccare il cavo
+  a mano. Il messaggio che distingue i due casi è `boot:0x5 (DOWNLOAD)` contro
+  `boot:0xd (SPI_FAST_FLASH_BOOT)`.
+
 **Il riquadro di anteprima non serve a provare questo progetto.** Carica i `file://` come
 `data:`, quindi i `<script src="../src/…">` non partono e si vede solo il guscio; e
 `localhost` è bloccato da policy, quindi nemmeno `serve.ps1` lo raggiunge. Per vedere una
@@ -384,11 +403,8 @@ tap tempo) la via è un **MCP23017**, sedici ingressi sugli stessi due fili dell
 
 ### Da misurare, in ordine
 
-1. **L'intervallo di connessione BLE.** Un preset sono 16 chunk che aspettano l'ack uno per
-   uno: 624 byte, che come banda sono niente. Quindi il secondo è quasi certamente
-   **sedici round-trip**, cioè l'intervallo di connessione. Web Bluetooth non lo lascia
-   toccare, **NimBLE sull'ESP32 sì**: a 30 ms sono ~960 ms (torna col misurato), chiedendo
-   7,5 ms sarebbero ~240. Se è così il pedale è quattro volte più svelto del telefono.
+1. ~~L'intervallo di connessione BLE.~~ **Misurato il 14 agosto 2026 sull'hardware, vedi
+   sotto: confermato, e il pedale è quasi due volte più svelto del telefono.**
 2. **Se si può abortire un trasferimento a metà** per far vincere l'ultima pressione.
    Sul buffer `0x7f` un mezzo preset è innocuo, ma che l'ampli scarti il troncone quando
    arriva un seq nuovo **non è verificato**. Finché non lo è: la pressione durante un
@@ -396,6 +412,32 @@ tap tempo) la via è un **MCP23017**, sedici ingressi sugli stessi due fili dell
 3. Una **devkit da otto euro** che si collega e cambia preset, senza saldare niente.
 4. **Lo schermo che si spegne** sul telefono ferma BLE e timer (Wake Lock API) — vale se
    si torna sul ponte via browser.
+
+### Il C3 parla con lo Spark — verificato sull'hardware il 14 agosto 2026
+
+**Un ESP32-C3 mini nudo, senza un solo pin collegato, si collega allo Spark 2 e gli cambia
+preset.** `pedale/prova-ble/`, comandato dal monitor seriale. `trovato: Spark 2 BLE
+[f0:9e:9e:10:5a:62]`, MTU 256, e ogni `0x0138` risponde `0x0438`.
+
+**L'ipotesi dell'intervallo di connessione è confermata, con i numeri:**
+
+| | giro di andata e ritorno | × 16 chunk = un preset |
+|---|---|---|
+| intervallo di sistema | **75,5 ms** | ~1,2 s — è il secondo del telefono |
+| chiesto 7,5–15 ms | **40,6 ms** | ~650 ms |
+
+Quindi il secondo **non è banda, sono sedici round-trip**, e sull'ESP32 si accorcia:
+`client->updateConnParams(min, max, 0, 400)` (unità da 1,25 ms, timeout da 10 ms).
+L'ampli però **sceglie dentro l'intervallo chiesto** e ha preso il massimo: chiedendo
+7,5–15 ha dato ~15. **Da provare: chiedere 7,5–7,5 secco**, che dovrebbe portare il giro
+verso i 20 ms e il preset verso i 350.
+
+**Il core esp32 3.x usa NimBLE sotto `BLEDevice.h`** (i tipi sono `ble_gap_conn_params`,
+non i Bluedroid `esp_ble_*`): niente da installare, e il timore sulla RAM del C3 decade —
+lo sketch BLE usa **19 KB di globali su 320**. Per questo `esp_gap_ble_api.h` non esiste e
+il metodo giusto è `BLEClient::updateConnParams`. Altri due nomi cambiati nel 3.x:
+`isAdvertisingService` (non `isAdvertisedServiceUUID`), e `onResult(BLEAdvertisedDevice)`
+per valore.
 
 ### Il simulatore — fatto il 14 agosto 2026, da provare col piede
 

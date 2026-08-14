@@ -18,8 +18,9 @@
  * Il comando 'v' fa la richiesta, 'm' misura. Si confrontano i due numeri.
  *
  * Libreria: nessuna da installare. Usa BLEDevice.h, che arriva col pacchetto
- * schede esp32. Per il firmware vero si passera' a NimBLE, che consuma molta
- * meno RAM, ma per provare meglio zero installazioni e zero motivi di fallire.
+ * schede esp32. Dal core 3.x quella libreria e' NimBLE sotto il cofano (i tipi
+ * sono ble_gap_conn_params, non i Bluedroid esp_ble_*), quindi il timore sulla
+ * RAM del C3 non si pone: ci siamo gia'.
  *
  * Scheda: ESP32C3 Dev Module. Se il monitor seriale resta muto, accendi
  * "USB CDC On Boot" nel menu Strumenti: sul C3 la seriale passa dall'USB
@@ -35,7 +36,6 @@
  */
 
 #include <BLEDevice.h>
-#include <esp_gap_ble_api.h>
 
 /* --- GATT dello Spark: service 0xFFC0, write 0xFFC1, notify 0xFFC2 ------ */
 static BLEUUID UUID_SERVIZIO((uint16_t)0xFFC0);
@@ -46,7 +46,6 @@ static BLEAdvertisedDevice* trovato    = nullptr;
 static BLEClient*           client     = nullptr;
 static BLERemoteCharacteristic* chScrittura = nullptr;
 static BLERemoteCharacteristic* chNotifiche = nullptr;
-static esp_bd_addr_t indirizzo;
 
 static uint8_t  seq       = 0x01;   // resta fra 0x01 e 0x3e
 static uint32_t rxTotali  = 0;      // quanti messaggi interi sono arrivati
@@ -161,7 +160,7 @@ static bool cambiaPreset(uint8_t slot) {
 
 class Scansione : public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice d) override {
-    if (d.haveServiceUUID() && d.isAdvertisedServiceUUID(UUID_SERVIZIO)) {
+    if (d.haveServiceUUID() && d.isAdvertisingService(UUID_SERVIZIO)) {
       Serial.printf("trovato: %s  [%s]  rssi %d\n",
                     d.getName().c_str(), d.getAddress().toString().c_str(), d.getRSSI());
       BLEDevice::getScan()->stop();
@@ -186,7 +185,6 @@ static bool collega() {
 
   client = BLEDevice::createClient();
   if (!client->connect(trovato)) { Serial.println(F("connessione fallita")); return false; }
-  memcpy(indirizzo, trovato->getAddress().getNative(), 6);
 
   BLERemoteService* servizio = client->getService(UUID_SERVIZIO);
   if (!servizio) { Serial.println(F("servizio 0xFFC0 assente")); client->disconnect(); return false; }
@@ -203,15 +201,12 @@ static bool collega() {
 
 /** L'intervallo di connessione: e' questo che decide quanto costa un preset. */
 static void chiediIntervallo(uint16_t minUnita, uint16_t maxUnita) {
-  esp_ble_conn_update_params_t p = {};
-  memcpy(p.bda, indirizzo, sizeof(esp_bd_addr_t));
-  p.min_int = minUnita;      // unita' da 1,25 ms
-  p.max_int = maxUnita;
-  p.latency = 0;
-  p.timeout = 400;           // 4 s
-  esp_ble_gap_update_conn_params(&p);
-  Serial.printf("chiesto intervallo %.2f - %.2f ms (l'ampli puo' rifiutare)\n",
-                minUnita * 1.25f, maxUnita * 1.25f);
+  if (!client || !client->isConnected()) { Serial.println(F("non connesso")); return; }
+  // unita' da 1,25 ms per gli intervalli, da 10 ms per il timeout
+  bool ok = client->updateConnParams(minUnita, maxUnita, 0, 400);
+  Serial.printf("chiesto intervallo %.2f - %.2f ms -> %s\n",
+                minUnita * 1.25f, maxUnita * 1.25f,
+                ok ? "richiesta inviata (l'ampli puo' rifiutare)" : "rifiutata subito");
 }
 
 /* ======================================================================
