@@ -216,7 +216,7 @@ static void chiediIntervallo(uint16_t minUnita, uint16_t maxUnita) {
 static void misura() {
   if (!chScrittura) { Serial.println(F("non connesso")); return; }
   Serial.println(F("dieci cambi preset, alternando A1 e A2..."));
-  uint32_t somma = 0, risposte = 0;
+  uint32_t somma = 0, risposte = 0, minimo = 0xffffffff, massimo = 0;
 
   for (int i = 0; i < 10; i++) {
     uint32_t primaRx = rxTotali;
@@ -224,7 +224,12 @@ static void misura() {
     cambiaPreset(i % 2);
     // aspetta l'ack, al massimo mezzo secondo
     while (rxTotali == primaRx && millis() - t0 < 500) delay(1);
-    if (rxTotali > primaRx) { somma += (ultimoRx - t0); risposte++; }
+    if (rxTotali > primaRx) {
+      uint32_t giro = ultimoRx - t0;
+      somma += giro; risposte++;
+      if (giro < minimo)  minimo  = giro;
+      if (giro > massimo) massimo = giro;
+    }
     delay(120);
   }
 
@@ -235,8 +240,12 @@ static void misura() {
     Serial.printf("nessuna risposta. RX totali dall'avvio: %u\n", rxTotali);
     return;
   }
-  Serial.printf("giro medio %.1f ms su %u risposte\n", (float)somma / risposte, risposte);
-  Serial.println(F("un preset intero sono ~16 di questi giri: moltiplica per sedici."));
+  Serial.printf("giro medio %.1f ms  (min %u, max %u)  su %u risposte\n",
+                (float)somma / risposte, minimo, massimo, risposte);
+  // Stima, non misura: i chunk di un preset sono 39 byte invece di 10, e
+  // l'ampli potrebbe digerirli piu' lentamente di un cambio preset. Il numero
+  // vero si avra' solo mandando un preset intero.
+  Serial.printf("stima di un preset intero (16 giri): ~%.0f ms\n", (float)somma / risposte * 16);
 }
 
 /* ====================================================================== */
@@ -245,7 +254,8 @@ static void elenco() {
   Serial.println(F(
     "\n  0..7  cambia preset sullo slot (A1..A4 = 0..3, B1..B4 = 4..7)\n"
     "  m     misura il giro di andata e ritorno\n"
-    "  v     chiedi intervallo veloce (7,5 ms)\n"
+    "  v     chiedi intervallo 7,5 ms\n"
+    "  w     chiedi intervallo 15 ms\n"
     "  s     chiedi intervallo lento (30 ms)\n"
     "  r     ricollega\n"));
 }
@@ -269,7 +279,11 @@ void loop() {
     char c = Serial.read();
     if (c >= '0' && c <= '7') cambiaPreset(c - '0');
     else if (c == 'm') misura();
-    else if (c == 'v') chiediIntervallo(6, 12);      // 7,5 - 15 ms
+    // L'ampli sceglie DENTRO l'intervallo chiesto, e prende il massimo:
+    // misurato il 14 agosto 2026, chiedendo 6-12 ha dato ~15 ms. Quindi si
+    // chiede secco, min uguale a max.
+    else if (c == 'v') chiediIntervallo(6, 6);       // 7,5 ms
+    else if (c == 'w') chiediIntervallo(12, 12);     // 15 ms
     else if (c == 's') chiediIntervallo(24, 40);     // 30 - 50 ms
     else if (c == 'r') collega();
     else if (c == '?') elenco();

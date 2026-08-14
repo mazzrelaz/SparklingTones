@@ -421,16 +421,27 @@ preset.** `pedale/prova-ble/`, comandato dal monitor seriale. `trovato: Spark 2 
 
 **L'ipotesi dell'intervallo di connessione è confermata, con i numeri:**
 
-| | giro di andata e ritorno | × 16 chunk = un preset |
+| intervallo chiesto | giro di andata e ritorno | × 16 chunk = un preset |
 |---|---|---|
-| intervallo di sistema | **75,5 ms** | ~1,2 s — è il secondo del telefono |
-| chiesto 7,5–15 ms | **40,6 ms** | ~650 ms |
+| di sistema | 75,5 ms | ~1,2 s — è il secondo del telefono |
+| 30–50 ms | 88,8 ms (79–129) | ~1420 ms |
+| 15 ms secco | 37,5 ms (24–44) | ~600 ms |
+| **7,5 ms secco** | **24,8 ms (21–29)** | **~400 ms** |
 
 Quindi il secondo **non è banda, sono sedici round-trip**, e sull'ESP32 si accorcia:
 `client->updateConnParams(min, max, 0, 400)` (unità da 1,25 ms, timeout da 10 ms).
-L'ampli però **sceglie dentro l'intervallo chiesto** e ha preso il massimo: chiedendo
-7,5–15 ha dato ~15. **Da provare: chiedere 7,5–7,5 secco**, che dovrebbe portare il giro
-verso i 20 ms e il preset verso i 350.
+Web Bluetooth non lo lascia toccare, ed è tutta la differenza. **Il pedale è tre volte più
+svelto del telefono.**
+
+Due cose imparate misurando, che valgono la prossima volta:
+
+- **L'ampli sceglie dentro l'intervallo chiesto e prende il massimo**: `6-12` ha dato ~15
+  ms, non 7,5. Si chiede **secco**, min uguale a max.
+- **La dispersione è il termometro**: a 30 ms i giri vanno da 79 a 129, a 7,5 ms da 21 a
+  29. Se la forbice resta larga la richiesta non è stata accolta, anche se la media scende.
+
+**È una stima, non una misura**, e va rifatta mandando un preset vero: i chunk sono da 39
+byte invece di 10 e l'ampli potrebbe digerirli più lentamente di un cambio preset.
 
 **Il core esp32 3.x usa NimBLE sotto `BLEDevice.h`** (i tipi sono `ble_gap_conn_params`,
 non i Bluedroid `esp_ble_*`): niente da installare, e il timore sulla RAM del C3 decade —
