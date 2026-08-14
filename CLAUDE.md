@@ -451,7 +451,22 @@ Due cose imparate misurando, che valgono la prossima volta:
 | di sistema | **1246 ms** |
 | 7,5 ms secco | **326 ms**, e 327 alla ripetizione |
 
-**Il pedale carica un preset in un terzo di secondo, quasi quattro volte il telefono.**
+**A regime è ancora meglio: 178–215 ms**, misurato su cinque preset di fila. Il primo dopo
+la connessione è più lento (~370 ms) perché l'intervallo corto entra in vigore con un po'
+di ritardo. Quindi **il pedale carica un preset in un quinto di secondo**, contro il
+secondo abbondante del telefono.
+
+**Il tempo dipende da quanto è lungo il preset**, non è fisso: ~25 ms per chunk, e i chunk
+vanno da 15 a 18 nel banco di prova.
+
+**Difetto trovato col dito, non ragionando: durante il trasferimento il firmware è in un
+ciclo di attesa e non legge il tasto**, quindi ogni pressione in quei ~200–400 ms si perde
+e da fuori sembra che il pedale abbia smesso di rispondere. Costava tre pressioni svelte
+per vederlo. Il tasto va letto **anche dentro l'attesa degli ack**, e la pressione si
+accoda: **vince l'ultima**, premere tre volte in fretta carica il terzo preset e non tutti
+e tre in fila. Conferma la scelta già fatta nel simulatore («si accoda, non annulla»), ed
+è la ragione per cui il pedale vero non deve avere attese bloccanti che non guardino gli
+ingressi.
 
 **E l'architettura è verificata sull'hardware, non solo ragionata.** Il firmware ha mandato
 frame **preserializzati dall'app** (`tools/frames-pedale.html` → `preset_frames.h`)

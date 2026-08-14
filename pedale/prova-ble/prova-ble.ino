@@ -75,6 +75,19 @@ static const uint32_t ANTIRIMBALZO = 25;   // ms
 static bool     tastoGiu    = false;
 static uint32_t tastoCambio = 0;
 static uint8_t  corrente    = 0;           // quale preset del banco sta suonando
+static uint8_t  bersaglio   = 0;           // l'ultimo chiesto, anche se non ancora arrivato
+
+/* Un trasferimento dura ~400 ms, e durante quei 400 ms il firmware sta in un
+ * ciclo di attesa. Se il tasto lo si legge solo dal loop, **ogni pressione in
+ * quella finestra si perde**, e da fuori sembra che il pedale abbia smesso di
+ * rispondere: e' il difetto che si e' visto alla prima prova col dito.
+ * Quindi il tasto si legge anche dentro l'attesa, e la pressione si accoda.
+ * Vince l'ultima: premere tre volte in fretta carica il terzo preset, non
+ * tutti e tre in fila. */
+static bool    inTrasferimento = false;
+static int8_t  inCoda          = -1;
+
+static void leggiTasto();                  // usata dentro l'attesa degli ack
 
 static bool silenzioso = false;   // durante un preset i 15 ack sono rumore
 
@@ -252,6 +265,7 @@ static void mandaPreset(uint8_t n) {
   const uint8_t mio    = seq;
   if (++seq > 0x3e) seq = 0x01;
 
+  inTrasferimento = true;
   silenzioso = true;
   const uint32_t t0 = millis();
   uint32_t ack = 0, persi = 0;
@@ -265,13 +279,14 @@ static void mandaPreset(uint8_t n) {
     const uint32_t prima = rxTotali;
     chScrittura->writeValue(frame, len, false);
     const uint32_t t = millis();
-    while (rxTotali == prima && millis() - t < 500) delay(1);
+    while (rxTotali == prima && millis() - t < 500) { leggiTasto(); delay(1); }
     // Un ack mancante non e' motivo di fermarsi: anche il firmware dell'ampli
     // si sblocca da solo dopo mezzo secondo, e interrompersi lascerebbe il
     // preset scritto a meta'.
     if (rxTotali > prima) ack++; else persi++;
   }
   silenzioso = false;
+  inTrasferimento = false;
 
   cambiaPreset(0x7f);                    // fa suonare il buffer software
   const uint32_t tTotale = millis() - t0;
@@ -280,6 +295,24 @@ static void mandaPreset(uint8_t n) {
                 n + 1, BANCO_NOMI[n], tTotale, ack, quanti,
                 persi ? "  (ATTENZIONE: qualche chunk non confermato)" : "");
   corrente = n;
+}
+
+/** Antirimbalzo: si agisce alla pressione, non al rilascio. */
+static void leggiTasto() {
+  const bool giu = (digitalRead(PIN_TASTO) == LOW);
+  if (giu == tastoGiu) return;
+  if (millis() - tastoCambio < ANTIRIMBALZO) return;
+  tastoCambio = millis();
+  tastoGiu = giu;
+  if (!giu) return;
+
+  bersaglio = (bersaglio + 1) % BANCO_QUANTI;
+  if (inTrasferimento) {
+    inCoda = bersaglio;                    // vince l'ultima, si parte appena libero
+    Serial.printf("  -> in coda: %s\n", BANCO_NOMI[bersaglio]);
+  } else {
+    inCoda = bersaglio;                    // lo raccoglie il loop, non ricorsione
+  }
 }
 
 /* ======================================================================
@@ -345,16 +378,6 @@ void setup() {
   collega();
 }
 
-/** Antirimbalzo: si agisce alla pressione, non al rilascio. */
-static void leggiTasto() {
-  const bool giu = (digitalRead(PIN_TASTO) == LOW);
-  if (giu == tastoGiu) return;
-  if (millis() - tastoCambio < ANTIRIMBALZO) return;
-  tastoCambio = millis();
-  tastoGiu = giu;
-  if (giu) mandaPreset((corrente + 1) % BANCO_QUANTI);
-}
-
 /* Un pedale non si arrende. Se si accende prima dell'ampli, o se la
  * connessione cade a meta' concerto, deve riprovare da solo: senza questo
  * il pedale resta muto finche' qualcuno non lo riavvia, che sul palco non
@@ -373,11 +396,16 @@ void loop() {
   }
 
   leggiTasto();
+  if (inCoda >= 0 && !inTrasferimento) {
+    const uint8_t n = (uint8_t)inCoda;
+    inCoda = -1;
+    mandaPreset(n);
+  }
 
   while (Serial.available()) {
     char c = Serial.read();
     if (c >= '0' && c <= '7') cambiaPreset(c - '0');
-    else if (c == 'p') mandaPreset((corrente + 1) % BANCO_QUANTI);
+    else if (c == 'p') { bersaglio = (bersaglio + 1) % BANCO_QUANTI; inCoda = bersaglio; }
     else if (c == 'e') { Serial.println(F("il banco nel firmware:"));
                          for (uint8_t i = 0; i < BANCO_QUANTI; i++)
                            Serial.printf("  %u  %s%s\n", i + 1, BANCO_NOMI[i],
