@@ -417,7 +417,23 @@ function rigiocaAvvio(conChiave) {
   }
 }
 
+/* L'ultima differenza strutturale rimasta fra noi e l'app: **l'intestazione di
+   blocco**. `wrapBlock` la produce già identica (`01 fe 00 00 53 fe <len> 00…`), ma
+   sul looper non l'abbiamo mai usata. L'app avvolge *e* spezza: 16 byte di
+   intestazione più i primi 4 del messaggio nella prima write da 20, il resto nella
+   seconda. Qui si riproduce esattamente quello. */
+function inviaComeLApp(cmd, sub, data, etichetta) {
+  riga('tx', `TX 0x${hex(cmd)}${hex(sub)} ${etichetta} — con intestazione di blocco, ` +
+             `spezzato in write da 20`, { cmd, sub, data: data.slice() });
+  spark.sendSpezzato({ cmd, sub, data: data.slice() }, 20, undefined, true)
+       .catch(err => riga('err', 'errore invio: ' + err.message));
+}
+
 const PROVE = [
+  { n: '⑥ COUNTIN come lo manda l\'app', d: 'intestazione di blocco + write da 20',
+    f: () => inviaComeLApp(0x01, 0x75, [0x02], 'COUNTIN') },
+  { n: '⑦ REC come lo manda l\'app', d: 'idem con 04, per confronto',
+    f: () => inviaComeLApp(0x01, 0x75, [0x04], 'REC') },
   { n: '④ rigioca l\'avvio dell\'app', d: 'tutti i 24 messaggi, con la chiave — 12 s',
     f: () => rigiocaAvvio(true) },
   { n: '⑤ rigioca l\'avvio senza la chiave', d: 'uguale ma senza 0x0170, che tanto e\' rifiutata',

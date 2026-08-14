@@ -157,10 +157,10 @@ window.SparkTransport = (function () {
      *
      * @returns il sequence number usato
      */
-    sendSpezzato(command, max, forcedSeq) {
+    sendSpezzato(command, max, forcedSeq, withBlockHeader) {
       if (!this.writeChar) return Promise.reject(new Error('non connesso'));
       const seq   = forcedSeq === undefined ? this._nextSeq() : forcedSeq;
-      const bytes = new Uint8Array(Spark.encode(command, seq, false));
+      const bytes = new Uint8Array(Spark.encode(command, seq, !!withBlockHeader));
       const passo = Math.max(1, max || 20);
 
       this.sendChain = this.sendChain.then(async () => {

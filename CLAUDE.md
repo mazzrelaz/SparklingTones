@@ -979,9 +979,23 @@ Quindi non è il comando a essere sbagliato — **è il contesto**, e il log dic
 3. Tutta la sequenza di avvio: `0x022f`, `0x0223`, `0x0211`, `0x022b`, tre letture di
    preset, `0x0210`, `0x0296`, `0x0271` due volte, `0x0201` sullo stato live, `0x0265`.
 
-**Non è l'intestazione di blocco.** L'app avvolge ogni scrittura in 16 byte
-(`01 fe 00 00 53 fe <len> 00 …`) e spezza in ATT da 20, ma manda `05` e `09` nello stesso
-identico modo e quelli a noi funzionano nudi. Quindi l'involucro non discrimina.
+**Il contesto è escluso** (`captures/2026-08-14-looper-rigioco-avvio.json`). Rigiocata
+tutta la sequenza di avvio dell'app — ventiquattro messaggi, nell'ordine e con le
+distanze vere — due volte, con e senza license key. **Ogni messaggio ha ricevuto la
+risposta giusta**, quindi la riproduzione è fedele; e tutte e due le volte `0x0175` con
+`02` ha ricevuto l'ack e non ha fatto niente. Non è lo stato della sessione.
+
+**La license key rigiocata viene ricevuta e rifiutata**: `0x0470` con payload `fe`, cioè
+**−2**, mentre all'app risponde `00 00`. Non è replicabile — è legata alla sessione. Ma
+almeno adesso arriva: prima, mandata in una write sola, non riceveva nemmeno l'ack.
+
+**Resta una sola differenza strutturale: l'intestazione di blocco.** L'app avvolge ogni
+scrittura in 16 byte (`01 fe 00 00 53 fe <len> 00 …`) e spezza in ATT da 20 — per un
+comando corto vuol dire 16 byte di intestazione più i primi 4 del messaggio nella prima
+write, il resto nella seconda. `wrapBlock` in `spark-protocol.js:231` produce **già quei
+byte identici**, e `send`/`sendSpezzato` sanno metterla, ma **sul looper non l'abbiamo
+mai usata**. Era stata archiviata come indifferente perché uno sweep su `0x0201` dava lo
+stesso esito con e senza — vero per le letture, mai provato sui comandi del looper.
 
 **Le interrogazioni prima non bastano** (`captures/2026-08-14-looper-contesto.json`):
 mandati `0x0278`, `0x0275`, `0x0276` — tutti e tre con risposta regolare — e 2,3 s dopo
