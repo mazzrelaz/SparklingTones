@@ -273,6 +273,18 @@ Le regole compatte sono **agganciate a `#listaLibreria`** e non a `.row`/`.head`
 sono condivise col dettaglio e col resto: cambiarle globalmente rimpicciolirebbe cose che
 devono restare grandi.
 
+**L'altezza giusta è ~46 px, non la metà secca.** Al primo colpo era scesa a 36 e l'utente
+l'ha rivista: troppo stretta, e il ▶ rimpicciolito a 26 non si prendeva col pollice.
+Rialzata del 30% — imbottitura da 5 a 9, tondo di nuovo a 28. Lo spazio guadagnato
+togliendo catena e categorie va speso lì, non incassato tutto.
+
+**Le azioni del dettaglio sono una riga per azione**, non un `flex-wrap` unico. Prima
+andavano a capo dove capitava e la tendina finiva staccata dal tasto a cui appartiene: si
+leggeva «Attiva, Regola, tendina» e poi «Invia a preset HW» da solo, che non vuol dire
+niente. Adesso: provare e regolare insieme, poi lo slot dell'ampli, poi il banco live, e
+**Elimina da sola** perché è l'unica che non si torna indietro. In ogni riga **il tasto
+sta prima della sua tendina**: si legge cosa si sta per fare e poi dove.
+
 `pastiglieCatena` **non si tocca**: serve ancora al dettaglio degli slot dell'ampli, dove
 la catena continua ad avere senso.
 
