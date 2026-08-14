@@ -329,7 +329,30 @@ const IMPOSTAZIONI = [0xcc, 0x85, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0xcd, 0xea, 0x60
    10, che stanno subito oltre la fine dell'elenco. */
 const NON_ELENCATI = [0x01, 0x03, 0x0f, 0x10];
 
+/* La license key `0x0170` catturata dallo snoop log dell'app ufficiale il 14 agosto
+   2026: 64 byte veri, scritti come 64 interi msgpack (da cui i prefissi `cc` sopra
+   il 127), per 89 byte di payload. **Il payload cambia da sessione a sessione**, quindi
+   rigiocarlo tale e quale può benissimo non bastare — ma costa un pulsante scoprirlo. */
+const LICENSE_KEY = [
+];
+
+/* Le tre interrogazioni che l'app fa **subito prima** del conteggio, nell'ordine e con
+   le distanze che ha nel log: 0x0278, poi 0x0275 e 0x0276 quasi insieme, e 2,3 s dopo
+   il comando. Noi quelle interrogazioni le avevamo fatte solo dopo. */
+function interrogaLooper(poi) {
+  invia(0x02, 0x78, [], 'stato looper');
+  setTimeout(() => invia(0x02, 0x75, [], 'stato registrazione'), 130);
+  setTimeout(() => invia(0x02, 0x76, [], 'configurazione'), 135);
+  setTimeout(poi, 2400);
+}
+
 const PROVE = [
+  { n: '① interroga ▸ poi COUNTIN', d: '0x0278 0x0275 0x0276, poi 0x0175 02',
+    f: () => interrogaLooper(() => invia(0x01, 0x75, [0x02], 'COUNTIN')) },
+  { n: '② license key ▸ interroga ▸ COUNTIN', d: '0x0170 catturata, poi come sopra',
+    f: () => { invia(0x01, 0x70, LICENSE_KEY, 'license key');
+               setTimeout(() => interrogaLooper(
+                 () => invia(0x01, 0x75, [0x02], 'COUNTIN')), 700); } },
   ...NON_ELENCATI.map(v => ({
     n: `valore ${hex(v)}`, d: 'non è nell\'elenco di Ignitron',
     f: () => invia(0x01, 0x75, [v], `sconosciuto ${hex(v)}`),
