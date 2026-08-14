@@ -114,6 +114,15 @@ la pagina non abbia prodotto niente. Va redirezionato su file:
 `localhost` è bloccato da policy, quindi nemmeno `serve.ps1` lo raggiunge. Per vedere una
 pagina che *gira* si usa Edge headless con `--screenshot` e la si legge come immagine.
 
+**I messaggi di commit vanno passati per file, non per here-string.** `git commit -m @'…'@`
+in PowerShell 5.1 si rompe in silenzio se il testo contiene virgolette doppie o certe
+sequenze: la here-string non parte, il testo viene spezzato in parole e git risponde
+`pathspec '…' did not match any file(s)`. E il sandbox rifiuta la riga se ci trova un
+`e:` o simili, leggendolo come percorso di disco. Si scrive il messaggio con lo strumento
+di Write nello scratchpad e poi
+`git -c i18n.commitEncoding=UTF-8 commit -F <file>` — così **si possono anche usare gli
+accenti**, che con la here-string andavano evitati.
+
 Il push non parte dalla mia shell, che è non interattiva: Git Credential Manager non
 riesce a chiedere le credenziali e git muore con *terminal prompts disabled*. Funziona
 con `GIT_TERMINAL_PROMPT=1`, `GCM_INTERACTIVE=true` e `GCM_GUI_PROMPT=true`, che gli fanno
