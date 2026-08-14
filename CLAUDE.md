@@ -283,9 +283,21 @@ rimescolano sotto le dita a ogni ridisegno. Chi non ha famiglia va **in fondo**:
 l'assenza di una scelta, non una categoria che meriti il primo posto. Le date c'erano già
 nei record (`createdAt`, `updatedAt`), non è stato aggiunto niente allo store.
 
-**Il tasto che porta all'altra vista è grosso**, con un bordo dell'accento: è quello che
-si preme più spesso di tutti, spesso in mano e al buio. Lo stile resta quello — accento su
-fondo trasparente — cambia solo la stazza.
+**Il tasto che porta all'altra vista non si può ingrandire**, provato e rimesso com'era
+lo stesso giorno: più grosso non sta sulla riga con «Leggi dall'ampli», «Categorie» e
+«Altro», e manda a capo l'intestazione. Se un giorno lo si vuole davvero più visibile,
+prima bisogna liberare spazio su quella riga — non basta cambiare il padding.
+
+**Dal dettaglio si mette un preset in un banco live**, senza passare dalla vista Live.
+Chiesto dall'utente: si sta già guardando il preset, e doverlo ricordare, cambiare vista e
+ritrovarlo lì dentro è un giro inutile. Una tendina coi banchi — con accanto quanti posti
+liberi ha ciascuno — e il tasto «Metti nel banco».
+
+Va nel **primo posto libero**, non in uno scelto: quale dei quattro tasti sia è una cosa
+che si decide col piede davanti al banco, e nella vista Live si sposta. Se il preset è già
+in quel banco lo dice e non lo duplica; se il banco è pieno lo dice e non fa niente.
+**Non tocca l'ampli**, coerente con la regola che i banchi inventati non ci scrivono mai.
+Se non esiste nessun banco il controllo non compare: si creano dalla vista Live.
 
 Nel dettaglio la catena è **una riga sola di nomi separati da «-», senza valori**: lì si
 guarda *che catena è*, e una colonna di numeri a due decimali non la legge nessuno — le
