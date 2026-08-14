@@ -949,6 +949,44 @@ resta suo.
 valeva la pena fare prima di aprire un'altra sonda, e la risposta riapre il capitolo
 invece di chiuderlo.
 
+#### Lo snoop log ha risposto — 14 agosto 2026
+
+`captures/2026-08-14-app-ufficiale-looper.txt`, ricavato col rapporto di bug del telefono
+e letto da `tools/leggi-btsnoop.ps1`. **Il comando del conteggio è `0x0175` con `02`, cioè
+esattamente quello che mandiamo noi.**
+
+```
+11,749s  APP    0x0175   f0 01 18 02 01 75 00 02 f7      <- l'app manda 02
+11,789s  ampli  0x0475   f0 01 18 00 04 75 f7            <- ack
+12,726s  ampli  0x0375   f0 01 40 02 03 75 00 02 f7      <- conteggio partito, col click
+14,684s  ampli  0x0375   f0 01 41 04 03 75 00 04 f7      <- registrazione, da sola
+```
+
+Il nostro frame era `f0 01 01 02 01 75 00 02 f7`: **identico a meno del sequence number**.
+Quindi non è il comando a essere sbagliato — **è il contesto**, e il log dice quale.
+
+**Tre differenze, in ordine di sospetto:**
+
+1. **L'app manda la license key `0x0170`** appena connessa, e l'ampli risponde `0x0470`
+   con `00 00`. Noi non l'abbiamo **mai** mandata. In `Ipotesi escluse` sta scritto
+   «`0x0138` funziona senza averla mai inviata», ed è vero — ma vale per `0x0138`, non
+   per tutto. **Il conteggio potrebbe essere l'unico comando dietro l'autenticazione.**
+   Attenzione: il payload della chiave **cambia da sessione a sessione** (le due sessioni
+   nel log hanno byte diversi), quindi rigiocarlo tale e quale forse non basta.
+2. **Subito prima del comando l'app interroga il looper**: `0x0278`, poi `0x0275`, poi
+   `0x0276`, tutti e tre entro 200 ms e 2,3 s prima del `02`. Noi quelle interrogazioni
+   le abbiamo fatte, ma **dopo** il comando, mai prima.
+3. Tutta la sequenza di avvio: `0x022f`, `0x0223`, `0x0211`, `0x022b`, tre letture di
+   preset, `0x0210`, `0x0296`, `0x0271` due volte, `0x0201` sullo stato live, `0x0265`.
+
+**Non è l'intestazione di blocco.** L'app avvolge ogni scrittura in 16 byte
+(`01 fe 00 00 53 fe <len> 00 …`) e spezza in ATT da 20, ma manda `05` e `09` nello stesso
+identico modo e quelli a noi funzionano nudi. Quindi l'involucro non discrimina.
+
+**La prossima prova è una sola e costa dieci minuti**: interrogare `0x0278`, `0x0275`,
+`0x0276` e *subito dopo* mandare `0x0175` con `02`. Se non basta, si prova a rigiocare la
+license key catturata. Non serve altro snoop log.
+
 **Da qui in avanti indovinare non serve più.** Sedici valori provati su `0x0175` dicono
 che il comando sta altrove: un altro sub-comando, o `0x0175` con un payload che non è un
 byte solo. Lo spazio è troppo grande per cercarlo a tentoni, e martellare l'ampli con
