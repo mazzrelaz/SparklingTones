@@ -1,0 +1,283 @@
+/*
+ * prova-ble — il primo passo del pedale, senza saldare niente
+ * =============================================================
+ *
+ * Serve solo la schedina e il cavo USB. Nessun pulsante, nessun LED, nessun
+ * display: si comanda tutto dal monitor seriale. Risponde alle tre domande che
+ * decidono se il progetto esiste, e nessuna di quelle domande ha bisogno di un
+ * pin collegato.
+ *
+ *   1. l'ESP32 vede lo Spark e ci si collega?
+ *   2. gli cambia preset?  (0x0138, dieci byte)
+ *   3. quanto ci mette un giro di andata e ritorno?  <- la misura che conta
+ *
+ * Sulla 3: un preset intero sono sedici chunk che aspettano l'ack uno per uno.
+ * Se il secondo che ci mette il telefono e' l'intervallo di connessione e non
+ * la banda, allora chiedendo 7,5 ms invece dei ~30 di sistema il pedale
+ * diventa quattro volte piu' svelto. Il browser non puo' chiederlo, noi si.
+ * Il comando 'v' fa la richiesta, 'm' misura. Si confrontano i due numeri.
+ *
+ * Libreria: nessuna da installare. Usa BLEDevice.h, che arriva col pacchetto
+ * schede esp32. Per il firmware vero si passera' a NimBLE, che consuma molta
+ * meno RAM, ma per provare meglio zero installazioni e zero motivi di fallire.
+ *
+ * Scheda: ESP32C3 Dev Module. Se il monitor seriale resta muto, accendi
+ * "USB CDC On Boot" nel menu Strumenti: sul C3 la seriale passa dall'USB
+ * nativo e senza quella spunta non esce niente.
+ *
+ * Comandi dal monitor seriale (invio a fine riga):
+ *   0..7   cambia preset sullo slot (A1..A4 = 0..3, B1..B4 = 4..7)
+ *   m      misura: dieci cambi preset di fila, riporta il giro medio
+ *   v      chiede un intervallo di connessione da 7,5 ms
+ *   s      chiede l'intervallo lento (30 ms), per il confronto
+ *   r      ricollega
+ *   ?      questo elenco
+ */
+
+#include <BLEDevice.h>
+#include <esp_gap_ble_api.h>
+
+/* --- GATT dello Spark: service 0xFFC0, write 0xFFC1, notify 0xFFC2 ------ */
+static BLEUUID UUID_SERVIZIO((uint16_t)0xFFC0);
+static BLEUUID UUID_SCRITTURA((uint16_t)0xFFC1);
+static BLEUUID UUID_NOTIFICHE((uint16_t)0xFFC2);
+
+static BLEAdvertisedDevice* trovato    = nullptr;
+static BLEClient*           client     = nullptr;
+static BLERemoteCharacteristic* chScrittura = nullptr;
+static BLERemoteCharacteristic* chNotifiche = nullptr;
+static esp_bd_addr_t indirizzo;
+
+static uint8_t  seq       = 0x01;   // resta fra 0x01 e 0x3e
+static uint32_t rxTotali  = 0;      // quanti messaggi interi sono arrivati
+static uint32_t ultimoRx  = 0;      // millis dell'ultimo messaggio: serve a misurare
+
+/* ======================================================================
+   Riassemblatore: le notifiche arrivano a pezzi, un messaggio sta fra
+   f0 e f7. Un f0 ricomincia sempre da capo — f0 e f7 non possono comparire
+   dentro un messaggio, perche' i byte dati sono impacchettati a 7 bit e
+   stanno tutti sotto 0x80.
+   ====================================================================== */
+
+static uint8_t  buffer[512];
+static size_t   dentro = 0;
+
+static void messaggioIntero(const uint8_t* m, size_t n) {
+  rxTotali++;
+  ultimoRx = millis();
+  Serial.print(F("  RX "));
+  if (n >= 6) {
+    Serial.printf("0x%02x%02x  ", m[4], m[5]);
+  }
+  for (size_t i = 0; i < n; i++) Serial.printf("%02x ", m[i]);
+  Serial.println();
+}
+
+static void mangia(const uint8_t* dati, size_t n) {
+  for (size_t i = 0; i < n; i++) {
+    uint8_t b = dati[i];
+    if (b == 0xf0) dentro = 0;                  // ricomincia sempre
+    if (dentro < sizeof(buffer)) buffer[dentro++] = b;
+    if (b == 0xf7 && dentro > 1) {
+      size_t quanti = dentro;
+      dentro = 0;                               // svuota PRIMA di consegnare
+      messaggioIntero(buffer, quanti);
+    }
+  }
+}
+
+static void alArrivo(BLERemoteCharacteristic*, uint8_t* dati, size_t n, bool) {
+  mangia(dati, n);
+}
+
+/* ======================================================================
+   Costruzione dei messaggi
+   chunk: f0 01 <seq> <checksum> <cmd> <sub> <dati impacchettati> f7
+   ====================================================================== */
+
+/** Codifica 7/8: ogni 7 byte reali preceduti da un byte con i loro MSB, LSB-first. */
+static size_t impacchetta(const uint8_t* dati, size_t n, uint8_t* fuori) {
+  size_t out = 0;
+  for (size_t base = 0; base < n; base += 7) {
+    size_t quanti = (n - base < 7) ? (n - base) : 7;
+    size_t posMsb = out++;
+    uint8_t msb = 0;
+    for (size_t k = 0; k < quanti; k++) {
+      uint8_t b = dati[base + k];
+      if (b & 0x80) msb |= (1 << k);            // LSB-first
+      fuori[out++] = b & 0x7f;
+    }
+    fuori[posMsb] = msb;
+  }
+  return out;
+}
+
+/** Ritorna la lunghezza del frame scritto in `fuori`. */
+static size_t costruisci(uint8_t cmd, uint8_t sub,
+                         const uint8_t* dati, size_t n, uint8_t* fuori) {
+  uint8_t packed[64];
+  size_t np = impacchetta(dati, n, packed);
+
+  uint8_t checksum = 0;
+  for (size_t i = 0; i < np; i++) checksum ^= packed[i];
+
+  size_t out = 0;
+  fuori[out++] = 0xf0;
+  fuori[out++] = 0x01;
+  fuori[out++] = seq;
+  fuori[out++] = checksum;
+  fuori[out++] = cmd;
+  fuori[out++] = sub;
+  for (size_t i = 0; i < np; i++) fuori[out++] = packed[i];
+  fuori[out++] = 0xf7;
+
+  if (++seq > 0x3e) seq = 0x01;
+  return out;
+}
+
+static bool manda(const uint8_t* frame, size_t n) {
+  if (!chScrittura) { Serial.println(F("non connesso")); return false; }
+  Serial.print(F("  TX "));
+  for (size_t i = 0; i < n; i++) Serial.printf("%02x ", frame[i]);
+  Serial.println();
+  // writeWithoutResponse e' l'unica modalita' che 0xFFC1 supporta: questa
+  // chiamata riesce sempre lato nostro, anche se l'ampli scarta tutto.
+  // L'unica verifica vera e' la risposta in RX.
+  chScrittura->writeValue((uint8_t*)frame, n, false);
+  return true;
+}
+
+/** 0x0138: [banco 0, slot]. Niente byte 0x00 finale, a differenza di 0x0115. */
+static bool cambiaPreset(uint8_t slot) {
+  uint8_t dati[2] = { 0x00, slot };
+  uint8_t frame[32];
+  size_t n = costruisci(0x01, 0x38, dati, sizeof(dati), frame);
+  return manda(frame, n);
+}
+
+/* ======================================================================
+   Connessione
+   ====================================================================== */
+
+class Scansione : public BLEAdvertisedDeviceCallbacks {
+  void onResult(BLEAdvertisedDevice d) override {
+    if (d.haveServiceUUID() && d.isAdvertisedServiceUUID(UUID_SERVIZIO)) {
+      Serial.printf("trovato: %s  [%s]  rssi %d\n",
+                    d.getName().c_str(), d.getAddress().toString().c_str(), d.getRSSI());
+      BLEDevice::getScan()->stop();
+      if (trovato) delete trovato;
+      trovato = new BLEAdvertisedDevice(d);
+    }
+  }
+};
+
+static bool collega() {
+  Serial.println(F("scansione..."));
+  BLEScan* scan = BLEDevice::getScan();
+  scan->setAdvertisedDeviceCallbacks(new Scansione());
+  scan->setActiveScan(true);
+  scan->setInterval(100);
+  scan->setWindow(99);
+  trovato = nullptr;
+  scan->start(8, false);
+  scan->clearResults();
+
+  if (!trovato) { Serial.println(F("nessuno Spark. Acceso? Gia' connesso a un telefono?")); return false; }
+
+  client = BLEDevice::createClient();
+  if (!client->connect(trovato)) { Serial.println(F("connessione fallita")); return false; }
+  memcpy(indirizzo, trovato->getAddress().getNative(), 6);
+
+  BLERemoteService* servizio = client->getService(UUID_SERVIZIO);
+  if (!servizio) { Serial.println(F("servizio 0xFFC0 assente")); client->disconnect(); return false; }
+
+  chScrittura = servizio->getCharacteristic(UUID_SCRITTURA);
+  chNotifiche = servizio->getCharacteristic(UUID_NOTIFICHE);
+  if (!chScrittura || !chNotifiche) { Serial.println(F("caratteristiche assenti")); client->disconnect(); return false; }
+
+  chNotifiche->registerForNotify(alArrivo);
+  Serial.printf("connesso, MTU %d\n", client->getMTU());
+  Serial.println(F("pronto. '?' per l'elenco dei comandi."));
+  return true;
+}
+
+/** L'intervallo di connessione: e' questo che decide quanto costa un preset. */
+static void chiediIntervallo(uint16_t minUnita, uint16_t maxUnita) {
+  esp_ble_conn_update_params_t p = {};
+  memcpy(p.bda, indirizzo, sizeof(esp_bd_addr_t));
+  p.min_int = minUnita;      // unita' da 1,25 ms
+  p.max_int = maxUnita;
+  p.latency = 0;
+  p.timeout = 400;           // 4 s
+  esp_ble_gap_update_conn_params(&p);
+  Serial.printf("chiesto intervallo %.2f - %.2f ms (l'ampli puo' rifiutare)\n",
+                minUnita * 1.25f, maxUnita * 1.25f);
+}
+
+/* ======================================================================
+   La misura: dieci cambi preset di fila, quanto ci mette il giro
+   ====================================================================== */
+
+static void misura() {
+  if (!chScrittura) { Serial.println(F("non connesso")); return; }
+  Serial.println(F("dieci cambi preset, alternando A1 e A2..."));
+  uint32_t somma = 0, risposte = 0;
+
+  for (int i = 0; i < 10; i++) {
+    uint32_t primaRx = rxTotali;
+    uint32_t t0 = millis();
+    cambiaPreset(i % 2);
+    // aspetta l'ack, al massimo mezzo secondo
+    while (rxTotali == primaRx && millis() - t0 < 500) delay(1);
+    if (rxTotali > primaRx) { somma += (ultimoRx - t0); risposte++; }
+    delay(120);
+  }
+
+  if (!risposte) {
+    // rxTotali a zero vuol dire ampli muto o connessione morta; piu' di zero
+    // vuol dire che parla e siamo noi a scartare. I due casi portano in
+    // direzioni opposte, e senza il numero si vedono uguali.
+    Serial.printf("nessuna risposta. RX totali dall'avvio: %u\n", rxTotali);
+    return;
+  }
+  Serial.printf("giro medio %.1f ms su %u risposte\n", (float)somma / risposte, risposte);
+  Serial.println(F("un preset intero sono ~16 di questi giri: moltiplica per sedici."));
+}
+
+/* ====================================================================== */
+
+static void elenco() {
+  Serial.println(F(
+    "\n  0..7  cambia preset sullo slot (A1..A4 = 0..3, B1..B4 = 4..7)\n"
+    "  m     misura il giro di andata e ritorno\n"
+    "  v     chiedi intervallo veloce (7,5 ms)\n"
+    "  s     chiedi intervallo lento (30 ms)\n"
+    "  r     ricollega\n"));
+}
+
+void setup() {
+  Serial.begin(115200);
+  delay(600);
+  Serial.println(F("\nprova-ble — pedale Spark 2\n"));
+  BLEDevice::init("pedale-prova");
+  collega();
+}
+
+void loop() {
+  if (client && !client->isConnected() && chScrittura) {
+    Serial.println(F("connessione persa"));
+    chScrittura = chNotifiche = nullptr;
+    dentro = 0;
+  }
+
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c >= '0' && c <= '7') cambiaPreset(c - '0');
+    else if (c == 'm') misura();
+    else if (c == 'v') chiediIntervallo(6, 12);      // 7,5 - 15 ms
+    else if (c == 's') chiediIntervallo(24, 40);     // 30 - 50 ms
+    else if (c == 'r') collega();
+    else if (c == '?') elenco();
+  }
+  delay(10);
+}
