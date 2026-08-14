@@ -1,0 +1,569 @@
+{
+    "quando":  "2026-08-14T11:25:51.495Z",
+    "nota":  "Prova dell intestazione di blocco piu scritture da 20, esattamente come fa l app. 04 funziona (ack e 0x0375 04 di ritorno), 02 no. Quindi l involucro non rompe niente e non e la differenza: 02 e inerte in ogni forma provata. Ultima prova prima di archiviare il capitolo.",
+    "rxTotali":  9,
+    "raffiche":  [
+                     {
+                         "n":  1,
+                         "ms":  27141,
+                         "quanti":  2,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  27141,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x56  0a",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  86,
+                                            "data":  [
+                                                         10
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        86,
+                                                        10,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        10,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  27144,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0376 seq=0x57  78 04 04 c2 c3 c2 3c",
+                                            "cmd":  3,
+                                            "sub":  118,
+                                            "seq":  87,
+                                            "data":  [
+                                                         120,
+                                                         4,
+                                                         4,
+                                                         194,
+                                                         195,
+                                                         194,
+                                                         60
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        87,
+                                                        63,
+                                                        3,
+                                                        118,
+                                                        56,
+                                                        120,
+                                                        4,
+                                                        4,
+                                                        66,
+                                                        67,
+                                                        66,
+                                                        60,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  2,
+                         "ms":  28318,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  28318,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x58  00",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  88,
+                                            "data":  [
+                                                         0
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        88,
+                                                        0,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        0,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  3,
+                         "ms":  33681,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  33681,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0475 seq=0x01  ",
+                                            "cmd":  4,
+                                            "sub":  117,
+                                            "seq":  1,
+                                            "data":  [
+
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        1,
+                                                        0,
+                                                        4,
+                                                        117,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  4,
+                         "ms":  46092,
+                         "quanti":  2,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  46092,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x59  0a",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  89,
+                                            "data":  [
+                                                         10
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        89,
+                                                        10,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        10,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  46129,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0376 seq=0x5a  78 04 04 c2 c3 c2 3c",
+                                            "cmd":  3,
+                                            "sub":  118,
+                                            "seq":  90,
+                                            "data":  [
+                                                         120,
+                                                         4,
+                                                         4,
+                                                         194,
+                                                         195,
+                                                         194,
+                                                         60
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        90,
+                                                        63,
+                                                        3,
+                                                        118,
+                                                        56,
+                                                        120,
+                                                        4,
+                                                        4,
+                                                        66,
+                                                        67,
+                                                        66,
+                                                        60,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  5,
+                         "ms":  47406,
+                         "quanti":  1,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  47406,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x5b  00",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  91,
+                                            "data":  [
+                                                         0
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        91,
+                                                        0,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        0,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     },
+                     {
+                         "n":  6,
+                         "ms":  49992,
+                         "quanti":  2,
+                         "etichetta":  null,
+                         "eventi":  [
+                                        {
+                                            "ms":  49992,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0475 seq=0x02  ",
+                                            "cmd":  4,
+                                            "sub":  117,
+                                            "seq":  2,
+                                            "data":  [
+
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        2,
+                                                        0,
+                                                        4,
+                                                        117,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        },
+                                        {
+                                            "ms":  50030,
+                                            "tipo":  "rx",
+                                            "testo":  "RX 0x0375 seq=0x5c  04",
+                                            "cmd":  3,
+                                            "sub":  117,
+                                            "seq":  92,
+                                            "data":  [
+                                                         4
+                                                     ],
+                                            "checksumOk":  true,
+                                            "raw":  [
+                                                        240,
+                                                        1,
+                                                        92,
+                                                        4,
+                                                        3,
+                                                        117,
+                                                        0,
+                                                        4,
+                                                        247
+                                                    ],
+                                            "demo":  false
+                                        }
+                                    ]
+                     }
+                 ],
+    "eventi":  [
+                   {
+                       "ms":  0,
+                       "tipo":  "log",
+                       "testo":  "pronta. Connetti l\u0027ampli, poi parti dall\u0027ascolto."
+                   },
+                   {
+                       "ms":  2870,
+                       "tipo":  "log",
+                       "testo":  "connesso a Spark 2 BLE"
+                   },
+                   {
+                       "ms":  27141,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x56  0a",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  86,
+                       "data":  [
+                                    10
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   86,
+                                   10,
+                                   3,
+                                   117,
+                                   0,
+                                   10,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  27144,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0376 seq=0x57  78 04 04 c2 c3 c2 3c",
+                       "cmd":  3,
+                       "sub":  118,
+                       "seq":  87,
+                       "data":  [
+                                    120,
+                                    4,
+                                    4,
+                                    194,
+                                    195,
+                                    194,
+                                    60
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   87,
+                                   63,
+                                   3,
+                                   118,
+                                   56,
+                                   120,
+                                   4,
+                                   4,
+                                   66,
+                                   67,
+                                   66,
+                                   60,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  28318,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x58  00",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  88,
+                       "data":  [
+                                    0
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   88,
+                                   0,
+                                   3,
+                                   117,
+                                   0,
+                                   0,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  33536,
+                       "tipo":  "tx",
+                       "testo":  "TX 0x0175 COUNTIN â€” con intestazione di blocco, spezzato in write da 20",
+                       "cmd":  1,
+                       "sub":  117,
+                       "data":  [
+                                    2
+                                ]
+                   },
+                   {
+                       "ms":  33542,
+                       "tipo":  "log",
+                       "testo":  "TX 0x0175 seq=0x01 25B in 2 scritture da 20"
+                   },
+                   {
+                       "ms":  33681,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0475 seq=0x01  ",
+                       "cmd":  4,
+                       "sub":  117,
+                       "seq":  1,
+                       "data":  [
+
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   1,
+                                   0,
+                                   4,
+                                   117,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  46092,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x59  0a",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  89,
+                       "data":  [
+                                    10
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   89,
+                                   10,
+                                   3,
+                                   117,
+                                   0,
+                                   10,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  46129,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0376 seq=0x5a  78 04 04 c2 c3 c2 3c",
+                       "cmd":  3,
+                       "sub":  118,
+                       "seq":  90,
+                       "data":  [
+                                    120,
+                                    4,
+                                    4,
+                                    194,
+                                    195,
+                                    194,
+                                    60
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   90,
+                                   63,
+                                   3,
+                                   118,
+                                   56,
+                                   120,
+                                   4,
+                                   4,
+                                   66,
+                                   67,
+                                   66,
+                                   60,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  47406,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x5b  00",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  91,
+                       "data":  [
+                                    0
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   91,
+                                   0,
+                                   3,
+                                   117,
+                                   0,
+                                   0,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  49864,
+                       "tipo":  "tx",
+                       "testo":  "TX 0x0175 REC â€” con intestazione di blocco, spezzato in write da 20",
+                       "cmd":  1,
+                       "sub":  117,
+                       "data":  [
+                                    4
+                                ]
+                   },
+                   {
+                       "ms":  49868,
+                       "tipo":  "log",
+                       "testo":  "TX 0x0175 seq=0x02 25B in 2 scritture da 20"
+                   },
+                   {
+                       "ms":  49992,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0475 seq=0x02  ",
+                       "cmd":  4,
+                       "sub":  117,
+                       "seq":  2,
+                       "data":  [
+
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   2,
+                                   0,
+                                   4,
+                                   117,
+                                   247
+                               ],
+                       "demo":  false
+                   },
+                   {
+                       "ms":  50030,
+                       "tipo":  "rx",
+                       "testo":  "RX 0x0375 seq=0x5c  04",
+                       "cmd":  3,
+                       "sub":  117,
+                       "seq":  92,
+                       "data":  [
+                                    4
+                                ],
+                       "checksumOk":  true,
+                       "raw":  [
+                                   240,
+                                   1,
+                                   92,
+                                   4,
+                                   3,
+                                   117,
+                                   0,
+                                   4,
+                                   247
+                               ],
+                       "demo":  false
+                   }
+               ]
+}

@@ -989,13 +989,36 @@ risposta giusta**, quindi la riproduzione è fedele; e tutte e due le volte `0x0
 **−2**, mentre all'app risponde `00 00`. Non è replicabile — è legata alla sessione. Ma
 almeno adesso arriva: prima, mandata in una write sola, non riceveva nemmeno l'ack.
 
-**Resta una sola differenza strutturale: l'intestazione di blocco.** L'app avvolge ogni
-scrittura in 16 byte (`01 fe 00 00 53 fe <len> 00 …`) e spezza in ATT da 20 — per un
-comando corto vuol dire 16 byte di intestazione più i primi 4 del messaggio nella prima
-write, il resto nella seconda. `wrapBlock` in `spark-protocol.js:231` produce **già quei
-byte identici**, e `send`/`sendSpezzato` sanno metterla, ma **sul looper non l'abbiamo
-mai usata**. Era stata archiviata come indifferente perché uno sweep su `0x0201` dava lo
-stesso esito con e senza — vero per le letture, mai provato sui comandi del looper.
+**Anche l'intestazione di blocco è esclusa, e la prova è pulita.** L'app avvolge ogni
+scrittura in 16 byte (`01 fe 00 00 53 fe <len> 00 …`, che `wrapBlock` produce identici) e
+spezza in ATT da 20. Mandati così tutti e due i comandi: **`04` funziona** — ack e
+`0x0375 04` di ritorno — e **`02` no**. L'involucro quindi non rompe niente e non
+discrimina: `02` è inerte in ogni forma provata.
+
+#### Archiviato il 14 agosto 2026, per decisione dell'utente
+
+**Stato: il looper si comanda, manca solo il conteggio col click.** Funzionano `04` rec,
+`05` stop rec, `08` play, `09` stop, `0b` dub, `0c` stop dub, `0a` delete, e si legge la
+posizione nel loop (`0x0377`), il bpm (`0x0363`) e le impostazioni (`0x0376`).
+
+**Sul conteggio siamo arrivati al fondo di quello che si può fare senza la chiave.**
+Escluso per misura, tutto: il valore del byte (sedici provati), il byte `0x00` finale, le
+impostazioni scritte prima, la coppia `02`+`04` in due distanze, le interrogazioni prima,
+l'intera sequenza di avvio dell'app rigiocata con e senza chiave, e l'intestazione di
+blocco. Ogni messaggio rigiocato riceve dall'ampli la **stessa identica risposta** che
+riceve l'app: la riproduzione è fedele, il comando è byte per byte lo stesso, e non
+funziona.
+
+**Resta una sola differenza, e non è replicabile: la license key accettata.** L'app manda
+`0x0170` e riceve `0x0470` con `00 00`; noi rigiocando la sua riceviamo `fe`, cioè −2.
+La chiave è legata alla sessione. **È quindi l'unica spiegazione rimasta in piedi**, e
+sarebbe strana — nessun altro comando è protetto — ma è l'unica cosa che non abbiamo
+potuto rendere uguale. Per verificarla servirebbe capire come la chiave è derivata, che è
+un lavoro di un altro ordine di grandezza.
+
+**Se si riprende, si riprende da lì**, non dalle sonde: tutto il resto è già escluso e
+sta scritto qui sopra. Gli attrezzi restano pronti — `tools/looper-probe.html` con
+ventinove pulsanti e `tools/leggi-btsnoop.ps1` per leggere altri snoop log.
 
 **Le interrogazioni prima non bastano** (`captures/2026-08-14-looper-contesto.json`):
 mandati `0x0278`, `0x0275`, `0x0276` — tutti e tre con risposta regolare — e 2,3 s dopo
