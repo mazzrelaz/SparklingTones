@@ -1320,6 +1320,37 @@ Il file lo leggo io con uno script — il formato btsnoop è banale e i nostri m
 riconoscono a vista (`f0 01 … f7` verso la caratteristica `0xFFC1`). **Niente Wireshark**,
 che era il consiglio scritto qui sopra quando la strada era solo teorica.
 
+#### Il pedale, deciso il 14 agosto 2026: si comincia
+
+L'utente ha fermato lo sviluppo dell'app e vuole partire con l'ESP32. La forma resta
+quella già dettata — autonomo, preset presi dall'app, blocchi selezionabili col piede —
+con in più l'hardware ora specificato: **sei footswitch, un LED per footswitch, un OLED
+128×128**.
+
+**Sta in questo repo, in `pedale/`.** Non in un progetto a parte, e il motivo è uno solo:
+la conoscenza del protocollo è qui, e sarebbe l'unica cosa che due repo farebbero
+divergere. Le differenze dello Spark 2 (byte `0x00` finale, chunk da 25, stesso seq, otto
+slot, `0x0127` che non salva) valgono identiche per il firmware, le catture in `captures/`
+e `test/fixtures/` sono il suo banco di prova, e **l'interfaccia app↔pedale è un contratto
+fra i due**: un commit solo deve poter cambiare tutte e due le sponde. Il build step del
+firmware non tocca la web app, che resta senza. Se un giorno il pedale prende vita
+propria, staccarlo è un `git subtree`.
+
+**Il primo passo non è comprare, è simulare.** `tools/pedale-sim.html`: la faccia del
+pedale in una pagina — sei footswitch cliccabili, sei LED, e l'OLED 128×128 disegnato
+1:1 su un canvas — con dentro la logica vera. **Parla allo Spark col nostro trasporto**,
+quindi non è un mockup: è un pedale funzionante guidato col mouse. Serve a decidere
+*cosa fa ogni tasto* e *cosa mostra il display* prima che quelle scelte costino una
+saldatura, e a rispondere alla domanda vera — «suonarci è comodo?» — senza aver comprato
+niente. Poi la stessa pagina diventa il telecomando e il monitor dell'ESP32 vero.
+
+Le domande di progetto a cui il simulatore deve far rispondere, tutte ancora aperte:
+sei tasti per cosa (quattro preset più su/giù di blocco? cinque preset più shift?);
+il blocco si sceglie col piede o dal display; l'OLED mostra il nome del preset attivo,
+il blocco, o la posizione nel loop; e soprattutto **se il pedale può riscrivere gli slot
+dell'ampli** per rendere i cambi istantanei — che contraddirebbe la regola della vista
+live e va chiesto, non deciso.
+
 **Ancora da fare, deciso: niente altro.** L'ordine
 economico è chiaro: la **sessione d'ascolto sul looper** non costa niente e serve a tutte
 e due le strade; poi una **devkit ESP32 da otto euro** senza saldare niente, per vedere
