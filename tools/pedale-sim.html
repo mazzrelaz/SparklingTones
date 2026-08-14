@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spark — simulatore del pedale</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
+         background:#0a0a0b; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:14px; }
+  h1 { font-size:1.1rem; margin:0 0 2px; }
+  h2 { font-size:0.95rem; margin:22px 0 6px; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:76ch; line-height:1.55; }
+  .sub b { color:#c8ccd2; }
+  .status { display:inline-block; padding:3px 9px; border-radius:11px;
+            font-size:0.75rem; font-weight:600; }
+  .status.off { background:#3a2020; color:#ff8080; }
+  .status.on  { background:#1f3a24; color:#7fe08a; }
+  .status.wait{ background:#3a3520; color:#f0d060; }
+  button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
+           background:#212227; color:#e8e8ea; padding:9px 13px; border-radius:8px; }
+  button.primary { background:#e30613; color:#fff; }
+  button:disabled { background:#18191d; color:#4e535b; cursor:not-allowed; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  label.campo { color:#b0b4bb; font-size:0.82rem; display:flex; align-items:center; gap:6px; }
+  input[type=number] { width:72px; background:#0e0f12; border:1px solid #34383f; color:#e8e8ea;
+                       padding:6px 7px; border-radius:6px; font:inherit; font-size:0.82rem; }
+
+  /* ---- la scatola del pedale ---------------------------------------- */
+  .pedale { background:#16171a; border:1px solid #2a2d33; border-radius:16px;
+            padding:18px; max-width:560px;
+            box-shadow:0 10px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04); }
+  .schermo { display:flex; justify-content:center; margin-bottom:18px; }
+  .schermo canvas { width:256px; height:256px; image-rendering:pixelated;
+                    border:6px solid #0c0d0f; border-radius:8px; background:#000;
+                    box-shadow:0 0 0 1px #34383f, 0 0 18px rgba(120,190,255,.10); }
+
+  .tasti { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
+  .posto { display:flex; flex-direction:column; align-items:center; gap:7px; }
+
+  /* il LED: vetrino scuro incassato, che si accende */
+  .led { width:14px; height:14px; border-radius:50%; background:#141518;
+         box-shadow:inset 0 1px 2px rgba(0,0,0,.9), 0 0 0 1px #2a2d33;
+         transition:background .08s, box-shadow .08s; }
+  .led.pieno   { background:#1d3350; box-shadow:inset 0 1px 2px rgba(0,0,0,.7), 0 0 0 1px #2a2d33; }
+  .led.attivo  { background:#48ff7a; box-shadow:0 0 0 1px #2a2d33, 0 0 10px 2px rgba(72,255,122,.65); }
+  .led.carica  { background:#ffb020; box-shadow:0 0 0 1px #2a2d33, 0 0 10px 2px rgba(255,176,32,.6);
+                 animation:pulsa .5s ease-in-out infinite alternate; }
+  .led.errore  { background:#ff5040; box-shadow:0 0 0 1px #2a2d33, 0 0 10px 2px rgba(255,80,64,.6); }
+  @keyframes pulsa { from { opacity:.35 } to { opacity:1 } }
+
+  .switch { width:100%; aspect-ratio:1/1; border-radius:12px; cursor:pointer;
+            background:linear-gradient(#2b2e34, #1b1d21);
+            border:1px solid #3a3e46; color:#c8ccd2;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:3px; padding:6px; text-align:center; user-select:none; touch-action:none;
+            box-shadow:0 3px 0 #0e0f12, 0 5px 8px rgba(0,0,0,.5); transition:transform .04s, box-shadow .04s; }
+  .switch:active, .switch.giu { transform:translateY(3px); box-shadow:0 0 0 #0e0f12, 0 2px 4px rgba(0,0,0,.5); }
+  .switch .num  { font-size:0.7rem; font-weight:700; color:#5f656e; }
+  .switch .nome { font-size:0.72rem; font-weight:600; line-height:1.2;
+                  overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
+  .switch.vuoto .nome { color:#4e535b; font-weight:400; font-style:italic; }
+  .switch.banco { border-color:#4a4030; }
+  .switch .tenuto { font-size:0.6rem; color:#8a7040; font-weight:700; letter-spacing:.03em; }
+
+  .misure { display:flex; gap:18px; flex-wrap:wrap; margin-top:14px;
+            font-family:'SF Mono',Consolas,monospace; font-size:0.76rem; color:#8a8f98; }
+  .misure b { color:#e8e8ea; font-weight:600; }
+
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         height:24vh; overflow-y:auto; margin-top:10px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.74rem; line-height:1.55;
+         color:#8a8f98; white-space:pre-wrap; word-break:break-word; }
+  #log .ok { color:#7fe08a; } #log .err { color:#ff8080; }
+  #log .mk { color:#f0d060; } #log .t { color:#4e535b; }
+  .nota { border-left:3px solid #3a3e46; padding:2px 0 2px 10px; margin:10px 0;
+          color:#8a8f98; font-size:0.8rem; line-height:1.55; max-width:76ch; }
+  .nota b { color:#c8ccd2; }
+</style>
+</head>
+<body>
+
+<h1>Simulatore del pedale</h1>
+<p class="sub">
+  La faccia del pedale, con dentro la logica vera: otto footswitch in due file da quattro,
+  otto LED, e l'OLED 128×128 disegnato 1:1. <b>Parla allo Spark col nostro trasporto</b>,
+  quindi non è un mockup — senza ampli simula il ritardo, così il <i>tatto</i> si prova lo
+  stesso. Serve a decidere cosa fa ogni tasto prima che quelle scelte costino una saldatura.
+</p>
+
+<div class="row">
+  <button id="btnConnect" class="primary">Connetti l'ampli</button>
+  <span id="status" class="status off">non connesso</span>
+  <label class="campo">ritardo simulato
+    <input type="number" id="latenza" value="1000" min="0" max="3000" step="50"> ms
+  </label>
+  <span class="sub" style="margin:0">i tasti <b>1</b>–<b>8</b> della tastiera fanno da piede</span>
+</div>
+
+<div class="pedale">
+  <div class="schermo"><canvas id="oled" width="128" height="128"></canvas></div>
+  <div class="tasti" id="tasti"></div>
+</div>
+
+<div class="misure">
+  <span>ultimo cambio <b id="mUltimo">—</b></span>
+  <span>medio <b id="mMedio">—</b></span>
+  <span>cambi <b id="mQuanti">0</b></span>
+</div>
+
+<p class="nota">
+  <b>Cosa guardare, che è il motivo per cui esiste questa pagina.</b><br>
+  I due tasti a destra (4 e 8) hanno una funzione lunga, quindi il tocco breve <b>agisce al
+  rilascio</b>: finché non sai se lo stai per tenere premuto non puoi cambiare preset alla
+  pressione. Gli altri sei scattano alla pressione. Si sente la differenza? Dà fastidio?<br>
+  Tenuti ~500 ms scorrono i banchi, e poi ripetono ogni 600 ms. È il passo giusto per
+  fermarsi dove vuoi, col piede?<br>
+  Una pressione durante un caricamento <b>si mette in coda</b>, non annulla quello in corso:
+  abortire un trasferimento a metà non è ancora verificato sull'ampli.
+</p>
+
+<h2>Log</h2>
+<div id="log"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script src="../src/preset-store.js"></script>
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+/* ====================================================================
+   Le costanti di progetto: sono queste che il simulatore serve a tarare
+   ==================================================================== */
+
+const PRESSIONE_LUNGA = 500;   // ms prima che «tenuto premuto» conti
+const RIPETI_BANCO    = 600;   // ms fra un banco e il successivo, tenendo premuto
+const TASTO_SU        = 3;     // in alto a destra
+const TASTO_GIU       = 7;     // in basso a destra
+const POSTI           = 8;
+
+/* ==================================================================== */
+
+const stato = {
+  banchi:    [],     // [{nome, posti:[record|null × 8]}]
+  iBanco:    0,
+  attivo:    null,   // posto che sta suonando
+  caricando: null,   // posto in trasferimento
+  inCoda:    null,   // premuto mentre l'altro caricava
+  progresso: 0,      // 0..1
+  scorrendo: false,  // l'OLED mostra l'elenco dei banchi
+  errore:    null,   // posto che ha lampeggiato rosso
+  demo:      false,
+};
+
+const misure = [];
+
+const spark = new SparkTransport({
+  onStatus: (state, label) => {
+    const el = $('status');
+    el.className = 'status ' + (state === 'connected' ? 'on' : state === 'connecting' ? 'wait' : 'off');
+    el.textContent = state === 'connected' ? label : state === 'connecting' ? label : 'non connesso';
+    $('btnConnect').disabled = state === 'connected';
+  },
+  onLog: msg => log(msg),
+});
+
+function log(msg, classe) {
+  const el = $('log');
+  const t  = new Date().toLocaleTimeString('it-IT');
+  const r  = document.createElement('div');
+  r.innerHTML = `<span class="t">${t}</span> <span class="${classe || ''}"></span>`;
+  r.lastChild.textContent = msg;
+  el.appendChild(r);
+  el.scrollTop = el.scrollHeight;
+}
+
+const bancoCorrente = () => stato.banchi[stato.iBanco] || { nome: '—', posti: new Array(POSTI).fill(null) };
+
+/* ====================================================================
+   Caricamento dei banchi dalla libreria
+   ==================================================================== */
+
+const NOMI_DEMO = [
+  ['Clean Twin', 'Crunch Bassman', 'Lead Fuzz', 'Ambient Plate',
+   'Acoustic Air', 'Funk Comp', 'Solo Boost', 'Doom Fuzz'],
+  ['Intro Chorus', 'Strofa Pulita', 'Ritornello', 'Assolo',
+   null, 'Ponte', 'Finale', null],
+  ['Prova 1', 'Prova 2', null, null, null, null, null, null],
+];
+
+function banchiFinti() {
+  return NOMI_DEMO.map((nomi, i) => ({
+    nome:  ['Concerto', 'Il pezzo lungo', 'Casa'][i],
+    posti: nomi.map((n, k) => (n ? { id: `demo-${i}-${k}`, name: n } : null)),
+  }));
+}
+
+async function caricaBanchi() {
+  const forzaDemo = new URLSearchParams(location.search).has('demo');
+  if (forzaDemo) { stato.demo = true; stato.banchi = banchiFinti();
+                   log('modo demo: banchi finti, nessuna libreria', 'mk'); return; }
+  try {
+    await store.open();
+    const banchi = await store.getBanks();
+    const tutti  = await store.all();
+    const perId  = new Map(tutti.map(r => [r.id, r]));
+    stato.banchi = banchi.map(b => ({ nome: b.nome, posti: b.posti.map(id => perId.get(id) || null) }));
+    if (!stato.banchi.length) {
+      stato.demo = true; stato.banchi = banchiFinti();
+      log('nessun banco in libreria: uso banchi finti. I banchi si creano dalla vista Live.', 'mk');
+    } else {
+      log(`${stato.banchi.length} banchi dalla libreria`, 'ok');
+      if (stato.banchi.length === 1) log('un banco solo: lo scorrimento non si può provare', 'mk');
+    }
+  } catch (err) {
+    stato.demo = true; stato.banchi = banchiFinti();
+    log('libreria non raggiungibile (' + err.message + '): uso banchi finti', 'err');
+  }
+}
+
+/* ====================================================================
+   Le azioni del pedale
+   ==================================================================== */
+
+async function attiva(i) {
+  const record = bancoCorrente().posti[i];
+  if (!record) {
+    stato.errore = i; disegna();
+    setTimeout(() => { stato.errore = null; disegna(); }, 260);
+    return;
+  }
+  // Una pressione durante un trasferimento non lo annulla: si accoda.
+  // Abortire un 0x0101 a metà è sicuro sul buffer 0x7f, ma che l'ampli
+  // scarti il troncone quando arriva un seq nuovo non è verificato.
+  if (stato.caricando !== null) {
+    stato.inCoda = i;
+    log(`in coda: ${record.name}`);
+    disegna();
+    return;
+  }
+
+  stato.caricando = i;
+  stato.progresso = 0;
+  disegna();
+
+  const t0 = performance.now();
+  let esito = true;
+  try {
+    if (spark.connected) {
+      await spark.loadPreset(record, (k, tot) => { stato.progresso = (k + 1) / tot; disegna(); });
+    } else {
+      await ritardoFinto();
+    }
+  } catch (err) {
+    esito = false;
+    log('errore: ' + err.message, 'err');
+  }
+  const ms = Math.round(performance.now() - t0);
+
+  stato.caricando = null;
+  stato.progresso = 0;
+  if (esito) {
+    stato.attivo = i;
+    misure.push(ms);
+    aggiornaMisure(ms);
+    log(`${record.name} — ${ms} ms${spark.connected ? '' : ' (simulato)'}`, 'ok');
+  }
+  disegna();
+
+  if (stato.inCoda !== null) {
+    const prossimo = stato.inCoda;
+    stato.inCoda = null;
+    attiva(prossimo);
+  }
+}
+
+function ritardoFinto() {
+  const totale = Math.max(0, Number($('latenza').value) || 0);
+  const passi  = 16;                       // sedici chunk, come un preset vero
+  return new Promise(risolvi => {
+    let k = 0;
+    if (!totale) return risolvi();
+    const iv = setInterval(() => {
+      k++; stato.progresso = k / passi; disegna();
+      if (k >= passi) { clearInterval(iv); risolvi(); }
+    }, totale / passi);
+  });
+}
+
+function aggiornaMisure(ms) {
+  $('mUltimo').textContent = ms + ' ms';
+  $('mQuanti').textContent = misure.length;
+  const media = Math.round(misure.reduce((a, b) => a + b, 0) / misure.length);
+  $('mMedio').textContent = media + ' ms';
+}
+
+function passoBanco(verso) {
+  if (stato.banchi.length < 2) { log('c\'è un banco solo', 'mk'); return; }
+  stato.iBanco = (stato.iBanco + verso + stato.banchi.length) % stato.banchi.length;
+  stato.scorrendo = true;
+  // Cambiando banco il preset che suona non è più in questo banco: l'ampli
+  // continua a suonarlo, ma nessun tasto lo rappresenta più.
+  stato.attivo = null;
+  log(`banco ${stato.iBanco + 1}/${stato.banchi.length} — ${bancoCorrente().nome}`);
+  disegna();
+}
+
+/* ====================================================================
+   Pressione e rilascio
+   ==================================================================== */
+
+const inMano = new Map();   // posto -> {timer, ripete, haScorso}
+
+function giu(i) {
+  if (inMano.has(i)) return;
+  const dati = { timer: null, ripete: null, haScorso: false };
+  inMano.set(i, dati);
+  document.querySelectorAll('.switch')[i].classList.add('giu');
+
+  if (i === TASTO_SU || i === TASTO_GIU) {
+    // Tasto con funzione lunga: il tocco breve agisce al RILASCIO, perché
+    // finché non so se lo terrà premuto non posso cambiare preset.
+    const verso = i === TASTO_SU ? -1 : +1;
+    dati.timer = setTimeout(() => {
+      dati.haScorso = true;
+      passoBanco(verso);
+      dati.ripete = setInterval(() => passoBanco(verso), RIPETI_BANCO);
+    }, PRESSIONE_LUNGA);
+  } else {
+    attiva(i);                    // gli altri sei scattano subito
+  }
+}
+
+function su(i) {
+  const dati = inMano.get(i);
+  if (!dati) return;
+  inMano.delete(i);
+  document.querySelectorAll('.switch')[i].classList.remove('giu');
+  clearTimeout(dati.timer);
+  clearInterval(dati.ripete);
+
+  if (i === TASTO_SU || i === TASTO_GIU) {
+    if (dati.haScorso) {
+      stato.scorrendo = false;    // finito di scorrere: l'OLED torna al banco
+      disegna();
+    } else {
+      attiva(i);                  // era un tocco breve
+    }
+  }
+}
+
+/* ====================================================================
+   Disegno
+   ==================================================================== */
+
+function costruisciTasti() {
+  const cont = $('tasti');
+  cont.innerHTML = '';
+  for (let i = 0; i < POSTI; i++) {
+    const posto = document.createElement('div');
+    posto.className = 'posto';
+
+    const led = document.createElement('div');
+    led.className = 'led';
+
+    const sw = document.createElement('div');
+    sw.className = 'switch';
+    sw.innerHTML = '<span class="num"></span><span class="nome"></span><span class="tenuto"></span>';
+
+    sw.addEventListener('pointerdown', e => { e.preventDefault(); sw.setPointerCapture(e.pointerId); giu(i); });
+    sw.addEventListener('pointerup',     () => su(i));
+    sw.addEventListener('pointercancel', () => su(i));
+    sw.addEventListener('contextmenu', e => e.preventDefault());
+
+    posto.append(led, sw);
+    cont.appendChild(posto);
+  }
+}
+
+function disegna() {
+  const banco = bancoCorrente();
+  const leds  = document.querySelectorAll('.led');
+  const sws   = document.querySelectorAll('.switch');
+
+  for (let i = 0; i < POSTI; i++) {
+    const record = banco.posti[i];
+    const led = leds[i];
+    led.className = 'led'
+      + (stato.errore    === i ? ' errore'
+      :  stato.caricando === i ? ' carica'
+      :  stato.attivo    === i ? ' attivo'
+      :  record                ? ' pieno' : '');
+
+    const sw = sws[i];
+    sw.classList.toggle('vuoto', !record);
+    sw.classList.toggle('banco', i === TASTO_SU || i === TASTO_GIU);
+    sw.querySelector('.num').textContent  = i + 1;
+    sw.querySelector('.nome').textContent = record ? record.name : 'vuoto';
+    sw.querySelector('.tenuto').textContent =
+      i === TASTO_SU ? '▲ tieni' : i === TASTO_GIU ? '▼ tieni' : '';
+  }
+  disegnaOled();
+}
+
+/* ---- l'OLED, 128×128, come sarà davvero ---------------------------- */
+
+const ctx = $('oled').getContext('2d');
+
+function disegnaOled() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, 128, 128);
+  ctx.textBaseline = 'alphabetic';
+
+  const banco = bancoCorrente();
+
+  // barra in alto: il banco, sempre visibile
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, 128, 13);
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 9px Consolas, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(taglia(banco.nome, 15), 3, 10);
+  ctx.textAlign = 'right';
+  ctx.fillText(`${stato.iBanco + 1}/${stato.banchi.length}`, 125, 10);
+
+  if (stato.scorrendo) return disegnaElencoBanchi();
+
+  // il nome di quello che suona (o che sta arrivando)
+  const i = stato.caricando !== null ? stato.caricando : stato.attivo;
+  const record = i !== null ? banco.posti[i] : null;
+
+  ctx.textAlign = 'center';
+  if (record) {
+    const righe = spezza(record.name, 13).slice(0, 3);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px Consolas, monospace';
+    righe.forEach((r, k) => ctx.fillText(r, 64, 34 + k * 15));
+  } else {
+    ctx.fillStyle = '#777';
+    ctx.font = '11px Consolas, monospace';
+    ctx.fillText('premi un tasto', 64, 40);
+  }
+
+  // barra di avanzamento solo mentre trasferisce
+  if (stato.caricando !== null) {
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+    ctx.strokeRect(14.5, 66.5, 99, 6);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(16, 68, Math.round(96 * stato.progresso), 3);
+  }
+
+  disegnaMappa();
+}
+
+/** Due file da quattro, come i tasti: dice a colpo d'occhio cos'è pieno. */
+function disegnaMappa() {
+  const banco = bancoCorrente();
+  for (let i = 0; i < POSTI; i++) {
+    const c = i % 4, r = (i / 4) | 0;
+    const x = 1 + c * 31.5, y = 79 + r * 24, w = 30, h = 22;
+    const pieno = !!banco.posti[i];
+
+    if (stato.attivo === i || stato.caricando === i) {
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = '#000';
+    } else {
+      ctx.strokeStyle = pieno ? '#fff' : '#3a3a3a';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+      ctx.fillStyle = pieno ? '#fff' : '#3a3a3a';
+    }
+    ctx.font = 'bold 11px Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(String(i + 1), x + w / 2, y + 15);
+  }
+}
+
+function disegnaElencoBanchi() {
+  ctx.textAlign = 'left';
+  const n = stato.banchi.length;
+  const primo = Math.max(0, Math.min(stato.iBanco - 2, n - 5));
+  for (let k = 0; k < Math.min(5, n); k++) {
+    const idx = primo + k, y = 20 + k * 21;
+    const attuale = idx === stato.iBanco;
+    if (attuale) { ctx.fillStyle = '#fff'; ctx.fillRect(0, y, 128, 19); }
+    ctx.fillStyle = attuale ? '#000' : '#bbb';
+    ctx.font = (attuale ? 'bold ' : '') + '11px Consolas, monospace';
+    ctx.fillText(taglia(stato.banchi[idx].nome, 16), 4, y + 13);
+  }
+}
+
+const taglia = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+
+function spezza(testo, larghezza) {
+  const parole = String(testo).split(/\s+/);
+  const righe = []; let riga = '';
+  for (const p of parole) {
+    if (!riga) riga = p;
+    else if ((riga + ' ' + p).length <= larghezza) riga += ' ' + p;
+    else { righe.push(riga); riga = p; }
+  }
+  if (riga) righe.push(riga);
+  return righe.map(r => taglia(r, larghezza));
+}
+
+/* ====================================================================
+   Avvio
+   ==================================================================== */
+
+$('btnConnect').addEventListener('click', async () => {
+  try {
+    await spark.connect();
+    await spark.identify();
+  } catch (err) { log('connessione fallita: ' + err.message, 'err'); }
+});
+
+// I tasti 1–8 fanno da piede: per provare la pressione lunga il mouse è scomodo.
+const giuDaTastiera = new Set();
+addEventListener('keydown', e => {
+  const i = '12345678'.indexOf(e.key);
+  if (i < 0 || e.repeat || giuDaTastiera.has(i)) return;
+  giuDaTastiera.add(i); giu(i);
+});
+addEventListener('keyup', e => {
+  const i = '12345678'.indexOf(e.key);
+  if (i < 0 || !giuDaTastiera.has(i)) return;
+  giuDaTastiera.delete(i); su(i);
+});
+
+(async function avvio() {
+  costruisciTasti();
+  await caricaBanchi();
+  disegna();
+  if (!navigator.bluetooth) {
+    $('btnConnect').disabled = true;
+    log('questo browser non ha Web Bluetooth: il simulatore funziona lo stesso, col ritardo finto', 'mk');
+  }
+  // Premi un tasto da solo, per verificare la pagina in headless: senza questo
+  // non c'è modo di provarla senza un browser pilotabile a mano.
+  //   ?demo&auto=0             tocco breve sul tasto 1
+  //   ?demo&auto=7&tieni=1400  tasto 8 tenuto: scorre i banchi
+  const auto = new URLSearchParams(location.search).get('auto');
+  if (auto !== null) {
+    const i = Number(auto);
+    const tenuta = Number(new URLSearchParams(location.search).get('tieni') || 80);
+    giu(i);
+    setTimeout(() => su(i), tenuta);
+  }
+})();
+</script>
+</body>
+</html>
