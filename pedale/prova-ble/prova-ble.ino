@@ -36,6 +36,7 @@
  */
 
 #include <BLEDevice.h>
+#include "preset_frames.h"
 
 /* --- GATT dello Spark: service 0xFFC0, write 0xFFC1, notify 0xFFC2 ------ */
 static BLEUUID UUID_SERVIZIO((uint16_t)0xFFC0);
@@ -61,9 +62,12 @@ static uint32_t ultimoRx  = 0;      // millis dell'ultimo messaggio: serve a mis
 static uint8_t  buffer[512];
 static size_t   dentro = 0;
 
+static bool silenzioso = false;   // durante un preset i 15 ack sono rumore
+
 static void messaggioIntero(const uint8_t* m, size_t n) {
   rxTotali++;
   ultimoRx = millis();
+  if (silenzioso) return;
   Serial.print(F("  RX "));
   if (n >= 6) {
     Serial.printf("0x%02x%02x  ", m[4], m[5]);
@@ -210,6 +214,55 @@ static void chiediIntervallo(uint16_t minUnita, uint16_t maxUnita) {
 }
 
 /* ======================================================================
+   Il preset intero: 0x0101 sul buffer 0x7f, poi 0x0138 con 0x7f.
+
+   Questo e' il pedale vero. I frame arrivano gia' pronti dall'app
+   (preset_frames.h), il firmware non serializza niente: **corregge un byte
+   solo**, il sequence number all'indice 2, perche' il checksum e' uno XOR
+   dei soli byte impacchettati e quindi non lo copre.
+
+   Tutti i chunk vanno con LO STESSO seq: e' cosi' che l'ampli li raggruppa,
+   e incrementarlo gli fa vedere N messaggi scollegati che conferma tutti
+   senza assemblarne nessuno.
+   ====================================================================== */
+
+static void mandaPreset() {
+  if (!chScrittura) { Serial.println(F("non connesso")); return; }
+
+  const uint8_t mio = seq;
+  if (++seq > 0x3e) seq = 0x01;
+
+  Serial.printf("invio %u chunk con seq 0x%02x...\n", PRESET_QUANTI, mio);
+  silenzioso = true;
+  const uint32_t t0 = millis();
+  uint32_t ack = 0, persi = 0;
+
+  for (uint8_t i = 0; i < PRESET_QUANTI; i++) {
+    uint8_t frame[64];
+    memcpy(frame, PRESET_FRAME[i], PRESET_LUNGH[i]);
+    frame[2] = mio;
+
+    const uint32_t prima = rxTotali;
+    chScrittura->writeValue(frame, PRESET_LUNGH[i], false);
+    const uint32_t t = millis();
+    while (rxTotali == prima && millis() - t < 500) delay(1);
+    // Un ack mancante non e' motivo di fermarsi: anche il firmware dell'ampli
+    // si sblocca da solo dopo mezzo secondo, e interrompersi lascerebbe il
+    // preset scritto a meta'.
+    if (rxTotali > prima) ack++; else persi++;
+  }
+  const uint32_t tTrasferimento = millis() - t0;
+  silenzioso = false;
+
+  cambiaPreset(0x7f);                    // fa suonare il buffer software
+  const uint32_t tTotale = millis() - t0;
+
+  Serial.printf("trasferimento %lu ms, con lo 0x0138 %lu ms — %u ack, %u persi\n",
+                tTrasferimento, tTotale, ack, persi);
+  Serial.println(F("l'ampli dovrebbe suonare \"DG - Shine On  clean\", col LED che lampeggia."));
+}
+
+/* ======================================================================
    La misura: dieci cambi preset di fila, quanto ci mette il giro
    ====================================================================== */
 
@@ -253,6 +306,7 @@ static void misura() {
 static void elenco() {
   Serial.println(F(
     "\n  0..7  cambia preset sullo slot (A1..A4 = 0..3, B1..B4 = 4..7)\n"
+    "  p     manda un preset intero sul buffer software e lo fa suonare\n"
     "  m     misura il giro di andata e ritorno\n"
     "  v     chiedi intervallo 7,5 ms\n"
     "  w     chiedi intervallo 15 ms\n"
@@ -278,6 +332,7 @@ void loop() {
   while (Serial.available()) {
     char c = Serial.read();
     if (c >= '0' && c <= '7') cambiaPreset(c - '0');
+    else if (c == 'p') mandaPreset();
     else if (c == 'm') misura();
     // L'ampli sceglie DENTRO l'intervallo chiesto, e prende il massimo:
     // misurato il 14 agosto 2026, chiedendo 6-12 ha dato ~15 ms. Quindi si
