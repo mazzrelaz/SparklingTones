@@ -144,6 +144,41 @@ window.SparkTransport = (function () {
     },
 
     /**
+     * Come `send`, ma spezza la **scrittura BLE** in pezzi da `max` byte.
+     *
+     * Non è la stessa cosa dei chunk di `0x0101`: lì si spezza il *messaggio*, qui
+     * il messaggio resta uno solo e si spezza soltanto la write. L'ampli riassembla
+     * da sé cercando `f0` … `f7`, esattamente come facciamo noi in ricezione.
+     *
+     * Serve per i messaggi lunghi. La license key `0x0170` è 109 byte, e mandata in
+     * una write sola l'ampli **non risponde nemmeno l'ack** — verificato il 14 agosto
+     * 2026. L'app ufficiale la manda in write ATT da 20 byte, come si vede nello snoop
+     * log (`captures/2026-08-14-app-ufficiale-looper.txt`).
+     *
+     * @returns il sequence number usato
+     */
+    sendSpezzato(command, max, forcedSeq) {
+      if (!this.writeChar) return Promise.reject(new Error('non connesso'));
+      const seq   = forcedSeq === undefined ? this._nextSeq() : forcedSeq;
+      const bytes = new Uint8Array(Spark.encode(command, seq, false));
+      const passo = Math.max(1, max || 20);
+
+      this.sendChain = this.sendChain.then(async () => {
+        for (let i = 0; i < bytes.length; i += passo) {
+          await this.writeChar.writeValueWithoutResponse(bytes.subarray(i, i + passo));
+        }
+        const pezzi = Math.ceil(bytes.length / passo);
+        this.onLog(`TX 0x${hex(command.cmd)}${hex(command.sub)} seq=0x${hex(seq)} ` +
+                   `${bytes.length}B in ${pezzi} scritture da ${passo}`);
+        await sleep(SEND_GAP_MS);
+      }).catch(err => {
+        this.onLog('errore invio: ' + err.message);
+      });
+
+      return this.sendChain.then(() => seq);
+    },
+
+    /**
      * Invia e aspetta una risposta che soddisfi il predicato.
      * @returns il messaggio, oppure null se scade il tempo
      */

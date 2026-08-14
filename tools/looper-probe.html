@@ -274,6 +274,16 @@ function riga(tipo, testo, extra) {
   $('btnExport').disabled = false;
 }
 
+/* Per i messaggi lunghi: la write BLE va spezzata, o l'ampli li scarta in silenzio.
+   Verificato sulla license key da 109 byte, che in una write sola non riceve
+   nemmeno l'ack — mentre l'app ufficiale la manda in write ATT da 20 byte. */
+function inviaSpezzato(cmd, sub, data, etichetta) {
+  riga('tx', `TX 0x${hex(cmd)}${hex(sub)} ${etichetta} — ${data.length}B spezzati in write da 20`,
+       { cmd, sub, data: data.slice() });
+  spark.sendSpezzato({ cmd, sub, data: data.slice() }, 20)
+       .catch(err => riga('err', 'errore invio: ' + err.message));
+}
+
 function invia(cmd, sub, data, etichetta) {
   const payload = data.slice();
   if (cmd === 0x01 && $('conZero').checked) payload.push(0x00);
@@ -355,10 +365,12 @@ function interrogaLooper(poi) {
 const PROVE = [
   { n: '① interroga ▸ poi COUNTIN', d: '0x0278 0x0275 0x0276, poi 0x0175 02',
     f: () => interrogaLooper(() => invia(0x01, 0x75, [0x02], 'COUNTIN')) },
-  { n: '② license key ▸ interroga ▸ COUNTIN', d: '0x0170 catturata, poi come sopra',
-    f: () => { invia(0x01, 0x70, LICENSE_KEY, 'license key');
+  { n: '② license key ▸ interroga ▸ COUNTIN', d: '0x0170 spezzata in write da 20, poi come sopra',
+    f: () => { inviaSpezzato(0x01, 0x70, LICENSE_KEY, 'license key');
                setTimeout(() => interrogaLooper(
-                 () => invia(0x01, 0x75, [0x02], 'COUNTIN')), 700); } },
+                 () => invia(0x01, 0x75, [0x02], 'COUNTIN')), 1200); } },
+  { n: '③ solo la license key', d: '0x0170 da sola — risponde 0x0470?',
+    f: () => inviaSpezzato(0x01, 0x70, LICENSE_KEY, 'license key') },
   ...NON_ELENCATI.map(v => ({
     n: `valore ${hex(v)}`, d: 'non è nell\'elenco di Ignitron',
     f: () => invia(0x01, 0x75, [v], `sconosciuto ${hex(v)}`),
