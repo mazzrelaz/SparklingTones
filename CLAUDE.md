@@ -422,6 +422,12 @@ per intero e ci mette circa un secondo. Il pulsante dice sempre quale dei due ca
 dell'ampli. La griglia è `grid-auto-flow: column` con quattro righe: senza, il riempimento
 sarebbe per riga e i posti 1–4 finirebbero a zigzag invece che tutti a sinistra.
 
+**Ogni pulsantone ha un LED verde**, idea dell'utente: spento è un vetrino scuro incassato,
+acceso è il preset che sta suonando. Ce n'è uno **anche sui posti vuoti** — su una
+pedaliera i led ci sono sempre, ed è quello che fa sembrare la fila una fila di tasti
+invece di otto riquadri. Si accende dalla classe `.attivo` che il pulsante ha già: nessuno
+stato nuovo da tenere allineato.
+
 **I preset di un banco si riordinano dal banco stesso.** In modifica ogni pulsante
 occupato ha una **presa `⇅`** in basso a sinistra: un tocco lì prende il preset, un tocco
 su un altro posto li **scambia**. Scambio e non inserimento — con otto posti fissi

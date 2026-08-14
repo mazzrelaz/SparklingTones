@@ -270,6 +270,16 @@
   .pad:active { transform:scale(0.985); }
   .pad .n { position:absolute; top:6px; right:10px; font-size:0.7rem;
             color:var(--faint); font-weight:700; }
+
+  /* Un LED per pulsante, come su una pedaliera vera: spento è un vetrino scuro,
+     acceso è il preset che sta suonando. Ce n'è uno anche sui posti vuoti — su
+     una pedaliera i led ci sono sempre, ed è quello che rende la fila coerente. */
+  .pad .ledpad { position:absolute; top:8px; left:10px; width:11px; height:11px;
+                 border-radius:50%; background:#15201a; border:1px solid #24312a;
+                 box-shadow:inset 0 1px 2px rgba(0,0,0,0.7); }
+  .pad.attivo .ledpad { background:var(--green); border-color:#8fe6a2;
+                        box-shadow:0 0 10px 2px rgba(122,224,138,0.75),
+                                   inset 0 0 3px rgba(255,255,255,0.6); }
   .pad .sub { font-size:0.7rem; font-weight:600; color:var(--dim); }
   /* `.istantaneo` e `.caricamento` erano i pallini verde e oro che dicevano se
      un preset parte subito o va trasmesso. Tolti col testo, il 14 agosto 2026. */
@@ -1470,6 +1480,9 @@ function disegnaLive() {
       + (live.modifica && banco ? ' inModifica' : '')
       + (live.sposta === posto ? ' inMano' : '');
 
+    const ledpad = document.createElement('span');
+    ledpad.className = 'ledpad';
+
     const numero = document.createElement('span');
     numero.className = 'n';
     numero.textContent = banco ? posto + 1 : Spark.slotLabel(posto).label;
@@ -1491,7 +1504,7 @@ function disegnaLive() {
     const barra = document.createElement('span');
     barra.className = 'barra';
 
-    pad.append(numero, nome, sub, barra);
+    pad.append(ledpad, numero, nome, sub, barra);
 
     if (live.modifica && banco) {
       pad.disabled = false;
