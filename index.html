@@ -74,12 +74,10 @@
   button.icon.on { color:var(--gold); }
   button.piccolo { font-size:0.76rem; padding:5px 9px; }
   button.pericolo { background:#3a2020; color:var(--rosso); }
-  /* Il passaggio fra le due viste è il tasto che si preme più spesso di tutti,
-     e in mano, spesso al buio: è grosso apposta. Lo stile resta quello — solo
-     l'accento su fondo trasparente — cambia la stazza. */
-  #btnVista { background:none; color:var(--accent); padding:10px 12px;
-              font-size:1.06rem; font-weight:700; letter-spacing:0.01em;
-              border:1px solid var(--accent); border-radius:9px; }
+  /* Ingrandito e rimesso com'era il 14 agosto 2026: più grosso non ci sta sulla
+     riga con «Leggi dall'ampli», «Categorie» e «Altro», e mandare a capo
+     l'intestazione costa più di quanto valga il tasto. */
+  #btnVista { background:none; color:var(--accent); padding:8px 4px; }
 
   input[type=text], input[type=search], select, textarea {
     background:#17181c; border:1px solid #2e3138; color:var(--text);
@@ -1316,6 +1314,51 @@ function dettaglio(record, slot) {
     mandaPreset(record, dove);
   });
   azioni.append(scelta, scrivi);
+
+  /* Mettere un preset in un banco live senza passare dalla vista Live.
+     Chiesto dall'utente il 14 agosto 2026: si sta già guardando il preset, e
+     doverlo ricordare, cambiare vista e ritrovarlo lì dentro è un giro inutile.
+     Va nel **primo posto libero** del banco scelto: quale dei quattro tasti sia
+     è una cosa che si decide col piede davanti, non da qui, e nella vista Live
+     si sposta. Non tocca l'ampli — i banchi inventati non ci scrivono mai. */
+  if (banchi.length) {
+    const banco = document.createElement('select');
+    banco.title = 'in quale banco live';
+    for (const b of banchi) {
+      const o = document.createElement('option');
+      o.value = b.id;
+      const liberi = b.posti.filter(p => p === null).length;
+      o.textContent = b.nome + (liberi ? ` — ${liberi} posti liberi` : ' — pieno');
+      banco.appendChild(o);
+    }
+
+    const metti = document.createElement('button');
+    metti.textContent = 'Metti nel banco';
+    metti.title = 'aggiunge il preset al banco live, senza toccare l\'ampli';
+    metti.addEventListener('click', async () => {
+      const id = Number(banco.value);
+      const scelto = banchi.find(b => b.id === id);
+      if (!scelto) return;
+
+      const giaLi = scelto.posti.indexOf(record.id);
+      if (giaLi !== -1) {
+        logLine(`«${record.name}» era già in «${scelto.nome}», al posto ${giaLi + 1}`);
+        return;
+      }
+      const libero = scelto.posti.indexOf(null);
+      if (libero === -1) {
+        alert(`«${scelto.nome}» è pieno: tutti e otto i posti sono occupati.\n\n` +
+              'Liberane uno dalla vista Live, oppure scegli un altro banco.');
+        return;
+      }
+      await store.setBankSlot(id, libero, record.id);
+      logLine(`«${record.name}» → «${scelto.nome}», posto ${libero + 1}`);
+      await ricarica();
+      disegnaPreset();
+      disegnaLive();
+    });
+    azioni.append(banco, metti);
+  }
 
   const elimina = document.createElement('button');
   elimina.className = 'pericolo';
