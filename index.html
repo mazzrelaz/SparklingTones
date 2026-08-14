@@ -271,12 +271,20 @@
   .pad .n { position:absolute; top:6px; right:10px; font-size:0.7rem;
             color:var(--faint); font-weight:700; }
   .pad .sub { font-size:0.7rem; font-weight:600; color:var(--dim); }
-  .pad .sub .istantaneo { color:var(--green); }
-  .pad .sub .caricamento { color:var(--gold); }
+  /* `.istantaneo` e `.caricamento` erano i pallini verde e oro che dicevano se
+     un preset parte subito o va trasmesso. Tolti col testo, il 14 agosto 2026. */
   .pad.attivo { border-color:var(--accent); background:#241a16; }
   .pad.occupato { opacity:0.55; }
   .pad.libero { border-style:dashed; background:none; color:var(--faint); font-weight:400; }
   .pad.inModifica { border-color:var(--gold); border-style:dashed; }
+
+  /* La presa per spostare un preset dentro il banco, solo in modifica. */
+  .presa { position:absolute; left:6px; bottom:6px; width:30px; height:30px;
+           display:flex; align-items:center; justify-content:center;
+           border-radius:8px; font-size:0.95rem; font-weight:700;
+           color:var(--dim); background:#1e2025; border:1px solid var(--line); }
+  .presa.viva { color:#000; background:var(--gold); border-color:var(--gold); }
+  .pad.inMano { border-color:var(--gold); border-style:solid; background:#241f16; }
   .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
                 background:var(--accent); transition:width 0.12s linear; }
 
@@ -710,7 +718,8 @@ let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic
 // nei record e nello store — cancellarlo butterebbe via delle scelte già
 // fatte — ma non si vede e non filtra più niente.
 const vista = { cerca: '', categoria: '', aperto: null, ordine: 'nome' };
-const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false };
+const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false,
+                sposta: null };   // il posto che si sta spostando, in modifica
 
 /** Il banco fisso non è salvato da nessuna parte: è quello che c'è sull'ampli. */
 const BANCO_AMPLI = 'ampli';
@@ -1395,13 +1404,12 @@ function dettaglio(record, slot) {
   });
   riga().appendChild(elimina);          // da sola: è l'unica che non si torna indietro
 
-  const meta = document.createElement('div');
-  meta.style.cssText = 'color:var(--faint);font-size:0.7rem;font-family:Consolas,monospace';
-  meta.textContent = `${record.uuid} · ${record.bpm} BPM`;
-
+  // Niente riga di identificativi in fondo: c'erano l'UUID e i BPM, tolti su
+  // richiesta il 14 agosto 2026. L'UUID serve al codice per riconoscere un
+  // preset fra un import e l'altro, non a chi guarda una scheda, e i BPM sono
+  // nel preset e non si cambiano da lì.
   det.append(boxNome, boxFam, boxCat, boxNote, azioni);
   if (avvisoAltriSlot) det.appendChild(avvisoAltriSlot);
-  det.appendChild(meta);
   return det;
 }
 
@@ -1426,6 +1434,23 @@ function postiDelBanco() {
   return banco.posti.map(id => (id === null ? null : perId(id)));
 }
 
+/**
+ * Scambia due posti di un banco. Non tocca l'ampli: i banchi inventati non ci
+ * scrivono mai, quindi riordinarli è solo una scrittura nelle preferenze.
+ */
+async function scambiaNelBanco(banco, da, a) {
+  const idDa = banco.posti[da];
+  const idA  = banco.posti[a];
+  await store.setBankSlot(banco.id, da, idA);
+  await store.setBankSlot(banco.id, a,  idDa);
+  live.sposta = null;
+  await ricarica();
+  disegnaLive();
+  const nome = r => (r ? `«${r.name}»` : 'il posto vuoto');
+  logLine(`${nome(perId(idDa))} ora è al posto ${a + 1}` +
+          (idA === null ? '' : `, ${nome(perId(idA))} al ${da + 1}`));
+}
+
 function disegnaLive() {
   disegnaBanchi();
 
@@ -1442,7 +1467,8 @@ function disegnaLive() {
       + (vuoto ? ' libero' : '')
       + (record && record.id === live.attivo ? ' attivo' : '')
       + (live.occupato ? ' occupato' : '')
-      + (live.modifica && banco ? ' inModifica' : '');
+      + (live.modifica && banco ? ' inModifica' : '')
+      + (live.sposta === posto ? ' inMano' : '');
 
     const numero = document.createElement('span');
     numero.className = 'n';
@@ -1453,15 +1479,14 @@ function disegnaLive() {
       ? (banco ? (live.modifica ? 'tocca per scegliere' : 'vuoto') : 'non letto')
       : record.name;
 
+    // Niente «● istantaneo» / «● da caricare»: tolti su richiesta il 14 agosto
+    // 2026. La differenza di velocità resta vera — chi non è in uno slot va
+    // trasmesso e ci mette circa un secondo — ma si sente suonando, e scritta su
+    // ognuno degli otto pulsanti era solo rumore. Nel banco fisso lo slot sta
+    // già nell'angolo, quindi lì la riga resta vuota del tutto.
     const sub = document.createElement('span');
     sub.className = 'sub';
-    if (!vuoto && !residente(record)) {
-      sub.innerHTML = '<span class="caricamento">● da caricare</span> · ~1s';
-    } else if (!vuoto) {
-      // Nel banco fisso lo slot è già scritto nell'angolo: ripeterlo è rumore.
-      sub.innerHTML = '<span class="istantaneo">● istantaneo</span>' +
-        (banco ? ` · ${etichetteSlot(record)}` : '');
-    }
+    if (!vuoto && banco) sub.textContent = etichetteSlot(record);
 
     const barra = document.createElement('span');
     barra.className = 'barra';
@@ -1470,7 +1495,31 @@ function disegnaLive() {
 
     if (live.modifica && banco) {
       pad.disabled = false;
-      pad.addEventListener('click', () => scegliPer(banco, posto));
+      pad.addEventListener('click', () => {
+        if (live.sposta === null)   return scegliPer(banco, posto);
+        if (live.sposta === posto) { live.sposta = null; disegnaLive(); return; }
+        scambiaNelBanco(banco, live.sposta, posto);
+      });
+
+      // La presa per spostare: un tocco qui prende il preset, un tocco su un
+      // altro posto li scambia. Sta su un angolo suo e non ruba il tocco al
+      // resto del pulsante, che continua a servire per scegliere cosa metterci.
+      // Scambio e non inserimento: con otto posti fissi «sposta in mezzo» vorrebbe
+      // dire far scalare tutti gli altri, e nessuno se lo aspetta da una pedaliera.
+      if (!vuoto) {
+        const presa = document.createElement('span');
+        presa.className = 'presa' + (live.sposta === posto ? ' viva' : '');
+        presa.textContent = '⇅';
+        presa.title = live.sposta === posto
+          ? 'tocca un altro posto per scambiare, o qui per lasciar perdere'
+          : 'sposta questo preset in un altro posto';
+        presa.addEventListener('click', event => {
+          event.stopPropagation();
+          live.sposta = live.sposta === posto ? null : posto;
+          disegnaLive();
+        });
+        pad.appendChild(presa);
+      }
     } else {
       pad.disabled = vuoto || !spark.connected || live.occupato;
       if (!vuoto) pad.addEventListener('click', () => attiva(record, barra));
@@ -1630,6 +1679,7 @@ $('btnModifica').addEventListener('click', () => {
     return;
   }
   live.modifica = !live.modifica;
+  live.sposta = null;              // uscendo dalla modifica non resta niente in mano
   disegnaLive();
 });
 
