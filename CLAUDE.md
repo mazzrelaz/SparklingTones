@@ -36,6 +36,7 @@ src/spark-effetti.js     nomi di effetti e manopole + elenco modelli, dal catalo
 src/spark-backup.js      legge preset_backup.zip dell'app ufficiale, senza librerie
 src/pwa.js               registra il service worker, «installa» e «versione nuova»
 pedale/                  firmware ESP32 (appena cominciato)
+tools/pedale-sim.html    la faccia del pedale in una pagina, con dentro la logica vera
 tools/serve.ps1          server statico su localhost, per provare la PWA
 tools/make-icons.ps1     rigenera le icone di icons/
 tools/leggi-btsnoop.ps1  legge uno snoop log HCI di Android e ne tira fuori i nostri messaggi
@@ -101,6 +102,17 @@ a «esecuzione…» — non è un test rotto, è l'ambiente. Quella va aperta in
 
 **In una scheda in secondo piano i timer vengono strozzati**, e una suite che ci mette un
 secondo sembra piantata a metà per minuti. Basta portare la scheda in primo piano.
+
+**Lo stdout di Edge headless non torna alla shell** (14 agosto 2026): catturarlo con
+`$out = & msedge …` dà **stringa vuota**, anche su una pagina che funziona, e sembra che
+la pagina non abbia prodotto niente. Va redirezionato su file:
+`Start-Process … -RedirectStandardOutput $file -NoNewWindow -Wait`, poi
+`[IO.File]::ReadAllText($file)`. Vale sia per `--dump-dom` sia per `--screenshot`.
+
+**Il riquadro di anteprima non serve a provare questo progetto.** Carica i `file://` come
+`data:`, quindi i `<script src="../src/…">` non partono e si vede solo il guscio; e
+`localhost` è bloccato da policy, quindi nemmeno `serve.ps1` lo raggiunge. Per vedere una
+pagina che *gira* si usa Edge headless con `--screenshot` e la si legge come immagine.
 
 Il push non parte dalla mia shell, che è non interattiva: Git Credential Manager non
 riesce a chiedere le credenziali e git muore con *terminal prompts disabled*. Funziona
@@ -365,25 +377,35 @@ tap tempo) la via è un **MCP23017**, sedici ingressi sugli stessi due fili dell
 4. **Lo schermo che si spegne** sul telefono ferma BLE e timer (Wake Lock API) — vale se
    si torna sul ponte via browser.
 
-### Il simulatore, primo passo — da fare
+### Il simulatore — fatto il 14 agosto 2026, da provare col piede
 
-`tools/pedale-sim.html`: la faccia del pedale in una pagina — otto footswitch cliccabili
-in due file da quattro, otto LED, e l'OLED 128×128 disegnato 1:1 su un canvas — con dentro
-la logica vera e **il nostro trasporto**, quindi non è un mockup. Serve a decidere *cosa fa
-ogni tasto* e *cosa mostra il display* prima che quelle scelte costino una saldatura, e a
-rispondere alla domanda vera: «suonarci è comodo?».
+`tools/pedale-sim.html`: la faccia del pedale in una pagina — otto footswitch in due file
+da quattro, otto LED, e l'OLED 128×128 disegnato 1:1 su un canvas — con dentro la logica
+vera e **il nostro trasporto**, quindi non è un mockup. Con l'ampli connesso manda
+`loadPreset` davvero; senza, simula il ritardo (regolabile, così si prova anche cosa
+sarebbero 250 ms) e misura quanto ci mette ogni cambio.
 
-Deve simulare il ritardo **onestamente** (regolabile, così si prova anche cosa sarebbero
-250 ms), e far provare due cose che si decidono solo col piede:
+I banchi arrivano da `store.getBanks()`. Se non ce ne sono usa banchi finti e lo dice;
+`?demo` li forza. **I tasti 1–8 della tastiera fanno da piede**: col mouse la pressione
+lunga non si prova bene.
 
-- **il tocco breve dei due tasti di destra deve agire al rilascio**, perché finché non sai
-  se lo stai per tenere premuto non puoi cambiare preset alla pressione. Riguarda solo
-  quei due; gli altri sei possono scattare alla pressione.
-- **con che passo scorrono i banchi**: tenuto ~500 ms = un banco, poi ripete ogni ~600 ms,
-  con l'OLED che mostra il banco mentre scorre.
+Le costanti da tarare stanno in cima al file: `PRESSIONE_LUNGA` 500 ms, `RIPETI_BANCO`
+600 ms, `TASTO_SU` 3 e `TASTO_GIU` 7. Le scelte già dentro, che sono quelle da giudicare
+suonando:
 
-Restano aperte: cosa mostra l'OLED (nome del preset, blocco, posizione nel loop), e se i
-sei tasti «liberi» servano ad altro.
+- **il tocco breve dei due tasti di destra agisce al rilascio**, perché finché non sai se
+  lo stai per tenere premuto non puoi cambiare preset alla pressione. Riguarda solo quei
+  due; gli altri sei scattano alla pressione.
+- **tenuti ~500 ms scorrono i banchi**, poi ripetono ogni 600 ms, e l'OLED mostra l'elenco
+  finché non si molla.
+- **una pressione durante un caricamento si accoda, non annulla**: vedi il punto 2 di
+  «da misurare».
+- cambiando banco **`attivo` torna a `null`**: l'ampli continua a suonare quel preset, ma
+  nessun tasto del banco nuovo lo rappresenta, e far finta di sì sarebbe una bugia.
+
+Restano aperte, ed è quello che il simulatore deve far decidere: cosa mostra l'OLED (per
+ora nome del preset + mappa 2×4; la mappa però ripete quello che i LED già dicono, quindi
+forse è spazio sprecato), e se i sei tasti «liberi» debbano servire ad altro.
 
 ### Ricognizione, non misura
 
