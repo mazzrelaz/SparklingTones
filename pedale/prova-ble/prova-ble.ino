@@ -62,6 +62,20 @@ static uint32_t ultimoRx  = 0;      // millis dell'ultimo messaggio: serve a mis
 static uint8_t  buffer[512];
 static size_t   dentro = 0;
 
+/* --- il footswitch: per ora il tasto BOOT che c'e' gia' sulla scheda ------
+ *
+ * GPIO9 e' il tasto BOOT, quindi zero saldature. Ma e' anche un pin di
+ * strapping: **tenuto premuto mentre la scheda si accende, il C3 parte in
+ * modalita' programmazione e non esegue lo sketch**. Va benissimo per provare,
+ * e nel pedale vero il footswitch non ci va mai sopra.
+ */
+static const uint8_t PIN_TASTO = 9;
+static const uint32_t ANTIRIMBALZO = 25;   // ms
+
+static bool     tastoGiu    = false;
+static uint32_t tastoCambio = 0;
+static uint8_t  corrente    = 0;           // quale preset del banco sta suonando
+
 static bool silenzioso = false;   // durante un preset i 15 ack sono rumore
 
 static void messaggioIntero(const uint8_t* m, size_t n) {
@@ -185,7 +199,7 @@ static bool collega() {
   scan->start(8, false);
   scan->clearResults();
 
-  if (!trovato) { Serial.println(F("nessuno Spark. Acceso? Gia' connesso a un telefono?")); return false; }
+  if (!trovato) { Serial.println(F("nessuno Spark: riprovo fra cinque secondi.")); return false; }
 
   client = BLEDevice::createClient();
   if (!client->connect(trovato)) { Serial.println(F("connessione fallita")); return false; }
@@ -198,7 +212,11 @@ static bool collega() {
   if (!chScrittura || !chNotifiche) { Serial.println(F("caratteristiche assenti")); client->disconnect(); return false; }
 
   chNotifiche->registerForNotify(alArrivo);
-  Serial.printf("connesso, MTU %d\n", client->getMTU());
+  // Subito l'intervallo corto: misurato, e' la differenza fra 1246 ms e 326 ms
+  // per un preset intero. Va chiesto SECCO, min uguale a max, perche' l'ampli
+  // sceglie dentro l'intervallo e prende sempre il massimo.
+  client->updateConnParams(6, 6, 0, 400);
+  Serial.printf("connesso, MTU %d, chiesto intervallo 7,5 ms\n", client->getMTU());
   Serial.println(F("pronto. '?' per l'elenco dei comandi."));
   return true;
 }
@@ -226,24 +244,26 @@ static void chiediIntervallo(uint16_t minUnita, uint16_t maxUnita) {
    senza assemblarne nessuno.
    ====================================================================== */
 
-static void mandaPreset() {
+static void mandaPreset(uint8_t n) {
   if (!chScrittura) { Serial.println(F("non connesso")); return; }
+  if (n >= BANCO_QUANTI) return;
 
-  const uint8_t mio = seq;
+  const uint8_t quanti = BANCO_CHUNK[n];
+  const uint8_t mio    = seq;
   if (++seq > 0x3e) seq = 0x01;
 
-  Serial.printf("invio %u chunk con seq 0x%02x...\n", PRESET_QUANTI, mio);
   silenzioso = true;
   const uint32_t t0 = millis();
   uint32_t ack = 0, persi = 0;
 
-  for (uint8_t i = 0; i < PRESET_QUANTI; i++) {
+  for (uint8_t i = 0; i < quanti; i++) {
     uint8_t frame[64];
-    memcpy(frame, PRESET_FRAME[i], PRESET_LUNGH[i]);
+    const uint8_t len = BANCO_LUNGH[n][i];
+    memcpy(frame, BANCO_FRAME[n][i], len);
     frame[2] = mio;
 
     const uint32_t prima = rxTotali;
-    chScrittura->writeValue(frame, PRESET_LUNGH[i], false);
+    chScrittura->writeValue(frame, len, false);
     const uint32_t t = millis();
     while (rxTotali == prima && millis() - t < 500) delay(1);
     // Un ack mancante non e' motivo di fermarsi: anche il firmware dell'ampli
@@ -251,15 +271,15 @@ static void mandaPreset() {
     // preset scritto a meta'.
     if (rxTotali > prima) ack++; else persi++;
   }
-  const uint32_t tTrasferimento = millis() - t0;
   silenzioso = false;
 
   cambiaPreset(0x7f);                    // fa suonare il buffer software
   const uint32_t tTotale = millis() - t0;
 
-  Serial.printf("trasferimento %lu ms, con lo 0x0138 %lu ms — %u ack, %u persi\n",
-                tTrasferimento, tTotale, ack, persi);
-  Serial.println(F("l'ampli dovrebbe suonare \"DG - Shine On  clean\", col LED che lampeggia."));
+  Serial.printf("[%u] %s — %lu ms, %u/%u ack%s\n",
+                n + 1, BANCO_NOMI[n], tTotale, ack, quanti,
+                persi ? "  (ATTENZIONE: qualche chunk non confermato)" : "");
+  corrente = n;
 }
 
 /* ======================================================================
@@ -306,7 +326,8 @@ static void misura() {
 static void elenco() {
   Serial.println(F(
     "\n  0..7  cambia preset sullo slot (A1..A4 = 0..3, B1..B4 = 4..7)\n"
-    "  p     manda un preset intero sul buffer software e lo fa suonare\n"
+    "  p     il prossimo preset del banco (come premere BOOT)\n"
+    "  e     elenca il banco\n"
     "  m     misura il giro di andata e ritorno\n"
     "  v     chiedi intervallo 7,5 ms\n"
     "  w     chiedi intervallo 15 ms\n"
@@ -317,10 +338,28 @@ static void elenco() {
 void setup() {
   Serial.begin(115200);
   delay(600);
-  Serial.println(F("\nprova-ble — pedale Spark 2\n"));
+  Serial.println(F("\nprova-ble — pedale Spark 2"));
+  Serial.printf("banco di %u preset nel firmware. Premi BOOT per il prossimo.\n\n", BANCO_QUANTI);
+  pinMode(PIN_TASTO, INPUT_PULLUP);
   BLEDevice::init("pedale-prova");
   collega();
 }
+
+/** Antirimbalzo: si agisce alla pressione, non al rilascio. */
+static void leggiTasto() {
+  const bool giu = (digitalRead(PIN_TASTO) == LOW);
+  if (giu == tastoGiu) return;
+  if (millis() - tastoCambio < ANTIRIMBALZO) return;
+  tastoCambio = millis();
+  tastoGiu = giu;
+  if (giu) mandaPreset((corrente + 1) % BANCO_QUANTI);
+}
+
+/* Un pedale non si arrende. Se si accende prima dell'ampli, o se la
+ * connessione cade a meta' concerto, deve riprovare da solo: senza questo
+ * il pedale resta muto finche' qualcuno non lo riavvia, che sul palco non
+ * succede. Riprova ogni cinque secondi, in silenzio. */
+static uint32_t ultimoTentativo = 0;
 
 void loop() {
   if (client && !client->isConnected() && chScrittura) {
@@ -328,11 +367,21 @@ void loop() {
     chScrittura = chNotifiche = nullptr;
     dentro = 0;
   }
+  if (!chScrittura && millis() - ultimoTentativo > 5000) {
+    ultimoTentativo = millis();
+    collega();
+  }
+
+  leggiTasto();
 
   while (Serial.available()) {
     char c = Serial.read();
     if (c >= '0' && c <= '7') cambiaPreset(c - '0');
-    else if (c == 'p') mandaPreset();
+    else if (c == 'p') mandaPreset((corrente + 1) % BANCO_QUANTI);
+    else if (c == 'e') { Serial.println(F("il banco nel firmware:"));
+                         for (uint8_t i = 0; i < BANCO_QUANTI; i++)
+                           Serial.printf("  %u  %s%s\n", i + 1, BANCO_NOMI[i],
+                                         i == corrente ? "   <- adesso" : ""); }
     else if (c == 'm') misura();
     // L'ampli sceglie DENTRO l'intervallo chiesto, e prende il massimo:
     // misurato il 14 agosto 2026, chiedendo 6-12 ha dato ~15 ms. Quindi si
