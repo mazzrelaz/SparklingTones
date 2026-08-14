@@ -70,7 +70,10 @@ con quelli che hanno davvero avuto effetto sull'ampli, byte per byte.
 **Mai riscrivere un file di questo progetto con `Get-Content`/`Set-Content` di PowerShell
 5.1.** Senza BOM, `Get-Content` decodifica l'UTF-8 come ANSI e `Set-Content -Encoding UTF8`
 lo riscrive doppiamente codificato: ogni accento e ogni «—» diventano `Ã ` e `â€"`, in
-tutto il file, in silenzio. Successo il 13 agosto 2026 su `index.html`, `live.html` e
+tutto il file, in silenzio. **Ci sono ricascato il 14 agosto 2026 su `sw.js`**, con un `-replace` di una riga sola
+per alzare la versione: basta quello. Rimediato con `git checkout -- sw.js` e rifatto
+con l'editor — se il file è già committato quella è la via più corta, non la conversione
+in CP1252. Successo il 13 agosto 2026 su `index.html`, `live.html` e
 `pwa.js` facendo un semplice replace di colori — visto solo da uno screenshot
 («cerca un presetâ€¦»). Le modifiche vanno fatte con gli strumenti di edit, o in .NET con
 l'encoding esplicito. Se ricapita si torna indietro senza perdere il lavoro: si rilegge
@@ -418,6 +421,20 @@ per intero e ci mette circa un secondo. Il pulsante dice sempre quale dei due ca
 **Banchi da otto, quattro a sinistra e quattro a destra**, come i due banchi di LED
 dell'ampli. La griglia è `grid-auto-flow: column` con quattro righe: senza, il riempimento
 sarebbe per riga e i posti 1–4 finirebbero a zigzag invece che tutti a sinistra.
+
+**I preset di un banco si riordinano dal banco stesso.** In modifica ogni pulsante
+occupato ha una **presa `⇅`** in basso a sinistra: un tocco lì prende il preset, un tocco
+su un altro posto li **scambia**. Scambio e non inserimento — con otto posti fissi
+«sposta in mezzo» vorrebbe dire far scalare tutti gli altri, e da una pedaliera nessuno se
+lo aspetta. La presa sta in un angolo suo e non ruba il tocco al resto del pulsante, che
+continua a servire per scegliere cosa metterci. Non tocca l'ampli: è una scrittura nelle
+preferenze.
+
+**Sui pulsantoni non c'è più «● istantaneo» / «● da caricare»**, tolti su richiesta il
+14 agosto 2026. La differenza di velocità resta vera — chi non sta in uno slot va
+trasmesso e ci mette circa un secondo — ma si sente suonando, e scritta su ognuno degli
+otto pulsanti era solo rumore. Nel banco fisso la riga sotto il nome resta vuota del
+tutto; nei banchi inventati porta lo slot dell'ampli, che è un fatto e non una previsione.
 
 - Il banco **«Ampli» non è salvato da nessuna parte**: si ricava dal campo `slot` dei
   record. Così non può divergere da quello che c'è davvero sull'ampli, e non esiste il
