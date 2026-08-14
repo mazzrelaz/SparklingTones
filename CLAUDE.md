@@ -36,7 +36,10 @@ src/spark-effetti.js     nomi di effetti e manopole + elenco modelli, dal catalo
 src/spark-backup.js      legge preset_backup.zip dell'app ufficiale, senza librerie
 src/pwa.js               registra il service worker, «installa» e «versione nuova»
 pedale/                  firmware ESP32 (appena cominciato)
+pedale/prova-ble/        firmware di prova: si collega, cambia preset, ne manda uno intero
+pedale/prova-usb/        sketch che non fa niente, per isolare i guai di USB/alimentazione
 tools/pedale-sim.html    la faccia del pedale in una pagina, con dentro la logica vera
+tools/frames-pedale.html genera i frame preserializzati per il firmware (preset_frames.h)
 tools/serve.ps1          server statico su localhost, per provare la PWA
 tools/make-icons.ps1     rigenera le icone di icons/
 tools/leggi-btsnoop.ps1  legge uno snoop log HCI di Android e ne tira fuori i nostri messaggi
@@ -440,8 +443,21 @@ Due cose imparate misurando, che valgono la prossima volta:
 - **La dispersione è il termometro**: a 30 ms i giri vanno da 79 a 129, a 7,5 ms da 21 a
   29. Se la forbice resta larga la richiesta non è stata accolta, anche se la media scende.
 
-**È una stima, non una misura**, e va rifatta mandando un preset vero: i chunk sono da 39
-byte invece di 10 e l'ampli potrebbe digerirli più lentamente di un cambio preset.
+**E il preset vero è stato mandato**, non più stimato — 15 chunk, `0x0101` sul buffer
+`0x7f` più `0x0138`, **15 ack su 15, zero persi**, tre volte di fila:
+
+| intervallo | preset intero, misurato |
+|---|---|
+| di sistema | **1246 ms** |
+| 7,5 ms secco | **326 ms**, e 327 alla ripetizione |
+
+**Il pedale carica un preset in un terzo di secondo, quasi quattro volte il telefono.**
+
+**E l'architettura è verificata sull'hardware, non solo ragionata.** Il firmware ha mandato
+frame **preserializzati dall'app** (`tools/frames-pedale.html` → `preset_frames.h`)
+correggendo **un byte solo**, il seq all'indice 2, senza ricalcolare il checksum. Ha
+funzionato al primo colpo. Quindi il porting non è «l'encoder in C++»: l'encoder resta uno
+solo, in JS, coperto da 87 test.
 
 **Il core esp32 3.x usa NimBLE sotto `BLEDevice.h`** (i tipi sono `ble_gap_conn_params`,
 non i Bluedroid `esp_ble_*`): niente da installare, e il timore sulla RAM del C3 decade —

@@ -1,0 +1,75 @@
+<!DOCTYPE html><meta charset="utf-8"><body><pre id="out"></pre>
+<script src="src/spark-protocol.js"></script>
+<script src="test/fixtures/preset0.js"></script>
+<script>
+const B = '/' + '*', E = '*' + '/';
+const righe = [
+  B,
+  ' * preset_frames.h — GENERATO, non modificare a mano.',
+  ' *',
+  ' * Prodotto da tools/frames-pedale.html partendo dalla cattura reale in',
+  ' * test/fixtures/preset0.js, con l\'encoder di src/spark-protocol.js.',
+  ' *',
+  ' * È il punto del progetto: l\'app preserializza e il pedale scrive i frame',
+  ' * tali e quali. Il seq sta all\'indice 2 e il checksum è uno XOR dei soli',
+  ' * byte impacchettati, quindi NON lo copre: il pedale può correggere quel',
+  ' * byte sul posto senza ricalcolare niente.',
+  ' ' + E,
+  '#pragma once',
+  '',
+];
+try {
+  // 1. la cattura reale dei 16 chunk -> payload del preset
+  // Il fixture puo' essere un flusso unico o un array di messaggi: accetto entrambi.
+  const grezzo = window.FIXTURE_PRESET0;
+  const byte = Array.isArray(grezzo[0]) ? [].concat(...grezzo) : Array.from(grezzo);
+  righe.push('// byte in ingresso: ' + byte.length);
+  const messaggi = [];
+  const asm = new Spark.MessageAssembler(m => messaggi.push(m));
+  asm.feed(new Uint8Array(byte));
+
+  righe.push('// messaggi assemblati: ' + messaggi.length);
+  if (messaggi[0]) {
+    righe.push('// campi del messaggio: ' + Object.keys(messaggi[0]).join(', '));
+    righe.push('// primo: cmd=' + messaggi[0].cmd + ' sub=' + messaggi[0].sub);
+    for (const k of Object.keys(messaggi[0])) {
+      const v = messaggi[0][k];
+      if (Array.isArray(v) || v instanceof Uint8Array) {
+        righe.push('//   ' + k + ' (' + v.length + '): ' +
+                   Array.from(v).slice(0, 12).map(b => b.toString(16)).join(' '));
+      }
+    }
+  }
+  const pezzi = messaggi
+    .filter(m => m.cmd === 0x03 && m.sub === 0x01)
+    .map(m => ({ idx: m.data[1], dati: m.data.slice(3, 3 + m.data[2]) }))
+    .sort((a, b) => a.idx - b.idx);
+  const payloadLetto = [].concat(...pezzi.map(p => p.dati));
+
+  const preset = Spark.parsePreset(payloadLetto);
+  righe.push('// preset letto: "' + preset.name + '"  uuid ' + preset.uuid);
+
+  // 2. ri-serializzato verso il buffer software 0x7f, come fa loadPreset
+  const payload = Spark.serializePreset(preset, Spark.SOFTWARE_TARGET, { omitTail: true });
+  const chunks  = Spark.splitPresetIntoChunks(payload);
+  const SEQ = 0x01;   // lo stesso per tutti i chunk: il pedale lo ripatcha
+  const frames = chunks.map(c =>
+    Spark.encode({ cmd: Spark.CMD_ACTION, sub: 0x01, data: c }, SEQ, false));
+
+  righe.push('// payload ' + payload.length + ' byte in ' + chunks.length + ' chunk');
+  righe.push('// frame piu lungo: ' + Math.max(...frames.map(f => f.length)) + ' byte');
+  righe.push('');
+  righe.push('static const uint8_t PRESET_QUANTI = ' + frames.length + ';');
+  righe.push('static const uint8_t PRESET_LUNGH[' + frames.length + '] = { ' +
+             frames.map(f => f.length).join(', ') + ' };');
+  righe.push('static const uint8_t PRESET_FRAME[' + frames.length + '][' +
+             Math.max(...frames.map(f => f.length)) + '] = {');
+  for (const f of frames) {
+    righe.push('  { ' + f.map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ' },');
+  }
+  righe.push('};');
+} catch (e) {
+  righe.push('ERRORE: ' + e.message + '\n' + e.stack);
+}
+document.getElementById('out').textContent = righe.join('\n');
+</script>
