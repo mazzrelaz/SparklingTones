@@ -1,75 +1,104 @@
-<!DOCTYPE html><meta charset="utf-8"><body><pre id="out"></pre>
-<script src="src/spark-protocol.js"></script>
-<script src="test/fixtures/preset0.js"></script>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Spark — frame preserializzati per il pedale</title>
+<style>
+  body { margin:0; padding:16px; background:#0a0a0b; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:14px; }
+  h1 { font-size:1.1rem; margin:0 0 2px; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:76ch; line-height:1.55; }
+  .sub b { color:#c8ccd2; }
+  pre { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+        font-family:'SF Mono',Consolas,monospace; font-size:0.72rem; line-height:1.5;
+        color:#8a8f98; overflow-x:auto; max-height:70vh; }
+</style>
+</head>
+<body>
+<h1>Frame preserializzati per il pedale</h1>
+<p class="sub">
+  Legge un banco di preset e produce l'header C++ che il firmware include.
+  <b>Non è un convertitore a parte</b>: usa <code>src/spark-protocol.js</code>, lo stesso
+  encoder dell'app, coperto dagli 87 test. Il firmware scrive questi frame tali e quali e
+  <b>corregge un byte solo</b>, il sequence number all'indice 2 — il checksum è uno XOR dei
+  soli byte impacchettati, quindi non lo copre.
+</p>
+<pre id="out">…</pre>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="banco-di-prova.js"></script>
 <script>
+'use strict';
+
 const B = '/' + '*', E = '*' + '/';
 const righe = [
   B,
-  ' * preset_frames.h — GENERATO, non modificare a mano.',
+  ' * preset_frames.h — GENERATO da tools/frames-pedale.html, non modificare a mano.',
   ' *',
-  ' * Prodotto da tools/frames-pedale.html partendo dalla cattura reale in',
-  ' * test/fixtures/preset0.js, con l\'encoder di src/spark-protocol.js.',
-  ' *',
-  ' * È il punto del progetto: l\'app preserializza e il pedale scrive i frame',
-  ' * tali e quali. Il seq sta all\'indice 2 e il checksum è uno XOR dei soli',
-  ' * byte impacchettati, quindi NON lo copre: il pedale può correggere quel',
-  ' * byte sul posto senza ricalcolare niente.',
+  ' * Un banco di preset già serializzati verso il buffer software 0x7f, pronti da',
+  ' * scrivere sulla caratteristica 0xFFC1. Il firmware non serializza niente: cambia',
+  ' * il seq all\'indice 2 e basta.',
   ' ' + E,
   '#pragma once',
   '',
 ];
+
+function esci(testo) { document.getElementById('out').textContent = testo; }
+
 try {
-  // 1. la cattura reale dei 16 chunk -> payload del preset
-  // Il fixture puo' essere un flusso unico o un array di messaggi: accetto entrambi.
-  const grezzo = window.FIXTURE_PRESET0;
-  const byte = Array.isArray(grezzo[0]) ? [].concat(...grezzo) : Array.from(grezzo);
-  righe.push('// byte in ingresso: ' + byte.length);
-  const messaggi = [];
-  const asm = new Spark.MessageAssembler(m => messaggi.push(m));
-  asm.feed(new Uint8Array(byte));
+  const presets = (window.PRESETS || []).slice(0, 8);
+  if (!presets.length) throw new Error('nessun preset: manca _presets.js');
 
-  righe.push('// messaggi assemblati: ' + messaggi.length);
-  if (messaggi[0]) {
-    righe.push('// campi del messaggio: ' + Object.keys(messaggi[0]).join(', '));
-    righe.push('// primo: cmd=' + messaggi[0].cmd + ' sub=' + messaggi[0].sub);
-    for (const k of Object.keys(messaggi[0])) {
-      const v = messaggi[0][k];
-      if (Array.isArray(v) || v instanceof Uint8Array) {
-        righe.push('//   ' + k + ' (' + v.length + '): ' +
-                   Array.from(v).slice(0, 12).map(b => b.toString(16)).join(' '));
-      }
-    }
+  const perPreset = presets.map(p => {
+    const payload = Spark.serializePreset(p, Spark.SOFTWARE_TARGET, { omitTail: true });
+    const chunks  = Spark.splitPresetIntoChunks(payload);
+    // Seq 0x01 per tutti: il pedale lo ripatcha a ogni invio. Tutti i chunk di
+    // un preset devono avere LO STESSO seq, altrimenti l'ampli li vede come
+    // messaggi scollegati e li conferma senza assemblarne nessuno.
+    const frames = chunks.map(c =>
+      Spark.encode({ cmd: Spark.CMD_ACTION, sub: 0x01, data: c }, 0x01, false));
+    return { nome: p.name, payload: payload.length, frames };
+  });
+
+  const maxChunk = Math.max(...perPreset.map(p => p.frames.length));
+  const maxLungh = Math.max(...perPreset.map(p => Math.max(...p.frames.map(f => f.length))));
+
+  for (const p of perPreset) {
+    righe.push(`// "${p.nome}" — ${p.payload} byte in ${p.frames.length} chunk`);
   }
-  const pezzi = messaggi
-    .filter(m => m.cmd === 0x03 && m.sub === 0x01)
-    .map(m => ({ idx: m.data[1], dati: m.data.slice(3, 3 + m.data[2]) }))
-    .sort((a, b) => a.idx - b.idx);
-  const payloadLetto = [].concat(...pezzi.map(p => p.dati));
-
-  const preset = Spark.parsePreset(payloadLetto);
-  righe.push('// preset letto: "' + preset.name + '"  uuid ' + preset.uuid);
-
-  // 2. ri-serializzato verso il buffer software 0x7f, come fa loadPreset
-  const payload = Spark.serializePreset(preset, Spark.SOFTWARE_TARGET, { omitTail: true });
-  const chunks  = Spark.splitPresetIntoChunks(payload);
-  const SEQ = 0x01;   // lo stesso per tutti i chunk: il pedale lo ripatcha
-  const frames = chunks.map(c =>
-    Spark.encode({ cmd: Spark.CMD_ACTION, sub: 0x01, data: c }, SEQ, false));
-
-  righe.push('// payload ' + payload.length + ' byte in ' + chunks.length + ' chunk');
-  righe.push('// frame piu lungo: ' + Math.max(...frames.map(f => f.length)) + ' byte');
   righe.push('');
-  righe.push('static const uint8_t PRESET_QUANTI = ' + frames.length + ';');
-  righe.push('static const uint8_t PRESET_LUNGH[' + frames.length + '] = { ' +
-             frames.map(f => f.length).join(', ') + ' };');
-  righe.push('static const uint8_t PRESET_FRAME[' + frames.length + '][' +
-             Math.max(...frames.map(f => f.length)) + '] = {');
-  for (const f of frames) {
-    righe.push('  { ' + f.map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ' },');
+  righe.push(`static const uint8_t BANCO_QUANTI   = ${perPreset.length};`);
+  righe.push(`static const uint8_t BANCO_MAX_CHUNK = ${maxChunk};`);
+  righe.push('');
+  righe.push(`static const char* const BANCO_NOMI[${perPreset.length}] = {`);
+  for (const p of perPreset) righe.push(`  ${JSON.stringify(p.nome)},`);
+  righe.push('};');
+  righe.push('');
+  righe.push(`static const uint8_t BANCO_CHUNK[${perPreset.length}] = { ` +
+             perPreset.map(p => p.frames.length).join(', ') + ' };');
+  righe.push('');
+  righe.push(`static const uint8_t BANCO_LUNGH[${perPreset.length}][${maxChunk}] = {`);
+  for (const p of perPreset) {
+    const l = p.frames.map(f => f.length);
+    while (l.length < maxChunk) l.push(0);
+    righe.push('  { ' + l.join(', ') + ' },');
   }
   righe.push('};');
+  righe.push('');
+  righe.push(`static const uint8_t BANCO_FRAME[${perPreset.length}][${maxChunk}][${maxLungh}] = {`);
+  for (const p of perPreset) {
+    righe.push('  {');
+    for (const f of p.frames) {
+      righe.push('    { ' + f.map(b => '0x' + b.toString(16).padStart(2, '0')).join(', ') + ' },');
+    }
+    righe.push('  },');
+  }
+  righe.push('};');
+
+  esci(righe.join('\n'));
 } catch (e) {
-  righe.push('ERRORE: ' + e.message + '\n' + e.stack);
+  esci('ERRORE: ' + e.message + '\n' + e.stack);
 }
-document.getElementById('out').textContent = righe.join('\n');
 </script>
+</body>
+</html>
