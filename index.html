@@ -201,10 +201,13 @@
      riga senza aiutare a scorrere — restano nel dettaglio, dove si va
      quando quel preset lo si vuole davvero guardare. Il colore a sinistra
      resta: è l'unica cosa che si legge senza leggere. */
-  #listaLibreria .head { padding:5px 12px; gap:8px; }
+  /* Alzata del 30% il 14 agosto 2026, su richiesta: a 36 px era troppo stretta
+     e il ▶ da 26 si prendeva male col pollice. Ora ~46: l'imbottitura passa da
+     5 a 9 e il tondo torna a 28, che è lo spazio guadagnato speso dove serve. */
+  #listaLibreria .head { padding:9px 12px; gap:8px; }
   #listaLibreria .name { font-size:1.02rem; }
-  #listaLibreria .via  { width:26px; height:26px; font-size:0.64rem; }
-  #listaLibreria .row  { margin-bottom:5px; }
+  #listaLibreria .via  { width:28px; height:28px; font-size:0.68rem; }
+  #listaLibreria .row  { margin-bottom:6px; }
 
   /* `.tags`/`.tag` erano le categorie sotto il nome nella riga di libreria.
      Tolte insieme alla catena il 14 agosto 2026: le categorie si vedono e si
@@ -218,6 +221,16 @@
   .detail input[type=text] { width:100%; }
   /* La catena su una riga sola: i nomi, e basta. */
   .azioni { display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* ---- le azioni del dettaglio: una riga per cosa che si fa -------------
+     Erano tutte in un `flex-wrap` unico, e mandando a capo dove capitava la
+     tendina finiva staccata dal tasto a cui appartiene: si leggeva «Attiva,
+     Regola, tendina» e poi «Invia a preset HW» da solo, che non vuol dire
+     niente. Adesso ogni riga è un'azione, e **il tasto viene prima della sua
+     tendina**: si legge cosa si sta per fare e poi dove. */
+  .azioni-blocchi { display:flex; flex-direction:column; gap:8px; }
+  .azioni-riga { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .azioni-riga select { flex:1; min-width:0; max-width:340px; }
   .scelte { display:flex; gap:6px; flex-wrap:wrap; }
   .scelta { background:#1e2025; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
             border-radius:12px; cursor:pointer; border:1px solid transparent; }
@@ -1249,7 +1262,14 @@ function dettaglio(record, slot) {
 
   /* azioni -------------------------------------------------------- */
   const azioni = document.createElement('div');
-  azioni.className = 'azioni';
+  azioni.className = 'azioni-blocchi';
+  const riga = () => {
+    const r = document.createElement('div');
+    r.className = 'azioni-riga';
+    azioni.appendChild(r);
+    return r;
+  };
+  const rigaSuono = riga();          // provare e regolare: non salva niente
 
   let avvisoAltriSlot = null;
   if (slot !== null) {
@@ -1269,7 +1289,7 @@ function dettaglio(record, slot) {
       await spark.send(Spark.commands.changePreset(slot));
       logLine(`selezionato ${nomeSlot(slot)}`);
     });
-    azioni.appendChild(attiva);
+    rigaSuono.appendChild(attiva);
   }
 
   // Caricare nel suono corrente non tocca nulla di salvato: è il modo
@@ -1280,14 +1300,14 @@ function dettaglio(record, slot) {
   prova.title = 'manda il preset all\'ampli senza sovrascrivere nessuno slot';
   prova.disabled = !spark.connected;
   prova.addEventListener('click', () => mandaPreset(record, null));
-  azioni.appendChild(prova);
+  rigaSuono.appendChild(prova);
 
   const regola = document.createElement('button');
   regola.textContent = 'Regola';
   regola.title = 'manda il preset all\'ampli e apri le manopole';
   regola.disabled = !spark.connected;
   regola.addEventListener('click', () => apriEditor(record));
-  azioni.appendChild(regola);
+  rigaSuono.appendChild(regola);
 
   const scelta = document.createElement('select');
   scelta.title = 'slot di destinazione';
@@ -1313,7 +1333,8 @@ function dettaglio(record, slot) {
     if (!confirm(avviso)) return;
     mandaPreset(record, dove);
   });
-  azioni.append(scelta, scrivi);
+  const rigaSlot = riga();
+  rigaSlot.append(scrivi, scelta);      // prima cosa fa, poi dove
 
   /* Mettere un preset in un banco live senza passare dalla vista Live.
      Chiesto dall'utente il 14 agosto 2026: si sta già guardando il preset, e
@@ -1357,7 +1378,7 @@ function dettaglio(record, slot) {
       disegnaPreset();
       disegnaLive();
     });
-    azioni.append(banco, metti);
+    riga().append(metti, banco);        // prima cosa fa, poi dove
   }
 
   const elimina = document.createElement('button');
@@ -1372,7 +1393,7 @@ function dettaglio(record, slot) {
     disegnaPreset();
     disegnaLive();
   });
-  azioni.appendChild(elimina);
+  riga().appendChild(elimina);          // da sola: è l'unica che non si torna indietro
 
   const meta = document.createElement('div');
   meta.style.cssText = 'color:var(--faint);font-size:0.7rem;font-family:Consolas,monospace';
