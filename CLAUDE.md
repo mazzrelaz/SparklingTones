@@ -315,10 +315,21 @@ Il pedale **si prende i preset dall'app** e poi è autonomo con lo Spark; dentro
 sull'ampli; **nessuna regolazione, solo preset**; e poi il looper. È la vista live del web,
 staccata dal telefono — non un secondo editor.
 
-**Hardware, deciso il 14 agosto 2026:** ESP32-**C3 mini** (quello che l'utente ha già),
-**otto footswitch in due file da quattro**, un LED per footswitch, OLED 128×128.
-Gli otto tasti sono gli otto preset del banco; **i due all'estrema destra, tenuti premuti,
-scorrono i banchi** su e giù.
+**Hardware, deciso il 14 agosto 2026:** **otto footswitch in due file da quattro**, un LED
+per footswitch, OLED 128×128, e **due tasti dedicati ai banchi** — a mano, non a pedale.
+Gli otto footswitch sono gli otto preset del banco e basta.
+
+I banchi erano prima sui due footswitch di destra tenuti premuti; l'utente ha preferito i
+tasti dedicati, ed è la scelta che semplifica: **nessun footswitch ha più una funzione
+lunga, quindi tutti e otto scattano alla pressione** e sparisce l'attesa del rilascio. Il
+banco si cambia comunque fra un pezzo e l'altro, con la mano, non col piede in mezzo a un
+assolo.
+
+**Conseguenza sui pin: il C3 mini da solo non basta più.** Servono 8 switch + 2 tasti + 1
+per i LED + 2 per l'I²C = **13**, e i pin sicuri sono **10** (vedi sotto). Quindi
+l'**MCP23017** non è più un'alternativa comoda ma la strada: sedici ingressi sui due fili
+dell'I²C che ci sono già, ~1,50 €, con pull-up interni e interrupt. Gli otto footswitch e
+i due tasti banco ci stanno tutti e al C3 restano dieci pin liberi.
 
 **Il pedale non tocca mai gli slot hardware** — deciso dall'utente il 14 agosto 2026,
 coerente con la regola dei banchi inventati nella vista live. Quindi ogni cambio preset è
@@ -393,19 +404,31 @@ Le costanti da tarare stanno in cima al file: `PRESSIONE_LUNGA` 500 ms, `RIPETI_
 600 ms, `TASTO_SU` 3 e `TASTO_GIU` 7. Le scelte già dentro, che sono quelle da giudicare
 suonando:
 
-- **il tocco breve dei due tasti di destra agisce al rilascio**, perché finché non sai se
-  lo stai per tenere premuto non puoi cambiare preset alla pressione. Riguarda solo quei
-  due; gli altri sei scattano alla pressione.
-- **tenuti ~500 ms scorrono i banchi**, poi ripetono ogni 600 ms, e l'OLED mostra l'elenco
-  finché non si molla.
+- **tutti e otto scattano alla pressione**, da quando i banchi hanno i loro tasti.
 - **una pressione durante un caricamento si accoda, non annulla**: vedi il punto 2 di
   «da misurare».
 - cambiando banco **`attivo` torna a `null`**: l'ampli continua a suonare quel preset, ma
   nessun tasto del banco nuovo lo rappresenta, e far finta di sì sarebbe una bugia.
 
-Restano aperte, ed è quello che il simulatore deve far decidere: cosa mostra l'OLED (per
-ora nome del preset + mappa 2×4; la mappa però ripete quello che i LED già dicono, quindi
-forse è spazio sprecato), e se i sei tasti «liberi» debbano servire ad altro.
+**Il display mostra tutti e otto i pedali col nome**, chiesto dall'utente, e il problema è
+che il nome intero non ci sta. Due disposizioni a confronto nel simulatore:
+
+- **griglia 4×2**, la stessa forma dei pedali: casella da 32 px, cioè **sei caratteri per
+  riga** con un font 5×7, su tre o quattro righe. «Ambient Plate» ci sta a capo, «Crunch
+  Bassman» viene tagliato.
+- **elenco di otto righe**: ~26 caratteri a testa, quasi tutti i nomi interi, ma si perde
+  la corrispondenza con i pedali e per trovare il terzo si conta invece di guardare. Una
+  riga di stacco dopo il quarto ricorda che le file sono due.
+
+Se il taglio dà fastidio la via è un **nome corto per il pedale deciso dall'utente** in
+libreria — la stessa regola dei nomi dei parametri: accorciare a indovinare lo faremmo
+male. Non ancora aggiunto allo store.
+
+**La resa a 1 bit del simulatore è più brutta del vero** e non va usata per giudicare:
+sogliare un font antialiasato a 7 px mangia i tratti, mentre un font a matrice 5×7 ha ogni
+pixel messo apposta. Vale la resa in grigi, che fra l'altro è quella giusta per un
+**SSD1327** (128×128 I²C, sedici livelli di grigio), che è il controller tipico di quel
+formato.
 
 ### Ricognizione, non misura
 
