@@ -11,7 +11,7 @@
          font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:14px; }
   h1 { font-size:1.1rem; margin:0 0 2px; }
   h2 { font-size:0.95rem; margin:22px 0 6px; }
-  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:76ch; line-height:1.55; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:78ch; line-height:1.55; }
   .sub b { color:#c8ccd2; }
   .status { display:inline-block; padding:3px 9px; border-radius:11px;
             font-size:0.75rem; font-weight:600; }
@@ -31,16 +31,14 @@
 
   /* ---- la scatola del pedale ---------------------------------------- */
   .pedale { background:#16171a; border:1px solid #2a2d33; border-radius:16px;
-            padding:18px; max-width:560px;
+            padding:18px; max-width:620px;
             box-shadow:0 10px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04); }
-  .testa { display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:18px; }
+  .testa { display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:20px; }
   .testa canvas { width:256px; height:256px; image-rendering:pixelated;
                   border:6px solid #0c0d0f; border-radius:8px; background:#000;
                   box-shadow:0 0 0 1px #34383f, 0 0 18px rgba(120,190,255,.10); }
-
-  /* i due tasti dedicati ai banchi: da premere con la mano, non col piede */
-  .banchi { display:flex; flex-direction:column; gap:12px; }
-  .tastino { width:46px; height:46px; border-radius:8px; cursor:pointer; user-select:none;
+  .banchi { display:flex; flex-direction:column; gap:10px; }
+  .tastino { width:48px; height:44px; border-radius:8px; cursor:pointer; user-select:none;
              background:linear-gradient(#33363d, #212429); border:1px solid #43474f;
              color:#c8ccd2; font-size:1rem; font-weight:700;
              display:flex; align-items:center; justify-content:center; touch-action:none;
@@ -48,18 +46,21 @@
   .tastino:active, .tastino.giu { transform:translateY(2px); box-shadow:0 0 0 #0e0f12; }
   .banchi .etich { font-size:0.6rem; color:#5f656e; text-align:center; letter-spacing:.04em; }
 
-  .tasti { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
-  .posto { display:flex; flex-direction:column; align-items:center; gap:7px; }
+  /* quattro footswitch in fila, piu' il quinto staccato */
+  .fila { display:flex; gap:14px; align-items:flex-end; }
+  .quattro { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; flex:1; }
+  .stacco { width:1px; align-self:stretch; background:#2a2d33; margin:0 4px; }
+  .posto { display:flex; flex-direction:column; align-items:center; gap:8px; }
 
-  /* il LED: vetrino scuro incassato, che si accende */
-  .led { width:14px; height:14px; border-radius:50%; background:#141518;
+  .led { width:16px; height:16px; border-radius:50%; background:#141518;
          box-shadow:inset 0 1px 2px rgba(0,0,0,.9), 0 0 0 1px #2a2d33;
          transition:background .08s, box-shadow .08s; }
-  .led.pieno   { background:#1d3350; box-shadow:inset 0 1px 2px rgba(0,0,0,.7), 0 0 0 1px #2a2d33; }
-  .led.attivo  { background:#48ff7a; box-shadow:0 0 0 1px #2a2d33, 0 0 10px 2px rgba(72,255,122,.65); }
-  .led.carica  { background:#ffb020; box-shadow:0 0 0 1px #2a2d33, 0 0 10px 2px rgba(255,176,32,.6);
+  .led.aRosso  { background:#4a1414; box-shadow:inset 0 1px 2px rgba(0,0,0,.7), 0 0 0 1px #2a2d33; }
+  .led.aRossoP { background:#ff3020; box-shadow:0 0 0 1px #2a2d33, 0 0 12px 3px rgba(255,48,32,.6); }
+  .led.bVerde  { background:#12401f; box-shadow:inset 0 1px 2px rgba(0,0,0,.7), 0 0 0 1px #2a2d33; }
+  .led.bVerdeP { background:#48ff7a; box-shadow:0 0 0 1px #2a2d33, 0 0 12px 3px rgba(72,255,122,.6); }
+  .led.carica  { background:#ffb020; box-shadow:0 0 0 1px #2a2d33, 0 0 12px 3px rgba(255,176,32,.6);
                  animation:pulsa .5s ease-in-out infinite alternate; }
-  .led.errore  { background:#ff5040; box-shadow:0 0 0 1px #2a2d33, 0 0 10px 2px rgba(255,80,64,.6); }
   @keyframes pulsa { from { opacity:.35 } to { opacity:1 } }
 
   .switch { width:100%; aspect-ratio:1/1; border-radius:12px; cursor:pointer;
@@ -70,22 +71,28 @@
             box-shadow:0 3px 0 #0e0f12, 0 5px 8px rgba(0,0,0,.5); transition:transform .04s, box-shadow .04s; }
   .switch:active, .switch.giu { transform:translateY(3px); box-shadow:0 0 0 #0e0f12, 0 2px 4px rgba(0,0,0,.5); }
   .switch .num  { font-size:0.7rem; font-weight:700; color:#5f656e; }
-  .switch .nome { font-size:0.72rem; font-weight:600; line-height:1.2;
+  .switch .nome { font-size:0.74rem; font-weight:600; line-height:1.2;
                   overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
   .switch.vuoto .nome { color:#4e535b; font-weight:400; font-style:italic; }
+
+  /* il quinto: piu' largo e staccato, fa un'altra cosa */
+  .gemello { width:120px; }
+  .gemello .switch { aspect-ratio:auto; height:100%; min-height:96px;
+                     background:linear-gradient(#34302a, #221f1b); border-color:#4a4238; }
+  .gemello .switch .nome { color:#e0c68a; }
 
   .misure { display:flex; gap:18px; flex-wrap:wrap; margin-top:14px;
             font-family:'SF Mono',Consolas,monospace; font-size:0.76rem; color:#8a8f98; }
   .misure b { color:#e8e8ea; font-weight:600; }
 
   #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
-         height:22vh; overflow-y:auto; margin-top:10px;
+         height:20vh; overflow-y:auto; margin-top:10px;
          font-family:'SF Mono',Consolas,monospace; font-size:0.74rem; line-height:1.55;
          color:#8a8f98; white-space:pre-wrap; word-break:break-word; }
-  #log .ok { color:#7fe08a; } #log .err { color:#ff8080; }
-  #log .mk { color:#f0d060; } #log .t { color:#4e535b; }
+  #log .ok { color:#7fe08a; } #log .err { color:#ff8080; } #log .mk { color:#f0d060; }
+  #log .t { color:#4e535b; }
   .nota { border-left:3px solid #3a3e46; padding:2px 0 2px 10px; margin:10px 0;
-          color:#8a8f98; font-size:0.8rem; line-height:1.55; max-width:76ch; }
+          color:#8a8f98; font-size:0.8rem; line-height:1.55; max-width:78ch; }
   .nota b { color:#c8ccd2; }
 </style>
 </head>
@@ -93,28 +100,26 @@
 
 <h1>Simulatore del pedale</h1>
 <p class="sub">
-  La faccia del pedale, con dentro la logica vera: otto footswitch in due file da quattro,
-  otto LED, due tasti a mano per i banchi, e l'OLED 128×128 disegnato 1:1.
-  <b>Parla allo Spark col nostro trasporto</b>, quindi non è un mockup — senza ampli simula
-  il ritardo, così il <i>tatto</i> si prova lo stesso.
+  Quattro footswitch per i quattro suoni della metà corrente, <b>il quinto staccato che
+  salta al gemello nell'altra metà</b>, e due tasti a mano per i banchi. I LED dicono in
+  che metà sei: <b>rossi = A1–A4, verdi = B1–B4</b>, la stessa convenzione del pannello
+  dell'ampli. Dentro c'è la logica vera e il nostro trasporto: con l'ampli connesso manda
+  <code>loadPreset</code> davvero, senza simula il ritardo.
 </p>
 
 <div class="row">
   <button id="btnConnect" class="primary">Connetti l'ampli</button>
   <span id="status" class="status off">non connesso</span>
   <label class="campo">ritardo simulato
-    <input type="number" id="latenza" value="1000" min="0" max="3000" step="50"> ms
+    <input type="number" id="latenza" value="350" min="0" max="3000" step="50"> ms
   </label>
-</div>
-<div class="row">
   <label class="campo">display
     <select id="disposizione">
-      <option value="griglia">griglia 4×2 — come i pedali</option>
-      <option value="elenco">elenco di otto righe</option>
+      <option value="elenco">elenco — il nome intero</option>
+      <option value="griglia">quattro colonne — come i pedali</option>
     </select>
   </label>
-  <label class="campo"><input type="checkbox" id="unBit"> soglia a 1 bit (più brutta del vero, vedi sotto)</label>
-  <span class="sub" style="margin:0">i tasti <b>1</b>–<b>8</b> fanno da piede, <b>+</b> e <b>−</b> cambiano banco</span>
+  <label class="campo"><input type="checkbox" id="unBit"> soglia a 1 bit</label>
 </div>
 
 <div class="pedale">
@@ -126,26 +131,28 @@
       <div class="tastino" id="bancoGiu">▼</div>
     </div>
   </div>
-  <div class="tasti" id="tasti"></div>
+  <div class="fila">
+    <div class="quattro" id="tasti"></div>
+    <div class="stacco"></div>
+    <div class="gemello" id="gemello"></div>
+  </div>
 </div>
 
 <div class="misure">
   <span>ultimo cambio <b id="mUltimo">—</b></span>
   <span>medio <b id="mMedio">—</b></span>
   <span>cambi <b id="mQuanti">0</b></span>
-  <span>più lungo del nome <b id="mNome">—</b></span>
 </div>
 
 <p class="nota">
-  <b>La domanda aperta è il nome sul display.</b> In griglia ogni casella è larga 32 px:
-  con un font 5×7 ci stanno <b>sei caratteri per riga</b>, tre righe. «Ambient Plate» ci
-  sta a capo, «Crunch Bassman» no e viene tagliato. L'elenco di otto righe dà trenta
-  caratteri per preset ma perde la corrispondenza con i pedali, che sono quattro per due:
-  per trovare il terzo devi contare invece di guardare.<br>
-  Confronta le due, e guarda <b>quanto viene tagliato</b> nei tuoi nomi veri (la misura
-  «più lungo del nome» dice il caso peggiore del banco). Se taglia troppo, la via è un
-  <b>nome corto per il pedale</b> deciso da te in libreria — come già fai coi nomi dei
-  parametri — invece di lasciar accorciare a noi, che indovineremmo male.
+  <b>Cosa provare.</b> Il quinto tasto salta al gemello: da A2 ti porta su B2 e viceversa,
+  una pedalata sola. Accoppia strofa e ritornello sullo stesso numero e diventa il tuo
+  interruttore per tutto il pezzo.<br>
+  Il rischio di questo disegno è uno solo: <b>pestare il tasto giusto nella metà
+  sbagliata</b>. Per questo tutti e quattro i LED cambiano colore insieme, non uno solo.
+  Guarda se ti basta, suonando.<br>
+  Tastiera: <b>1–4</b> i footswitch, <b>5</b> o <b>spazio</b> il gemello,
+  <b>+</b> e <b>−</b> i banchi.
 </p>
 
 <h2>Log</h2>
@@ -158,16 +165,19 @@
 'use strict';
 
 const $ = id => document.getElementById(id);
-const POSTI = 8;
+
+const POSTI = 8;         // un banco resta da otto: due metà da quattro
+const META  = 4;
 
 const stato = {
   banchi:    [],     // [{nome, posti:[record|null × 8]}]
   iBanco:    0,
-  attivo:    null,   // posto che sta suonando
-  caricando: null,   // posto in trasferimento
-  inCoda:    null,   // premuto mentre l'altro caricava
-  progresso: 0,      // 0..1
-  errore:    null,   // posto che ha lampeggiato rosso
+  meta:      0,      // 0 = A (posti 0-3), 1 = B (posti 4-7)
+  attivo:    null,   // posto assoluto 0-7 che sta suonando
+  caricando: null,
+  inCoda:    null,
+  progresso: 0,
+  errore:    null,
   demo:      false,
 };
 
@@ -192,17 +202,18 @@ function log(msg, classe) {
   el.scrollTop = el.scrollHeight;
 }
 
-const bancoCorrente = () => stato.banchi[stato.iBanco] || { nome: '—', posti: new Array(POSTI).fill(null) };
+const banco    = () => stato.banchi[stato.iBanco] || { nome: '—', posti: new Array(POSTI).fill(null) };
+const postoDi  = i => stato.meta * META + i;              // tasto 0-3 -> posto assoluto
+const gemelloDi = p => (p === null ? null : p ^ META);    // A2 <-> B2
+const etichetta = p => (p < META ? 'A' : 'B') + ((p % META) + 1);
 
-/* ====================================================================
-   Caricamento dei banchi dalla libreria
-   ==================================================================== */
+/* ==================================================================== */
 
 const NOMI_DEMO = [
-  ['Clean Twin', 'Crunch Bassman', 'Lead Fuzz', 'Ambient Plate',
-   'Acoustic Air', 'Funk Comp', 'Solo Boost', 'Doom Fuzz Octavia'],
-  ['Intro Chorus', 'Strofa Pulita', 'Ritornello', 'Assolo',
-   null, 'Ponte', 'Finale', null],
+  ['Clean Twin', 'Crunch Bassman', 'Nylon Reverb', 'Ambient Plate',
+   'Lead Fuzz', 'Solo Boost', 'Doom Fuzz Octavia', 'Hey Jimi Solo'],
+  ['Intro Chorus', 'Strofa Pulita', 'Ritornello', 'Ponte',
+   'Assolo', 'Finale', null, null],
   ['Prova 1', 'Prova 2', null, null, null, null, null, null],
 ];
 
@@ -228,7 +239,6 @@ async function caricaBanchi() {
       log('nessun banco in libreria: uso banchi finti. I banchi si creano dalla vista Live.', 'mk');
     } else {
       log(`${stato.banchi.length} banchi dalla libreria`, 'ok');
-      if (stato.banchi.length === 1) log('un banco solo: lo scorrimento non si può provare', 'mk');
     }
   } catch (err) {
     stato.demo = true; stato.banchi = banchiFinti();
@@ -237,27 +247,28 @@ async function caricaBanchi() {
 }
 
 /* ====================================================================
-   Le azioni del pedale
+   Le azioni
    ==================================================================== */
 
-async function attiva(i) {
-  const record = bancoCorrente().posti[i];
+async function attiva(posto) {
+  const record = banco().posti[posto];
   if (!record) {
-    stato.errore = i; disegna();
+    stato.errore = posto; disegna();
     setTimeout(() => { stato.errore = null; disegna(); }, 260);
     return;
   }
-  // Una pressione durante un trasferimento non lo annulla: si accoda.
-  // Abortire un 0x0101 a metà è sicuro sul buffer 0x7f, ma che l'ampli
-  // scarti il troncone quando arriva un seq nuovo non è verificato.
+  // Una pressione durante un trasferimento si accoda: vince l'ultima.
+  // Verificato sul firmware vero, dove serviva leggere il tasto anche
+  // dentro l'attesa degli ack.
   if (stato.caricando !== null) {
-    stato.inCoda = i;
-    log(`in coda: ${record.name}`);
+    stato.inCoda = posto;
+    log(`in coda: ${etichetta(posto)} ${record.name}`);
     return;
   }
 
-  stato.caricando = i;
+  stato.caricando = posto;
   stato.progresso = 0;
+  stato.meta = posto < META ? 0 : 1;      // il suono decide in che metà sei
   disegna();
 
   const t0 = performance.now();
@@ -277,23 +288,44 @@ async function attiva(i) {
   stato.caricando = null;
   stato.progresso = 0;
   if (esito) {
-    stato.attivo = i;
+    stato.attivo = posto;
     misure.push(ms);
-    aggiornaMisure(ms);
-    log(`${record.name} — ${ms} ms${spark.connected ? '' : ' (simulato)'}`, 'ok');
+    $('mUltimo').textContent = ms + ' ms';
+    $('mQuanti').textContent = misure.length;
+    $('mMedio').textContent  = Math.round(misure.reduce((a, b) => a + b, 0) / misure.length) + ' ms';
+    log(`${etichetta(posto)} ${record.name} — ${ms} ms${spark.connected ? '' : ' (simulato)'}`, 'ok');
   }
   disegna();
 
   if (stato.inCoda !== null) {
-    const prossimo = stato.inCoda;
-    stato.inCoda = null;
-    attiva(prossimo);
+    const p = stato.inCoda; stato.inCoda = null; attiva(p);
   }
+}
+
+/** Il quinto tasto: salta al gemello nell'altra metà. */
+function saltaAlGemello() {
+  if (stato.attivo === null) {
+    // Niente sta suonando: non c'è un gemello, quindi cambia solo il
+    // significato dei quattro. Fingere un salto sarebbe una bugia.
+    stato.meta = 1 - stato.meta;
+    log(`metà ${stato.meta ? 'B' : 'A'} — nessun suono attivo, cambiano solo i tasti`);
+    disegna();
+    return;
+  }
+  const g = gemelloDi(stato.attivo);
+  if (!banco().posti[g]) {
+    stato.meta = 1 - stato.meta;
+    stato.errore = g % META; disegna();
+    setTimeout(() => { stato.errore = null; disegna(); }, 260);
+    log(`${etichetta(g)} è vuoto: cambio solo metà`, 'mk');
+    return;
+  }
+  attiva(g);
 }
 
 function ritardoFinto() {
   const totale = Math.max(0, Number($('latenza').value) || 0);
-  const passi  = 16;                       // sedici chunk, come un preset vero
+  const passi  = 16;
   return new Promise(risolvi => {
     if (!totale) return risolvi();
     let k = 0;
@@ -304,213 +336,183 @@ function ritardoFinto() {
   });
 }
 
-function aggiornaMisure(ms) {
-  $('mUltimo').textContent = ms + ' ms';
-  $('mQuanti').textContent = misure.length;
-  $('mMedio').textContent  = Math.round(misure.reduce((a, b) => a + b, 0) / misure.length) + ' ms';
-}
-
 function passoBanco(verso) {
   if (stato.banchi.length < 2) { log('c\'è un banco solo', 'mk'); return; }
   stato.iBanco = (stato.iBanco + verso + stato.banchi.length) % stato.banchi.length;
-  // Cambiando banco il preset che suona non è più in questo banco: l'ampli
-  // continua a suonarlo, ma nessun tasto lo rappresenta più, e dirlo sarebbe
-  // una bugia.
+  // Si torna sempre in metà A: cambiare banco è un gesto fra un pezzo e
+  // l'altro, e atterrare in uno stato noto vale più che ricordarsi dov'eri.
+  stato.meta   = 0;
   stato.attivo = null;
-  log(`banco ${stato.iBanco + 1}/${stato.banchi.length} — ${bancoCorrente().nome}`);
+  log(`banco ${stato.iBanco + 1}/${stato.banchi.length} — ${banco().nome}`);
   disegna();
 }
 
 /* ====================================================================
-   Pressione e rilascio — tutti e otto scattano alla pressione, perché
-   nessun footswitch ha più una funzione lunga da aspettare.
+   Costruzione e disegno della scatola
    ==================================================================== */
 
-function giu(i) {
-  document.querySelectorAll('.switch')[i].classList.add('giu');
-  attiva(i);
-}
-function su(i) {
-  document.querySelectorAll('.switch')[i].classList.remove('giu');
-}
-
-/* ====================================================================
-   Disegno della scatola
-   ==================================================================== */
-
-function costruisciTasti() {
-  const cont = $('tasti');
-  cont.innerHTML = '';
-  for (let i = 0; i < POSTI; i++) {
+function costruisci() {
+  const quattro = $('tasti');
+  quattro.innerHTML = '';
+  for (let i = 0; i < META; i++) {
     const posto = document.createElement('div');
     posto.className = 'posto';
-
-    const led = document.createElement('div');
-    led.className = 'led';
-
-    const sw = document.createElement('div');
-    sw.className = 'switch';
+    const led = document.createElement('div'); led.className = 'led';
+    const sw  = document.createElement('div'); sw.className = 'switch';
     sw.innerHTML = '<span class="num"></span><span class="nome"></span>';
-    sw.addEventListener('pointerdown', e => { e.preventDefault(); sw.setPointerCapture(e.pointerId); giu(i); });
-    sw.addEventListener('pointerup',     () => su(i));
-    sw.addEventListener('pointercancel', () => su(i));
+    sw.addEventListener('pointerdown', e => { e.preventDefault(); sw.setPointerCapture(e.pointerId);
+                                              sw.classList.add('giu'); attiva(postoDi(i)); });
+    sw.addEventListener('pointerup',     () => sw.classList.remove('giu'));
+    sw.addEventListener('pointercancel', () => sw.classList.remove('giu'));
     sw.addEventListener('contextmenu', e => e.preventDefault());
-
     posto.append(led, sw);
-    cont.appendChild(posto);
+    quattro.appendChild(posto);
   }
+
+  const g = $('gemello');
+  g.innerHTML = '';
+  const posto = document.createElement('div');
+  posto.className = 'posto';
+  const led = document.createElement('div'); led.className = 'led';
+  const sw  = document.createElement('div'); sw.className = 'switch';
+  sw.id = 'swGemello';
+  sw.innerHTML = '<span class="num">⇄</span><span class="nome"></span>';
+  sw.addEventListener('pointerdown', e => { e.preventDefault(); sw.setPointerCapture(e.pointerId);
+                                            sw.classList.add('giu'); saltaAlGemello(); });
+  sw.addEventListener('pointerup',     () => sw.classList.remove('giu'));
+  sw.addEventListener('pointercancel', () => sw.classList.remove('giu'));
+  posto.append(led, sw);
+  g.appendChild(posto);
 }
 
 function disegna() {
-  const banco = bancoCorrente();
-  const leds  = document.querySelectorAll('.led');
-  const sws   = document.querySelectorAll('.switch');
+  const b = banco();
+  const leds = $('tasti').querySelectorAll('.led');
+  const sws  = $('tasti').querySelectorAll('.switch');
 
-  let piuLungo = 0;
-  for (let i = 0; i < POSTI; i++) {
-    const record = banco.posti[i];
-    if (record) piuLungo = Math.max(piuLungo, record.name.length);
+  for (let i = 0; i < META; i++) {
+    const p = postoDi(i);
+    const record = b.posti[p];
+    const acceso = stato.attivo === p;
+    const inCarica = stato.caricando === p;
 
+    // Il colore dice la metà, la luminosità dice quale sta suonando:
+    // uno stato che occupa tutti e quattro i LED non lo confondi.
     leds[i].className = 'led'
-      + (stato.errore    === i ? ' errore'
-      :  stato.caricando === i ? ' carica'
-      :  stato.attivo    === i ? ' attivo'
-      :  record                ? ' pieno' : '');
+      + (stato.errore === i || (stato.errore !== null && stato.errore === p) ? ' carica'
+      :  inCarica            ? ' carica'
+      :  !record             ? ''
+      :  stato.meta === 0    ? (acceso ? ' aRossoP' : ' aRosso')
+      :                        (acceso ? ' bVerdeP' : ' bVerde'));
 
     sws[i].classList.toggle('vuoto', !record);
-    sws[i].querySelector('.num').textContent  = i + 1;
+    sws[i].querySelector('.num').textContent  = etichetta(p);
     sws[i].querySelector('.nome').textContent = record ? record.name : 'vuoto';
   }
-  $('mNome').textContent = piuLungo ? piuLungo + ' caratteri' : '—';
+
+  // il quinto: dice dove ti porta
+  const g = gemelloDi(stato.attivo);
+  const rg = g === null ? null : b.posti[g];
+  const swg = $('swGemello');
+  swg.querySelector('.nome').textContent =
+    g === null ? `passa a ${stato.meta ? 'A' : 'B'}`
+    : rg       ? `${etichetta(g)}  ${rg.name}`
+    :            `${etichetta(g)} vuoto`;
+  $('gemello').querySelector('.led').className =
+    'led' + (g === null ? '' : stato.meta === 0 ? ' bVerde' : ' aRosso');
+
   disegnaOled();
 }
 
-/* ====================================================================
-   L'OLED, 128×128, disegnato 1:1
-
-   La resa a 1 bit non è un vezzo: a 7 px il testo antialiasato del canvas
-   sembra illeggibile mentre lo stesso testo su un OLED mono è nitido.
-   Giudicare la leggibilità sulla resa sbagliata porta alla scelta sbagliata,
-   quindi alla fine si soglia tutto a bianco o nero.
-   ==================================================================== */
+/* ---- l'OLED, 128×128 ----------------------------------------------- */
 
 const ctx = $('oled').getContext('2d');
-
-const CARATTERE = 7;                       // px: un font 5×7 con una colonna di stacco
-const LARGH_CH  = 4.2;                     // avanzamento reale del monospace a 7 px
-const FONT      = `${CARATTERE}px Consolas, 'DejaVu Sans Mono', monospace`;
+const CH  = 4.2;                       // larghezza reale del monospace a 7 px
+const FONT = "7px Consolas, 'DejaVu Sans Mono', monospace";
 
 function disegnaOled() {
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, 128, 128);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 128, 128);
   ctx.textBaseline = 'alphabetic';
-
   intestazione();
-  if ($('disposizione').value === 'elenco') elencoOtto();
-  else                                      grigliaQuattroPerDue();
-  if (stato.caricando !== null) barraAvanzamento();
-  if ($('unBit').checked) sogliaUnBit();
+  if ($('disposizione').value === 'griglia') quattroColonne();
+  else                                       elencoQuattro();
+  strisciaGemello();
+  if (stato.caricando !== null) barra();
+  if ($('unBit').checked) unBit();
 }
 
 function intestazione() {
-  const banco = bancoCorrente();
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, 128, 11);
-  ctx.fillStyle = '#000';
-  ctx.font = `bold ${FONT}`;
-  ctx.textAlign = 'left';
-  ctx.fillText(taglia(banco.nome, 20), 2, 8);
+  const b = banco();
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 128, 11);
+  ctx.fillStyle = '#000'; ctx.font = 'bold ' + FONT; ctx.textAlign = 'left';
+  ctx.fillText(taglia(b.nome, 17), 2, 8);
   ctx.textAlign = 'right';
-  ctx.fillText(`${stato.iBanco + 1}/${stato.banchi.length}`, 126, 8);
+  ctx.fillText(`${stato.meta ? 'B' : 'A'} ${stato.iBanco + 1}/${stato.banchi.length}`, 126, 8);
 }
 
-/** Quattro colonne per due righe: la stessa forma dei pedali sotto. */
-function grigliaQuattroPerDue() {
-  const banco = bancoCorrente();
-  const W = 32, H = 58, Y0 = 12;
-  const CHAR_RIGA = Math.floor((W - 4) / LARGH_CH);   // sei caratteri
+/** Quattro righe intere: con soli quattro nomi ci stanno quasi tutti. */
+function elencoQuattro() {
+  const b = banco();
+  for (let i = 0; i < META; i++) {
+    const p = postoDi(i), y = 14 + i * 21, record = b.posti[p];
+    const acceso = stato.attivo === p || stato.caricando === p;
+    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(0, y, 128, 19); }
+    const inchiostro = acceso ? '#000' : (record ? '#fff' : '#555');
+    ctx.fillStyle = inchiostro;
+    ctx.font = 'bold 9px Consolas, monospace'; ctx.textAlign = 'left';
+    ctx.fillText(etichetta(p), 3, y + 13);
+    ctx.font = FONT;
+    ctx.fillText(record ? taglia(record.name, 22) : '—', 22, y + 13);
+  }
+}
 
-  for (let i = 0; i < POSTI; i++) {
-    const c = i % 4, r = (i / 4) | 0;
-    const x = c * W, y = Y0 + r * H;
-    const record = banco.posti[i];
-    const acceso = stato.attivo === i || stato.caricando === i;
-
-    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(x + 1, y + 1, W - 2, H - 2); }
+/** Quattro colonne, come i pedali in fila: sei caratteri per riga. */
+function quattroColonne() {
+  const b = banco();
+  for (let i = 0; i < META; i++) {
+    const p = postoDi(i), x = i * 32, record = b.posti[p];
+    const acceso = stato.attivo === p || stato.caricando === p;
+    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(x + 1, 13, 30, 72); }
     else {
-      ctx.strokeStyle = record ? '#fff' : '#555';
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = record ? '#fff' : '#555'; ctx.lineWidth = 1;
       if (!record) ctx.setLineDash([2, 2]);
-      ctx.strokeRect(x + 1.5, y + 1.5, W - 3, H - 3);
-      ctx.setLineDash([]);
+      ctx.strokeRect(x + 1.5, 13.5, 29, 71); ctx.setLineDash([]);
     }
     const inchiostro = acceso ? '#000' : (record ? '#fff' : '#555');
-
-    // il numero del pedale, in alto a sinistra: è la sola cosa che non cambia mai
     ctx.fillStyle = inchiostro;
-    ctx.font = `bold ${FONT}`;
-    ctx.textAlign = 'left';
-    ctx.fillText(String(i + 1), x + 3, y + 10);
-
-    ctx.font = FONT;
-    ctx.textAlign = 'center';
-    if (record) {
-      spezza(record.name, CHAR_RIGA).slice(0, 4)
-        .forEach((riga, k) => ctx.fillText(riga, x + W / 2, y + 22 + k * 9));
-    } else {
-      ctx.fillText('·', x + W / 2, y + 32);
-    }
+    ctx.font = 'bold ' + FONT; ctx.textAlign = 'left';
+    ctx.fillText(etichetta(p), x + 3, 22);
+    ctx.font = FONT; ctx.textAlign = 'center';
+    if (record) spezza(record.name, Math.floor(28 / CH)).slice(0, 5)
+                  .forEach((r, k) => ctx.fillText(r, x + 16, 34 + k * 9));
   }
 }
 
-/** Otto righe intere: trenta caratteri a testa, ma i pedali sono 4×2. */
-function elencoOtto() {
-  const banco = bancoCorrente();
-  const H = 14, Y0 = 12;
-  const CHAR_RIGA = Math.floor((128 - 16) / LARGH_CH);
-
-  for (let i = 0; i < POSTI; i++) {
-    const y = Y0 + i * H;
-    const record = banco.posti[i];
-    const acceso = stato.attivo === i || stato.caricando === i;
-
-    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(0, y, 128, H - 1); }
-    const inchiostro = acceso ? '#000' : (record ? '#fff' : '#555');
-
-    ctx.fillStyle = inchiostro;
-    ctx.font = `bold ${FONT}`;
-    ctx.textAlign = 'left';
-    ctx.fillText(String(i + 1), 2, y + 10);
-    ctx.font = FONT;
-    ctx.fillText(record ? taglia(record.name, CHAR_RIGA) : '—', 13, y + 10);
-
-    // una riga di stacco fra i primi quattro e gli altri quattro: sono le
-    // due file di pedali, e senza il segno l'elenco è una colonna sola
-    if (i === 3) {
-      ctx.strokeStyle = '#666'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(0, y + H - 0.5); ctx.lineTo(128, y + H - 0.5); ctx.stroke();
-    }
-  }
+/** In fondo: cosa fa il quinto tasto adesso. */
+function strisciaGemello() {
+  const g = gemelloDi(stato.attivo), b = banco();
+  ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, 100.5); ctx.lineTo(128, 100.5); ctx.stroke();
+  ctx.fillStyle = '#aaa'; ctx.font = FONT; ctx.textAlign = 'left';
+  const rg = g === null ? null : b.posti[g];
+  const testo = g === null ? `passa a ${stato.meta ? 'A' : 'B'}`
+              : rg        ? `${etichetta(g)} ${rg.name}`
+              :             `${etichetta(g)} vuoto`;
+  ctx.fillText('⇄', 3, 113);
+  ctx.fillText(taglia(testo, 24), 14, 113);
 }
 
-function barraAvanzamento() {
-  ctx.fillStyle = '#000'; ctx.fillRect(20, 58, 88, 12);
+function barra() {
+  ctx.fillStyle = '#000'; ctx.fillRect(20, 88, 88, 10);
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
-  ctx.strokeRect(22.5, 60.5, 83, 7);
+  ctx.strokeRect(22.5, 89.5, 83, 7);
   ctx.fillStyle = '#fff';
-  ctx.fillRect(24, 62, Math.round(80 * stato.progresso), 4);
+  ctx.fillRect(24, 91, Math.round(80 * stato.progresso), 4);
 }
 
-/**
- * Bianco o nero, niente vie di mezzo. **Attenzione: qui viene peggio del vero.**
- * Sogliare un font antialiasato a 7 px mangia i tratti, mentre un font a matrice
- * 5×7 ha ogni pixel messo apposta ed è nitido. Serve solo a vedere il caso
- * pessimo: per giudicare la leggibilità vale di più la resa in grigi, che fra
- * l'altro è quella giusta per un SSD1327 (128×128 I²C, sedici livelli di grigio).
- */
-function sogliaUnBit() {
-  const img = ctx.getImageData(0, 0, 128, 128);
-  const d = img.data;
+/** Peggio del vero: un font a matrice 5×7 ha i pixel messi apposta. */
+function unBit() {
+  const img = ctx.getImageData(0, 0, 128, 128), d = img.data;
   for (let i = 0; i < d.length; i += 4) {
     const v = (d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11) > 96 ? 255 : 0;
     d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255;
@@ -549,38 +551,32 @@ for (const [id, verso] of [['bancoSu', -1], ['bancoGiu', +1]]) {
   el.addEventListener('pointercancel', () => el.classList.remove('giu'));
 }
 
-// I tasti 1–8 fanno da piede, + e − da tasti banco: col mouse si prova male.
-const premuti = new Set();
 addEventListener('keydown', e => {
+  if (e.repeat) return;
   if (e.key === '+') return passoBanco(-1);
   if (e.key === '-') return passoBanco(+1);
-  const i = '12345678'.indexOf(e.key);
-  if (i < 0 || e.repeat || premuti.has(i)) return;
-  premuti.add(i); giu(i);
-});
-addEventListener('keyup', e => {
-  const i = '12345678'.indexOf(e.key);
-  if (i < 0 || !premuti.has(i)) return;
-  premuti.delete(i); su(i);
+  if (e.key === '5' || e.key === ' ') { e.preventDefault(); return saltaAlGemello(); }
+  const i = '1234'.indexOf(e.key);
+  if (i >= 0) attiva(postoDi(i));
 });
 
 (async function avvio() {
-  costruisciTasti();
+  costruisci();
   await caricaBanchi();
   disegna();
   if (!navigator.bluetooth) {
     $('btnConnect').disabled = true;
     log('questo browser non ha Web Bluetooth: il simulatore funziona lo stesso, col ritardo finto', 'mk');
   }
-  // Preme un tasto da solo, per verificare la pagina in headless: senza questo
-  // non c'è modo di provarla senza un browser pilotabile a mano.
-  //   ?demo&auto=0            preme il pedale 1
-  //   ?demo&banco=1           sale di un banco
-  //   ?demo&vista=elenco      parte con l'altra disposizione
+  // Per verificare la pagina in headless, senza un browser pilotabile a mano.
+  //   ?demo&auto=1        preme il footswitch 2
+  //   ?demo&auto=1&poi=g  e poi il gemello
   const q = new URLSearchParams(location.search);
   if (q.has('vista')) { $('disposizione').value = q.get('vista'); disegna(); }
-  if (q.has('banco')) for (let k = 0; k < Number(q.get('banco')); k++) passoBanco(+1);
-  if (q.has('auto'))  giu(Number(q.get('auto')));
+  if (q.has('auto')) {
+    await attiva(postoDi(Number(q.get('auto'))));
+    if (q.get('poi') === 'g') saltaAlGemello();
+  }
 })();
 </script>
 </body>
