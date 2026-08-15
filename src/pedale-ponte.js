@@ -69,6 +69,11 @@ window.PedalePonte = (function () {
    * @param slot  dove va messo nel pedale, 0..7
    */
   function blocco(banco, slot) {
+    // Un banco senza preset il pedale lo accetterebbe e poi resterebbe muto:
+    // meglio fermarsi qui, dove si puo' ancora dire perche'.
+    if (!(banco.posti || []).some(Boolean))
+      throw new Error(`il banco "${banco.nome}" non ha nemmeno un preset dentro`);
+
     const out = [0x53, 0x50, 0x42, 0x31, slot & 0xff];   // "SPB1"
     out.push(...testo(banco.nome));
     out.push(POSTI);

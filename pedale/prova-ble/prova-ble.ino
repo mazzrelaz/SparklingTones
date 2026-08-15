@@ -49,6 +49,22 @@ static bool        postoPieno(uint8_t n)    { return bancoAttivo.valido ? bancoA
 static const char* nomePosto(uint8_t n)     { return bancoAttivo.valido ? bancoAttivo.posti[n].nome : BANCO_NOMI[n]; }
 static uint8_t     chunkDelPosto(uint8_t n) { return bancoAttivo.valido ? bancoAttivo.posti[n].quanti : BANCO_CHUNK[n]; }
 
+/** Il prossimo posto **pieno**: coi banchi veri i posti vuoti ci sono, e
+ *  fermarcisi sopra fa sembrare il pedale morto. */
+static uint8_t prossimoPieno(uint8_t da) {
+  const uint8_t quanti = quantiPosti();
+  for (uint8_t k = 1; k <= quanti; k++) {
+    const uint8_t c = (uint8_t)((da + k) % quanti);
+    if (postoPieno(c)) return c;
+  }
+  return da;                               // banco tutto vuoto
+}
+
+static bool bancoHaQualcosa() {
+  for (uint8_t i = 0; i < quantiPosti(); i++) if (postoPieno(i)) return true;
+  return false;
+}
+
 static const uint8_t* frameDelPosto(uint8_t n, uint8_t c, uint8_t& lunghezza) {
   if (bancoAttivo.valido) {
     lunghezza = bancoAttivo.posti[n].lung[c];
@@ -388,7 +404,11 @@ static void leggiTasto() {
   livelloFermo = livello;
   if (livelloFermo) return;                                // rilascio: niente
   pressioniViste++;
-  richiedi(bersaglio + 1);
+  if (!bancoHaQualcosa()) {
+    Serial.println(F("il banco caricato non ha nemmeno un preset: non c'e' niente da suonare"));
+    return;
+  }
+  richiedi(prossimoPieno(bersaglio));
 }
 
 /* ======================================================================
@@ -597,6 +617,11 @@ class Ponte : public BLECharacteristicCallbacks {
         if (n < 2) { rispondi(RSP_ERRORE, "USA malformato"); break; }
         BancoCaricato nuovo = {};
         if (!bancoCarica(d[1], nuovo)) { rispondi(RSP_ERRORE, "slot vuoto o illeggibile"); break; }
+        // Un banco senza nemmeno un preset non si puo' suonare: accettarlo
+        // vorrebbe dire lasciare il pedale muto senza spiegare perche'.
+        bool qualcosa = false;
+        for (uint8_t k = 0; k < POSTI_PER_BANCO; k++) if (nuovo.posti[k].presente) qualcosa = true;
+        if (!qualcosa) { bancoLibera(nuovo); rispondi(RSP_ERRORE, "quel banco non ha preset dentro"); break; }
         bancoLibera(bancoAttivo);
         bancoAttivo = nuovo;
         bersaglio = corrente = 0;
@@ -741,7 +766,8 @@ void loop() {
   while (Serial.available()) {
     char c = Serial.read();
     if (c >= '0' && c <= '7') cambiaPreset(c - '0');
-    else if (c == 'p') richiedi(bersaglio + 1);
+    else if (c == 'p') { if (bancoHaQualcosa()) richiedi(prossimoPieno(bersaglio));
+                         else Serial.println(F("banco vuoto")); }
     // Maiuscole, non minuscole: 'a'..'h' si sovrapponeva a 'c', 'd' ed 'e',
     // che sono comandi, e «elenca il banco» finiva per caricare un preset.
     else if (c >= 'A' && c <= 'H') richiedi(c - 'A');       // preset 1..8 diretto
