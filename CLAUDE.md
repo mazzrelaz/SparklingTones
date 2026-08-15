@@ -346,21 +346,36 @@ Il pedale **si prende i preset dall'app** e poi è autonomo con lo Spark; dentro
 sull'ampli; **nessuna regolazione, solo preset**; e poi il looper. È la vista live del web,
 staccata dal telefono — non un secondo editor.
 
-**Hardware, deciso il 14 agosto 2026:** **otto footswitch in due file da quattro**, un LED
-per footswitch, OLED 128×128, e **due tasti dedicati ai banchi** — a mano, non a pedale.
-Gli otto footswitch sono gli otto preset del banco e basta.
+**Hardware, deciso il 15 agosto 2026 — cinque footswitch, non otto.** L'utente ha ridotto:
+otto footswitch fanno un pedale enorme e otto suoni sempre disponibili non gli servono.
 
-I banchi erano prima sui due footswitch di destra tenuti premuti; l'utente ha preferito i
-tasti dedicati, ed è la scelta che semplifica: **nessun footswitch ha più una funzione
-lunga, quindi tutti e otto scattano alla pressione** e sparisce l'attesa del rilascio. Il
-banco si cambia comunque fra un pezzo e l'altro, con la mano, non col piede in mezzo a un
-assolo.
+- **quattro footswitch** = i quattro suoni della metà corrente;
+- **un quinto footswitch, staccato dagli altri**, che **salta al gemello nell'altra metà**:
+  da A2 porta a B2 e viceversa, una pedalata sola. È l'A/B della coppia strofa/ritornello,
+  ed è la ragione per cui è stata scelta questa forma invece del semplice «cambia il
+  significato dei quattro» (che costava due pedalate per ogni suono della metà B);
+- **due tasti a mano** per i banchi, come già deciso.
 
-**Conseguenza sui pin: il C3 mini da solo non basta più.** Servono 8 switch + 2 tasti + 1
-per i LED + 2 per l'I²C = **13**, e i pin sicuri sono **10** (vedi sotto). Quindi
-l'**MCP23017** non è più un'alternativa comoda ma la strada: sedici ingressi sui due fili
-dell'I²C che ci sono già, ~1,50 €, con pull-up interni e interrupt. Gli otto footswitch e
-i due tasti banco ci stanno tutti e al C3 restano dieci pin liberi.
+**Il banco resta da otto**, diviso in due metà da quattro: combacia senza toccare niente
+col modello dell'app, dove i banchi sono già disegnati quattro e quattro. La libreria non
+cambia di una riga.
+
+**Quattro tasti con LED rosso/verde è il pannello dello Spark**, che ha quattro LED
+bicolore, rosso banco A e verde banco B. Il pedale ricostruisce col piede l'interfaccia che
+l'ampli ha già.
+
+**Il rischio di questa forma è uno solo: pestare il tasto giusto nella metà sbagliata.**
+Per questo **cambiano colore tutti e quattro i LED insieme**, non uno solo: uno stato che
+occupa metà del pedale non si confonde. Da giudicare suonando.
+
+**Conseguenza sui pin: l'MCP23017 non serve più.** Cinque footswitch + due tasti = 7
+ingressi, e ci stanno tutti sui pin sicuri del C3 (vedi sotto). Resta senza margine per un
+*nono* ingresso — pedale d'espressione o tap tempo vorrebbero l'espansore — ma per questo
+disegno la schedina basta.
+
+**E il problema del nome tagliato sul display si è sciolto da solo**: con quattro nomi da
+mostrare invece di otto, un elenco di quattro righe intere dà ~22 caratteri a testa e
+quasi tutti i nomi veri ci stanno.
 
 **Il pedale non tocca mai gli slot hardware** — deciso dall'utente il 14 agosto 2026,
 coerente con la regola dei banchi inventati nella vista live. Quindi ogni cambio preset è
@@ -390,19 +405,18 @@ premuto all'accensione, impedisce l'avvio (il 9 è il BOOT). Pin sicuri per uno 
 
 | cosa | pin |
 |---|---|
-| switch 1–8 | `0, 1, 3, 4, 5, 6, 7, 10`, `INPUT_PULLUP` verso massa, nessuna resistenza |
-| dati WS2812 (8 LED) | `2`, con una 10k verso 3V3 così all'avvio è alto |
+| 5 footswitch + 2 tasti banco | `0, 1, 3, 4, 5, 6, 7`, `INPUT_PULLUP` verso massa, nessuna resistenza |
+| dati WS2812 | `10` |
 | OLED I²C | `20`, `21` (sul C3 l'I²C è rimappabile su qualsiasi pin) |
-| liberi | `8`, `9` |
+| liberi, ma solo come uscite | `2`, `8`, `9` (strapping) |
 
-**LED: striscia WS2812, non discreti** — otto LED separati sarebbero otto pin e sul C3 non
-ci stanno. Un pin solo, e sono RGB, quindi possono fare rosso banco A / verde banco B o il
-colore della famiglia. Luminosità bassa (20–30 su 255): a bianco pieno sono ~480 mA e il
-regolatore della schedina non li regge.
+**LED: striscia WS2812, non discreti.** Un pin solo, e sono RGB, quindi fanno rosso metà A
+/ verde metà B — la convenzione del pannello dell'ampli. Luminosità bassa (20–30 su 255):
+a bianco pieno sono ~480 mA e il regolatore della schedina non li regge.
 
-**Undici pin su tredici: zero margine.** Se serve un nono ingresso (pedale d'espressione,
-tap tempo) la via è un **MCP23017**, sedici ingressi sugli stessi due fili dell'OLED,
-~1,50 €.
+**Dieci pin sicuri, dieci usati: zero margine, ma nessun espansore.** Se un giorno serve un
+ottavo ingresso (pedale d'espressione, tap tempo) la via è un **MCP23017**, sedici ingressi
+sugli stessi due fili dell'OLED, ~1,50 €.
 
 ### Da misurare, in ordine
 
@@ -521,29 +535,24 @@ I banchi arrivano da `store.getBanks()`. Se non ce ne sono usa banchi finti e lo
 `?demo` li forza. **I tasti 1–8 della tastiera fanno da piede**: col mouse la pressione
 lunga non si prova bene.
 
-Le costanti da tarare stanno in cima al file: `PRESSIONE_LUNGA` 500 ms, `RIPETI_BANCO`
-600 ms, `TASTO_SU` 3 e `TASTO_GIU` 7. Le scelte già dentro, che sono quelle da giudicare
-suonando:
+Le scelte già dentro, che sono quelle da giudicare suonando:
 
-- **tutti e otto scattano alla pressione**, da quando i banchi hanno i loro tasti.
-- **una pressione durante un caricamento si accoda, non annulla**: vedi il punto 2 di
-  «da misurare».
-- cambiando banco **`attivo` torna a `null`**: l'ampli continua a suonare quel preset, ma
-  nessun tasto del banco nuovo lo rappresenta, e far finta di sì sarebbe una bugia.
+- **tutti scattano alla pressione**: nessun footswitch ha una funzione lunga da aspettare.
+- **il quinto salta al gemello.** Se non sta suonando niente non c'è un gemello, quindi
+  cambia solo la metà e lo dice; se il gemello è un posto vuoto cambia metà e lampeggia,
+  invece di fingere.
+- **una pressione durante un caricamento si accoda, non annulla** — verificato poi sul
+  firmware vero, dove il tasto va letto anche dentro l'attesa degli ack.
+- cambiando banco si torna **sempre in metà A** e `attivo` va a `null`: atterrare in uno
+  stato noto vale più che ricordarsi dov'eri, e l'ampli continua a suonare quel preset ma
+  nessun tasto del banco nuovo lo rappresenta.
+- l'OLED tiene una **striscia in fondo che dice dove porta il quinto tasto** («⇄ A2 Crunch
+  Bassman»): è lo spazio che si libera mostrando quattro nomi invece di otto.
 
-**Il display mostra tutti e otto i pedali col nome**, chiesto dall'utente, e il problema è
-che il nome intero non ci sta. Due disposizioni a confronto nel simulatore:
-
-- **griglia 4×2**, la stessa forma dei pedali: casella da 32 px, cioè **sei caratteri per
-  riga** con un font 5×7, su tre o quattro righe. «Ambient Plate» ci sta a capo, «Crunch
-  Bassman» viene tagliato.
-- **elenco di otto righe**: ~26 caratteri a testa, quasi tutti i nomi interi, ma si perde
-  la corrispondenza con i pedali e per trovare il terzo si conta invece di guardare. Una
-  riga di stacco dopo il quarto ricorda che le file sono due.
-
-Se il taglio dà fastidio la via è un **nome corto per il pedale deciso dall'utente** in
-libreria — la stessa regola dei nomi dei parametri: accorciare a indovinare lo faremmo
-male. Non ancora aggiunto allo store.
+Due disposizioni del display a confronto, ma la scelta è quasi fatta: **l'elenco di quattro
+righe** dà ~22 caratteri a testa e i nomi veri ci stanno interi, mentre le **quattro
+colonne** — che ricalcano i pedali in fila — tornano a sei caratteri per riga. Il nome
+corto per il pedale, deciso dall'utente in libreria, per ora non serve più.
 
 **La resa a 1 bit del simulatore è più brutta del vero** e non va usata per giudicare:
 sogliare un font antialiasato a 7 px mangia i tratti, mentre un font a matrice 5×7 ha ogni
