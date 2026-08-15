@@ -13,8 +13,7 @@
   h2 { font-size:0.9rem; margin:20px 0 6px; color:#c8ccd2; }
   .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:78ch; line-height:1.55; }
   .sub b { color:#c8ccd2; }
-  .status { display:inline-block; padding:3px 9px; border-radius:11px;
-            font-size:0.75rem; font-weight:600; }
+  .status { display:inline-block; padding:3px 9px; border-radius:11px; font-size:0.75rem; font-weight:600; }
   .status.off { background:#3a2020; color:#ff8080; }
   .status.on  { background:#1f3a24; color:#7fe08a; }
   .status.wait{ background:#3a3520; color:#f0d060; }
@@ -22,9 +21,24 @@
            background:#212227; color:#e8e8ea; padding:9px 13px; border-radius:8px; }
   button.primary { background:#e30613; color:#fff; }
   button:disabled { background:#18191d; color:#4e535b; cursor:not-allowed; }
+  select { background:#0e0f12; border:1px solid #34383f; color:#e8e8ea;
+           padding:7px 8px; border-radius:6px; font:inherit; font-size:0.83rem; }
   .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  label.campo { color:#b0b4bb; font-size:0.82rem; display:flex; align-items:center; gap:6px; }
+
+  .banchi { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; margin-bottom:10px; }
+  .slot { border:1px solid #24272c; border-radius:10px; padding:9px 10px; background:#101115; }
+  .slot.vuoto { border-style:dashed; color:#4e535b; }
+  .slot .n { font-size:0.68rem; color:#5f656e; font-weight:700; }
+  .slot .nome { font-weight:600; margin:2px 0 6px; }
+  .slot .azioni { display:flex; gap:6px; }
+  .slot button { padding:5px 9px; font-size:0.75rem; }
+
+  .barra { height:6px; background:#1a1c20; border-radius:3px; overflow:hidden; margin:8px 0; }
+  .barra i { display:block; height:100%; background:#e30613; width:0; transition:width .1s; }
+
   #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
-         height:46vh; overflow-y:auto; margin-top:6px;
+         height:34vh; overflow-y:auto; margin-top:6px;
          font-family:'SF Mono',Consolas,monospace; font-size:0.76rem; line-height:1.55;
          color:#8a8f98; white-space:pre-wrap; word-break:break-word; }
   #log .ok { color:#7fe08a; } #log .err { color:#ff8080; }
@@ -38,41 +52,52 @@
 
 <h1>Ponte app ↔ pedale</h1>
 <p class="sub">
-  Il primo pezzo del ponte: l'app trova il pedale via Bluetooth e ci scambia due parole.
-  Niente banchi ancora, niente memoria — solo verificare che <b>il pedale si faccia
-  trovare</b> e che il passaggio di consegne funzioni.
+  Manda un banco della libreria al pedale, che se lo tiene in memoria e lo suona da solo.
+  Dentro il blocco ci sono <b>i frame già serializzati</b> dallo stesso encoder che parla
+  con l'ampli: il firmware non serializza niente. Mentre questa pagina è collegata,
+  <b>il pedale molla l'ampli</b>; appena stacchi, se lo riprende.
 </p>
 
 <div class="row">
   <button id="btnConnect" class="primary">Cerca il pedale</button>
   <span id="status" class="status off">non connesso</span>
   <button id="btnCiao" disabled>Chi sei</button>
-  <button id="btnElenca" disabled>Che banchi hai</button>
+  <button id="btnElenca" disabled>Rileggi i banchi</button>
   <button id="btnStacca" disabled>Stacca</button>
 </div>
 
+<h2>Manda un banco</h2>
+<div class="row">
+  <label class="campo">banco <select id="scegliBanco"></select></label>
+  <label class="campo">nello slot <select id="scegliSlot"></select></label>
+  <button id="btnInvia" class="primary" disabled>Invia al pedale</button>
+</div>
+<div class="barra"><i id="avanzamento"></i></div>
+
+<h2>Cosa c'è nel pedale</h2>
+<div class="banchi" id="slots"></div>
+
 <p class="nota">
-  <b>Un padrone alla volta, per scelta.</b> Quando questa pagina si collega, il pedale
-  <b>molla l'ampli</b>; quando la chiudi o premi Stacca, <b>se lo riprende da solo</b>.
-  Guarda il pannello dell'ampli mentre lo fai: è lì che si vede il passaggio di consegne.
+  <b>La prova che conta è lo spegnimento.</b> Manda un banco, stacca la corrente al pedale,
+  riattaccala: se al riavvio suona ancora quel banco, il pedale è autonomo davvero — che è
+  tutto il punto di questo lavoro.
 </p>
 
 <h2>Log</h2>
 <div id="log"></div>
 
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/preset-store.js"></script>
+<script src="../src/pedale-ponte.js"></script>
 <script>
 'use strict';
 
 const $ = id => document.getElementById(id);
-
-const UUID_PONTE   = '7a9c0000-4b2e-4f6a-9d3c-1e5f8b2a6c40';
-const UUID_COMANDO = '7a9c0001-4b2e-4f6a-9d3c-1e5f8b2a6c40';
-const UUID_STATO   = '7a9c0002-4b2e-4f6a-9d3c-1e5f8b2a6c40';
-
-const CMD_CIAO = 0x01, CMD_ELENCA = 0x02;
-const RSP = { 0x81: 'info', 0x82: 'elenco', 0x8f: 'errore' };
+const P = PedalePonte;
+const store = new PresetStore();
 
 let device = null, chComando = null, chStato = null;
+let banchiLibreria = [];
 
 function log(testo, classe) {
   const el = $('log');
@@ -87,25 +112,71 @@ function log(testo, classe) {
 function stato(classe, testo) {
   $('status').className = 'status ' + classe;
   $('status').textContent = testo;
-  const collegato = classe === 'on';
-  for (const id of ['btnCiao', 'btnElenca', 'btnStacca']) $(id).disabled = !collegato;
-  $('btnConnect').disabled = collegato;
+  const su = classe === 'on';
+  for (const id of ['btnCiao', 'btnElenca', 'btnStacca', 'btnInvia']) $(id).disabled = !su;
+  $('btnConnect').disabled = su;
+}
+
+/* ---- libreria ------------------------------------------------------ */
+
+async function caricaLibreria() {
+  try {
+    await store.open();
+    const tutti = await store.all();
+    const perId = new Map(tutti.map(r => [r.id, r]));
+    banchiLibreria = (await store.getBanks())
+      .map(b => ({ nome: b.nome, posti: b.posti.map(id => perId.get(id) || null) }));
+    log(`libreria: ${tutti.length} preset, ${banchiLibreria.length} banchi`);
+  } catch (err) {
+    log('libreria non raggiungibile: ' + err.message, 'err');
+  }
+  const sel = $('scegliBanco');
+  sel.innerHTML = banchiLibreria.length
+    ? banchiLibreria.map((b, i) =>
+        `<option value="${i}">${b.nome} (${b.posti.filter(Boolean).length} preset)</option>`).join('')
+    : '<option value="">nessun banco in libreria</option>';
+  $('scegliSlot').innerHTML =
+    Array.from({ length: 8 }, (_, i) => `<option value="${i}">${i + 1}</option>`).join('');
+}
+
+/* ---- pedale -------------------------------------------------------- */
+
+function disegnaSlot(elenco) {
+  const perSlot = new Map(elenco.map(v => [v.slot, v]));
+  $('slots').innerHTML = '';
+  for (let s = 0; s < 8; s++) {
+    const v = perSlot.get(s);
+    const d = document.createElement('div');
+    d.className = 'slot' + (v ? '' : ' vuoto');
+    d.innerHTML = `<div class="n">slot ${s + 1}</div>` +
+                  `<div class="nome">${v ? v.nome : 'vuoto'}</div>` +
+                  (v ? `<div class="azioni"></div>` : '');
+    if (v) {
+      const usa = document.createElement('button');
+      usa.textContent = `Suona (${v.pieni})`;
+      usa.addEventListener('click', () => manda(P.CMD.USA, s));
+      const canc = document.createElement('button');
+      canc.textContent = 'Cancella';
+      canc.addEventListener('click', () => manda(P.CMD.CANCELLA, s));
+      d.querySelector('.azioni').append(usa, canc);
+    }
+    $('slots').appendChild(d);
+  }
 }
 
 async function manda(...byte) {
   if (!chComando) { log('non connesso', 'err'); return; }
-  const dati = new Uint8Array(byte);
-  log('TX ' + [...dati].map(b => b.toString(16).padStart(2, '0')).join(' '), 'tx');
-  // Il pedale espone anche la scrittura senza risposta, ma qui la conferma
-  // serve: se il comando non arriva vogliamo saperlo subito.
-  await chComando.writeValue(dati);
+  await chComando.writeValueWithResponse(new Uint8Array(byte));
+  log('TX ' + byte.map(b => b.toString(16).padStart(2, '0')).join(' '), 'tx');
 }
 
 function arrivato(e) {
   const v = new Uint8Array(e.target.value.buffer);
-  const tipo = RSP[v[0]] || ('0x' + v[0].toString(16));
+  const tipo = P.RSP[v[0]] || ('0x' + v[0].toString(16));
   const testo = new TextDecoder().decode(v.subarray(1));
+  if (v[0] === 0x82) { disegnaSlot(P.leggiElenco(testo)); log(`RX [elenco] ${testo.trim() || '(vuoto)'}`, 'rx'); return; }
   log(`RX [${tipo}] ${testo}`, v[0] === 0x8f ? 'err' : 'rx');
+  if (v[0] === 0x81 && /salvato|cancellato/.test(testo)) manda(P.CMD.ELENCA);
 }
 
 $('btnConnect').addEventListener('click', async () => {
@@ -113,41 +184,58 @@ $('btnConnect').addEventListener('click', async () => {
   try {
     stato('wait', 'ricerca…');
     device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: [UUID_PONTE] }],
-      optionalServices: [UUID_PONTE],
-    });
+      filters: [{ services: [P.SERVIZIO] }], optionalServices: [P.SERVIZIO] });
     device.addEventListener('gattserverdisconnected', () => {
       chComando = chStato = null;
       stato('off', 'non connesso');
-      log('il pedale si è staccato — adesso dovrebbe riprendersi l\'ampli', 'mk');
+      log('staccato — il pedale dovrebbe riprendersi l\'ampli', 'ok');
     });
-
     stato('wait', 'connessione…');
     const server   = await device.gatt.connect();
-    const servizio = await server.getPrimaryService(UUID_PONTE);
-    chComando = await servizio.getCharacteristic(UUID_COMANDO);
-    chStato   = await servizio.getCharacteristic(UUID_STATO);
-
+    const servizio = await server.getPrimaryService(P.SERVIZIO);
+    chComando = await servizio.getCharacteristic(P.COMANDO);
+    chStato   = await servizio.getCharacteristic(P.STATO);
     await chStato.startNotifications();
     chStato.addEventListener('characteristicvaluechanged', arrivato);
-
     stato('on', device.name || 'pedale');
-    log(`connesso a "${device.name}"`, 'ok');
-    log('il pedale ha mollato l\'ampli: guarda il pannello', 'ok');
-    manda(CMD_CIAO);
+    log(`connesso a "${device.name}" — il pedale ha mollato l'ampli`, 'ok');
+    await manda(P.CMD.CIAO);
+    await manda(P.CMD.ELENCA);
   } catch (err) {
     stato('off', 'non connesso');
     log('connessione fallita: ' + err.message, 'err');
   }
 });
 
-$('btnCiao').addEventListener('click',   () => manda(CMD_CIAO));
-$('btnElenca').addEventListener('click', () => manda(CMD_ELENCA));
+$('btnCiao').addEventListener('click',   () => manda(P.CMD.CIAO));
+$('btnElenca').addEventListener('click', () => manda(P.CMD.ELENCA));
 $('btnStacca').addEventListener('click', () => { if (device && device.gatt.connected) device.gatt.disconnect(); });
 
+$('btnInvia').addEventListener('click', async () => {
+  const i = Number($('scegliBanco').value);
+  const banco = banchiLibreria[i];
+  if (!banco) { log('nessun banco da mandare', 'err'); return; }
+  const slot = Number($('scegliSlot').value);
+  $('btnInvia').disabled = true;
+  try {
+    const t0 = performance.now();
+    const quanti = await P.invia(chComando, banco, slot, (fatti, totale) => {
+      $('avanzamento').style.width = Math.round(fatti / totale * 100) + '%';
+    });
+    log(`"${banco.nome}" → slot ${slot + 1}: ${quanti} byte in ` +
+        `${Math.round(performance.now() - t0)} ms`, 'ok');
+  } catch (err) {
+    log('invio fallito: ' + err.message, 'err');
+  }
+  $('avanzamento').style.width = '0';
+  $('btnInvia').disabled = false;
+});
+
+disegnaSlot([]);
+caricaLibreria();
 if (!navigator.bluetooth) {
   $('btnConnect').disabled = true;
-  log('Web Bluetooth non disponibile: serve Chrome o Edge, e su iPhone non esiste.', 'err');
+  log('Web Bluetooth non disponibile: serve Chrome o Edge.', 'err');
 }
 </script>
 </body>
