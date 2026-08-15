@@ -232,18 +232,40 @@ async function caricaBanchi() {
   }
   try {
     await store.open();
+    const tutti  = await store.all();
     const banchi = await store.getBanks();
-    const perId  = new Map((await store.all()).map(r => [r.id, r]));
+    const perId  = new Map(tutti.map(r => [r.id, r]));
     stato.banchi = banchi.map(b => ({ nome: b.nome, posti: b.posti.map(id => perId.get(id) || null) }));
-    if (!stato.banchi.length) {
-      stato.demo = true; stato.banchi = banchiFinti();
-      log('ATTENZIONE: nessun banco in libreria, sto usando banchi FINTI. ' +
-          'Servono a provare il tatto, ma all\'ampli non mandano niente. ' +
-          'I banchi si creano dalla vista Live dell\'app, sulla stessa origine di questa pagina.', 'err');
-    } else {
-      log(`${stato.banchi.length} banchi dalla libreria`, 'ok');
+
+    log(`libreria: ${tutti.length} preset, ${banchi.length} banchi`);
+
+    if (stato.banchi.length) {
       const vuoti = stato.banchi.filter(b => !b.posti.some(Boolean)).length;
       if (vuoti) log(`${vuoti} banchi non hanno nemmeno un preset dentro`, 'mk');
+      return;
+    }
+
+    // Nessun banco. Sono due situazioni molto diverse, e confonderle fa perdere
+    // tempo: **senza preset** la libreria di questa origine e' vuota, **con i
+    // preset ma senza banchi** manca solo di decidere quale va su quale tasto.
+    if (tutti.length) {
+      // Banco provvisorio, per poter provare subito: sono preset veri, quindi
+      // all'ampli ci vanno davvero. Ma non e' un banco salvato e non lo diventa.
+      stato.banchi = [{
+        nome:  'Provvisorio',
+        posti: tutti.slice(0, POSTI).map(r => r || null)
+              .concat(new Array(POSTI).fill(null)).slice(0, POSTI),
+      }];
+      log(`nessun banco salvato: ho messo insieme un banco PROVVISORIO coi primi ` +
+          `${Math.min(POSTI, tutti.length)} preset della libreria. Sono preset veri e ` +
+          `all'ampli ci vanno davvero, ma non e' un banco salvato: i banchi si creano ` +
+          `dalla vista Live dell'app.`, 'mk');
+    } else {
+      stato.demo = true; stato.banchi = banchiFinti();
+      log('ATTENZIONE: la libreria di questa origine e\' VUOTA, sto usando banchi FINTI. ' +
+          'Servono a provare il tatto, ma all\'ampli non mandano niente.', 'err');
+      log('Ricorda che file:// e https:// sono due origini diverse con due database ' +
+          'diversi: se i tuoi preset stanno sull\'app pubblicata, da qui non si vedono.', 'err');
     }
   } catch (err) {
     stato.demo = true; stato.banchi = banchiFinti();
