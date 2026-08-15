@@ -395,7 +395,8 @@ static void elenco() {
     "  v     chiedi intervallo 7,5 ms\n"
     "  w     chiedi intervallo 15 ms\n"
     "  s     chiedi intervallo lento (30 ms)\n"
-    "  r     ricollega\n"));
+    "  x     molla l'ampli (cosi' l'app nel browser lo trova)\n"
+    "  r     riprendi l'ampli\n"));
 }
 
 void setup() {
@@ -414,13 +415,19 @@ void setup() {
  * succede. Riprova ogni cinque secondi, in silenzio. */
 static uint32_t ultimoTentativo = 0;
 
+/* ...ma in sviluppo serve il contrario. **Mentre il pedale e' connesso, lo
+ * Spark smette di annunciarsi**, quindi l'app nel browser non lo trova piu' e
+ * riaccendere l'ampli non basta: il pedale se lo riprende in cinque secondi.
+ * Con 'x' il pedale molla l'ampli e sta fermo finche' non gli si dice 'r'. */
+static bool sganciato = false;
+
 void loop() {
   if (client && !client->isConnected() && chScrittura) {
     Serial.println(F("connessione persa"));
     chScrittura = chNotifiche = nullptr;
     dentro = 0;
   }
-  if (!chScrittura && millis() - ultimoTentativo > 5000) {
+  if (!chScrittura && !sganciato && millis() - ultimoTentativo > 5000) {
     ultimoTentativo = millis();
     collega();
   }
@@ -455,7 +462,13 @@ void loop() {
     else if (c == 'v') chiediIntervallo(6, 6);       // 7,5 ms
     else if (c == 'w') chiediIntervallo(12, 12);     // 15 ms
     else if (c == 's') chiediIntervallo(24, 40);     // 30 - 50 ms
-    else if (c == 'r') collega();
+    else if (c == 'r') { sganciato = false; collega(); }
+    else if (c == 'x') {
+      sganciato = true;
+      if (client && client->isConnected()) client->disconnect();
+      chScrittura = chNotifiche = nullptr;
+      Serial.println(F("sganciato: l'ampli e' libero, l'app puo' trovarlo. 'r' per riprenderlo."));
+    }
     else if (c == '?') elenco();
   }
   // 2 ms, non 10: una battuta secca su un tattile puo' durare pochi

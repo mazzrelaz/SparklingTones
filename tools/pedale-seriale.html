@@ -72,6 +72,8 @@
   <span id="status" class="status off">non collegato</span>
   <label class="check"><input type="checkbox" id="diag"> diagnostica del tasto fisico</label>
   <button id="btnConta">Contatori</button>
+  <button id="btnSgancia">Molla l'ampli</button>
+  <button id="btnRiprendi">Riprendi l'ampli</button>
   <button id="btnPulisci">Pulisci log</button>
 </div>
 
@@ -236,6 +238,10 @@ $('btnConnect').addEventListener('click', async () => {
 
 $('diag').addEventListener('change', () => manda('d'));
 $('btnConta').addEventListener('click', () => manda('c'));
+// Mentre il pedale e' connesso, lo Spark smette di annunciarsi e l'app nel
+// browser non lo trova. Questo lo libera senza staccare il cavo.
+$('btnSgancia').addEventListener('click', () => manda('x'));
+$('btnRiprendi').addEventListener('click', () => manda('r'));
 $('btnPulisci').addEventListener('click', () => { $('log').innerHTML = ''; });
 
 disegna();
