@@ -56,7 +56,8 @@ static uint32_t ultimoTentativo = 0;
 
 /* Ma quando l'app si collega il pedale deve mollare l'ampli, e restare
  * mollato finche' l'app c'e'. Anche 'x' dal seriale mette qui. */
-static bool sganciato = false;
+static bool     sganciato      = false;
+static uint32_t momentoSgancio = 0;   // quando l'app ha mollato: da li' si riprova fitto
 
 static uint8_t  seq       = 0x01;   // resta fra 0x01 e 0x3e
 static uint32_t rxTotali  = 0;      // quanti messaggi interi sono arrivati
@@ -237,7 +238,11 @@ static bool collega() {
 
   if (!trovato) { Serial.println(F("nessuno Spark: riprovo fra cinque secondi.")); return false; }
 
-  client = BLEDevice::createClient();
+  // Un client solo, riusato. Crearne uno nuovo a ogni tentativo li accumula
+  // e NimBLE ne ammette pochi: dopo qualche passaggio di consegne il pedale
+  // smetterebbe di potersi collegare, e sarebbe un guasto che si manifesta
+  // solo dopo mezz'ora d'uso.
+  if (!client) client = BLEDevice::createClient();
   if (!client->connect(trovato)) { Serial.println(F("connessione fallita")); return false; }
 
   BLERemoteService* servizio = client->getService(UUID_SERVIZIO);
@@ -496,6 +501,7 @@ class Collegamenti : public BLEServerCallbacks {
     Serial.println(F("ponte: l'app se n'e' andata, riprendo l'ampli"));
     sganciato = false;              // il loop si ricollega da solo
     ultimoTentativo = 0;
+    momentoSgancio  = millis();
     s->startAdvertising();          // senza questo il pedale sparisce per sempre
   }
 };
@@ -537,9 +543,16 @@ void loop() {
     chScrittura = chNotifiche = nullptr;
     dentro = 0;
   }
-  if (!chScrittura && !sganciato && millis() - ultimoTentativo > 5000) {
-    ultimoTentativo = millis();
-    collega();
+  // Dopo che l'app se n'e' andata l'ampli ci mette qualche secondo a
+  // rimettersi ad annunciarsi, quindi il primo tentativo va spesso a vuoto:
+  // per mezzo minuto si riprova fitto, poi si rallenta per non stare a
+  // scansionare in eterno.
+  if (!chScrittura && !sganciato) {
+    const uint32_t attesa = (millis() - momentoSgancio < 30000) ? 2000 : 5000;
+    if (millis() - ultimoTentativo > attesa) {
+      ultimoTentativo = millis();
+      collega();
+    }
   }
 
   leggiTasto();
@@ -572,7 +585,13 @@ void loop() {
     else if (c == 'v') chiediIntervallo(6, 6);       // 7,5 ms
     else if (c == 'w') chiediIntervallo(12, 12);     // 15 ms
     else if (c == 's') chiediIntervallo(24, 40);     // 30 - 50 ms
-    else if (c == 'r') { sganciato = false; collega(); }
+    else if (c == 'r') {
+      sganciato = false;
+      // Se e' gia' collegato, scansionare non serve e anzi confonde: l'ampli
+      // connesso non si annuncia, quindi si leggerebbe «nessuno Spark».
+      if (chScrittura) Serial.println(F("gia' collegato all'ampli"));
+      else { momentoSgancio = millis(); collega(); }
+    }
     else if (c == 'x') {
       sganciato = true;
       if (client && client->isConnected()) client->disconnect();
