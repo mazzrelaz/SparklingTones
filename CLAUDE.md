@@ -523,6 +523,42 @@ il metodo giusto è `BLEClient::updateConnParams`. Altri due nomi cambiati nel 3
 `isAdvertisingService` (non `isAdvertisedServiceUUID`), e `onResult(BLEAdvertisedDevice)`
 per valore.
 
+### Il ponte app↔pedale — primo pezzo verificato il 15 agosto 2026
+
+**Un padrone alla volta, per scelta dell'utente**: non serve che il pedale parli con l'app
+e con l'ampli insieme. Ci si collega all'app, si chiude l'app, e il pedale torna all'ampli
+da solo. Cade così il pezzo più rischioso del disegno — client e server contemporanei.
+
+Il pedale **si annuncia sempre** come `SparkPedale`, anche mentre suona: è l'unico modo
+perché l'app lo trovi senza staccargli la corrente. Quando l'app si collega **molla
+l'ampli**, quando l'app se ne va **se lo riprende**. Servizio e caratteristiche nostre
+(`7a9c0000-…`), protocollo nostro: primo byte il comando, il resto payload. **Non si riusa
+il protocollo dello Spark**: i chunk da 25, il packing a 7 bit e il byte `0x00` finale sono
+cicatrici dell'ampli, non nostre.
+
+Sonde: `tools/ponte-prova.html` (sponda app) e `tools/pedale-seriale.html` (log del pedale
+via Web Serial, che **non resetta la scheda** come fa `System.IO.Ports`).
+
+**Le quattro trappole pagate, tutte misurate:**
+
+- **Mai fare operazioni BLE dentro un callback BLE.** `client->disconnect()` dentro
+  `onConnect` e `startAdvertising()` dentro `onDisconnect` bloccavano NimBLE per decine di
+  secondi, e il sintomo era il pedale che non tornava più all'ampli. I callback alzano una
+  bandiera, il lavoro lo fa il `loop()`.
+- **La richiesta dell'intervallo di connessione va ripetuta a connessione matura.** Sulla
+  *prima* connessione quella fatta subito dopo `connect()` fa in tempo; su una
+  **riconnessione arriva troppo presto e si perde**, e la connessione resta lenta:
+  **89–95 ms di giro invece di 26–29, cioè ~1400 ms a preset invece di ~420.** Si chiede
+  subito e si ripete dal loop a 600 ms e a 2,5 s. È il difetto che ha fatto sembrare il
+  ponte lento quando invece era solo mal parametrato.
+- **Un `BLEClient` solo, riusato.** Crearne uno nuovo a ogni riconnessione li accumula e
+  NimBLE ne ammette pochi: il pedale smetterebbe di collegarsi dopo mezz'ora d'uso.
+- **La pressione del footswitch resta in coda finché l'ampli non c'è**, invece di essere
+  buttata via: premendo durante un riaggancio sembrava che il pedale ignorasse il piede.
+
+**E l'ampli torna disponibile in mezzo secondo** dopo essere stato mollato — misurato.
+Quando il riaggancio sembra lento la causa non è mai lui.
+
 ### Il simulatore — fatto il 14 agosto 2026, da provare col piede
 
 `tools/pedale-sim.html`: la faccia del pedale in una pagina — otto footswitch in due file
