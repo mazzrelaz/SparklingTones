@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spark — ponte app ↔ pedale</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px calc(16px + env(safe-area-inset-right)) 16px calc(16px + env(safe-area-inset-left));
+         background:#0a0a0b; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:14px; }
+  h1 { font-size:1.1rem; margin:0 0 2px; }
+  h2 { font-size:0.9rem; margin:20px 0 6px; color:#c8ccd2; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:78ch; line-height:1.55; }
+  .sub b { color:#c8ccd2; }
+  .status { display:inline-block; padding:3px 9px; border-radius:11px;
+            font-size:0.75rem; font-weight:600; }
+  .status.off { background:#3a2020; color:#ff8080; }
+  .status.on  { background:#1f3a24; color:#7fe08a; }
+  .status.wait{ background:#3a3520; color:#f0d060; }
+  button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
+           background:#212227; color:#e8e8ea; padding:9px 13px; border-radius:8px; }
+  button.primary { background:#e30613; color:#fff; }
+  button:disabled { background:#18191d; color:#4e535b; cursor:not-allowed; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         height:46vh; overflow-y:auto; margin-top:6px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.76rem; line-height:1.55;
+         color:#8a8f98; white-space:pre-wrap; word-break:break-word; }
+  #log .ok { color:#7fe08a; } #log .err { color:#ff8080; }
+  #log .tx { color:#f0d060; } #log .rx { color:#7fb8ff; }
+  .nota { border-left:3px solid #3a3e46; padding:2px 0 2px 10px; margin:10px 0;
+          color:#8a8f98; font-size:0.8rem; line-height:1.55; max-width:78ch; }
+  .nota b { color:#c8ccd2; }
+</style>
+</head>
+<body>
+
+<h1>Ponte app ↔ pedale</h1>
+<p class="sub">
+  Il primo pezzo del ponte: l'app trova il pedale via Bluetooth e ci scambia due parole.
+  Niente banchi ancora, niente memoria — solo verificare che <b>il pedale si faccia
+  trovare</b> e che il passaggio di consegne funzioni.
+</p>
+
+<div class="row">
+  <button id="btnConnect" class="primary">Cerca il pedale</button>
+  <span id="status" class="status off">non connesso</span>
+  <button id="btnCiao" disabled>Chi sei</button>
+  <button id="btnElenca" disabled>Che banchi hai</button>
+  <button id="btnStacca" disabled>Stacca</button>
+</div>
+
+<p class="nota">
+  <b>Un padrone alla volta, per scelta.</b> Quando questa pagina si collega, il pedale
+  <b>molla l'ampli</b>; quando la chiudi o premi Stacca, <b>se lo riprende da solo</b>.
+  Guarda il pannello dell'ampli mentre lo fai: è lì che si vede il passaggio di consegne.
+</p>
+
+<h2>Log</h2>
+<div id="log"></div>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+const UUID_PONTE   = '7a9c0000-4b2e-4f6a-9d3c-1e5f8b2a6c40';
+const UUID_COMANDO = '7a9c0001-4b2e-4f6a-9d3c-1e5f8b2a6c40';
+const UUID_STATO   = '7a9c0002-4b2e-4f6a-9d3c-1e5f8b2a6c40';
+
+const CMD_CIAO = 0x01, CMD_ELENCA = 0x02;
+const RSP = { 0x81: 'info', 0x82: 'elenco', 0x8f: 'errore' };
+
+let device = null, chComando = null, chStato = null;
+
+function log(testo, classe) {
+  const el = $('log');
+  const r = document.createElement('div');
+  r.innerHTML = `<span style="color:#4e535b">${new Date().toLocaleTimeString('it-IT')}</span> ` +
+                `<span class="${classe || ''}"></span>`;
+  r.lastChild.textContent = testo;
+  el.appendChild(r);
+  el.scrollTop = el.scrollHeight;
+}
+
+function stato(classe, testo) {
+  $('status').className = 'status ' + classe;
+  $('status').textContent = testo;
+  const collegato = classe === 'on';
+  for (const id of ['btnCiao', 'btnElenca', 'btnStacca']) $(id).disabled = !collegato;
+  $('btnConnect').disabled = collegato;
+}
+
+async function manda(...byte) {
+  if (!chComando) { log('non connesso', 'err'); return; }
+  const dati = new Uint8Array(byte);
+  log('TX ' + [...dati].map(b => b.toString(16).padStart(2, '0')).join(' '), 'tx');
+  // Il pedale espone anche la scrittura senza risposta, ma qui la conferma
+  // serve: se il comando non arriva vogliamo saperlo subito.
+  await chComando.writeValue(dati);
+}
+
+function arrivato(e) {
+  const v = new Uint8Array(e.target.value.buffer);
+  const tipo = RSP[v[0]] || ('0x' + v[0].toString(16));
+  const testo = new TextDecoder().decode(v.subarray(1));
+  log(`RX [${tipo}] ${testo}`, v[0] === 0x8f ? 'err' : 'rx');
+}
+
+$('btnConnect').addEventListener('click', async () => {
+  if (!navigator.bluetooth) { log('questo browser non ha Web Bluetooth', 'err'); return; }
+  try {
+    stato('wait', 'ricerca…');
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [UUID_PONTE] }],
+      optionalServices: [UUID_PONTE],
+    });
+    device.addEventListener('gattserverdisconnected', () => {
+      chComando = chStato = null;
+      stato('off', 'non connesso');
+      log('il pedale si è staccato — adesso dovrebbe riprendersi l\'ampli', 'mk');
+    });
+
+    stato('wait', 'connessione…');
+    const server   = await device.gatt.connect();
+    const servizio = await server.getPrimaryService(UUID_PONTE);
+    chComando = await servizio.getCharacteristic(UUID_COMANDO);
+    chStato   = await servizio.getCharacteristic(UUID_STATO);
+
+    await chStato.startNotifications();
+    chStato.addEventListener('characteristicvaluechanged', arrivato);
+
+    stato('on', device.name || 'pedale');
+    log(`connesso a "${device.name}"`, 'ok');
+    log('il pedale ha mollato l\'ampli: guarda il pannello', 'ok');
+    manda(CMD_CIAO);
+  } catch (err) {
+    stato('off', 'non connesso');
+    log('connessione fallita: ' + err.message, 'err');
+  }
+});
+
+$('btnCiao').addEventListener('click',   () => manda(CMD_CIAO));
+$('btnElenca').addEventListener('click', () => manda(CMD_ELENCA));
+$('btnStacca').addEventListener('click', () => { if (device && device.gatt.connected) device.gatt.disconnect(); });
+
+if (!navigator.bluetooth) {
+  $('btnConnect').disabled = true;
+  log('Web Bluetooth non disponibile: serve Chrome o Edge, e su iPhone non esiste.', 'err');
+}
+</script>
+</body>
+</html>
