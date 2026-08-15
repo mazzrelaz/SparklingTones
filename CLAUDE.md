@@ -564,11 +564,21 @@ formato.
 
 - **Lo Spark 2 non ha nessun ingresso MIDI** (niente DIN, l'USB-C è solo scheda audio):
   qualunque pedaliera MIDI passa per forza da un ponte che traduce MIDI in BLE.
+- **Un padrone alla volta: verificato il 15 agosto 2026, per caso.** Col C3 connesso allo
+  Spark, il simulatore nel browser non trova niente: `requestDevice` filtrato sul servizio
+  `0xFFC0` non vede nessun dispositivo. **Mentre è connesso, l'ampli smette di
+  annunciarsi.** In senso stretto questo non dimostra che rifiuterebbe una seconda
+  connessione, ma dimostra la cosa che conta: **via Web Bluetooth, che ha bisogno della
+  scoperta, il secondo non entra.** Basta staccare l'alimentazione al pedale e il browser
+  lo ritrova.
+- **Conseguenza pesante sul ponte app↔pedale**, da tenere presente quando lo si fa: **app e
+  pedale non possono parlare all'ampli insieme.** O si usa uno o si usa l'altro, oppure
+  **il pedale fa da tramite** — client verso l'ampli e server verso l'app, che è esattamente
+  quello che fa Ignitron, e adesso si capisce perché.
 - **L'AIRSTEP Spk Edition comanda il looper dello Spark 2**, ed è di terzi: i comandi
   stanno nella stessa conversazione BLE, non c'è un canale privilegiato dell'app ufficiale.
-  E funzionerebbe **con l'app ufficiale connessa insieme** — se vale anche per noi cade
-  l'idea che «l'ampli accetta un padrone solo». **Da verificare**, è una prova da cinque
-  minuti.
+  Si diceva che funzionasse **con l'app ufficiale connessa insieme**: alla luce di quanto
+  sopra, se è vero è perché fa da tramite, non perché l'ampli accetti due padroni.
 - **Ignitron** (`stangreg/Ignitron`) è già un pedale ESP32 per lo Spark 2: fa da client
   verso l'ampli **e da server verso l'app ufficiale**, ha i banchi dentro. Prima di
   scrivere firmware da zero conviene leggerlo, e valutare se il lavoro non sia configurarlo
