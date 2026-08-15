@@ -37,6 +37,26 @@
 
 #include <BLEDevice.h>
 #include "preset_frames.h"
+#include "banchi.h"
+
+/* Il banco che il pedale sta suonando. Se ne ha uno ricevuto dall'app usa
+ * quello; altrimenti ripiega su preset_frames.h, che resta utile per provare
+ * senza dipendere dalla memoria. */
+static BancoCaricato bancoAttivo = {};
+
+static uint8_t     quantiPosti()            { return bancoAttivo.valido ? POSTI_PER_BANCO : BANCO_QUANTI; }
+static bool        postoPieno(uint8_t n)    { return bancoAttivo.valido ? bancoAttivo.posti[n].presente : true; }
+static const char* nomePosto(uint8_t n)     { return bancoAttivo.valido ? bancoAttivo.posti[n].nome : BANCO_NOMI[n]; }
+static uint8_t     chunkDelPosto(uint8_t n) { return bancoAttivo.valido ? bancoAttivo.posti[n].quanti : BANCO_CHUNK[n]; }
+
+static const uint8_t* frameDelPosto(uint8_t n, uint8_t c, uint8_t& lunghezza) {
+  if (bancoAttivo.valido) {
+    lunghezza = bancoAttivo.posti[n].lung[c];
+    return bancoAttivo.dati + bancoAttivo.posti[n].inizio[c];
+  }
+  lunghezza = BANCO_LUNGH[n][c];
+  return BANCO_FRAME[n][c];
+}
 
 /* --- GATT dello Spark: service 0xFFC0, write 0xFFC1, notify 0xFFC2 ------ */
 static BLEUUID UUID_SERVIZIO((uint16_t)0xFFC0);
@@ -298,9 +318,10 @@ static void chiediIntervallo(uint16_t minUnita, uint16_t maxUnita) {
 
 static void mandaPreset(uint8_t n) {
   if (!chScrittura) { Serial.println(F("non connesso")); return; }
-  if (n >= BANCO_QUANTI) return;
+  if (n >= quantiPosti()) return;
+  if (!postoPieno(n)) { Serial.printf("[%u] posto vuoto\n", n + 1); return; }
 
-  const uint8_t quanti = BANCO_CHUNK[n];
+  const uint8_t quanti = chunkDelPosto(n);
   const uint8_t mio    = seq;
   if (++seq > 0x3e) seq = 0x01;
 
@@ -311,9 +332,11 @@ static void mandaPreset(uint8_t n) {
 
   for (uint8_t i = 0; i < quanti; i++) {
     uint8_t frame[64];
-    const uint8_t len = BANCO_LUNGH[n][i];
-    memcpy(frame, BANCO_FRAME[n][i], len);
-    frame[2] = mio;
+    uint8_t len = 0;
+    const uint8_t* origine = frameDelPosto(n, i, len);
+    if (len == 0 || len > sizeof(frame)) { persi++; continue; }
+    memcpy(frame, origine, len);
+    frame[2] = mio;                      // il checksum non copre il seq
 
     const uint32_t prima = rxTotali;
     chScrittura->writeValue(frame, len, false);
@@ -331,7 +354,7 @@ static void mandaPreset(uint8_t n) {
   const uint32_t tTotale = millis() - t0;
 
   Serial.printf("[%u] %s — %lu ms, %u/%u ack%s\n",
-                n + 1, BANCO_NOMI[n], tTotale, ack, quanti,
+                n + 1, nomePosto(n), tTotale, ack, quanti,
                 persi ? "  (ATTENZIONE: qualche chunk non confermato)" : "");
   corrente = n;
 }
@@ -340,10 +363,10 @@ static void mandaPreset(uint8_t n) {
  *  pressione durante un trasferimento si accoda invece di ricorrere. */
 static void richiedi(uint8_t n) {
   if (inCoda >= 0) pressioniPerse++;       // ne stava gia' aspettando una: vince l'ultima
-  bersaglio = n % BANCO_QUANTI;
+  bersaglio = n % quantiPosti();
   inCoda = bersaglio;
   if (diagnostica)
-    Serial.printf("  = accettata -> %s%s\n", BANCO_NOMI[bersaglio],
+    Serial.printf("  = accettata -> %s%s\n", nomePosto(bersaglio),
                   inTrasferimento ? "  (in coda, trasferimento in corso)" : "");
 }
 
@@ -439,11 +462,29 @@ static void elenco() {
 #define UUID_COMANDO   "7a9c0001-4b2e-4f6a-9d3c-1e5f8b2a6c40"
 #define UUID_STATO     "7a9c0002-4b2e-4f6a-9d3c-1e5f8b2a6c40"
 
-static const uint8_t CMD_CIAO   = 0x01;
-static const uint8_t CMD_ELENCA = 0x02;
-static const uint8_t RSP_INFO   = 0x81;
-static const uint8_t RSP_ELENCO = 0x82;
-static const uint8_t RSP_ERRORE = 0x8f;
+static const uint8_t CMD_CIAO     = 0x01;
+static const uint8_t CMD_ELENCA   = 0x02;
+static const uint8_t CMD_INIZIA   = 0x10;   // slot, lunghezza LE32
+static const uint8_t CMD_PEZZO    = 0x11;   // offset LE16, byte
+static const uint8_t CMD_FINE     = 0x12;   // checksum XOR
+static const uint8_t CMD_CANCELLA = 0x20;   // slot
+static const uint8_t CMD_USA      = 0x21;   // slot: carica e suona quel banco
+static const uint8_t RSP_INFO     = 0x81;
+static const uint8_t RSP_ELENCO   = 0x82;
+static const uint8_t RSP_ERRORE   = 0x8f;
+
+/* Il blocco in arrivo si accumula in heap e si scrive in LittleFS solo alla
+ * fine, quando il checksum torna: cosi' un trasferimento interrotto non
+ * lascia in memoria un banco a meta', che sarebbe peggio di non averlo. */
+static uint8_t* ricDati   = nullptr;
+static size_t   ricAttesi = 0, ricAvuti = 0;
+static uint8_t  ricSlot   = 0;
+
+static void ricAnnulla() {
+  if (ricDati) free(ricDati);
+  ricDati = nullptr;
+  ricAttesi = ricAvuti = 0;
+}
 
 static BLECharacteristic* chStato = nullptr;
 static bool appCollegata = false;
@@ -468,18 +509,103 @@ class Ponte : public BLECharacteristicCallbacks {
     switch (d[0]) {
       case CMD_CIAO: {
         char msg[160];
-        snprintf(msg, sizeof(msg), "pedale prova-ble; ampli %s; banchi in memoria 0; banco nel firmware %u",
-                 chScrittura ? "connesso" : "non connesso", BANCO_QUANTI);
+        char elenco[180];
+        const uint8_t quantiBanchi = banchiElenca(elenco, sizeof(elenco));
+        snprintf(msg, sizeof(msg), "pedale prova-ble; ampli %s; banchi in memoria %u; suono \"%s\"",
+                 chScrittura ? "connesso" : "non connesso", quantiBanchi,
+                 bancoAttivo.valido ? bancoAttivo.nome : "(banco del firmware)");
         Serial.printf("ponte: CIAO -> %s\n", msg);
         rispondi(RSP_INFO, msg);
         break;
       }
-      case CMD_ELENCA:
-        // Ancora niente in memoria: la persistenza e' il passo dopo. Ma
-        // rispondere il vero, cioe' zero, invece di tacere.
-        Serial.println(F("ponte: ELENCA -> nessun banco memorizzato"));
-        rispondi(RSP_ELENCO, "0");
+      case CMD_ELENCA: {
+        char elenco[180];
+        const uint8_t quanti = banchiElenca(elenco, sizeof(elenco));
+        Serial.printf("ponte: ELENCA -> %u banchi\n", quanti);
+        rispondi(RSP_ELENCO, elenco);
         break;
+      }
+
+      case CMD_INIZIA: {
+        if (n < 6) { rispondi(RSP_ERRORE, "INIZIA malformato"); break; }
+        ricAnnulla();
+        ricSlot   = d[1];
+        ricAttesi = (size_t)d[2] | ((size_t)d[3] << 8) | ((size_t)d[4] << 16) | ((size_t)d[5] << 24);
+        if (ricSlot >= BANCHI_MAX)   { rispondi(RSP_ERRORE, "slot fuori range"); break; }
+        if (!ricAttesi || ricAttesi > BLOCCO_MAX) { rispondi(RSP_ERRORE, "lunghezza assurda"); break; }
+        ricDati = (uint8_t*)malloc(ricAttesi);
+        if (!ricDati) { ricAnnulla(); rispondi(RSP_ERRORE, "memoria insufficiente"); break; }
+        Serial.printf("ponte: INIZIA slot %u, %u byte in arrivo\n", ricSlot, ricAttesi);
+        rispondi(RSP_INFO, "pronto");
+        break;
+      }
+
+      case CMD_PEZZO: {
+        if (!ricDati || n < 4) { rispondi(RSP_ERRORE, "PEZZO fuori sequenza"); break; }
+        const size_t offset = (size_t)d[1] | ((size_t)d[2] << 8);
+        const size_t quanti = n - 3;
+        // L'offset arriva da fuori: senza questo controllo un pezzo malformato
+        // scriverebbe oltre il buffer, ed e' il solo modo in cui questo codice
+        // puo' fare danni veri.
+        if (offset + quanti > ricAttesi) { ricAnnulla(); rispondi(RSP_ERRORE, "pezzo fuori dal blocco"); break; }
+        memcpy(ricDati + offset, d + 3, quanti);
+        ricAvuti += quanti;
+        break;                             // nessuna risposta: sarebbe solo lentezza
+      }
+
+      case CMD_FINE: {
+        if (!ricDati) { rispondi(RSP_ERRORE, "FINE senza INIZIA"); break; }
+        if (ricAvuti != ricAttesi) {
+          char msg[64];
+          snprintf(msg, sizeof(msg), "arrivati %u byte su %u", ricAvuti, ricAttesi);
+          ricAnnulla(); rispondi(RSP_ERRORE, msg); break;
+        }
+        uint8_t somma = 0;
+        for (size_t k = 0; k < ricAttesi; k++) somma ^= ricDati[k];
+        if (n >= 2 && somma != d[1]) { ricAnnulla(); rispondi(RSP_ERRORE, "checksum sbagliato"); break; }
+
+        // Si verifica che sia interpretabile PRIMA di scriverlo: un banco che
+        // non si riesce a leggere non deve nemmeno entrare in memoria.
+        BancoCaricato prova = {};
+        prova.dati = ricDati; prova.quanti = ricAttesi;
+        const bool buono = bancoInterpreta(prova);
+        prova.dati = nullptr;              // il buffer resta di ricDati
+        if (!buono) { ricAnnulla(); rispondi(RSP_ERRORE, "blocco non interpretabile"); break; }
+
+        const bool salvato = bancoSalva(ricSlot, ricDati, ricAttesi);
+        char msg[80];
+        snprintf(msg, sizeof(msg), salvato ? "banco \"%s\" salvato nello slot %u"
+                                           : "scrittura fallita per \"%s\" (slot %u)",
+                 prova.nome, ricSlot);
+        Serial.printf("ponte: %s\n", msg);
+        ricAnnulla();
+        rispondi(salvato ? RSP_INFO : RSP_ERRORE, msg);
+        break;
+      }
+
+      case CMD_CANCELLA: {
+        if (n < 2) { rispondi(RSP_ERRORE, "CANCELLA malformato"); break; }
+        const bool fatto = bancoCancella(d[1]);
+        char msg[48];
+        snprintf(msg, sizeof(msg), fatto ? "slot %u cancellato" : "slot %u era gia' vuoto", d[1]);
+        Serial.printf("ponte: %s\n", msg);
+        rispondi(fatto ? RSP_INFO : RSP_ERRORE, msg);
+        break;
+      }
+
+      case CMD_USA: {
+        if (n < 2) { rispondi(RSP_ERRORE, "USA malformato"); break; }
+        BancoCaricato nuovo = {};
+        if (!bancoCarica(d[1], nuovo)) { rispondi(RSP_ERRORE, "slot vuoto o illeggibile"); break; }
+        bancoLibera(bancoAttivo);
+        bancoAttivo = nuovo;
+        bersaglio = corrente = 0;
+        char msg[64];
+        snprintf(msg, sizeof(msg), "adesso suono \"%s\"", bancoAttivo.nome);
+        Serial.printf("ponte: %s\n", msg);
+        rispondi(RSP_INFO, msg);
+        break;
+      }
       default: {
         char msg[48];
         snprintf(msg, sizeof(msg), "comando 0x%02x sconosciuto", d[0]);
@@ -557,6 +683,15 @@ void setup() {
   Serial.println(F("\nprova-ble — pedale Spark 2"));
   Serial.printf("banco di %u preset nel firmware. Premi BOOT per il prossimo.\n\n", BANCO_QUANTI);
   pinMode(PIN_TASTO, INPUT_PULLUP);
+  banchiAvvia();
+  // Se in memoria c'e' gia' un banco, il pedale riparte con quello: e' la
+  // prova che e' autonomo, cioe' che sopravvive allo spegnimento.
+  for (uint8_t s = 0; s < BANCHI_MAX; s++) {
+    if (bancoCarica(s, bancoAttivo)) {
+      Serial.printf("banco \"%s\" dallo slot %u\n", bancoAttivo.nome, s);
+      break;
+    }
+  }
   BLEDevice::init("SparkPedale");
   avviaPonte();          // prima il server: cosi' l'app lo trova sempre
   collega();
@@ -615,10 +750,15 @@ void loop() {
     else if (c == 'c') Serial.printf("tasto: %lu fronti grezzi, %lu pressioni accettate, "
                                      "%lu richieste sovrascritte in coda\n",
                                      frontiVisti, pressioniViste, pressioniPerse);
-    else if (c == 'e') { Serial.println(F("il banco nel firmware:"));
-                         for (uint8_t i = 0; i < BANCO_QUANTI; i++)
-                           Serial.printf("  %u  %s%s\n", i + 1, BANCO_NOMI[i],
-                                         i == corrente ? "   <- adesso" : ""); }
+    else if (c == 'e') {
+      Serial.printf("banco: %s\n", bancoAttivo.valido ? bancoAttivo.nome : "(quello del firmware)");
+      for (uint8_t i = 0; i < quantiPosti(); i++)
+        Serial.printf("  %u  %s%s\n", i + 1,
+                      postoPieno(i) ? nomePosto(i) : "-",
+                      i == corrente ? "   <- adesso" : "");
+    }
+    else if (c == 'b') { char el[180]; const uint8_t q = banchiElenca(el, sizeof(el));
+                         Serial.printf("banchi in memoria: %u\n%s", q, el); }
     else if (c == 'm') misura();
     // L'ampli sceglie DENTRO l'intervallo chiesto, e prende il massimo:
     // misurato il 14 agosto 2026, chiedendo 6-12 ha dato ~15 ms. Quindi si
