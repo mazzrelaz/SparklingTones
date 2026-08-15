@@ -488,23 +488,37 @@ class Ponte : public BLECharacteristicCallbacks {
  *
  * Annunciarsi invece lo fa **sempre**, anche mentre suona: costa niente ed
  * e' l'unico modo perche' l'app lo trovi senza staccare la corrente. */
+/* I callback girano nel task dello stack BLE. **Non si fanno operazioni BLE
+ * li' dentro** — niente disconnect, niente startAdvertising: e' il modo di
+ * piantare NimBLE o di lasciarlo in uno stato incoerente, e il sintomo e'
+ * proprio quello visto, il pedale che non torna piu' all'ampli. Qui si alza
+ * solo una bandiera; il lavoro lo fa il loop. */
+static volatile bool appEntrata = false, appUscita = false;
+
 class Collegamenti : public BLEServerCallbacks {
-  void onConnect(BLEServer*) override {
-    appCollegata = true;
+  void onConnect(BLEServer*)    override { appCollegata = true;  appEntrata = true; }
+  void onDisconnect(BLEServer*) override { appCollegata = false; appUscita  = true; }
+};
+
+/** Le conseguenze dei collegamenti, eseguite fuori dal task BLE. */
+static void sbrigaPonte() {
+  if (appEntrata) {
+    appEntrata = false;
     Serial.println(F("ponte: l'app si e' collegata, mollo l'ampli"));
     sganciato = true;
     if (client && client->isConnected()) client->disconnect();
     chScrittura = chNotifiche = nullptr;
+    dentro = 0;
   }
-  void onDisconnect(BLEServer* s) override {
-    appCollegata = false;
+  if (appUscita) {
+    appUscita = false;
     Serial.println(F("ponte: l'app se n'e' andata, riprendo l'ampli"));
-    sganciato = false;              // il loop si ricollega da solo
+    sganciato       = false;
     ultimoTentativo = 0;
     momentoSgancio  = millis();
-    s->startAdvertising();          // senza questo il pedale sparisce per sempre
+    BLEDevice::startAdvertising();   // senza, il pedale sparisce per sempre
   }
-};
+}
 
 static void avviaPonte() {
   BLEServer* server = BLEDevice::createServer();
@@ -538,6 +552,8 @@ void setup() {
 }
 
 void loop() {
+  sbrigaPonte();
+
   if (client && !client->isConnected() && chScrittura) {
     Serial.println(F("connessione persa"));
     chScrittura = chNotifiche = nullptr;
@@ -556,7 +572,11 @@ void loop() {
   }
 
   leggiTasto();
-  if (inCoda >= 0 && !inTrasferimento) {
+  // La richiesta resta in coda **finche' non c'e' l'ampli**, invece di essere
+  // buttata via. Mentre il pedale si sta riagganciando una pressione andava
+  // persa e da fuori sembrava che il pedale ignorasse il piede: cosi' invece
+  // il suono arriva appena si puo', ed e' il comportamento che serve sul palco.
+  if (inCoda >= 0 && !inTrasferimento && chScrittura) {
     const uint8_t n = (uint8_t)inCoda;
     inCoda = -1;
     mandaPreset(n);
