@@ -559,6 +559,43 @@ via Web Serial, che **non resetta la scheda** come fa `System.IO.Ports`).
 **E l'ampli torna disponibile in mezzo secondo** dopo essere stato mollato — misurato.
 Quando il riaggancio sembra lento la causa non è mai lui.
 
+#### Il pedale è autonomo — verificato il 15 agosto 2026
+
+Il formato del banco sta in **due file che vanno cambiati insieme**:
+`src/pedale-ponte.js` lo costruisce, `pedale/prova-ble/banchi.h` lo legge. Dentro ci sono
+**i frame già serializzati** più nome e UUID di ogni preset; il firmware non serializza
+niente. Trasferimento: `INIZIA`, una trentina di `PEZZO`, `FINE` col checksum — **con
+risposta**, al contrario di quello che si fa con l'ampli dove non c'è scelta. Il blocco si
+accumula in heap e finisce in LittleFS **solo se il checksum torna e la struttura si lascia
+interpretare**: un banco a metà sarebbe peggio di non averlo.
+
+**Verificato sull'hardware:** banco «prova banco ped» mandato dall'app, scritto in
+LittleFS, **ricaricato da solo dopo un riavvio**, e suonato — 291–346 ms per preset con
+tutti gli ack. **I preset sopravvivono allo spegnimento**, che era tutto il punto.
+
+`banchi.h` è **l'unico punto del progetto dove entrano byte non nostri**: l'offset di ogni
+pezzo e la lunghezza di ogni stringa vanno verificati, o un blocco malformato scrive oltre
+il buffer.
+
+#### APERTO — col banco ricevuto, il footswitch non cambia preset (fine sessione)
+
+Dal seriale i preset del banco ricevuto **partono** (`p` → 319, 291, 346 ms, tutti gli
+ack), ma premendo BOOT l'utente non sente cambiare niente.
+
+**Prima di ogni ipotesi, due cose da escludere, in quest'ordine:**
+
+1. **L'app era ancora collegata?** Mentre lo è, il pedale ha mollato l'ampli *per
+   costruzione* e BOOT non può fare niente. È già successo due volte di scambiarlo per un
+   guasto.
+2. **L'ultimo firmware caricato non è mai stato provato sull'hardware.** Contiene
+   `prossimoPieno`/`bancoHaQualcosa`, nuovi, che stanno proprio nella strada del tasto:
+   `leggiTasto` ora chiama `bancoHaQualcosa()` e può uscire senza fare niente. **È il primo
+   posto da guardare**, e si guarda con `d` (diagnostica) più `c` (contatori), che separano
+   «il fronte non arriva» da «arriva e lo scarto io».
+
+Da controllare anche che l'utente non abbia cancellato per sbaglio lo slot giusto: `b`
+elenca cosa c'è in memoria, `e` dice quale banco sta suonando e cosa contiene.
+
 ### Il simulatore — fatto il 14 agosto 2026, da provare col piede
 
 `tools/pedale-sim.html`: la faccia del pedale in una pagina — otto footswitch in due file
