@@ -58,6 +58,8 @@ static uint32_t ultimoTentativo = 0;
  * mollato finche' l'app c'e'. Anche 'x' dal seriale mette qui. */
 static bool     sganciato      = false;
 static uint32_t momentoSgancio = 0;   // quando l'app ha mollato: da li' si riprova fitto
+static uint32_t momentoConnesso = 0;  // per ripetere la richiesta dell'intervallo
+static uint8_t  ripetizioniIntervallo = 0;
 
 static uint8_t  seq       = 0x01;   // resta fra 0x01 e 0x3e
 static uint32_t rxTotali  = 0;      // quanti messaggi interi sono arrivati
@@ -253,10 +255,19 @@ static bool collega() {
   if (!chScrittura || !chNotifiche) { Serial.println(F("caratteristiche assenti")); client->disconnect(); return false; }
 
   chNotifiche->registerForNotify(alArrivo);
-  // Subito l'intervallo corto: misurato, e' la differenza fra 1246 ms e 326 ms
-  // per un preset intero. Va chiesto SECCO, min uguale a max, perche' l'ampli
-  // sceglie dentro l'intervallo e prende sempre il massimo.
+  // L'intervallo corto e' la differenza fra ~1400 ms e ~420 ms per un preset
+  // intero, e va chiesto SECCO, min uguale a max, perche' l'ampli sceglie
+  // dentro l'intervallo e prende sempre il massimo.
+  //
+  // **Chiederlo qui non basta.** Misurato il 15 agosto 2026: sulla prima
+  // connessione fa in tempo, su una RICONNESSIONE arriva troppo presto e
+  // viene perso — la connessione resta lenta e il pedale ci mette un secondo
+  // e mezzo a preset. Ripetendolo a connessione matura torna a 26 ms di giro.
+  // Quindi si chiede subito e poi si ripete dal loop, che e' l'unica forma
+  // che ha funzionato in tutti e due i casi.
   client->updateConnParams(6, 6, 0, 400);
+  momentoConnesso = millis();
+  ripetizioniIntervallo = 0;
   Serial.printf("connesso, MTU %d, chiesto intervallo 7,5 ms\n", client->getMTU());
   Serial.println(F("pronto. '?' per l'elenco dei comandi."));
   return true;
@@ -568,6 +579,16 @@ void loop() {
     if (millis() - ultimoTentativo > attesa) {
       ultimoTentativo = millis();
       collega();
+    }
+  }
+
+  // La richiesta dell'intervallo, ripetuta a connessione matura: e' quella che
+  // fa la differenza fra un secondo e mezzo e quattro decimi (vedi collega()).
+  if (chScrittura && client && ripetizioniIntervallo < 2) {
+    const uint32_t quando = ripetizioniIntervallo == 0 ? 600 : 2500;
+    if (millis() - momentoConnesso > quando) {
+      ripetizioniIntervallo++;
+      client->updateConnParams(6, 6, 0, 400);
     }
   }
 
