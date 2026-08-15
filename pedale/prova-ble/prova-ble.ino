@@ -72,9 +72,22 @@ static size_t   dentro = 0;
 static const uint8_t PIN_TASTO = 9;
 static const uint32_t ANTIRIMBALZO = 25;   // ms
 
-static bool     tastoGiu    = false;
-static uint32_t tastoCambio = 0;
-static uint8_t  corrente    = 0;           // quale preset del banco sta suonando
+/* Antirimbalzo «aspetta che stia fermo», non «ignora i cambi ravvicinati».
+ * La seconda forma - quella scritta il 14 agosto - fa ripartire il conto a
+ * ogni rimbalzo, quindi un contatto sporco puo' tenere la porta chiusa a
+ * tempo indeterminato e la pressione si perde. Qui si registra l'ultimo
+ * fronte grezzo e si accetta il livello solo quando e' rimasto immobile per
+ * ANTIRIMBALZO: i rimbalzi allungano l'attesa di qualche ms, non annullano
+ * la pressione. */
+static bool     livelloGrezzo = true;      // true = rilasciato (pull-up)
+static bool     livelloFermo  = true;
+static uint32_t ultimoFronte  = 0;
+static uint8_t  corrente      = 0;         // quale preset del banco sta suonando
+
+/* Strumentazione: senza questa non si distingue «il fronte non arriva» da
+ * «arriva e lo scarto io», e sono due cause opposte. */
+static bool     diagnostica = false;
+static uint32_t frontiVisti = 0, pressioniViste = 0, pressioniPerse = 0;
 static uint8_t  bersaglio   = 0;           // l'ultimo chiesto, anche se non ancora arrivato
 
 /* Un trasferimento dura ~400 ms, e durante quei 400 ms il firmware sta in un
@@ -297,22 +310,36 @@ static void mandaPreset(uint8_t n) {
   corrente = n;
 }
 
-/** Antirimbalzo: si agisce alla pressione, non al rilascio. */
-static void leggiTasto() {
-  const bool giu = (digitalRead(PIN_TASTO) == LOW);
-  if (giu == tastoGiu) return;
-  if (millis() - tastoCambio < ANTIRIMBALZO) return;
-  tastoCambio = millis();
-  tastoGiu = giu;
-  if (!giu) return;
+/** Chiede un preset. Non lo manda qui: lo raccoglie il loop, cosi' una
+ *  pressione durante un trasferimento si accoda invece di ricorrere. */
+static void richiedi(uint8_t n) {
+  if (inCoda >= 0) pressioniPerse++;       // ne stava gia' aspettando una: vince l'ultima
+  bersaglio = n % BANCO_QUANTI;
+  inCoda = bersaglio;
+  if (diagnostica)
+    Serial.printf("  = accettata -> %s%s\n", BANCO_NOMI[bersaglio],
+                  inTrasferimento ? "  (in coda, trasferimento in corso)" : "");
+}
 
-  bersaglio = (bersaglio + 1) % BANCO_QUANTI;
-  if (inTrasferimento) {
-    inCoda = bersaglio;                    // vince l'ultima, si parte appena libero
-    Serial.printf("  -> in coda: %s\n", BANCO_NOMI[bersaglio]);
-  } else {
-    inCoda = bersaglio;                    // lo raccoglie il loop, non ricorsione
+/** Si agisce alla pressione, non al rilascio. */
+static void leggiTasto() {
+  const bool livello = (digitalRead(PIN_TASTO) == HIGH);   // true = rilasciato
+
+  if (livello != livelloGrezzo) {          // fronte grezzo, rimbalzi compresi
+    livelloGrezzo = livello;
+    ultimoFronte  = millis();
+    frontiVisti++;
+    if (diagnostica)
+      Serial.printf("  ~ fronte %s  t=%lu\n", livello ? "su" : "GIU", millis());
+    return;
   }
+  if (livello == livelloFermo) return;                     // gia' registrato
+  if (millis() - ultimoFronte < ANTIRIMBALZO) return;      // non ancora fermo
+
+  livelloFermo = livello;
+  if (livelloFermo) return;                                // rilascio: niente
+  pressioniViste++;
+  richiedi(bersaglio + 1);
 }
 
 /* ======================================================================
@@ -360,7 +387,10 @@ static void elenco() {
   Serial.println(F(
     "\n  0..7  cambia preset sullo slot (A1..A4 = 0..3, B1..B4 = 4..7)\n"
     "  p     il prossimo preset del banco (come premere BOOT)\n"
+    "  A..H  vai direttamente al preset 1..8\n"
     "  e     elenca il banco\n"
+    "  d     accendi/spegni la diagnostica del tasto\n"
+    "  c     contatori del tasto\n"
     "  m     misura il giro di andata e ritorno\n"
     "  v     chiedi intervallo 7,5 ms\n"
     "  w     chiedi intervallo 15 ms\n"
@@ -405,7 +435,15 @@ void loop() {
   while (Serial.available()) {
     char c = Serial.read();
     if (c >= '0' && c <= '7') cambiaPreset(c - '0');
-    else if (c == 'p') { bersaglio = (bersaglio + 1) % BANCO_QUANTI; inCoda = bersaglio; }
+    else if (c == 'p') richiedi(bersaglio + 1);
+    // Maiuscole, non minuscole: 'a'..'h' si sovrapponeva a 'c', 'd' ed 'e',
+    // che sono comandi, e «elenca il banco» finiva per caricare un preset.
+    else if (c >= 'A' && c <= 'H') richiedi(c - 'A');       // preset 1..8 diretto
+    else if (c == 'd') { diagnostica = !diagnostica;
+                         Serial.printf("diagnostica del tasto: %s\n", diagnostica ? "accesa" : "spenta"); }
+    else if (c == 'c') Serial.printf("tasto: %lu fronti grezzi, %lu pressioni accettate, "
+                                     "%lu richieste sovrascritte in coda\n",
+                                     frontiVisti, pressioniViste, pressioniPerse);
     else if (c == 'e') { Serial.println(F("il banco nel firmware:"));
                          for (uint8_t i = 0; i < BANCO_QUANTI; i++)
                            Serial.printf("  %u  %s%s\n", i + 1, BANCO_NOMI[i],
@@ -420,5 +458,7 @@ void loop() {
     else if (c == 'r') collega();
     else if (c == '?') elenco();
   }
-  delay(10);
+  // 2 ms, non 10: una battuta secca su un tattile puo' durare pochi
+  // millisecondi, e con un polling lento la si perde e basta.
+  delay(2);
 }
