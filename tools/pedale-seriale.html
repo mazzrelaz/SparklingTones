@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — banco del pedale ESP32</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:#0a0a0b; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:14px; }
+  h1 { font-size:1.1rem; margin:0 0 2px; }
+  h2 { font-size:0.9rem; margin:20px 0 6px; color:#c8ccd2; }
+  .sub { color:#8a8f98; font-size:0.82rem; margin-bottom:14px; max-width:78ch; line-height:1.55; }
+  .sub b { color:#c8ccd2; }
+  .status { display:inline-block; padding:3px 9px; border-radius:11px;
+            font-size:0.75rem; font-weight:600; }
+  .status.off { background:#3a2020; color:#ff8080; }
+  .status.on  { background:#1f3a24; color:#7fe08a; }
+  button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
+           background:#212227; color:#e8e8ea; padding:9px 13px; border-radius:8px; }
+  button.primary { background:#e30613; color:#fff; }
+  button:disabled { background:#18191d; color:#4e535b; cursor:not-allowed; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+
+  /* gli otto footswitch, due file da quattro come il pedale vero */
+  .tasti { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;
+           max-width:560px; margin-bottom:12px; }
+  .sw { aspect-ratio:5/3; border-radius:12px; cursor:pointer; user-select:none;
+        background:linear-gradient(#2b2e34, #1b1d21); border:1px solid #3a3e46;
+        color:#c8ccd2; display:flex; flex-direction:column; align-items:center;
+        justify-content:center; gap:4px; padding:8px; text-align:center;
+        box-shadow:0 3px 0 #0e0f12; transition:transform .05s, box-shadow .05s; }
+  .sw:active { transform:translateY(3px); box-shadow:0 0 0 #0e0f12; }
+  .sw:disabled { opacity:.45; cursor:not-allowed; }
+  .sw .n { font-size:0.68rem; font-weight:700; color:#5f656e; }
+  .sw .nome { font-size:0.75rem; font-weight:600; line-height:1.2; }
+  .sw.attivo { border-color:#48ff7a; box-shadow:0 3px 0 #0e0f12, 0 0 12px rgba(72,255,122,.35); }
+  .sw.attivo .nome { color:#7fe08a; }
+  .sw.carica { border-color:#ffb020; }
+
+  .misure { display:flex; gap:18px; flex-wrap:wrap; margin:10px 0;
+            font-family:'SF Mono',Consolas,monospace; font-size:0.76rem; color:#8a8f98; }
+  .misure b { color:#e8e8ea; font-weight:600; }
+
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         height:38vh; overflow-y:auto; margin-top:6px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.74rem; line-height:1.5;
+         color:#8a8f98; white-space:pre-wrap; word-break:break-word; }
+  #log .ok  { color:#7fe08a; }
+  #log .err { color:#ff8080; }
+  #log .mk  { color:#f0d060; }
+  #log .diag{ color:#7fb8ff; }
+  #log .io  { color:#4e535b; }
+  .nota { border-left:3px solid #3a3e46; padding:2px 0 2px 10px; margin:10px 0;
+          color:#8a8f98; font-size:0.8rem; line-height:1.55; max-width:78ch; }
+  .nota b { color:#c8ccd2; }
+  label.check { color:#b0b4bb; font-size:0.82rem; display:flex; align-items:center; gap:6px; }
+</style>
+</head>
+<body>
+
+<h1>Banco del pedale</h1>
+<p class="sub">
+  Comanda il firmware sull'ESP32 dalla porta seriale, con <b>Web Serial</b> — nessuna
+  installazione, si apre da <code>file://</code>. Gli otto tasti fanno quello che faranno i
+  footswitch: mandano un preset intero all'ampli passando dal buffer <code>0x7f</code>.
+  <b>Non toccano mai gli slot salvati.</b>
+</p>
+
+<div class="row">
+  <button id="btnConnect" class="primary">Apri la porta</button>
+  <span id="status" class="status off">non collegato</span>
+  <label class="check"><input type="checkbox" id="diag"> diagnostica del tasto fisico</label>
+  <button id="btnConta">Contatori</button>
+  <button id="btnPulisci">Pulisci log</button>
+</div>
+
+<div class="tasti" id="tasti"></div>
+
+<div class="misure">
+  <span>ultimo <b id="mUltimo">—</b></span>
+  <span>medio <b id="mMedio">—</b></span>
+  <span>cambi <b id="mQuanti">0</b></span>
+</div>
+
+<p class="nota">
+  <b>Attenzione a cosa dimostra questa pagina.</b> I tasti qui sopra saltano il tasto
+  fisico: se funzionano non vuol dire che il pedale funziona, vuol dire che funziona
+  <i>tutto tranne</i> il tasto. Per il difetto che stiamo cercando serve premere BOOT sulla
+  scheda con la <b>diagnostica accesa</b> — allora il log dice ogni fronte visto sul pin,
+  rimbalzi compresi, e si vede se la pressione non arriva o se arriva e viene scartata.
+</p>
+
+<h2>Log</h2>
+<div id="log"></div>
+
+<script>
+'use strict';
+
+const $ = id => document.getElementById(id);
+
+let porta = null, scrittore = null, leggendo = false;
+const misure = [];
+let attivo = null, inCorso = false;
+
+/* I nomi li dice il firmware con «e»: qui parto da segnaposto. */
+let nomi = ['1', '2', '3', '4', '5', '6', '7', '8'];
+
+function log(testo, classe) {
+  const el = $('log');
+  const r = document.createElement('div');
+  r.className = classe || '';
+  r.textContent = testo;
+  el.appendChild(r);
+  el.scrollTop = el.scrollHeight;
+  while (el.childElementCount > 500) el.removeChild(el.firstChild);
+}
+
+function disegna() {
+  const cont = $('tasti');
+  if (cont.childElementCount !== 8) {
+    cont.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+      const b = document.createElement('button');
+      b.className = 'sw';
+      b.innerHTML = '<span class="n"></span><span class="nome"></span>';
+      // maiuscole: le minuscole sono i comandi del firmware
+      b.addEventListener('click', () => manda(String.fromCharCode(65 + i)));
+      cont.appendChild(b);
+    }
+  }
+  [...cont.children].forEach((b, i) => {
+    b.querySelector('.n').textContent = i + 1;
+    b.querySelector('.nome').textContent = nomi[i];
+    b.classList.toggle('attivo', attivo === i && !inCorso);
+    b.classList.toggle('carica', attivo === i && inCorso);
+    b.disabled = !porta;
+  });
+}
+
+async function manda(testo) {
+  if (!scrittore) { log('porta non aperta', 'err'); return; }
+  await scrittore.write(new TextEncoder().encode(testo));
+  log('> ' + testo, 'io');
+}
+
+/* ---- lettura continua, riga per riga ------------------------------- */
+
+async function leggi() {
+  const decodifica = new TextDecoderStream();
+  const chiusura = porta.readable.pipeTo(decodifica.writable).catch(() => {});
+  const lettore = decodifica.readable.getReader();
+  let resto = '';
+  leggendo = true;
+  try {
+    while (leggendo) {
+      const { value, done } = await lettore.read();
+      if (done) break;
+      resto += value;
+      const righe = resto.split('\n');
+      resto = righe.pop();
+      for (const riga of righe) interpreta(riga.replace(/\r$/, ''));
+    }
+  } catch (err) {
+    log('lettura interrotta: ' + err.message, 'err');
+  }
+  await chiusura;
+}
+
+function interpreta(riga) {
+  if (!riga.trim()) return;
+
+  // "[3] SV - For the Love of God — 178 ms, 15/15 ack"
+  const m = riga.match(/^\[(\d)\]\s+(.*?)\s+[—-]+\s+(\d+) ms,\s*(\d+)\/(\d+) ack/);
+  if (m) {
+    const i = Number(m[1]) - 1;
+    nomi[i] = m[2].trim();
+    attivo = i; inCorso = false;
+    const ms = Number(m[3]);
+    misure.push(ms);
+    $('mUltimo').textContent = ms + ' ms';
+    $('mQuanti').textContent = misure.length;
+    $('mMedio').textContent =
+      Math.round(misure.reduce((a, b) => a + b, 0) / misure.length) + ' ms';
+    const tutti = m[4] === m[5];
+    log(riga, tutti ? 'ok' : 'err');
+    disegna();
+    return;
+  }
+
+  // elenco del banco: "  3  SV - For the Love of God   <- adesso"
+  const e = riga.match(/^\s{2}(\d)\s{2}(.+?)(\s+<- adesso)?\s*$/);
+  if (e) {
+    const i = Number(e[1]) - 1;
+    if (i >= 0 && i < 8) nomi[i] = e[2].trim();
+    if (e[3]) attivo = i;
+    disegna();
+    log(riga);
+    return;
+  }
+
+  if (riga.startsWith('  ~') || riga.startsWith('  =')) { log(riga, 'diag'); return; }
+  if (riga.includes('ATTENZIONE') || riga.includes('persa') ||
+      riga.includes('non connesso') || riga.includes('nessuno Spark')) {
+    log(riga, 'err'); return;
+  }
+  if (riga.includes('connesso, MTU')) { log(riga, 'ok'); return; }
+  log(riga);
+}
+
+/* ---- apertura ------------------------------------------------------ */
+
+$('btnConnect').addEventListener('click', async () => {
+  if (!('serial' in navigator)) {
+    log('questo browser non ha Web Serial: serve Chrome o Edge sul computer', 'err');
+    return;
+  }
+  try {
+    porta = await navigator.serial.requestPort();
+    // Il firmware parla a 115200. Su USB nativo la velocita' non conta davvero,
+    // ma DTR/RTS si': sul C3 pilotano reset e boot, e alzarli puo' far ripartire
+    // la scheda in modalita' programmazione. Web Serial li lascia bassi.
+    await porta.open({ baudRate: 115200 });
+    scrittore = porta.writable.getWriter();
+    $('status').className = 'status on';
+    $('status').textContent = 'porta aperta';
+    $('btnConnect').disabled = true;
+    log('porta aperta', 'ok');
+    disegna();
+    leggi();
+    setTimeout(() => manda('e'), 300);      // fatti dire il banco
+  } catch (err) {
+    log('apertura fallita: ' + err.message, 'err');
+  }
+});
+
+$('diag').addEventListener('change', () => manda('d'));
+$('btnConta').addEventListener('click', () => manda('c'));
+$('btnPulisci').addEventListener('click', () => { $('log').innerHTML = ''; });
+
+disegna();
+if (!('serial' in navigator)) {
+  log('Web Serial non disponibile in questo browser.', 'err');
+  $('btnConnect').disabled = true;
+}
+</script>
+</body>
+</html>
