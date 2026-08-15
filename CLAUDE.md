@@ -468,36 +468,33 @@ e tre in fila. Conferma la scelta già fatta nel simulatore («si accoda, non an
 è la ragione per cui il pedale vero non deve avere attese bloccanti che non guardino gli
 ingressi.
 
-#### APERTO — il tasto perde ancora colpi (14 agosto 2026, fine sessione)
+#### Il tasto che perdeva colpi — risolto il 15 agosto 2026, ed era colpa mia
 
-**Non è risolto.** Con la lettura del tasto dentro l'attesa degli ack le pressioni **si
-perdono ancora**, riferito dall'utente premendo col dito.
+**Il tastino non c'entrava niente.** Con la strumentazione accesa: **14 fronti grezzi per
+7 pressioni**, cioè esattamente due a testa — discesa e risalita, **zero rimbalzi** — e
+**7 pressioni accettate su 7**, sette cambi preset di fila fra 297 e 414 ms. Il BOOT è un
+tattile da schedina ed è pulito.
 
-Quello che **non** è la causa, misurato:
+Era l'**antirimbalzo, scritto nella forma sbagliata**: scartava i cambi troppo vicini
+all'ultimo *accettato* invece di aspettare che il segnale stesse *fermo*. Con quella forma
+un contatto sporco fa ripartire il conto a ogni rimbalzo e può tenere la porta chiusa a
+tempo indeterminato. La forma giusta registra l'ultimo fronte grezzo e accetta il livello
+quando è rimasto immobile per `ANTIRIMBALZO`: i rimbalzi allungano l'attesa di qualche
+millisecondo invece di annullare la pressione.
 
-- non è il trasferimento, che riesce sempre: 15/15, 17/17, 18/18 ack, mai un chunk perso;
-- non è l'accodamento in sé: cinque richieste in raffica dal monitor seriale, a 200 ms
-  l'una dall'altra, sono state **tutte servite, nessuna persa**. Quindi il meccanismo
-  `inCoda`/`bersaglio` funziona — **il problema è a monte, fra il dito e `leggiTasto`.**
+Nella stessa passata sono cambiate altre due cose, e **quale delle tre abbia risolto non è
+isolato**: il polling è sceso da 10 ms a 2 (una battuta secca su un tattile può durare
+pochissimo) e i comandi diretti sono passati da `a`–`h` a `A`–`H`, perché si
+sovrapponevano a `c`, `d` ed `e` e «elenca il banco» finiva per caricare un preset.
 
-**Da fare per prima cosa, prima di qualunque ipotesi: strumentare il tasto.** Stampare
-**ogni** transizione di `digitalRead(PIN_TASTO)` con il millis, comprese quelle scartate
-dall'antirimbalzo, e un contatore di pressioni viste. Una sessione di pressioni dice
-subito quale dei tre casi è, e senza quello si tira a indovinare:
+**Da provare ancora: la raffica col dito.** Le sette pressioni erano a ~5 secondi l'una
+dall'altra, e il guasto si vedeva premendo in fretta. Dal seriale la raffica regge
+(cinque richieste a 200 ms, tutte servite), dal dito non è ancora verificato.
 
-1. **il fronte non arriva proprio** → è il tasto: BOOT è un tattile minuscolo con un
-   pull-up di bordo, non un footswitch, e potrebbe rimbalzare ben oltre i 25 ms di
-   `ANTIRIMBALZO`, oppure fare contatto male;
-2. **il fronte arriva ma viene scartato** → è `ANTIRIMBALZO` o la logica di `leggiTasto`;
-3. **il fronte arriva, è accettato, e il preset non parte** → allora è il lato BLE, e lì
-   il sospetto è l'ampli che si strozza sotto `0x0101` ravvicinati (in questo progetto
-   si è già impiantato una volta). Firma: `0/15 ack` invece del silenzio, e l'ampli che
-   non risponde nemmeno ai suoi tasti sul pannello.
-
-Nota che `leggiTasto` viene chiamata **solo dentro `while (rxTotali == prima && …)`**, e
-quel ciclo si chiude appena arriva l'ack, cioè dopo ~25 ms: fra la scrittura di un chunk e
-la successiva la finestra di lettura è breve. Se il rimbalzo del tattile cade lì dentro,
-la pressione può essere vista e scartata. **È l'ipotesi 2, ed è la prima da guardare.**
+**La lezione che vale oltre questo caso:** «strumentare prima di ipotizzare» ha chiuso in
+una sessione un problema su cui si era tirato a indovinare per due. I contatori — fronti
+grezzi contro pressioni accettate — separano da soli tre cause che dall'esterno si vedono
+identiche.
 
 **E l'architettura è verificata sull'hardware, non solo ragionata.** Il firmware ha mandato
 frame **preserializzati dall'app** (`tools/frames-pedale.html` → `preset_frames.h`)
