@@ -55,10 +55,10 @@
   .led { width:16px; height:16px; border-radius:50%; background:#141518;
          box-shadow:inset 0 1px 2px rgba(0,0,0,.9), 0 0 0 1px #2a2d33;
          transition:background .08s, box-shadow .08s; }
-  .led.aRosso  { background:#4a1414; box-shadow:inset 0 1px 2px rgba(0,0,0,.7), 0 0 0 1px #2a2d33; }
-  .led.aRossoP { background:#ff3020; box-shadow:0 0 0 1px #2a2d33, 0 0 12px 3px rgba(255,48,32,.6); }
-  .led.bVerde  { background:#12401f; box-shadow:inset 0 1px 2px rgba(0,0,0,.7), 0 0 0 1px #2a2d33; }
-  .led.bVerdeP { background:#48ff7a; box-shadow:0 0 0 1px #2a2d33, 0 0 12px 3px rgba(72,255,122,.6); }
+  /* Acceso solo quello che sta suonando, col colore della metà. Il quinto
+     LED invece resta sempre acceso: è lui che dice in che metà sei. */
+  .led.rosso   { background:#ff3020; box-shadow:0 0 0 1px #2a2d33, 0 0 12px 3px rgba(255,48,32,.6); }
+  .led.verde   { background:#48ff7a; box-shadow:0 0 0 1px #2a2d33, 0 0 12px 3px rgba(72,255,122,.6); }
   .led.carica  { background:#ffb020; box-shadow:0 0 0 1px #2a2d33, 0 0 12px 3px rgba(255,176,32,.6);
                  animation:pulsa .5s ease-in-out infinite alternate; }
   @keyframes pulsa { from { opacity:.35 } to { opacity:1 } }
@@ -101,10 +101,11 @@
 <h1>Simulatore del pedale</h1>
 <p class="sub">
   Quattro footswitch per i quattro suoni della metà corrente, <b>il quinto staccato che
-  salta al gemello nell'altra metà</b>, e due tasti a mano per i banchi. I LED dicono in
-  che metà sei: <b>rossi = A1–A4, verdi = B1–B4</b>, la stessa convenzione del pannello
-  dell'ampli. Dentro c'è la logica vera e il nostro trasporto: con l'ampli connesso manda
-  <code>loadPreset</code> davvero, senza simula il ritardo.
+  salta al gemello nell'altra metà</b>, e due tasti a mano per i banchi. Dei quattro LED
+  <b>si accende solo quello che sta suonando</b>, col colore della metà; il <b>quinto resta
+  sempre acceso</b> ed è lui a dire dove sei — <b>rosso in A, verde in B</b>, la convenzione
+  del pannello dell'ampli. Dentro c'è la logica vera e il nostro trasporto: con l'ampli
+  connesso manda <code>loadPreset</code> davvero, senza simula il ritardo.
 </p>
 
 <div class="row">
@@ -149,8 +150,8 @@
   una pedalata sola. Accoppia strofa e ritornello sullo stesso numero e diventa il tuo
   interruttore per tutto il pezzo.<br>
   Il rischio di questo disegno è uno solo: <b>pestare il tasto giusto nella metà
-  sbagliata</b>. Per questo tutti e quattro i LED cambiano colore insieme, non uno solo.
-  Guarda se ti basta, suonando.<br>
+  sbagliata</b>. A dirtelo è il LED del quinto tasto, sempre acceso, più il colore di
+  quello che sta suonando. Guarda se ti basta, suonando.<br>
   Tastiera: <b>1–4</b> i footswitch, <b>5</b> o <b>spazio</b> il gemello,
   <b>+</b> e <b>−</b> i banchi.
 </p>
@@ -236,9 +237,13 @@ async function caricaBanchi() {
     stato.banchi = banchi.map(b => ({ nome: b.nome, posti: b.posti.map(id => perId.get(id) || null) }));
     if (!stato.banchi.length) {
       stato.demo = true; stato.banchi = banchiFinti();
-      log('nessun banco in libreria: uso banchi finti. I banchi si creano dalla vista Live.', 'mk');
+      log('ATTENZIONE: nessun banco in libreria, sto usando banchi FINTI. ' +
+          'Servono a provare il tatto, ma all\'ampli non mandano niente. ' +
+          'I banchi si creano dalla vista Live dell\'app, sulla stessa origine di questa pagina.', 'err');
     } else {
       log(`${stato.banchi.length} banchi dalla libreria`, 'ok');
+      const vuoti = stato.banchi.filter(b => !b.posti.some(Boolean)).length;
+      if (vuoti) log(`${vuoti} banchi non hanno nemmeno un preset dentro`, 'mk');
     }
   } catch (err) {
     stato.demo = true; stato.banchi = banchiFinti();
@@ -255,6 +260,17 @@ async function attiva(posto) {
   if (!record) {
     stato.errore = posto; disegna();
     setTimeout(() => { stato.errore = null; disegna(); }, 260);
+    return;
+  }
+  // I banchi finti hanno un nome e basta: nessuna catena di effetti, quindi
+  // all'ampli non si puo' mandare niente. Senza questo controllo la pagina si
+  // collegava, sembrava funzionare, e sull'ampli non succedeva nulla — che e'
+  // esattamente il modo in cui una UI mente.
+  if (spark.connected && !record.effects) {
+    log(`"${record.name}" e' un preset finto, non ha dati sonori: crea dei banchi ` +
+        `veri nella vista Live dell'app e riapri questa pagina.`, 'err');
+    stato.errore = posto; disegna();
+    setTimeout(() => { stato.errore = null; disegna(); }, 600);
     return;
   }
   // Una pressione durante un trasferimento si accoda: vince l'ultima.
@@ -396,14 +412,15 @@ function disegna() {
     const acceso = stato.attivo === p;
     const inCarica = stato.caricando === p;
 
-    // Il colore dice la metà, la luminosità dice quale sta suonando:
-    // uno stato che occupa tutti e quattro i LED non lo confondi.
+    // Scelta dell'utente: si accende **solo** quello che sta suonando, col
+    // colore della metà. Chi dice in che metà sei è il quinto LED, che resta
+    // sempre acceso. Costa meno corrente e lascia il pedale al buio tranne
+    // dove serve guardare.
     leds[i].className = 'led'
-      + (stato.errore === i || (stato.errore !== null && stato.errore === p) ? ' carica'
-      :  inCarica            ? ' carica'
-      :  !record             ? ''
-      :  stato.meta === 0    ? (acceso ? ' aRossoP' : ' aRosso')
-      :                        (acceso ? ' bVerdeP' : ' bVerde'));
+      + (inCarica                        ? ' carica'
+      :  stato.errore !== null && stato.errore === p ? ' rosso'
+      :  !acceso                         ? ''
+      :  stato.meta === 0                ? ' rosso' : ' verde');
 
     sws[i].classList.toggle('vuoto', !record);
     sws[i].querySelector('.num').textContent  = etichetta(p);
@@ -418,8 +435,9 @@ function disegna() {
     g === null ? `passa a ${stato.meta ? 'A' : 'B'}`
     : rg       ? `${etichetta(g)}  ${rg.name}`
     :            `${etichetta(g)} vuoto`;
+  // Sempre acceso: è il LED che dice in che metà sei, e non si spegne mai.
   $('gemello').querySelector('.led').className =
-    'led' + (g === null ? '' : stato.meta === 0 ? ' bVerde' : ' aRosso');
+    'led ' + (stato.meta === 0 ? 'rosso' : 'verde');
 
   disegnaOled();
 }
