@@ -48,6 +48,16 @@ static BLEClient*           client     = nullptr;
 static BLERemoteCharacteristic* chScrittura = nullptr;
 static BLERemoteCharacteristic* chNotifiche = nullptr;
 
+/* Un pedale non si arrende. Se si accende prima dell'ampli, o se la
+ * connessione cade a meta' concerto, deve riprovare da solo: senza questo
+ * il pedale resta muto finche' qualcuno non lo riavvia, che sul palco non
+ * succede. Riprova ogni cinque secondi, in silenzio. */
+static uint32_t ultimoTentativo = 0;
+
+/* Ma quando l'app si collega il pedale deve mollare l'ampli, e restare
+ * mollato finche' l'app c'e'. Anche 'x' dal seriale mette qui. */
+static bool sganciato = false;
+
 static uint8_t  seq       = 0x01;   // resta fra 0x01 e 0x3e
 static uint32_t rxTotali  = 0;      // quanti messaggi interi sono arrivati
 static uint32_t ultimoRx  = 0;      // millis dell'ultimo messaggio: serve a misurare
@@ -399,27 +409,127 @@ static void elenco() {
     "  r     riprendi l'ampli\n"));
 }
 
+/* ======================================================================
+   Il ponte verso l'app: qui il pedale fa da SERVER, mentre verso l'ampli
+   resta client. E' la cosa da verificare prima di costruirci sopra: che le
+   due parti convivano sullo stesso radio.
+
+   Protocollo nostro, non quello dello Spark: qui l'MTU e' ampio e non ci
+   sono le stranezze dell'ampli, quindi niente impacchettamento a 7 bit e
+   niente chunk da 25. Primo byte = comando, il resto e' payload.
+   ====================================================================== */
+
+#define UUID_PONTE     "7a9c0000-4b2e-4f6a-9d3c-1e5f8b2a6c40"
+#define UUID_COMANDO   "7a9c0001-4b2e-4f6a-9d3c-1e5f8b2a6c40"
+#define UUID_STATO     "7a9c0002-4b2e-4f6a-9d3c-1e5f8b2a6c40"
+
+static const uint8_t CMD_CIAO   = 0x01;
+static const uint8_t CMD_ELENCA = 0x02;
+static const uint8_t RSP_INFO   = 0x81;
+static const uint8_t RSP_ELENCO = 0x82;
+static const uint8_t RSP_ERRORE = 0x8f;
+
+static BLECharacteristic* chStato = nullptr;
+static bool appCollegata = false;
+
+static void rispondi(uint8_t tipo, const char* testo) {
+  if (!chStato) return;
+  uint8_t buf[200];
+  buf[0] = tipo;
+  size_t n = strlen(testo);
+  if (n > sizeof(buf) - 1) n = sizeof(buf) - 1;
+  memcpy(buf + 1, testo, n);
+  chStato->setValue(buf, n + 1);
+  chStato->notify();
+}
+
+class Ponte : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic* c) override {
+    const uint8_t* d = c->getData();
+    const size_t   n = c->getLength();
+    if (!n) return;
+
+    switch (d[0]) {
+      case CMD_CIAO: {
+        char msg[160];
+        snprintf(msg, sizeof(msg), "pedale prova-ble; ampli %s; banchi in memoria 0; banco nel firmware %u",
+                 chScrittura ? "connesso" : "non connesso", BANCO_QUANTI);
+        Serial.printf("ponte: CIAO -> %s\n", msg);
+        rispondi(RSP_INFO, msg);
+        break;
+      }
+      case CMD_ELENCA:
+        // Ancora niente in memoria: la persistenza e' il passo dopo. Ma
+        // rispondere il vero, cioe' zero, invece di tacere.
+        Serial.println(F("ponte: ELENCA -> nessun banco memorizzato"));
+        rispondi(RSP_ELENCO, "0");
+        break;
+      default: {
+        char msg[48];
+        snprintf(msg, sizeof(msg), "comando 0x%02x sconosciuto", d[0]);
+        Serial.printf("ponte: %s\n", msg);
+        rispondi(RSP_ERRORE, msg);
+      }
+    }
+  }
+};
+
+/* Un padrone alla volta, per scelta dell'utente: non serve che il pedale
+ * parli con l'app e con l'ampli insieme. Ci si collega all'app, si chiude
+ * l'app, e il pedale torna all'ampli da solo. Quindi:
+ *
+ *   l'app si collega  -> il pedale molla l'ampli
+ *   l'app se ne va    -> il pedale se lo riprende
+ *
+ * Annunciarsi invece lo fa **sempre**, anche mentre suona: costa niente ed
+ * e' l'unico modo perche' l'app lo trovi senza staccare la corrente. */
+class Collegamenti : public BLEServerCallbacks {
+  void onConnect(BLEServer*) override {
+    appCollegata = true;
+    Serial.println(F("ponte: l'app si e' collegata, mollo l'ampli"));
+    sganciato = true;
+    if (client && client->isConnected()) client->disconnect();
+    chScrittura = chNotifiche = nullptr;
+  }
+  void onDisconnect(BLEServer* s) override {
+    appCollegata = false;
+    Serial.println(F("ponte: l'app se n'e' andata, riprendo l'ampli"));
+    sganciato = false;              // il loop si ricollega da solo
+    ultimoTentativo = 0;
+    s->startAdvertising();          // senza questo il pedale sparisce per sempre
+  }
+};
+
+static void avviaPonte() {
+  BLEServer* server = BLEDevice::createServer();
+  server->setCallbacks(new Collegamenti());
+
+  BLEService* servizio = server->createService(UUID_PONTE);
+  BLECharacteristic* chComando = servizio->createCharacteristic(
+    UUID_COMANDO, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_NR);
+  chComando->setCallbacks(new Ponte());
+
+  chStato = servizio->createCharacteristic(
+    UUID_STATO, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
+
+  servizio->start();
+  BLEAdvertising* adv = BLEDevice::getAdvertising();
+  adv->addServiceUUID(UUID_PONTE);
+  adv->setScanResponse(true);
+  BLEDevice::startAdvertising();
+  Serial.println(F("ponte avviato: il pedale si annuncia come \"SparkPedale\""));
+}
+
 void setup() {
   Serial.begin(115200);
   delay(600);
   Serial.println(F("\nprova-ble — pedale Spark 2"));
   Serial.printf("banco di %u preset nel firmware. Premi BOOT per il prossimo.\n\n", BANCO_QUANTI);
   pinMode(PIN_TASTO, INPUT_PULLUP);
-  BLEDevice::init("pedale-prova");
+  BLEDevice::init("SparkPedale");
+  avviaPonte();          // prima il server: cosi' l'app lo trova sempre
   collega();
 }
-
-/* Un pedale non si arrende. Se si accende prima dell'ampli, o se la
- * connessione cade a meta' concerto, deve riprovare da solo: senza questo
- * il pedale resta muto finche' qualcuno non lo riavvia, che sul palco non
- * succede. Riprova ogni cinque secondi, in silenzio. */
-static uint32_t ultimoTentativo = 0;
-
-/* ...ma in sviluppo serve il contrario. **Mentre il pedale e' connesso, lo
- * Spark smette di annunciarsi**, quindi l'app nel browser non lo trova piu' e
- * riaccendere l'ampli non basta: il pedale se lo riprende in cinque secondi.
- * Con 'x' il pedale molla l'ampli e sta fermo finche' non gli si dice 'r'. */
-static bool sganciato = false;
 
 void loop() {
   if (client && !client->isConnected() && chScrittura) {
