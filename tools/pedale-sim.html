@@ -167,6 +167,9 @@
 
 const $ = id => document.getElementById(id);
 
+// preset-store.js espone il costruttore, non un'istanza: si fa come in index.html.
+const store = new PresetStore();
+
 const POSTI = 8;         // un banco resta da otto: due metà da quattro
 const META  = 4;
 
