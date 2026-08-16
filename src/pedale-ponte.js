@@ -35,7 +35,7 @@ window.PedalePonte = (function () {
   const STATO    = '7a9c0002-4b2e-4f6a-9d3c-1e5f8b2a6c40';
 
   const CMD = { CIAO: 0x01, ELENCA: 0x02, INIZIA: 0x10, PEZZO: 0x11,
-                FINE: 0x12, CANCELLA: 0x20, USA: 0x21 };
+                FINE: 0x12, CANCELLA: 0x20, USA: 0x21, SCAMBIA: 0x22 };
   const RSP = { 0x81: 'info', 0x82: 'elenco', 0x8f: 'errore' };
 
   const POSTI = 8;
