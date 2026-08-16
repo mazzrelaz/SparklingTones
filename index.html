@@ -2814,18 +2814,36 @@ function disegnaSlotsPedale() {
   }
 }
 
-async function comandoPedale(...byte) {
-  if (!pedale.comando) { logPedale('non collegato al pedale'); return; }
-  try {
-    await pedale.comando.writeValueWithResponse(new Uint8Array(byte));
-    // Si dice sempre cosa si è mandato, tranne per la rilettura dell'elenco
-    // che è automatica e coprirebbe la risposta vera. Senza questo, un tasto
-    // che non fa niente e un tasto che manda e non viene eseguito si vedono
-    // identici — ed è già costato un giro.
-    logPedale('→ ' + byte.map(b => b.toString(16).padStart(2, '0')).join(' '));
-  } catch (err) {
-    logPedale('comando fallito: ' + err.message);
-  }
+/**
+ * Coda delle operazioni GATT.
+ *
+ * **Web Bluetooth ne ammette una alla volta per dispositivo**: farne partire
+ * un'altra mentre la prima è in corso la fa morire con «GATT operation
+ * already in progress». Ci si casca appena si risponde a una notifica con un
+ * comando — che è esattamente quello che fa la rilettura dell'elenco dopo un
+ * salvataggio o uno scambio. Il risultato era un pedale che eseguiva e una
+ * lista che non si aggiornava mai.
+ *
+ * È la stessa cura che `spark-transport.js` usa con `sendChain` per l'ampli.
+ */
+let codaPedale = Promise.resolve();
+
+/** Un errore non deve bloccare la coda, quindi si aggancia sui due lati. */
+function inCodaPedale(lavoro) {
+  codaPedale = codaPedale.then(lavoro, lavoro);
+  return codaPedale;
+}
+
+function comandoPedale(...byte) {
+  if (!pedale.comando) { logPedale('non collegato al pedale'); return Promise.resolve(); }
+  return inCodaPedale(async () => {
+    try {
+      await pedale.comando.writeValueWithResponse(new Uint8Array(byte));
+      logPedale('→ ' + byte.map(b => b.toString(16).padStart(2, '0')).join(' '));
+    } catch (err) {
+      logPedale('comando fallito: ' + err.message);
+    }
+  });
 }
 
 function rispostaPedale(e) {
@@ -2884,16 +2902,21 @@ async function mandaBancoAlPedale() {
   const barra = $('avanzamentoPedale').firstElementChild;
 
   $('btnMandaAlPedale').disabled = true;
-  try {
-    const t0 = performance.now();
-    const byte = await PedalePonte.invia(
-      pedale.comando, { nome: banco.nome, posti }, slot,
-      (fatti, totale) => { barra.style.width = Math.round(fatti / totale * 100) + '%'; });
-    logPedale(`"${banco.nome}" → slot ${slot + 1}: ${byte} byte in ` +
-              `${Math.round(performance.now() - t0)} ms`);
-  } catch (err) {
-    logPedale('invio fallito: ' + err.message);
-  }
+  // Tutto il trasferimento entra nella coda come un blocco solo: dentro fa
+  // una trentina di scritture, e una notifica che arrivasse a metà non deve
+  // potersi infilare in mezzo con un comando suo.
+  await inCodaPedale(async () => {
+    try {
+      const t0 = performance.now();
+      const byte = await PedalePonte.invia(
+        pedale.comando, { nome: banco.nome, posti }, slot,
+        (fatti, totale) => { barra.style.width = Math.round(fatti / totale * 100) + '%'; });
+      logPedale(`"${banco.nome}" → slot ${slot + 1}: ${byte} byte in ` +
+                `${Math.round(performance.now() - t0)} ms`);
+    } catch (err) {
+      logPedale('invio fallito: ' + err.message);
+    }
+  });
   barra.style.width = '0';
   aggiornaInvioPedale();
 }

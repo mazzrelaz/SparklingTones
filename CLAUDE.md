@@ -555,6 +555,13 @@ via Web Serial, che **non resetta la scheda** come fa `System.IO.Ports`).
   NimBLE ne ammette pochi: il pedale smetterebbe di collegarsi dopo mezz'ora d'uso.
 - **La pressione del footswitch resta in coda finché l'ampli non c'è**, invece di essere
   buttata via: premendo durante un riaggancio sembrava che il pedale ignorasse il piede.
+- **Web Bluetooth ammette una sola operazione GATT alla volta per dispositivo.** Farne
+  partire un'altra mentre la prima è in corso la fa morire con `GATT operation already in
+  progress`. **Ci si casca appena si risponde a una notifica con un comando** — ed è
+  proprio quello che fa la rilettura dell'elenco dopo un salvataggio o uno scambio: il
+  pedale eseguiva e la lista non si aggiornava mai. Serve una coda, come `sendChain` in
+  `spark-transport.js`. Il trasferimento di un banco ci entra **come blocco solo**, o una
+  notifica a metà si infila fra le sue trenta scritture.
 
 **E l'ampli torna disponibile in mezzo secondo** dopo essere stato mollato — misurato.
 Quando il riaggancio sembra lento la causa non è mai lui.
