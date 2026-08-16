@@ -577,24 +577,16 @@ tutti gli ack. **I preset sopravvivono allo spegnimento**, che era tutto il punt
 pezzo e la lunghezza di ogni stringa vanno verificati, o un blocco malformato scrive oltre
 il buffer.
 
-#### APERTO — col banco ricevuto, il footswitch non cambia preset (fine sessione)
+**Chiuso il 16 agosto 2026: il footswitch col banco ricevuto funziona.** Contatori alla
+mano, **6 fronti grezzi per 3 pressioni** — due a testa, zero rimbalzi — e tutte e tre
+hanno cambiato preset, 359–407 ms. Il difetto del giorno prima era una delle due cose
+annotate, quasi certamente **l'app ancora collegata**: mentre lo è, il pedale ha mollato
+l'ampli per costruzione e BOOT non può fare niente. **È lo scambio più facile da fare, ed
+è già costato tre giri di diagnosi.**
 
-Dal seriale i preset del banco ricevuto **partono** (`p` → 319, 291, 346 ms, tutti gli
-ack), ma premendo BOOT l'utente non sente cambiare niente.
-
-**Prima di ogni ipotesi, due cose da escludere, in quest'ordine:**
-
-1. **L'app era ancora collegata?** Mentre lo è, il pedale ha mollato l'ampli *per
-   costruzione* e BOOT non può fare niente. È già successo due volte di scambiarlo per un
-   guasto.
-2. **L'ultimo firmware caricato non è mai stato provato sull'hardware.** Contiene
-   `prossimoPieno`/`bancoHaQualcosa`, nuovi, che stanno proprio nella strada del tasto:
-   `leggiTasto` ora chiama `bancoHaQualcosa()` e può uscire senza fare niente. **È il primo
-   posto da guardare**, e si guarda con `d` (diagnostica) più `c` (contatori), che separano
-   «il fronte non arriva» da «arriva e lo scarto io».
-
-Da controllare anche che l'utente non abbia cancellato per sbaglio lo slot giusto: `b`
-elenca cosa c'è in memoria, `e` dice quale banco sta suonando e cosa contiene.
+Da tenere d'occhio, visto una volta sola: un primo invio dopo una pausa a **758 ms con
+15/16 ack**, con l'`0x0401` mancante arrivato in ritardo. I successivi puliti. Se si
+ripete è un sintomo da annotare, non da inseguire.
 
 ### Il simulatore — fatto il 14 agosto 2026, da provare col piede
 
