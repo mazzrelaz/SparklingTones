@@ -489,6 +489,7 @@ static const uint8_t CMD_PEZZO    = 0x11;   // offset LE16, byte
 static const uint8_t CMD_FINE     = 0x12;   // checksum XOR
 static const uint8_t CMD_CANCELLA = 0x20;   // slot
 static const uint8_t CMD_USA      = 0x21;   // slot: carica e suona quel banco
+static const uint8_t CMD_SCAMBIA  = 0x22;   // slot a, slot b
 static const uint8_t RSP_INFO     = 0x81;
 static const uint8_t RSP_ELENCO   = 0x82;
 static const uint8_t RSP_ERRORE   = 0x8f;
@@ -600,6 +601,17 @@ class Ponte : public BLECharacteristicCallbacks {
         Serial.printf("ponte: %s\n", msg);
         ricAnnulla();
         rispondi(salvato ? RSP_INFO : RSP_ERRORE, msg);
+        break;
+      }
+
+      case CMD_SCAMBIA: {
+        if (n < 3) { rispondi(RSP_ERRORE, "SCAMBIA malformato"); break; }
+        const bool fatto = bancoScambia(d[1], d[2]);
+        char msg[56];
+        snprintf(msg, sizeof(msg), fatto ? "slot %u e %u scambiati" : "scambio %u-%u fallito",
+                 d[1] + 1, d[2] + 1);
+        Serial.printf("ponte: %s\n", msg);
+        rispondi(fatto ? RSP_INFO : RSP_ERRORE, msg);
         break;
       }
 

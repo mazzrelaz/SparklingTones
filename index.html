@@ -342,6 +342,21 @@
   .stato-pannello { font-size:0.8rem; color:var(--gold); background:var(--panel);
                     border:1px solid var(--line); border-radius:8px;
                     padding:8px 10px; margin:0 0 12px; }
+
+  /* --- il pedale: gli otto slot che tiene in memoria -------------------- */
+  .barra-invio { height:5px; background:var(--panel); border-radius:3px;
+                 overflow:hidden; margin-top:8px; }
+  .barra-invio i { display:block; height:100%; width:0; background:var(--accent);
+                   transition:width .12s; }
+  .slot-pedale { display:flex; align-items:center; gap:10px; padding:9px 10px;
+                 border:1px solid var(--line); border-radius:9px; margin-bottom:6px;
+                 background:var(--panel); font-size:0.9rem; }
+  .slot-pedale.vuoto { border-style:dashed; background:none; color:var(--dim); }
+  .slot-pedale .n { font-size:0.72rem; color:var(--dim); font-weight:700; min-width:2.6em; }
+  .slot-pedale .nome { flex:1; font-weight:600; }
+  .slot-pedale.vuoto .nome { font-weight:400; font-style:italic; }
+  .slot-pedale .quanti { font-size:0.75rem; color:var(--dim); }
+  .slot-pedale button { padding:5px 9px; font-size:0.75rem; }
   .voce { display:flex; align-items:center; gap:10px; padding:9px 10px;
           border-bottom:1px solid var(--line); font-size:0.9rem; }
   .voce .nome { flex:1; min-width:0; }
@@ -467,6 +482,7 @@
     <button id="btnCategorie" class="solo-preset">Categorie</button>
     <button id="btnAltro" class="solo-preset">Altro</button>
     <button id="btnModifica" class="solo-live">Modifica</button>
+    <button id="btnPedale" class="solo-live">Pedale</button>
     <button id="btnVista">Live →</button>
   </div>
   <div class="cerca solo-preset">
@@ -678,10 +694,48 @@
   <div id="elencoScegli"></div>
 </div>
 
+<!-- il pedale ESP32: gli otto slot che tiene in memoria, e l'invio di un banco.
+     Mentre l'app è collegata al pedale, il pedale ha mollato l'ampli: è una
+     scelta di disegno, non un difetto, e il pannello lo dice. -->
+<div class="pannello" id="pannelloPedale">
+  <div class="barra-alta">
+    <h2>Pedale</h2>
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloPedale">Fatto</button>
+  </div>
+
+  <div class="barra-alta">
+    <button id="btnPedaleConnetti" class="primary">Cerca il pedale</button>
+    <span id="statoPedale" class="status off">non collegato</span>
+    <span style="flex:1"></span>
+    <button id="btnPedaleStacca" class="piccolo" disabled>Stacca</button>
+  </div>
+
+  <div class="sezione-pannello">
+    <p class="spiega">Mentre sei collegato al pedale, <em>il pedale ha mollato l'ampli</em>
+      e non suona: è così per scelta, un padrone alla volta. Appena stacchi se lo riprende
+      da solo. I banchi restano nel pedale anche a corrente staccata.</p>
+    <div class="barra-alta">
+      <span id="nomeBancoDaMandare" style="flex:1"></span>
+      <select id="slotPedale" title="in quale slot del pedale"></select>
+      <button id="btnMandaAlPedale" class="primary" disabled>Invia al pedale</button>
+    </div>
+    <div id="avanzamentoPedale" class="barra-invio"><i></i></div>
+  </div>
+
+  <div class="sezione-pannello">
+    <h3>Cosa c'è nel pedale</h3>
+    <div id="slotsPedale"></div>
+  </div>
+
+  <div class="stato-pannello" id="statoPannelloPedale"></div>
+</div>
+
 <script src="src/spark-protocol.js"></script>
 <script src="src/spark-effetti.js"></script>
 <script src="src/spark-transport.js"></script>
 <script src="src/preset-store.js"></script>
+<script src="src/pedale-ponte.js"></script>
 <script src="src/spark-backup.js"></script>
 <script src="src/pwa.js"></script>
 <script>
@@ -2611,6 +2665,186 @@ function marchioNeiPannelli() {
   if (logo && !logo.complete) logo.addEventListener('load', marchioNeiPannelli, { once: true });
   else marchioNeiPannelli();
 })();
+
+/* ====================================================================
+   Il pedale ESP32
+
+   Un padrone alla volta: mentre l'app è collegata al pedale, **il pedale
+   ha mollato l'ampli** e non suona. Appena si stacca se lo riprende da
+   solo. Non è un limite tecnico che subiamo, è la scelta che ha reso
+   semplice il firmware — e il pannello lo dice, perché altrimenti si
+   scambia per un guasto (è già successo tre volte in sviluppo).
+
+   Il formato del blocco sta in `src/pedale-ponte.js`, e la sua altra
+   sponda è `pedale/prova-ble/banchi.h`: si cambiano insieme.
+   ==================================================================== */
+
+const pedale = { device: null, comando: null, stato: null, slots: [] };
+
+function logPedale(msg) { $('statoPannelloPedale').textContent = msg; }
+
+function statoPedale(su, testo) {
+  const el = $('statoPedale');
+  el.className = 'status ' + (su ? 'on' : 'off');
+  el.textContent = testo;
+  $('btnPedaleConnetti').disabled = su;
+  $('btnPedaleStacca').disabled = !su;
+  aggiornaInvioPedale();
+}
+
+/** Si può mandare solo un banco vero dell'utente, e solo se ha dei preset. */
+function aggiornaInvioPedale() {
+  const banco = bancoCorrente();
+  const posti = banco ? postiDelBanco().filter(Boolean).length : 0;
+  $('nomeBancoDaMandare').textContent = banco
+    ? `${banco.nome} — ${posti} preset`
+    : 'il banco «Ampli» non si manda: è quello che c\'è già sull\'ampli';
+  $('btnMandaAlPedale').disabled = !(pedale.comando && banco && posti > 0);
+}
+
+function disegnaSlotsPedale() {
+  const cont = $('slotsPedale');
+  cont.innerHTML = '';
+  const perSlot = new Map(pedale.slots.map(v => [v.slot, v]));
+
+  for (let s = 0; s < PedalePonte.POSTI; s++) {
+    const v = perSlot.get(s);
+    const riga = document.createElement('div');
+    riga.className = 'slot-pedale' + (v ? '' : ' vuoto');
+
+    const n = document.createElement('span');
+    n.className = 'n';
+    n.textContent = s + 1;
+
+    const nome = document.createElement('span');
+    nome.className = 'nome';
+    nome.textContent = v ? v.nome : 'vuoto';
+
+    riga.append(n, nome);
+
+    if (v) {
+      const quanti = document.createElement('span');
+      quanti.className = 'quanti';
+      quanti.textContent = `${v.pieni} preset`;
+      riga.appendChild(quanti);
+
+      // Lo scambio con quello sopra: con otto posti fissi «sposta in mezzo»
+      // vorrebbe dire far scalare tutti gli altri, ed è la stessa scelta
+      // già fatta per i preset dentro un banco.
+      if (s > 0) {
+        const su = document.createElement('button');
+        su.textContent = '↑';
+        su.title = 'scambia con lo slot sopra';
+        su.addEventListener('click', () => comandoPedale(PedalePonte.CMD.SCAMBIA, s, s - 1));
+        riga.appendChild(su);
+      }
+      const suona = document.createElement('button');
+      suona.textContent = 'Suona';
+      suona.addEventListener('click', () => comandoPedale(PedalePonte.CMD.USA, s));
+      const canc = document.createElement('button');
+      canc.textContent = 'Elimina';
+      canc.addEventListener('click', () => {
+        if (confirm(`Eliminare "${v.nome}" dal pedale?`))
+          comandoPedale(PedalePonte.CMD.CANCELLA, s);
+      });
+      riga.append(suona, canc);
+    }
+    cont.appendChild(riga);
+  }
+}
+
+async function comandoPedale(...byte) {
+  if (!pedale.comando) { logPedale('non collegato al pedale'); return; }
+  try {
+    await pedale.comando.writeValueWithResponse(new Uint8Array(byte));
+  } catch (err) {
+    logPedale('comando fallito: ' + err.message);
+  }
+}
+
+function rispostaPedale(e) {
+  const v = new Uint8Array(e.target.value.buffer);
+  const testo = new TextDecoder().decode(v.subarray(1));
+  if (v[0] === 0x82) {                       // l'elenco degli slot
+    pedale.slots = PedalePonte.leggiElenco(testo);
+    disegnaSlotsPedale();
+    return;
+  }
+  logPedale(testo);
+  // Dopo un cambiamento l'elenco che abbiamo è vecchio: rileggerlo è più
+  // sicuro che indovinare com'è rimasto.
+  if (v[0] === 0x81 && /salvat|cancellat|scambiat/.test(testo))
+    comandoPedale(PedalePonte.CMD.ELENCA);
+}
+
+async function collegaPedale() {
+  if (!navigator.bluetooth) { logPedale('questo browser non parla col Bluetooth'); return; }
+  try {
+    statoPedale(false, 'ricerca…');
+    pedale.device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [PedalePonte.SERVIZIO] }],
+      optionalServices: [PedalePonte.SERVIZIO],
+    });
+    pedale.device.addEventListener('gattserverdisconnected', () => {
+      pedale.comando = pedale.stato = null;
+      pedale.slots = [];
+      disegnaSlotsPedale();
+      statoPedale(false, 'non collegato');
+      logPedale('staccato — il pedale si riprende l\'ampli da solo');
+    });
+
+    const server   = await pedale.device.gatt.connect();
+    const servizio = await server.getPrimaryService(PedalePonte.SERVIZIO);
+    pedale.comando = await servizio.getCharacteristic(PedalePonte.COMANDO);
+    pedale.stato   = await servizio.getCharacteristic(PedalePonte.STATO);
+    await pedale.stato.startNotifications();
+    pedale.stato.addEventListener('characteristicvaluechanged', rispostaPedale);
+
+    statoPedale(true, pedale.device.name || 'pedale');
+    logPedale('collegato — da adesso il pedale ha mollato l\'ampli');
+    await comandoPedale(PedalePonte.CMD.ELENCA);
+  } catch (err) {
+    statoPedale(false, 'non collegato');
+    logPedale('connessione fallita: ' + err.message);
+  }
+}
+
+async function mandaBancoAlPedale() {
+  const banco = bancoCorrente();
+  if (!banco) return;
+  const posti = postiDelBanco();
+  const slot  = Number($('slotPedale').value);
+  const barra = $('avanzamentoPedale').firstElementChild;
+
+  $('btnMandaAlPedale').disabled = true;
+  try {
+    const t0 = performance.now();
+    const byte = await PedalePonte.invia(
+      pedale.comando, { nome: banco.nome, posti }, slot,
+      (fatti, totale) => { barra.style.width = Math.round(fatti / totale * 100) + '%'; });
+    logPedale(`"${banco.nome}" → slot ${slot + 1}: ${byte} byte in ` +
+              `${Math.round(performance.now() - t0)} ms`);
+  } catch (err) {
+    logPedale('invio fallito: ' + err.message);
+  }
+  barra.style.width = '0';
+  aggiornaInvioPedale();
+}
+
+$('btnPedale').addEventListener('click', () => {
+  $('slotPedale').innerHTML = Array.from({ length: PedalePonte.POSTI },
+    (_, i) => `<option value="${i}">slot ${i + 1}</option>`).join('');
+  aggiornaInvioPedale();
+  disegnaSlotsPedale();
+  if (!$('statoPannelloPedale').textContent)
+    logPedale('il pedale si annuncia come «SparkPedale» anche mentre suona');
+  apriPannello('pannelloPedale');
+});
+$('btnPedaleConnetti').addEventListener('click', collegaPedale);
+$('btnPedaleStacca').addEventListener('click', () => {
+  if (pedale.device && pedale.device.gatt.connected) pedale.device.gatt.disconnect();
+});
+$('btnMandaAlPedale').addEventListener('click', mandaBancoAlPedale);
 
 /**
  * Siamo su un apparecchio Apple da tasca o da divano? Serve solo a scegliere

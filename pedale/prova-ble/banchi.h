@@ -177,6 +177,28 @@ static bool bancoCancella(uint8_t slot) {
   return LittleFS.remove(via);
 }
 
+/**
+ * Scambia due slot. **Scambio e non inserimento**: con otto posti fissi «sposta
+ * in mezzo» vorrebbe dire far scalare tutti gli altri, ed e' la stessa scelta
+ * gia' fatta nell'app per i preset dentro un banco.
+ */
+static bool bancoScambia(uint8_t a, uint8_t b) {
+  if (a >= BANCHI_MAX || b >= BANCHI_MAX || a == b) return false;
+  char viaA[16], viaB[16], viaTmp[16];
+  nomeFile(a, viaA, sizeof(viaA));
+  nomeFile(b, viaB, sizeof(viaB));
+  snprintf(viaTmp, sizeof(viaTmp), "/scambio.tmp");
+
+  const bool cA = LittleFS.exists(viaA), cB = LittleFS.exists(viaB);
+  if (!cA && !cB) return false;
+  if (LittleFS.exists(viaTmp)) LittleFS.remove(viaTmp);
+
+  if (cA && !LittleFS.rename(viaA, viaTmp)) return false;
+  if (cB && !LittleFS.rename(viaB, viaA)) { if (cA) LittleFS.rename(viaTmp, viaA); return false; }
+  if (cA && !LittleFS.rename(viaTmp, viaB)) return false;
+  return true;
+}
+
 /** Quanti banchi ci sono, e riempie `nomi` con «slot:nome» separati da \n. */
 static uint8_t banchiElenca(char* fuori, size_t max) {
   size_t usato = 0;
