@@ -716,10 +716,11 @@
       e non suona: è così per scelta, un padrone alla volta. Appena stacchi se lo riprende
       da solo. I banchi restano nel pedale anche a corrente staccata.</p>
     <div class="barra-alta">
-      <span id="nomeBancoDaMandare" style="flex:1"></span>
+      <select id="bancoDaMandare" title="quale banco mandare" style="flex:1"></select>
       <select id="slotPedale" title="in quale slot del pedale"></select>
-      <button id="btnMandaAlPedale" class="primary" disabled>Invia al pedale</button>
+      <button id="btnMandaAlPedale" class="primary" disabled>Invia</button>
     </div>
+    <p class="spiega" id="notaBancoDaMandare"></p>
     <div id="avanzamentoPedale" class="barra-invio"><i></i></div>
   </div>
 
@@ -2692,14 +2693,47 @@ function statoPedale(su, testo) {
   aggiornaInvioPedale();
 }
 
-/** Si può mandare solo un banco vero dell'utente, e solo se ha dei preset. */
+/** I preset di un banco salvato, per id. Il banco «Ampli» non c'entra qui. */
+function postiDiBanco(banco) {
+  return banco.posti.map(id => (id === null ? null : perId(id)));
+}
+
+function bancoDaMandare() {
+  const id = Number($('bancoDaMandare').value);
+  return banchi.find(b => b.id === id) || null;
+}
+
+/**
+ * Il banco si sceglie **dentro il pannello**: la barra dei banchi sta dietro
+ * e il pannello la copre, quindi legarsi a quella voleva dire chiudere,
+ * cambiare e riaprire per ogni invio.
+ *
+ * Il banco «Ampli» non compare: è quello che c'è già sull'ampli, mandarlo al
+ * pedale non vuol dire niente.
+ */
+function riempiSceltaBanco() {
+  const sel = $('bancoDaMandare');
+  const primaScelto = Number(sel.value);
+  sel.innerHTML = banchi.map(b => {
+    const quanti = postiDiBanco(b).filter(Boolean).length;
+    return `<option value="${b.id}">${b.nome} — ${quanti} preset</option>`;
+  }).join('');
+  if (!banchi.length) sel.innerHTML = '<option value="">nessun banco in libreria</option>';
+  // Si riparte da quello che stavi guardando in Live, che quasi sempre è
+  // quello che vuoi mandare; se non è un banco vero, dal primo.
+  const preferito = banchi.some(b => b.id === primaScelto) ? primaScelto
+                  : (bancoCorrente() ? bancoCorrente().id : (banchi[0] || {}).id);
+  if (preferito !== undefined) sel.value = String(preferito);
+}
+
 function aggiornaInvioPedale() {
-  const banco = bancoCorrente();
-  const posti = banco ? postiDelBanco().filter(Boolean).length : 0;
-  $('nomeBancoDaMandare').textContent = banco
-    ? `${banco.nome} — ${posti} preset`
-    : 'il banco «Ampli» non si manda: è quello che c\'è già sull\'ampli';
-  $('btnMandaAlPedale').disabled = !(pedale.comando && banco && posti > 0);
+  const banco = bancoDaMandare();
+  const quanti = banco ? postiDiBanco(banco).filter(Boolean).length : 0;
+  $('notaBancoDaMandare').textContent =
+    !banchi.length ? 'Non hai ancora banchi: creane uno nella vista Live e riempilo.'
+    : !quanti      ? 'Questo banco è vuoto: mettici dentro dei preset prima di mandarlo.'
+    : '';
+  $('btnMandaAlPedale').disabled = !(pedale.comando && banco && quanti > 0);
 }
 
 function disegnaSlotsPedale() {
@@ -2810,9 +2844,9 @@ async function collegaPedale() {
 }
 
 async function mandaBancoAlPedale() {
-  const banco = bancoCorrente();
+  const banco = bancoDaMandare();
   if (!banco) return;
-  const posti = postiDelBanco();
+  const posti = postiDiBanco(banco);
   const slot  = Number($('slotPedale').value);
   const barra = $('avanzamentoPedale').firstElementChild;
 
@@ -2831,9 +2865,12 @@ async function mandaBancoAlPedale() {
   aggiornaInvioPedale();
 }
 
+$('bancoDaMandare').addEventListener('change', aggiornaInvioPedale);
+
 $('btnPedale').addEventListener('click', () => {
   $('slotPedale').innerHTML = Array.from({ length: PedalePonte.POSTI },
     (_, i) => `<option value="${i}">slot ${i + 1}</option>`).join('');
+  riempiSceltaBanco();
   aggiornaInvioPedale();
   disegnaSlotsPedale();
   if (!$('statoPannelloPedale').textContent)
