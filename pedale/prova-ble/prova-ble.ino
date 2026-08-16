@@ -521,12 +521,40 @@ static void rispondi(uint8_t tipo, const char* testo) {
   chStato->notify();
 }
 
+/* I comandi che toccano LittleFS — elencare, salvare, cancellare, scambiare,
+ * caricare — leggono e scrivono migliaia di byte su flash. **Farlo dentro il
+ * callback BLE blocca il task dello stack**, e con sei banchi in memoria basta
+ * a far cadere la connessione: il sintomo e' «GATT operation failed for unknown
+ * reason» seguito da una disconnessione. E' lo stesso errore gia' pagato con
+ * disconnect() dentro onConnect.
+ *
+ * Il callback quindi prende nota e basta; il lavoro lo fa il loop. Restano nel
+ * callback solo INIZIA e PEZZO, che sono due memcpy e arrivano fitti. */
+static uint8_t  attesaDati[8];
+static size_t   attesaLung = 0;
+static volatile bool attesaPiena = false;
+
+static void eseguiComandoPesante(const uint8_t* d, size_t n);
+
 class Ponte : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* c) override {
     const uint8_t* d = c->getData();
     const size_t   n = c->getLength();
     if (!n) return;
 
+    if (d[0] != CMD_INIZIA && d[0] != CMD_PEZZO) {
+      if (attesaPiena) { rispondi(RSP_ERRORE, "sto ancora finendo il comando prima"); return; }
+      attesaLung = (n < sizeof(attesaDati)) ? n : sizeof(attesaDati);
+      memcpy(attesaDati, d, attesaLung);
+      attesaPiena = true;
+      return;
+    }
+    eseguiComandoPesante(d, n);            // qui ci arrivano solo INIZIA e PEZZO
+  }
+};
+
+/** Tutto il resto, eseguito dal loop e non dal task BLE. */
+static void eseguiComandoPesante(const uint8_t* d, size_t n) {
     switch (d[0]) {
       case CMD_CIAO: {
         char msg[160];
@@ -650,8 +678,17 @@ class Ponte : public BLECharacteristicCallbacks {
         rispondi(RSP_ERRORE, msg);
       }
     }
-  }
-};
+}
+
+/** Chiamata dal loop: esegue il comando messo da parte dal callback. */
+static void sbrigaComandoPonte() {
+  if (!attesaPiena) return;
+  uint8_t copia[8];
+  const size_t n = attesaLung;
+  memcpy(copia, attesaDati, n);
+  attesaPiena = false;                     // libera il posto prima di lavorare
+  eseguiComandoPesante(copia, n);
+}
 
 /* Un padrone alla volta, per scelta dell'utente: non serve che il pedale
  * parli con l'app e con l'ampli insieme. Ci si collega all'app, si chiude
@@ -736,6 +773,7 @@ void setup() {
 
 void loop() {
   sbrigaPonte();
+  sbrigaComandoPonte();
 
   if (client && !client->isConnected() && chScrittura) {
     Serial.println(F("connessione persa"));

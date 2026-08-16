@@ -735,7 +735,14 @@
 
   <div class="sezione-pannello">
     <h3>Cosa c'è nel pedale</h3>
+    <p class="spiega">Sposta e togli quanto vuoi: qui non succede niente finché non premi
+      <em>Aggiorna il pedale</em>. Caricare un banco invece è immediato.</p>
     <div id="slotsPedale"></div>
+    <div class="barra-alta">
+      <span id="notaModifichePedale" class="spiega" style="flex:1;margin:0"></span>
+      <button id="btnAnnullaPedale" class="piccolo" disabled>Annulla</button>
+      <button id="btnApplicaPedale" class="primary" disabled>Aggiorna il pedale</button>
+    </div>
   </div>
 </div>
 
@@ -2687,7 +2694,12 @@ function marchioNeiPannelli() {
    sponda è `pedale/prova-ble/banchi.h`: si cambiano insieme.
    ==================================================================== */
 
-const pedale = { device: null, comando: null, stato: null, slots: [], righe: [] };
+const pedale = {
+  device: null, comando: null, stato: null, righe: [],
+  slots: [],                 // quello che il pedale ha detto, l'ultima volta
+  partenza: new Array(8).fill(null),   // la stessa cosa, per slot
+  locale:   new Array(8).fill(null),   // la disposizione che stai sistemando
+};
 
 /**
  * Tiene le ultime righe, non solo l'ultima: qui la sequenza conta più del
@@ -2760,10 +2772,9 @@ function aggiornaInvioPedale() {
 function disegnaSlotsPedale() {
   const cont = $('slotsPedale');
   cont.innerHTML = '';
-  const perSlot = new Map(pedale.slots.map(v => [v.slot, v]));
 
   for (let s = 0; s < PedalePonte.POSTI; s++) {
-    const v = perSlot.get(s);
+    const v = pedale.locale[s];
     const riga = document.createElement('div');
     riga.className = 'slot-pedale' + (v ? '' : ' vuoto');
 
@@ -2783,35 +2794,102 @@ function disegnaSlotsPedale() {
       quanti.textContent = `${v.pieni} preset`;
       riga.appendChild(quanti);
 
-      // Scambio con il vicino, sopra o sotto. Con otto posti fissi «sposta in
-      // mezzo» vorrebbe dire far scalare tutti gli altri, ed è la stessa
-      // scelta già fatta per i preset dentro un banco.
-      //
-      // Ci vogliono **tutte e due le frecce**: col solo «su» la prima riga
-      // non aveva nessun pulsante, e da lì sembrava che lo spostamento non
-      // esistesse.
+      // Le frecce e l'eliminazione lavorano **solo sulla copia locale**: si
+      // sistema tutto con calma e si applica una volta sola. In tempo reale
+      // ogni spostamento era un giro completo, e riordinarne tre ne costava
+      // sei — oltre a rendere ogni singolo comando un'occasione di errore.
       for (const [segno, verso] of [['↑', -1], ['↓', +1]]) {
         const f = document.createElement('button');
         f.textContent = segno;
         const dove = s + verso;
-        f.title = `scambia con lo slot ${dove + 1}`;
         f.disabled = dove < 0 || dove >= PedalePonte.POSTI;
-        f.addEventListener('click', () => comandoPedale(PedalePonte.CMD.SCAMBIA, s, dove));
+        f.addEventListener('click', () => {
+          const t = pedale.locale[s];
+          pedale.locale[s] = pedale.locale[dove];
+          pedale.locale[dove] = t;
+          disegnaSlotsPedale();
+        });
         riga.appendChild(f);
       }
+
       const suona = document.createElement('button');
       suona.textContent = 'Suona';
+      // Questo invece è immediato: non è una modifica da applicare, è un
+      // ordine di suonare adesso.
+      suona.disabled = daApplicare();
+      suona.title = suona.disabled ? 'prima aggiorna il pedale' : 'fai suonare questo banco';
       suona.addEventListener('click', () => comandoPedale(PedalePonte.CMD.USA, s));
+
       const canc = document.createElement('button');
-      canc.textContent = 'Elimina';
+      canc.textContent = 'Togli';
       canc.addEventListener('click', () => {
-        if (confirm(`Eliminare "${v.nome}" dal pedale?`))
-          comandoPedale(PedalePonte.CMD.CANCELLA, s);
+        pedale.locale[s] = null;
+        disegnaSlotsPedale();
       });
       riga.append(suona, canc);
     }
     cont.appendChild(riga);
   }
+  aggiornaTastiModifiche();
+}
+
+/** La disposizione locale differisce da quella che ha il pedale? */
+function daApplicare() {
+  for (let s = 0; s < PedalePonte.POSTI; s++) {
+    const a = pedale.locale[s], b = pedale.partenza[s];
+    if ((a ? a.slot : -1) !== (b ? b.slot : -1)) return true;
+  }
+  return false;
+}
+
+function aggiornaTastiModifiche() {
+  const cambiato = daApplicare();
+  $('btnApplicaPedale').disabled = !cambiato || !pedale.comando;
+  $('btnAnnullaPedale').disabled = !cambiato;
+  $('notaModifichePedale').textContent = cambiato
+    ? 'Ci sono spostamenti non ancora applicati al pedale.' : '';
+}
+
+/** Riparte dalla disposizione vera del pedale, buttando le modifiche locali. */
+function ripartiDaPedale() {
+  const perSlot = new Map(pedale.slots.map(v => [v.slot, v]));
+  pedale.partenza = Array.from({ length: PedalePonte.POSTI }, (_, s) => perSlot.get(s) || null);
+  pedale.locale   = pedale.partenza.slice();
+  disegnaSlotsPedale();
+}
+
+/**
+ * Applica la disposizione locale al pedale: prima le eliminazioni, poi la
+ * permutazione realizzata con scambi. Al massimo sette scambi, tutti in coda.
+ *
+ * Si simula lo stato del pedale mentre si emettono i comandi, invece di
+ * ricalcolarlo dopo ognuno: così non serve una rilettura per ogni passo, che
+ * era proprio il costo del modo di prima.
+ */
+async function applicaAlPedale() {
+  const stato = pedale.partenza.map(v => (v ? v.slot : null));
+  const voluto = pedale.locale.map(v => (v ? v.slot : null));
+  const comandi = [];
+
+  for (let s = 0; s < PedalePonte.POSTI; s++) {
+    if (stato[s] !== null && !voluto.includes(stato[s])) {
+      comandi.push([PedalePonte.CMD.CANCELLA, s]);
+      stato[s] = null;
+    }
+  }
+  for (let i = 0; i < PedalePonte.POSTI; i++) {
+    if (voluto[i] === null || stato[i] === voluto[i]) continue;
+    const j = stato.indexOf(voluto[i]);
+    if (j < 0) continue;
+    comandi.push([PedalePonte.CMD.SCAMBIA, i, j]);
+    const t = stato[i]; stato[i] = stato[j]; stato[j] = t;
+  }
+
+  if (!comandi.length) { logPedale('niente da applicare'); return; }
+  $('btnApplicaPedale').disabled = true;
+  logPedale(`applico ${comandi.length} modifiche…`);
+  for (const c of comandi) await comandoPedale(...c);
+  await comandoPedale(PedalePonte.CMD.ELENCA);
 }
 
 /**
@@ -2852,13 +2930,13 @@ function rispostaPedale(e) {
   if (v[0] === 0x82) {                       // l'elenco degli slot
     pedale.slots = PedalePonte.leggiElenco(testo);
     logPedale(`elenco: ${pedale.slots.length} slot occupati`);
-    disegnaSlotsPedale();
+    ripartiDaPedale();                       // la verità è quella del pedale
     return;
   }
   logPedale('← ' + testo);
-  // Dopo un cambiamento l'elenco che abbiamo è vecchio: rileggerlo è più
-  // sicuro che indovinare com'è rimasto.
-  if (v[0] === 0x81 && /salvat|cancellat|scambiat/.test(testo))
+  // Solo dopo un salvataggio: gli scambi e le eliminazioni li rileggiamo una
+  // volta sola alla fine, non uno per uno.
+  if (v[0] === 0x81 && /salvato/.test(testo))
     comandoPedale(PedalePonte.CMD.ELENCA);
 }
 
@@ -2873,7 +2951,7 @@ async function collegaPedale() {
     pedale.device.addEventListener('gattserverdisconnected', () => {
       pedale.comando = pedale.stato = null;
       pedale.slots = [];
-      disegnaSlotsPedale();
+      ripartiDaPedale();
       statoPedale(false, 'non collegato');
       logPedale('staccato — il pedale si riprende l\'ampli da solo');
     });
@@ -2961,6 +3039,8 @@ $('btnPedaleStacca').addEventListener('click', () => {
   if (pedale.device && pedale.device.gatt.connected) pedale.device.gatt.disconnect();
 });
 $('btnMandaAlPedale').addEventListener('click', mandaBancoAlPedale);
+$('btnApplicaPedale').addEventListener('click', applicaAlPedale);
+$('btnAnnullaPedale').addEventListener('click', ripartiDaPedale);
 
 /**
  * Siamo su un apparecchio Apple da tasca o da divano? Serve solo a scegliere
