@@ -350,10 +350,21 @@ staccata dal telefono — non un secondo editor.
 otto footswitch fanno un pedale enorme e otto suoni sempre disponibili non gli servono.
 
 - **quattro footswitch** = i quattro suoni della metà corrente;
-- **un quinto footswitch, staccato dagli altri**, che **salta al gemello nell'altra metà**:
-  da A2 porta a B2 e viceversa, una pedalata sola. È l'A/B della coppia strofa/ritornello,
-  ed è la ragione per cui è stata scelta questa forma invece del semplice «cambia il
-  significato dei quattro» (che costava due pedalate per ogni suono della metà B);
+- **un quinto footswitch, staccato dagli altri**, che **cambia metà senza toccare il
+  suono**: i quattro tasti passano a voler dire B1–B4, ma continua a suonare quello di
+  prima finché non ne scegli un altro.
+
+  **Prima saltava al gemello** (A2 → B2), per avere l'A/B della coppia strofa/ritornello in
+  una pedalata sola. L'utente l'ha provato **col piede nel simulatore il 16 agosto 2026 e
+  ha voluto il contrario**: premere il tasto di metà non deve cambiare quello che stai
+  suonando. Costa una pedalata in più per la coppia, ma nessun cambio di suono a sorpresa —
+  e sul palco la sorpresa è il difetto peggiore. **È la decisione che il simulatore esiste
+  per far prendere**: ragionandoci era stata scelta l'altra.
+
+  Ne segue che **quando la metà mostrata non è quella che suona, nessuno dei quattro LED è
+  acceso** — ed è giusto, nessuno di quei tasti è il suono che senti. Per questo l'OLED
+  tiene in fondo una riga **♪** con quello che sta suonando davvero, che senza sarebbe
+  l'unica informazione persa;
 - **due tasti a mano** per i banchi, come già deciso.
 
 **Il banco resta da otto**, diviso in due metà da quattro: combacia senza toccare niente
@@ -641,16 +652,15 @@ lunga non si prova bene.
 Le scelte già dentro, che sono quelle da giudicare suonando:
 
 - **tutti scattano alla pressione**: nessun footswitch ha una funzione lunga da aspettare.
-- **il quinto salta al gemello.** Se non sta suonando niente non c'è un gemello, quindi
-  cambia solo la metà e lo dice; se il gemello è un posto vuoto cambia metà e lampeggia,
-  invece di fingere.
+- **il quinto cambia solo la metà**, e il suono resta quello che era.
 - **una pressione durante un caricamento si accoda, non annulla** — verificato poi sul
   firmware vero, dove il tasto va letto anche dentro l'attesa degli ack.
 - cambiando banco si torna **sempre in metà A** e `attivo` va a `null`: atterrare in uno
   stato noto vale più che ricordarsi dov'eri, e l'ampli continua a suonare quel preset ma
   nessun tasto del banco nuovo lo rappresenta.
-- l'OLED tiene una **striscia in fondo che dice dove porta il quinto tasto** («⇄ A2 Crunch
-  Bassman»): è lo spazio che si libera mostrando quattro nomi invece di otto.
+- l'OLED tiene una **striscia in fondo con quello che sta suonando** («♪ A1 Clean Twin»):
+  è lo spazio che si libera mostrando quattro nomi invece di otto, e serve soprattutto
+  quando la metà mostrata non è quella che suona.
 
 Due disposizioni del display a confronto, ma la scelta è quasi fatta: **l'elenco di quattro
 righe** dà ~22 caratteri a testa e i nomi veri ci stanno interi, mentre le **quattro
