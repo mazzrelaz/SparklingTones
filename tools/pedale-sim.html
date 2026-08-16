@@ -101,7 +101,7 @@
 <h1>Simulatore del pedale</h1>
 <p class="sub">
   Quattro footswitch per i quattro suoni della metà corrente, <b>il quinto staccato che
-  salta al gemello nell'altra metà</b>, e due tasti a mano per i banchi. Dei quattro LED
+  cambia metà senza toccare il suono</b>, e due tasti a mano per i banchi. Dei quattro LED
   <b>si accende solo quello che sta suonando</b>, col colore della metà; il <b>quinto resta
   sempre acceso</b> ed è lui a dire dove sei — <b>rosso in A, verde in B</b>, la convenzione
   del pannello dell'ampli. Dentro c'è la logica vera e il nostro trasporto: con l'ampli
@@ -146,9 +146,10 @@
 </div>
 
 <p class="nota">
-  <b>Cosa provare.</b> Il quinto tasto salta al gemello: da A2 ti porta su B2 e viceversa,
-  una pedalata sola. Accoppia strofa e ritornello sullo stesso numero e diventa il tuo
-  interruttore per tutto il pezzo.<br>
+  <b>Cosa provare.</b> Il quinto tasto cambia soltanto <em>cosa vogliono dire i quattro</em>:
+  il suono resta quello che era finché non ne scegli un altro. Appena lo premi nessuno dei
+  quattro LED è acceso — nessuno di quei tasti è il suono che stai sentendo — e in fondo
+  al display c'è scritto <b>♪</b> con quello che suona davvero.<br>
   Il rischio di questo disegno è uno solo: <b>pestare il tasto giusto nella metà
   sbagliata</b>. A dirtelo è il LED del quinto tasto, sempre acceso, più il colore di
   quello che sta suonando. Guarda se ti basta, suonando.<br>
@@ -343,25 +344,20 @@ async function attiva(posto) {
   }
 }
 
-/** Il quinto tasto: salta al gemello nell'altra metà. */
-function saltaAlGemello() {
-  if (stato.attivo === null) {
-    // Niente sta suonando: non c'è un gemello, quindi cambia solo il
-    // significato dei quattro. Fingere un salto sarebbe una bugia.
-    stato.meta = 1 - stato.meta;
-    log(`metà ${stato.meta ? 'B' : 'A'} — nessun suono attivo, cambiano solo i tasti`);
-    disegna();
-    return;
-  }
-  const g = gemelloDi(stato.attivo);
-  if (!banco().posti[g]) {
-    stato.meta = 1 - stato.meta;
-    stato.errore = g % META; disegna();
-    setTimeout(() => { stato.errore = null; disegna(); }, 260);
-    log(`${etichetta(g)} è vuoto: cambio solo metà`, 'mk');
-    return;
-  }
-  attiva(g);
+/**
+ * Il quinto tasto: cambia **solo il significato dei quattro**, e il suono
+ * resta quello che era finché non ne scegli un altro.
+ *
+ * Prima saltava al gemello (A2 → B2) per avere un A/B in una pedalata sola.
+ * L'utente l'ha provato col piede e ha voluto il contrario: premere il tasto
+ * di metà non deve cambiare quello che stai suonando. Costa una pedalata in
+ * più per la coppia strofa/ritornello, ma nessun cambio di suono a sorpresa —
+ * e sul palco la sorpresa è il difetto peggiore.
+ */
+function cambiaMeta() {
+  stato.meta = 1 - stato.meta;
+  log(`metà ${stato.meta ? 'B' : 'A'} — i tasti cambiano, il suono no`);
+  disegna();
 }
 
 function ritardoFinto() {
@@ -419,7 +415,7 @@ function costruisci() {
   sw.id = 'swGemello';
   sw.innerHTML = '<span class="num">⇄</span><span class="nome"></span>';
   sw.addEventListener('pointerdown', e => { e.preventDefault(); sw.setPointerCapture(e.pointerId);
-                                            sw.classList.add('giu'); saltaAlGemello(); });
+                                            sw.classList.add('giu'); cambiaMeta(); });
   sw.addEventListener('pointerup',     () => sw.classList.remove('giu'));
   sw.addEventListener('pointercancel', () => sw.classList.remove('giu'));
   posto.append(led, sw);
@@ -452,14 +448,8 @@ function disegna() {
     sws[i].querySelector('.nome').textContent = record ? record.name : 'vuoto';
   }
 
-  // il quinto: dice dove ti porta
-  const g = gemelloDi(stato.attivo);
-  const rg = g === null ? null : b.posti[g];
-  const swg = $('swGemello');
-  swg.querySelector('.nome').textContent =
-    g === null ? `passa a ${stato.meta ? 'A' : 'B'}`
-    : rg       ? `${etichetta(g)}  ${rg.name}`
-    :            `${etichetta(g)} vuoto`;
+  // il quinto: dice in che metà stai andando
+  $('swGemello').querySelector('.nome').textContent = `passa a ${stato.meta ? 'A' : 'B'}`;
   // Sempre acceso: è il LED che dice in che metà sei, e non si spegne mai.
   $('gemello').querySelector('.led').className =
     'led ' + (stato.meta === 0 ? 'rosso' : 'verde');
@@ -531,18 +521,23 @@ function quattroColonne() {
   }
 }
 
-/** In fondo: cosa fa il quinto tasto adesso. */
+/**
+ * In fondo: **cosa sta suonando davvero**, sempre.
+ *
+ * Serve soprattutto quando il suono attivo non è nella metà che stai
+ * guardando — cioè appena premi il tasto di metà. Lì nessuno dei quattro LED
+ * è acceso, ed è giusto che sia così: nessuno di quei tasti è il suono che
+ * senti. Ma senza questa riga non sapresti più cosa stai suonando.
+ */
 function strisciaGemello() {
-  const g = gemelloDi(stato.attivo), b = banco();
+  const b = banco();
   ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(0, 100.5); ctx.lineTo(128, 100.5); ctx.stroke();
   ctx.fillStyle = '#aaa'; ctx.font = FONT; ctx.textAlign = 'left';
-  const rg = g === null ? null : b.posti[g];
-  const testo = g === null ? `passa a ${stato.meta ? 'A' : 'B'}`
-              : rg        ? `${etichetta(g)} ${rg.name}`
-              :             `${etichetta(g)} vuoto`;
-  ctx.fillText('⇄', 3, 113);
-  ctx.fillText(taglia(testo, 24), 14, 113);
+  const p = stato.caricando !== null ? stato.caricando : stato.attivo;
+  const r = p === null ? null : b.posti[p];
+  ctx.fillText('♪', 3, 113);
+  ctx.fillText(r ? taglia(`${etichetta(p)} ${r.name}`, 24) : 'niente', 14, 113);
 }
 
 function barra() {
@@ -598,7 +593,7 @@ addEventListener('keydown', e => {
   if (e.repeat) return;
   if (e.key === '+') return passoBanco(-1);
   if (e.key === '-') return passoBanco(+1);
-  if (e.key === '5' || e.key === ' ') { e.preventDefault(); return saltaAlGemello(); }
+  if (e.key === '5' || e.key === ' ') { e.preventDefault(); return cambiaMeta(); }
   const i = '1234'.indexOf(e.key);
   if (i >= 0) attiva(postoDi(i));
 });
@@ -618,7 +613,7 @@ addEventListener('keydown', e => {
   if (q.has('vista')) { $('disposizione').value = q.get('vista'); disegna(); }
   if (q.has('auto')) {
     await attiva(postoDi(Number(q.get('auto'))));
-    if (q.get('poi') === 'g') saltaAlGemello();
+    if (q.get('poi') === 'g') cambiaMeta();
   }
 })();
 </script>
