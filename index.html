@@ -339,9 +339,12 @@
   .about code { font-family:'SF Mono',Consolas,monospace; font-size:0.9em; color:var(--text); }
   /* Un pannello copre tutto lo schermo, log compreso: quello che succede va
      detto qui dentro, o non lo legge nessuno. */
+  /* Il log è testo da leggere e da riportare, quindi si seleziona anche in
+     vista live, dove tutto il resto è `user-select:none` perché si pesta. */
   .stato-pannello { font-size:0.8rem; color:var(--gold); background:var(--panel);
                     border:1px solid var(--line); border-radius:8px;
-                    padding:8px 10px; margin:0 0 12px; white-space:pre-wrap; }
+                    padding:8px 10px; margin:0 0 12px; white-space:pre-wrap;
+                    -webkit-user-select:text; user-select:text; }
 
   /* --- il pedale: gli otto slot che tiene in memoria -------------------- */
   .barra-invio { height:5px; background:var(--panel); border-radius:3px;
@@ -708,6 +711,7 @@
     <button id="btnPedaleConnetti" class="primary">Cerca il pedale</button>
     <span id="statoPedale" class="status off">non collegato</span>
     <span style="flex:1"></span>
+    <button id="btnCopiaLogPedale" class="piccolo">Copia il log</button>
     <button id="btnPedaleStacca" class="piccolo" disabled>Stacca</button>
   </div>
 
@@ -2895,6 +2899,29 @@ async function mandaBancoAlPedale() {
 }
 
 $('bancoDaMandare').addEventListener('change', aggiornaInvioPedale);
+
+/**
+ * Copiare il log serve a riportarlo, e in vista live il testo non si
+ * seleziona col dito. Se gli appunti non sono disponibili si ripiega sulla
+ * selezione, che è comunque meglio di un tasto che non fa niente.
+ */
+$('btnCopiaLogPedale').addEventListener('click', async () => {
+  const testo = pedale.righe.join('\n');
+  const tasto = $('btnCopiaLogPedale');
+  const prima = tasto.textContent;
+  try {
+    await navigator.clipboard.writeText(testo);
+    tasto.textContent = 'copiato';
+  } catch (err) {
+    const sel = window.getSelection();
+    const r = document.createRange();
+    r.selectNodeContents($('statoPannelloPedale'));
+    sel.removeAllRanges();
+    sel.addRange(r);
+    tasto.textContent = 'selezionato, copia a mano';
+  }
+  setTimeout(() => { tasto.textContent = prima; }, 2000);
+});
 
 $('btnPedale').addEventListener('click', () => {
   $('slotPedale').innerHTML = Array.from({ length: PedalePonte.POSTI },
