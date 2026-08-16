@@ -467,17 +467,17 @@ const FONT = "7px Consolas, 'DejaVu Sans Mono', monospace";
    il suono che sta suonando vanno letti da lontano, le quattro caselle no —
    quelle si guardano da vicino, quando scegli. Quindi le caselle si stringono
    e lo spazio va ai due nomi. */
-const Y_NOME    = 15;    // il suono attivo, grande
-const Y_CASELLE = 62;    // le quattro caselle
+const Y_CASELLE = 16;    // le quattro caselle, subito sotto il banco
 const H_CASELLE = 50;
+const Y_NOME    = 68;    // il suono attivo, grande, in fondo
 
 function disegnaOled() {
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 128, 128);
   ctx.textBaseline = 'alphabetic';
   intestazione();
-  nomeGrande();
   if ($('disposizione').value === 'griglia') quattroColonne();
   else                                       elencoQuattro();
+  nomeGrande();
   if (stato.caricando !== null) barra();
   if ($('unBit').checked) unBit();
 }
@@ -503,20 +503,23 @@ function nomeGrande() {
   const p = stato.caricando !== null ? stato.caricando : stato.attivo;
   const r = p === null ? null : b.posti[p];
 
+  ctx.strokeStyle = '#555'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, Y_NOME - 3.5); ctx.lineTo(128, Y_NOME - 3.5); ctx.stroke();
+
   ctx.textAlign = 'left';
   ctx.fillStyle = r ? '#fff' : '#666';
   ctx.font = 'bold 11px Consolas, monospace';
-  ctx.fillText(r ? etichetta(p) : '--', 3, Y_NOME + 10);
+  ctx.fillText(r ? etichetta(p) : '--', 3, Y_NOME + 12);
 
   if (!r) {
     ctx.font = '9px Consolas, monospace'; ctx.fillStyle = '#666';
-    ctx.fillText('premi un tasto', 26, Y_NOME + 10);
+    ctx.fillText('premi un tasto', 26, Y_NOME + 12);
     return;
   }
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 13px Consolas, monospace';
   spezza(r.name, 13).slice(0, 2)
-    .forEach((riga, k) => ctx.fillText(riga, 26, Y_NOME + 10 + k * 15));
+    .forEach((riga, k) => ctx.fillText(riga, 26, Y_NOME + 12 + k * 15));
 }
 
 /** Quattro righe intere: con soli quattro nomi ci stanno quasi tutti. */
@@ -577,8 +580,9 @@ function strisciaGemello() {
   ctx.fillText(r ? taglia(`${etichetta(p)} ${r.name}`, 24) : 'niente', 14, 113);
 }
 
+/** Sotto il nome, in fondo: non copre né le caselle né il nome. */
 function barra() {
-  const y = Y_CASELLE + H_CASELLE + 4;
+  const y = 116;
   ctx.fillStyle = '#000'; ctx.fillRect(0, y, 128, 12);
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
   ctx.strokeRect(22.5, y + 1.5, 83, 7);
