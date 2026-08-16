@@ -116,8 +116,8 @@
   </label>
   <label class="campo">display
     <select id="disposizione">
-      <option value="elenco">elenco — il nome intero</option>
       <option value="griglia">quattro colonne — come i pedali</option>
+      <option value="elenco">elenco — il nome intero</option>
     </select>
   </label>
   <label class="campo"><input type="checkbox" id="unBit"> soglia a 1 bit</label>
@@ -463,39 +463,76 @@ const ctx = $('oled').getContext('2d');
 const CH  = 4.2;                       // larghezza reale del monospace a 7 px
 const FONT = "7px Consolas, 'DejaVu Sans Mono', monospace";
 
+/* Le tre fasce del display, dopo la revisione del 16 agosto 2026: il banco e
+   il suono che sta suonando vanno letti da lontano, le quattro caselle no —
+   quelle si guardano da vicino, quando scegli. Quindi le caselle si stringono
+   e lo spazio va ai due nomi. */
+const Y_NOME    = 15;    // il suono attivo, grande
+const Y_CASELLE = 62;    // le quattro caselle
+const H_CASELLE = 50;
+
 function disegnaOled() {
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 128, 128);
   ctx.textBaseline = 'alphabetic';
   intestazione();
+  nomeGrande();
   if ($('disposizione').value === 'griglia') quattroColonne();
   else                                       elencoQuattro();
-  strisciaGemello();
   if (stato.caricando !== null) barra();
   if ($('unBit').checked) unBit();
 }
 
 function intestazione() {
   const b = banco();
-  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 128, 11);
-  ctx.fillStyle = '#000'; ctx.font = 'bold ' + FONT; ctx.textAlign = 'left';
-  ctx.fillText(taglia(b.nome, 17), 2, 8);
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 128, 13);
+  ctx.fillStyle = '#000';
+  ctx.font = 'bold 10px Consolas, monospace'; ctx.textAlign = 'left';
+  ctx.fillText(taglia(b.nome, 14), 2, 10);
   ctx.textAlign = 'right';
-  ctx.fillText(`${stato.meta ? 'B' : 'A'} ${stato.iBanco + 1}/${stato.banchi.length}`, 126, 8);
+  ctx.font = 'bold 9px Consolas, monospace';
+  ctx.fillText(`${stato.meta ? 'B' : 'A'} ${stato.iBanco + 1}/${stato.banchi.length}`, 126, 10);
+}
+
+/**
+ * Il suono che sta suonando, grande. **Sempre**, anche quando non è nella
+ * metà mostrata: appena si preme il tasto di metà nessuno dei quattro LED è
+ * acceso, e senza questa riga non sapresti più cosa senti.
+ */
+function nomeGrande() {
+  const b = banco();
+  const p = stato.caricando !== null ? stato.caricando : stato.attivo;
+  const r = p === null ? null : b.posti[p];
+
+  ctx.textAlign = 'left';
+  ctx.fillStyle = r ? '#fff' : '#666';
+  ctx.font = 'bold 11px Consolas, monospace';
+  ctx.fillText(r ? etichetta(p) : '--', 3, Y_NOME + 10);
+
+  if (!r) {
+    ctx.font = '9px Consolas, monospace'; ctx.fillStyle = '#666';
+    ctx.fillText('premi un tasto', 26, Y_NOME + 10);
+    return;
+  }
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 13px Consolas, monospace';
+  spezza(r.name, 13).slice(0, 2)
+    .forEach((riga, k) => ctx.fillText(riga, 26, Y_NOME + 10 + k * 15));
 }
 
 /** Quattro righe intere: con soli quattro nomi ci stanno quasi tutti. */
 function elencoQuattro() {
   const b = banco();
+  const alta = Math.floor(H_CASELLE / META);
   for (let i = 0; i < META; i++) {
-    const p = postoDi(i), y = 14 + i * 21, record = b.posti[p];
+    const p = postoDi(i), y = Y_CASELLE + i * alta, record = b.posti[p];
     const acceso = stato.attivo === p || stato.caricando === p;
-    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(0, y, 128, 19); }
+    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(0, y, 128, alta - 1); }
     const inchiostro = acceso ? '#000' : (record ? '#fff' : '#555');
     ctx.fillStyle = inchiostro;
     ctx.font = 'bold 9px Consolas, monospace'; ctx.textAlign = 'left';
-    ctx.fillText(etichetta(p), 3, y + 13);
+    ctx.fillText(etichetta(p), 3, y + alta - 3);
     ctx.font = FONT;
-    ctx.fillText(record ? taglia(record.name, 22) : '—', 22, y + 13);
+    ctx.fillText(record ? taglia(record.name, 22) : '—', 22, y + alta - 3);
   }
 }
 
@@ -505,19 +542,19 @@ function quattroColonne() {
   for (let i = 0; i < META; i++) {
     const p = postoDi(i), x = i * 32, record = b.posti[p];
     const acceso = stato.attivo === p || stato.caricando === p;
-    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(x + 1, 13, 30, 72); }
+    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(x + 1, Y_CASELLE, 30, H_CASELLE); }
     else {
       ctx.strokeStyle = record ? '#fff' : '#555'; ctx.lineWidth = 1;
       if (!record) ctx.setLineDash([2, 2]);
-      ctx.strokeRect(x + 1.5, 13.5, 29, 71); ctx.setLineDash([]);
+      ctx.strokeRect(x + 1.5, Y_CASELLE + 0.5, 29, H_CASELLE - 1); ctx.setLineDash([]);
     }
     const inchiostro = acceso ? '#000' : (record ? '#fff' : '#555');
     ctx.fillStyle = inchiostro;
     ctx.font = 'bold ' + FONT; ctx.textAlign = 'left';
-    ctx.fillText(etichetta(p), x + 3, 22);
+    ctx.fillText(etichetta(p), x + 3, Y_CASELLE + 9);
     ctx.font = FONT; ctx.textAlign = 'center';
-    if (record) spezza(record.name, Math.floor(28 / CH)).slice(0, 5)
-                  .forEach((r, k) => ctx.fillText(r, x + 16, 34 + k * 9));
+    if (record) spezza(record.name, Math.floor(28 / CH)).slice(0, 4)
+                  .forEach((r, k) => ctx.fillText(r, x + 16, Y_CASELLE + 21 + k * 9));
   }
 }
 
@@ -541,11 +578,12 @@ function strisciaGemello() {
 }
 
 function barra() {
-  ctx.fillStyle = '#000'; ctx.fillRect(20, 88, 88, 10);
+  const y = Y_CASELLE + H_CASELLE + 4;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, y, 128, 12);
   ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
-  ctx.strokeRect(22.5, 89.5, 83, 7);
+  ctx.strokeRect(22.5, y + 1.5, 83, 7);
   ctx.fillStyle = '#fff';
-  ctx.fillRect(24, 91, Math.round(80 * stato.progresso), 4);
+  ctx.fillRect(24, y + 3, Math.round(80 * stato.progresso), 4);
 }
 
 /** Peggio del vero: un font a matrice 5×7 ha i pixel messi apposta. */
