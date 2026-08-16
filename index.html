@@ -2693,7 +2693,12 @@ const pedale = { device: null, comando: null, stato: null, slots: [], righe: [] 
 function logPedale(msg) {
   pedale.righe.push(msg);
   while (pedale.righe.length > 6) pedale.righe.shift();
-  $('statoPannelloPedale').textContent = pedale.righe.join('\n');
+  const riga = $('statoPannelloPedale');
+  riga.textContent = pedale.righe.join('\n');
+  // `pulisciStatoPannelli()` nasconde ogni `.stato-pannello` all'apertura, e
+  // chi ci scrive deve rimostrarlo — è quello che fa `statoDelPannello`.
+  // Senza questa riga il log veniva scritto sempre e non si vedeva mai.
+  riga.hidden = false;
 }
 
 function statoPedale(su, testo) {
