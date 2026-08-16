@@ -429,6 +429,30 @@ a bianco pieno sono ~480 mA e il regolatore della schedina non li regge.
 ottavo ingresso (pedale d'espressione, tap tempo) la via è un **MCP23017**, sedici ingressi
 sugli stessi due fili dell'OLED, ~1,50 €.
 
+#### Il formato del display — aperto, ma con una raccomandazione
+
+**Il problema non è l'altezza, è la larghezza.** Su 128 pixel quattro colonne fanno 28 px
+l'una, cioè **cinque caratteri**. E conta più della risoluzione **la dimensione fisica del
+vetro**: il display sta per terra e lo si guarda da un metro e mezzo, di sbieco. Un
+128×128 da 1,5" è **27 × 27 mm**, con lettere alte due millimetri.
+
+| | vetro | per colonna |
+|---|---|---|
+| 1,5" 128×128 (SSD1327, I²C) | 27 × 27 mm | 5 caratteri |
+| 2,42" 128×64 (SSD1309, I²C) | 54 × 27 mm | 5 caratteri |
+| **3,12" 256×64 (SSD1322, SPI)** | **72 × 18 mm** | **13 caratteri** |
+
+**Consigliato il 256×64**: il rapporto 4:1 è esattamente la forma delle quattro colonne, e
+i nomi ci stanno. Costa 15–20 €.
+
+**Il prezzo è sui pin: l'SSD1322 va in SPI e vuole cinque pin, che non ci sono.** Torna
+quindi l'**MCP23017**, tolto passando a cinque footswitch: i sette interruttori vanno
+sull'espansore (due fili I²C) e liberano sette pin. Il conto torna con due di avanzo.
+
+`tools/pedale-sim.html` disegna tutti e tre i formati **alla stessa scala fisica** (7 px
+per mm), che è l'unico modo di confrontarli onestamente: a parità di dimensione sullo
+schermo il 128×128 sembra ottimo.
+
 ### Da misurare, in ordine
 
 1. ~~L'intervallo di connessione BLE.~~ **Misurato il 14 agosto 2026 sull'hardware, vedi
