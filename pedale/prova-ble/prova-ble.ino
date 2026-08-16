@@ -530,9 +530,14 @@ static void rispondi(uint8_t tipo, const char* testo) {
  *
  * Il callback quindi prende nota e basta; il lavoro lo fa il loop. Restano nel
  * callback solo INIZIA e PEZZO, che sono due memcpy e arrivano fitti. */
-static uint8_t  attesaDati[8];
-static size_t   attesaLung = 0;
-static volatile bool attesaPiena = false;
+/* Una coda, non un posto solo: l'app manda i comandi in raffica — applicando
+ * un riordino ne partono fino a sette di fila — e con un posto solo il secondo
+ * veniva rifiutato con «sto ancora finendo il comando prima». I comandi
+ * pesanti sono corti, quindi la coda costa un centinaio di byte. */
+static const uint8_t CODA_MAX = 12;
+static uint8_t codaDati[CODA_MAX][8];
+static uint8_t codaLung[CODA_MAX];
+static volatile uint8_t codaTesta = 0, codaFondo = 0;
 
 static void eseguiComandoPesante(const uint8_t* d, size_t n);
 
@@ -543,10 +548,12 @@ class Ponte : public BLECharacteristicCallbacks {
     if (!n) return;
 
     if (d[0] != CMD_INIZIA && d[0] != CMD_PEZZO) {
-      if (attesaPiena) { rispondi(RSP_ERRORE, "sto ancora finendo il comando prima"); return; }
-      attesaLung = (n < sizeof(attesaDati)) ? n : sizeof(attesaDati);
-      memcpy(attesaDati, d, attesaLung);
-      attesaPiena = true;
+      const uint8_t prossimo = (uint8_t)((codaFondo + 1) % CODA_MAX);
+      if (prossimo == codaTesta) { rispondi(RSP_ERRORE, "coda dei comandi piena"); return; }
+      const uint8_t quanti = (n < sizeof(codaDati[0])) ? (uint8_t)n : (uint8_t)sizeof(codaDati[0]);
+      memcpy(codaDati[codaFondo], d, quanti);
+      codaLung[codaFondo] = quanti;
+      codaFondo = prossimo;
       return;
     }
     eseguiComandoPesante(d, n);            // qui ci arrivano solo INIZIA e PEZZO
@@ -680,13 +687,17 @@ static void eseguiComandoPesante(const uint8_t* d, size_t n) {
     }
 }
 
-/** Chiamata dal loop: esegue il comando messo da parte dal callback. */
+/**
+ * Chiamata dal loop: esegue **un** comando per giro, non tutta la coda.
+ * Svuotarla in un colpo rifarebbe l'errore da cui veniamo, cioe' tenere
+ * occupato troppo a lungo chi deve anche rispondere alla radio.
+ */
 static void sbrigaComandoPonte() {
-  if (!attesaPiena) return;
+  if (codaTesta == codaFondo) return;
   uint8_t copia[8];
-  const size_t n = attesaLung;
-  memcpy(copia, attesaDati, n);
-  attesaPiena = false;                     // libera il posto prima di lavorare
+  const uint8_t n = codaLung[codaTesta];
+  memcpy(copia, codaDati[codaTesta], n);
+  codaTesta = (uint8_t)((codaTesta + 1) % CODA_MAX);
   eseguiComandoPesante(copia, n);
 }
 
