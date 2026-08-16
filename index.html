@@ -341,7 +341,7 @@
      detto qui dentro, o non lo legge nessuno. */
   .stato-pannello { font-size:0.8rem; color:var(--gold); background:var(--panel);
                     border:1px solid var(--line); border-radius:8px;
-                    padding:8px 10px; margin:0 0 12px; }
+                    padding:8px 10px; margin:0 0 12px; white-space:pre-wrap; }
 
   /* --- il pedale: gli otto slot che tiene in memoria -------------------- */
   .barra-invio { height:5px; background:var(--panel); border-radius:3px;
@@ -711,6 +711,11 @@
     <button id="btnPedaleStacca" class="piccolo" disabled>Stacca</button>
   </div>
 
+  <!-- In alto, non in fondo: un pannello a tutto schermo con otto righe di
+       slot spinge il log sotto la piega, e un comando fallito diventa
+       indistinguibile da un comando che non fa niente. -->
+  <div class="stato-pannello" id="statoPannelloPedale"></div>
+
   <div class="sezione-pannello">
     <p class="spiega">Mentre sei collegato al pedale, <em>il pedale ha mollato l'ampli</em>
       e non suona: è così per scelta, un padrone alla volta. Appena stacchi se lo riprende
@@ -728,8 +733,6 @@
     <h3>Cosa c'è nel pedale</h3>
     <div id="slotsPedale"></div>
   </div>
-
-  <div class="stato-pannello" id="statoPannelloPedale"></div>
 </div>
 
 <script src="src/spark-protocol.js"></script>
@@ -2680,9 +2683,18 @@ function marchioNeiPannelli() {
    sponda è `pedale/prova-ble/banchi.h`: si cambiano insieme.
    ==================================================================== */
 
-const pedale = { device: null, comando: null, stato: null, slots: [] };
+const pedale = { device: null, comando: null, stato: null, slots: [], righe: [] };
 
-function logPedale(msg) { $('statoPannelloPedale').textContent = msg; }
+/**
+ * Tiene le ultime righe, non solo l'ultima: qui la sequenza conta più del
+ * singolo messaggio — «mandato 22 01 00» seguito o non seguito dalla
+ * risposta del pedale dice da sola in quale dei due lati sta il difetto.
+ */
+function logPedale(msg) {
+  pedale.righe.push(msg);
+  while (pedale.righe.length > 6) pedale.righe.shift();
+  $('statoPannelloPedale').textContent = pedale.righe.join('\n');
+}
 
 function statoPedale(su, testo) {
   const el = $('statoPedale');
@@ -2797,6 +2809,11 @@ async function comandoPedale(...byte) {
   if (!pedale.comando) { logPedale('non collegato al pedale'); return; }
   try {
     await pedale.comando.writeValueWithResponse(new Uint8Array(byte));
+    // Si dice sempre cosa si è mandato, tranne per la rilettura dell'elenco
+    // che è automatica e coprirebbe la risposta vera. Senza questo, un tasto
+    // che non fa niente e un tasto che manda e non viene eseguito si vedono
+    // identici — ed è già costato un giro.
+    logPedale('→ ' + byte.map(b => b.toString(16).padStart(2, '0')).join(' '));
   } catch (err) {
     logPedale('comando fallito: ' + err.message);
   }
@@ -2807,10 +2824,11 @@ function rispostaPedale(e) {
   const testo = new TextDecoder().decode(v.subarray(1));
   if (v[0] === 0x82) {                       // l'elenco degli slot
     pedale.slots = PedalePonte.leggiElenco(testo);
+    logPedale(`elenco: ${pedale.slots.length} slot occupati`);
     disegnaSlotsPedale();
     return;
   }
-  logPedale(testo);
+  logPedale('← ' + testo);
   // Dopo un cambiamento l'elenco che abbiamo è vecchio: rileggerlo è più
   // sicuro che indovinare com'è rimasto.
   if (v[0] === 0x81 && /salvat|cancellat|scambiat/.test(testo))
