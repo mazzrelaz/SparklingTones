@@ -467,9 +467,15 @@ const FONT = "7px Consolas, 'DejaVu Sans Mono', monospace";
    il suono che sta suonando vanno letti da lontano, le quattro caselle no —
    quelle si guardano da vicino, quando scegli. Quindi le caselle si stringono
    e lo spazio va ai due nomi. */
-const Y_CASELLE = 16;    // le quattro caselle, subito sotto il banco
+const Y_CASELLE = 22;    // le quattro caselle: staccate dalla banda del banco
 const H_CASELLE = 50;
-const Y_NOME    = 68;    // il suono attivo, grande, in fondo
+const Y_NOME    = 78;    // il suono attivo, grande, in fondo
+
+/* Le caselle non toccano i bordi: quattro da 28 con 4 di stacco fanno 124,
+   quindi restano due pixel per parte e i quattro pedali stanno in mezzo. */
+const LARG_CASELLA = 28;
+const STACCO       = 4;
+const X_CASELLE    = (128 - (LARG_CASELLA * META + STACCO * (META - 1))) / 2;
 
 function disegnaOled() {
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 128, 128);
@@ -543,21 +549,23 @@ function elencoQuattro() {
 function quattroColonne() {
   const b = banco();
   for (let i = 0; i < META; i++) {
-    const p = postoDi(i), x = i * 32, record = b.posti[p];
+    const p = postoDi(i), record = b.posti[p];
+    const x = X_CASELLE + i * (LARG_CASELLA + STACCO);
     const acceso = stato.attivo === p || stato.caricando === p;
-    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(x + 1, Y_CASELLE, 30, H_CASELLE); }
+    if (acceso) { ctx.fillStyle = '#fff'; ctx.fillRect(x, Y_CASELLE, LARG_CASELLA, H_CASELLE); }
     else {
       ctx.strokeStyle = record ? '#fff' : '#555'; ctx.lineWidth = 1;
       if (!record) ctx.setLineDash([2, 2]);
-      ctx.strokeRect(x + 1.5, Y_CASELLE + 0.5, 29, H_CASELLE - 1); ctx.setLineDash([]);
+      ctx.strokeRect(x + 0.5, Y_CASELLE + 0.5, LARG_CASELLA - 1, H_CASELLE - 1);
+      ctx.setLineDash([]);
     }
     const inchiostro = acceso ? '#000' : (record ? '#fff' : '#555');
     ctx.fillStyle = inchiostro;
     ctx.font = 'bold ' + FONT; ctx.textAlign = 'left';
-    ctx.fillText(etichetta(p), x + 3, Y_CASELLE + 9);
+    ctx.fillText(etichetta(p), x + 2, Y_CASELLE + 9);
     ctx.font = FONT; ctx.textAlign = 'center';
-    if (record) spezza(record.name, Math.floor(28 / CH)).slice(0, 4)
-                  .forEach((r, k) => ctx.fillText(r, x + 16, Y_CASELLE + 21 + k * 9));
+    if (record) spezza(record.name, Math.floor((LARG_CASELLA - 3) / CH)).slice(0, 4)
+                  .forEach((r, k) => ctx.fillText(r, x + LARG_CASELLA / 2, Y_CASELLE + 21 + k * 9));
   }
 }
 
