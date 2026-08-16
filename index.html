@@ -2762,15 +2762,21 @@ function disegnaSlotsPedale() {
       quanti.textContent = `${v.pieni} preset`;
       riga.appendChild(quanti);
 
-      // Lo scambio con quello sopra: con otto posti fissi «sposta in mezzo»
-      // vorrebbe dire far scalare tutti gli altri, ed è la stessa scelta
-      // già fatta per i preset dentro un banco.
-      if (s > 0) {
-        const su = document.createElement('button');
-        su.textContent = '↑';
-        su.title = 'scambia con lo slot sopra';
-        su.addEventListener('click', () => comandoPedale(PedalePonte.CMD.SCAMBIA, s, s - 1));
-        riga.appendChild(su);
+      // Scambio con il vicino, sopra o sotto. Con otto posti fissi «sposta in
+      // mezzo» vorrebbe dire far scalare tutti gli altri, ed è la stessa
+      // scelta già fatta per i preset dentro un banco.
+      //
+      // Ci vogliono **tutte e due le frecce**: col solo «su» la prima riga
+      // non aveva nessun pulsante, e da lì sembrava che lo spostamento non
+      // esistesse.
+      for (const [segno, verso] of [['↑', -1], ['↓', +1]]) {
+        const f = document.createElement('button');
+        f.textContent = segno;
+        const dove = s + verso;
+        f.title = `scambia con lo slot ${dove + 1}`;
+        f.disabled = dove < 0 || dove >= PedalePonte.POSTI;
+        f.addEventListener('click', () => comandoPedale(PedalePonte.CMD.SCAMBIA, s, dove));
+        riga.appendChild(f);
       }
       const suona = document.createElement('button');
       suona.textContent = 'Suona';

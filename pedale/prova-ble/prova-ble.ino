@@ -797,6 +797,10 @@ void loop() {
     }
     else if (c == 'b') { char el[180]; const uint8_t q = banchiElenca(el, sizeof(el));
                          Serial.printf("banchi in memoria: %u\n%s", q, el); }
+    // Scambia gli slot 1 e 2: serve a provare bancoScambia senza passare
+    // dall'app, cioe' a separare un difetto del firmware da uno dell'app.
+    else if (c == 'w') Serial.printf("scambio slot 1<->2: %s\n",
+                                     bancoScambia(0, 1) ? "fatto" : "fallito");
     else if (c == 'm') misura();
     // L'ampli sceglie DENTRO l'intervallo chiesto, e prende il massimo:
     // misurato il 14 agosto 2026, chiedendo 6-12 ha dato ~15 ms. Quindi si
