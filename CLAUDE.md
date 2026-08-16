@@ -584,6 +584,37 @@ tutti gli ack. **I preset sopravvivono allo spegnimento**, che era tutto il punt
 pezzo e la lunghezza di ogni stringa vanno verificati, o un blocco malformato scrive oltre
 il buffer.
 
+#### Il pannello «Pedale» nell'app — fatto il 16 agosto 2026
+
+Nella vista Live, accanto a «Modifica». Si collega al pedale, mostra i suoi otto slot,
+manda il banco scelto, e lascia riordinare ed eliminare.
+
+**Il riordino si compone offline e si applica in una volta** (scelta dell'utente, ed è
+migliore di quella di prima): le frecce e «Togli» lavorano su una copia locale, e
+«Aggiorna il pedale» calcola la differenza — prima le eliminazioni, poi la permutazione
+con al massimo sette scambi — simulando lo stato del pedale mentre emette i comandi, così
+non serve rileggere dopo ognuno. In tempo reale ogni spostamento era un giro completo, e
+riordinarne tre ne costava sei. **Caricare un banco resta immediato**, perché non è una
+modifica da comporre ma un trasferimento.
+
+**Due difetti pagati qui, e la lezione è la stessa dei callback BLE:**
+
+- **`pulisciStatoPannelli()` nasconde ogni `.stato-pannello`**, e chi ci scrive deve
+  rimostrarlo (`riga.hidden = false`) — è quello che fa `statoDelPannello`. Senza, il log
+  viene scritto sempre e non si vede mai, e **due giri di diagnostica finiscono in un
+  elemento invisibile**.
+- **Il pedale accodava un comando solo**, e applicando un riordino ne arrivano sette di
+  fila: il secondo rimbalzava. Ora la coda è circolare da dodici e il loop ne esegue
+  **uno per giro**, perché svuotarla tutta rifarebbe l'errore di tenere occupato chi deve
+  rispondere alla radio.
+
+Il trasferimento di un banco costa ~6 s per 5,5 KB, con scritture una alla volta e con
+risposta. Funziona; si può accorciare, ma è ottimizzazione.
+
+**Ancora da fare: il pedale non ricorda quale banco stava suonando.** Al riavvio carica il
+primo che trova. Con più banchi in memoria non basta più, e ha senso farlo insieme ai
+tasti banco veri — sono la stessa funzione vista da due lati.
+
 **Chiuso il 16 agosto 2026: il footswitch col banco ricevuto funziona.** Contatori alla
 mano, **6 fronti grezzi per 3 pressioni** — due a testa, zero rimbalzi — e tutte e tre
 hanno cambiato preset, 359–407 ms. Il difetto del giorno prima era una delle due cose
