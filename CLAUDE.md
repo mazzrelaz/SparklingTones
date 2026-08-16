@@ -416,20 +416,23 @@ premuto all'accensione, impedisce l'avvio (il 9 è il BOOT). Pin sicuri per uno 
 
 | cosa | pin |
 |---|---|
-| 5 footswitch + 2 tasti banco | `0, 1, 3, 4, 5, 6, 7`, `INPUT_PULLUP` verso massa, nessuna resistenza |
-| dati WS2812 | `10` |
-| OLED I²C | `20`, `21` (sul C3 l'I²C è rimappabile su qualsiasi pin) |
-| liberi, ma solo come uscite | `2`, `8`, `9` (strapping) |
+| MCP23017 in I²C — ci vanno i 5 footswitch + i 2 tasti banco | `20`, `21` |
+| display SSD1322 in SPI (SCK, MOSI, CS, DC, RST) | `0, 1, 3, 4, 5` |
+| dati WS2812 | `6` |
+| liberi | `7`, `10`, più `2`, `8`, `9` come sole uscite (strapping) |
+
+Gli interruttori vanno **sull'espansore**, non sui pin del C3: sono ingressi lenti, e
+l'MCP23017 ha i pull-up interni e un piedino di interrupt. Sui pin diretti restano le cose
+che hanno bisogno di velocità o di temporizzazione — il display e i LED.
 
 **LED: striscia WS2812, non discreti.** Un pin solo, e sono RGB, quindi fanno rosso metà A
 / verde metà B — la convenzione del pannello dell'ampli. Luminosità bassa (20–30 su 255):
 a bianco pieno sono ~480 mA e il regolatore della schedina non li regge.
 
-**Dieci pin sicuri, dieci usati: zero margine, ma nessun espansore.** Se un giorno serve un
-ottavo ingresso (pedale d'espressione, tap tempo) la via è un **MCP23017**, sedici ingressi
-sugli stessi due fili dell'OLED, ~1,50 €.
+**Otto pin su dieci, e due di avanzo** — più sedici ingressi sull'espansore, di cui ne
+usiamo sette. Il margine per un pedale d'espressione o un tap tempo adesso c'è.
 
-#### Il formato del display — aperto, ma con una raccomandazione
+#### Il formato del display — deciso il 16 agosto 2026: 256×64
 
 **Il problema non è l'altezza, è la larghezza.** Su 128 pixel quattro colonne fanno 28 px
 l'una, cioè **cinque caratteri**. E conta più della risoluzione **la dimensione fisica del
@@ -442,12 +445,15 @@ vetro**: il display sta per terra e lo si guarda da un metro e mezzo, di sbieco.
 | 2,42" 128×64 (SSD1309, I²C) | 54 × 27 mm | 5 caratteri |
 | **3,12" 256×64 (SSD1322, SPI)** | **72 × 18 mm** | **13 caratteri** |
 
-**Consigliato il 256×64**: il rapporto 4:1 è esattamente la forma delle quattro colonne, e
-i nomi ci stanno. Costa 15–20 €.
+**Scelto il 256×64**, guardando i tre nel simulatore: il rapporto 4:1 è esattamente la
+forma delle quattro colonne, e i nomi ci stanno. Costa 15–20 €.
 
-**Il prezzo è sui pin: l'SSD1322 va in SPI e vuole cinque pin, che non ci sono.** Torna
-quindi l'**MCP23017**, tolto passando a cinque footswitch: i sette interruttori vanno
-sull'espansore (due fili I²C) e liberano sette pin. Il conto torna con due di avanzo.
+Il 2,42" è la conferma del ragionamento: **vetro doppio e non guadagna un carattere**,
+perché resta largo 128 pixel. Serviva più larghezza, non meno altezza.
+
+**Il prezzo è sui pin: l'SSD1322 va in SPI e vuole cinque pin.** Torna quindi
+l'**MCP23017**, tolto passando a cinque footswitch — vedi la tabella qui sopra. Non è un
+ripensamento: con quel display serve, senza no.
 
 `tools/pedale-sim.html` disegna tutti e tre i formati **alla stessa scala fisica** (7 px
 per mm), che è l'unico modo di confrontarli onestamente: a parità di dimensione sullo
