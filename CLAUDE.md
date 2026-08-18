@@ -266,6 +266,20 @@ non esiste nessuna tabella da cui dedurli. Sono salvati **per modello di effetto
 **aggiunge** invece di sovrascrivere: reimportare un backup vecchio non deve cancellare i
 battesimi fatti da allora.
 
+**L'elenco dei modelli (`MODELLI`) non è verificato, e un nome sbagliato fa danni.**
+Viene dal catalogo di Soundshed: se l'ampli quel modello non ce l'ha, `0x0106` gli chiede
+di **ricostruire un blocco DSP che non esiste** — che è il comando più pesante che gli
+mandiamo. **`TrebleBooster` mandava in palla l'ampli** (segnalato il 18 agosto 2026: sullo
+Spark 2 c'è solo `Booster`), ed è stato tolto. Resta nella `TABELLA` dei nomi, che è
+innocua: serve solo a dare un nome alle manopole se un preset importato da altrove lo
+contenesse.
+
+**Non si può chiedere all'ampli quali modelli conosce.** L'unica prova che abbiamo è che
+un modello **compaia in un preset uscito dall'ampli**: allora esiste di sicuro. Per questo
+la tendina dell'editor divide in due gruppi, «sul tuo ampli» e «dal catalogo, da provare»
+(`modelliVisti()` in `index.html`). Quando se ne trova un altro che non esiste, si toglie
+da `MODELLI`.
+
 ## Protocollo — quello che non va dimenticato mai
 
 Dettaglio, derivazioni e misure: `docs/protocollo-spark2.md`.

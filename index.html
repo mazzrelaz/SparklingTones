@@ -817,6 +817,27 @@ async function ricarica() {
 }
 
 /**
+ * I modelli che questo ampli ha davvero, ricavati dai preset in libreria.
+ *
+ * Serve perché l'elenco di `MODELLI` viene dal catalogo di Soundshed e **non è
+ * verificato sullo Spark 2**: un nome che l'ampli non conosce non è solo
+ * inutile, è dannoso — `0x0106` gli chiede di ricostruire un blocco DSP che non
+ * esiste, e l'utente ha visto l'ampli andare in palla con `TrebleBooster`, che
+ * su questo ampli non c'è (c'è solo `Booster`).
+ *
+ * Non possiamo chiedere all'ampli cosa conosce. Ma se un modello compare in un
+ * preset che dall'ampli è uscito, allora quel modello c'è di sicuro: è l'unica
+ * prova che abbiamo, e vale la pena mostrarla.
+ */
+function modelliVisti() {
+  const visti = new Set();
+  for (const record of tutti) {
+    for (const e of (record.effects || [])) if (e.name) visti.add(e.name);
+  }
+  return visti;
+}
+
+/**
  * L'ordine della libreria. È una scelta dell'utente e va ricordata: cambiarla
  * a ogni ricaricamento sarebbe un fastidio quotidiano, quindi sta fra le
  * preferenze.
@@ -1951,12 +1972,29 @@ function disegnaCatena() {
 
     const candidati = (SparkEffetti.MODELLI[posizione] || []).slice();
     if (!candidati.includes(effetto.name)) candidati.unshift(effetto.name);
-    for (const modello of candidati) {
-      const opzione = document.createElement('option');
-      opzione.value = modello;
-      opzione.textContent = SparkEffetti.nome(modello);
-      opzione.title = modello;
-      scelta.appendChild(opzione);
+
+    // Due gruppi, e la distinzione non è cosmetica: i primi sono modelli che
+    // **da questo ampli sono usciti**, quindi esistono di sicuro; gli altri
+    // vengono dal catalogo di Soundshed e non sono verificati. Chiederne uno
+    // che l'ampli non ha vuol dire fargli ricostruire un blocco DSP
+    // inesistente — è così che `TrebleBooster` lo mandava in palla.
+    const visti = modelliVisti();
+    const gruppi = [
+      ['sul tuo ampli',            candidati.filter(m =>  visti.has(m))],
+      ['dal catalogo, da provare', candidati.filter(m => !visti.has(m))],
+    ];
+    for (const [titolo, elenco] of gruppi) {
+      if (!elenco.length) continue;
+      const gruppo = document.createElement('optgroup');
+      gruppo.label = titolo;
+      for (const modello of elenco) {
+        const opzione = document.createElement('option');
+        opzione.value = modello;
+        opzione.textContent = SparkEffetti.nome(modello);
+        opzione.title = modello;
+        gruppo.appendChild(opzione);
+      }
+      scelta.appendChild(gruppo);
     }
     // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
     // fonte elenca, e senza questa via non ci si arriverebbe mai.
