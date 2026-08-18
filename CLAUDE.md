@@ -223,9 +223,22 @@ inventati. Niente viene salvato finché non si preme **Salva in libreria**.
 **Le sette posizioni sono etichettate per categoria** (`Spark.CATENA`): noise gate,
 compressore, drive, ampli, modulazione, delay, riverbero.
 
-**Il cursore va strozzato.** Un trascinamento genera decine di eventi al secondo e ogni
-comando è una scrittura BLE. Si manda al massimo ogni 60 ms tenendo solo l'ultimo valore
-per manopola, e l'ultimo parte sempre.
+**Il cursore va strozzato, e lo strozzamento dev'essere autocadenzato.** Un trascinamento
+genera decine di eventi al secondo e ogni comando è una scrittura BLE.
+**`writeWithoutResponse` non ha controllo di flusso**: la promessa si risolve quando il
+sistema ha preso in carico la scrittura, non quando l'ampli l'ha ricevuta, quindi l'app
+può correre più della radio. **È la causa più probabile dell'ampli che si pianta girando
+le manopole**, segnalato dall'utente il 16 agosto 2026.
+
+Quindi il prossimo invio parte **quando il precedente è finito**, più `PAUSA_PARAMETRO`
+(90 ms), e non su un timer: così la coda non può crescere qualunque cosa faccia il dito.
+La versione a timer da 60 ms poteva **sovrapporsi a sé stessa** — `svuotaCoda` azzerava
+`timerInvio` prima di aspettare gli invii — e accumulava arretrato. Si tiene solo
+l'ultimo valore per manopola, e l'ultimo parte sempre.
+
+**Non è verificato che risolva**: il blocco non si riproduce a comando, quindi la prova è
+usarlo. Se ricapita, la manopola da girare è `PAUSA_PARAMETRO`, e poi `SEND_GAP_MS` in
+`spark-transport.js` (30 ms, che è più svelto di un intervallo di connessione).
 
 **Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**, e `logLine`/
 `logProgress` ci scrivono l'ultimo messaggio: un pannello a tutto schermo copre il log, e

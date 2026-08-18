@@ -2294,35 +2294,51 @@ async function aggiornaCatenaDallAmpli() {
 
 /**
  * Un cursore trascinato genera decine di eventi al secondo, e ogni comando è
- * una scrittura BLE: mandarli tutti intasa la coda e il suono arriva in
- * ritardo sul gesto. Si manda al massimo ogni 60 ms, e l'ultimo valore parte
- * sempre — altrimenti si resterebbe fermi un pelo prima di dove si è lasciato.
+ * una scrittura BLE. **`writeWithoutResponse` non ha nessun controllo di
+ * flusso**: la promessa si risolve quando il sistema ha preso in carico la
+ * scrittura, non quando l'ampli l'ha ricevuta. Quindi l'app può correre più
+ * della radio, e l'ampli si strozza — sintomo: si pianta e serve staccare la
+ * corrente.
+ *
+ * Per questo l'invio è **autocadenzato** e non a timer: il prossimo parte solo
+ * quando il precedente è finito, più una pausa. Così la coda non può crescere,
+ * qualunque cosa faccia il dito, e il ritmo si adatta da sé alla connessione.
+ * La versione a timer poteva sovrapporsi a sé stessa — `svuotaCoda` azzerava
+ * `timerInvio` prima di aspettare gli invii — e accumulava arretrato.
+ *
+ * Si tiene solo l'ultimo valore per manopola, e **l'ultimo parte sempre**:
+ * altrimenti si resterebbe fermi un pelo prima di dove si è lasciato.
  */
+const PAUSA_PARAMETRO = 90;   // ms fra la fine di un invio e l'inizio del prossimo
+
 const inAttesa = new Map();
-let ultimoInvio = 0, timerInvio = null;
+let invioInCorso = false, timerInvio = null;
 
 function mandaParametro(nomeEffetto, indice, valore) {
   inAttesa.set(nomeEffetto + '#' + indice, { nomeEffetto, indice, valore });
-  const adesso = Date.now();
-  const manca = Math.max(0, 60 - (adesso - ultimoInvio));
-  if (timerInvio) return;
-  timerInvio = setTimeout(svuotaCoda, manca);
+  avviaInvioParametri();
+}
+
+function avviaInvioParametri() {
+  if (invioInCorso || timerInvio || !inAttesa.size) return;
+  timerInvio = setTimeout(svuotaCoda, PAUSA_PARAMETRO);
 }
 
 async function svuotaCoda() {
   timerInvio = null;
-  ultimoInvio = Date.now();
+  invioInCorso = true;
   const daMandare = [...inAttesa.values()];
   inAttesa.clear();
-  for (const { nomeEffetto, indice, valore } of daMandare) {
-    try {
+  try {
+    for (const { nomeEffetto, indice, valore } of daMandare) {
       await spark.send(Spark.commands.changeParam(nomeEffetto, indice, valore));
-    } catch (err) {
-      logLine('errore: ' + err.message);
-      return;
     }
+  } catch (err) {
+    logLine('errore: ' + err.message);
+    inAttesa.clear();          // non si insiste su una connessione che non va
   }
-  if (inAttesa.size) timerInvio = setTimeout(svuotaCoda, 60);
+  invioInCorso = false;
+  avviaInvioParametri();       // se nel frattempo il dito ha mosso ancora
 }
 
 /**
