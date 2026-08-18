@@ -246,7 +246,7 @@ window.SparkEffetti = (function () {
      'Comp76'],
     [
       'Booster', 'DistortionTS9', 'Overdrive', 'Fuzz', 'ProCoRat', 'BassBigMuff',
-      'GuitarMuff', 'MaestroBassmaster', 'SABdriver', 'MetalZoneMT2', 'TrebleBooster',
+      'GuitarMuff', 'MaestroBassmaster', 'SABdriver', 'MetalZoneMT2',
       'KlonCentaurSilver',
       'JH.AxisFuzz', 'JH.SupaFuzz', 'JH.Octavia', 'JH.FuzzTone',
     ],
