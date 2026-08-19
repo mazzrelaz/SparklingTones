@@ -1,8 +1,13 @@
 # Spark 2 Controller
 
 App personale per controllare e organizzare i preset di un Positive Grid Spark 2.
-Web app / PWA, HTML+JS vanilla, zero dipendenze, Web Bluetooth. Più un pedale ESP32,
-appena cominciato, in `pedale/`.
+Web app / PWA, HTML+JS vanilla, zero dipendenze, Web Bluetooth. Più un pedale ESP32
+in `pedale/`.
+
+**In pausa dal 18 agosto 2026**, per mancanza di tempo dell'utente — non perché
+qualcosa sia rotto. L'app è pubblicata e funziona; il pedale funziona su una devkit
+e aspetta i componenti da comprare. `README.md` racconta il progetto a chi arriva da
+fuori. **Dove si riprende** è in fondo a questo file.
 
 ## Dove sta il resto di questa memoria
 
@@ -23,6 +28,7 @@ Snellito il 14 agosto 2026: era 27.700 token, di cui 6.100 di indagine chiusa.
 ## Struttura
 
 ```
+README.md                presentazione del progetto per chi arriva da GitHub
 index.html               tutta l'app: sezione Preset e sezione Live, nello stesso documento
 live.html                rimando a index.html#live, per le scorciatoie già installate
 manifest.webmanifest     identità della PWA
@@ -48,7 +54,7 @@ tools/write-probe.html   prova le varianti di 0x0101 e verifica da sé rileggend
 tools/model-probe.html   idem per 0x0106
 tools/looper-probe.html  ascolta l'ampli mentre si usa il looper e prova i comandi noti
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
-test/protocol-test.html  87 test del protocollo contro catture reali
+test/protocol-test.html  125 test del protocollo contro catture reali
 test/transport-test.html 48 test del trasporto, con send finto e catture reali
 test/store-test.html     99 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
@@ -777,3 +783,26 @@ formato.
 - Segnare sempre cosa è verificato sull'hardware e cosa no.
 - Italiano nei commenti e nella UI.
 - I byte nei log e nella documentazione si scrivono in hex minuscolo separato da spazi.
+
+## Dove si riprende — 18 agosto 2026
+
+Il progetto è in pausa, non abbandonato. In ordine di quanto conta:
+
+1. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri
+   è stato reso autocadenzato ma **la correzione non è verificata**: il blocco non si
+   riproduce a comando. Se ricapita, le manopole da girare sono `PAUSA_PARAMETRO` e poi
+   `SEND_GAP_MS` — vedi la sezione dell'editor.
+2. **Comprare i componenti del pedale**: OLED 3,12" 256×64 SSD1322 (SPI), MCP23017,
+   cinque footswitch, due pulsantini, striscia WS2812, una scatola. Tutto il resto è già
+   deciso e scritto qui.
+3. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
+   trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due
+   lati.
+4. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` è stato
+   trovato dall'utente; l'elenco viene da Soundshed e non è verificato. La tendina adesso
+   distingue i modelli visti sull'ampli da quelli supposti, quindi il prossimo si trova
+   più in fretta.
+
+**Non aperti, e vanno bene così:** il conteggio col click del looper (archiviato, vedi
+`docs/looper.md`), e il trasferimento di un banco al pedale che costa ~6 s — funziona,
+si può accorciare, ma è ottimizzazione.
