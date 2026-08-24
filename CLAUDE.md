@@ -797,7 +797,7 @@ formato.
 - Italiano nei commenti e nella UI.
 - I byte nei log e nella documentazione si scrivono in hex minuscolo separato da spazi.
 
-### Il sync con Dropbox — fatto il 24 agosto 2026, mai provato con Dropbox vero
+### Il sync con Dropbox — fatto il 24 agosto 2026, collegamento verificato
 
 Chiesto dall'utente il 18 agosto. Il problema che risolve: `file://` e `https://` sono due
 origini con due IndexedDB diversi, e la libreria non passa dall'una all'altra — né dal
@@ -840,11 +840,16 @@ il 24 agosto 2026: «inserisco il codice e non funziona»). Lo scambio va: prova
 browser, `api.dropboxapi.com/oauth2/token` risponde `400 {"error": "invalid_client…"}` a
 una pagina web, quindi **i CORS ci sono**. Quello che si rompeva era il rientro:
 
+- **il verifier si riusa, non si rigenera.** È stata la causa vera, ed è costata tre giri:
+  ogni pressione di «Collega» faceva un verifier nuovo, quindi una sfida nuova, e il codice
+  appena copiato dalla pagina di prima diventava di nessuno. Dropbox lo rifiuta dicendo
+  **«code doesn't exist or has expired»**, che manda a cercare la scadenza mentre il
+  problema è l'appartenenza. Un verifier non scade e non si consuma: vale per quante
+  pagine di autorizzazione si vuole, e si butta solo quando l'autorizzazione riesce.
+  Ripremere «Collega» dev'essere innocuo, perché è la prima cosa che fa chi è bloccato;
 - salvare il verifier non basta, va **rimesso in piedi anche il campo dove incollare il
   codice**. Ripartiva nascosto, e chi torna con un codice in mano e non trova dove metterlo
-  ripreme «Collega» — che genera un verifier nuovo e rende quel codice inservibile per
-  sempre. Il link si ricostruisce dal verifier salvato, quindi lo stesso segreto resta
-  buono e la pagina si può riaprire per averne uno nuovo;
+  ripreme «Collega» — vedi sopra. Il link si ricostruisce dal verifier salvato;
 - **`window.open` sul telefono viene bloccato** come finestra a sorpresa, e il pulsante
   sembra rotto. Ci vuole un link da toccare, e dirlo quando la finestra non si apre;
 - **un codice si spende una volta sola**, e ogni apparecchio fa la sua autorizzazione: si
@@ -855,11 +860,17 @@ scada; quello da conservare è il **refresh token** (`token_access_type=offline`
 scade. Nella UI: pannello «Altro», due pulsanti espliciti con accanto la data del file
 lassù, e «Prendi» chiede conferma perché è il gesto che può anche togliere.
 
-**Quello che manca è la prova contro Dropbox vero**, e il primo passo è dell'utente:
-registrare un'app (dropbox.com/developers → Create app → Scoped access → App folder,
-permessi `files.content.write` e `files.content.read`) e incollare l'app key nel pannello.
-Non sta nel codice, e l'app secret non serve. **I 34 test girano contro un fetch finto:
-dicono che parliamo il protocollo giusto, non che Dropbox risponda come crediamo.**
+**Il collegamento a Dropbox vero funziona, verificato dall'utente il 24 agosto 2026.**
+Quindi due cose che valeva la pena stabilire una volta per tutte: **PKCE senza redirect,
+col codice da incollare, Dropbox lo accetta** — non era quello il problema — e i CORS
+sull'endpoint dei token ci sono. Restano da provare **mandare su e prendere giù**, e il
+giro completo computer→telefono.
+
+Il primo passo è dell'utente e va fatto una volta per apparecchio: registrare l'app
+(dropbox.com/developers → Create app → Scoped access → App folder, permessi
+`files.content.write` e `files.content.read`) e incollare l'app key nel pannello. Non sta
+nel codice, e l'app secret non serve. **I 34 test girano contro un fetch finto: dicono che
+parliamo il protocollo giusto, non che Dropbox risponda come crediamo.**
 
 **L'alternativa da poche righe, se un giorno Dropbox desse noia:** la File System Access
 API su un file dentro la cartella Dropbox locale — zero OAuth, ma **su Android non
@@ -868,11 +879,11 @@ l'apparecchio che va all'ampli.
 
 ## Dove si riprende — 24 agosto 2026
 
-1. **Provare il sync contro Dropbox vero.** È l'unica cosa che manca al lavoro di oggi.
-   Serve l'app registrata e l'app key incollata nel pannello «Altro»; poi: mandare su dal
-   computer, prendere dal telefono, cancellare un preset di qua e vedere se sparisce di
-   là. Se qualcosa non torna, il sospetto numero uno è la risposta di Dropbox, non la
-   fusione, che è coperta da test.
+1. **Finire di provare il sync.** Il collegamento a Dropbox è verificato; **mandare su e
+   prendere giù no**. Il giro da fare: mandare su dal computer, collegare anche il
+   telefono (app key la stessa, autorizzazione sua) e prendere; poi cancellare un preset
+   di qua e vedere se sparisce di là. Se qualcosa non torna, il sospetto numero uno è la
+   risposta di Dropbox, non la fusione, che è coperta da test.
 2. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri
    è stato reso autocadenzato ma **la correzione non è verificata**: il blocco non si
    riproduce a comando. Se ricapita, le manopole da girare sono `PAUSA_PARAMETRO` e poi
