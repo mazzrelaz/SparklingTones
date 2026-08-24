@@ -563,7 +563,7 @@
   <div class="azioni">
     <button id="btnExport">Esporta la libreria</button>
     <button id="btnImport">Importa un file</button>
-    <button id="btnLive" disabled title="legge il suono attivo, senza scrivere nulla">Leggi il suono corrente</button>
+    <button id="btnLive" disabled title="legge quello che l&#39;ampli sta suonando e te lo offre da salvare; l&#39;ampli non viene toccato">Leggi il suono corrente</button>
     <input type="file" id="fileInput" accept=".json,.zip" hidden>
   </div>
   <p class="spiega" style="margin-top:12px">Si importano sia i backup di quest'app (.json)
@@ -1543,6 +1543,22 @@ function dettaglio(record, slot) {
     });
     riga().append(metti, banco);        // prima cosa fa, poi dove
   }
+
+  // Duplicare è il modo vero di fare un preset nuovo: si parte da un suono
+  // che funziona. Non serve l'ampli, quindi il pulsante c'è sempre.
+  const duplica = document.createElement('button');
+  duplica.textContent = 'Duplica';
+  duplica.title = 'ne fa una copia in libreria, da storcere a piacere';
+  duplica.addEventListener('click', async () => {
+    const copiaId = await store.duplicate(record.id);
+    const copia = await store.get(copiaId);
+    vista.aperto = `${copiaId}:null`;   // si apre la copia, che è quella su cui si lavora
+    logLine(`«${copia.name}» creato copiando «${record.name}»`);
+    await ricarica();
+    disegnaPreset();
+    disegnaLive();
+  });
+  riga().appendChild(duplica);
 
   const elimina = document.createElement('button');
   elimina.className = 'pericolo';
@@ -2673,8 +2689,16 @@ async function leggiDallAmpli() {
   disegnaLive();
 }
 
-// Legge il suono attivo senza toccare nulla: serve sia a sapere cosa sta
-// suonando l'ampli, sia a catturare il payload quando non sappiamo leggerlo.
+/**
+ * Legge quello che l'ampli sta suonando e lo offre alla libreria. È l'altro
+ * modo di fare un preset nuovo: si gira le manopole vere — o si usa l'app
+ * ufficiale — e poi lo si prende. `readLiveState` non torna nessuno slot, e
+ * va bene così: quel suono sta nel buffer, non in uno degli otto.
+ *
+ * Se quell'UUID è già in libreria non se ne fa un doppione: si aggiorna la
+ * parte sonora e basta, che è la regola di `importFromAmp` — tag, note,
+ * famiglia e ordine sono lavoro dell'utente e non si toccano.
+ */
 $('btnLive').addEventListener('click', async () => {
   $('btnLive').disabled = true;
   spark.lastFailedPayload = null;
@@ -2682,6 +2706,20 @@ $('btnLive').addEventListener('click', async () => {
   if (corrente) {
     const catena = corrente.effects.filter(e => e.enabled).map(e => e.name).join(' · ');
     logLine(`suono corrente: «${corrente.name}» — ${catena}`);
+
+    const esistente = corrente.uuid ? await store.byUuid(corrente.uuid) : null;
+    const domanda = esistente
+      ? `«${esistente.name}» è già in libreria.\n\nAggiornarne il suono con quello ` +
+        'che l\'ampli sta suonando adesso? Tag, note e famiglia restano.'
+      : `Salvare «${corrente.name}» in libreria come preset nuovo?`;
+    if (confirm(domanda)) {
+      const { added } = await store.importFromAmp([corrente]);
+      logLine(added ? `«${corrente.name}» aggiunto alla libreria`
+                    : `«${corrente.name}» aggiornato in libreria`);
+      await ricarica();
+      disegnaPreset();
+      disegnaLive();
+    }
   } else if (spark.lastFailedPayload) {
     scaricaDiagnostica();
     logLine('non so leggere il suono corrente: payload grezzo scaricato nei Download.');

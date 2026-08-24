@@ -57,7 +57,7 @@ tools/looper-probe.html  ascolta l'ampli mentre si usa il looper e prova i coman
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 test/protocol-test.html  125 test del protocollo contro catture reali
 test/transport-test.html 48 test del trasporto, con send finto e catture reali
-test/store-test.html     127 test della libreria, su un database temporaneo
+test/store-test.html     136 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
 test/dropbox-test.html   34 test del sync, contro un fetch finto: nessuna rete
 test/fixtures/preset0.js catture condivise fra le suite
@@ -217,6 +217,15 @@ prudenza: quelli l'ampli li suona, quindi la prima lettura li rimetterebbe dentr
 comunque — ma spogliati di tag, note e famiglia, e *quello* sarebbe lavoro perso davvero.
 `svuotaTranneAmpli` passa da `remove`, quindi lascia le lapidi: senza, il primo «Prendi da
 Dropbox» rimetterebbe dentro tutto. Due conferme, e la seconda dice che la cosa viaggia.
+
+**Un preset nuovo si fa in due modi, e nessuno parte dal nulla**: «Duplica» nel dettaglio
+(`store.duplicate`, che cambia **UUID, slot e nome** — l'UUID perché altrimenti la lettura
+dall'ampli scambierebbe la copia per l'originale), e «Leggi il suono corrente» in «Altro»,
+che offre di salvare quello che l'ampli sta suonando — se quell'UUID c'è già aggiorna solo
+la parte sonora, che è la regola di `importFromAmp`. **Dal nulla non si fa, ed è
+deliberato**: un preset inventato dovrebbe dichiarare sette blocchi con modelli che
+l'ampli ha davvero, e un modello inesistente è quello che l'ha già piantato una volta
+(vedi `TrebleBooster`).
 
 ### Sezione Live
 
