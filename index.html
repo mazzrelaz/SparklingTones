@@ -568,6 +568,48 @@
   </div>
   <p class="spiega" style="margin-top:12px">Si importano sia i backup di quest'app (.json)
     sia il <code>preset_backup.zip</code> dell'app ufficiale.</p>
+
+  <!-- Dropbox: la stessa libreria sul computer e sul telefono. -->
+  <div class="sezione-pannello" style="margin-top:22px">
+    <h3>Dropbox</h3>
+    <p class="spiega">Due gesti espliciti, mai in automatico. Quello che arriva si
+      <strong>fonde</strong>: aggiorna i preset che riconosce, aggiunge quelli che non ci
+      sono, e quelli cancellati sull'altro apparecchio spariscono anche qui — a meno che
+      tu non li abbia toccati dopo.</p>
+
+    <div id="dropboxCollegato" hidden>
+      <div class="azioni">
+        <button id="btnDropboxSu" class="primary">Manda su Dropbox</button>
+        <button id="btnDropboxGiu">Prendi da Dropbox</button>
+      </div>
+      <p class="spiega" id="dropboxQuando">&nbsp;</p>
+      <button id="btnDropboxVia" class="piccolo">Scollega Dropbox</button>
+    </div>
+
+    <div id="dropboxDaCollegare">
+      <div class="barra-alta">
+        <input type="text" id="dropboxChiave" placeholder="app key della tua app Dropbox"
+               autocomplete="off" spellcheck="false" style="flex:1">
+        <button id="btnDropboxCollega" class="primary">Collega</button>
+      </div>
+      <div id="dropboxPassoDue" hidden style="margin-top:10px">
+        <p class="spiega">Si è aperta la pagina di Dropbox: autorizza, e incolla qui il
+          codice che ti mostra.</p>
+        <div class="barra-alta">
+          <input type="text" id="dropboxCodice" placeholder="codice da Dropbox"
+                 autocomplete="off" spellcheck="false" style="flex:1">
+          <button id="btnDropboxFine" class="primary">Fatto</button>
+        </div>
+      </div>
+      <p class="spiega" style="margin-top:10px">Serve un'app tua, una volta sola: su
+        <code>dropbox.com/developers</code>, «Create app», <em>Scoped access</em> e
+        <em>App folder</em>; nella scheda «Permissions» spunta
+        <code>files.content.write</code> e <code>files.content.read</code>. L'app key sta
+        nella scheda «Settings». L'app secret non serve: una pagina come questa non
+        potrebbe tenerlo nascosto, ed è il motivo per cui si usa PKCE.</p>
+    </div>
+  </div>
+  <div class="stato-pannello" hidden></div>
   <div style="margin-top:20px">
     <button id="btnAbout" class="piccolo">Informazioni, licenze e responsabilità</button>
   </div>
@@ -708,6 +750,7 @@
   </div>
 
   <div class="barra-alta">
+<script src="src/dropbox-sync.js"></script>
     <button id="btnPedaleConnetti" class="primary">Cerca il pedale</button>
     <span id="statoPedale" class="status off">non collegato</span>
     <span style="flex:1"></span>
@@ -2559,7 +2602,10 @@ $('btnAzzeraCategorie').addEventListener('click', async () => {
    Azioni comuni
    ==================================================================== */
 
-$('btnAltro').addEventListener('click', () => apriPannello('pannelloAltro'));
+$('btnAltro').addEventListener('click', () => {
+  apriPannello('pannelloAltro');
+  leggiDataDropbox();          // la data di lassù si legge aprendo, non a ogni avvio
+});
 $('btnAbout').addEventListener('click', () => apriPannello('pannelloAbout'));
 
 // La spiegazione lunga sui nomi delle manopole serve una volta sola, poi è
@@ -2691,6 +2737,132 @@ async function importaBackupUfficiale(file) {
     logLine(`${saltati.length} preset saltati: ${saltati[0].motivo}`);
   }
 }
+
+/* ====================================================================
+   Dropbox — la stessa libreria sul computer e sul telefono
+
+   Il problema che risolve: `file://` e `https://` sono due origini con due
+   IndexedDB diversi, e la libreria non passa dall'una all'altra né dal
+   computer al telefono. Il trasporto sta in `dropbox-sync.js`; qui c'è solo
+   il pannello, e la regola dei due gesti espliciti.
+   ==================================================================== */
+
+// Vive per tutta la sessione: dentro ci sta il token di accesso, che dura
+// quattro ore e si rifà da sé. Il refresh token invece sta in `settings`.
+let dropbox = null;
+
+async function preparaDropbox() {
+  dropbox = new DropboxSync.Client({
+    appKey:       await store.getSetting('dropboxChiave', ''),
+    refreshToken: await store.getSetting('dropboxRefresh', null),
+    salvaRefresh: valore => store.setSetting('dropboxRefresh', valore),
+  });
+  $('dropboxChiave').value = dropbox.appKey;
+  disegnaDropbox();
+}
+
+function disegnaDropbox() {
+  const collegato = Boolean(dropbox && dropbox.autorizzato());
+  $('dropboxCollegato').hidden   = !collegato;
+  $('dropboxDaCollegare').hidden = collegato;
+}
+
+/**
+ * La data del file lassù, accanto ai pulsanti. Prendere qualcosa senza
+ * sapere se è più vecchio di quello che si ha è il modo migliore di
+ * pentirsene, e una riga di testo costa una chiamata sola.
+ */
+async function leggiDataDropbox() {
+  if (!dropbox || !dropbox.autorizzato()) return;
+  const riga = $('dropboxQuando');
+  riga.textContent = 'controllo cosa c\'è su Dropbox…';
+  try {
+    const info = await dropbox.info();
+    riga.textContent = info
+      ? `Lassù: ${new Date(info.quando).toLocaleString('it-IT')}, ` +
+        `${Math.round(info.byte / 1024)} KB.`
+      : 'Su Dropbox non c\'è ancora niente: il primo invio lo crea.';
+  } catch (err) {
+    riga.textContent = 'non riesco a leggere Dropbox: ' + err.message;
+  }
+}
+
+$('btnDropboxCollega').addEventListener('click', async () => {
+  const chiave = $('dropboxChiave').value.trim();
+  if (!chiave) { statoDelPannello('serve l\'app key della tua app Dropbox'); return; }
+  await store.setSetting('dropboxChiave', chiave);
+  dropbox.appKey = chiave;
+  try {
+    const { verifier, url } = await dropbox.iniziaAutorizzazione();
+    // Il verifier va conservato, non tenuto in una variabile: fra l'apertura
+    // della pagina di Dropbox e il ritorno qui, sul telefono, questa scheda
+    // può essere buttata via dal sistema — e senza il verifier il codice non
+    // vale niente e l'autorizzazione va rifatta da capo.
+    await store.setSetting('dropboxVerifier', verifier);
+    $('dropboxPassoDue').hidden = false;
+    window.open(url, '_blank', 'noopener');
+    statoDelPannello('autorizza su Dropbox, poi incolla qui il codice');
+  } catch (err) {
+    statoDelPannello('non riesco a partire: ' + err.message);
+  }
+});
+
+$('btnDropboxFine').addEventListener('click', async () => {
+  const codice = $('dropboxCodice').value.trim();
+  if (!codice) { statoDelPannello('incolla il codice che ti ha dato Dropbox'); return; }
+  const verifier = await store.getSetting('dropboxVerifier', null);
+  if (!verifier) { statoDelPannello('l\'autorizzazione è scaduta: ricomincia'); return; }
+  try {
+    await dropbox.completaAutorizzazione(verifier, codice);
+    await store.setSetting('dropboxVerifier', null);
+    $('dropboxCodice').value = '';
+    $('dropboxPassoDue').hidden = true;
+    disegnaDropbox();
+    logLine('Dropbox collegato');
+    await leggiDataDropbox();
+  } catch (err) {
+    statoDelPannello('Dropbox non ha accettato il codice: ' + err.message);
+  }
+});
+
+$('btnDropboxSu').addEventListener('click', async () => {
+  statoDelPannello('mando la libreria su Dropbox…');
+  try {
+    const backup = await store.exportAll();
+    await dropbox.carica(JSON.stringify(backup, null, 2));
+    logLine(`${backup.presets.length} preset mandati su Dropbox`);
+    await leggiDataDropbox();
+  } catch (err) {
+    statoDelPannello('non sono riuscito a mandarla su: ' + err.message);
+  }
+});
+
+$('btnDropboxGiu').addEventListener('click', async () => {
+  // Prendere può anche togliere: un preset cancellato sull'altro apparecchio
+  // sparisce anche qui. È il gesto meno reversibile dei due, e va chiesto.
+  if (!confirm('Prendere la libreria da Dropbox e fonderla con questa?\n\n' +
+               'Quello che è stato cancellato sull\'altro apparecchio sparisce anche qui, ' +
+               'se qui non l\'hai toccato dopo.')) return;
+  statoDelPannello('prendo la libreria da Dropbox…');
+  try {
+    const testo  = await dropbox.scarica();
+    const quanti = await store.importBackup(JSON.parse(testo));
+    logLine(`${quanti} preset presi da Dropbox`);
+    await ricarica();
+    disegnaPreset();
+    disegnaLive();
+    await leggiDataDropbox();
+  } catch (err) {
+    statoDelPannello('non sono riuscito a prenderla: ' + err.message);
+  }
+});
+
+$('btnDropboxVia').addEventListener('click', async () => {
+  if (!confirm('Scollegare Dropbox? La libreria qui e quella lassù restano dove sono.')) return;
+  await dropbox.scollega();
+  disegnaDropbox();
+  logLine('Dropbox scollegato');
+});
 
 /**
  * Il marchio va in ogni schermata, pannelli compresi. Si copia quello
@@ -3140,6 +3312,7 @@ function mela() {
   }
 
   await store.open();
+  await preparaDropbox();
   await applicaVista();
 })();
 </script>
