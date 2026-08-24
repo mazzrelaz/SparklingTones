@@ -2809,12 +2809,19 @@ $('btnDropboxCollega').addEventListener('click', async () => {
   await store.setSetting('dropboxChiave', chiave);
   dropbox.appKey = chiave;
   try {
-    const { verifier, url } = await dropbox.iniziaAutorizzazione();
-    // Il verifier va conservato, non tenuto in una variabile: fra l'apertura
-    // della pagina di Dropbox e il ritorno qui, sul telefono, questa scheda
-    // può essere buttata via dal sistema — e senza il verifier il codice non
-    // vale niente e l'autorizzazione va rifatta da capo.
-    await store.setSetting('dropboxVerifier', verifier);
+    // Il verifier si **riusa**, non si rigenera. Un verifier non scade e non
+    // si consuma: lo stesso segreto vale per quante pagine di autorizzazione
+    // si vuole, e la pagina riaperta dà ogni volta un codice nuovo che
+    // combacia. Rigenerarlo a ogni «Collega» invece uccideva il codice che
+    // l'utente aveva appena copiato — e Dropbox lo rifiuta dicendo «code
+    // doesn't exist or has expired», che manda a cercare nel posto sbagliato.
+    // Si butta solo quando l'autorizzazione riesce.
+    let verifier = await store.getSetting('dropboxVerifier', null);
+    if (!verifier) {
+      verifier = DropboxSync.nuovoVerifier();
+      await store.setSetting('dropboxVerifier', verifier);
+    }
+    const url = DropboxSync.urlAutorizza(chiave, await DropboxSync.sfida(verifier));
     $('dropboxPassoDue').hidden = false;
     $('dropboxLink').href = url;
     // Se il browser blocca la finestra, `window.open` torna null e non
