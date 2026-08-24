@@ -92,6 +92,7 @@ window.PresetStore = (function () {
       this.db = await promisify(request);
       await this._migraScalettaInBanco();
       await this._migraSlotInLista();
+      await this._migraBanchiConUuid();
       return this;
     },
 
@@ -176,6 +177,7 @@ window.PresetStore = (function () {
       const vivi   = new Set((await this.all()).map(r => r.id));
       return banchi.map(banco => ({
         id:    banco.id,
+        uuid:  banco.uuid,
         nome:  banco.nome,
         posti: this._ottoPosti(banco.posti).map(id => (vivi.has(id) ? id : null)),
       }));
@@ -188,11 +190,61 @@ window.PresetStore = (function () {
     async addBank(nome) {
       const banchi = await this.getSetting('banchi', []);
       const id = banchi.reduce((max, b) => Math.max(max, b.id), 0) + 1;
-      const banco = { id, nome: String(nome || '').trim() || `Banco ${banchi.length + 1}`,
+      const banco = { id, uuid: nuovoUuid(),
+                      nome: String(nome || '').trim() || `Banco ${banchi.length + 1}`,
                       posti: this._ottoPosti([]) };
       banchi.push(banco);
       await this.setBanks(banchi);
       return banco;
+    },
+
+    /**
+     * I banchi come vanno in un backup: i posti per UUID e non per id,
+     * perché l'id è locale e sull'altro dispositivo indica un altro preset.
+     * Un posto il cui preset non c'è più viaggia vuoto.
+     */
+    async _banchiPerBackup() {
+      const uuidDi = new Map((await this.all()).map(r => [r.id, r.uuid || null]));
+      return (await this.getBanks()).map(banco => ({
+        uuid:  banco.uuid,
+        nome:  banco.nome,
+        posti: banco.posti.map(id => (id === null ? null : (uuidDi.get(id) || null))),
+      }));
+    },
+
+    /**
+     * I banchi che arrivano da un backup si fondono per UUID: quello che
+     * riconosce lo aggiorna, quello che non conosce lo aggiunge in coda, e i
+     * banchi che esistono solo qui li lascia stare. Il banco che arriva vince
+     * su quello che c'è, perché reimportare è un gesto esplicito — ma non può
+     * togliere niente dalla libreria, solo comporre i suoi otto posti.
+     *
+     * Un preset che qui non c'è lascia un posto vuoto, come già fa getBanks
+     * con un id morto.
+     */
+    async _importaBanchi(banchi) {
+      if (!Array.isArray(banchi) || banchi.length === 0) return;
+      const idDi   = new Map((await this.all()).map(r => [r.uuid, r.id]));
+      const nostri = await this.getSetting('banchi', []);
+      let prossimo = nostri.reduce((max, b) => Math.max(max, b.id), 0) + 1;
+
+      for (const arrivo of banchi) {
+        const posti = this._ottoPosti(arrivo.posti)
+          .map(uuid => (uuid && idDi.has(uuid) ? idDi.get(uuid) : null));
+        // Senza UUID vale il nome: succede con un backup scritto a mano o
+        // con un banco nato prima che i banchi avessero un UUID.
+        const mio = nostri.find(b => (arrivo.uuid && b.uuid === arrivo.uuid) ||
+                                     (!arrivo.uuid && stessoNome(b.nome, arrivo.nome)));
+        if (mio) {
+          mio.nome  = String(arrivo.nome || '').trim() || mio.nome;
+          mio.posti = posti;
+        } else {
+          nostri.push({ id: prossimo++, uuid: arrivo.uuid || nuovoUuid(),
+                        nome: String(arrivo.nome || '').trim() || `Banco ${nostri.length + 1}`,
+                        posti });
+        }
+      }
+      await this.setBanks(nostri);
     },
 
     async renameBank(id, nome) {
@@ -264,6 +316,20 @@ window.PresetStore = (function () {
       await this.setBanks([{ id: 1, nome: 'Scaletta', posti: this._ottoPosti(ids) }]);
     },
 
+    /**
+     * I banchi nati prima del sync non hanno un UUID, e senza quello due
+     * dispositivi non possono riconoscere lo stesso banco: al primo scambio
+     * ne nascerebbe un doppione a testa. Si assegna una volta sola, a chi non
+     * ce l'ha, e da lì in poi il banco ha un'identità che sopravvive
+     * all'export.
+     */
+    async _migraBanchiConUuid() {
+      const banchi = await this.getSetting('banchi', []);
+      if (!Array.isArray(banchi) || banchi.every(b => b.uuid)) return;
+      for (const banco of banchi) if (!banco.uuid) banco.uuid = nuovoUuid();
+      await this.setBanks(banchi);
+    },
+
     /* ---------------------------------------------------------------- */
 
     /** Aggiunge un preset, completandolo con i campi di organizzazione. */
@@ -279,6 +345,9 @@ window.PresetStore = (function () {
       }));
       delete record.id;
       record.id = await promisify(this._tx('readwrite').add(record));
+      // Se quell'UUID era stato cancellato, ora è tornato: via la lapide, o
+      // il prossimo import lo ricancellerebbe.
+      if (record.uuid) await this._dimenticaCancellato(record.uuid);
       return record.id;
     },
 
@@ -288,8 +357,31 @@ window.PresetStore = (function () {
     },
 
     get(id)    { return promisify(this._tx('readonly').get(id)); },
-    remove(id) { return promisify(this._tx('readwrite').delete(id)); },
     clear()    { return promisify(this._tx('readwrite').clear()); },
+
+    /**
+     * Cancella un preset e ne segna l'UUID fra i cancellati. Senza quella
+     * lapide la fusione per UUID non distingue «cancellato» da «non ancora
+     * arrivato», e il primo backup di un altro dispositivo lo farebbe
+     * risuscitare.
+     */
+    async remove(id) {
+      const record = await this.get(id);
+      await promisify(this._tx('readwrite').delete(id));
+      if (record && record.uuid) {
+        const tombe = await this.getSetting('cancellati', {});
+        tombe[record.uuid] = Date.now();
+        await this.setSetting('cancellati', tombe);
+      }
+    },
+
+    /** Un preset tornato in libreria non è più cancellato. */
+    async _dimenticaCancellato(uuid) {
+      const tombe = await this.getSetting('cancellati', {});
+      if (tombe[uuid] === undefined) return;
+      delete tombe[uuid];
+      await this.setSetting('cancellati', tombe);
+    },
 
     /** Tutti i preset, nell'ordine manuale scelto dall'utente. */
     async all() {
@@ -733,17 +825,29 @@ window.PresetStore = (function () {
     /**
      * Nel backup vanno anche categorie e nomi dei parametri: sono lavoro
      * dell'utente che non si ricava da nessun'altra parte, e perderli
-     * esportando sarebbe il modo più stupido di buttarli via. Non ci vanno i
-     * banchi, che puntano agli id dei preset — e gli id cambiano reimportando.
+     * esportando sarebbe il modo più stupido di buttarli via.
+     *
+     * Dalla versione 2 ci sono anche i banchi e i preset cancellati, perché
+     * il backup è diventato anche il mezzo per tenere allineati due
+     * dispositivi, e non solo per non perdere niente:
+     *
+     * - i banchi puntano agli id dei preset, che sono locali e reimportando
+     *   cambiano: è la ragione per cui prima restavano fuori. Qui viaggiano
+     *   per UUID, e all'arrivo si ritraducono;
+     * - senza la lista dei cancellati la fusione per UUID non distingue
+     *   «cancellato» da «non ancora arrivato», e un preset buttato via su un
+     *   dispositivo tornerebbe dall'altro al primo scambio.
      */
     async exportAll() {
       return {
         format:        'spark-controller-library',
-        version:       1,
+        version:       2,
         exportedAt:    new Date().toISOString(),
         categorie:     await this.getSetting('categorie', []),
         nomiParametri: await this.getParamNames(),
         coloriFamiglia: await this.getSetting('coloriFamiglia', {}),
+        banchi:        await this._banchiPerBackup(),
+        cancellati:    await this.getSetting('cancellati', {}),
         presets:       await this.all(),
       };
     },
@@ -751,6 +855,13 @@ window.PresetStore = (function () {
     /**
      * Reimporta un backup. Di default aggiunge a quanto c'è; con
      * `replace` svuota prima la libreria.
+     *
+     * Le cancellazioni si propagano, ma non vincono sempre: un preset viene
+     * tolto solo se qui non è stato toccato dopo la data in cui l'altro
+     * dispositivo l'ha cancellato. Se nel frattempo è stato modificato — o
+     * riletto dall'ampli, che ai fini della data è lo stesso — resta dov'è:
+     * fra perdere lavoro e tenersi un preset di troppo, la regola della
+     * libreria è chiara.
      */
     async importBackup(backup, options) {
       const opts = options || {};
@@ -780,13 +891,43 @@ window.PresetStore = (function () {
         await this.setSetting('nomiParametri', tutti);
       }
 
+      // Le due liste di lapidi si fondono tenendo la data più vecchia fra le
+      // due: è quella che dice davvero quando il preset è stato cancellato.
+      // Fondendole, la cancellazione continua a viaggiare verso un terzo
+      // dispositivo che non l'ha ancora vista.
+      const tombe  = opts.replace ? {} : await this.getSetting('cancellati', {});
+      const arrivo = (backup.cancellati && typeof backup.cancellati === 'object')
+        ? backup.cancellati : {};
+      for (const [uuid, quando] of Object.entries(arrivo)) {
+        if (tombe[uuid] === undefined || quando < tombe[uuid]) tombe[uuid] = quando;
+      }
+
+      // Si cancella prima di importare: se lo stesso backup porta la lapide e
+      // un preset più recente, deve vincere il preset, e lo fa perché il
+      // ciclo qui sotto lo riaggiunge.
+      if (!opts.replace) {
+        for (const [uuid, quando] of Object.entries(tombe)) {
+          const locale = await this.byUuid(uuid);
+          if (locale && !((locale.updatedAt || 0) > quando)) {
+            await promisify(this._tx('readwrite').delete(locale.id));
+          }
+        }
+      }
+
       let imported = 0;
       for (const preset of backup.presets) {
         const copy = Object.assign({}, preset);
         delete copy.id;
+
+        // Un preset cancellato altrove non risuscita, a meno che la copia che
+        // arriva sia più recente della cancellazione.
+        const cancellato = copy.uuid ? tombe[copy.uuid] : undefined;
+        if (!opts.replace && cancellato !== undefined &&
+            !((copy.updatedAt || 0) > cancellato)) continue;
+        if (copy.uuid) delete tombe[copy.uuid];   // è tornato: la lapide non serve più
+
         if (opts.replace) {
           await this.add(copy);
-          imported++;
         } else {
           const existing = copy.uuid ? await this.byUuid(copy.uuid) : null;
           if (existing) {
@@ -796,14 +937,34 @@ window.PresetStore = (function () {
           } else {
             await this.add(copy);
           }
-          imported++;
         }
+        imported++;
       }
+
+      await this.setSetting('cancellati', tombe);
+      await this._importaBanchi(backup.banchi);   // dopo i preset: gli UUID devono esserci
       return imported;
     },
   };
 
   /* ------------------------------------------------------------------ */
+
+  /**
+   * Un UUID per un banco, che è la sua identità fra due dispositivi.
+   * `crypto.randomUUID` vuole un contesto sicuro: c'è su https e su
+   * `file://`, non su un http qualunque — la riserva serve solo a quello, e
+   * per distinguere due banchi basta e avanza.
+   */
+  function nuovoUuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'banco-' + Date.now().toString(36) + '-' +
+           Math.random().toString(36).slice(2, 10);
+  }
+
+  /** Due nomi di banco uguali a meno di spazi e maiuscole. */
+  function stessoNome(a, b) {
+    return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+  }
 
   /** Tag ripuliti: senza spazi ai bordi, senza vuoti, senza duplicati. */
   function normalizeTags(tags) {
