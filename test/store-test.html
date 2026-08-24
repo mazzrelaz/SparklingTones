@@ -228,7 +228,7 @@ const DB_NAME = 'spark-test-' + Date.now();
   const backup = await store.exportAll();
   check('il backup ha il formato atteso',
         [backup.format, backup.version, backup.presets.length],
-        ['spark-controller-library', 1, 4]);
+        ['spark-controller-library', 2, 4]);
 
   await store.clear();
   check('clear svuota la libreria', await store.count(), 0);
@@ -520,6 +520,78 @@ const DB_NAME = 'spark-test-' + Date.now();
         (await conLista.hardware()).map(r => (r ? r.name : null))[4], 'Vecchio stile');
   conLista.close();
   await PresetStore.deleteDatabase(DB_SLOT);
+
+  /* ------------------------------------------------------------------ */
+  group('sincronizzazione fra due dispositivi');
+
+  // Due database, come sarebbero il computer e il telefono: gli stessi preset
+  // inseriti in ordine diverso, quindi con id diversi. È il motivo per cui i
+  // banchi viaggiano per UUID.
+  const attesa = ms => new Promise(r => setTimeout(r, ms));
+
+  const DB_QUA = DB_NAME + '-qua', DB_LA = DB_NAME + '-la';
+  const qua = await new PresetStore(DB_QUA).open();
+  const q1  = await qua.add(makePreset('uuid-s1', 'Primo', ['Twin']));
+  const q2  = await qua.add(makePreset('uuid-s2', 'Secondo', ['Bassman']));
+  const bancoQua = await qua.addBank('Concerto');
+  await qua.setBankSlot(bancoQua.id, 0, q2);
+  await qua.setBankSlot(bancoQua.id, 3, q1);
+
+  const istantanea = await qua.exportAll();
+  check('il backup porta con sé i banchi, coi posti per UUID',
+        [istantanea.banchi.length, istantanea.banchi[0].nome,
+         istantanea.banchi[0].posti[0], istantanea.banchi[0].posti[3]],
+        [1, 'Concerto', 'uuid-s2', 'uuid-s1']);
+
+  const la = await new PresetStore(DB_LA).open();
+  const l2 = await la.add(makePreset('uuid-s2', 'Secondo', ['Bassman']));
+  const l1 = await la.add(makePreset('uuid-s1', 'Primo', ['Twin']));
+  await la.importBackup(istantanea);
+  const arrivati = await la.getBanks();
+  check('il banco arriva sull\'altro dispositivo e punta ai suoi id',
+        [arrivati.length, arrivati[0].nome, arrivati[0].posti[0], arrivati[0].posti[3]],
+        [1, 'Concerto', l2, l1]);
+
+  await la.importBackup(await qua.exportAll());
+  check('reimportando lo stesso banco non se ne crea un doppione',
+        (await la.getBanks()).map(b => b.nome), ['Concerto']);
+
+  const soloSuo = await la.addBank('Solo suo');
+  await la.importBackup(await qua.exportAll());
+  check('e un banco che esiste solo qui non viene toccato',
+        (await la.getBanks()).map(b => b.nome), ['Concerto', 'Solo suo']);
+  await la.removeBank(soloSuo.id);
+
+  await qua.remove(q1);
+  check('cancellare un preset ne segna l\'UUID',
+        Object.keys(await qua.getSetting('cancellati', {})), ['uuid-s1']);
+
+  await la.importBackup(await qua.exportAll());
+  check('la cancellazione si propaga all\'altro dispositivo',
+        (await la.all()).map(r => r.name), ['Secondo']);
+
+  await qua.importBackup(istantanea);
+  check('e un backup più vecchio non fa risuscitare il cancellato',
+        (await qua.all()).map(r => r.name), ['Secondo']);
+
+  // Ma il lavoro dell'utente vince sulla cancellazione: se nel frattempo il
+  // preset è stato modificato — o riletto dall'ampli — resta dov'è.
+  await attesa(5);
+  await qua.remove((await qua.byUuid('uuid-s2')).id);
+  await attesa(5);
+  await la.setNotes(l2, 'ci sto ancora lavorando');
+  await la.importBackup(await qua.exportAll());
+  check('un preset modificato dopo la cancellazione non viene tolto',
+        (await la.all()).map(r => r.name), ['Secondo']);
+
+  await qua.add(makePreset('uuid-s1', 'Primo', ['Twin']));
+  check('e se il preset torna, la lapide sparisce',
+        Object.keys(await qua.getSetting('cancellati', {})), ['uuid-s2']);
+
+  qua.close(); la.close();
+  await PresetStore.deleteDatabase(DB_QUA);
+  await PresetStore.deleteDatabase(DB_LA);
+
 
   /* ------------------------------------------------------------------ */
   group('errori');
