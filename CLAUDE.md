@@ -57,7 +57,7 @@ tools/looper-probe.html  ascolta l'ampli mentre si usa il looper e prova i coman
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 test/protocol-test.html  125 test del protocollo contro catture reali
 test/transport-test.html 48 test del trasporto, con send finto e catture reali
-test/store-test.html     122 test della libreria, su un database temporaneo
+test/store-test.html     127 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
 test/dropbox-test.html   34 test del sync, contro un fetch finto: nessuna rete
 test/fixtures/preset0.js catture condivise fra le suite
@@ -211,6 +211,12 @@ davvero. `normalizzaSlots` tiene una sola verità: costruisce `record.slots` ord
 `readLibrary` salta quelli che non rispondono e cancellare uno slot mai visto farebbe
 sparire un preset per un timeout. Nella UI un preset in due slot compare due volte, e la
 chiave di apertura del dettaglio è `id:slot` e non `id`.
+
+**«Elimina tutti i preset» (pannello «Altro») risparmia gli otto dell'ampli**, e non per
+prudenza: quelli l'ampli li suona, quindi la prima lettura li rimetterebbe dentro
+comunque — ma spogliati di tag, note e famiglia, e *quello* sarebbe lavoro perso davvero.
+`svuotaTranneAmpli` passa da `remove`, quindi lascia le lapidi: senza, il primo «Prendi da
+Dropbox» rimetterebbe dentro tutto. Due conferme, e la seconda dice che la cosa viaggia.
 
 ### Sezione Live
 

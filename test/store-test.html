@@ -592,6 +592,38 @@ const DB_NAME = 'spark-test-' + Date.now();
   await PresetStore.deleteDatabase(DB_QUA);
   await PresetStore.deleteDatabase(DB_LA);
 
+  /* ------------------------------------------------------------------ */
+  group('svuotare la libreria tenendo gli otto dell\'ampli');
+
+  const DB_VUOTA = DB_NAME + '-vuota';
+  const piena = await new PresetStore(DB_VUOTA).open();
+  const sull1 = await piena.add(makePreset('uuid-h1', 'Sull\'ampli', ['Twin']));
+  const sull2 = await piena.add(makePreset('uuid-h2', 'Anche questo', ['Bassman']));
+  await piena.add(makePreset('uuid-l1', 'Solo in libreria', []));
+  await piena.add(makePreset('uuid-l2', 'Pure questo', []));
+  await piena.assignSlots({ [sull1]: 0, [sull2]: 5 });
+  await piena.setTags(sull1, ['da tenere']);
+
+  const tolti = await piena.svuotaTranneAmpli();
+  check('toglie solo quelli che non stanno sull\'ampli', tolti, 2);
+  check('e restano quelli caricati, coi loro slot',
+        (await piena.all()).map(r => r.name + ':' + r.slots.join(',')),
+        ['Sull\'ampli:0', 'Anche questo:5']);
+  check('il lavoro fatto sui superstiti non si tocca',
+        (await piena.get(sull1)).tags, ['da tenere']);
+
+  // Senza lapidi il primo «prendi» da un altro apparecchio li rimetterebbe
+  // tutti dentro, che è l'ultima cosa che uno si aspetta dopo aver svuotato.
+  check('ogni preset tolto lascia la sua lapide',
+        Object.keys(await piena.getSetting('cancellati', {})).sort(),
+        ['uuid-l1', 'uuid-l2']);
+
+  check('rifarlo su una libreria già sfoltita non toglie niente',
+        await piena.svuotaTranneAmpli(), 0);
+
+  piena.close();
+  await PresetStore.deleteDatabase(DB_VUOTA);
+
 
   /* ------------------------------------------------------------------ */
   group('errori');

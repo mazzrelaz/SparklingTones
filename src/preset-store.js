@@ -383,6 +383,26 @@ window.PresetStore = (function () {
       await this.setSetting('cancellati', tombe);
     },
 
+    /**
+     * Toglie dalla libreria tutto quello che non sta sull'ampli, e restituisce
+     * quanti ne ha tolti.
+     *
+     * Gli otto slot restano, e non è una gentilezza: sono i preset che l'ampli
+     * suona adesso, quindi la prima lettura li rimetterebbe dentro comunque —
+     * ma senza tag, note, famiglia e ordine, che a quel punto sarebbero persi
+     * davvero. Meglio non toglierli affatto.
+     *
+     * Passa da `remove`, quindi ogni preset lascia la sua lapide: senza, il
+     * primo «Prendi da Dropbox» li farebbe tornare tutti, ed è esattamente
+     * quello che uno non si aspetta dopo aver svuotato la libreria.
+     */
+    async svuotaTranneAmpli() {
+      const daTogliere = (await this.all())
+        .filter(record => normalizzaSlots(record).slots.length === 0);
+      for (const record of daTogliere) await this.remove(record.id);
+      return daTogliere.length;
+    },
+
     /** Tutti i preset, nell'ordine manuale scelto dall'utente. */
     async all() {
       const records = await promisify(this._tx('readonly').getAll());
