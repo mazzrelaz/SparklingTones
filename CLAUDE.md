@@ -4,10 +4,10 @@ App personale per controllare e organizzare i preset di un Positive Grid Spark 2
 Web app / PWA, HTML+JS vanilla, zero dipendenze, Web Bluetooth. Più un pedale ESP32
 in `pedale/`.
 
-**In pausa dal 18 agosto 2026**, per mancanza di tempo dell'utente — non perché
-qualcosa sia rotto. L'app è pubblicata e funziona; il pedale funziona su una devkit
-e aspetta i componenti da comprare. `README.md` racconta il progetto a chi arriva da
-fuori. **Dove si riprende** è in fondo a questo file.
+**Ripreso il 24 agosto 2026** dopo la pausa di agosto: la libreria si sincronizza con
+Dropbox. L'app è pubblicata e funziona; il pedale funziona su una devkit e aspetta i
+componenti da comprare. `README.md` racconta il progetto a chi arriva da fuori. **Dove si
+riprende** è in fondo a questo file.
 
 ## Dove sta il resto di questa memoria
 
@@ -40,6 +40,7 @@ src/spark-transport.js   connessione BLE, coda di invio, attesa risposte, lettur
 src/preset-store.js      libreria su IndexedDB, import dall'ampli, backup, banchi, categorie
 src/spark-effetti.js     nomi di effetti e manopole + elenco modelli, dal catalogo Soundshed
 src/spark-backup.js      legge preset_backup.zip dell'app ufficiale, senza librerie
+src/dropbox-sync.js      manda la libreria su Dropbox e la riprende: OAuth PKCE, niente server
 src/pwa.js               registra il service worker, «installa» e «versione nuova»
 pedale/                  firmware ESP32 (appena cominciato)
 pedale/prova-ble/        firmware di prova: si collega, cambia preset, ne manda uno intero
@@ -56,8 +57,9 @@ tools/looper-probe.html  ascolta l'ampli mentre si usa il looper e prova i coman
 tools/explorer.html      tool diagnostico, congelato — single-file, apribile da Android
 test/protocol-test.html  125 test del protocollo contro catture reali
 test/transport-test.html 48 test del trasporto, con send finto e catture reali
-test/store-test.html     99 test della libreria, su un database temporaneo
+test/store-test.html     122 test della libreria, su un database temporaneo
 test/backup-test.html    33 test del lettore zip e della conversione dal formato ufficiale
+test/dropbox-test.html   34 test del sync, contro un fetch finto: nessuna rete
 test/fixtures/preset0.js catture condivise fra le suite
 design/proposte-preset.html  le tre proposte grafiche a confronto, non è l'app
 docs/                    vedi tabella qui sopra
@@ -104,10 +106,21 @@ codifica senza avere l'hardware a portata.
   --no-first-run --user-data-dir="$env:TEMP\claude\edge-prof" --virtual-time-budget=20000 `
   --dump-dom 'file:///C:/Users/massi/spark/test/protocol-test.html'
 ```
+Poi si cerca `id="summary"` nel DOM stampato. Funziona per protocol e transport.
+**Su `store-test.html` no, e il 24 agosto 2026 nemmeno su `backup-test.html`**: con il
+tempo virtuale il browser manda avanti i timer ma non aspetta il lavoro asincrono vero —
+IndexedDB e le fetch dei fixture non fanno in tempo — e la pagina resta a «esecuzione…».
+Non è un test rotto, è l'ambiente.
 
-Poi si cerca `id="summary"` nel DOM stampato. Funziona per protocol, transport e backup.
-**Su `store-test.html` no**: con il tempo virtuale IndexedDB non avanza e la pagina resta
-a «esecuzione…» — non è un test rotto, è l'ambiente. Quella va aperta in un browser vero.
+**Per quelle, e per provare l'app che gira, si passa da `localhost`** (24 agosto 2026):
+`tools/serve.ps1` in background, poi una scheda del browser del riquadro su
+`http://localhost:8099/test/store-test.html`, e il riepilogo si legge con una riga di
+JavaScript. Lì IndexedDB e la rete si comportano da veri. **La nota di prima, che
+`localhost` fosse bloccato da policy, non vale più**: quello che resta vero è che aprire
+un `file://` nel riquadro non serve a niente, perché lo carica come `data:` e i
+`<script src="../src/…">` non partono — si vede solo il guscio. In quel browser il
+service worker non si registra: **non è verificato** se sia un limite suo o un difetto
+nostro, ma `sw.js` è cambiato solo per un file in più nell'elenco del guscio.
 
 **In una scheda in secondo piano i timer vengono strozzati**, e una suite che ci mette un
 secondo sembra piantata a metà per minuti. Basta portare la scheda in primo piano.
@@ -784,58 +797,78 @@ formato.
 - Italiano nei commenti e nella UI.
 - I byte nei log e nella documentazione si scrivono in hex minuscolo separato da spazi.
 
-### Il prossimo passo: sincronizzare la libreria con Dropbox
+### Il sync con Dropbox — fatto il 24 agosto 2026, mai provato con Dropbox vero
 
-Chiesto dall'utente il 18 agosto 2026, e **è da qui che si riprende**. Il problema vero
-che risolve: `file://` e `https://` sono due origini con due IndexedDB diversi, e la
-libreria non passa dall'una all'altra — né dal computer al telefono.
+Chiesto dall'utente il 18 agosto. Il problema che risolve: `file://` e `https://` sono due
+origini con due IndexedDB diversi, e la libreria non passa dall'una all'altra — né dal
+computer al telefono.
 
-**Metà del lavoro c'è già.** `exportAll()` produce l'istantanea completa e
-`importBackup()` **fonde per UUID** invece di sovrascrivere: aggiorna quello che
-riconosce, aggiunge quello che non c'è, lascia stare il resto. È coperto da test. Un
-sync è poco più di «carica questo JSON» / «scarica e reimporta».
+**Prima sono stati chiusi i due buchi, che erano il pezzo difficile.** Il trasporto no:
 
-**Fattibile senza server:** le API Dropbox supportano CORS e OAuth **PKCE**, quindi
-basta la pagina statica su GitHub Pages. Serve registrare un'app e tenere il token.
+- **`exportAll()` adesso porta anche i banchi.** Restavano fuori per una ragione vera:
+  puntano agli id dei preset, che sono locali e reimportando cambiano. Quindi viaggiano
+  **per UUID** e all'arrivo si ritraducono, e **ogni banco ha un suo UUID** — dato una
+  volta sola a quelli che c'erano già — o due dispositivi se ne farebbero un doppione a
+  testa. Il banco che arriva vince su quello locale, ma non tocca la libreria: compone
+  solo i suoi otto posti, e un preset che qui non c'è lascia il posto vuoto.
+- **Le cancellazioni si propagano**, con una lapide per UUID e la data
+  (`settings.cancellati`). Ma **non vincono sempre**: il preset viene tolto solo se qui
+  non è stato toccato dopo quella data — se nel frattempo è stato modificato, o riletto
+  dall'ampli, resta dov'è. Fra perdere lavoro e tenersi un preset di troppo la regola
+  della libreria è chiara. Se il preset torna, la lapide sparisce. Le due liste si fondono
+  tenendo la **data più vecchia**, che è quella che dice davvero quando è stato
+  cancellato, e così la cancellazione viaggia anche verso un terzo dispositivo che non
+  l'ha ancora vista.
 
-**Due buchi trovati leggendo il codice, e vanno chiusi prima del trasporto:**
+Formato del backup alla **versione 2**. Dieci test nuovi su due database che si scambiano
+istantanee, come sarebbero il computer e il telefono.
 
-- **`exportAll()` non esporta `settings.banchi`.** Porta preset, categorie, nomi dei
-  parametri e colori delle famiglie. Quindi oggi un sync lascerebbe indietro proprio i
-  banchi live, che sono la cosa che serve identica su telefono e computer. Poco lavoro,
-  ma cambia il formato: va alzata `version`.
-- **Le cancellazioni non si propagano.** La fusione per UUID non distingue «cancellato»
-  da «non ancora arrivato», quindi un preset cancellato sul telefono **torna** al primo
-  sync dal computer. Non perde lavoro — coerente con la regola — ma è il genere di cosa
-  che fa impazzire. Serve almeno una lista di UUID cancellati, con la data.
+**Il trasporto è `src/dropbox-sync.js`**, e le tre scelte che contano:
 
-**Come farlo, deciso ragionando e da confermare:** **due pulsanti espliciti**, «Manda su
-Dropbox» e «Prendi da Dropbox», con la data del file remoto accanto. Non sincronizzazione
-automatica: un sync silenzioso che sbaglia una fusione è esattamente il difetto che
-questo progetto ha deciso di non avere.
+- **Niente server.** CORS aperti e OAuth **PKCE**, fatto apposta per chi non può tenere un
+  segreto: basta la pagina statica, da GitHub Pages come da `file://`.
+- **Niente redirect.** `response_type=code` **senza `redirect_uri`**: Dropbox mostra un
+  codice e l'utente lo incolla. Costa un copia-incolla una volta sola, e in cambio
+  funziona identico da `file://`, da https e dal telefono, senza registrare nessun
+  indirizzo di ritorno e senza intercettare un ritorno dentro una pagina sola.
+- **Il verifier PKCE sta in `settings`, non in una variabile.** Fra l'apertura della
+  pagina di Dropbox e il ritorno qui, sul telefono, la scheda può essere buttata via dal
+  sistema — e senza verifier il codice non vale niente.
 
-**Alternativa molto più economica, se basta il computer:** la **File System Access API**
-su un file dentro la cartella Dropbox locale — si sceglie una volta, il browser ricorda
-il permesso, e Dropbox sincronizza da sé. Zero OAuth, poche righe. **Su Android non
-esiste**, quindi risolve solo metà del problema se il telefono è il dispositivo che va
-all'ampli.
+Il token di accesso dura quattro ore e il client se lo rifà da sé un minuto prima che
+scada; quello da conservare è il **refresh token** (`token_access_type=offline`), che non
+scade. Nella UI: pannello «Altro», due pulsanti espliciti con accanto la data del file
+lassù, e «Prendi» chiede conferma perché è il gesto che può anche togliere.
 
-## Dove si riprende — 18 agosto 2026
+**Quello che manca è la prova contro Dropbox vero**, e il primo passo è dell'utente:
+registrare un'app (dropbox.com/developers → Create app → Scoped access → App folder,
+permessi `files.content.write` e `files.content.read`) e incollare l'app key nel pannello.
+Non sta nel codice, e l'app secret non serve. **I 34 test girano contro un fetch finto:
+dicono che parliamo il protocollo giusto, non che Dropbox risponda come crediamo.**
 
-**La prossima sessione parte dal sync Dropbox** (sezione qui sopra). Il resto è in
-pausa, non abbandonato, in ordine di quanto conta:
+**L'alternativa da poche righe, se un giorno Dropbox desse noia:** la File System Access
+API su un file dentro la cartella Dropbox locale — zero OAuth, ma **su Android non
+esiste**, quindi risolverebbe solo la metà che serve meno, visto che il telefono è
+l'apparecchio che va all'ampli.
 
-1. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri
+## Dove si riprende — 24 agosto 2026
+
+1. **Provare il sync contro Dropbox vero.** È l'unica cosa che manca al lavoro di oggi.
+   Serve l'app registrata e l'app key incollata nel pannello «Altro»; poi: mandare su dal
+   computer, prendere dal telefono, cancellare un preset di qua e vedere se sparisce di
+   là. Se qualcosa non torna, il sospetto numero uno è la risposta di Dropbox, non la
+   fusione, che è coperta da test.
+2. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri
    è stato reso autocadenzato ma **la correzione non è verificata**: il blocco non si
    riproduce a comando. Se ricapita, le manopole da girare sono `PAUSA_PARAMETRO` e poi
    `SEND_GAP_MS` — vedi la sezione dell'editor.
-2. **Comprare i componenti del pedale**: OLED 3,12" 256×64 SSD1322 (SPI), MCP23017,
+3. **Comprare i componenti del pedale**: OLED 3,12" 256×64 SSD1322 (SPI), MCP23017,
    cinque footswitch, due pulsantini, striscia WS2812, una scatola. Tutto il resto è già
    deciso e scritto qui.
-3. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
+4. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due
    lati.
-4. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` è stato
+5. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` è stato
    trovato dall'utente; l'elenco viene da Soundshed e non è verificato. La tendina adesso
    distingue i modelli visti sull'ampli da quelli supposti, quindi il prossimo si trova
    più in fretta.
