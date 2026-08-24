@@ -830,7 +830,7 @@ formato.
 - Italiano nei commenti e nella UI.
 - I byte nei log e nella documentazione si scrivono in hex minuscolo separato da spazi.
 
-### Il sync con Dropbox — fatto il 24 agosto 2026, collegamento verificato
+### Il sync con Dropbox — fatto e verificato il 24 agosto 2026
 
 Chiesto dall'utente il 18 agosto. Il problema che risolve: `file://` e `https://` sono due
 origini con due IndexedDB diversi, e la libreria non passa dall'una all'altra — né dal
@@ -893,11 +893,12 @@ scada; quello da conservare è il **refresh token** (`token_access_type=offline`
 scade. Nella UI: pannello «Altro», due pulsanti espliciti con accanto la data del file
 lassù, e «Prendi» chiede conferma perché è il gesto che può anche togliere.
 
-**Il collegamento a Dropbox vero funziona, verificato dall'utente il 24 agosto 2026.**
-Quindi due cose che valeva la pena stabilire una volta per tutte: **PKCE senza redirect,
-col codice da incollare, Dropbox lo accetta** — non era quello il problema — e i CORS
-sull'endpoint dei token ci sono. Restano da provare **mandare su e prendere giù**, e il
-giro completo computer→telefono.
+**Il sync con Dropbox funziona, verificato dall'utente il 24 agosto 2026** — prima il
+collegamento, poi il resto. Quindi due cose stabilite una volta per tutte: **PKCE senza
+redirect, col codice da incollare, Dropbox lo accetta** — non era quello il problema — e i
+CORS sull'endpoint dei token ci sono. Quello che l'utente abbia esercitato nel dettaglio
+(il giro computer→telefono, la propagazione di una cancellazione) non è annotato: ha detto
+che funziona, non quali passi ha fatto.
 
 Il primo passo è dell'utente e va fatto una volta per apparecchio: registrare l'app
 (dropbox.com/developers → Create app → Scoped access → App folder, permessi
@@ -910,13 +911,16 @@ API su un file dentro la cartella Dropbox locale — zero OAuth, ma **su Android
 esiste**, quindi risolverebbe solo la metà che serve meno, visto che il telefono è
 l'apparecchio che va all'ampli.
 
-## Dove si riprende — 24 agosto 2026
+## Dove si riprende — fine sessione del 24 agosto 2026
 
-1. **Finire di provare il sync.** Il collegamento a Dropbox è verificato; **mandare su e
-   prendere giù no**. Il giro da fare: mandare su dal computer, collegare anche il
-   telefono (app key la stessa, autorizzazione sua) e prendere; poi cancellare un preset
-   di qua e vedere se sparisce di là. Se qualcosa non torna, il sospetto numero uno è la
-   risposta di Dropbox, non la fusione, che è coperta da test.
+Fatto oggi, tutto pubblicato (guscio a `v30`): il sync con Dropbox, «Elimina tutti i
+preset», «Duplica», il salvataggio del suono letto dall'ampli, e l'editor che si apre
+anche senza ampli. Le suite sono verdi — protocol 125, transport 48, store 136, backup 33,
+dropbox 34.
+
+1. **Provare col piede quello che è nato oggi.** Le prove le ho fatte contro un ampli
+   finto, che è il limite del banco: che l'editor senza ampli salvi la cosa giusta si
+   vede solo riscrivendo quel preset sull'ampli e ascoltandolo.
 2. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri
    è stato reso autocadenzato ma **la correzione non è verificata**: il blocco non si
    riproduce a comando. Se ricapita, le manopole da girare sono `PAUSA_PARAMETRO` e poi
@@ -931,6 +935,10 @@ l'apparecchio che va all'ampli.
    trovato dall'utente; l'elenco viene da Soundshed e non è verificato. La tendina adesso
    distingue i modelli visti sull'ampli da quelli supposti, quindi il prossimo si trova
    più in fretta.
+
+**Se un giorno serve un preset costruito da zero**, la strada c'è ed è scritta nella
+sezione Preset: lo scheletro va preso da un preset **uscito dall'ampli**, non dal catalogo.
+Oggi non serviva e non è stato fatto.
 
 **Non aperti, e vanno bene così:** il conteggio col click del looper (archiviato, vedi
 `docs/looper.md`), e il trasferimento di un banco al pedale che costa ~6 s — funziona,
