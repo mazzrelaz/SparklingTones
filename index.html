@@ -1467,8 +1467,11 @@ function dettaglio(record, slot) {
 
   const regola = document.createElement('button');
   regola.textContent = 'Regola';
-  regola.title = 'manda il preset all\'ampli e apri le manopole';
-  regola.disabled = !spark.connected;
+  // Senza ampli si apre lo stesso, sulla copia in libreria: non si sente
+  // niente, ma si guarda la catena e si salva. È il caso del divano.
+  regola.title = spark.connected
+    ? 'manda il preset all\'ampli e apri le manopole'
+    : 'apri le manopole sulla copia in libreria: senza ampli non si sente, ma si salva';
   regola.addEventListener('click', () => apriEditor(record));
   rigaSuono.appendChild(regola);
 
@@ -1980,10 +1983,42 @@ async function mandaPreset(record, slot) {
    dalla libreria: se l'utente ha girato una manopola vera, la verità è lì.
    ==================================================================== */
 
-let inModifica = null;      // { record, effetti }
+let inModifica = null;      // { record, effetti, offline }
 
+/** Una copia della catena, staccata da chi l'ha prodotta. */
+const copiaEffetti = effetti => (effetti || []).map(e => ({
+  name: e.name,
+  enabled: e.enabled,
+  params: (e.params || []).map(p => ({ index: p.index, value: p.value })),
+}));
+
+/**
+ * Senza ampli si regola **la copia in libreria**: i valori di partenza sono
+ * quelli del record, che è un'istantanea vera di quel suono, non roba
+ * inventata — la regola «meglio niente che manopole finte» resta rispettata.
+ * Non si sente niente e non parte niente sulla radio; «Salva in libreria»
+ * funziona come sempre.
+ *
+ * La modalità si decide all'apertura e **non cambia più finché il pannello è
+ * aperto**, anche se l'ampli si connette nel frattempo: rileggere la catena a
+ * metà lavoro sostituirebbe di soppiatto quello che si sta modificando con
+ * quello che l'ampli sta suonando, che è tutt'altro suono.
+ */
 async function apriEditor(record) {
-  if (!spark.connected) return;
+  if (!spark.connected) {
+    inModifica = {
+      record,
+      offline: true,
+      attendibile: false,          // non c'è nessun ampli di cui fidarsi
+      effetti: copiaEffetti(record.effects),
+    };
+    $('titoloEditor').textContent = `${record.name} — senza ampli`;
+    disegnaCatena();
+    apriPannello('pannelloEditor');
+    logLine(`«${record.name}»: regolazioni senza ampli, sulla copia in libreria.`);
+    statoDelPannello('stai regolando la copia in libreria: non si sente, ma si salva');
+    return;
+  }
 
   logLine(`mando «${record.name}» all'ampli per regolarlo…`);
   const esito = await spark.loadPreset(record, (i, total) =>
@@ -2000,14 +2035,11 @@ async function apriEditor(record) {
 
   inModifica = {
     record,
+    offline: false,
     // La catena viene da una lettura appena fatta: finché una lettura non
     // fallisce, ci si può fidare senza richiederla ogni volta.
     attendibile: true,
-    effetti: attuale.effects.map(e => ({
-      name: e.name,
-      enabled: e.enabled,
-      params: e.params.map(p => ({ index: p.index, value: p.value })),
-    })),
+    effetti: copiaEffetti(attuale.effects),
   };
   $('titoloEditor').textContent = record.name;
   disegnaCatena();
@@ -2074,8 +2106,19 @@ function disegnaCatena() {
     scelta.appendChild(aMano);
     scelta.value = effetto.name;
 
+    // Senza ampli il modello non si cambia, e non è pigrizia: cambiarlo vuol
+    // dire fargli ricostruire un blocco DSP e poi **rileggere quanti
+    // parametri ha quello nuovo**. Deciderlo alla cieca vorrebbe dire tenersi
+    // i parametri del modello di prima e mandarli a un modello che ne vuole
+    // altri — cioè costruire a tavolino il preset che pianta l'ampli.
+    if (inModifica.offline) {
+      scelta.disabled = true;
+      scelta.title = 'serve l\'ampli: cambiare modello vuol dire fargli ricostruire ' +
+                     'un blocco, e poi rileggere quanti parametri ha quello nuovo';
+    }
+
     scelta.addEventListener('change', () => {
-      if (scelta.value === ' amano') {
+      if (scelta.value === ' amano') {
         scelta.value = effetto.name;
         const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
         if (nome && nome.trim()) cambiaModello(posizione, nome.trim());
@@ -2092,10 +2135,12 @@ function disegnaCatena() {
     interruttore.textContent = effetto.enabled ? 'acceso' : 'spento';
     interruttore.addEventListener('click', async () => {
       effetto.enabled = !effetto.enabled;
-      try {
-        await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
-      } catch (err) {
-        logLine('errore: ' + err.message);
+      if (!inModifica.offline) {
+        try {
+          await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
+        } catch (err) {
+          logLine('errore: ' + err.message);
+        }
       }
       // L'ampli scrive lui l'acceso/spento anche nel parametro che lo
       // rispecchia (misurato: spegnendo il blocco quel parametro va a 0).
@@ -2316,8 +2361,13 @@ async function cambiaModello(posizione, nuovo) {
   // l'ampli ha ancora il vecchio, che è la bugia peggiore di tutte.
   if (!inModifica) { logLine('l\'editor non è più aperto: riapri «Regola».'); return; }
 
-  if (!spark.connected) {
-    logLine('ampli non connesso: il cambio non è partito.');
+  // L'editor aperto senza ampli resta senza ampli anche se nel frattempo la
+  // connessione arriva: quello che l'ampli suona adesso è un altro suono, e
+  // rileggerlo sostituirebbe di soppiatto la catena su cui si sta lavorando.
+  if (inModifica.offline || !spark.connected) {
+    logLine(inModifica.offline
+      ? 'senza ampli il modello non si cambia: chiudi, connetti e riapri «Regola».'
+      : 'ampli non connesso: il cambio non è partito.');
     disegnaCatena();                    // la tendina torna a dire la verità
     return;
   }
@@ -2423,6 +2473,11 @@ const inAttesa = new Map();
 let invioInCorso = false, timerInvio = null;
 
 function mandaParametro(nomeEffetto, indice, valore) {
+  // Senza ampli il valore è già stato scritto nella catena di lavoro dal
+  // chiamante: qui non c'è niente da mandare, e mettere in coda comandi che
+  // nessuno spedirà lascerebbe solo un arretrato pronto a partire tutto
+  // insieme se l'ampli si connettesse a metà.
+  if (inModifica && inModifica.offline) return;
   inAttesa.set(nomeEffetto + '#' + indice, { nomeEffetto, indice, valore });
   avviaInvioParametri();
 }
@@ -2458,6 +2513,10 @@ async function svuotaCoda() {
  */
 $('btnRileggi').addEventListener('click', async () => {
   if (!inModifica) return;
+  if (inModifica.offline) {
+    logLine('stai regolando la copia in libreria: non c\'è nessun ampli da rileggere.');
+    return;
+  }
   if (!spark.connected) { logLine('ampli non connesso: non c\'è niente da rileggere.'); return; }
   logProgress('rileggo la catena dall\'ampli…');
   const catena = await aggiornaCatenaDallAmpli();
