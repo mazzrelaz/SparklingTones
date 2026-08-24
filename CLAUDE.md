@@ -246,13 +246,31 @@ zigzag). Ogni pulsantone ha un LED verde, anche i posti vuoti.
 ### Editor della catena effetti
 
 **Le manopole agiscono sul suono che sta suonando**, non su una copia: è la scelta che
-governa tutto il resto. Per questo «Regola» prima manda il preset all'ampli con
-`loadPreset`, e solo dopo apre il pannello.
+governa tutto il resto. Per questo «Regola», **quando l'ampli c'è**, prima manda il preset
+con `loadPreset` e solo dopo apre il pannello.
 
 Lo stato di partenza si rilegge **dall'ampli** (`readLiveState`), non dalla libreria: se
 l'utente ha girato una manopola vera o ha usato l'app ufficiale, la verità è lì. Se la
 rilettura fallisce l'editor non si apre — meglio niente che manopole che partono da valori
 inventati. Niente viene salvato finché non si preme **Salva in libreria**.
+
+**Senza ampli l'editor si apre lo stesso, sulla copia in libreria** (chiesto dall'utente
+il 24 agosto 2026: è il caso del divano). Non tradisce la regola di sopra, perché i valori
+del record sono un'istantanea vera di quel suono, non roba inventata. `inModifica.offline`
+governa la differenza:
+
+- **niente parte sulla radio**: `mandaParametro` non accoda nemmeno, o un arretrato
+  partirebbe tutto insieme se l'ampli si connettesse a metà;
+- **il modello non si cambia**, e la tendina è spenta: cambiarlo vuol dire far ricostruire
+  un blocco DSP e poi **rileggere quanti parametri ha quello nuovo**. Deciderlo alla cieca
+  vorrebbe dire tenersi i parametri del modello di prima e darli a un modello che ne vuole
+  altri — cioè costruire a tavolino il preset che pianta l'ampli;
+- **la modalità si decide all'apertura e non cambia più**, anche se l'ampli si connette
+  dopo: rileggere la catena a metà lavoro sostituirebbe di soppiatto quello che si sta
+  modificando con quello che l'ampli sta suonando, che è un altro suono.
+
+Il titolo dice «— senza ampli» e la riga di stato lo ripete: la differenza fra regolare un
+suono e regolare una scheda non si deve indovinare.
 
 **Le sette posizioni sono etichettate per categoria** (`Spark.CATENA`): noise gate,
 compressore, drive, ampli, modulazione, delay, riverbero.
