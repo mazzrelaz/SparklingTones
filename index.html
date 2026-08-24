@@ -611,6 +611,15 @@
         potrebbe tenerlo nascosto, ed è il motivo per cui si usa PKCE.</p>
     </div>
   </div>
+
+  <!-- Fare piazza pulita: la libreria si svuota, l'ampli resta com'è. -->
+  <div class="sezione-pannello" style="margin-top:22px">
+    <h3>Fare piazza pulita</h3>
+    <p class="spiega">Toglie dalla libreria tutti i preset <strong>tranne gli otto
+      caricati sull'ampli</strong>, che restano coi loro tag e le loro note. L'ampli non
+      viene toccato. Se usi Dropbox, al prossimo «Manda su» spariranno anche di là.</p>
+    <button id="btnSvuota" class="pericolo piccolo">Elimina tutti i preset</button>
+  </div>
   <div class="stato-pannello" hidden></div>
   <div style="margin-top:20px">
     <button id="btnAbout" class="piccolo">Informazioni, licenze e responsabilità</button>
@@ -2896,6 +2905,36 @@ $('btnDropboxVia').addEventListener('click', async () => {
   await dropbox.scollega();
   disegnaDropbox();
   logLine('Dropbox scollegato');
+});
+
+/**
+ * Fare piazza pulita. Due conferme, e non è un vezzo: la prima dice quanti
+ * preset spariscono, la seconda dice che non si torna indietro e che, con
+ * Dropbox collegato, la cosa viaggia. Chi preme due volte sa cosa fa.
+ *
+ * Gli otto dell'ampli restano: sono quelli che l'ampli suona adesso, quindi
+ * la prima lettura li rimetterebbe dentro comunque — ma spogliati di tag,
+ * note e famiglia, e quello sì che sarebbe lavoro perso.
+ */
+$('btnSvuota').addEventListener('click', async () => {
+  const quanti = (await store.all()).filter(r => !(r.slots || []).length).length;
+  if (!quanti) {
+    statoDelPannello('non c\'è niente da togliere: in libreria ci sono solo gli otto dell\'ampli');
+    return;
+  }
+  if (!confirm(`Eliminare ${quanti} preset dalla libreria?\n\n` +
+               'Restano solo quelli caricati sull\'ampli. L\'ampli non viene toccato.')) return;
+  if (!confirm(`Ultima conferma: ${quanti} preset, e non si torna indietro.\n\n` +
+               'Se usi Dropbox, al prossimo «Manda su» spariranno anche dagli altri ' +
+               'apparecchi.')) return;
+
+  statoDelPannello('elimino…');
+  const tolti = await store.svuotaTranneAmpli();
+  logLine(`${tolti} preset eliminati dalla libreria; gli otto dell'ampli restano`);
+  vista.aperto = null;
+  await ricarica();
+  disegnaPreset();
+  disegnaLive();
 });
 
 /**
