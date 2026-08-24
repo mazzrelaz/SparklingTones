@@ -403,6 +403,43 @@ window.PresetStore = (function () {
       return daTogliere.length;
     },
 
+    /**
+     * Copia un preset: stesso suono, identità nuova. È il modo vero di farne
+     * uno — si parte da un suono che funziona e lo si storce, non dal nulla.
+     *
+     * Tre cose devono cambiare, e sono tutte trappole se non cambiano:
+     * l'**UUID**, o la prossima lettura dall'ampli scambierebbe la copia per
+     * l'originale e ne aggiornerebbe uno solo; gli **slot**, perché la copia
+     * sull'ampli non c'è; e il **nome**, perché due righe identiche in
+     * libreria non si distinguono.
+     */
+    async duplicate(id, nome) {
+      const originale = await this.get(id);
+      if (!originale) throw new Error(`preset ${id} inesistente`);
+
+      const copia = Object.assign({}, originale, {
+        uuid:  nuovoUuid(),
+        slots: [],
+        name:  String(nome || '').trim() ||
+               await this._nomeLibero(originale.name),
+        order: originale.order + 0.5,     // subito sotto l'originale
+      });
+      delete copia.id;
+      const nuovoId = await this.add(copia);
+      await this.move(nuovoId, originale.order + 1);   // e rinumera 0..n-1
+      return nuovoId;
+    },
+
+    /** «Clean Twin» → «Clean Twin (copia)», e se c'è già, «(copia 2)». */
+    async _nomeLibero(nome) {
+      const presi = new Set((await this.all())
+        .map(r => String(r.name || '').trim().toLowerCase()));
+      const base = String(nome || 'Senza nome').trim();
+      let proposto = `${base} (copia)`;
+      for (let n = 2; presi.has(proposto.toLowerCase()); n++) proposto = `${base} (copia ${n})`;
+      return proposto;
+    },
+
     /** Tutti i preset, nell'ordine manuale scelto dall'utente. */
     async all() {
       const records = await promisify(this._tx('readonly').getAll());
@@ -970,15 +1007,23 @@ window.PresetStore = (function () {
   /* ------------------------------------------------------------------ */
 
   /**
-   * Un UUID per un banco, che è la sua identità fra due dispositivi.
-   * `crypto.randomUUID` vuole un contesto sicuro: c'è su https e su
-   * `file://`, non su un http qualunque — la riserva serve solo a quello, e
-   * per distinguere due banchi basta e avanza.
+   * Un UUID: l'identità di un preset o di un banco fra due dispositivi.
+   *
+   * `crypto.randomUUID` vuole un contesto sicuro — c'è su https e su `file://`,
+   * non su un http qualunque — e la riserva **deve avere la stessa forma**, non
+   * solo essere diversa dalle altre: lo stesso UUID finisce dentro il preset
+   * che va all'ampli, dove il campo è di 36 caratteri (`spark-protocol.js`
+   * avvisa se non lo è).
    */
   function nuovoUuid() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-    return 'banco-' + Date.now().toString(36) + '-' +
-           Math.random().toString(36).slice(2, 10);
+    const b = new Uint8Array(16);
+    crypto.getRandomValues(b);
+    b[6] = (b[6] & 0x0f) | 0x40;        // versione 4
+    b[8] = (b[8] & 0x3f) | 0x80;        // variante
+    const hex = [...b].map(n => n.toString(16).padStart(2, '0')).join('');
+    return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-' + hex.slice(12, 16) +
+           '-' + hex.slice(16, 20) + '-' + hex.slice(20);
   }
 
   /** Due nomi di banco uguali a meno di spazi e maiuscole. */

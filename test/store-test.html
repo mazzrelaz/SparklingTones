@@ -593,6 +593,44 @@ const DB_NAME = 'spark-test-' + Date.now();
   await PresetStore.deleteDatabase(DB_LA);
 
   /* ------------------------------------------------------------------ */
+  group('duplicare un preset');
+
+  const DB_COPIA = DB_NAME + '-copia';
+  const copie = await new PresetStore(DB_COPIA).open();
+  const orig = await copie.add(makePreset('uuid-orig', 'Clean Twin', ['Twin']));
+  await copie.add(makePreset('uuid-dopo', 'Un altro', []));
+  await copie.assignSlots({ [orig]: 2 });
+  await copie.setTags(orig, ['pulito']);
+  await copie.setNotes(orig, 'volume a 7');
+
+  const copiaId = await copie.duplicate(orig);
+  const copia   = await copie.get(copiaId);
+  check('la copia prende un nome che si distingue', copia.name, 'Clean Twin (copia)');
+  check('e l\'UUID è nuovo, o la lettura dall\'ampli le confonderebbe',
+        [copia.uuid === 'uuid-orig', copia.uuid.length], [false, 36]);
+  check('la copia non sta su nessuno slot: sull\'ampli non c\'è', copia.slots, []);
+  check('ma l\'originale il suo se lo tiene', (await copie.get(orig)).slots, [2]);
+  check('il suono e il lavoro dell\'utente vengono copiati',
+        [copia.effects.map(e => e.name).join(), copia.tags, copia.notes],
+        ['Twin', ['pulito'], 'volume a 7']);
+  check('e si mette subito sotto l\'originale, con gli ordini senza buchi',
+        (await copie.all()).map(r => r.name + ':' + r.order),
+        ['Clean Twin:0', 'Clean Twin (copia):1', 'Un altro:2']);
+
+  const seconda = await copie.get(await copie.duplicate(orig));
+  check('duplicando di nuovo il nome non si ripete', seconda.name, 'Clean Twin (copia 2)');
+
+  const battezzata = await copie.get(await copie.duplicate(orig, '  Assolo  '));
+  check('e un nome dato a mano vince', battezzata.name, 'Assolo');
+
+  let inesistente = null;
+  try { await copie.duplicate(99999); } catch (e) { inesistente = e.message; }
+  check('duplicare un preset che non c\'è è un errore', inesistente, 'preset 99999 inesistente');
+
+  copie.close();
+  await PresetStore.deleteDatabase(DB_COPIA);
+
+  /* ------------------------------------------------------------------ */
   group('svuotare la libreria tenendo gli otto dell\'ampli');
 
   const DB_VUOTA = DB_NAME + '-vuota';
