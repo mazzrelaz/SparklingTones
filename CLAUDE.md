@@ -835,6 +835,21 @@ istantanee, come sarebbero il computer e il telefono.
   pagina di Dropbox e il ritorno qui, sul telefono, la scheda può essere buttata via dal
   sistema — e senza verifier il codice non vale niente.
 
+**Il ritorno dall'autorizzazione è il punto fragile, non lo scambio** (segnalato dall'utente
+il 24 agosto 2026: «inserisco il codice e non funziona»). Lo scambio va: provato dal
+browser, `api.dropboxapi.com/oauth2/token` risponde `400 {"error": "invalid_client…"}` a
+una pagina web, quindi **i CORS ci sono**. Quello che si rompeva era il rientro:
+
+- salvare il verifier non basta, va **rimesso in piedi anche il campo dove incollare il
+  codice**. Ripartiva nascosto, e chi torna con un codice in mano e non trova dove metterlo
+  ripreme «Collega» — che genera un verifier nuovo e rende quel codice inservibile per
+  sempre. Il link si ricostruisce dal verifier salvato, quindi lo stesso segreto resta
+  buono e la pagina si può riaprire per averne uno nuovo;
+- **`window.open` sul telefono viene bloccato** come finestra a sorpresa, e il pulsante
+  sembra rotto. Ci vuole un link da toccare, e dirlo quando la finestra non si apre;
+- **un codice si spende una volta sola**, e ogni apparecchio fa la sua autorizzazione: si
+  riusa l'app key, mai il codice.
+
 Il token di accesso dura quattro ore e il client se lo rifà da sé un minuto prima che
 scada; quello da conservare è il **refresh token** (`token_access_type=offline`), che non
 scade. Nella UI: pannello «Altro», due pulsanti espliciti con accanto la data del file
