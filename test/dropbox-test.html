@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Test dropbox-sync</title>
+<style>
+  body { font-family:'SF Mono',Consolas,monospace; background:#14161a; color:#e8e8ea;
+         padding:20px; font-size:0.85rem; line-height:1.6; }
+  h1 { font-size:1.1rem; font-family:-apple-system,'Segoe UI',sans-serif; }
+  .pass { color:#7fe08a; }
+  .fail { color:#ff8080; }
+  .group { color:#8a8f98; margin-top:14px; font-weight:700; }
+  .detail { color:#8a8f98; margin-left:22px; white-space:pre-wrap; }
+  #summary { margin:18px 0; padding:10px 14px; border-radius:8px; font-weight:700;
+             font-family:-apple-system,'Segoe UI',sans-serif; }
+  #summary.ok  { background:#1f3a24; color:#7fe08a; }
+  #summary.bad { background:#3a2020; color:#ff8080; }
+</style>
+</head>
+<body>
+<h1>Test dropbox-sync.js</h1>
+<p class="detail" style="margin-left:0">Nessuna rete: le chiamate vanno a un fetch finto,
+che registra cosa gli è stato chiesto. Quello che si può provare senza Dropbox è tutto
+qui — il resto lo dice solo una libreria che va su e torna giù davvero.</p>
+<div id="summary">esecuzione…</div>
+<div id="out"></div>
+
+<script src="../src/dropbox-sync.js"></script>
+<script>
+'use strict';
+
+let passed = 0, failed = 0;
+
+function check(name, actual, expected) {
+  const a = JSON.stringify(actual), e = JSON.stringify(expected);
+  const ok = a === e;
+  ok ? passed++ : failed++;
+  const div = document.createElement('div');
+  div.innerHTML = `<span class="${ok ? 'pass' : 'fail'}">${ok ? '✓' : '✗'} ${name}</span>`;
+  if (!ok) div.innerHTML += `<div class="detail">atteso:  ${e}\nottenuto: ${a}</div>`;
+  document.getElementById('out').appendChild(div);
+}
+
+function group(title) {
+  const div = document.createElement('div');
+  div.className = 'group';
+  div.textContent = title;
+  document.getElementById('out').appendChild(div);
+}
+
+/**
+ * Un fetch finto: risponde con quello che gli si mette in coda e si ricorda
+ * tutto quello che gli è stato chiesto. `risposte` è una lista di
+ * { stato, corpo }, servite in ordine.
+ */
+function fetchFinto(risposte) {
+  const chiamate = [];
+  const coda = risposte.slice();
+  const finto = async (url, opzioni) => {
+    chiamate.push({ url, opzioni: opzioni || {} });
+    const r = coda.shift() || { stato: 200, corpo: '{}' };
+    const corpo = typeof r.corpo === 'string' ? r.corpo : JSON.stringify(r.corpo);
+    return {
+      ok: r.stato >= 200 && r.stato < 300,
+      status: r.stato,
+      text: async () => corpo,
+      json: async () => JSON.parse(corpo),
+    };
+  };
+  finto.chiamate = chiamate;
+  return finto;
+}
+
+const RINNOVO = { stato: 200, corpo: { access_token: 'tok-1', expires_in: 14400 } };
+
+/** Un client già autorizzato, con le risposte che gli servono in coda. */
+function clientCon(risposte) {
+  const finto = fetchFinto(risposte);
+  const client = new DropboxSync.Client({
+    appKey: 'chiave123', refreshToken: 'refresh-abc', fetch: finto,
+  });
+  return { client, finto };
+}
+
+const corpoDi = chiamata => {
+  const b = chiamata.opzioni.body;
+  return typeof b === 'string' ? b : '(non testo)';
+};
+
+(async function run() {
+
+  /* ------------------------------------------------------------------ */
+  group('PKCE');
+
+  // Il vettore di prova dell'RFC 7636: se la sfida non torna bit per bit,
+  // Dropbox rifiuta lo scambio del codice e il messaggio non spiega perché.
+  check('la sfida S256 è quella dell\'RFC 7636',
+        await DropboxSync.sfida('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk'),
+        'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM');
+
+  const v1 = DropboxSync.nuovoVerifier(), v2 = DropboxSync.nuovoVerifier();
+  check('il verifier è lungo abbastanza e in base64url',
+        [v1.length >= 43, /^[A-Za-z0-9_-]+$/.test(v1)], [true, true]);
+  check('e non è due volte lo stesso', v1 === v2, false);
+
+  const url = new URL(DropboxSync.urlAutorizza('chiave123', 'sfida456'));
+  check('l\'indirizzo di autorizzazione chiede il codice, con la sfida S256',
+        [url.origin + url.pathname,
+         url.searchParams.get('client_id'),
+         url.searchParams.get('response_type'),
+         url.searchParams.get('code_challenge'),
+         url.searchParams.get('code_challenge_method')],
+        ['https://www.dropbox.com/oauth2/authorize',
+         'chiave123', 'code', 'sfida456', 'S256']);
+  check('e chiede il refresh token, o l\'autorizzazione durerebbe quattro ore',
+        url.searchParams.get('token_access_type'), 'offline');
+  check('non c\'è nessun redirect da registrare',
+        url.searchParams.has('redirect_uri'), false);
+
+  /* ------------------------------------------------------------------ */
+  group('argomento nell\'intestazione');
+
+  check('un argomento ASCII resta com\'è',
+        DropboxSync.arg({ path: '/spark-libreria.json' }),
+        '{"path":"/spark-libreria.json"}');
+  check('un accento esce come \\uXXXX: un\'intestazione HTTP è solo ASCII',
+        DropboxSync.arg({ path: '/perché.json' }),
+        '{"path":"/perch\\u00e9.json"}');
+  check('e ogni carattere dell\'argomento è sotto il 128',
+        [...DropboxSync.arg({ path: '/così è —.json' })].every(c => c.charCodeAt(0) < 128),
+        true);
+
+  /* ------------------------------------------------------------------ */
+  group('errori tradotti');
+
+  check('il file che non c\'è ancora si riconosce',
+        /nessuna libreria/.test(DropboxSync.messaggioErrore(409,
+          '{"error_summary":"path/not_found/..."}')), true);
+  check('l\'autorizzazione scaduta si riconosce',
+        /non vale più/.test(DropboxSync.messaggioErrore(401, 'expired_access_token')), true);
+  check('un errore sconosciuto porta con sé il testo grezzo, che è meglio di niente',
+        /400/.test(DropboxSync.messaggioErrore(400, 'boh')), true);
+
+  /* ------------------------------------------------------------------ */
+  group('collegamento');
+
+  const nudo = new DropboxSync.Client({});
+  check('senza chiave e senza refresh non è collegato', nudo.autorizzato(), false);
+  check('e chiedergli l\'autorizzazione dice cosa manca',
+        await nudo.iniziaAutorizzazione().then(() => null, e => e.message),
+        'manca la chiave dell\'app Dropbox');
+
+  const primo = new DropboxSync.Client({
+    appKey: 'chiave123',
+    fetch: fetchFinto([{ stato: 200, corpo: { access_token: 'tok', refresh_token: 'refr' } }]),
+    salvaRefresh: async r => { primo.salvato = r; },
+  });
+  const avvio = await primo.iniziaAutorizzazione();
+  check('l\'avvio dà un verifier e un indirizzo',
+        [avvio.verifier.length >= 43, avvio.url.startsWith('https://www.dropbox.com/')],
+        [true, true]);
+
+  await primo.completaAutorizzazione(avvio.verifier, '  codice-incollato  ');
+  const scambio = new URLSearchParams(corpoDi(primo.fetch.chiamate[0]));
+  check('il codice viene scambiato col verifier, non con un segreto',
+        [scambio.get('grant_type'), scambio.get('code_verifier') === avvio.verifier,
+         scambio.get('client_id')],
+        ['authorization_code', true, 'chiave123']);
+  check('il codice incollato viene ripulito dagli spazi',
+        scambio.get('code'), 'codice-incollato');
+  check('il refresh token viene salvato da chi ce l\'ha chiesto', primo.salvato, 'refr');
+  check('e ora è collegato', primo.autorizzato(), true);
+
+  const senzaRefresh = new DropboxSync.Client({
+    appKey: 'chiave123',
+    fetch: fetchFinto([{ stato: 200, corpo: { access_token: 'tok' } }]),
+  });
+  check('un\'autorizzazione senza refresh token viene rifiutata subito',
+        await senzaRefresh.completaAutorizzazione('v', 'c').then(() => null, e => e.message),
+        'Dropbox non ha dato un refresh token: rifai l\'autorizzazione');
+
+  /* ------------------------------------------------------------------ */
+  group('mandare su e prendere giù');
+
+  const su = clientCon([RINNOVO, { stato: 200, corpo: { name: 'spark-libreria.json' } }]);
+  await su.client.carica('{"format":"spark-controller-library"}');
+  check('prima si rinnova il token, poi si carica',
+        su.finto.chiamate.map(c => c.url),
+        ['https://api.dropboxapi.com/oauth2/token',
+         'https://content.dropboxapi.com/2/files/upload']);
+  check('il rinnovo usa il refresh token',
+        new URLSearchParams(corpoDi(su.finto.chiamate[0])).get('grant_type'),
+        'refresh_token');
+  const invio = su.finto.chiamate[1].opzioni;
+  check('la richiesta porta il token appena ottenuto',
+        invio.headers.Authorization, 'Bearer tok-1');
+  check('e sovrascrive il file di prima, senza notificare mezzo mondo',
+        JSON.parse(invio.headers['Dropbox-API-Arg']),
+        { path: '/spark-libreria.json', mode: 'overwrite', mute: true });
+
+  const giu = clientCon([RINNOVO, { stato: 200, corpo: '{"presets":[]}' }]);
+  check('scaricare restituisce il testo, che sta al chiamante fondere',
+        await giu.client.scarica(), '{"presets":[]}');
+
+  const scaduto = clientCon([RINNOVO,
+    { stato: 401, corpo: '{"error_summary":"expired_access_token/"}' }]);
+  check('un token rifiutato lo dice in italiano',
+        await scaduto.client.carica('x').then(() => null, e => e.message),
+        'l\'autorizzazione a Dropbox non vale più: rifalla');
+
+  const mai = new DropboxSync.Client({ appKey: 'chiave123', fetch: fetchFinto([]) });
+  check('senza collegamento non si prova nemmeno a chiamare',
+        await mai.scarica().then(() => null, e => e.message),
+        'Dropbox non è ancora collegato');
+
+  /* ------------------------------------------------------------------ */
+  group('il token si riusa finché vale');
+
+  const due = clientCon([RINNOVO, { stato: 200, corpo: {} }, { stato: 200, corpo: {} }]);
+  await due.client.carica('a');
+  await due.client.carica('b');
+  check('due invii di fila rinnovano il token una volta sola',
+        due.finto.chiamate.filter(c => c.url.endsWith('oauth2/token')).length, 1);
+
+  const corto = clientCon([{ stato: 200, corpo: { access_token: 'tok-1', expires_in: 30 } },
+                           { stato: 200, corpo: {} },
+                           { stato: 200, corpo: { access_token: 'tok-2', expires_in: 14400 } },
+                           { stato: 200, corpo: {} }]);
+  await corto.client.carica('a');
+  await corto.client.carica('b');
+  check('un token che sta per scadere viene rinnovato prima di usarlo',
+        corto.finto.chiamate.map(c => c.url.endsWith('oauth2/token')),
+        [true, false, true, false]);
+  check('e la seconda richiesta va col token nuovo',
+        corto.finto.chiamate[3].opzioni.headers.Authorization, 'Bearer tok-2');
+
+  /* ------------------------------------------------------------------ */
+  group('la data di quello che c\'è lassù');
+
+  const conFile = clientCon([RINNOVO,
+    { stato: 200, corpo: { server_modified: '2026-08-24T10:00:00Z', size: 4096 } }]);
+  check('info dice quando è stata scritta e quanto è grande',
+        await conFile.client.info(), { quando: '2026-08-24T10:00:00Z', byte: 4096 });
+
+  const vuoto = clientCon([RINNOVO,
+    { stato: 409, corpo: '{"error_summary":"path/not_found/."}' }]);
+  check('se lassù non c\'è ancora niente torna null, che non è un errore',
+        await vuoto.client.info(), null);
+
+  const rotto = clientCon([RINNOVO, { stato: 500, corpo: 'ops' }]);
+  check('ma un guasto vero resta un errore',
+        await rotto.client.info().then(() => 'nessun errore', e => e.message),
+        'Dropbox non risponde bene: riprova fra poco');
+
+  /* ------------------------------------------------------------------ */
+  group('scollegarsi');
+
+  const via = clientCon([]);
+  await via.client.scollega();
+  check('scollegarsi dimentica tutto, senza chiamare nessuno',
+        [via.client.autorizzato(), via.client.refresh, via.finto.chiamate.length],
+        [false, null, 0]);
+
+  /* ------------------------------------------------------------------ */
+  const s = document.getElementById('summary');
+  s.className = failed === 0 ? 'ok' : 'bad';
+  s.textContent = `${passed} passati, ${failed} falliti`;
+})().catch(err => {
+  const s = document.getElementById('summary');
+  s.className = 'bad';
+  s.textContent = 'errore fatale: ' + err.message;
+  console.error(err);
+});
+</script>
+</body>
+</html>
