@@ -784,9 +784,46 @@ formato.
 - Italiano nei commenti e nella UI.
 - I byte nei log e nella documentazione si scrivono in hex minuscolo separato da spazi.
 
+### Il prossimo passo: sincronizzare la libreria con Dropbox
+
+Chiesto dall'utente il 18 agosto 2026, e **è da qui che si riprende**. Il problema vero
+che risolve: `file://` e `https://` sono due origini con due IndexedDB diversi, e la
+libreria non passa dall'una all'altra — né dal computer al telefono.
+
+**Metà del lavoro c'è già.** `exportAll()` produce l'istantanea completa e
+`importBackup()` **fonde per UUID** invece di sovrascrivere: aggiorna quello che
+riconosce, aggiunge quello che non c'è, lascia stare il resto. È coperto da test. Un
+sync è poco più di «carica questo JSON» / «scarica e reimporta».
+
+**Fattibile senza server:** le API Dropbox supportano CORS e OAuth **PKCE**, quindi
+basta la pagina statica su GitHub Pages. Serve registrare un'app e tenere il token.
+
+**Due buchi trovati leggendo il codice, e vanno chiusi prima del trasporto:**
+
+- **`exportAll()` non esporta `settings.banchi`.** Porta preset, categorie, nomi dei
+  parametri e colori delle famiglie. Quindi oggi un sync lascerebbe indietro proprio i
+  banchi live, che sono la cosa che serve identica su telefono e computer. Poco lavoro,
+  ma cambia il formato: va alzata `version`.
+- **Le cancellazioni non si propagano.** La fusione per UUID non distingue «cancellato»
+  da «non ancora arrivato», quindi un preset cancellato sul telefono **torna** al primo
+  sync dal computer. Non perde lavoro — coerente con la regola — ma è il genere di cosa
+  che fa impazzire. Serve almeno una lista di UUID cancellati, con la data.
+
+**Come farlo, deciso ragionando e da confermare:** **due pulsanti espliciti**, «Manda su
+Dropbox» e «Prendi da Dropbox», con la data del file remoto accanto. Non sincronizzazione
+automatica: un sync silenzioso che sbaglia una fusione è esattamente il difetto che
+questo progetto ha deciso di non avere.
+
+**Alternativa molto più economica, se basta il computer:** la **File System Access API**
+su un file dentro la cartella Dropbox locale — si sceglie una volta, il browser ricorda
+il permesso, e Dropbox sincronizza da sé. Zero OAuth, poche righe. **Su Android non
+esiste**, quindi risolve solo metà del problema se il telefono è il dispositivo che va
+all'ampli.
+
 ## Dove si riprende — 18 agosto 2026
 
-Il progetto è in pausa, non abbandonato. In ordine di quanto conta:
+**La prossima sessione parte dal sync Dropbox** (sezione qui sopra). Il resto è in
+pausa, non abbandonato, in ordine di quanto conta:
 
 1. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri
    è stato reso autocadenzato ma **la correzione non è verificata**: il blocco non si
