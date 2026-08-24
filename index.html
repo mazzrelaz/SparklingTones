@@ -594,7 +594,9 @@
       </div>
       <div id="dropboxPassoDue" hidden style="margin-top:10px">
         <p class="spiega">Si è aperta la pagina di Dropbox: autorizza, e incolla qui il
-          codice che ti mostra.</p>
+          codice che ti mostra. Se non si è aperta da sé — sul telefono capita, il
+          browser la blocca come una finestra a sorpresa — <a id="dropboxLink" href="#"
+          target="_blank" rel="noopener">aprila da qui</a>.</p>
         <div class="barra-alta">
           <input type="text" id="dropboxCodice" placeholder="codice da Dropbox"
                  autocomplete="off" spellcheck="false" style="flex:1">
@@ -2759,6 +2761,20 @@ async function preparaDropbox() {
   });
   $('dropboxChiave').value = dropbox.appKey;
   disegnaDropbox();
+
+  // Un'autorizzazione lasciata a metà va **ripresa**, non ricominciata. Fra
+  // l'apertura della pagina di Dropbox e il ritorno qui la scheda può essere
+  // ricaricata — sul telefono succede quasi sempre — e con lei sparisce il
+  // campo dove incollare il codice. Chi torna con un codice in mano e non
+  // trova dove metterlo ripreme «Collega»: e quello genera un verifier nuovo,
+  // che rende quel codice inservibile per sempre. È la trappola che fa dire
+  // «inserisco il codice e non funziona».
+  const inSospeso = await store.getSetting('dropboxVerifier', null);
+  if (inSospeso && !dropbox.autorizzato() && dropbox.appKey) {
+    $('dropboxPassoDue').hidden = false;
+    $('dropboxLink').href = DropboxSync.urlAutorizza(
+      dropbox.appKey, await DropboxSync.sfida(inSospeso));
+  }
 }
 
 function disegnaDropbox() {
@@ -2800,8 +2816,14 @@ $('btnDropboxCollega').addEventListener('click', async () => {
     // vale niente e l'autorizzazione va rifatta da capo.
     await store.setSetting('dropboxVerifier', verifier);
     $('dropboxPassoDue').hidden = false;
-    window.open(url, '_blank', 'noopener');
-    statoDelPannello('autorizza su Dropbox, poi incolla qui il codice');
+    $('dropboxLink').href = url;
+    // Se il browser blocca la finestra, `window.open` torna null e non
+    // succede niente: da fuori il pulsante sembra rotto. Il link resta lì da
+    // toccare, e va detto.
+    const finestra = window.open(url, '_blank', 'noopener');
+    statoDelPannello(finestra
+      ? 'autorizza su Dropbox, poi incolla qui il codice'
+      : 'il browser ha bloccato la finestra: apri Dropbox col link qui sopra');
   } catch (err) {
     statoDelPannello('non riesco a partire: ' + err.message);
   }
@@ -2821,7 +2843,12 @@ $('btnDropboxFine').addEventListener('click', async () => {
     logLine('Dropbox collegato');
     await leggiDataDropbox();
   } catch (err) {
-    statoDelPannello('Dropbox non ha accettato il codice: ' + err.message);
+    // Il verifier non si butta: la pagina di Dropbox si riapre dallo stesso
+    // link e dà un codice nuovo per lo stesso segreto. Un codice si spende una
+    // volta sola, ed è la causa di gran lunga più probabile di questo errore.
+    statoDelPannello('Dropbox non ha accettato il codice (' + err.message +
+      '). Un codice vale una volta sola: riapri Dropbox col link qui sopra e ' +
+      'incolla quello nuovo.');
   }
 });
 
