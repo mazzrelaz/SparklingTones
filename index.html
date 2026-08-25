@@ -429,6 +429,14 @@
   /* Il nome del preset che si sta regolando: la prima cosa da leggere. */
   .titolo-grande { font-size:1.4rem; margin:0 0 4px; letter-spacing:-0.02em;
                    font-family:var(--strumento); }
+  /* Il nome del preset, nell'editor: grande e in centro come il nome del
+     blocco. È la prima cosa da leggere in un pannello che cambia il suono
+     sotto le dita — sapere *quale* suono si sta cambiando. */
+  .titolo-editor { text-align:center; font-size:1.6rem; margin:2px 0 10px; }
+  .modo-editor { text-align:center; font-family:var(--strumento);
+                 font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em;
+                 font-weight:700; color:var(--gold); margin:-6px 0 12px;
+                 text-shadow:0 0 10px rgba(240,192,64,0.5); }
   /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
      Il fondo dentro è più scuro della pagina, non più chiaro: il neon si vede
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
@@ -481,17 +489,18 @@
      è il gesto che si fa più spesso e va preso senza guardare. */
   .blocco.aFuoco .riga-modello { padding:6px 12px 0; }
   .blocco.aFuoco .nome-effetto { appearance:none; -webkit-appearance:none;
-                                 width:100%; background:#0e1014;
-                                 border:1px solid var(--line); border-radius:12px;
-                                 padding:13px 34px; margin:0; text-align:center;
+                                 display:block; width:auto; max-width:100%;
+                                 margin:0 auto; background:#0e1014;
+                                 border:1px solid var(--line); border-radius:10px;
+                                 padding:8px 34px 8px 18px; text-align:center;
                                  text-align-last:center;
-                                 font-family:var(--strumento); font-size:1.25rem;
+                                 font-family:var(--strumento); font-size:1.1rem;
                                  font-weight:700; letter-spacing:-0.01em;
                                  color:var(--text); cursor:pointer;
                                  background-image:
                                    linear-gradient(45deg, transparent 50%, var(--cat) 50%),
                                    linear-gradient(135deg, var(--cat) 50%, transparent 50%);
-                                 background-position:right 17px center, right 11px center;
+                                 background-position:right 15px center, right 9px center;
                                  background-size:6px 6px, 6px 6px;
                                  background-repeat:no-repeat; }
   .blocco.aFuoco .nome-effetto:hover { border-color:var(--cat); }
@@ -902,7 +911,10 @@
   <!-- Il nome del preset che si sta regolando: grande, su una riga sua.
        Accanto al marchio non si leggeva, e in un pannello che cambia il suono
        sotto le dita sapere *quale* suono si sta cambiando è la prima cosa. -->
-  <h2 id="titoloEditor" class="titolo-grande">Regola il suono</h2>
+  <h2 id="titoloEditor" class="titolo-grande titolo-editor">Regola il suono</h2>
+  <!-- La modalita' e' uno stato, non un messaggio: sta qui sotto il nome e non
+       nella riga di stato, che deve restare libera per le risposte. -->
+  <div id="modoEditor" class="modo-editor" hidden>senza ampli — stai regolando la copia in libreria</div>
   <div id="aiutoEditor" hidden>
     <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente
       finché non premi «Salva». Tocca un blocco della catena per aprirlo: dentro ci sono
@@ -913,7 +925,7 @@
       <strong>Tocca il nome di una manopola per cambiarlo</strong>: vale per quel modello,
       in ogni preset che lo usa.</p>
   </div>
-  <div class="stato-pannello" hidden></div>
+  <div class="stato-pannello" data-solo-risposte hidden></div>
   <div id="catena"></div>
   <!-- Il valore grande mentre si trascina: sotto il dito il numerino non si vede. -->
   <div class="bolla" id="bolla" hidden></div>
@@ -1160,14 +1172,14 @@ $('btnVista').addEventListener('click', () => {
 const righeLog = [];
 let logProvvisorio = false;
 
-function logLine(msg) {
+function logLine(msg, risposta) {
   if (logProvvisorio) righeLog.pop();
   logProvvisorio = false;
   righeLog.push(msg);
   if (righeLog.length > 8) righeLog.shift();
   $('log').textContent = righeLog.join('\n');
   $('logLive').textContent = msg;
-  statoDelPannello(msg);
+  statoDelPannello(msg, risposta);
 }
 
 /** Riga di avanzamento: la successiva la sostituisce invece di accodarsi. */
@@ -1186,9 +1198,17 @@ function logProgress(msg) {
  * fallisce sembra un comando che non fa niente. Ogni pannello che parla con
  * l'ampli ha la sua riga di stato, e ci finisce l'ultimo messaggio.
  */
-function statoDelPannello(msg) {
+/**
+ * @param risposta true se il messaggio **risponde a un gesto** dell'utente:
+ *   un comando fallito, l'esito di un pulsante che ha appena premuto. I
+ *   pannelli marcati `data-solo-risposte` — l'editor — mostrano solo quelli:
+ *   lì lo schermo serve alla catena, e una riga che racconta «è sull'ampli,
+ *   gira pure» a nessuno che l'abbia chiesto è solo un ingombro.
+ */
+function statoDelPannello(msg, risposta) {
   const riga = document.querySelector('.pannello.aperto .stato-pannello');
   if (!riga) return;
+  if (riga.dataset.soloRisposte !== undefined && !risposta) return;
   riga.textContent = msg;
   riga.hidden = false;
 }
@@ -2205,12 +2225,12 @@ async function apriEditor(record) {
       attendibile: false,          // non c'è nessun ampli di cui fidarsi
       effetti: copiaEffetti(record.effects),
     };
-    $('titoloEditor').textContent = `${record.name} — senza ampli`;
+    $('titoloEditor').textContent = record.name;
+    $('modoEditor').hidden = false;   // lo stato sta sotto il nome, non nel log
     $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
     disegnaCatena();
     apriPannello('pannelloEditor');
     logLine(`«${record.name}»: regolazioni senza ampli, sulla copia in libreria.`);
-    statoDelPannello('stai regolando la copia in libreria: non si sente, ma si salva');
     return;
   }
 
@@ -2236,9 +2256,12 @@ async function apriEditor(record) {
     effetti: copiaEffetti(attuale.effects),
   };
   $('titoloEditor').textContent = record.name;
+  $('modoEditor').hidden = true;
   $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
   disegnaCatena();
   apriPannello('pannelloEditor');
+  // Non finisce nella riga di stato del pannello: nessuno l'ha chiesto, e lì
+  // ci vanno solo le risposte a un gesto. Nel log resta.
   logLine(`«${record.name}» è sull'ampli: gira pure.`);
 }
 
@@ -2446,29 +2469,33 @@ function intestazioneBlocco(effetto, posizione) {
   const candidati = (SparkEffetti.MODELLI[posizione] || []).slice();
   if (!candidati.includes(effetto.name)) candidati.unshift(effetto.name);
 
-  // Due gruppi, e la distinzione non è cosmetica: i primi sono modelli che
-  // **da questo ampli sono usciti**, quindi esistono di sicuro; gli altri
-  // vengono dal catalogo di Soundshed e non sono verificati. Chiederne uno che
-  // l'ampli non ha vuol dire fargli ricostruire un blocco DSP inesistente — è
-  // così che `TrebleBooster` lo mandava in palla.
+  // I modelli **usciti da questo ampli** vengono per primi: esistono di sicuro.
+  // Gli altri arrivano dal catalogo di Soundshed e non sono verificati —
+  // chiederne uno che l'ampli non ha vuol dire fargli ricostruire un blocco DSP
+  // inesistente, ed è così che `TrebleBooster` lo mandava in palla.
+  //
+  // La distinzione resta, ma **senza scritte**: una riga separatrice fra i due
+  // mucchi. Le intestazioni dicevano la stessa cosa occupando due righe di
+  // parole in un elenco che si sfoglia col pollice.
   const visti = modelliVisti();
-  const gruppi = [
-    ['sul tuo ampli',            candidati.filter(m =>  visti.has(m))],
-    ['dal catalogo, da provare', candidati.filter(m => !visti.has(m))],
-  ];
-  for (const [titolo, elenco] of gruppi) {
-    if (!elenco.length) continue;
-    const gruppo = document.createElement('optgroup');
-    gruppo.label = titolo;
-    for (const modello of elenco) {
-      const opzione = document.createElement('option');
-      opzione.value = modello;
-      opzione.textContent = SparkEffetti.nome(modello);
-      opzione.title = modello;
-      gruppo.appendChild(opzione);
-    }
-    scelta.appendChild(gruppo);
+  const sicuri  = candidati.filter(m =>  visti.has(m));
+  const daProva = candidati.filter(m => !visti.has(m));
+
+  const metti = modello => {
+    const opzione = document.createElement('option');
+    opzione.value = modello;
+    opzione.textContent = SparkEffetti.nome(modello);
+    opzione.title = modello;
+    scelta.appendChild(opzione);
+  };
+  sicuri.forEach(metti);
+  if (sicuri.length && daProva.length) {
+    const riga = document.createElement('option');
+    riga.disabled = true;
+    riga.textContent = '──────────';
+    scelta.appendChild(riga);
   }
+  daProva.forEach(metti);
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
   // fonte elenca, e senza questa via non ci si arriverebbe mai.
   const aMano = document.createElement('option');
@@ -2508,7 +2535,7 @@ function intestazioneBlocco(effetto, posizione) {
       try {
         await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
       } catch (err) {
-        logLine('errore: ' + err.message);
+        logLine('errore: ' + err.message, true);
       }
     }
     // L'ampli scrive lui l'acceso/spento anche nel parametro che lo rispecchia
@@ -2886,7 +2913,7 @@ async function cambiaModello(posizione, nuovo) {
   if (inModifica.offline || !spark.connected) {
     logLine(inModifica.offline
       ? 'senza ampli il modello non si cambia: chiudi, connetti e riapri «Regola».'
-      : 'ampli non connesso: il cambio non è partito.');
+      : 'ampli non connesso: il cambio non è partito.', true);
     disegnaCatena();                    // la tendina torna a dire la verità
     return;
   }
@@ -2905,18 +2932,18 @@ async function cambiaModello(posizione, nuovo) {
     if (!prima) {
       logLine('non riesco a leggere la catena dall\'ampli: senza sapere cosa ' +
               'c\'è adesso, il cambio partirebbe alla cieca. Se si ripete, ' +
-              'chiudi l\'editor e riconnetti l\'ampli.');
+              'chiudi l\'editor e riconnetti l\'ampli.', true);
       disegnaCatena();
       return;
     }
 
     const vecchio = prima[posizione] && prima[posizione].name;
     if (!vecchio) {
-      logLine('quel blocco non esiste nella catena letta.');
+      logLine('quel blocco non esiste nella catena letta.', true);
       disegnaCatena();
       return;
     }
-    if (nuovo === vecchio) { logLine(`${nuovo} c'era già.`); return; }
+    if (nuovo === vecchio) { logLine(`${nuovo} c'era già.`, true); return; }
 
     logProgress(`sostituisco ${vecchio} con ${nuovo}…`);
     await spark.send(Spark.commands.changeEffectModel(vecchio, nuovo));
@@ -2928,19 +2955,19 @@ async function cambiaModello(posizione, nuovo) {
     const dopo = await aggiornaCatenaDallAmpli();
     if (!dopo) {
       logLine('comando mandato, ma non riesco a rileggere la catena: ' +
-              'riapri «Regola» per vedere com\'è rimasta.');
+              'riapri «Regola» per vedere com\'è rimasta.', true);
       return;
     }
 
     if (dopo[posizione] && dopo[posizione].name === nuovo) {
-      logLine(`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`);
+      logLine(`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`, true);
     } else {
       logLine(`il comando è partito ma quel blocco riporta ancora ` +
               `${dopo[posizione] ? dopo[posizione].name : '?'}: il modello ` +
-              'potrebbe non esistere con questo nome.');
+              'potrebbe non esistere con questo nome.', true);
     }
   } catch (err) {
-    logLine('cambio modello fallito: ' + err.message);
+    logLine('cambio modello fallito: ' + err.message, true);
   }
 }
 
@@ -3016,7 +3043,7 @@ async function svuotaCoda() {
       await spark.send(Spark.commands.changeParam(nomeEffetto, indice, valore));
     }
   } catch (err) {
-    logLine('errore: ' + err.message);
+    logLine('errore: ' + err.message, true);
     inAttesa.clear();          // non si insiste su una connessione che non va
   }
   invioInCorso = false;
@@ -3033,7 +3060,7 @@ async function svuotaCoda() {
 $('btnRileggi').addEventListener('click', async () => {
   if (!inModifica) return;
   if (inModifica.offline) {
-    logLine('stai regolando la copia in libreria: non c\'è nessun ampli da rileggere.');
+    logLine('stai regolando la copia in libreria: non c\'è nessun ampli da rileggere.', true);
     return;
   }
   if (!spark.connected) { logLine('ampli non connesso: non c\'è niente da rileggere.'); return; }
@@ -3041,14 +3068,14 @@ $('btnRileggi').addEventListener('click', async () => {
   const catena = await aggiornaCatenaDallAmpli();
   logLine(catena
     ? 'catena riletta: adesso sullo schermo c\'è quello che ha l\'ampli.'
-    : 'non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.');
+    : 'non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.', true);
 });
 
 $('btnSalvaModifiche').addEventListener('click', async () => {
   if (!inModifica) return;
   const { record, effetti } = inModifica;
   const aggiornato = await store.get(record.id);
-  if (!aggiornato) { logLine('il preset non è più in libreria.'); return; }
+  if (!aggiornato) { logLine('il preset non è più in libreria.', true); return; }
 
   aggiornato.effects = effetti.map(e => ({
     name: e.name,
@@ -3057,7 +3084,7 @@ $('btnSalvaModifiche').addEventListener('click', async () => {
   }));
   await store.put(aggiornato);
   logLine(`modifiche salvate su «${aggiornato.name}» in libreria. ` +
-          'Sull\'ampli il preset salvato non cambia finché non lo riscrivi in uno slot.');
+          'Sull\'ampli il preset salvato non cambia finché non lo riscrivi in uno slot.', true);
   await ricarica();
   disegnaPreset();
   disegnaLive();
