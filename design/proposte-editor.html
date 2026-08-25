@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor della catena — tre proposte</title>
+<style>
+  * { box-sizing:border-box; }
+  :root {
+    --bg:#14161a; --panel:#181a1f; --line:#24272c; --line-soft:#1f2228;
+    --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
+    --accent:#ff6a3d; --green:#7fe08a; --gold:#f0c040; --rosso:#ff8080;
+  }
+  body { margin:0; background:#0b0c0e; color:var(--text);
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:15px;
+         padding:24px; }
+
+  .intro { max-width:80ch; margin:0 auto 26px; }
+  .intro h1 { font-size:1.2rem; margin:0 0 8px; }
+  .intro p { color:var(--dim); font-size:0.86rem; line-height:1.6; margin:0 0 8px; }
+  .intro strong { color:var(--text); }
+  .intro code { color:var(--gold); font-size:0.85em; }
+
+  .campo { display:flex; gap:26px; justify-content:center; flex-wrap:wrap;
+           align-items:flex-start; }
+  .colonna { width:390px; }
+  .didascalia { margin-bottom:10px; }
+  .didascalia h2 { font-size:0.95rem; margin:0 0 4px; }
+  .didascalia .idea { color:var(--dim); font-size:0.8rem; line-height:1.55; margin:0; }
+  .didascalia .costo { color:var(--faint); font-size:0.76rem; margin:6px 0 0; }
+
+  /* il telaio del telefono: larghezza vera, altezza limitata, scorre dentro */
+  .telefono { width:390px; height:740px; overflow-y:auto; background:var(--bg);
+              border:1px solid #2c3038; border-radius:22px;
+              box-shadow:0 10px 40px rgba(0,0,0,0.5); }
+  .telefono::-webkit-scrollbar { width:0; }
+
+  /* ---------- pezzi comuni alle tre proposte ---------- */
+
+  .hdr { position:sticky; top:0; z-index:3; background:var(--bg);
+         border-bottom:1px solid var(--line); padding:10px 12px;
+         display:flex; align-items:center; gap:10px; }
+  .hdr .titolo { flex:1; font-weight:700; font-size:0.95rem; }
+  .hdr button { background:#22262d; color:var(--text); border:1px solid var(--line);
+                border-radius:8px; padding:6px 10px; font-size:0.78rem; cursor:pointer; }
+  .hdr button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+  /* La fascia che dice in che modo sei. Colorata, non una parola in fondo a
+     una riga: la differenza fra regolare un suono e regolare una scheda non
+     si deve indovinare. */
+  .fascia { padding:6px 12px; font-size:0.74rem; letter-spacing:0.02em;
+            background:rgba(240,192,64,0.14); color:var(--gold);
+            border-bottom:1px solid rgba(240,192,64,0.25); }
+  .fascia.viva { background:rgba(127,224,138,0.12); color:var(--green);
+                 border-bottom-color:rgba(127,224,138,0.25); }
+
+  /* ---------- la catena in cima ---------- */
+
+  .catena { display:flex; gap:8px; overflow-x:auto; padding:12px;
+            scroll-snap-type:x proximity; }
+  .catena::-webkit-scrollbar { height:0; }
+  .tassello { position:relative; flex:0 0 96px; scroll-snap-align:center;
+              background:var(--panel); border:1px solid var(--line);
+              border-radius:12px; padding:8px 8px 6px; cursor:pointer;
+              display:flex; flex-direction:column; gap:6px; }
+  .tassello.scelto { border-color:var(--cat); box-shadow:0 0 0 1px var(--cat) inset; }
+  .tassello.spento { opacity:0.42; }
+  .tassello .cat { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
+                   color:var(--cat); font-weight:700; }
+  .tassello .modello { font-size:0.76rem; line-height:1.2; min-height:2.4em; }
+  .tassello .led { position:absolute; top:8px; right:8px; width:7px; height:7px;
+                   border-radius:50%; background:#33383f; }
+  .tassello.acceso .led { background:var(--cat); box-shadow:0 0 6px var(--cat); }
+  /* le barrettine: non si leggono i numeri, si vede la forma del suono */
+  .barrette { display:flex; align-items:flex-end; gap:2px; height:16px; }
+  .barrette i { flex:1; background:var(--cat); opacity:0.55; border-radius:1px;
+                min-height:1px; }
+  .filo { flex:0 0 10px; align-self:center; height:1px; background:var(--line);
+          margin:0 -3px; }
+
+  /* ---------- il blocco a fuoco ---------- */
+
+  .fuoco { padding:4px 14px 20px; }
+  .barraFuoco { display:flex; align-items:center; gap:8px; margin:6px 0 10px; }
+  .barraFuoco .freccia { background:none; border:1px solid var(--line); color:var(--dim);
+                         border-radius:8px; width:30px; height:30px; cursor:pointer;
+                         font-size:0.9rem; }
+  .barraFuoco .dove { flex:1; text-align:center; font-size:0.66rem; letter-spacing:0.08em;
+                      text-transform:uppercase; color:var(--cat); font-weight:700; }
+  select.modello { width:100%; background:#1d2027; color:var(--text);
+                   border:1px solid var(--line); border-radius:10px;
+                   padding:10px 12px; font-size:0.95rem; font-family:inherit; }
+  .interruttore { width:100%; margin-top:8px; padding:10px; border-radius:10px;
+                  border:1px solid var(--line); background:#1d2027; color:var(--dim);
+                  font-size:0.8rem; cursor:pointer; letter-spacing:0.04em; }
+  .interruttore.acceso { border-color:var(--cat); color:var(--cat);
+                         background:color-mix(in srgb, var(--cat) 12%, #1d2027); }
+
+  /* ---------- manopole a cursore ---------- */
+
+  .manopola { margin-top:16px; }
+  .etichetta { display:flex; justify-content:space-between; align-items:baseline;
+               margin-bottom:6px; }
+  .etichetta .nome { font-size:0.84rem; }
+  .etichetta .nome.proposto { font-style:italic; color:var(--dim); }
+  .etichetta .val { font-variant-numeric:tabular-nums; color:var(--cat);
+                    font-weight:700; font-size:0.9rem; }
+  input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:26px;
+                      background:none; cursor:pointer; }
+  input[type=range]::-webkit-slider-runnable-track {
+    height:6px; border-radius:3px;
+    background:linear-gradient(to right, var(--cat) calc(var(--p) * 100%),
+                               #2a2e35 calc(var(--p) * 100%)); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance:none; width:24px; height:24px; border-radius:50%;
+    background:#e8e8ea; border:3px solid var(--bg); margin-top:-9px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.6); }
+
+  /* ---------- manopole vere ---------- */
+
+  .griglia { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px 6px;
+             margin-top:14px; }
+  .griglia.cinque { grid-template-columns:repeat(5, 1fr); gap:8px 2px; }
+  .pomello { text-align:center; cursor:ns-resize; touch-action:none; color:var(--cat);
+             user-select:none; -webkit-user-select:none; }
+  .pomello svg { display:block; margin:0 auto 4px; }
+  .pomello .nome { font-size:0.68rem; color:var(--dim); line-height:1.2;
+                   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pomello .nome.proposto { font-style:italic; }
+  .pomello .val { font-size:0.68rem; color:var(--cat); font-variant-numeric:tabular-nums; }
+  .griglia.cinque .pomello .nome { font-size:0.62rem; }
+
+  /* la bolla del valore mentre si trascina */
+  .bolla { position:fixed; z-index:9; transform:translate(-50%,-140%);
+           background:var(--text); color:#101216; font-weight:700; font-size:1.1rem;
+           padding:6px 12px; border-radius:10px; pointer-events:none; display:none;
+           font-variant-numeric:tabular-nums; }
+
+  /* ---------- fisarmonica ---------- */
+
+  .riga { border-bottom:1px solid var(--line-soft); }
+  .testaRiga { display:flex; align-items:center; gap:10px; padding:12px 14px;
+               cursor:pointer; }
+  .testaRiga .pallino { width:9px; height:9px; border-radius:50%; background:#33383f;
+                        flex:0 0 auto; }
+  .riga.acceso .testaRiga .pallino { background:var(--cat); box-shadow:0 0 6px var(--cat); }
+  .testaRiga .testi { flex:1; min-width:0; }
+  .testaRiga .cat { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
+                    color:var(--cat); font-weight:700; }
+  .testaRiga .modello { font-size:0.9rem; }
+  .riga.spento .testi { opacity:0.45; }
+  .testaRiga .barrette { width:54px; flex:0 0 auto; }
+  .testaRiga .chevron { color:var(--faint); font-size:0.8rem; }
+  .corpo { padding:0 14px 18px; }
+
+  .nota { color:var(--faint); font-size:0.72rem; line-height:1.5; padding:14px;
+          border-top:1px solid var(--line-soft); }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Editor della catena — tre proposte</h1>
+  <p>Non è l'app: è un banco di prova per <strong>scegliere</strong>. Le tre colonne
+    mostrano lo stesso preset con la stessa catena — sette blocchi, nomi veri presi da
+    <code>src/spark-effetti.js</code> — disposti in tre modi diversi. Si toccano: i
+    tasselli cambiano blocco, le manopole si girano, l'interruttore spegne.</p>
+  <p>Il problema da risolvere non è la bruttezza, è che <strong>sette blocchi con tutte
+    le manopole aperte fanno tre schermate</strong> in cui non si capisce mai a che punto
+    della catena si sta mettendo le mani.</p>
+  <p>Le domande da farsi guardandole, possibilmente sul telefono e non qui:
+    <strong>trovo il blocco che voglio senza cercarlo?</strong> —
+    <strong>capisco com'è messo il suono senza aprire niente?</strong> —
+    <strong>la manopola la prendo col pollice al primo colpo?</strong></p>
+  <p>Due cose valgono per tutte e tre, e non sono il vantaggio di una sull'altra: la
+    <strong>fascia colorata</strong> in cima dice in che modo sei — gialla senza ampli
+    (A e C), verde quando stai girando il suono che suona (B) — e le manopole dell'ampli
+    sono nell'ordine del frontale, Gain Bass Middle Treble Master, non in quello degli
+    indici.</p>
+</div>
+
+<div class="campo">
+  <div class="colonna">
+    <div class="didascalia">
+      <h2>A · Catena e pannello, cursori</h2>
+      <p class="idea">La catena in cima nell'ordine del segnale, un blocco alla volta
+        sotto. I cursori restano quelli di adesso, ma larghi tutta la riga e col valore
+        grande mentre trascini.</p>
+      <p class="costo">Il grosso del lavoro è la striscia. Le manopole si spostano com'erano.</p>
+    </div>
+    <div class="telefono" id="telA"></div>
+  </div>
+
+  <div class="colonna">
+    <div class="didascalia">
+      <h2>B · Catena e pannello, manopole vere</h2>
+      <p class="idea">Stessa struttura, ma le manopole si girano trascinando in verticale.
+        Sull'ampli sono cinque in fila come sul frontale, <strong>nell'ordine
+        dell'ampli</strong> (Gain, Bass, Middle, Treble, Master) e non in quello degli
+        indici.</p>
+      <p class="costo">La striscia più i pomelli: un componente nuovo da fare bene sul touch.</p>
+    </div>
+    <div class="telefono" id="telB"></div>
+  </div>
+
+  <div class="colonna">
+    <div class="didascalia">
+      <h2>C · Fisarmonica</h2>
+      <p class="idea">Nessun pannello a parte: i sette blocchi restano una lista, chiusi,
+        e quello che tocchi si apre in mezzo agli altri. Chiusa si vede tutta la catena
+        in un'occhiata — <strong>ma appena ne apri uno, gli ultimi tornano sotto la
+        piega</strong>, ed è il difetto da pesare guardandola.</p>
+      <p class="costo">La più vicina a quello che c'è già: è la stessa pagina, chiusa di
+        partenza.</p>
+    </div>
+    <div class="telefono" id="telC"></div>
+  </div>
+</div>
+
+<div class="bolla" id="bolla"></div>
+
+<script src="../src/spark-effetti.js"></script>
+<script>
+'use strict';
+
+/* Un preset vero, con modelli che dall'ampli sono usciti davvero. I nomi delle
+   manopole li chiediamo al catalogo, come fa l'app: in corsivo quelli proposti
+   dalla tabella, tondi quelli che l'utente ha battezzato. Qui fingiamo che ne
+   abbia battezzato qualcuno, per far vedere la differenza. */
+const CATEGORIE = [
+  { nome: 'noise gate',   colore: '#7f8c9b' },
+  { nome: 'compressore',  colore: '#b07fd0' },
+  { nome: 'drive',        colore: '#ff8a3d' },
+  { nome: 'ampli',        colore: '#f0c040' },
+  { nome: 'modulazione',  colore: '#4fd1c5' },
+  { nome: 'delay',        colore: '#5aa9ff' },
+  { nome: 'riverbero',    colore: '#8f9bff' },
+];
+
+const BLOCCHI = [
+  { modello: 'bias.noisegate', acceso: true,  valori: [0.22, 0.38] },
+  { modello: 'LA2AComp',       acceso: false, valori: [0.50, 0.62, 0.44] },
+  { modello: 'Booster',        acceso: true,  valori: [0.34] },
+  { modello: 'Twin',           acceso: true,  valori: [0.61, 0.55, 0.48, 0.52, 0.72] },
+  { modello: 'Cloner',         acceso: false, valori: [0.30, 0.55] },
+  { modello: 'DelayRe201',     acceso: true,  valori: [0.28, 0.45, 0.60, 0.33, 0.50] },
+  { modello: 'bias.reverb',    acceso: true,  valori: [0.42, 0.55, 0.20, 0.70, 0.35, 0.48] },
+];
+
+/* I nomi che l'utente avrebbe già dato girando e ascoltando: vincono sulla
+   tabella e si vedono tondi invece che in corsivo. */
+const BATTEZZATI = { 'Twin': { 0: 'Gain', 4: 'Volume' } };
+
+/** Sull'ampli le manopole si leggono Gain, Bass, Middle, Treble, Master; negli
+ *  indici invece stanno Gain(0), Treble(1), Middle(2), Bass(3), Master(4).
+ *  Trascrivendo dall'interfaccia si sbaglia in silenzio: qui l'ordine di
+ *  lettura è dichiarato, non dedotto. */
+const ORDINE_AMPLI = [0, 3, 2, 1, 4];
+
+const nomeModello = m =>
+  (window.SparkEffetti && SparkEffetti.nome(m)) || m;
+
+function nomeManopola(modello, indice, quante) {
+  const dato = (BATTEZZATI[modello] || {})[indice];
+  if (dato) return { testo: dato, proposto: false };
+  const tabella = window.SparkEffetti &&
+                  SparkEffetti.manopola(modello, indice, quante);
+  return tabella ? { testo: tabella, proposto: true }
+                 : { testo: String(indice + 1), proposto: true };
+}
+
+/** Lo stato è uno per proposta: si girano indipendentemente, così si possono
+ *  confrontare due disposizioni sullo stesso suono senza che si copino. */
+const statoNuovo = () => ({
+  scelto: 3,                                   // si parte dall'ampli
+  blocchi: BLOCCHI.map(b => ({ modello: b.modello, acceso: b.acceso,
+                               valori: b.valori.slice() })),
+});
+
+/* ------------------------------------------------------------------ */
+
+const el = (tag, cls, testo) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (testo !== undefined) n.textContent = testo;
+  return n;
+};
+
+function intestazione(telefono, viva) {
+  const hdr = el('div', 'hdr');
+  const indietro = el('button', '', '‹');
+  hdr.append(indietro, el('div', 'titolo', 'Notturno'));
+  hdr.append(el('button', '', 'Rileggi'));
+  const salva = el('button', 'primary', 'Salva');
+  hdr.appendChild(salva);
+  telefono.appendChild(hdr);
+
+  const fascia = el('div', 'fascia' + (viva ? ' viva' : ''),
+    viva ? 'stai girando il suono che l\'ampli sta suonando'
+         : 'senza ampli: stai regolando la copia in libreria');
+  telefono.appendChild(fascia);
+}
+
+/** Le barrettine coi valori: la forma del suono, senza numeri da leggere. */
+function barrette(valori) {
+  const box = el('div', 'barrette');
+  valori.slice(0, 5).forEach(v => {
+    const barra = el('i');
+    barra.style.height = Math.max(2, Math.round(v * 16)) + 'px';
+    box.appendChild(barra);
+  });
+  return box;
+}
+
+/* ------------------------------------------------------------------
+   La striscia della catena, comune ad A e B
+   ------------------------------------------------------------------ */
+
+function striscia(stato, ridisegna) {
+  const fila = el('div', 'catena');
+  stato.blocchi.forEach((blocco, i) => {
+    if (i) fila.appendChild(el('div', 'filo'));
+    const tassello = el('div', 'tassello' +
+      (i === stato.scelto ? ' scelto' : '') +
+      (blocco.acceso ? ' acceso' : ' spento'));
+    tassello.style.setProperty('--cat', CATEGORIE[i].colore);
+    tassello.append(
+      el('div', 'led'),
+      el('div', 'cat', CATEGORIE[i].nome),
+      el('div', 'modello', nomeModello(blocco.modello)),
+      barrette(blocco.valori));
+    tassello.addEventListener('click', () => { stato.scelto = i; ridisegna(); });
+    fila.appendChild(tassello);
+  });
+  return fila;
+}
+
+/* ------------------------------------------------------------------
+   Il blocco a fuoco
+   ------------------------------------------------------------------ */
+
+function pannelloFuoco(stato, ridisegna, conPomelli) {
+  const i = stato.scelto;
+  const blocco = stato.blocchi[i];
+  const fuoco = el('div', 'fuoco');
+  fuoco.style.setProperty('--cat', CATEGORIE[i].colore);
+
+  const barra = el('div', 'barraFuoco');
+  const prima = el('button', 'freccia', '‹');
+  const dopo  = el('button', 'freccia', '›');
+  prima.disabled = i === 0;
+  dopo.disabled  = i === stato.blocchi.length - 1;
+  prima.addEventListener('click', () => { stato.scelto = i - 1; ridisegna(); });
+  dopo.addEventListener('click',  () => { stato.scelto = i + 1; ridisegna(); });
+  barra.append(prima, el('div', 'dove', CATEGORIE[i].nome), dopo);
+  fuoco.appendChild(barra);
+
+  fuoco.appendChild(tendinaModello(blocco));
+  fuoco.appendChild(interruttore(blocco, ridisegna));
+  fuoco.appendChild(conPomelli ? pomelli(blocco) : cursori(blocco));
+  return fuoco;
+}
+
+function tendinaModello(blocco) {
+  const scelta = el('select', 'modello');
+  const opzione = el('option', '', nomeModello(blocco.modello));
+  scelta.appendChild(opzione);
+  scelta.title = blocco.modello;
+  return scelta;
+}
+
+function interruttore(blocco, ridisegna) {
+  const tasto = el('button', 'interruttore' + (blocco.acceso ? ' acceso' : ''),
+                   blocco.acceso ? 'acceso' : 'spento');
+  tasto.addEventListener('click', () => { blocco.acceso = !blocco.acceso; ridisegna(); });
+  return tasto;
+}
+
+/* ---------- cursori ---------- */
+
+/**
+ * L'ordine in cui si leggono le manopole sullo schermo. Per l'ampli è quello
+ * del frontale, non quello degli indici, e vale per tutte e tre le proposte:
+ * è una correzione a sé, non il vantaggio di una disposizione sull'altra.
+ */
+function ordineDi(blocco) {
+  const ampli = blocco.valori.length === 5 && window.SparkEffetti &&
+                SparkEffetti.manopola(blocco.modello, 4, 5) === 'Master';
+  return ampli ? ORDINE_AMPLI : blocco.valori.map((_, i) => i);
+}
+
+function cursori(blocco) {
+  const box = el('div');
+  ordineDi(blocco).forEach(indice => box.appendChild(rigaCursore(blocco, indice)));
+  return box;
+}
+
+function rigaCursore(blocco, indice) {
+  const riga = el('div', 'manopola');
+  const nome = nomeManopola(blocco.modello, indice, blocco.valori.length);
+
+  const etichetta = el('div', 'etichetta');
+  etichetta.appendChild(el('div', 'nome' + (nome.proposto ? ' proposto' : ''), nome.testo));
+  const val = el('div', 'val', blocco.valori[indice].toFixed(2));
+  etichetta.appendChild(val);
+  riga.appendChild(etichetta);
+
+  const cursore = el('input');
+  cursore.type = 'range';
+  cursore.min = 0; cursore.max = 1; cursore.step = 0.01;
+  cursore.value = blocco.valori[indice];
+  cursore.style.setProperty('--p', blocco.valori[indice]);
+  const muovi = () => {
+    blocco.valori[indice] = Number(cursore.value);
+    cursore.style.setProperty('--p', cursore.value);
+    val.textContent = Number(cursore.value).toFixed(2);
+    mostraBolla(cursore, val.textContent);
+  };
+  cursore.addEventListener('input', muovi);
+  cursore.addEventListener('pointerup', nascondiBolla);
+  cursore.addEventListener('pointercancel', nascondiBolla);
+  riga.appendChild(cursore);
+  return riga;
+}
+
+/* ---------- pomelli ---------- */
+
+/**
+ * Si gira trascinando **in verticale**, non in cerchio: col dito il cerchio è
+ * un terno al lotto, e sui pedali veri nessuno gira guardando il polso.
+ * Trecento pixel di corsa da zero a uno, che è più fine di un cursore largo
+ * quanto lo schermo.
+ */
+function pomelli(blocco) {
+  const ordine = ordineDi(blocco);
+  const ampli = ordine === ORDINE_AMPLI;
+  const griglia = el('div', 'griglia' + (ampli ? ' cinque' : ''));
+  ordine.forEach(indice => griglia.appendChild(pomello(blocco, indice)));
+  return griglia;
+}
+
+function pomello(blocco, indice) {
+  const nome = nomeManopola(blocco.modello, indice, blocco.valori.length);
+  const box = el('div', 'pomello');
+  const grande = blocco.valori.length <= 3 ? 62 : 52;
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('width', grande);
+  svg.setAttribute('height', grande);
+  svg.setAttribute('viewBox', '0 0 100 100');
+
+  const guida = document.createElementNS(ns, 'circle');
+  guida.setAttribute('cx', 50); guida.setAttribute('cy', 50); guida.setAttribute('r', 42);
+  guida.setAttribute('fill', 'none'); guida.setAttribute('stroke', '#333941');
+  guida.setAttribute('stroke-width', 7); guida.setAttribute('stroke-linecap', 'round');
+  guida.setAttribute('transform', 'rotate(135 50 50)');
+  guida.setAttribute('stroke-dasharray', `${2 * Math.PI * 42 * 0.75} 999`);
+
+  const arco = document.createElementNS(ns, 'circle');
+  arco.setAttribute('cx', 50); arco.setAttribute('cy', 50); arco.setAttribute('r', 42);
+  arco.setAttribute('fill', 'none'); arco.setAttribute('stroke', 'currentColor');
+  arco.setAttribute('stroke-width', 7); arco.setAttribute('stroke-linecap', 'round');
+  arco.setAttribute('transform', 'rotate(135 50 50)');
+
+  const corpo = document.createElementNS(ns, 'circle');
+  corpo.setAttribute('cx', 50); corpo.setAttribute('cy', 50); corpo.setAttribute('r', 30);
+  corpo.setAttribute('fill', '#262b33'); corpo.setAttribute('stroke', '#363c45');
+
+  const tacca = document.createElementNS(ns, 'line');
+  tacca.setAttribute('x1', 50); tacca.setAttribute('y1', 26);
+  tacca.setAttribute('x2', 50); tacca.setAttribute('y2', 44);
+  tacca.setAttribute('stroke', 'currentColor'); tacca.setAttribute('stroke-width', 5);
+  tacca.setAttribute('stroke-linecap', 'round');
+
+  svg.append(guida, arco, corpo, tacca);
+  const etichetta = el('div', 'nome' + (nome.proposto ? ' proposto' : ''), nome.testo);
+  const valore = el('div', 'val');
+  box.append(svg, etichetta, valore);
+
+  const disegna = () => {
+    const v = blocco.valori[indice];
+    const giro = 2 * Math.PI * 42 * 0.75;
+    arco.setAttribute('stroke-dasharray', `${giro * v} 999`);
+    tacca.setAttribute('transform', `rotate(${135 + v * 270} 50 50)`);
+    valore.textContent = v.toFixed(2);
+  };
+  disegna();
+
+  let partenzaY = null, partenzaV = 0;
+  box.addEventListener('pointerdown', evento => {
+    partenzaY = evento.clientY;
+    partenzaV = blocco.valori[indice];
+    box.setPointerCapture(evento.pointerId);
+    mostraBolla(box, blocco.valori[indice].toFixed(2));
+  });
+  box.addEventListener('pointermove', evento => {
+    if (partenzaY === null) return;
+    const passo = (partenzaY - evento.clientY) / 300;   // 300 px da zero a uno
+    blocco.valori[indice] = Math.min(1, Math.max(0, partenzaV + passo));
+    disegna();
+    mostraBolla(box, blocco.valori[indice].toFixed(2));
+  });
+  const fine = () => { partenzaY = null; nascondiBolla(); };
+  box.addEventListener('pointerup', fine);
+  box.addEventListener('pointercancel', fine);
+  return box;
+}
+
+/* ---------- la bolla del valore ---------- */
+
+const bolla = document.getElementById('bolla');
+function mostraBolla(dentro, testo) {
+  const r = dentro.getBoundingClientRect();
+  bolla.textContent = testo;
+  bolla.style.display = 'block';
+  bolla.style.left = (r.left + r.width / 2) + 'px';
+  bolla.style.top  = r.top + 'px';
+}
+function nascondiBolla() { bolla.style.display = 'none'; }
+
+/* ------------------------------------------------------------------
+   Le tre proposte
+   ------------------------------------------------------------------ */
+
+function proposta(telefonoId, conPomelli, viva) {
+  const telefono = document.getElementById(telefonoId);
+  const stato = statoNuovo();
+  const ridisegna = () => {
+    const scorrimento = telefono.scrollTop;
+    telefono.innerHTML = '';
+    intestazione(telefono, viva);
+    telefono.appendChild(striscia(stato, ridisegna));
+    telefono.appendChild(pannelloFuoco(stato, ridisegna, conPomelli));
+    telefono.appendChild(el('div', 'nota',
+      'Le barrettine sui tasselli dicono come sta il suono senza aprirlo. ' +
+      'I nomi in corsivo vengono dal catalogo e sono proposte: quelli tondi ' +
+      'li hai messi tu.'));
+    telefono.scrollTop = scorrimento;
+    // il tassello scelto va portato in vista: sennò cambiando blocco con le
+    // frecce la striscia resta ferma e sembra che non sia successo niente
+    const scelto = telefono.querySelector('.tassello.scelto');
+    if (scelto) scelto.scrollIntoView({ block:'nearest', inline:'center' });
+  };
+  ridisegna();
+}
+
+function fisarmonica(telefonoId) {
+  const telefono = document.getElementById(telefonoId);
+  const stato = statoNuovo();
+  const ridisegna = () => {
+    const scorrimento = telefono.scrollTop;
+    telefono.innerHTML = '';
+    intestazione(telefono, false);
+
+    stato.blocchi.forEach((blocco, i) => {
+      const aperto = i === stato.scelto;
+      const riga = el('div', 'riga' + (blocco.acceso ? ' acceso' : ' spento'));
+      riga.style.setProperty('--cat', CATEGORIE[i].colore);
+
+      const testa = el('div', 'testaRiga');
+      const testi = el('div', 'testi');
+      testi.append(el('div', 'cat', CATEGORIE[i].nome),
+                   el('div', 'modello', nomeModello(blocco.modello)));
+      testa.append(el('div', 'pallino'), testi);
+      if (!aperto) testa.appendChild(barrette(blocco.valori));
+      testa.appendChild(el('div', 'chevron', aperto ? '▾' : '▸'));
+      testa.addEventListener('click', () => {
+        stato.scelto = aperto ? -1 : i;
+        ridisegna();
+      });
+      riga.appendChild(testa);
+
+      if (aperto) {
+        const corpo = el('div', 'corpo');
+        corpo.appendChild(interruttore(blocco, ridisegna));
+        corpo.appendChild(cursori(blocco));
+        riga.appendChild(corpo);
+      }
+      telefono.appendChild(riga);
+    });
+
+    telefono.appendChild(el('div', 'nota',
+      'Tutta la catena resta in un\'occhiata: si apre solo quello che stai ' +
+      'toccando, e gli altri restano dove sono.'));
+    telefono.scrollTop = scorrimento;
+  };
+  ridisegna();
+}
+
+proposta('telA', false, false);
+proposta('telB', true,  true);
+fisarmonica('telC');
+</script>
+</body>
+</html>
