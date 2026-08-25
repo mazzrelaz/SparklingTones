@@ -430,13 +430,24 @@
 
   /* ---- editor della catena ------------------------------------------- */
 
-  /* Il nome del preset che si sta regolando: la prima cosa da leggere. */
-  .titolo-grande { font-size:1.4rem; margin:0 0 4px; letter-spacing:-0.02em;
-                   font-family:var(--strumento); }
-  /* Il nome del preset, nell'editor: grande, in centro, e con dell'aria
-     intorno. È la prima cosa da leggere in un pannello che cambia il suono
-     sotto le dita — sapere *quale* suono si sta cambiando. */
-  .titolo-editor { text-align:center; font-size:1.6rem; margin:34px 0 12px; }
+  /* Il nome del preset che si sta regolando, dentro un'insegna al neon: è la
+     prima cosa da leggere in un pannello che cambia il suono sotto le dita —
+     sapere *quale* suono. Il colore è quello della sua famiglia (clean, drive,
+     acoustic); chi non ne ha resta bianco, perché un colore inventato qui si
+     leggerebbe come una famiglia che non c'è.
+
+     Il titolo va per id e non per classe: `.pannello h2` è più specifico di una
+     classe e vinceva lui, quindi la misura scritta qui non si vedeva. */
+  #riquadroPreset { width:fit-content; max-width:100%; margin:44px auto 14px;
+                    padding:12px 26px; border-radius:16px; background:#0e1014;
+                    border:1px solid var(--fam, #ffffff);
+                    box-shadow:0 0 0 1px var(--fam, #ffffff) inset,
+                               0 0 12px -2px var(--fam, #ffffff),
+                               0 0 34px -10px var(--fam, #ffffff); }
+  #titoloEditor { margin:0; text-align:center; font-size:2rem; line-height:1.15;
+                  letter-spacing:-0.02em; color:var(--fam, #ffffff);
+                  text-shadow:0 0 10px var(--fam, #ffffff),
+                              0 0 26px var(--fam, #ffffff); }
   .modo-editor { text-align:center; font-family:var(--strumento);
                  font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em;
                  font-weight:700; color:var(--gold); margin:0 0 18px;
@@ -449,16 +460,17 @@
      spazio da mangiare. */
   #pannelloEditor.aperto { display:flex; flex-direction:column; }
   #pannelloEditor #catena { flex:1; display:flex; flex-direction:column; }
-  /* Niente restringimenti: su uno schermo basso il flex schiaccerebbe le
-     manopole invece di far scorrere il pannello, e i pomelli diventerebbero
-     ellissi. Quando non ci stanno, si scorre. */
-  #pannelloEditor .striscia,
-  #pannelloEditor .blocco.aFuoco { flex:0 0 auto; }
-  /* Lo spazio libero va **sopra la catena**, non fra la catena e le
-     regolazioni: quelle due si leggono insieme — tocchi un tassello e guardi
-     cosa c'è dentro — e un vuoto in mezzo le farebbe sembrare due cose
-     diverse. Scendono in fondo attaccate, e l'aria resta al nome del preset. */
-  #pannelloEditor .striscia { margin-top:auto; }
+  /* La striscia non si restringe mai: su uno schermo basso il flex la
+     schiaccerebbe invece di far scorrere il pannello. */
+  #pannelloEditor .striscia { flex:0 0 auto; }
+  /* Lo spazio che avanza **non resta vuoto**: se lo prende il riquadro delle
+     regolazioni, che si allunga fino in fondo e distribuisce le manopole
+     dentro. L'aria sta sopra il nome del preset — quella è voluta — ma fra il
+     nome e la catena no: sono la stessa cosa vista da due distanze.
+     `flex:1 0 auto` cresce e non si stringe: le manopole non diventano mai
+     ellissi, e se non ci stanno il pannello scorre. */
+  #pannelloEditor .blocco.aFuoco { flex:1 0 auto; display:flex; flex-direction:column; }
+  #pannelloEditor .pomelli { flex:1; justify-content:space-evenly; }
   /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
      Il fondo dentro è più scuro della pagina, non più chiaro: il neon si vede
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
@@ -930,10 +942,10 @@
     <button id="btnSalvaModifiche">Salva in libreria</button>
     <button class="primary" data-chiudi="pannelloEditor">Fatto</button>
   </div>
-  <!-- Il nome del preset che si sta regolando: grande, su una riga sua.
-       Accanto al marchio non si leggeva, e in un pannello che cambia il suono
-       sotto le dita sapere *quale* suono si sta cambiando è la prima cosa. -->
-  <h2 id="titoloEditor" class="titolo-grande titolo-editor">Regola il suono</h2>
+  <!-- Il nome del preset, dentro un'insegna al neon del colore della sua
+       famiglia di suono: clean, drive, acoustic. Chi non ne ha resta bianco —
+       un colore inventato qui si leggerebbe come una famiglia che non c'è. -->
+  <div id="riquadroPreset"><h2 id="titoloEditor">Regola il suono</h2></div>
   <!-- La modalita' e' uno stato, non un messaggio: sta qui sotto il nome e non
        nella riga di stato, che deve restare libera per le risposte. -->
   <div id="modoEditor" class="modo-editor" hidden>senza ampli</div>
@@ -2247,7 +2259,7 @@ async function apriEditor(record) {
       attendibile: false,          // non c'è nessun ampli di cui fidarsi
       effetti: copiaEffetti(record.effects),
     };
-    $('titoloEditor').textContent = record.name;
+    accendiInsegna(record);
     $('modoEditor').hidden = false;   // lo stato sta sotto il nome, non nel log
     $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
     disegnaCatena();
@@ -2277,7 +2289,7 @@ async function apriEditor(record) {
     attendibile: true,
     effetti: copiaEffetti(attuale.effects),
   };
-  $('titoloEditor').textContent = record.name;
+  accendiInsegna(record);
   $('modoEditor').hidden = true;
   $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
   disegnaCatena();
@@ -2329,6 +2341,18 @@ function èFrontale(effetto, vere) {
     SparkEffetti.manopola(effetto.name, vere[i].index, vere.length) === atteso);
 }
 
+
+/**
+ * L'insegna col nome del preset, accesa del colore della sua famiglia di
+ * suono. Senza famiglia resta bianca: inventarle un colore qui vorrebbe dire
+ * far leggere una famiglia che non c'è.
+ */
+function accendiInsegna(record) {
+  const scelta = record && record.famiglia &&
+                 famiglie.find(f => f.id === record.famiglia);
+  $('titoloEditor').textContent = record.name;
+  $('riquadroPreset').style.setProperty('--fam', scelta ? scelta.colore : '#ffffff');
+}
 function disegnaCatena() {
   const catena = $('catena');
   catena.innerHTML = '';
