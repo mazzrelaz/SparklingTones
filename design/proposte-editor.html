@@ -63,8 +63,9 @@
               background:var(--panel); border:1px solid var(--line);
               border-radius:12px; padding:8px 8px 6px; cursor:pointer;
               display:flex; flex-direction:column; gap:6px; }
-  .tassello.scelto { border-color:var(--cat); box-shadow:0 0 0 1px var(--cat) inset; }
-  .tassello.spento { opacity:0.42; }
+  .tassello.scelto { border-color:var(--cat);
+                     box-shadow:0 0 0 1px var(--cat) inset, 0 0 14px -4px var(--cat); }
+  .tassello.spento { opacity:0.5; }
   .tassello .cat { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
                    color:var(--cat); font-weight:700; }
   .tassello .modello { font-size:0.76rem; line-height:1.2; min-height:2.4em; }
@@ -73,7 +74,7 @@
   .tassello.acceso .led { background:var(--cat); box-shadow:0 0 6px var(--cat); }
   /* le barrettine: non si leggono i numeri, si vede la forma del suono */
   .barrette { display:flex; align-items:flex-end; gap:2px; height:16px; }
-  .barrette i { flex:1; background:var(--cat); opacity:0.55; border-radius:1px;
+  .barrette i { flex:1; background:var(--cat); opacity:0.9; border-radius:1px;
                 min-height:1px; }
   .filo { flex:0 0 10px; align-self:center; height:1px; background:var(--line);
           margin:0 -3px; }
@@ -123,12 +124,20 @@
   .griglia.cinque { grid-template-columns:repeat(5, 1fr); gap:8px 2px; }
   .pomello { text-align:center; cursor:ns-resize; touch-action:none; color:var(--cat);
              user-select:none; -webkit-user-select:none; }
-  .pomello svg { display:block; margin:0 auto 4px; }
+  .pomello svg { display:block; margin:0 auto 4px;
+                 filter:drop-shadow(0 0 6px color-mix(in srgb, var(--cat) 55%, transparent)); }
   .pomello .nome { font-size:0.68rem; color:var(--dim); line-height:1.2;
                    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pomello .nome.proposto { font-style:italic; }
-  .pomello .val { font-size:0.68rem; color:var(--cat); font-variant-numeric:tabular-nums; }
+  .pomello .val { font-size:0.72rem; color:var(--cat); font-weight:700;
+                  font-variant-numeric:tabular-nums; }
   .griglia.cinque .pomello .nome { font-size:0.62rem; }
+  .pomello.scelta { display:flex; flex-direction:column; justify-content:center;
+                    cursor:default; }
+  .pomello.scelta select { width:100%; background:#1d2027; color:var(--cat);
+                           border:1px solid var(--cat); border-radius:8px;
+                           padding:6px 4px; font-size:0.7rem; font-family:inherit;
+                           margin-bottom:4px; }
 
   /* la bolla del valore mentre si trascina */
   .bolla { position:fixed; z-index:9; transform:translate(-50%,-140%);
@@ -227,14 +236,19 @@
    manopole li chiediamo al catalogo, come fa l'app: in corsivo quelli proposti
    dalla tabella, tondi quelli che l'utente ha battezzato. Qui fingiamo che ne
    abbia battezzato qualcuno, per far vedere la differenza. */
+/* Sette colori, uno per posizione della catena, e devono essere **accesi**:
+   su un fondo così scuro un colore smorto diventa grigio, e la categoria si
+   legge solo leggendo la parola. Sette tinte distinte in giro per la ruota —
+   ciano, magenta, arancio, giallo, verde acqua, azzurro, viola — così due
+   blocchi vicini non si confondono nemmeno con la coda dell'occhio. */
 const CATEGORIE = [
-  { nome: 'noise gate',   colore: '#7f8c9b' },
-  { nome: 'compressore',  colore: '#b07fd0' },
-  { nome: 'drive',        colore: '#ff8a3d' },
-  { nome: 'ampli',        colore: '#f0c040' },
-  { nome: 'modulazione',  colore: '#4fd1c5' },
-  { nome: 'delay',        colore: '#5aa9ff' },
-  { nome: 'riverbero',    colore: '#8f9bff' },
+  { nome: 'noise gate',   colore: '#00d9ff' },
+  { nome: 'compressore',  colore: '#ff4fd8' },
+  { nome: 'drive',        colore: '#ff6a2c' },
+  { nome: 'ampli',        colore: '#ffd21e' },
+  { nome: 'modulazione',  colore: '#17e39b' },
+  { nome: 'delay',        colore: '#3aa0ff' },
+  { nome: 'riverbero',    colore: '#8b6bff' },
 ];
 
 const BLOCCHI = [
@@ -244,7 +258,7 @@ const BLOCCHI = [
   { modello: 'Twin',           acceso: true,  valori: [0.61, 0.55, 0.48, 0.52, 0.72] },
   { modello: 'Cloner',         acceso: false, valori: [0.30, 0.55] },
   { modello: 'DelayRe201',     acceso: true,  valori: [0.28, 0.45, 0.60, 0.33, 0.50] },
-  { modello: 'bias.reverb',    acceso: true,  valori: [0.42, 0.55, 0.20, 0.70, 0.35, 0.48] },
+  { modello: 'bias.reverb',    acceso: true,  valori: [0.42, 0.55, 0.20, 0.70, 0.35, 0.48, 0.25] },
 ];
 
 /* I nomi che l'utente avrebbe già dato girando e ascoltando: vincono sulla
@@ -272,7 +286,7 @@ function nomeManopola(modello, indice, quante) {
 /** Lo stato è uno per proposta: si girano indipendentemente, così si possono
  *  confrontare due disposizioni sullo stesso suono senza che si copino. */
 const statoNuovo = () => ({
-  scelto: 3,                                   // si parte dall'ampli
+  scelto: Number(parametri.get("blocco") || 3),   // si parte dall'ampli
   blocchi: BLOCCHI.map(b => ({ modello: b.modello, acceso: b.acceso,
                                valori: b.valori.slice() })),
 });
@@ -439,7 +453,31 @@ function pomelli(blocco) {
   return griglia;
 }
 
+/**
+ * Certi parametri scelgono fra cose invece di scorrere — il tipo di riverbero
+ * è l'unico che conosciamo. Un pomello lì sarebbe un terno al lotto: fra le
+ * manopole ci va un elenco, e questa è una delle cose da guardare, perché una
+ * tendina in mezzo ai pomelli o sta bene o stona.
+ */
+function sceltaFraPosizioni(blocco, indice, quante) {
+  const nome = nomeManopola(blocco.modello, indice, blocco.valori.length);
+  const box = el('div', 'pomello scelta');
+  const menu = el('select');
+  const nomi = SparkEffetti.nomiPosizioni(blocco.modello, indice);
+  for (let n = 0; n < quante; n++) {
+    menu.appendChild(el('option', '', nomi ? nomi[n] : 'posizione ' + (n + 1)));
+  }
+  menu.selectedIndex = Math.min(quante - 1,
+    Math.round(blocco.valori[indice] * (quante - 1)));
+  box.append(menu, el('div', 'nome' + (nome.proposto ? ' proposto' : ''), nome.testo));
+  return box;
+}
+
 function pomello(blocco, indice) {
+  const quante = window.SparkEffetti &&
+                 SparkEffetti.posizioni(blocco.modello, indice);
+  if (quante) return sceltaFraPosizioni(blocco, indice, quante);
+
   const nome = nomeManopola(blocco.modello, indice, blocco.valori.length);
   const box = el('div', 'pomello');
   const grande = blocco.valori.length <= 3 ? 62 : 52;
@@ -525,6 +563,7 @@ function nascondiBolla() { bolla.style.display = 'none'; }
 
 function proposta(telefonoId, conPomelli, viva) {
   const telefono = document.getElementById(telefonoId);
+  if (!telefono) return;           // tolta da ?solo=
   const stato = statoNuovo();
   const ridisegna = () => {
     const scorrimento = telefono.scrollTop;
@@ -547,6 +586,7 @@ function proposta(telefonoId, conPomelli, viva) {
 
 function fisarmonica(telefonoId) {
   const telefono = document.getElementById(telefonoId);
+  if (!telefono) return;           // tolta da ?solo=
   const stato = statoNuovo();
   const ridisegna = () => {
     const scorrimento = telefono.scrollTop;
@@ -586,6 +626,25 @@ function fisarmonica(telefonoId) {
     telefono.scrollTop = scorrimento;
   };
   ridisegna();
+}
+
+/* `?solo=a`, `?solo=b`, `?solo=c` lascia una colonna sola: sul telefono tre
+   telefoni affiancati non ci stanno, e per guardarne una col pollice si vuole
+   quella e basta. */
+const parametri = new URLSearchParams(location.search);
+const solo = parametri.get('solo');
+// `&nudo` toglie i testi e lascia il telefono da solo: serve a guardarlo senza
+// le mie spiegazioni intorno, che sono quelle che ti convincono a parole.
+if (parametri.has('nudo')) {
+  document.querySelector('.intro').remove();
+  document.querySelectorAll('.didascalia').forEach(d => d.remove());
+  document.body.style.padding = '10px';
+}
+if (solo) {
+  document.querySelectorAll('.colonna').forEach(colonna => {
+    const suo = colonna.querySelector('.telefono').id.slice(-1).toLowerCase();
+    if (suo !== solo.toLowerCase()) colonna.remove();
+  });
 }
 
 proposta('telA', false, false);
