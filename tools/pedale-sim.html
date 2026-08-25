@@ -32,13 +32,21 @@
   /* ---- la scatola del pedale ---------------------------------------- */
   .pedale { background:#16171a; border:1px solid #2a2d33; border-radius:16px;
             padding:18px; max-width:620px;
+            /* confrontando due schermi la scatola si allarga: affiancati si
+               giudicano, incolonnati si guardano uno per volta. */
             box-shadow:0 10px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04); }
+  .pedale.confronto { max-width:min(980px, 96vw); }
   .testa { display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:20px; }
   /* La misura in CSS la mette il codice, in proporzione ai **millimetri** di
      vetro: è l'unico modo di confrontare formati diversi onestamente. */
   .testa canvas { image-rendering:pixelated;
                   border:6px solid #0c0d0f; border-radius:8px; background:#000;
                   box-shadow:0 0 0 1px #34383f, 0 0 18px rgba(120,190,255,.10); }
+  .schermi { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;
+            justify-content:center; }
+  .schermo { margin:0; display:flex; flex-direction:column; align-items:center; gap:7px; }
+  .schermo figcaption { font-family:'SF Mono',Consolas,monospace; font-size:0.7rem;
+                        color:#7d838c; text-align:center; line-height:1.4; }
   .misura-display { font-family:'SF Mono',Consolas,monospace; font-size:0.72rem;
                     color:#5f656e; text-align:center; margin-top:6px; }
   .banchi { display:flex; flex-direction:column; gap:10px; }
@@ -120,8 +128,8 @@
   </label>
   <label class="campo">display
     <select id="disposizione">
+      <option value="elenco" selected>elenco — il nome intero</option>
       <option value="griglia">quattro colonne — come i pedali</option>
-      <option value="elenco">elenco — il nome intero</option>
     </select>
   </label>
   <label class="campo">formato
@@ -131,12 +139,23 @@
       <option value="256x64" selected>3,12" 256×64 — SPI, il consigliato</option>
     </select>
   </label>
+  <label class="campo"><input type="checkbox" id="confronta" checked> affianca i due candidati</label>
   <label class="campo"><input type="checkbox" id="unBit"> soglia a 1 bit</label>
 </div>
-
 <div class="pedale">
   <div class="testa">
-    <canvas id="oled" width="256" height="64"></canvas>
+    <!-- Due schermi affiancati quando si confronta: stesso contenuto, stessa
+         scala, formati diversi. È l'unico modo onesto di sceglierne uno. -->
+    <div class="schermi">
+      <figure class="schermo">
+        <canvas id="oled" width="256" height="64"></canvas>
+        <figcaption id="capA"></figcaption>
+      </figure>
+      <figure class="schermo" id="figB" hidden>
+        <canvas id="oledB" width="128" height="64"></canvas>
+        <figcaption id="capB"></figcaption>
+      </figure>
+    </div>
     <div class="banchi" style="align-self:center">
       <div class="tastino" id="bancoSu">▲</div>
       <div class="etich">banco</div>
@@ -471,7 +490,7 @@ function disegna() {
 
 /* ---- l'OLED, 128×128 ----------------------------------------------- */
 
-const ctx = $('oled').getContext('2d');
+let ctx = $('oled').getContext('2d');   // cambia schermo quando si confronta
 const CH  = 4.2;                       // larghezza reale del monospace a 7 px
 const FONT = "7px Consolas, 'DejaVu Sans Mono', monospace";
 
@@ -493,7 +512,8 @@ const FORMATI = {
   '128x64':  { w: 128, h:  64, mmW: 54, mmH: 27 },
   '256x64':  { w: 256, h:  64, mmW: 72, mmH: 18 },
 };
-const PX_PER_MM = 7;     // quanto ingrandire, uguale per tutti
+// La scala non è più fissa: la decide `scala()`, perché due schermi
+// affiancati su un telefono a 7 px per millimetro non ci stanno.
 
 function formato() { return FORMATI[$('formato').value] || FORMATI['256x64']; }
 
@@ -517,17 +537,62 @@ function geometria(W, H) {
 
 let G = geometria(128, 128);     // rifatta a ogni disegno
 
+/**
+ * I due candidati, quando si confronta: a sinistra il 3,12" che fa più testo
+ * piccolo, a destra il 2,42" che ne fa metà ma con lettere una volta e mezza
+ * più grandi. Il 128×128 resta nell'elenco per memoria di com'era.
+ *
+ * Il confronto ha senso solo se stanno **alla stessa scala**, e la scala si
+ * adatta alla finestra: su un telefono 7 px per millimetro non ci starebbero,
+ * e ridurre solo quello largo falserebbe tutto. Quel che conta è che il
+ * rapporto fra i due sia vero, e la didascalia dice a quanto siamo.
+ */
+const CANDIDATI = ['256x64', '128x64'];
+
+/** Millimetri per pixel di schermo, uguali per tutti gli schermi mostrati. */
+function scala(formati) {
+  const mm = formati.reduce((somma, f) => somma + f.mmW, 0) + (formati.length - 1) * 3;
+  // Lo spazio non e' tutta la finestra: accanto agli schermi ci stanno i tasti
+  // del banco, e senza tenerne conto i due schermi vanno a capo — cioe' si
+  // smette di poterli confrontare, che era tutto il punto.
+  const spazio = Math.min(window.innerWidth - 170, 830);
+  return Math.max(2.2, Math.min(7, spazio / mm));
+}
+
 function disegnaOled() {
-  const f = formato();
-  const tela = $('oled');
+  const confronto = $('confronta').checked;
+  const formati = confronto ? CANDIDATI.map(k => FORMATI[k]) : [formato()];
+  const tele    = [$('oled'), $('oledB')];
+  const dida    = [$('capA'), $('capB')];
+  const px      = scala(formati);
+
+  $('figB').hidden = !confronto;
+  document.querySelector('.pedale').classList.toggle('confronto', confronto);
+  $('formato').disabled = confronto;
+
+  formati.forEach((f, i) => {
+    disegnaSu(tele[i], f, px);
+    dida[i].textContent = confronto
+      ? `${f.mmW === 72 ? '3,12"' : '2,42"'} · ${f.w}×${f.h} px · ${f.mmW}×${f.mmH} mm`
+      : '';
+  });
+
+  $('misuraDisplay').textContent = confronto
+    ? `alla stessa scala, 1 mm di vetro = ${px.toFixed(1)} px di schermo — ` +
+      'il 3,12" fa più testo, il 2,42" lo fa più grande'
+    : `${formati[0].w}×${formati[0].h} pixel su ${formati[0].mmW}×${formati[0].mmH} mm ` +
+      'di vetro — i formati sono alla stessa scala';
+}
+
+function disegnaSu(tela, f, px) {
   if (tela.width !== f.w || tela.height !== f.h) { tela.width = f.w; tela.height = f.h; }
   // La misura in CSS si riscrive sempre: al primo disegno il canvas ha già la
   // dimensione giusta in pixel, quindi legarla al cambio di formato voleva
-  // dire non applicarla mai — e i tre formati si vedevano alla scala sbagliata.
-  tela.style.width  = (f.mmW * PX_PER_MM) + 'px';
-  tela.style.height = (f.mmH * PX_PER_MM) + 'px';
-  $('misuraDisplay').textContent =
-    `${f.w}×${f.h} pixel su ${f.mmW}×${f.mmH} mm di vetro — i tre formati sono alla stessa scala`;
+  // dire non applicarla mai — e i formati si vedevano alla scala sbagliata.
+  tela.style.width  = (f.mmW * px) + 'px';
+  tela.style.height = (f.mmH * px) + 'px';
+
+  ctx = tela.getContext('2d');
   G = geometria(f.w, f.h);
 
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, f.w, f.h);
@@ -695,6 +760,8 @@ $('btnConnect').addEventListener('click', async () => {
 });
 $('disposizione').addEventListener('change', disegna);
 $('formato').addEventListener('change', disegna);
+$('confronta').addEventListener('change', disegna);
+window.addEventListener('resize', disegna);   // la scala dipende dalla finestra
 $('unBit').addEventListener('change', disegna);
 
 for (const [id, verso] of [['bancoSu', -1], ['bancoGiu', +1]]) {
