@@ -624,7 +624,7 @@ custodia è il modo più facile di trovarlo scarico al concerto.
 analogico e aspetta un pedale d'espressione, e `9` che è il BOOT e va lasciato stare — e
 sull'espansore restano nove ingressi su sedici, quindi altri footswitch non costano niente.
 
-#### Il formato del display — deciso il 16 agosto 2026: 256×64
+#### Il formato del display — scelto il 16 agosto 2026, **riaperto il 25**: vedi sotto
 
 **Il problema non è l'altezza, è la larghezza.** Su 128 pixel quattro colonne fanno 28 px
 l'una, cioè **cinque caratteri**. E conta più della risoluzione **la dimensione fisica del
@@ -647,9 +647,41 @@ perché resta largo 128 pixel. Serviva più larghezza, non meno altezza.
 l'**MCP23017**, tolto passando a cinque footswitch — vedi la tabella qui sopra. Non è un
 ripensamento: con quel display serve, senza no.
 
-`tools/pedale-sim.html` disegna tutti e tre i formati **alla stessa scala fisica** (7 px
-per mm), che è l'unico modo di confrontarli onestamente: a parità di dimensione sullo
-schermo il 128×128 sembra ottimo.
+`tools/pedale-sim.html` disegna i formati **alla stessa scala fisica**, che è l'unico modo
+di confrontarli onestamente: a parità di dimensione sullo schermo il 128×128 sembra ottimo.
+Dal 25 agosto 2026 la spunta «affianca i due candidati» mette il 3,12" e il 2,42" **uno
+accanto all'altro**, stessa scala e stesso contenuto, e la scala si adatta alla finestra —
+su un telefono 7 px per millimetro non ci starebbero, e rimpicciolire solo quello largo
+falserebbe il confronto.
+
+#### La scelta del display è riaperta — 25 agosto 2026
+
+Due fatti nuovi, e nessuno dei due era prevedibile ad agosto.
+
+**Primo: quei moduli escono tutti in 8080 parallelo.** Il 3,12" 256×64 si compra con
+l'interfaccia da scegliere **spostando ponticelli a saldare sul retro**, ed è così da tre
+venditori diversi — anche quelli che scrivono «SPI» nel titolo, dove l'SPI è compatibilità,
+non configurazione. L'utente non se la sente di rifare quelle saldature e un venditore ha
+già detto di no. Senza SPI il display non si usa: l'8080 vuole dodici pin e sulla XIAO non
+ci stanno.
+
+**Secondo: l'argomento con cui il 2,42" era stato scartato non vale più.** Era «128 pixel
+danno cinque caratteri per colonna», e valeva per la disposizione a **quattro colonne** —
+che poi è stata abbandonata per l'**elenco a quattro righe**. Con le righe il conto cambia:
+
+| | vetro | caratteri per riga | quanto sono grandi |
+|---|---|---|---|
+| 3,12" 256×64 | 72 × 18 mm | ~42 | 1,7 × 2,2 mm |
+| 2,42" 128×64 | 54 × 27 mm | ~21 | **2,5 × 3,4 mm** |
+
+Il 2,42" mostra **metà testo con lettere una volta e mezza più grandi**, e ventun caratteri
+bastano per un nome di preset. Su un affare che si guarda da un metro e mezzo, in piedi,
+non è affatto detto che vinca il più largo. **E gli OLED a 7 pin sono SPI e basta**: nessuna
+modalità da scegliere, quindi il problema dei ponticelli sparisce per costruzione.
+
+**Non è ancora deciso**: l'utente deve guardare i due affiancati nel simulatore. Le altre
+due strade restano una scheda con più pin (FireBeetle 2 ESP32-C6, che ha anche la carica a
+bordo) per usare il 3,12" in 8080, o far fare quel ponticello a qualcun altro.
 
 ### Da misurare, in ordine
 
