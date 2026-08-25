@@ -14,6 +14,21 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
   * { box-sizing: border-box; }
+
+  /* I caratteri stanno **in casa**, non su una rete: l'app deve funzionare
+     davanti all'ampli col telefono senza campo, e un carattere che arriva da
+     fuori sarebbe l'unica cosa che manca proprio lì. Sono due, e fanno due
+     lavori diversi: Space Grotesk per etichette, numeri e pulsanti — la parte
+     «strumento», dove le cifre devono staccare — e Inter per il testo che si
+     legge davvero. Tutti e due SIL OFL, vedi NOTICE. */
+  @font-face {
+    font-family:'Inter'; src:url('fonts/inter-latin.woff2') format('woff2');
+    font-weight:400 700; font-style:normal; font-display:swap;
+  }
+  @font-face {
+    font-family:'Space Grotesk'; src:url('fonts/space-grotesk-latin.woff2') format('woff2');
+    font-weight:500 700; font-style:normal; font-display:swap;
+  }
   /* Fondo nero e rosso al posto dell'arancione, scelta dell'utente.
      I riquadri non sono neri anche loro: su nero pieno una scheda si vede
      solo se è un filo più chiara, altrimenti restano i bordi a reggere
@@ -25,10 +40,16 @@
        stessa barra il marchio e il pulsante «Connetti» si toccano, e due
        rossi diversi si vedono. */
     --accent:#e30613; --green:#7fe08a; --gold:#f0c040; --rosso:#ff8080;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    /* Etichette, numeri, pulsanti: tutto quello che si guarda invece di
+       leggerlo. Le cifre di Space Grotesk stanno larghe e si distinguono a
+       colpo d'occhio, che su una manopola è quello che serve. */
+    --strumento:'Space Grotesk','Inter',-apple-system,sans-serif;
   }
   html { height:100%; }
   body { margin:0; min-height:100%; background:var(--bg); color:var(--text);
-         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; font-size:15px; }
+         font-family:var(--font); font-size:15px;
+         -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
 
   /* La vista live è più scura e non scorre: schermo pieno, header fisso,
      pulsanti che si toccano al buio. Cambia solo il vestito, non la pagina. */
@@ -60,29 +81,43 @@
   .pannello .logo { margin-right:0; }
   /* Torna ai preset da qualunque punto dell'app. */
   .logo { cursor:pointer; }
-  .status { padding:3px 9px; border-radius:11px; font-size:0.74rem; font-weight:600; white-space:nowrap; }
+  .status { padding:3px 10px; border-radius:11px; font-size:0.72rem; font-weight:700;
+           white-space:nowrap; font-family:var(--strumento); letter-spacing:0.02em; }
   .status.off { background:#3a2020; color:var(--rosso); }
   .status.on  { background:#1f3a24; color:var(--green); }
   .status.wait{ background:#3a3520; color:#f0d060; }
 
-  button { font:inherit; font-size:0.85rem; font-weight:600; border:none; cursor:pointer;
-           background:#24262b; color:var(--text); padding:8px 13px; border-radius:8px; }
-  button.primary { background:var(--accent); color:#fff; }
-  button:disabled { background:#26282d; color:#5a5f68; cursor:not-allowed; }
-  button.icon { background:none; padding:5px 7px; font-size:1rem; line-height:1; color:var(--faint); }
-  button.icon:hover { color:var(--text); }
+  /* I pulsanti hanno lo stesso vestito dei tasselli dell'editor: fondo scuro,
+     un bordo sottile che li stacca dal nero, e l'angolo un po' più tondo. Il
+     carattere è quello «strumento»: un pulsante si guarda, non si legge. */
+  button { font-family:var(--strumento); font-size:0.84rem; font-weight:600;
+           letter-spacing:0.01em; cursor:pointer; background:#16181d;
+           border:1px solid var(--line); color:var(--text);
+           padding:9px 14px; border-radius:10px;
+           transition:border-color .12s ease, background .12s ease; }
+  button:hover { border-color:#3d434c; background:#1c1f25; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff;
+                   box-shadow:0 0 16px -5px var(--accent); }
+  button.primary:hover { background:#f5121f; border-color:#f5121f; }
+  button:disabled { background:#131519; border-color:var(--line-soft);
+                    color:#4d525b; cursor:not-allowed; box-shadow:none; }
+  button.icon { background:none; border-color:transparent; padding:5px 7px;
+                font-size:1rem; line-height:1; color:var(--faint); }
+  button.icon:hover { color:var(--text); background:none; }
   button.icon.on { color:var(--gold); }
-  button.piccolo { font-size:0.76rem; padding:5px 9px; }
-  button.pericolo { background:#3a2020; color:var(--rosso); }
+  button.piccolo { font-size:0.75rem; padding:6px 10px; }
+  button.pericolo { background:#1d1013; border-color:#4a2226; color:var(--rosso); }
+  button.pericolo:hover { background:#26161a; border-color:#6a2f35; }
   /* Ingrandito e rimesso com'era il 14 agosto 2026: più grosso non ci sta sulla
      riga con «Leggi dall'ampli», «Categorie» e «Altro», e mandare a capo
      l'intestazione costa più di quanto valga il tasto. */
   #btnVista { background:none; color:var(--accent); padding:8px 4px; }
 
   input[type=text], input[type=search], select, textarea {
-    background:#17181c; border:1px solid #2e3138; color:var(--text);
-    padding:8px 10px; border-radius:8px; font:inherit; font-size:0.85rem;
+    background:#0e1014; border:1px solid var(--line); color:var(--text);
+    padding:10px 12px; border-radius:10px; font:inherit; font-size:0.85rem;
   }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:#4a515c; }
   textarea { width:100%; resize:vertical; min-height:60px; }
 
   /* ---- ricerca ------------------------------------------------------- */
@@ -107,10 +142,12 @@
   body.vista-live #vistaPreset { display:none; }
 
   .sezione { margin-bottom:22px; }
-  .sezione > h2 { font-size:0.76rem; color:var(--dim); text-transform:uppercase;
-                  letter-spacing:0.06em; margin:0 0 8px; font-weight:700;
+  .sezione > h2 { font-family:var(--strumento); font-size:0.74rem; color:var(--dim);
+                  text-transform:uppercase;
+                  letter-spacing:0.1em; margin:0 0 8px; font-weight:700;
                   display:flex; align-items:baseline; gap:8px; }
-  .sezione > h2 .nota { text-transform:none; letter-spacing:0; font-weight:400;
+  .sezione > h2 .nota { font-family:var(--font); text-transform:none;
+                        letter-spacing:0; font-weight:400;
                         color:var(--faint); font-size:0.72rem; }
   .vuoto-sezione { color:var(--faint); font-size:0.8rem; padding:6px 2px; }
   /* Quando manca qualcosa che non dipende da noi, si dice qui e si dice per
@@ -129,29 +166,33 @@
   .pannello-ampli { display:grid; grid-template-columns:1fr 1fr; gap:8px;
                     align-items:start; }
   .colonna-banco { display:grid; gap:8px; align-content:start; }
-  .banco-eti { font-size:0.66rem; letter-spacing:0.08em; text-transform:uppercase;
-               font-weight:700; color:var(--faint); }
+  .banco-eti { font-family:var(--strumento); font-size:0.66rem; letter-spacing:0.1em;
+               text-transform:uppercase; font-weight:700; color:var(--faint); }
   .banco-eti.a { color:#ff9b9b; }
   .banco-eti.b { color:#9be0a8; }
 
-  .slotcard { background:var(--panel); border:1px solid var(--line); border-radius:10px;
+  .slotcard { background:#0e1014; border:1px solid var(--line); border-radius:12px;
               padding:9px 10px; min-height:70px; cursor:pointer;
               display:flex; flex-direction:column; justify-content:space-between;
               gap:6px; position:relative; overflow:hidden; }
   .slotcard.libero { border-style:dashed; background:none; cursor:default; }
-  .slotcard.attivo { border-color:var(--accent); }
+  .slotcard.attivo { border-color:var(--accent);
+                     box-shadow:0 0 12px -4px var(--accent); }
   .slotcard .alto { display:flex; align-items:center; gap:6px; }
   .slotcard .sigla { font-family:'SF Mono',Consolas,monospace; font-size:0.7rem;
                      color:var(--faint); }
-  .slotcard .nome-slot { font-size:0.84rem; font-weight:600; line-height:1.25;
+  .slotcard .nome-slot { font-family:var(--strumento); font-size:0.86rem;
+                         font-weight:700; line-height:1.25;
                          overflow:hidden; display:-webkit-box; -webkit-line-clamp:2;
                          -webkit-box-orient:vertical; }
   .slotcard.libero .nome-slot { color:var(--faint); font-weight:400; font-size:0.78rem; }
   .slotcard .suono { font-size:0.7rem; color:var(--dim); margin-top:3px;
                      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .led { width:8px; height:8px; border-radius:50%; flex:none; }
-  .led.a { background:#ff9b9b; box-shadow:0 0 7px rgba(255,155,155,0.5); }
-  .led.b { background:#9be0a8; box-shadow:0 0 7px rgba(155,224,168,0.5); }
+  /* I LED dei banchi, accesi come quelli dell'editor: l'alone li fa lampadine
+     invece che pallini disegnati. */
+  .led.a { background:#ff5f6d; box-shadow:0 0 6px #ff5f6d, 0 0 14px #ff5f6d; }
+  .led.b { background:#4ade80; box-shadow:0 0 6px #4ade80, 0 0 14px #4ade80; }
   .led.spento { background:#33373e; box-shadow:none; }
   .aperta-sotto { margin-top:8px; }
 
@@ -263,30 +304,45 @@
           padding:0 calc(12px + env(safe-area-inset-right)) 10px
                     calc(12px + env(safe-area-inset-left)); }
 
-  .pad { position:relative; background:var(--panel); border:2px solid var(--line);
-         border-radius:14px; padding:10px 12px; text-align:left; overflow:hidden;
+  /* I pulsantoni hanno lo stesso vestito dei tasselli dell'editor: fondo più
+     scuro della pagina, un bordo sottile, e quando sono accesi l'alone del
+     neon invece di un semplice cambio di colore. Il carattere è quello
+     «strumento»: da un metro e mezzo, in piedi, si guarda — non si legge. */
+  .pad { position:relative; background:#0e1014; border:1px solid var(--line);
+         border-radius:14px; padding:12px 14px; text-align:left; overflow:hidden;
          display:flex; flex-direction:column; justify-content:center; gap:4px;
-         font-size:1rem; font-weight:700; line-height:1.2; min-height:0; }
+         font-family:var(--strumento); font-size:1.05rem; font-weight:700;
+         line-height:1.2; min-height:0;
+         transition:border-color .12s ease, box-shadow .12s ease; }
   .pad:active { transform:scale(0.985); }
-  .pad .n { position:absolute; top:6px; right:10px; font-size:0.7rem;
-            color:var(--faint); font-weight:700; }
+  .pad .n { position:absolute; top:7px; right:11px; font-size:0.7rem;
+            font-family:var(--strumento); color:var(--faint); font-weight:700;
+            letter-spacing:0.04em; }
 
   /* Un LED per pulsante, come su una pedaliera vera: spento è un vetrino scuro,
      acceso è il preset che sta suonando. Ce n'è uno anche sui posti vuoti — su
      una pedaliera i led ci sono sempre, ed è quello che rende la fila coerente. */
-  .pad .ledpad { position:absolute; top:8px; left:10px; width:11px; height:11px;
+  .pad .ledpad { position:absolute; top:9px; left:11px; width:11px; height:11px;
                  border-radius:50%; background:#15201a; border:1px solid #24312a;
                  box-shadow:inset 0 1px 2px rgba(0,0,0,0.7); }
   .pad.attivo .ledpad { background:var(--green); border-color:#8fe6a2;
-                        box-shadow:0 0 10px 2px rgba(122,224,138,0.75),
+                        box-shadow:0 0 8px var(--green), 0 0 20px var(--green),
                                    inset 0 0 3px rgba(255,255,255,0.6); }
-  .pad .sub { font-size:0.7rem; font-weight:600; color:var(--dim); }
+  .pad .sub { font-size:0.72rem; font-weight:600; color:var(--dim);
+              letter-spacing:0.01em; }
   /* `.istantaneo` e `.caricamento` erano i pallini verde e oro che dicevano se
-     un preset parte subito o va trasmesso. Tolti col testo, il 14 agosto 2026. */
-  .pad.attivo { border-color:var(--accent); background:#241a16; }
+     un preset parte subito o va trasmesso. Tolti col testo, il 14 agosto 2026.
+
+     Acceso è **verde**, come il suo LED e non come l'accento dell'app: su un
+     pedale è la lampadina che colora tutto l'interruttore, e un alone rosso
+     sopra un LED verde direbbe due cose diverse insieme. */
+  .pad.attivo { border-color:var(--green); background:#0c1410;
+                box-shadow:0 0 0 1px var(--green) inset,
+                           0 0 12px -2px var(--green), 0 0 32px -10px var(--green); }
   .pad.occupato { opacity:0.55; }
   .pad.libero { border-style:dashed; background:none; color:var(--faint); font-weight:400; }
-  .pad.inModifica { border-color:var(--gold); border-style:dashed; }
+  .pad.inModifica { border-color:var(--gold); border-style:dashed;
+                    box-shadow:0 0 14px -6px var(--gold); }
 
   /* La presa per spostare un preset dentro il banco, solo in modifica. */
   .presa { position:absolute; left:6px; bottom:6px; width:30px; height:30px;
@@ -312,7 +368,8 @@
                       calc(14px + env(safe-area-inset-bottom))
                       calc(14px + env(safe-area-inset-left)); }
   .pannello.aperto { display:block; }
-  .pannello h2 { font-size:1rem; margin:0 0 4px; }
+  .pannello h2 { font-size:1rem; margin:0 0 4px; font-family:var(--strumento);
+                 letter-spacing:-0.01em; }
   .pannello .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px;
                           flex-wrap:wrap; }
   .pannello .spiega { color:var(--dim); font-size:0.8rem; margin:0 0 12px; }
@@ -370,7 +427,8 @@
   /* ---- editor della catena ------------------------------------------- */
 
   /* Il nome del preset che si sta regolando: la prima cosa da leggere. */
-  .titolo-grande { font-size:1.35rem; margin:0 0 4px; letter-spacing:-0.01em; }
+  .titolo-grande { font-size:1.4rem; margin:0 0 4px; letter-spacing:-0.02em;
+                   font-family:var(--strumento); }
   /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
      Il fondo dentro è più scuro della pagina, non più chiaro: il neon si vede
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
@@ -386,10 +444,10 @@
                      box-shadow:0 0 0 1px var(--cat) inset,
                                 0 0 10px -1px var(--cat), 0 0 26px -6px var(--cat); }
   .tassello.spento { opacity:0.5; }
-  .tassello .cat { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
+  .tassello .cat { font-family:var(--strumento); font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
                    color:var(--cat); font-weight:700;
                    text-shadow:0 0 6px var(--cat), 0 0 14px var(--cat); }
-  .tassello .modello { font-size:0.78rem; line-height:1.2; min-height:2.4em;
+  .tassello .modello { font-family:var(--strumento); font-size:0.78rem; line-height:1.2; min-height:2.4em;
                        color:var(--text); }
   .tassello .led { position:absolute; top:9px; right:9px; width:7px; height:7px;
                    border-radius:50%; background:#33383f; }
@@ -408,7 +466,8 @@
                               color:var(--dim); border-radius:8px; width:32px;
                               height:32px; font-size:0.9rem; cursor:pointer; }
   .barra-posizione .freccia:disabled { opacity:0.3; cursor:default; }
-  .barra-posizione .dove { flex:1; text-align:center; font-size:0.66rem;
+  .barra-posizione .dove { flex:1; text-align:center; font-family:var(--strumento);
+                           font-size:0.66rem;
                            letter-spacing:0.08em; text-transform:uppercase;
                            color:var(--cat); font-weight:700;
                            text-shadow:0 0 8px var(--cat), 0 0 18px var(--cat); }
@@ -440,12 +499,12 @@
      solo sull'arco e sulla tacca: alonando anche il corpo verrebbe una macchia. */
   .pomello .arco, .pomello .tacca {
     filter:drop-shadow(0 0 4px var(--cat)) drop-shadow(0 0 11px var(--cat)); }
-  .pomello .nome { font-size:0.72rem; color:var(--dim); line-height:1.25;
+  .pomello .nome { font-family:var(--strumento); font-size:0.72rem; color:var(--dim); line-height:1.25;
                    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
                    cursor:pointer; }
   .pomello .nome.daTabella { font-style:italic; }
   .pomello .nome.senzaNome { font-family:Consolas,monospace; color:var(--faint); }
-  .pomello .val { font-size:0.78rem; color:var(--cat); font-weight:700;
+  .pomello .val { font-family:var(--strumento); font-size:0.82rem; color:var(--cat); font-weight:700;
                   font-variant-numeric:tabular-nums; text-shadow:0 0 8px var(--cat); }
   .pomelli.cinque .pomello .nome { font-size:0.64rem; }
   .pomello.scelta { display:flex; flex-direction:column; justify-content:center;
@@ -455,7 +514,7 @@
                            padding:7px 4px; font-size:0.72rem; font-family:inherit;
                            margin-bottom:5px; }
   /* Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
-  .bolla { position:fixed; z-index:60; transform:translate(-50%,-150%);
+  .bolla { position:fixed; z-index:60; font-family:var(--strumento); transform:translate(-50%,-150%);
            background:var(--text); color:#101216; font-weight:700; font-size:1.2rem;
            padding:6px 14px; border-radius:10px; pointer-events:none;
            font-variant-numeric:tabular-nums; box-shadow:0 4px 18px rgba(0,0,0,0.6); }

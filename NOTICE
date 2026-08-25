@@ -43,5 +43,21 @@ Questo prodotto include, o si basa su, software di terze parti.
    identificarli.
 
 
+4. Inter e Space Grotesk — licenza SIL Open Font License 1.1
+
+   https://github.com/rsms/inter — Copyright (c) The Inter Project Authors
+   https://github.com/floriankarsten/space-grotesk — Copyright (c) Florian Karsten
+
+   In `fonts/` ci sono i due caratteri nel sottoinsieme latino, in formato
+   woff2, così come li distribuisce Google Fonts. Sono ospitati qui e non
+   presi da una rete: l'applicazione deve funzionare davanti
+   all'amplificatore, col telefono senza campo.
+
+   La OFL permette di usare, incorporare e ridistribuire i file, anche in un
+   prodotto, a patto di non venderli da soli e di non usare i Nomi Riservati
+   per una versione modificata. Qui i file non sono modificati.
+
+   Testo della licenza: https://openfontlicense.org
+
 Nessuno dei suddetti progetti è affiliato a questo, né lo approva o lo
 supporta. Questo progetto non ha alcun rapporto con Positive Grid Inc.
