@@ -4,8 +4,9 @@ App personale per controllare e organizzare i preset di un Positive Grid Spark 2
 Web app / PWA, HTML+JS vanilla, zero dipendenze, Web Bluetooth. Più un pedale ESP32
 in `pedale/`.
 
-**Ripreso il 24 agosto 2026** dopo la pausa di agosto: la libreria si sincronizza con
-Dropbox. L'app è pubblicata e funziona; il pedale funziona su una devkit e aspetta i
+**Ripreso il 24 agosto 2026** dopo la pausa: la libreria si sincronizza con Dropbox, e il
+**25 agosto** l'editor è stato rifatto — la catena al neon — insieme al vestito di tutta
+l'app. L'app è pubblicata e funziona; il pedale funziona su una devkit e aspetta i
 componenti da comprare. `README.md` racconta il progetto a chi arriva da fuori. **Dove si
 riprende** è in fondo a questo file.
 
@@ -34,6 +35,7 @@ live.html                rimando a index.html#live, per le scorciatoie già inst
 manifest.webmanifest     identità della PWA
 sw.js                    service worker: guscio in cache, app utilizzabile offline
 icons/logo.svg           logotipo orizzontale dell'utente; logo-mark.svg è il solo simbolo
+fonts/                   Inter e Space Grotesk, sottoinsieme latino: stanno in casa, non su una rete
 LICENSE / NOTICE         MIT, Massimo Togni; software di terzi (Soundshed MIT, paulhamsh Apache 2.0)
 src/spark-protocol.js    encoder/decoder puro, senza I/O — il cuore del progetto
 src/spark-transport.js   connessione BLE, coda di invio, attesa risposte, lettura preset
@@ -245,6 +247,40 @@ zigzag). Ogni pulsantone ha un LED verde, anche i posti vuoti.
   Per questo non c'è nessun «Prepara» — se lo scrivesse, sovrascriverebbe il banco fisso.
 
 ### Editor della catena effetti
+
+**Come si presenta, dal 25 agosto 2026**: in cima i sette blocchi nell'ordine del segnale,
+un tassello ciascuno col colore della categoria, il LED acceso/spento e le barrettine dei
+valori — la forma del suono senza aprirlo; sotto, **un blocco solo alla volta** con le sue
+manopole a pomello. Prima erano sette blocchi aperti: tre schermate, e non si sapeva mai a
+che punto della catena si stessero mettendo le mani. La scelta è dell'utente, fatta
+guardando le tre disposizioni di `design/proposte-editor.html`.
+
+Le regole di quel disegno, tutte chieste o approvate dall'utente:
+
+- **i valori si leggono da 0 a 10 con un decimale** («6.1» dice qualcosa a chi suona,
+  «0.61» no). All'ampli continua ad andare 0..1: `mostraValore` non entra mai in un comando;
+- **i pomelli si girano trascinando in verticale**, 300 px da zero a dieci — in cerchio col
+  dito è un terno al lotto — e il valore compare in una bolla grande, perché sotto il dito
+  il numerino non si vede;
+- **si dispongono a piramide**, ultima riga in centro: 4 fanno 2 e 2, 3 fanno 2 e 1, 5 fanno
+  3 e 2, 7 fanno 4 e 3. Vale anche per l'ampli, che tiene però l'ordine del frontale (Gain,
+  Bass, Middle, Treble, Master) riconosciuto **dai nomi della tabella**, non dalla posizione
+  nella catena;
+- **il nome del modello è il titolo del blocco ed è la tendina che lo cambia**, in centro,
+  con l'interruttore sotto a tutta larghezza. Era un titolo con una freccina accanto e
+  l'utente non trovava il modo di cambiare effetto — due volte colpa mia, perché senza ampli
+  era anche spento senza dire perché;
+- nella tendina **niente intestazioni**: prima i modelli usciti da questo ampli, poi una riga
+  separatrice senza parole, poi quelli dal catalogo. La distinzione è di sicurezza e resta;
+- **il nome del preset è un'insegna al neon** del colore della sua famiglia (clean, drive,
+  acoustic), bianca se non ne ha — inventarle un colore farebbe leggere una famiglia che non
+  c'è. Sta centrata fra il menu e la catena, e il riquadro delle regolazioni si allunga fino
+  in fondo: lo spazio che avanza non resta mai vuoto;
+- **la riga di stato compare solo se qualcosa non va**, ed è rossa. Le conferme («modifiche
+  salvate», «catena riletta») restano nel log della vista preset: in quel pannello lo schermo
+  serve alla catena. Il pannello è marcato `data-solo-risposte` e `logLine` ha un secondo
+  argomento che dice se il messaggio è un problema;
+- la guida sta dietro un **«?»** in cima e si richiude da sé riaprendo l'editor.
 
 **Le manopole agiscono sul suono che sta suonando**, non su una copia: è la scelta che
 governa tutto il resto. Per questo «Regola», **quando l'ampli c'è**, prima manda il preset
@@ -816,6 +852,36 @@ formato.
   prova. Ma con l'ESP32 la domanda non si pone: interruttori sui GPIO sono un
   `digitalRead` con antirimbalzo, niente accoppiamento, niente seconda batteria.
 
+### Il vestito dell'app — rifatto il 25 agosto 2026
+
+Chiesto dall'utente dopo l'editor nuovo: uniformare il resto e usare un carattere più
+moderno. **Due caratteri, e stanno in casa** (`fonts/`, 70 KB in due, sottoinsieme latino,
+nel guscio del service worker): **Space Grotesk** per etichette, numeri e pulsanti — la
+parte «strumento», dove le cifre devono staccare da un metro e mezzo — e **Inter** per il
+testo che si legge. Presi da una rete sarebbero l'unica cosa che manca proprio davanti
+all'ampli col telefono senza campo. Attribuzione OFL in `NOTICE`.
+
+Pulsanti, schede e campi hanno il vestito dei tasselli: fondo più scuro della pagina, un
+bordo sottile, angolo tondo. **I pulsantoni della vista live** sono la stessa cosa in
+grande, e da accesi hanno l'alone **verde**, come il loro LED e non come l'accento rosso
+dell'app: su un pedale è la lampadina che colora tutto l'interruttore.
+
+**Le trappole grafiche pagate qui**, che valgono oltre questo caso:
+
+- **un alone che sborda va disegnato dentro qualcosa che lo lascia sbordare.** Il bagliore
+  dei pomelli veniva tagliato di netto dal viewport dell'SVG e attorno a ogni manopola
+  compariva un quadrato più chiaro. `overflow:visible`, **e** il disegno più stretto del
+  riquadro, che serve dove il browser non lascia sconfinare;
+- **`.pannello h2` è più specifico di una classe.** Il nome del preset non è mai stato
+  grande come diceva il suo CSS, e alzare la classe non serviva a niente: la regola va per
+  id. Costato tre giri con l'utente che continuava a vederlo piccolo;
+- **il flex schiaccia prima di far scorrere.** Striscia e riquadro delle regolazioni vanno
+  a `flex:0 0 auto` / `flex:1 0 auto`, o su uno schermo basso i pomelli diventano ellissi
+  invece di far comparire la barra di scorrimento;
+- **un conto sulle misure va fatto dopo un giro di disegno.** All'apertura il pannello è
+  ancora nascosto e un elemento nascosto è largo zero: `requestAnimationFrame`, o la
+  striscia resta ferma sul primo tassello.
+
 ## Convenzioni
 
 - **I commit li gestisco io**, senza che l'utente li chieda: quando un pezzo di lavoro sta
@@ -912,37 +978,25 @@ API su un file dentro la cartella Dropbox locale — zero OAuth, ma **su Android
 esiste**, quindi risolverebbe solo la metà che serve meno, visto che il telefono è
 l'apparecchio che va all'ampli.
 
-## Dove si riprende — fine sessione del 24 agosto 2026
+## Dove si riprende — fine sessione del 25 agosto 2026
 
-Fatto oggi, tutto pubblicato (guscio a `v30`): il sync con Dropbox, «Elimina tutti i
-preset», «Duplica», il salvataggio del suono letto dall'ampli, e l'editor che si apre
-anche senza ampli. Le suite sono verdi — protocol 125, transport 48, store 136, backup 33,
-dropbox 34.
+**Il 24 agosto** (guscio `v30`): il sync con Dropbox, «Elimina tutti i preset», «Duplica»,
+il salvataggio del suono letto dall'ampli, e l'editor che si apre anche senza ampli.
 
-**Aperto dopo la chiusura, e già deciso**: l'utente trovava l'editor «incasinato» e
-voleva qualcosa di più grafico. Le tre disposizioni sono in
-`design/proposte-editor.html` — si guarda una alla volta con `?solo=a|b|c`, `&nudo=1`
-toglie i testi e `&blocco=N` la apre su un altro punto della catena.
+**Il 25 agosto** (guscio `v39`): l'editor rifatto — la catena al neon scelta dall'utente in
+`design/proposte-editor.html` — e il vestito nuovo per tutta l'app, caratteri compresi. Le
+due sezioni qui sopra raccontano com'è fatto e perché; qui basta sapere che **è tutto
+pubblicato e niente di quello è ancora stato toccato con l'ampli acceso**.
 
-**Scelta la B**: la catena in cima in tasselli colorati, un blocco alla volta sotto, e le
-manopole a **pomello** che si girano trascinando in verticale — in cerchio col dito è un
-terno al lotto. Sull'ampli sono cinque in fila come sul frontale.
+Le suite sono verdi — protocol 125, transport 48, store 136, backup 33, dropbox 34 — ma
+**`index.html` non è coperto da nessuna suite**: tutto il lavoro di questi due giorni si
+verifica solo aprendo l'app. Le mie prove sono contro un ampli finto, nel browser.
 
-**La tavolozza è al neon, ed è una richiesta esplicita.** Sette tinte accese, una per
-posizione della catena: ciano, viola, rosso, giallo, verde acqua, azzurro, indaco. Su un
-fondo scuro un colore smorto diventa grigio e la categoria si legge invece di
-riconoscerla. L'alone non è un'ombra: è il disegno stesso sfocato due volte, una stretta e
-forte e una larga e tenue, e il fondo dentro i tasselli è **più scuro** della pagina,
-perché il neon si vede sul buio.
-
-Due cose da portarsi dietro quando si scriverà nell'app: **le barrettine sul tassello
-chiuso** dicono la forma del suono senza aprirlo, e i parametri che scelgono fra cose (il
-tipo di riverbero) restano **una tendina in mezzo ai pomelli**, perché un pomello lì
-sarebbe un terno al lotto. **Non è ancora stato portato nell'app.**
-
-1. **Provare col piede quello che è nato oggi.** Le prove le ho fatte contro un ampli
-   finto, che è il limite del banco: che l'editor senza ampli salvi la cosa giusta si
-   vede solo riscrivendo quel preset sull'ampli e ascoltandolo.
+1. **Provare l'editor nuovo con l'ampli acceso.** È la cosa che il banco non può dare:
+   girare un pomello e sentire se il suono segue, cambiare un modello e vedere se la catena
+   si rilegge, salvare e riscrivere il preset sull'ampli per sentire se ha salvato la cosa
+   giusta. Se qualcosa non torna, il primo sospetto sono i comandi — non il disegno, che è
+   solo un modo diverso di mostrare gli stessi.
 2. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri
    è stato reso autocadenzato ma **la correzione non è verificata**: il blocco non si
    riproduce a comando. Se ricapita, le manopole da girare sono `PAUSA_PARAMETRO` e poi
@@ -955,12 +1009,18 @@ sarebbe un terno al lotto. **Non è ancora stato portato nell'app.**
    lati.
 5. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` è stato
    trovato dall'utente; l'elenco viene da Soundshed e non è verificato. La tendina adesso
-   distingue i modelli visti sull'ampli da quelli supposti, quindi il prossimo si trova
-   più in fretta.
+   mette per primi i modelli visti sull'ampli, quindi il prossimo si trova più in fretta.
+
+**Discusso e non aperto: creare un preset con l'AI** («voglio il suono dell'assolo di
+Gilmour in Mother»). L'utente ha chiesto solo di ragionarci. Il punto della discussione:
+il vocabolario dei modelli non lo può scegliere l'AI — un nome che l'ampli non ha è il
+comando che lo pianta — quindi glielo si dà ristretto a `modelliVisti()`, lo scheletro si
+prende da un preset uscito dall'ampli, e il risultato si prova **solo sul buffer `0x7f`**,
+mai in uno slot. Serve una API key dell'utente, e sarebbe la prima funzione dell'app che
+non funziona offline. L'AI non sente: dà un punto di partenza, non un suono finito.
 
 **Se un giorno serve un preset costruito da zero**, la strada c'è ed è scritta nella
 sezione Preset: lo scheletro va preso da un preset **uscito dall'ampli**, non dal catalogo.
-Oggi non serviva e non è stato fatto.
 
 **Non aperti, e vanno bene così:** il conteggio col click del looper (archiviato, vedi
 `docs/looper.md`), e il trasferimento di un banco al pedale che costa ~6 s — funziona,
