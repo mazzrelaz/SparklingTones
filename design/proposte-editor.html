@@ -135,7 +135,11 @@
              user-select:none; -webkit-user-select:none; }
   /* Il tubo al neon: l'alone non e' un'ombra sotto il disegno, e' il disegno
      stesso sfocato due volte — una stretta e forte, una larga e tenue. */
-  .pomello svg { display:block; margin:0 auto 4px; }
+  /* L'alone deve poter uscire dal riquadro dell'SVG: senza `overflow:visible`
+     viene tagliato di netto sui quattro lati e i pomelli sembrano dentro un
+     quadrato. Il disegno sta comunque più stretto del riquadro, così il taglio
+     non capita nemmeno dove il browser non ci lascia sconfinare. */
+  .pomello svg { display:block; margin:0 auto 4px; overflow:visible; }
   .pomello .arco, .pomello .tacca {
     filter:drop-shadow(0 0 4px var(--cat)) drop-shadow(0 0 11px var(--cat)); }
   .pomello .nome { font-size:0.68rem; color:var(--dim); line-height:1.2;
@@ -502,27 +506,27 @@ function pomello(blocco, indice) {
   svg.setAttribute('viewBox', '0 0 100 100');
 
   const guida = document.createElementNS(ns, 'circle');
-  guida.setAttribute('cx', 50); guida.setAttribute('cy', 50); guida.setAttribute('r', 42);
+  guida.setAttribute('cx', 50); guida.setAttribute('cy', 50); guida.setAttribute('r', 34);
   guida.setAttribute('fill', 'none'); guida.setAttribute('stroke', '#262b33');
-  guida.setAttribute('stroke-width', 7); guida.setAttribute('stroke-linecap', 'round');
+  guida.setAttribute('stroke-width', 8); guida.setAttribute('stroke-linecap', 'round');
   guida.setAttribute('transform', 'rotate(135 50 50)');
-  guida.setAttribute('stroke-dasharray', `${2 * Math.PI * 42 * 0.75} 999`);
+  guida.setAttribute('stroke-dasharray', `${2 * Math.PI * 34 * 0.75} 999`);
 
   const arco = document.createElementNS(ns, 'circle');
   arco.setAttribute('class', 'arco');
-  arco.setAttribute('cx', 50); arco.setAttribute('cy', 50); arco.setAttribute('r', 42);
+  arco.setAttribute('cx', 50); arco.setAttribute('cy', 50); arco.setAttribute('r', 34);
   arco.setAttribute('fill', 'none'); arco.setAttribute('stroke', 'currentColor');
-  arco.setAttribute('stroke-width', 7); arco.setAttribute('stroke-linecap', 'round');
+  arco.setAttribute('stroke-width', 8); arco.setAttribute('stroke-linecap', 'round');
   arco.setAttribute('transform', 'rotate(135 50 50)');
 
   const corpo = document.createElementNS(ns, 'circle');
-  corpo.setAttribute('cx', 50); corpo.setAttribute('cy', 50); corpo.setAttribute('r', 30);
+  corpo.setAttribute('cx', 50); corpo.setAttribute('cy', 50); corpo.setAttribute('r', 24);
   corpo.setAttribute('fill', '#0e1014'); corpo.setAttribute('stroke', '#2a2f37');
 
   const tacca = document.createElementNS(ns, 'line');
   tacca.setAttribute('class', 'tacca');
-  tacca.setAttribute('x1', 50); tacca.setAttribute('y1', 26);
-  tacca.setAttribute('x2', 50); tacca.setAttribute('y2', 44);
+  tacca.setAttribute('x1', 50); tacca.setAttribute('y1', 32);
+  tacca.setAttribute('x2', 50); tacca.setAttribute('y2', 46);
   tacca.setAttribute('stroke', 'currentColor'); tacca.setAttribute('stroke-width', 5);
   tacca.setAttribute('stroke-linecap', 'round');
 
@@ -533,7 +537,7 @@ function pomello(blocco, indice) {
 
   const disegna = () => {
     const v = blocco.valori[indice];
-    const giro = 2 * Math.PI * 42 * 0.75;
+    const giro = 2 * Math.PI * 34 * 0.75;
     arco.setAttribute('stroke-dasharray', `${giro * v} 999`);
     tacca.setAttribute('transform', `rotate(${135 + v * 270} 50 50)`);
     valore.textContent = v.toFixed(2);
