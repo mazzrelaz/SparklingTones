@@ -475,11 +475,41 @@
                                         color:var(--cat); border-color:var(--cat);
                                         text-shadow:0 0 8px var(--cat);
                                         box-shadow:0 0 12px -2px var(--cat); }
+  /* Nel blocco a fuoco il modello è **il** comando da trovare: un titolo con
+     una freccina non si riconosce come tendina, e l'utente non trovava il modo
+     di cambiare effetto. Qui è un campo vero, largo quanto il blocco, con
+     sopra la sua etichetta. */
+  .blocco.aFuoco .riga-modello { padding:4px 12px 0; }
+  .blocco.aFuoco .fila-modello { display:flex; gap:8px; align-items:stretch; }
+  .blocco.aFuoco .fila-modello .nome-effetto { flex:1; min-width:0; }
+  .blocco.aFuoco .fila-modello .interruttore { flex:none; margin:0; }
+  .blocco.aFuoco .eti-modello { font-family:var(--strumento); font-size:0.6rem;
+                                text-transform:uppercase; letter-spacing:0.1em;
+                                color:var(--faint); font-weight:700;
+                                margin-bottom:5px; }
+  .blocco.aFuoco .nome-effetto { appearance:none; -webkit-appearance:none;
+                                 width:100%; background:#0e1014;
+                                 border:1px solid var(--line); border-radius:10px;
+                                 padding:11px 34px 11px 13px; margin:0;
+                                 font-family:var(--strumento); font-size:1rem;
+                                 font-weight:700; color:var(--text); cursor:pointer;
+                                 background-image:
+                                   linear-gradient(45deg, transparent 50%, var(--cat) 50%),
+                                   linear-gradient(135deg, var(--cat) 50%, transparent 50%);
+                                 background-position:right 17px center, right 11px center;
+                                 background-size:6px 6px, 6px 6px;
+                                 background-repeat:no-repeat; }
+  .blocco.aFuoco .nome-effetto:hover { border-color:var(--cat); }
+  .blocco.aFuoco .nome-effetto:disabled { color:var(--dim); cursor:not-allowed;
+                                          background-image:none; }
+  .blocco.aFuoco .senza-ampli { font-size:0.72rem; color:var(--faint);
+                                margin:6px 0 0; }
 
-  /* ---- i pomelli ---- */
-  .pomelli { padding:14px 12px 12px; display:grid;
-             grid-template-columns:repeat(3, 1fr); gap:16px 6px; }
-  .pomelli.cinque { grid-template-columns:repeat(5, 1fr); gap:12px 2px; }
+  /* Righe centrate invece di una griglia piena: l'ultima riga sta in mezzo, e
+     le manopole non lasciano mai un buco in fondo a destra. */
+  .pomelli { padding:14px 12px 12px; display:flex; flex-direction:column; gap:18px; }
+  .riga-pomelli { display:flex; justify-content:center; gap:10px; }
+  .riga-pomelli > * { flex:0 1 100px; min-width:0; }
   .pomello { text-align:center; cursor:ns-resize; touch-action:none;
              color:var(--cat); user-select:none; -webkit-user-select:none; }
   /* L'alone deve poter uscire dal riquadro dell'SVG: senza `overflow:visible`
@@ -487,7 +517,7 @@
      quadrato. Il disegno sta comunque più stretto del riquadro. */
   .pomello svg { display:block; margin:0 auto 5px; overflow:visible;
                  width:58px; height:58px; }
-  .pomelli.cinque .pomello svg { width:52px; height:52px; }
+  .riga-pomelli:has(> :nth-child(4)) .pomello svg { width:50px; height:50px; }
   .pomello .guida { stroke:#262b33; stroke-width:8; stroke-linecap:round;
                     transform:rotate(135deg); transform-origin:50% 50%; }
   .pomello .arco  { stroke:currentColor; stroke-width:8; stroke-linecap:round;
@@ -506,7 +536,7 @@
   .pomello .nome.senzaNome { font-family:Consolas,monospace; color:var(--faint); }
   .pomello .val { font-family:var(--strumento); font-size:0.82rem; color:var(--cat); font-weight:700;
                   font-variant-numeric:tabular-nums; text-shadow:0 0 8px var(--cat); }
-  .pomelli.cinque .pomello .nome { font-size:0.64rem; }
+  .riga-pomelli:has(> :nth-child(4)) .pomello .nome { font-size:0.64rem; }
   .pomello.scelta { display:flex; flex-direction:column; justify-content:center;
                     cursor:default; }
   .pomello.scelta select { width:100%; background:#0e1014; color:var(--cat);
@@ -872,7 +902,8 @@
        sotto le dita sapere *quale* suono si sta cambiando è la prima cosa. -->
   <h2 id="titoloEditor" class="titolo-grande">Regola il suono</h2>
   <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente finché
-    non premi «Salva». Il nome del blocco è una tendina: da lì cambi il modello.
+    non premi «Salva». Tocca un blocco della catena qui sotto per aprirlo: dentro ci sono
+    il modello, l'interruttore e le sue manopole.
     <button type="button" class="piu" id="btnSpiegaNomi">perché certi nomi sono in corsivo</button></p>
   <p class="spiega" id="spiegaNomi" hidden>L'ampli i nomi dei parametri non li manda: quelli
     <em>in corsivo</em> arrivano da una tabella e sono proposte da verificare a orecchio,
@@ -2394,9 +2425,6 @@ function barraPosizione(posizione) {
  * pulsante al nome che stava leggendo.
  */
 function intestazioneBlocco(effetto, posizione) {
-  const testa = document.createElement('div');
-  testa.className = 'intestazione';
-
   const scelta = document.createElement('select');
   scelta.className = 'nome-effetto';
   scelta.title = 'tocca per mettere un altro modello in questa posizione';
@@ -2479,24 +2507,77 @@ function intestazioneBlocco(effetto, posizione) {
     }
     disegnaCatena();
   });
+  // Il modello e l'interruttore stanno sulla stessa riga, larghi quanto il
+  // blocco: sono i due comandi del blocco e si trovano insieme. Prima il
+  // modello era il titolo con una freccina accanto, e non lo trovava nessuno.
+  const riga = document.createElement('div');
+  riga.className = 'riga-modello';
+  const eti = document.createElement('div');
+  eti.className = 'eti-modello';
+  eti.textContent = 'modello';
 
-  testa.append(scelta, interruttore);
-  return testa;
+  const fila = document.createElement('div');
+  fila.className = 'fila-modello';
+  fila.append(scelta, interruttore);
+  riga.append(eti, fila);
+
+  if (inModifica.offline) {
+    // Spegnere un comando senza dire perché è il modo migliore di far cercare
+    // a vuoto: qui la ragione sta scritta sotto, non solo nel suggerimento.
+    const nota = document.createElement('p');
+    nota.className = 'senza-ampli';
+    nota.textContent = 'Senza ampli il modello non si cambia: l\'ampli deve ' +
+                       'ricostruire il blocco e dire quante manopole ha quello nuovo.';
+    riga.appendChild(nota);
+  }
+  return riga;
 }
 
 /* ------------------------------------------------------------------
    Le manopole
    ------------------------------------------------------------------ */
 
+/**
+ * Le manopole si dispongono a piramide, non a griglia piena: l'ultima riga sta
+ * in centro. Quattro fanno 2 e 2, non 3 e 1; tre fanno 2 e 1; cinque fanno 3 e
+ * 2. È come stanno i comandi su un pannello vero, e una manopola spaiata in
+ * fondo a sinistra si vede subito che è un avanzo di riempimento.
+ *
+ * Una riga sola fino a due; da tre in su si taglia a metà, con la riga più
+ * piena sopra. Oltre le quattro per riga si va a tre righe, perché più di
+ * quattro pomelli affiancati su un telefono diventano bottoni da spillo.
+ */
+function righeDi(quante) {
+  if (quante <= 2) return [quante];
+  let righe = 2;
+  while (Math.ceil(quante / righe) > 4) righe++;
+  const fuori = [];
+  let restano = quante;
+  for (let r = righe; r > 0; r--) {
+    const quanti = Math.ceil(restano / r);
+    fuori.push(quanti);
+    restano -= quanti;
+  }
+  return fuori;
+}
+
 function griglia(effetto) {
   const vere = manopoleVere(effetto);
   const frontale = èFrontale(effetto, vere);
-  const box = document.createElement('div');
-  box.className = 'pomelli' + (frontale ? ' cinque' : '');
   // Gain, Bass, Middle, Treble, Master: l'ordine del frontale, non quello
   // degli indici.
   const ordine = frontale ? [0, 3, 2, 1, 4] : vere.map((_, i) => i);
-  ordine.forEach(i => box.appendChild(cella(effetto, vere[i])));
+
+  const box = document.createElement('div');
+  box.className = 'pomelli';
+  let da = 0;
+  for (const quanti of righeDi(ordine.length)) {
+    const riga = document.createElement('div');
+    riga.className = 'riga-pomelli';
+    ordine.slice(da, da + quanti).forEach(i => riga.appendChild(cella(effetto, vere[i])));
+    box.appendChild(riga);
+    da += quanti;
+  }
   return box;
 }
 
