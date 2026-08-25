@@ -371,6 +371,95 @@
 
   /* Il nome del preset che si sta regolando: la prima cosa da leggere. */
   .titolo-grande { font-size:1.35rem; margin:0 0 4px; letter-spacing:-0.01em; }
+  /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
+     Il fondo dentro è più scuro della pagina, non più chiaro: il neon si vede
+     sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
+  .striscia { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 14px;
+              scroll-snap-type:x proximity; }
+  .striscia::-webkit-scrollbar { height:0; }
+  .tassello { position:relative; flex:0 0 106px; scroll-snap-align:center;
+              background:#0e1014; border:1px solid var(--line); border-radius:12px;
+              padding:9px 9px 7px; cursor:pointer; text-align:left;
+              font:inherit; color:inherit;
+              display:flex; flex-direction:column; gap:6px; }
+  .tassello.scelto { border-color:var(--cat);
+                     box-shadow:0 0 0 1px var(--cat) inset,
+                                0 0 10px -1px var(--cat), 0 0 26px -6px var(--cat); }
+  .tassello.spento { opacity:0.5; }
+  .tassello .cat { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
+                   color:var(--cat); font-weight:700;
+                   text-shadow:0 0 6px var(--cat), 0 0 14px var(--cat); }
+  .tassello .modello { font-size:0.78rem; line-height:1.2; min-height:2.4em;
+                       color:var(--text); }
+  .tassello .led { position:absolute; top:9px; right:9px; width:7px; height:7px;
+                   border-radius:50%; background:#33383f; }
+  .tassello.acceso .led { background:var(--cat);
+                          box-shadow:0 0 6px var(--cat), 0 0 14px var(--cat); }
+  /* Le barrettine: non si leggono i numeri, si vede la forma del suono. */
+  .barrette { display:flex; align-items:flex-end; gap:2px; height:16px; }
+  .barrette i { flex:1; background:var(--cat); border-radius:1px; min-height:1px;
+                box-shadow:0 0 6px var(--cat); }
+  .filo { flex:0 0 10px; align-self:center; height:1px; background:var(--line);
+          margin:0 -3px; }
+
+  /* ---- il blocco a fuoco ---- */
+  .barra-posizione { display:flex; align-items:center; gap:8px; padding:10px 12px 0; }
+  .barra-posizione .freccia { background:none; border:1px solid var(--line);
+                              color:var(--dim); border-radius:8px; width:32px;
+                              height:32px; font-size:0.9rem; cursor:pointer; }
+  .barra-posizione .freccia:disabled { opacity:0.3; cursor:default; }
+  .barra-posizione .dove { flex:1; text-align:center; font-size:0.66rem;
+                           letter-spacing:0.08em; text-transform:uppercase;
+                           color:var(--cat); font-weight:700;
+                           text-shadow:0 0 8px var(--cat), 0 0 18px var(--cat); }
+  .blocco.aFuoco .interruttore.acceso { background:color-mix(in srgb, var(--cat) 10%, #0e1014);
+                                        color:var(--cat); border-color:var(--cat);
+                                        text-shadow:0 0 8px var(--cat);
+                                        box-shadow:0 0 12px -2px var(--cat); }
+
+  /* ---- i pomelli ---- */
+  .pomelli { padding:14px 12px 12px; display:grid;
+             grid-template-columns:repeat(3, 1fr); gap:16px 6px; }
+  .pomelli.cinque { grid-template-columns:repeat(5, 1fr); gap:12px 2px; }
+  .pomello { text-align:center; cursor:ns-resize; touch-action:none;
+             color:var(--cat); user-select:none; -webkit-user-select:none; }
+  /* L'alone deve poter uscire dal riquadro dell'SVG: senza `overflow:visible`
+     viene tagliato di netto sui quattro lati e i pomelli sembrano dentro un
+     quadrato. Il disegno sta comunque più stretto del riquadro. */
+  .pomello svg { display:block; margin:0 auto 5px; overflow:visible;
+                 width:58px; height:58px; }
+  .pomelli.cinque .pomello svg { width:52px; height:52px; }
+  .pomello .guida { stroke:#262b33; stroke-width:8; stroke-linecap:round;
+                    transform:rotate(135deg); transform-origin:50% 50%; }
+  .pomello .arco  { stroke:currentColor; stroke-width:8; stroke-linecap:round;
+                    transform:rotate(135deg); transform-origin:50% 50%; }
+  .pomello .corpo { fill:#0e1014; stroke:#2a2f37; }
+  .pomello .tacca { stroke:currentColor; stroke-width:5; stroke-linecap:round; }
+  /* Il tubo al neon: l'alone non è un'ombra sotto il disegno, è il disegno
+     stesso sfocato due volte — una stretta e forte, una larga e tenue. Sta
+     solo sull'arco e sulla tacca: alonando anche il corpo verrebbe una macchia. */
+  .pomello .arco, .pomello .tacca {
+    filter:drop-shadow(0 0 4px var(--cat)) drop-shadow(0 0 11px var(--cat)); }
+  .pomello .nome { font-size:0.72rem; color:var(--dim); line-height:1.25;
+                   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+                   cursor:pointer; }
+  .pomello .nome.daTabella { font-style:italic; }
+  .pomello .nome.senzaNome { font-family:Consolas,monospace; color:var(--faint); }
+  .pomello .val { font-size:0.78rem; color:var(--cat); font-weight:700;
+                  font-variant-numeric:tabular-nums; text-shadow:0 0 8px var(--cat); }
+  .pomelli.cinque .pomello .nome { font-size:0.64rem; }
+  .pomello.scelta { display:flex; flex-direction:column; justify-content:center;
+                    cursor:default; }
+  .pomello.scelta select { width:100%; background:#0e1014; color:var(--cat);
+                           border:1px solid var(--cat); border-radius:8px;
+                           padding:7px 4px; font-size:0.72rem; font-family:inherit;
+                           margin-bottom:5px; }
+  /* Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
+  .bolla { position:fixed; z-index:60; transform:translate(-50%,-150%);
+           background:var(--text); color:#101216; font-weight:700; font-size:1.2rem;
+           padding:6px 14px; border-radius:10px; pointer-events:none;
+           font-variant-numeric:tabular-nums; box-shadow:0 4px 18px rgba(0,0,0,0.6); }
+
 
   /* Ogni blocco è un modulo della catena, e si legge come tale: la fascia in
      alto col nome e l'interruttore, i comandi sotto. */
@@ -733,6 +822,8 @@
     ogni preset che lo usa.</p>
   <div class="stato-pannello" hidden></div>
   <div id="catena"></div>
+  <!-- Il valore grande mentre si trascina: sotto il dito il numerino non si vede. -->
+  <div class="bolla" id="bolla" hidden></div>
 </div>
 
 
@@ -2047,290 +2138,571 @@ async function apriEditor(record) {
   logLine(`«${record.name}» è sull'ampli: gira pure.`);
 }
 
+/* ====================================================================
+   Il disegno dell'editor: la catena in cima, un blocco alla volta sotto
+
+   Scelto dall'utente in `design/proposte-editor.html`, che esiste apposta per
+   far prendere questa decisione guardando invece che ragionando. Prima i
+   sette blocchi stavano tutti aperti: erano tre schermate, e non si sapeva
+   mai a che punto della catena si stessero mettendo le mani.
+   ==================================================================== */
+
+/**
+ * Un colore acceso per posizione della catena, così la categoria si riconosce
+ * senza leggerla. Sono tinte sature con l'alone, e il fondo dei tasselli è
+ * **più scuro** della pagina: il neon si vede sul buio, e un pannello grigio
+ * smorza tutto quello che ci sta sopra.
+ */
+const COLORI_CATENA = ['#00d9ff', '#c04bff', '#ff3040', '#ffd21e',
+                       '#17e39b', '#3aa0ff', '#8b6bff'];
+const coloreDi = posizione => COLORI_CATENA[posizione % COLORI_CATENA.length];
+
+/**
+ * I valori viaggiano da 0 a 1 — è quello che vuole l'ampli — ma si leggono da
+ * 0 a 10 con un decimale, come sulle manopole vere: «6.1» dice qualcosa a chi
+ * suona, «0.61» no. Il numero mostrato non entra mai in un comando.
+ */
+const mostraValore = valore => (valore * 10).toFixed(1);
+
+/**
+ * L'ordine in cui si leggono le manopole sullo schermo. Su un ampli è quello
+ * del frontale — Gain, Bass, Middle, Treble, Master — mentre negli indici
+ * Treble e Bass stanno al contrario (vedi `spark-effetti.js`).
+ *
+ * Si riconosce **dai nomi**, non dalla posizione nella catena: è avere quei
+ * cinque comandi che fa di un blocco un frontale, non dove sta. Se i nomi non
+ * combaciano si resta all'ordine degli indici, che è sempre vero.
+ */
+const TONI = ['Gain', 'Treble', 'Middle', 'Bass', 'Master'];
+function èFrontale(effetto, vere) {
+  if (vere.length !== 5) return false;
+  return TONI.every((atteso, i) =>
+    SparkEffetti.manopola(effetto.name, vere[i].index, vere.length) === atteso);
+}
+
 function disegnaCatena() {
   const catena = $('catena');
   catena.innerHTML = '';
   if (!inModifica) return;
 
+  const quanti = inModifica.effetti.length;
+  if (!quanti) return;
+  if (inModifica.scelto === undefined || inModifica.scelto >= quanti) {
+    inModifica.scelto = Math.min(3, quanti - 1);      // si parte dall'ampli
+  }
+
+  catena.appendChild(striscia());
+  catena.appendChild(bloccoAFuoco(inModifica.effetti[inModifica.scelto],
+                                  inModifica.scelto));
+  // Il tassello scelto va portato in vista da sé: cambiando blocco con le
+  // frecce la striscia resterebbe ferma, e sembrerebbe che non sia successo
+  // niente. Si sposta la striscia a mano invece di `scrollIntoView`, che
+  // trascina anche la pagina sotto e fa saltare il pannello.
+  //
+  // E si aspetta un giro di disegno: all'apertura questa funzione gira mentre
+  // il pannello è ancora nascosto, e un elemento nascosto è largo zero — il
+  // conto verrebbe zero e la striscia resterebbe al primo tassello.
+  requestAnimationFrame(() => {
+    const scelto = catena.querySelector('.tassello.scelto');
+    const fila   = catena.querySelector('.striscia');
+    if (!scelto || !fila || !fila.clientWidth) return;
+    fila.scrollLeft = scelto.offsetLeft - (fila.clientWidth - scelto.offsetWidth) / 2;
+  });
+}
+
+/** La fila dei sette blocchi, nell'ordine del segnale. */
+function striscia() {
+  const fila = document.createElement('div');
+  fila.className = 'striscia';
   inModifica.effetti.forEach((effetto, posizione) => {
-    const blocco = document.createElement('div');
-    blocco.className = 'blocco' + (effetto.enabled ? '' : ' spento');
-
-    const testa = document.createElement('div');
-    testa.className = 'intestazione';
-    const nomi = document.createElement('div');
-    nomi.className = 'nomi';
-    const categoria = document.createElement('div');
-    categoria.className = 'categoria';
-    categoria.textContent = Spark.CATENA[posizione] || `posizione ${posizione + 1}`;
-
-    // Il modello si cambia dal nome stesso: era un pulsante «cambia» accanto,
-    // e nessuno lo collegava al nome che stava leggendo. L'identificativo
-    // interno (`Twin`, `LA2AComp`) non si vede più: serve a noi nei comandi,
-    // non a chi sta regolando un suono. Resta nel suggerimento della voce.
-    const scelta = document.createElement('select');
-    scelta.className = 'nome-effetto';
-    scelta.title = 'tocca per mettere un altro modello in questa posizione';
-
-    const candidati = (SparkEffetti.MODELLI[posizione] || []).slice();
-    if (!candidati.includes(effetto.name)) candidati.unshift(effetto.name);
-
-    // Due gruppi, e la distinzione non è cosmetica: i primi sono modelli che
-    // **da questo ampli sono usciti**, quindi esistono di sicuro; gli altri
-    // vengono dal catalogo di Soundshed e non sono verificati. Chiederne uno
-    // che l'ampli non ha vuol dire fargli ricostruire un blocco DSP
-    // inesistente — è così che `TrebleBooster` lo mandava in palla.
-    const visti = modelliVisti();
-    const gruppi = [
-      ['sul tuo ampli',            candidati.filter(m =>  visti.has(m))],
-      ['dal catalogo, da provare', candidati.filter(m => !visti.has(m))],
-    ];
-    for (const [titolo, elenco] of gruppi) {
-      if (!elenco.length) continue;
-      const gruppo = document.createElement('optgroup');
-      gruppo.label = titolo;
-      for (const modello of elenco) {
-        const opzione = document.createElement('option');
-        opzione.value = modello;
-        opzione.textContent = SparkEffetti.nome(modello);
-        opzione.title = modello;
-        gruppo.appendChild(opzione);
-      }
-      scelta.appendChild(gruppo);
+    if (posizione) {
+      const filo = document.createElement('div');
+      filo.className = 'filo';
+      fila.appendChild(filo);
     }
-    // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
-    // fonte elenca, e senza questa via non ci si arriverebbe mai.
-    const aMano = document.createElement('option');
-    aMano.value = ' amano';
-    aMano.textContent = 'altro modello, a mano…';
-    scelta.appendChild(aMano);
-    scelta.value = effetto.name;
+    fila.appendChild(tassello(effetto, posizione));
+  });
+  return fila;
+}
 
-    // Senza ampli il modello non si cambia, e non è pigrizia: cambiarlo vuol
-    // dire fargli ricostruire un blocco DSP e poi **rileggere quanti
-    // parametri ha quello nuovo**. Deciderlo alla cieca vorrebbe dire tenersi
-    // i parametri del modello di prima e mandarli a un modello che ne vuole
-    // altri — cioè costruire a tavolino il preset che pianta l'ampli.
-    if (inModifica.offline) {
-      scelta.disabled = true;
-      scelta.title = 'serve l\'ampli: cambiare modello vuol dire fargli ricostruire ' +
-                     'un blocco, e poi rileggere quanti parametri ha quello nuovo';
-    }
+function tassello(effetto, posizione) {
+  const scelto = posizione === inModifica.scelto;
+  const t = document.createElement('button');
+  t.type = 'button';
+  t.className = 'tassello' + (scelto ? ' scelto' : '') +
+                (effetto.enabled ? ' acceso' : ' spento');
+  t.style.setProperty('--cat', coloreDi(posizione));
+  t.title = effetto.name;          // l'identificativo dell'ampli resta a portata
 
-    scelta.addEventListener('change', () => {
-      if (scelta.value === ' amano') {
-        scelta.value = effetto.name;
-        const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
-        if (nome && nome.trim()) cambiaModello(posizione, nome.trim());
-        return;
-      }
-      cambiaModello(posizione, scelta.value);
-    });
+  const led = document.createElement('span');
+  led.className = 'led';
 
-    nomi.append(categoria, scelta);
+  const cat = document.createElement('div');
+  cat.className = 'cat';
+  cat.textContent = Spark.CATENA[posizione] || `posizione ${posizione + 1}`;
 
-    const interruttore = document.createElement('button');
-    interruttore.className = 'interruttore' + (effetto.enabled ? ' acceso' : '');
-    interruttore.style.marginLeft = '0';
-    interruttore.textContent = effetto.enabled ? 'acceso' : 'spento';
-    interruttore.addEventListener('click', async () => {
-      effetto.enabled = !effetto.enabled;
-      if (!inModifica.offline) {
-        try {
-          await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
-        } catch (err) {
-          logLine('errore: ' + err.message);
-        }
-      }
-      // L'ampli scrive lui l'acceso/spento anche nel parametro che lo
-      // rispecchia (misurato: spegnendo il blocco quel parametro va a 0).
-      // Se non lo seguiamo qui, lo schermo resta a dire il contrario finché
-      // non si rilegge.
-      if (SparkEffetti.nomeExtra(effetto.name)) {
-        effetto.params.forEach(p => {
-          if (SparkEffetti.extra(effetto.name, p.index)) p.value = effetto.enabled ? 1 : 0;
-        });
-      }
+  const modello = document.createElement('div');
+  modello.className = 'modello';
+  modello.textContent = SparkEffetti.nome(effetto.name);
+
+  const barre = barrette(effetto);
+  if (scelto) inModifica.barreAFuoco = barre;    // si aggiornano girando
+
+  t.append(led, cat, modello, barre);
+  t.addEventListener('click', () => {
+    inModifica.scelto = posizione;
+    disegnaCatena();
+  });
+  return t;
+}
+
+/**
+ * Le barrettine coi valori delle prime cinque manopole. Non si leggono i
+ * numeri: si vede la forma del suono, e si capisce quale blocco andare a
+ * toccare prima di toccarlo.
+ */
+function barrette(effetto) {
+  const box = document.createElement('div');
+  box.className = 'barrette';
+  manopoleVere(effetto).slice(0, 5).forEach(param => {
+    const barra = document.createElement('i');
+    barra.style.height = Math.max(2, Math.round(param.value * 16)) + 'px';
+    box.appendChild(barra);
+  });
+  return box;
+}
+
+/** Le manopole vere: senza i parametri che manopole non sono. */
+const manopoleVere = effetto =>
+  effetto.params.filter(p => !SparkEffetti.extra(effetto.name, p.index));
+
+/* ------------------------------------------------------------------ */
+
+function bloccoAFuoco(effetto, posizione) {
+  const blocco = document.createElement('div');
+  blocco.className = 'blocco aFuoco' + (effetto.enabled ? '' : ' spento');
+  blocco.style.setProperty('--cat', coloreDi(posizione));
+
+  blocco.appendChild(barraPosizione(posizione));
+  blocco.appendChild(intestazioneBlocco(effetto, posizione));
+  blocco.appendChild(griglia(effetto));
+
+  // Trappola già pagata una volta: girare la manopola di un effetto spento
+  // non produce nessun suono, e sembra che il comando non funzioni.
+  if (!effetto.enabled && effetto.params.length) {
+    const avviso = document.createElement('div');
+    avviso.className = 'avviso-spento';
+    avviso.textContent = 'È spento: le manopole non si sentono finché non lo accendi.';
+    blocco.appendChild(avviso);
+  }
+
+  const cassetto = cassettoExtra(effetto);
+  if (cassetto) blocco.appendChild(cassetto);
+  return blocco;
+}
+
+/** ‹ CATEGORIA › — si cambia blocco anche senza tornare sulla striscia. */
+function barraPosizione(posizione) {
+  const barra = document.createElement('div');
+  barra.className = 'barra-posizione';
+
+  const vaiA = (dove, segno, etichetta) => {
+    const tasto = document.createElement('button');
+    tasto.type = 'button';
+    tasto.className = 'freccia';
+    tasto.textContent = segno;
+    tasto.title = etichetta;
+    tasto.disabled = dove < 0 || dove >= inModifica.effetti.length;
+    tasto.addEventListener('click', () => {
+      inModifica.scelto = dove;
       disegnaCatena();
     });
+    return tasto;
+  };
 
-    testa.append(nomi, interruttore);
-    blocco.appendChild(testa);
+  const dove = document.createElement('div');
+  dove.className = 'dove';
+  dove.textContent = Spark.CATENA[posizione] || `posizione ${posizione + 1}`;
 
-    // L'ampli manda, su certi preset, qualche parametro che manopola non è: il
-    // terzo del noise gate e l'ottavo del riverbero, sempre esattamente 1. Non
-    // si nascondono — restano lì sotto, muovibili — ma stanno da parte, così le
-    // manopole vere si contano a colpo d'occhio e tornano con quelle dell'app.
-    const rigaDi = (param) => {
-      const riga = document.createElement('div');
-      riga.className = 'manopola';
+  barra.append(vaiA(posizione - 1, '‹', 'il blocco prima'), dove,
+               vaiA(posizione + 1, '›', 'il blocco dopo'));
+  return barra;
+}
 
-      // L'ampli non manda i nomi dei parametri e non c'è tabella da cui
-      // dedurli: li battezza l'utente, girando e ascoltando. Il nome vale per
-      // il modello, quindi si dà una volta e vale in tutti i preset.
-      // Tre stati, e si distinguono a vista: il nome che hai messo tu vince
-      // sempre, quello della tabella è una proposta ancora da verificare a
-      // orecchio, e il numero è la verità quando non sappiamo niente.
-      const dato     = (nomiParam[effetto.name] || {})[param.index];
-      const proposto = SparkEffetti.manopola(effetto.name, param.index,
-                                             effetto.params.length);
-      const numero = document.createElement('span');
-      numero.className = 'numero' +
-        (dato ? '' : proposto ? ' daTabella' : ' senzaNome');
-      numero.textContent = dato || proposto || (param.index + 1);
-      numero.title = dato
-        ? `«${dato}», nome tuo — tocca per cambiarlo`
-        : proposto
-          ? `«${proposto}» arriva dalla tabella: gira e senti se torna. ` +
-            'Tocca per correggerlo.'
-          : 'tocca per dargli un nome: varrà per ogni preset che usa ' + effetto.name;
-      numero.addEventListener('click', async () => {
-        const nome = prompt(
-          `Nome del parametro ${param.index + 1} di ${SparkEffetti.nome(effetto.name)}\n` +
-          '(vuoto per tornare al valore di partenza):', dato || proposto || '');
-        if (nome === null) return;
-        await store.setParamName(effetto.name, param.index, nome);
-        nomiParam = await store.getParamNames();
-        disegnaCatena();
-      });
+/**
+ * Il nome del blocco è una tendina: da lì si cambia il modello. L'era di un
+ * pulsante «cambia» accanto al nome è finita perché nessuno collegava il
+ * pulsante al nome che stava leggendo.
+ */
+function intestazioneBlocco(effetto, posizione) {
+  const testa = document.createElement('div');
+  testa.className = 'intestazione';
 
-      const valore = document.createElement('span');
-      valore.className = 'valore';
-      valore.textContent = param.value.toFixed(2);
+  const scelta = document.createElement('select');
+  scelta.className = 'nome-effetto';
+  scelta.title = 'tocca per mettere un altro modello in questa posizione';
 
-      // Nome a sinistra e valore a destra su una riga loro, il comando sotto a
-      // tutta larghezza: prima stavano tutti e tre in fila e al cursore
-      // restava una fessura, che su un telefono si prende col pollice a
-      // fatica. Un parametro che si regola a orecchio merita la riga intera.
-      const etichetta = document.createElement('div');
-      etichetta.className = 'etichetta';
-      etichetta.append(numero, valore);
-      riga.appendChild(etichetta);
+  const candidati = (SparkEffetti.MODELLI[posizione] || []).slice();
+  if (!candidati.includes(effetto.name)) candidati.unshift(effetto.name);
 
-      // Il parametro in più di cui sappiamo il significato non è un cursore.
-      // Sul noise gate è l'acceso/spento: un cursore lì spegnerebbe il blocco
-      // di nascosto, mentre l'interruttore in cima continua a dire «acceso».
-      // Si mostra e basta — cambiarlo si cambia dall'interruttore, che è
-      // esattamente quello che fa l'app ufficiale.
-      const nomeExtra = SparkEffetti.extra(effetto.name, param.index) &&
-                        SparkEffetti.nomeExtra(effetto.name);
-      if (nomeExtra) {
-        numero.className = 'numero daTabella';
-        numero.textContent = nomeExtra;
-        numero.title = `«${nomeExtra}», misurato sull'ampli: sotto 0.50 il blocco ` +
-                       'è spento, sopra è acceso. È l\'interruttore qui sopra, ' +
-                       'visto da un\'altra parte.';
-        const spiega = document.createElement('div');
-        spiega.className = 'spiega-extra';
-        spiega.textContent = param.value >= 0.5
-          ? 'acceso — si cambia dall\'interruttore in cima al blocco'
-          : 'spento — si cambia dall\'interruttore in cima al blocco';
-        riga.appendChild(spiega);
-        return riga;
-      }
-
-      // Certi parametri scelgono fra cose invece di scorrere — il tipo di
-      // riverbero è l'unico che conosciamo. Con un cursore continuo azzeccare
-      // la posizione sarebbe un terno al lotto, quindi lì ci va un elenco.
-      const quante = SparkEffetti.posizioni(effetto.name, param.index);
-      if (quante) {
-        const scelta = document.createElement('select');
-        scelta.className = 'scelta';
-        // Dove i nomi ci sono si leggono da soli; il numero della posizione
-        // resta nel suggerimento, che serve solo se un giorno si scoprisse
-        // l'elenco sfasato.
-        const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
-        for (let n = 0; n < quante; n++) {
-          const opzione = document.createElement('option');
-          opzione.value = SparkEffetti.valorePosizione(n);
-          opzione.textContent = nomi ? nomi[n]
-                                     : (dato || proposto || 'posizione') + ' ' + (n + 1);
-          opzione.title = `posizione ${n + 1}`;
-          scelta.appendChild(opzione);
-        }
-        const dove = SparkEffetti.posizioneDi(param.value, quante);
-        if (dove === -1) {
-          // L'ampli riporta un valore che non è nessuna delle posizioni note:
-          // si aggiunge invece di spostarlo di nascosto su quella più vicina.
-          const suo = document.createElement('option');
-          suo.value = param.value;
-          suo.textContent = 'valore dell\'ampli (' + param.value.toFixed(2) + ')';
-          scelta.appendChild(suo);
-          scelta.value = String(param.value);
-        } else {
-          scelta.value = String(SparkEffetti.valorePosizione(dove));
-        }
-        scelta.addEventListener('change', () => {
-          param.value = Number(scelta.value);
-          valore.textContent = param.value.toFixed(2);
-          mandaParametro(effetto.name, param.index, param.value);
-        });
-        riga.appendChild(scelta);
-        return riga;
-      }
-
-      const cursore = document.createElement('input');
-      cursore.type = 'range';
-      cursore.className = 'cursore';
-      cursore.min = 0; cursore.max = 1; cursore.step = 0.01;
-      cursore.value = param.value;
-      // La parte già percorsa si colora: `--p` è la posizione, e il CSS ci
-      // costruisce sopra il riempimento della guida. Senza, un cursore fermo a
-      // metà e uno fermo a zero si distinguono solo cercando la pallina.
-      cursore.style.setProperty('--p', param.value);
-
-      const muovi = () => {
-        param.value = Number(cursore.value);
-        cursore.style.setProperty('--p', param.value);
-        valore.textContent = param.value.toFixed(2);
-        mandaParametro(effetto.name, param.index, param.value);
-      };
-      cursore.addEventListener('input', muovi);
-      cursore.addEventListener('change', muovi);
-
-      riga.appendChild(cursore);
-      return riga;
-    };
-
-    const vere  = effetto.params.filter(p => !SparkEffetti.extra(effetto.name, p.index));
-    const fuori = effetto.params.filter(p =>  SparkEffetti.extra(effetto.name, p.index));
-
-    // Su schermo largo i parametri stanno a due colonne: cinque manopole in
-    // colonna singola fanno scorrere la pagina per ogni blocco, e la catena
-    // intera non si vede mai tutta.
-    const parametri = document.createElement('div');
-    parametri.className = 'parametri';
-    vere.forEach(param => parametri.appendChild(rigaDi(param)));
-    blocco.appendChild(parametri);
-
-    // Trappola già pagata una volta: girare la manopola di un effetto spento
-    // non produce nessun suono, e sembra che il comando non funzioni.
-    if (!effetto.enabled && effetto.params.length) {
-      const avviso = document.createElement('div');
-      avviso.className = 'avviso-spento';
-      avviso.textContent = 'È spento: le manopole non si sentono finché non lo accendi.';
-      blocco.appendChild(avviso);
+  // Due gruppi, e la distinzione non è cosmetica: i primi sono modelli che
+  // **da questo ampli sono usciti**, quindi esistono di sicuro; gli altri
+  // vengono dal catalogo di Soundshed e non sono verificati. Chiederne uno che
+  // l'ampli non ha vuol dire fargli ricostruire un blocco DSP inesistente — è
+  // così che `TrebleBooster` lo mandava in palla.
+  const visti = modelliVisti();
+  const gruppi = [
+    ['sul tuo ampli',            candidati.filter(m =>  visti.has(m))],
+    ['dal catalogo, da provare', candidati.filter(m => !visti.has(m))],
+  ];
+  for (const [titolo, elenco] of gruppi) {
+    if (!elenco.length) continue;
+    const gruppo = document.createElement('optgroup');
+    gruppo.label = titolo;
+    for (const modello of elenco) {
+      const opzione = document.createElement('option');
+      opzione.value = modello;
+      opzione.textContent = SparkEffetti.nome(modello);
+      opzione.title = modello;
+      gruppo.appendChild(opzione);
     }
+    scelta.appendChild(gruppo);
+  }
+  // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
+  // fonte elenca, e senza questa via non ci si arriverebbe mai.
+  const aMano = document.createElement('option');
+  aMano.value = ' amano';
+  aMano.textContent = 'altro modello, a mano…';
+  scelta.appendChild(aMano);
+  scelta.value = effetto.name;
 
-    if (fuori.length) {
-      const cassetto = document.createElement('details');
-      cassetto.className = 'extra';
-      const titolo = document.createElement('summary');
-      const cosaSia = SparkEffetti.nomeExtra(effetto.name);
-      titolo.textContent = fuori.length === 1
-        ? (cosaSia ? `1 parametro che non è una manopola: ${cosaSia.toLowerCase()}`
-                   : '1 parametro che non è una manopola')
-        : `${fuori.length} parametri che non sono manopole`;
-      titolo.title = `${SparkEffetti.nome(effetto.name)} ha ` +
-        `${SparkEffetti.TABELLA[effetto.name].quante} manopole, ma su certi preset ` +
-        'l\'ampli manda qualche parametro in più. Restano qui, e si possono muovere.';
-      cassetto.appendChild(titolo);
-      fuori.forEach(param => cassetto.appendChild(rigaDi(param)));
-      blocco.appendChild(cassetto);
+  // Senza ampli il modello non si cambia, e non è pigrizia: cambiarlo vuol
+  // dire fargli ricostruire un blocco DSP e poi **rileggere quanti parametri
+  // ha quello nuovo**. Deciderlo alla cieca vorrebbe dire tenersi i parametri
+  // del modello di prima e darli a un modello che ne vuole altri — cioè
+  // costruire a tavolino il preset che pianta l'ampli.
+  if (inModifica.offline) {
+    scelta.disabled = true;
+    scelta.title = 'serve l\'ampli: cambiare modello vuol dire fargli ricostruire ' +
+                   'un blocco, e poi rileggere quanti parametri ha quello nuovo';
+  }
+
+  scelta.addEventListener('change', () => {
+    if (scelta.value === ' amano') {
+      scelta.value = effetto.name;
+      const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
+      if (nome && nome.trim()) cambiaModello(posizione, nome.trim());
+      return;
     }
-
-    catena.appendChild(blocco);
+    cambiaModello(posizione, scelta.value);
   });
+
+  const interruttore = document.createElement('button');
+  interruttore.type = 'button';
+  interruttore.className = 'interruttore' + (effetto.enabled ? ' acceso' : '');
+  interruttore.textContent = effetto.enabled ? 'acceso' : 'spento';
+  interruttore.addEventListener('click', async () => {
+    effetto.enabled = !effetto.enabled;
+    if (!inModifica.offline) {
+      try {
+        await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
+      } catch (err) {
+        logLine('errore: ' + err.message);
+      }
+    }
+    // L'ampli scrive lui l'acceso/spento anche nel parametro che lo rispecchia
+    // (misurato: spegnendo il blocco quel parametro va a 0). Se non lo
+    // seguiamo qui, lo schermo resta a dire il contrario finché non si rilegge.
+    if (SparkEffetti.nomeExtra(effetto.name)) {
+      effetto.params.forEach(p => {
+        if (SparkEffetti.extra(effetto.name, p.index)) p.value = effetto.enabled ? 1 : 0;
+      });
+    }
+    disegnaCatena();
+  });
+
+  testa.append(scelta, interruttore);
+  return testa;
+}
+
+/* ------------------------------------------------------------------
+   Le manopole
+   ------------------------------------------------------------------ */
+
+function griglia(effetto) {
+  const vere = manopoleVere(effetto);
+  const frontale = èFrontale(effetto, vere);
+  const box = document.createElement('div');
+  box.className = 'pomelli' + (frontale ? ' cinque' : '');
+  // Gain, Bass, Middle, Treble, Master: l'ordine del frontale, non quello
+  // degli indici.
+  const ordine = frontale ? [0, 3, 2, 1, 4] : vere.map((_, i) => i);
+  ordine.forEach(i => box.appendChild(cella(effetto, vere[i])));
+  return box;
+}
+
+function cella(effetto, param) {
+  // Certi parametri scelgono fra cose invece di scorrere — il tipo di
+  // riverbero è l'unico che conosciamo. Con un pomello azzeccare la posizione
+  // sarebbe un terno al lotto, quindi lì ci va un elenco.
+  const quante = SparkEffetti.posizioni(effetto.name, param.index);
+  return quante ? cellaScelta(effetto, param, quante) : pomello(effetto, param);
+}
+
+/**
+ * L'etichetta di una manopola, coi suoi tre stati che si distinguono a vista:
+ * il nome che hai messo tu vince sempre, quello della tabella è una proposta
+ * ancora da verificare a orecchio, e il numero è la verità quando non
+ * sappiamo niente. Si tocca per battezzarla, e vale per il modello — quindi
+ * una volta sola, in ogni preset che lo usa.
+ */
+function etichettaDi(effetto, param, quante) {
+  const dato     = (nomiParam[effetto.name] || {})[param.index];
+  const proposto = SparkEffetti.manopola(effetto.name, param.index, quante);
+
+  const nome = document.createElement('div');
+  nome.className = 'nome' + (dato ? '' : proposto ? ' daTabella' : ' senzaNome');
+  nome.textContent = dato || proposto || (param.index + 1);
+  nome.title = dato
+    ? `«${dato}», nome tuo — tocca per cambiarlo`
+    : proposto
+      ? `«${proposto}» arriva dalla tabella: gira e senti se torna. Tocca per correggerlo.`
+      : 'tocca per dargli un nome: varrà per ogni preset che usa ' + effetto.name;
+  nome.addEventListener('click', async evento => {
+    evento.stopPropagation();
+    const scelto = prompt(
+      `Nome del parametro ${param.index + 1} di ${SparkEffetti.nome(effetto.name)}\n` +
+      '(vuoto per tornare al valore di partenza):', dato || proposto || '');
+    if (scelto === null) return;
+    await store.setParamName(effetto.name, param.index, scelto);
+    nomiParam = await store.getParamNames();
+    disegnaCatena();
+  });
+  return nome;
+}
+
+/**
+ * Il pomello. Si gira trascinando **in verticale**, non in cerchio: col dito
+ * il cerchio è un terno al lotto, e su un pedale vero nessuno gira guardando
+ * il polso. Trecento pixel di corsa da zero a uno, che è più fine di un
+ * cursore largo quanto lo schermo.
+ *
+ * L'alone è il disegno stesso sfocato due volte, e sta solo sull'arco e sulla
+ * tacca: alonando anche il corpo scuro verrebbe una macchia. L'SVG deve
+ * lasciarlo uscire (`overflow:visible`), o il bagliore viene tagliato di netto
+ * e attorno a ogni manopola compare un quadrato.
+ */
+const RAGGIO = 34, GIRO = 2 * Math.PI * RAGGIO * 0.75;   // 270 gradi di corsa
+const CORSA_PX = 300;                                    // pixel da zero a uno
+
+function pomello(effetto, param) {
+  const box = document.createElement('div');
+  box.className = 'pomello';
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+
+  const cerchio = (raggio, classe) => {
+    const c = document.createElementNS(ns, 'circle');
+    c.setAttribute('cx', 50); c.setAttribute('cy', 50); c.setAttribute('r', raggio);
+    if (classe) c.setAttribute('class', classe);
+    return c;
+  };
+
+  const guida = cerchio(RAGGIO, 'guida');
+  guida.setAttribute('fill', 'none');
+  guida.setAttribute('stroke-dasharray', `${GIRO} 999`);
+
+  const arco = cerchio(RAGGIO, 'arco');
+  arco.setAttribute('fill', 'none');
+
+  const corpo = cerchio(24, 'corpo');
+
+  const tacca = document.createElementNS(ns, 'line');
+  tacca.setAttribute('class', 'tacca');
+  tacca.setAttribute('x1', 50); tacca.setAttribute('y1', 32);
+  tacca.setAttribute('x2', 50); tacca.setAttribute('y2', 46);
+
+  svg.append(guida, arco, corpo, tacca);
+
+  const valore = document.createElement('div');
+  valore.className = 'val';
+  box.append(svg, etichettaDi(effetto, param, manopoleVere(effetto).length), valore);
+
+  const disegna = () => {
+    arco.setAttribute('stroke-dasharray', `${GIRO * param.value} 999`);
+    tacca.setAttribute('transform', `rotate(${135 + param.value * 270} 50 50)`);
+    valore.textContent = mostraValore(param.value);
+  };
+  disegna();
+
+  let partenzaY = null, partenzaV = 0;
+  box.addEventListener('pointerdown', evento => {
+    if (evento.target.classList.contains('nome')) return;   // lì si battezza
+    partenzaY = evento.clientY;
+    partenzaV = param.value;
+    box.setPointerCapture(evento.pointerId);
+    mostraBolla(box, param.value);
+  });
+  box.addEventListener('pointermove', evento => {
+    if (partenzaY === null) return;
+    const passo = (partenzaY - evento.clientY) / CORSA_PX;
+    param.value = Math.min(1, Math.max(0, partenzaV + passo));
+    disegna();
+    mostraBolla(box, param.value);
+    aggiornaBarrette();
+    mandaParametro(effetto.name, param.index, param.value);
+  });
+  const fine = () => { partenzaY = null; nascondiBolla(); };
+  box.addEventListener('pointerup', fine);
+  box.addEventListener('pointercancel', fine);
+  return box;
+}
+
+/** Il tipo di riverbero e compagnia: un elenco in mezzo ai pomelli. */
+function cellaScelta(effetto, param, quante) {
+  const box = document.createElement('div');
+  box.className = 'pomello scelta';
+
+  const menu = document.createElement('select');
+  const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
+  for (let n = 0; n < quante; n++) {
+    const opzione = document.createElement('option');
+    opzione.value = SparkEffetti.valorePosizione(n);
+    opzione.textContent = nomi ? nomi[n] : 'posizione ' + (n + 1);
+    opzione.title = `posizione ${n + 1}`;
+    menu.appendChild(opzione);
+  }
+  const dove = SparkEffetti.posizioneDi(param.value, quante);
+  if (dove === -1) {
+    // L'ampli riporta un valore che non è nessuna delle posizioni note: si
+    // aggiunge invece di spostarlo di nascosto su quella più vicina.
+    const suo = document.createElement('option');
+    suo.value = param.value;
+    suo.textContent = 'valore dell\'ampli (' + mostraValore(param.value) + ')';
+    menu.appendChild(suo);
+    menu.value = String(param.value);
+  } else {
+    menu.value = String(SparkEffetti.valorePosizione(dove));
+  }
+  menu.addEventListener('change', () => {
+    param.value = Number(menu.value);
+    aggiornaBarrette();
+    mandaParametro(effetto.name, param.index, param.value);
+  });
+
+  box.append(menu, etichettaDi(effetto, param, manopoleVere(effetto).length));
+  return box;
+}
+
+/**
+ * Le barrettine del tassello a fuoco seguono le manopole mentre si girano.
+ * Ridisegnare tutta la catena a ogni pixel rifarebbe il DOM sotto il dito.
+ */
+function aggiornaBarrette() {
+  const barre = inModifica && inModifica.barreAFuoco;
+  if (!barre || !barre.isConnected) return;
+  const valori = manopoleVere(inModifica.effetti[inModifica.scelto]).slice(0, 5);
+  barre.querySelectorAll('i').forEach((barra, i) => {
+    if (valori[i]) barra.style.height = Math.max(2, Math.round(valori[i].value * 16)) + 'px';
+  });
+}
+
+/** Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
+function mostraBolla(dentro, valore) {
+  const bolla = $('bolla');
+  const r = dentro.getBoundingClientRect();
+  bolla.textContent = mostraValore(valore);
+  bolla.hidden = false;
+  bolla.style.left = (r.left + r.width / 2) + 'px';
+  bolla.style.top  = r.top + 'px';
+}
+function nascondiBolla() { $('bolla').hidden = true; }
+
+/**
+ * I parametri che manopole non sono restano in fondo, in un cassetto: non si
+ * nascondono — si possono muovere — ma stanno da parte, così le manopole vere
+ * si contano a colpo d'occhio e tornano con quelle dell'app ufficiale.
+ */
+function cassettoExtra(effetto) {
+  const fuori = effetto.params.filter(p => SparkEffetti.extra(effetto.name, p.index));
+  if (!fuori.length) return null;
+
+  const cassetto = document.createElement('details');
+  cassetto.className = 'extra';
+  const titolo = document.createElement('summary');
+  const cosaSia = SparkEffetti.nomeExtra(effetto.name);
+  titolo.textContent = fuori.length === 1
+    ? (cosaSia ? `1 parametro che non è una manopola: ${cosaSia.toLowerCase()}`
+               : '1 parametro che non è una manopola')
+    : `${fuori.length} parametri che non sono manopole`;
+  const quante = SparkEffetti.TABELLA[effetto.name] &&
+                 SparkEffetti.TABELLA[effetto.name].quante;
+  if (quante) {
+    titolo.title = `${SparkEffetti.nome(effetto.name)} ha ${quante} manopole, ma su ` +
+      'certi preset l\'ampli manda qualche parametro in più. Restano qui, e si ' +
+      'possono muovere.';
+  }
+  cassetto.appendChild(titolo);
+  fuori.forEach(param => cassetto.appendChild(rigaExtra(effetto, param)));
+  return cassetto;
+}
+
+/**
+ * Una riga del cassetto: il parametro in più di cui sappiamo il significato
+ * non è un cursore. Sul noise gate è l'acceso/spento del blocco: un cursore lì
+ * lo spegnerebbe di nascosto mentre l'interruttore in cima continua a dire
+ * «acceso». Si mostra e basta — si cambia dall'interruttore, che è esattamente
+ * quello che fa l'app ufficiale. Gli altri, di cui non sappiamo niente,
+ * restano muovibili.
+ */
+function rigaExtra(effetto, param) {
+  const riga = document.createElement('div');
+  riga.className = 'manopola';
+
+  const etichetta = document.createElement('div');
+  etichetta.className = 'etichetta';
+  const nome = etichettaDi(effetto, param, manopoleVere(effetto).length);
+  nome.classList.add('numero');
+  const valore = document.createElement('span');
+  valore.className = 'valore';
+  valore.textContent = mostraValore(param.value);
+  etichetta.append(nome, valore);
+  riga.appendChild(etichetta);
+
+  const nomeExtra = SparkEffetti.nomeExtra(effetto.name);
+  if (nomeExtra) {
+    nome.classList.add('daTabella');
+    nome.textContent = nomeExtra;
+    nome.title = `«${nomeExtra}», misurato sull'ampli: sotto la metà il blocco è ` +
+                 'spento, sopra è acceso. È l\'interruttore qui sopra, visto da ' +
+                 'un\'altra parte.';
+    const spiega = document.createElement('div');
+    spiega.className = 'spiega-extra';
+    spiega.textContent = param.value >= 0.5
+      ? 'acceso — si cambia dall\'interruttore in cima al blocco'
+      : 'spento — si cambia dall\'interruttore in cima al blocco';
+    riga.appendChild(spiega);
+    return riga;
+  }
+
+  const cursore = document.createElement('input');
+  cursore.type = 'range';
+  cursore.className = 'cursore';
+  cursore.min = 0; cursore.max = 1; cursore.step = 0.01;
+  cursore.value = param.value;
+  cursore.style.setProperty('--p', param.value);
+  const muovi = () => {
+    param.value = Number(cursore.value);
+    cursore.style.setProperty('--p', param.value);
+    valore.textContent = mostraValore(param.value);
+    mandaParametro(effetto.name, param.index, param.value);
+  };
+  cursore.addEventListener('input', muovi);
+  cursore.addEventListener('change', muovi);
+  riga.appendChild(cursore);
+  return riga;
 }
 
 /* ---- cambio del modello in una posizione della catena ---------------
