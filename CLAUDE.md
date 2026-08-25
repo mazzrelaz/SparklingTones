@@ -699,6 +699,18 @@ I²C andrebbe bene lo stesso: lo si mette **sullo stesso bus dell'MCP23017** e u
 riempimento completo di 1024 byte a 400 kHz costa ~25 ms, che per uno schermo che cambia
 quando si preme un footswitch non è niente. Qualunque cosa arrivi, si usa.
 
+**Fra le due versioni si prende la SPI a 7 pin, e la ragione non è la velocità.** In I²C il
+display starebbe **sullo stesso bus dell'MCP23017**, cioè sulla stessa coppia di fili da
+cui si leggono i footswitch. Un display che pianta il bus — tenendo SDA basso, che è il
+modo classico in cui un OLED muore — si porterebbe dietro **anche gli interruttori**, e un
+pedale che non risponde più al piede è il guasto peggiore che questo affare possa avere.
+In SPI il display ha le sue linee e non può toccare la strada del piede. Costa tre fili in
+più, e i pin erano già stati messi da parte.
+
+Il modulo comprato è dichiarato **«SPI (4-wire)»** nelle specifiche, senza ponticelli:
+GND, VCC, SCL (clock), SDA (MOSI), RES, DC, CS — logica 3,3 V, alimentazione 3,3–5 V,
+modulo 71 × 43 mm, sui 65 zł.
+
 **Cosa cambia nel resto del progetto: quasi niente.** Il display resta in SPI sugli stessi
 cinque pin, il piano dei pin della XIAO non si tocca. Cambia l'ingombro — 71 × 43,5 mm di
 modulo invece di 101 × 33,6, quindi più basso e più stretto, meglio in larghezza e peggio
