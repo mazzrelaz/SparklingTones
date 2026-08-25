@@ -398,6 +398,10 @@
      detto qui dentro, o non lo legge nessuno. */
   /* Il log è testo da leggere e da riportare, quindi si seleziona anche in
      vista live, dove tutto il resto è `user-select:none` perché si pesta. */
+  /* Nell'editor la riga compare **solo se qualcosa non va**, quindi è rossa e
+     non oro: il colore dice da solo che non è una conferma. */
+  .stato-pannello[data-solo-risposte] { color:var(--rosso);
+    background:#1a1012; border-color:#4a2226; }
   .stato-pannello { font-size:0.8rem; color:var(--gold); background:var(--panel);
                     border:1px solid var(--line); border-radius:8px;
                     padding:8px 10px; margin:0 0 12px; white-space:pre-wrap;
@@ -429,14 +433,28 @@
   /* Il nome del preset che si sta regolando: la prima cosa da leggere. */
   .titolo-grande { font-size:1.4rem; margin:0 0 4px; letter-spacing:-0.02em;
                    font-family:var(--strumento); }
-  /* Il nome del preset, nell'editor: grande e in centro come il nome del
-     blocco. È la prima cosa da leggere in un pannello che cambia il suono
+  /* Il nome del preset, nell'editor: grande, in centro, e con dell'aria
+     intorno. È la prima cosa da leggere in un pannello che cambia il suono
      sotto le dita — sapere *quale* suono si sta cambiando. */
-  .titolo-editor { text-align:center; font-size:1.6rem; margin:2px 0 10px; }
+  .titolo-editor { text-align:center; font-size:1.6rem; margin:22px 0 10px; }
   .modo-editor { text-align:center; font-family:var(--strumento);
                  font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em;
-                 font-weight:700; color:var(--gold); margin:-6px 0 12px;
+                 font-weight:700; color:var(--gold); margin:0 0 18px;
                  text-shadow:0 0 10px rgba(240,192,64,0.5); }
+
+  /* Il riquadro delle regolazioni sta **in fondo allo schermo**: è dove
+     arrivano i pollici, e lascia la catena in alto dove la si guarda. Se il
+     blocco è alto — sette manopole più il cassetto — il pannello torna a
+     scorrere come sempre, e l'accostamento in basso semplicemente non ha più
+     spazio da mangiare. */
+  #pannelloEditor.aperto { display:flex; flex-direction:column; }
+  #pannelloEditor #catena { flex:1; display:flex; flex-direction:column; }
+  /* Niente restringimenti: su uno schermo basso il flex schiaccerebbe le
+     manopole invece di far scorrere il pannello, e i pomelli diventerebbero
+     ellissi. Quando non ci stanno, si scorre. */
+  #pannelloEditor .striscia,
+  #pannelloEditor .blocco.aFuoco { flex:0 0 auto; }
+  #pannelloEditor .blocco.aFuoco { margin-top:auto; }
   /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
      Il fondo dentro è più scuro della pagina, non più chiaro: il neon si vede
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
@@ -914,7 +932,7 @@
   <h2 id="titoloEditor" class="titolo-grande titolo-editor">Regola il suono</h2>
   <!-- La modalita' e' uno stato, non un messaggio: sta qui sotto il nome e non
        nella riga di stato, che deve restare libera per le risposte. -->
-  <div id="modoEditor" class="modo-editor" hidden>senza ampli — stai regolando la copia in libreria</div>
+  <div id="modoEditor" class="modo-editor" hidden>senza ampli</div>
   <div id="aiutoEditor" hidden>
     <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente
       finché non premi «Salva». Tocca un blocco della catena per aprirlo: dentro ci sono
@@ -2943,7 +2961,7 @@ async function cambiaModello(posizione, nuovo) {
       disegnaCatena();
       return;
     }
-    if (nuovo === vecchio) { logLine(`${nuovo} c'era già.`, true); return; }
+    if (nuovo === vecchio) { logLine(`${nuovo} c'era già.`); return; }
 
     logProgress(`sostituisco ${vecchio} con ${nuovo}…`);
     await spark.send(Spark.commands.changeEffectModel(vecchio, nuovo));
@@ -2960,7 +2978,7 @@ async function cambiaModello(posizione, nuovo) {
     }
 
     if (dopo[posizione] && dopo[posizione].name === nuovo) {
-      logLine(`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`, true);
+      logLine(`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`);
     } else {
       logLine(`il comando è partito ma quel blocco riporta ancora ` +
               `${dopo[posizione] ? dopo[posizione].name : '?'}: il modello ` +
@@ -3063,12 +3081,17 @@ $('btnRileggi').addEventListener('click', async () => {
     logLine('stai regolando la copia in libreria: non c\'è nessun ampli da rileggere.', true);
     return;
   }
-  if (!spark.connected) { logLine('ampli non connesso: non c\'è niente da rileggere.'); return; }
+  if (!spark.connected) {
+    logLine('ampli non connesso: non c\'è niente da rileggere.', true);
+    return;
+  }
   logProgress('rileggo la catena dall\'ampli…');
   const catena = await aggiornaCatenaDallAmpli();
+  // La riuscita finisce solo nel log: nel pannello ci va quello che non va.
   logLine(catena
     ? 'catena riletta: adesso sullo schermo c\'è quello che ha l\'ampli.'
-    : 'non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.', true);
+    : 'non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.',
+    !catena);
 });
 
 $('btnSalvaModifiche').addEventListener('click', async () => {
@@ -3084,7 +3107,7 @@ $('btnSalvaModifiche').addEventListener('click', async () => {
   }));
   await store.put(aggiornato);
   logLine(`modifiche salvate su «${aggiornato.name}» in libreria. ` +
-          'Sull\'ampli il preset salvato non cambia finché non lo riscrivi in uno slot.', true);
+          'Sull\'ampli il preset salvato non cambia finché non lo riscrivi in uno slot.');
   await ricarica();
   disegnaPreset();
   disegnaLive();
