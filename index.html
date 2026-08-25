@@ -438,7 +438,7 @@
 
      Il titolo va per id e non per classe: `.pannello h2` è più specifico di una
      classe e vinceva lui, quindi la misura scritta qui non si vedeva. */
-  #riquadroPreset { width:fit-content; max-width:100%; margin:44px auto 14px;
+  #riquadroPreset { width:fit-content; max-width:100%; margin:0 auto 12px;
                     padding:12px 26px; border-radius:16px; background:#0e1014;
                     border:1px solid var(--fam, #ffffff);
                     box-shadow:0 0 0 1px var(--fam, #ffffff) inset,
@@ -469,6 +469,11 @@
      nome e la catena no: sono la stessa cosa vista da due distanze.
      `flex:1 0 auto` cresce e non si stringe: le manopole non diventano mai
      ellissi, e se non ci stanno il pannello scorre. */
+  /* Nome e catena si spartiscono lo spazio che avanza: meta' alla testa, che
+     ci centra dentro il nome fra il menu e la catena, e meta' al riquadro
+     delle regolazioni, che si allunga invece di lasciare un buco. */
+  #pannelloEditor .testa-editor { flex:1 0 auto; display:flex;
+                                  flex-direction:column; justify-content:center; }
   #pannelloEditor .blocco.aFuoco { flex:1 0 auto; display:flex; flex-direction:column; }
   #pannelloEditor .pomelli { flex:1; justify-content:space-evenly; }
   /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
@@ -945,10 +950,14 @@
   <!-- Il nome del preset, dentro un'insegna al neon del colore della sua
        famiglia di suono: clean, drive, acoustic. Chi non ne ha resta bianco —
        un colore inventato qui si leggerebbe come una famiglia che non c'è. -->
-  <div id="riquadroPreset"><h2 id="titoloEditor">Regola il suono</h2></div>
-  <!-- La modalita' e' uno stato, non un messaggio: sta qui sotto il nome e non
-       nella riga di stato, che deve restare libera per le risposte. -->
-  <div id="modoEditor" class="modo-editor" hidden>senza ampli</div>
+  <!-- Nome e modalità stanno insieme, e insieme si centrano nello spazio fra
+       il menu in alto e la catena. -->
+  <div class="testa-editor">
+    <div id="riquadroPreset"><h2 id="titoloEditor">Regola il suono</h2></div>
+    <!-- La modalita' e' uno stato, non un messaggio: sta sotto il nome e non
+         nella riga di stato, che deve restare libera per le risposte. -->
+    <div id="modoEditor" class="modo-editor" hidden>offline</div>
+  </div>
   <div id="aiutoEditor" hidden>
     <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente
       finché non premi «Salva». Tocca un blocco della catena per aprirlo: dentro ci sono
