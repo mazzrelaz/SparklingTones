@@ -537,6 +537,29 @@ premuto all'accensione, impedisce l'avvio (il 9 è il BOOT). Pin sicuri per uno 
 | dati WS2812 | `6` |
 | liberi | `7`, `10`, più `2`, `8`, `9` come sole uscite (strapping) |
 
+**Se la scheda è una XIAO ESP32C3** (chiesto dall'utente il 25 agosto 2026, mentre
+ordinava): stesso chip, stesso codice, ma **GPIO 0 e 1 non sono portati sul connettore** —
+la XIAO espone solo `2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 21`. Tolti i tre di strapping restano
+**otto pin sicuri, ed è esattamente il fabbisogno**:
+
+| cosa | pin XIAO |
+|---|---|
+| MCP23017 in I²C (SDA, SCL) — sono i piedini D4/D5, quelli serigrafati | `6`, `7` |
+| display SSD1322 in SPI (SCK, MOSI, CS, DC, RST) | `3, 4, 5, 20, 21` |
+| dati WS2812 | `10` |
+| non usati, perché strapping | `2`, `8`, `9` |
+
+SPI su `3` e `4` invece che sui pin nativi `8`/`10` passa dalla matrice GPIO: perde un po'
+di frequenza massima, e a un SSD1322 non cambia niente. **Margine zero**: altri footswitch
+si aggiungono sull'espansore, che ne ha sedici e ne usa sette, ma un **pedale d'espressione
+vorrebbe un pin analogico** (ADC1 = GPIO 0–4) e lì bisognerebbe spostare qualcosa.
+
+Due cose pratiche di quella scheda: **l'antenna è esterna e va attaccata** al connettore
+u.FL — non ne ha una a bordo, quindi nella scatola va previsto il posto — e ha il
+**caricabatterie** integrato sui piedini BAT, che per un pedale a batteria è un regalo. Non
+è la scheda su cui ho misurato il BLE: quella era una C3 mini generica. Il chip è lo
+stesso, quindi il firmware e i tempi valgono; l'antenna diversa cambia la portata, non il
+protocollo.
 Gli interruttori vanno **sull'espansore**, non sui pin del C3: sono ingressi lenti, e
 l'MCP23017 ha i pull-up interni e un piedino di interrupt. Sui pin diretti restano le cose
 che hanno bisogno di velocità o di temporizzazione — il display e i LED.
