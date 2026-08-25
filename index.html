@@ -436,7 +436,7 @@
   /* Il nome del preset, nell'editor: grande, in centro, e con dell'aria
      intorno. È la prima cosa da leggere in un pannello che cambia il suono
      sotto le dita — sapere *quale* suono si sta cambiando. */
-  .titolo-editor { text-align:center; font-size:1.6rem; margin:22px 0 10px; }
+  .titolo-editor { text-align:center; font-size:1.6rem; margin:34px 0 12px; }
   .modo-editor { text-align:center; font-family:var(--strumento);
                  font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em;
                  font-weight:700; color:var(--gold); margin:0 0 18px;
@@ -454,11 +454,15 @@
      ellissi. Quando non ci stanno, si scorre. */
   #pannelloEditor .striscia,
   #pannelloEditor .blocco.aFuoco { flex:0 0 auto; }
-  #pannelloEditor .blocco.aFuoco { margin-top:auto; }
+  /* Lo spazio libero va **sopra la catena**, non fra la catena e le
+     regolazioni: quelle due si leggono insieme — tocchi un tassello e guardi
+     cosa c'è dentro — e un vuoto in mezzo le farebbe sembrare due cose
+     diverse. Scendono in fondo attaccate, e l'aria resta al nome del preset. */
+  #pannelloEditor .striscia { margin-top:auto; }
   /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
      Il fondo dentro è più scuro della pagina, non più chiaro: il neon si vede
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
-  .striscia { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 14px;
+  .striscia { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 9px;
               scroll-snap-type:x proximity; }
   .striscia::-webkit-scrollbar { height:0; }
   .tassello { position:relative; flex:0 0 106px; scroll-snap-align:center;
