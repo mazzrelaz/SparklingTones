@@ -564,12 +564,65 @@ Gli interruttori vanno **sull'espansore**, non sui pin del C3: sono ingressi len
 l'MCP23017 ha i pull-up interni e un piedino di interrupt. Sui pin diretti restano le cose
 che hanno bisogno di velocità o di temporizzazione — il display e i LED.
 
-**LED: striscia WS2812, non discreti.** Un pin solo, e sono RGB, quindi fanno rosso metà A
-/ verde metà B — la convenzione del pannello dell'ampli. Luminosità bassa (20–30 su 255):
-a bianco pieno sono ~480 mA e il regolatore della schedina non li regge.
+**LED: erano una striscia WS2812, dal 25 agosto 2026 sono discreti** sull'espansore — vedi
+la sezione della batteria qui sotto: un WS2812 vuole 3,5 V minimi e una cella LiPo scende
+fino a 3,0. La convenzione resta quella del pannello dell'ampli: rosso banco A, verde
+banco B.
 
-**Otto pin su dieci, e due di avanzo** — più sedici ingressi sull'espansore, di cui ne
-usiamo sette. Il margine per un pedale d'espressione o un tap tempo adesso c'è.
+### A batteria, e la batteria sta nella scatola — deciso il 25 agosto 2026
+
+Chiesto dall'utente mentre ordinava. Non era scritto da nessuna parte, e cambia tre cose.
+
+**Il conto della corrente**, per ordine di grandezza, che è quello che serve per scegliere:
+
+| cosa | assorbimento medio |
+|---|---|
+| ESP32-C3 con BLE connesso a intervallo corto | ~20–30 mA |
+| ESP32-S3 o ESP32 classico, stesso lavoro | ~30–50 mA |
+| OLED 256×64, quattro righe di testo su fondo nero | ~25–40 mA |
+| TFT IPS retroilluminato | ~100–130 mA, **e la luce non si spegne mai** |
+| WS2812, 4–8 LED bassi | ~8 mA, più ~1 mA a LED anche da spenti |
+| MCP23017 | ~1 mA |
+
+Ne segue tutto il resto. **L'OLED resta**, e un TFT a colori è fuori discussione: su un OLED
+i pixel neri non consumano, e il nostro schermo è testo su fondo nero — il caso migliore
+possibile. **La XIAO resta**, e non solo per i pin: ha il caricabatterie a bordo sui
+piedini BAT, quindi una cella LiPo ci si attacca diretta e si ricarica dalla sua USB-C,
+senza TP4056 né boost. E **il microcontrollore conta meno del display**: fra C3 e S3 ballano
+10–20 mA, fra OLED e TFT un centinaio.
+
+**I LED cambiano: discreti bicolori sull'espansore, non la striscia WS2812.** Un WS2812
+vuole 3,5 V minimi e una cella LiPo va da 4,2 a 3,0: a batteria scarica smetterebbero di
+funzionare, e tenerli su vorrebbe dire aggiungere un boost a 5 V — cioè un altro pezzo e
+altra corrente. Quattro LED bicolore rosso/verde vogliono otto uscite, l'MCP23017 ne ha
+sedici e ne usa sette per gli interruttori: **ci stanno senza aggiungere niente**, si
+alimentano a 3,3 V, e la corrente la decide la resistenza in serie. Si perde il colore
+libero per LED, che non serviva: la convenzione è rosso banco A / verde banco B.
+
+Con i LED sull'espansore si libera anche un pin del C3, e il piano diventa:
+
+| cosa | pin XIAO |
+|---|---|
+| MCP23017 in I²C (SDA, SCL) — i piedini D4/D5 | `6`, `7` |
+| display SSD1322 in SPI: SCK, MOSI | `8`, `10` (i pin SPI della scheda) |
+| display: CS, DC, RST | `20`, `21`, `5` |
+| lettura della tensione di batteria (partitore, ADC1) | `3` |
+| libero, ADC1 — un pedale d'espressione starebbe qui | `4` |
+| non usati: strapping e BOOT | `2`, `9` |
+
+`8` è un pin di strapping ma è anche l'SCK di serie della XIAO: l'ingresso del display è ad
+alta impedenza e non lo tira giù all'accensione, quindi va bene — **è l'unico strapping che
+usiamo, e solo come uscita**.
+
+**Tre cose pratiche della batteria in scatola**, da non riscoprire col saldatore in mano:
+la cella dev'essere **protetta** (il caricabatterie della XIAO gestisce la carica, non la
+scarica profonda); l'**USB-C va portata sul pannello**, che serve sia a caricare sia a
+riprogrammare; e ci vuole un **interruttore generale**, perché lasciare il pedale acceso in
+custodia è il modo più facile di trovarlo scarico al concerto.
+
+**Il conto dei pin torna con un avanzo**: sulla XIAO ne restano liberi due — `4`, che è
+analogico e aspetta un pedale d'espressione, e `9` che è il BOOT e va lasciato stare — e
+sull'espansore restano nove ingressi su sedici, quindi altri footswitch non costano niente.
 
 #### Il formato del display — deciso il 16 agosto 2026: 256×64
 
