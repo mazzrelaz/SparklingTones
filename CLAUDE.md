@@ -62,6 +62,7 @@ test/backup-test.html    33 test del lettore zip e della conversione dal formato
 test/dropbox-test.html   34 test del sync, contro un fetch finto: nessuna rete
 test/fixtures/preset0.js catture condivise fra le suite
 design/proposte-preset.html  le tre proposte grafiche a confronto, non è l'app
+design/proposte-editor.html  idem per l'editor della catena: catena in cima, pomelli, fisarmonica
 docs/                    vedi tabella qui sopra
 reference/paulhamsh/     sorgenti di riferimento (ESP32 + Python), BLE funzionante
 captures/                log grezzi dall'ampli
@@ -917,6 +918,14 @@ Fatto oggi, tutto pubblicato (guscio a `v30`): il sync con Dropbox, «Elimina tu
 preset», «Duplica», il salvataggio del suono letto dall'ampli, e l'editor che si apre
 anche senza ampli. Le suite sono verdi — protocol 125, transport 48, store 136, backup 33,
 dropbox 34.
+
+**Aperto dopo la chiusura**: l'utente trova l'editor «incasinato» e vuole qualcosa di più
+grafico — la catena in cima, e toccando un effetto compaiono le sue regolazioni. Le tre
+disposizioni sono in `design/proposte-editor.html` (catena e pannello coi cursori, la
+stessa coi pomelli da girare, e la fisarmonica), da guardare **sul telefono**. Il
+problema vero non è la bruttezza: sono sette blocchi aperti che fanno tre schermate in cui
+non si sa a che punto della catena si sta mettendo le mani. **La scelta è dell'utente e
+non è ancora stata fatta.**
 
 1. **Provare col piede quello che è nato oggi.** Le prove le ho fatte contro un ampli
    finto, che è il limite del banco: che l'editor senza ampli salvi la cosa giusta si
