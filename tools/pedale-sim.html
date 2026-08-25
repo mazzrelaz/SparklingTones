@@ -42,6 +42,15 @@
   .testa canvas { image-rendering:pixelated;
                   border:6px solid #0c0d0f; border-radius:8px; background:#000;
                   box-shadow:0 0 0 1px #34383f, 0 0 18px rgba(120,190,255,.10); }
+  .taratura { background:#16171a; border:1px solid #2a2d33; border-radius:12px;
+              padding:14px 16px; margin-bottom:14px; max-width:620px; }
+  .taratura p { margin:0 0 10px; font-size:0.85rem; color:#b9bec6; line-height:1.5; }
+  .taratura input[type=range] { width:100%; max-width:420px; }
+  /* La carta di credito da ricalcare: 85,6 × 54 mm per norma ISO, cioè
+     l'unico righello che tutti hanno in tasca. */
+  .carta { border:2px dashed #7a828d; border-radius:7px; margin:10px 0 6px; }
+  .nota-taratura { font-family:'SF Mono',Consolas,monospace; font-size:0.72rem;
+                   color:#5f656e; }
   .schermi { display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;
             justify-content:center; }
   .schermo { margin:0; display:flex; flex-direction:column; align-items:center; gap:7px; }
@@ -140,7 +149,24 @@
     </select>
   </label>
   <label class="campo"><input type="checkbox" id="confronta" checked> affianca i due candidati</label>
+  <label class="campo"><input type="checkbox" id="vero"> scala reale</label>
   <label class="campo"><input type="checkbox" id="unBit"> soglia a 1 bit</label>
+</div>
+
+<!-- La scala reale è l'unico modo di rispondere a «come si vede a terra»: il
+     display disegnato grande quanto è davvero, il telefono per terra, e ci si
+     alza. Ma un browser non sa quanto è grande il suo schermo in millimetri —
+     i `mm` del CSS sono una convenzione che sui telefoni sbaglia di un terzo.
+     Quindi lo si taratura con un oggetto che ha misure certe: una carta di
+     credito è 85,6 × 54 mm in tutto il mondo, per norma ISO. -->
+<div class="taratura" id="taratura" hidden>
+  <p><strong>Appoggia una carta di credito o il bancomat sullo schermo</strong> e muovi il
+     cursore finché il rettangolo la ricalca esattamente. Poi i display qui sotto sono a
+     <strong>grandezza naturale</strong>: appoggia il telefono per terra, alzati, e guarda
+     se leggi i nomi.</p>
+  <input type="range" id="pxmm" min="2" max="9" step="0.01">
+  <div class="carta" id="carta"></div>
+  <div class="nota-taratura" id="notaTaratura"></div>
 </div>
 <div class="pedale">
   <div class="testa">
@@ -547,10 +573,35 @@ let G = geometria(128, 128);     // rifatta a ogni disegno
  * e ridurre solo quello largo falserebbe tutto. Quel che conta è che il
  * rapporto fra i due sia vero, e la didascalia dice a quanto siamo.
  */
+/* ---- scala reale ----------------------------------------------------
+   Un browser non sa quanto è grande il suo schermo in millimetri: i `mm` del
+   CSS valgono 96 punti per pollice, che su un telefono sbaglia di un terzo
+   abbondante. L'unico modo onesto è farsi dare un righello dall'utente, e il
+   righello che tutti hanno in tasca è una carta di credito: 85,6 × 54 mm per
+   norma ISO, uguale in tutto il mondo. Tarato una volta, resta.
+   -------------------------------------------------------------------- */
+
+const CARTA = { w: 85.6, h: 54 };
+const PXMM_CSS = 96 / 25.4;                 // il valore nominale, per partire
+let pxMmVero = Number(localStorage.getItem('spark.pxmm')) || PXMM_CSS;
+
+function disegnaTaratura() {
+  const acceso = $('vero').checked;
+  $('taratura').hidden = !acceso;
+  $('pxmm').value = pxMmVero;
+  $('carta').style.width  = (CARTA.w * pxMmVero) + 'px';
+  $('carta').style.height = (CARTA.h * pxMmVero) + 'px';
+  $('notaTaratura').textContent =
+    `1 mm = ${pxMmVero.toFixed(2)} px · il rettangolo deve essere 85,6 × 54 mm, ` +
+    'come la carta';
+}
 const CANDIDATI = ['256x64', '128x64'];
 
 /** Millimetri per pixel di schermo, uguali per tutti gli schermi mostrati. */
 function scala(formati) {
+  // A scala reale comanda la taratura e basta: se i due schermi non ci stanno
+  // affiancati vanno a capo, ed è giusto — la misura non si tocca, è il punto.
+  if ($('vero').checked) return pxMmVero;
   const mm = formati.reduce((somma, f) => somma + f.mmW, 0) + (formati.length - 1) * 3;
   // Lo spazio non e' tutta la finestra: accanto agli schermi ci stanno i tasti
   // del banco, e senza tenerne conto i due schermi vanno a capo — cioe' si
@@ -577,11 +628,13 @@ function disegnaOled() {
       : '';
   });
 
-  $('misuraDisplay').textContent = confronto
-    ? `alla stessa scala, 1 mm di vetro = ${px.toFixed(1)} px di schermo — ` +
-      'il 3,12" fa più testo, il 2,42" lo fa più grande'
-    : `${formati[0].w}×${formati[0].h} pixel su ${formati[0].mmW}×${formati[0].mmH} mm ` +
-      'di vetro — i formati sono alla stessa scala';
+  $('misuraDisplay').textContent = $('vero').checked
+    ? 'grandezza naturale — appoggia il telefono per terra e alzati'
+    : confronto
+      ? `alla stessa scala, 1 mm di vetro = ${px.toFixed(1)} px di schermo — ` +
+        'il 3,12" fa più testo, il 2,42" lo fa più grande'
+      : `${formati[0].w}×${formati[0].h} pixel su ${formati[0].mmW}×${formati[0].mmH} mm ` +
+        'di vetro — i formati sono alla stessa scala';
 }
 
 function disegnaSu(tela, f, px) {
@@ -761,6 +814,13 @@ $('btnConnect').addEventListener('click', async () => {
 $('disposizione').addEventListener('change', disegna);
 $('formato').addEventListener('change', disegna);
 $('confronta').addEventListener('change', disegna);
+$('vero').addEventListener('change', () => { disegnaTaratura(); disegna(); });
+$('pxmm').addEventListener('input', evento => {
+  pxMmVero = Number(evento.target.value);
+  localStorage.setItem('spark.pxmm', pxMmVero);   // si tara una volta sola
+  disegnaTaratura();
+  disegna();
+});
 window.addEventListener('resize', disegna);   // la scala dipende dalla finestra
 $('unBit').addEventListener('change', disegna);
 
@@ -783,6 +843,7 @@ addEventListener('keydown', e => {
 (async function avvio() {
   costruisci();
   await caricaBanchi();
+  disegnaTaratura();                 // il cursore parte dal valore tarato
   disegna();
   if (!navigator.bluetooth) {
     $('btnConnect').disabled = true;
@@ -792,9 +853,10 @@ addEventListener('keydown', e => {
   //   ?demo&auto=1        preme il footswitch 2
   //   ?demo&auto=1&poi=g  e poi il gemello
   const q = new URLSearchParams(location.search);
+  if (q.has('vero'))  { $('vero').checked = true; disegnaTaratura(); }
   if (q.has('fmt'))   $('formato').value = q.get('fmt');
   if (q.has('vista')) { $('disposizione').value = q.get('vista'); }
-  if (q.has('fmt') || q.has('vista')) disegna();
+  if (q.has('fmt') || q.has('vista') || q.has('vero')) disegna();
   if (q.has('auto')) {
     await attiva(postoDi(Number(q.get('auto'))));
     if (q.get('poi') === 'g') cambiaMeta();
