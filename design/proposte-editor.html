@@ -59,23 +59,29 @@
   .catena { display:flex; gap:8px; overflow-x:auto; padding:12px;
             scroll-snap-type:x proximity; }
   .catena::-webkit-scrollbar { height:0; }
+  /* Il tassello, acceso come un'insegna. Il fondo dentro è più scuro della
+     pagina, non più chiaro: il neon si vede sul buio, e un pannello grigio
+     smorza tutto quello che ci sta sopra. */
   .tassello { position:relative; flex:0 0 96px; scroll-snap-align:center;
-              background:var(--panel); border:1px solid var(--line);
+              background:#0e1014; border:1px solid var(--line);
               border-radius:12px; padding:8px 8px 6px; cursor:pointer;
               display:flex; flex-direction:column; gap:6px; }
   .tassello.scelto { border-color:var(--cat);
-                     box-shadow:0 0 0 1px var(--cat) inset, 0 0 14px -4px var(--cat); }
+                     box-shadow:0 0 0 1px var(--cat) inset,
+                                0 0 10px -1px var(--cat), 0 0 26px -6px var(--cat); }
   .tassello.spento { opacity:0.5; }
   .tassello .cat { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
-                   color:var(--cat); font-weight:700; }
+                   color:var(--cat); font-weight:700;
+                   text-shadow:0 0 6px var(--cat), 0 0 14px var(--cat); }
   .tassello .modello { font-size:0.76rem; line-height:1.2; min-height:2.4em; }
   .tassello .led { position:absolute; top:8px; right:8px; width:7px; height:7px;
                    border-radius:50%; background:#33383f; }
-  .tassello.acceso .led { background:var(--cat); box-shadow:0 0 6px var(--cat); }
+  .tassello.acceso .led { background:var(--cat);
+                          box-shadow:0 0 6px var(--cat), 0 0 14px var(--cat); }
   /* le barrettine: non si leggono i numeri, si vede la forma del suono */
   .barrette { display:flex; align-items:flex-end; gap:2px; height:16px; }
-  .barrette i { flex:1; background:var(--cat); opacity:0.9; border-radius:1px;
-                min-height:1px; }
+  .barrette i { flex:1; background:var(--cat); opacity:1; border-radius:1px;
+                min-height:1px; box-shadow:0 0 6px var(--cat); }
   .filo { flex:0 0 10px; align-self:center; height:1px; background:var(--line);
           margin:0 -3px; }
 
@@ -87,7 +93,8 @@
                          border-radius:8px; width:30px; height:30px; cursor:pointer;
                          font-size:0.9rem; }
   .barraFuoco .dove { flex:1; text-align:center; font-size:0.66rem; letter-spacing:0.08em;
-                      text-transform:uppercase; color:var(--cat); font-weight:700; }
+                      text-transform:uppercase; color:var(--cat); font-weight:700;
+                      text-shadow:0 0 8px var(--cat), 0 0 18px var(--cat); }
   select.modello { width:100%; background:#1d2027; color:var(--text);
                    border:1px solid var(--line); border-radius:10px;
                    padding:10px 12px; font-size:0.95rem; font-family:inherit; }
@@ -95,7 +102,9 @@
                   border:1px solid var(--line); background:#1d2027; color:var(--dim);
                   font-size:0.8rem; cursor:pointer; letter-spacing:0.04em; }
   .interruttore.acceso { border-color:var(--cat); color:var(--cat);
-                         background:color-mix(in srgb, var(--cat) 12%, #1d2027); }
+                         background:color-mix(in srgb, var(--cat) 10%, #0e1014);
+                         text-shadow:0 0 8px var(--cat);
+                         box-shadow:0 0 12px -2px var(--cat), inset 0 0 12px -6px var(--cat); }
 
   /* ---------- manopole a cursore ---------- */
 
@@ -124,13 +133,17 @@
   .griglia.cinque { grid-template-columns:repeat(5, 1fr); gap:8px 2px; }
   .pomello { text-align:center; cursor:ns-resize; touch-action:none; color:var(--cat);
              user-select:none; -webkit-user-select:none; }
-  .pomello svg { display:block; margin:0 auto 4px;
-                 filter:drop-shadow(0 0 6px color-mix(in srgb, var(--cat) 55%, transparent)); }
+  /* Il tubo al neon: l'alone non e' un'ombra sotto il disegno, e' il disegno
+     stesso sfocato due volte — una stretta e forte, una larga e tenue. */
+  .pomello svg { display:block; margin:0 auto 4px; }
+  .pomello .arco, .pomello .tacca {
+    filter:drop-shadow(0 0 4px var(--cat)) drop-shadow(0 0 11px var(--cat)); }
   .pomello .nome { font-size:0.68rem; color:var(--dim); line-height:1.2;
                    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pomello .nome.proposto { font-style:italic; }
   .pomello .val { font-size:0.72rem; color:var(--cat); font-weight:700;
-                  font-variant-numeric:tabular-nums; }
+                  font-variant-numeric:tabular-nums;
+                  text-shadow:0 0 8px var(--cat); }
   .griglia.cinque .pomello .nome { font-size:0.62rem; }
   .pomello.scelta { display:flex; flex-direction:column; justify-content:center;
                     cursor:default; }
@@ -490,12 +503,13 @@ function pomello(blocco, indice) {
 
   const guida = document.createElementNS(ns, 'circle');
   guida.setAttribute('cx', 50); guida.setAttribute('cy', 50); guida.setAttribute('r', 42);
-  guida.setAttribute('fill', 'none'); guida.setAttribute('stroke', '#333941');
+  guida.setAttribute('fill', 'none'); guida.setAttribute('stroke', '#262b33');
   guida.setAttribute('stroke-width', 7); guida.setAttribute('stroke-linecap', 'round');
   guida.setAttribute('transform', 'rotate(135 50 50)');
   guida.setAttribute('stroke-dasharray', `${2 * Math.PI * 42 * 0.75} 999`);
 
   const arco = document.createElementNS(ns, 'circle');
+  arco.setAttribute('class', 'arco');
   arco.setAttribute('cx', 50); arco.setAttribute('cy', 50); arco.setAttribute('r', 42);
   arco.setAttribute('fill', 'none'); arco.setAttribute('stroke', 'currentColor');
   arco.setAttribute('stroke-width', 7); arco.setAttribute('stroke-linecap', 'round');
@@ -503,9 +517,10 @@ function pomello(blocco, indice) {
 
   const corpo = document.createElementNS(ns, 'circle');
   corpo.setAttribute('cx', 50); corpo.setAttribute('cy', 50); corpo.setAttribute('r', 30);
-  corpo.setAttribute('fill', '#262b33'); corpo.setAttribute('stroke', '#363c45');
+  corpo.setAttribute('fill', '#0e1014'); corpo.setAttribute('stroke', '#2a2f37');
 
   const tacca = document.createElementNS(ns, 'line');
+  tacca.setAttribute('class', 'tacca');
   tacca.setAttribute('x1', 50); tacca.setAttribute('y1', 26);
   tacca.setAttribute('x2', 50); tacca.setAttribute('y2', 44);
   tacca.setAttribute('stroke', 'currentColor'); tacca.setAttribute('stroke-width', 5);

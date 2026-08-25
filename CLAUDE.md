@@ -919,13 +919,26 @@ preset», «Duplica», il salvataggio del suono letto dall'ampli, e l'editor che
 anche senza ampli. Le suite sono verdi — protocol 125, transport 48, store 136, backup 33,
 dropbox 34.
 
-**Aperto dopo la chiusura**: l'utente trova l'editor «incasinato» e vuole qualcosa di più
-grafico — la catena in cima, e toccando un effetto compaiono le sue regolazioni. Le tre
-disposizioni sono in `design/proposte-editor.html` (catena e pannello coi cursori, la
-stessa coi pomelli da girare, e la fisarmonica), da guardare **sul telefono**. Il
-problema vero non è la bruttezza: sono sette blocchi aperti che fanno tre schermate in cui
-non si sa a che punto della catena si sta mettendo le mani. **La scelta è dell'utente e
-non è ancora stata fatta.**
+**Aperto dopo la chiusura, e già deciso**: l'utente trovava l'editor «incasinato» e
+voleva qualcosa di più grafico. Le tre disposizioni sono in
+`design/proposte-editor.html` — si guarda una alla volta con `?solo=a|b|c`, `&nudo=1`
+toglie i testi e `&blocco=N` la apre su un altro punto della catena.
+
+**Scelta la B**: la catena in cima in tasselli colorati, un blocco alla volta sotto, e le
+manopole a **pomello** che si girano trascinando in verticale — in cerchio col dito è un
+terno al lotto. Sull'ampli sono cinque in fila come sul frontale.
+
+**La tavolozza è al neon, ed è una richiesta esplicita.** Sette tinte accese, una per
+posizione della catena: ciano, viola, rosso, giallo, verde acqua, azzurro, indaco. Su un
+fondo scuro un colore smorto diventa grigio e la categoria si legge invece di
+riconoscerla. L'alone non è un'ombra: è il disegno stesso sfocato due volte, una stretta e
+forte e una larga e tenue, e il fondo dentro i tasselli è **più scuro** della pagina,
+perché il neon si vede sul buio.
+
+Due cose da portarsi dietro quando si scriverà nell'app: **le barrettine sul tassello
+chiuso** dicono la forma del suono senza aprirlo, e i parametri che scelgono fra cose (il
+tipo di riverbero) restano **una tendina in mezzo ai pomelli**, perché un pomello lì
+sarebbe un terno al lotto. **Non è ancora stato portato nell'app.**
 
 1. **Provare col piede quello che è nato oggi.** Le prove le ho fatte contro un ampli
    finto, che è il limite del banco: che l'editor senza ampli salvi la cosa giusta si
