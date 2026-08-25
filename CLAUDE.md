@@ -654,6 +654,18 @@ accanto all'altro**, stessa scala e stesso contenuto, e la scala si adatta alla 
 su un telefono 7 px per millimetro non ci starebbero, e rimpicciolire solo quello largo
 falserebbe il confronto.
 
+**E c'è la «scala reale», che è la risposta vera a «come si vede a terra»:** i display
+disegnati **grandi quanto sono**, il telefono appoggiato per terra, e ci si alza. Un browser
+però non sa quanto è grande il suo schermo in millimetri — i `mm` del CSS valgono 96 punti
+per pollice e su un telefono sbagliano di un terzo abbondante — quindi lo **si tara con una
+carta di credito**, che è 85,6 × 54 mm per norma ISO ed è il righello che tutti hanno in
+tasca. Si tara una volta, resta in `localStorage`.
+
+**La soglia che decide, e vale per qualunque display:** a un metro e mezzo l'occhio legge
+comodamente caratteri alti **~2,2 mm**. Con l'elenco a quattro righe il 3,12" ne fa 2,2 —
+esattamente sul filo — e il 2,42" ne fa 3,4, cioè una volta e mezza di margine. In piedi,
+di sbieco e con le luci addosso, quel margine è la differenza.
+
 #### La scelta del display è riaperta — 25 agosto 2026
 
 Due fatti nuovi, e nessuno dei due era prevedibile ad agosto.
