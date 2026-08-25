@@ -560,9 +560,23 @@ u.FL — non ne ha una a bordo, quindi nella scatola va previsto il posto — e 
 è la scheda su cui ho misurato il BLE: quella era una C3 mini generica. Il chip è lo
 stesso, quindi il firmware e i tempi valgono; l'antenna diversa cambia la portata, non il
 protocollo.
+
 Gli interruttori vanno **sull'espansore**, non sui pin del C3: sono ingressi lenti, e
 l'MCP23017 ha i pull-up interni e un piedino di interrupt. Sui pin diretti restano le cose
 che hanno bisogno di velocità o di temporizzazione — il display e i LED.
+
+**Il modulo scelto è il KAmod I2C-IOexp16** (MCP23017, ~28 zł): alimentazione **2–5 V**,
+quindi va a 3,3 V; ponticello per l'indirizzo; **uscita di interrupt assegnabile alle linee
+del port A**; 20 mA per linea, che con LED da ~5 mA sta larghissimo. I pettini sono
+inclusi ma sciolti, da saldare.
+
+Da quell'interrupt discende una scelta di cablaggio: **gli interruttori sul port A e i LED
+sul port B**. È il port A che può far scattare l'interrupt, e l'interrupt serve al piede —
+non ai LED, che li comandiamo noi.
+
+Cosa controllare quando arriva: **se il modulo ha i pull-up sull'I²C**. La scheda non lo
+dice, e la XIAO non ne ha: se il bus non parte, quello è il primo sospetto, e si risolve
+con due resistenze da 4,7 kΩ.
 
 **LED: erano una striscia WS2812, dal 25 agosto 2026 sono discreti** sull'espansore — vedi
 la sezione della batteria qui sotto: un WS2812 vuole 3,5 V minimi e una cella LiPo scende
@@ -620,6 +634,29 @@ scarica profonda); l'**USB-C va portata sul pannello**, che serve sia a caricare
 riprogrammare; e ci vuole un **interruttore generale**, perché lasciare il pedale acceso in
 custodia è il modo più facile di trovarlo scarico al concerto.
 
+**Che cella comprare** (deciso il 25 agosto 2026, chiesto dall'utente mentre ordinava):
+una **LiPo 1S da 2000 mAh con protezione e connettore JST-PH 2,0**, formato pouch 103450
+(10 × 34 × 50 mm). Il conto: l'insieme tira ~60 mA — XIAO col BLE ~25, l'OLED 2,42" ~20–30,
+espansore e LED una decina — quindi 2000 mAh sono **una trentina d'ore teoriche**, che coi
+margini veri restano una ventina. Più grande non serve, più piccola si ricarica più spesso
+e basta.
+
+Tre cose che decidono più della capacità:
+
+- **1S e protetta.** Il caricabatterie della XIAO è per una cella sola, e la protezione
+  contro la scarica profonda mettila sulla cella: non darla per scontata sulla scheda.
+- **La XIAO ha piazzole `BAT`, non un connettore.** Ci si salda un **socket JST-PH 2,0**,
+  così la cella si stacca — serve quando si lavora sul firmware e quando il pedale sta
+  fermo per mesi. E **la polarità va guardata due volte**: invertirla brucia la scheda
+  all'istante.
+- **Carica lenta, ed è normale:** 380 mA di corrente di carica su 2000 mAh sono ~6 ore.
+  Si carica di notte, non fra un pezzo e l'altro.
+
+**L'alternativa meccanicamente più robusta è un 18650 protetto in portacella**: è una
+lattina d'acciaio invece di una busta morbida, e in una scatola che prende pedate non è un
+dettaglio. Costa un po' di spazio (20 × 70 mm col portacella) e carica ancora più lenta
+(~9 ore per 3400 mAh). Se la pouch finisce dove passa la meccanica dei footswitch, si va
+su quello.
 **Il conto dei pin torna con un avanzo**: sulla XIAO ne restano liberi due — `4`, che è
 analogico e aspetta un pedale d'espressione, e `9` che è il BOOT e va lasciato stare — e
 sull'espansore restano nove ingressi su sedici, quindi altri footswitch non costano niente.
