@@ -475,24 +475,19 @@
                                         color:var(--cat); border-color:var(--cat);
                                         text-shadow:0 0 8px var(--cat);
                                         box-shadow:0 0 12px -2px var(--cat); }
-  /* Nel blocco a fuoco il modello è **il** comando da trovare: un titolo con
-     una freccina non si riconosce come tendina, e l'utente non trovava il modo
-     di cambiare effetto. Qui è un campo vero, largo quanto il blocco, con
-     sopra la sua etichetta. */
-  .blocco.aFuoco .riga-modello { padding:4px 12px 0; }
-  .blocco.aFuoco .fila-modello { display:flex; gap:8px; align-items:stretch; }
-  .blocco.aFuoco .fila-modello .nome-effetto { flex:1; min-width:0; }
-  .blocco.aFuoco .fila-modello .interruttore { flex:none; margin:0; }
-  .blocco.aFuoco .eti-modello { font-family:var(--strumento); font-size:0.6rem;
-                                text-transform:uppercase; letter-spacing:0.1em;
-                                color:var(--faint); font-weight:700;
-                                margin-bottom:5px; }
+  /* Nel blocco a fuoco il modello è **il** comando da trovare, e adesso è
+     anche il titolo del blocco: grande e in centro, non un'etichetta di
+     servizio a sinistra. L'interruttore sta sotto, largo quanto il blocco:
+     è il gesto che si fa più spesso e va preso senza guardare. */
+  .blocco.aFuoco .riga-modello { padding:6px 12px 0; }
   .blocco.aFuoco .nome-effetto { appearance:none; -webkit-appearance:none;
                                  width:100%; background:#0e1014;
-                                 border:1px solid var(--line); border-radius:10px;
-                                 padding:11px 34px 11px 13px; margin:0;
-                                 font-family:var(--strumento); font-size:1rem;
-                                 font-weight:700; color:var(--text); cursor:pointer;
+                                 border:1px solid var(--line); border-radius:12px;
+                                 padding:13px 34px; margin:0; text-align:center;
+                                 text-align-last:center;
+                                 font-family:var(--strumento); font-size:1.25rem;
+                                 font-weight:700; letter-spacing:-0.01em;
+                                 color:var(--text); cursor:pointer;
                                  background-image:
                                    linear-gradient(45deg, transparent 50%, var(--cat) 50%),
                                    linear-gradient(135deg, var(--cat) 50%, transparent 50%);
@@ -502,8 +497,11 @@
   .blocco.aFuoco .nome-effetto:hover { border-color:var(--cat); }
   .blocco.aFuoco .nome-effetto:disabled { color:var(--dim); cursor:not-allowed;
                                           background-image:none; }
+  .blocco.aFuoco .nome-effetto option { font-size:0.95rem; font-weight:600; }
+  .blocco.aFuoco .interruttore { display:block; width:100%; margin:8px 0 0;
+                                 font-size:0.75rem; padding:10px; }
   .blocco.aFuoco .senza-ampli { font-size:0.72rem; color:var(--faint);
-                                margin:6px 0 0; }
+                                margin:8px 0 0; text-align:center; }
 
   /* Righe centrate invece di una griglia piena: l'ultima riga sta in mezzo, e
      le manopole non lasciano mai un buco in fondo a destra. */
@@ -894,6 +892,10 @@
   <div class="barra-alta">
     <span style="flex:1"></span>
     <button id="btnRileggi" class="piccolo">Rileggi dall'ampli</button>
+    <!-- La guida sta dietro un punto di domanda invece che sotto il titolo:
+         due paragrafi di spiegazione si leggono una volta e poi rubano lo
+         schermo per sempre, e qui lo schermo serve alla catena. -->
+    <button id="btnAiutoEditor" class="piccolo" title="come funziona">?</button>
     <button id="btnSalvaModifiche">Salva in libreria</button>
     <button class="primary" data-chiudi="pannelloEditor">Fatto</button>
   </div>
@@ -901,15 +903,16 @@
        Accanto al marchio non si leggeva, e in un pannello che cambia il suono
        sotto le dita sapere *quale* suono si sta cambiando è la prima cosa. -->
   <h2 id="titoloEditor" class="titolo-grande">Regola il suono</h2>
-  <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente finché
-    non premi «Salva». Tocca un blocco della catena qui sotto per aprirlo: dentro ci sono
-    il modello, l'interruttore e le sue manopole.
-    <button type="button" class="piu" id="btnSpiegaNomi">perché certi nomi sono in corsivo</button></p>
-  <p class="spiega" id="spiegaNomi" hidden>L'ampli i nomi dei parametri non li manda: quelli
-    <em>in corsivo</em> arrivano da una tabella e sono proposte da verificare a orecchio,
-    quelli in chiaro li hai messi tu, i numeri sono ancora da battezzare.
-    <strong>Tocca il nome di una manopola per cambiarlo</strong>: vale per quel modello, in
-    ogni preset che lo usa.</p>
+  <div id="aiutoEditor" hidden>
+    <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente
+      finché non premi «Salva». Tocca un blocco della catena per aprirlo: dentro ci sono
+      il modello, l'interruttore e le sue manopole.</p>
+    <p class="spiega">L'ampli i nomi dei parametri non li manda: quelli <em>in corsivo</em>
+      arrivano da una tabella e sono proposte da verificare a orecchio, quelli in chiaro
+      li hai messi tu, i numeri sono ancora da battezzare.
+      <strong>Tocca il nome di una manopola per cambiarlo</strong>: vale per quel modello,
+      in ogni preset che lo usa.</p>
+  </div>
   <div class="stato-pannello" hidden></div>
   <div id="catena"></div>
   <!-- Il valore grande mentre si trascina: sotto il dito il numerino non si vede. -->
@@ -1014,7 +1017,16 @@ const spark = new SparkTransport({
     disegnaPreset();
     disegnaLive();
   },
-  onLog: msg => logLine(msg),
+  /**
+   * Il trasporto racconta anche ogni singola scrittura (`TX 0x0104 seq=…`).
+   * Girando una manopola sono decine di righe al secondo, che coprono i
+   * messaggi veri e non dicono niente a chi sta suonando. Restano nella
+   * console del browser, dove servono a me e non danno fastidio a nessuno.
+   */
+  onLog: msg => {
+    if (msg.startsWith('TX ')) { console.debug(msg); return; }
+    logLine(msg);
+  },
 });
 
 /* ====================================================================
@@ -2194,6 +2206,7 @@ async function apriEditor(record) {
       effetti: copiaEffetti(record.effects),
     };
     $('titoloEditor').textContent = `${record.name} — senza ampli`;
+    $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
     disegnaCatena();
     apriPannello('pannelloEditor');
     logLine(`«${record.name}»: regolazioni senza ampli, sulla copia in libreria.`);
@@ -2223,6 +2236,7 @@ async function apriEditor(record) {
     effetti: copiaEffetti(attuale.effects),
   };
   $('titoloEditor').textContent = record.name;
+  $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
   disegnaCatena();
   apriPannello('pannelloEditor');
   logLine(`«${record.name}» è sull'ampli: gira pure.`);
@@ -2507,19 +2521,12 @@ function intestazioneBlocco(effetto, posizione) {
     }
     disegnaCatena();
   });
-  // Il modello e l'interruttore stanno sulla stessa riga, larghi quanto il
-  // blocco: sono i due comandi del blocco e si trovano insieme. Prima il
-  // modello era il titolo con una freccina accanto, e non lo trovava nessuno.
+  // Il nome del modello è il titolo del blocco **ed** è la tendina che lo
+  // cambia: grande, in centro, con l'interruttore sotto a tutta larghezza.
+  // Prima era un titolo con una freccina accanto e non lo trovava nessuno.
   const riga = document.createElement('div');
   riga.className = 'riga-modello';
-  const eti = document.createElement('div');
-  eti.className = 'eti-modello';
-  eti.textContent = 'modello';
-
-  const fila = document.createElement('div');
-  fila.className = 'fila-modello';
-  fila.append(scelta, interruttore);
-  riga.append(eti, fila);
+  riga.append(scelta, interruttore);
 
   if (inModifica.offline) {
     // Spegnere un comando senza dire perché è il modo migliore di far cercare
@@ -3206,11 +3213,12 @@ $('btnAltro').addEventListener('click', () => {
 });
 $('btnAbout').addEventListener('click', () => apriPannello('pannelloAbout'));
 
-// La spiegazione lunga sui nomi delle manopole serve una volta sola, poi è
-// un muro di testo fra te e le manopole: sta chiusa e si apre a richiesta.
-$('btnSpiegaNomi').addEventListener('click', () => {
-  const p = $('spiegaNomi');
-  p.hidden = !p.hidden;
+// La guida dell'editor serve una volta sola, poi è un muro di testo fra te e
+// le manopole. Sta dietro il «?» in cima, e si chiude da sé riaprendo
+// l'editor: chi lo riapre vuole girare, non rileggere.
+$('btnAiutoEditor').addEventListener('click', () => {
+  const guida = $('aiutoEditor');
+  guida.hidden = !guida.hidden;
 });
 
 $('btnConnect').addEventListener('click', async () => {
