@@ -624,7 +624,7 @@ custodia è il modo più facile di trovarlo scarico al concerto.
 analogico e aspetta un pedale d'espressione, e `9` che è il BOOT e va lasciato stare — e
 sull'espansore restano nove ingressi su sedici, quindi altri footswitch non costano niente.
 
-#### Il formato del display — scelto il 16 agosto 2026, **riaperto il 25**: vedi sotto
+#### Come si era arrivati al 3,12" — 16 agosto 2026, rovesciato il 25 (vedi sotto)
 
 **Il problema non è l'altezza, è la larghezza.** Su 128 pixel quattro colonne fanno 28 px
 l'una, cioè **cinque caratteri**. E conta più della risoluzione **la dimensione fisica del
@@ -666,34 +666,44 @@ comodamente caratteri alti **~2,2 mm**. Con l'elenco a quattro righe il 3,12" ne
 esattamente sul filo — e il 2,42" ne fa 3,4, cioè una volta e mezza di margine. In piedi,
 di sbieco e con le luci addosso, quel margine è la differenza.
 
-#### La scelta del display è riaperta — 25 agosto 2026
+#### Il display è il 2,42" 128×64 — deciso il 25 agosto 2026, guardandolo a grandezza naturale
 
-Due fatti nuovi, e nessuno dei due era prevedibile ad agosto.
+La scelta di agosto (3,12" 256×64) si era riaperta per due fatti nuovi, e si è chiusa
+dall'altra parte.
 
-**Primo: quei moduli escono tutti in 8080 parallelo.** Il 3,12" 256×64 si compra con
-l'interfaccia da scegliere **spostando ponticelli a saldare sul retro**, ed è così da tre
-venditori diversi — anche quelli che scrivono «SPI» nel titolo, dove l'SPI è compatibilità,
-non configurazione. L'utente non se la sente di rifare quelle saldature e un venditore ha
-già detto di no. Senza SPI il display non si usa: l'8080 vuole dodici pin e sulla XIAO non
-ci stanno.
+**Primo fatto: quei moduli 3,12" escono tutti in 8080 parallelo**, con l'interfaccia da
+scegliere spostando ponticelli a saldare sul retro — così da tre venditori diversi, anche
+quelli che scrivono «SPI» nel titolo, dove l'SPI è compatibilità e non configurazione. Un
+venditore ha rifiutato di configurarlo e l'utente non se la sente di rifare quelle
+saldature. Senza SPI quel display non si usa: l'8080 vuole dodici pin e sulla XIAO non ci
+stanno.
 
-**Secondo: l'argomento con cui il 2,42" era stato scartato non vale più.** Era «128 pixel
-danno cinque caratteri per colonna», e valeva per la disposizione a **quattro colonne** —
-che poi è stata abbandonata per l'**elenco a quattro righe**. Con le righe il conto cambia:
+**Secondo fatto: l'argomento con cui il 2,42" era stato scartato non valeva più.** Era
+«128 pixel danno cinque caratteri per colonna», e valeva per la disposizione a **quattro
+colonne** — abbandonata da un pezzo per l'**elenco a quattro righe**. Con le righe:
 
-| | vetro | caratteri per riga | quanto sono grandi |
-|---|---|---|---|
-| 3,12" 256×64 | 72 × 18 mm | ~42 | 1,7 × 2,2 mm |
-| 2,42" 128×64 | 54 × 27 mm | ~21 | **2,5 × 3,4 mm** |
+| | vetro acceso | modulo | caratteri per riga | altezza lettere |
+|---|---|---|---|---|
+| 3,12" 256×64 | 71,5 × 17,9 mm | 100,9 × 33,6 mm | ~42 | 2,2 mm |
+| **2,42" 128×64** | **55,0 × 27,5 mm** | **71 × 43,5 mm** | ~21 | **3,4 mm** |
 
-Il 2,42" mostra **metà testo con lettere una volta e mezza più grandi**, e ventun caratteri
-bastano per un nome di preset. Su un affare che si guarda da un metro e mezzo, in piedi,
-non è affatto detto che vinca il più largo. **E gli OLED a 7 pin sono SPI e basta**: nessuna
-modalità da scegliere, quindi il problema dei ponticelli sparisce per costruzione.
+A un metro e mezzo l'occhio legge comodamente lettere alte ~2,2 mm: il 3,12" era
+**esattamente sul filo**, il 2,42" ha una volta e mezza di margine. E ventun caratteri
+bastano per un nome di preset. **Deciso guardando i due a grandezza naturale col telefono
+per terra**, che è il modo in cui era stata presa anche la decisione di agosto — solo che
+allora si confrontava un'altra disposizione.
 
-**Non è ancora deciso**: l'utente deve guardare i due affiancati nel simulatore. Le altre
-due strade restano una scheda con più pin (FireBeetle 2 ESP32-C6, che ha anche la carica a
-bordo) per usare il 3,12" in 8080, o far fare quel ponticello a qualcun altro.
+**Il ponticello sparisce come problema, e non per fortuna:** i 2,42" si vendono in due
+versioni, **7 pin = SPI** e 4 pin = I²C. Si prende il 7 pin. E anche se ne arrivasse uno in
+I²C andrebbe bene lo stesso: lo si mette **sullo stesso bus dell'MCP23017** e un
+riempimento completo di 1024 byte a 400 kHz costa ~25 ms, che per uno schermo che cambia
+quando si preme un footswitch non è niente. Qualunque cosa arrivi, si usa.
+
+**Cosa cambia nel resto del progetto: quasi niente.** Il display resta in SPI sugli stessi
+cinque pin, il piano dei pin della XIAO non si tocca. Cambia l'ingombro — 71 × 43,5 mm di
+modulo invece di 101 × 33,6, quindi più basso e più stretto, meglio in larghezza e peggio
+in altezza dove stanno i footswitch — e il controller, che è un **SSD1309** invece di un
+SSD1322 (U8g2 li ha tutti e due).
 
 ### Da misurare, in ordine
 
