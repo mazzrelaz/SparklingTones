@@ -634,29 +634,41 @@ scarica profonda); l'**USB-C va portata sul pannello**, che serve sia a caricare
 riprogrammare; e ci vuole un **interruttore generale**, perché lasciare il pedale acceso in
 custodia è il modo più facile di trovarlo scarico al concerto.
 
-**Che cella comprare** (deciso il 25 agosto 2026, chiesto dall'utente mentre ordinava):
-una **LiPo 1S da 2000 mAh con protezione e connettore JST-PH 2,0**, formato pouch 103450
-(10 × 34 × 50 mm). Il conto: l'insieme tira ~60 mA — XIAO col BLE ~25, l'OLED 2,42" ~20–30,
-espansore e LED una decina — quindi 2000 mAh sono **una trentina d'ore teoriche**, che coi
-margini veri restano una ventina. Più grande non serve, più piccola si ricarica più spesso
-e basta.
+**Che cella comprare — deciso il 25 agosto 2026: un 18650 protetto in portacella.**
+L'utente ha posto il vincolo così: «la scatola la vedrò all'ultimo, lo spazio non sarà un
+problema, ma voglio qualcosa di sicuro». Con quella priorità la busta LiPo perde, e non
+per poco.
 
-Tre cose che decidono più della capacità:
+**Perché la lattina batte la busta.** Una pouch è una busta morbida: si buca, si schiaccia,
+e una vite che le preme contro per mesi la rovina — dentro una scatola che prende pedate è
+l'unico pezzo che un incidente meccanico trasforma in un incendio. Un 18650 è acciaio, e
+si toglie: quando il pedale resta fermo per mesi la cella esce, che è la cosa più sicura
+di tutte.
 
-- **1S e protetta.** Il caricabatterie della XIAO è per una cella sola, e la protezione
-  contro la scarica profonda mettila sulla cella: non darla per scontata sulla scheda.
-- **La XIAO ha piazzole `BAT`, non un connettore.** Ci si salda un **socket JST-PH 2,0**,
-  così la cella si stacca — serve quando si lavora sul firmware e quando il pedale sta
-  fermo per mesi. E **la polarità va guardata due volte**: invertirla brucia la scheda
-  all'istante.
-- **Carica lenta, ed è normale:** 380 mA di corrente di carica su 2000 mAh sono ~6 ore.
-  Si carica di notte, non fra un pezzo e l'altro.
+E ci sono due vantaggi che con la busta non si hanno affatto: **si porta una cella carica
+di riserva** — dimenticarsi di caricare non fa più saltare la serata — e **si carica fuori,
+in un caricabatterie vero**, in un paio d'ore invece delle ~9 che ci metterebbe la XIAO a
+380 mA. In quel caso l'USB del pedale torna a servire solo per il firmware.
 
-**L'alternativa meccanicamente più robusta è un 18650 protetto in portacella**: è una
-lattina d'acciaio invece di una busta morbida, e in una scatola che prende pedate non è un
-dettaglio. Costa un po' di spazio (20 × 70 mm col portacella) e carica ancora più lenta
-(~9 ore per 3400 mAh). Se la pouch finisce dove passa la meccanica dei footswitch, si va
-su quello.
+Cosa comprare, verificato su Allegro il 25 agosto 2026:
+
+- **cella: XTAR 18650-330PCM, 3300 mAh, «Protected»** (~4,89 su 700 valutazioni). La
+  protezione dev'essere sulla cella: la XIAO gestisce la carica, non la scarica profonda.
+  **Regola contro i falsi: un 18650 oltre i ~3600 mAh dichiarati non esiste** — le
+  «9900 mAh» sono sabbia;
+- **portacella 1× 18650 con i fili**, quelli da qualche zloty. Trappola nota: **le celle
+  protette sono più lunghe (~69 mm invece di 65)** e in certi portacella stretti non
+  entrano;
+- 3300 mAh su ~60 mA fanno **una quarantina d'ore vere**.
+
+**Il montaggio è la parte che decide se è davvero sicuro**: la cella va **bloccata** — una
+pedalata non deve farla saltare fuori dalle mollette — i terminali isolati, i fili lontani
+dalla meccanica dei footswitch, e l'interruttore generale sul positivo.
+
+**Elettricamente non cambia niente**: 3,7 V nominali, 4,2 V a fine carica, le stesse due
+piazzole `BAT`. Se un giorno la scatola dovesse costringere alla busta piatta, si torna
+indietro senza toccare altro.
+
 **Il conto dei pin torna con un avanzo**: sulla XIAO ne restano liberi due — `4`, che è
 analogico e aspetta un pedale d'espressione, e `9` che è il BOOT e va lasciato stare — e
 sull'espansore restano nove ingressi su sedici, quindi altri footswitch non costano niente.
