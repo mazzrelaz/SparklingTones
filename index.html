@@ -337,8 +337,11 @@
   #vistaLive { display:none; }
   body.vista-live #vistaLive { display:flex; flex-direction:column; flex:1; min-height:0; }
 
+  /* Il primo numero è lo stacco dall'intestazione: senza, le pastiglie dei
+     banchi sembrano appese al bordo di sopra. Non di più, che ogni pixel qui
+     è tolto ai pulsantoni. */
   #banchi { display:flex; gap:6px; overflow-x:auto; flex:none;
-            padding:0 calc(12px + env(safe-area-inset-right)) 8px
+            padding:10px calc(12px + env(safe-area-inset-right)) 8px
                     calc(12px + env(safe-area-inset-left));
             scrollbar-width:none; }
   #banchi::-webkit-scrollbar { display:none; }
