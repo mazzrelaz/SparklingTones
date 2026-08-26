@@ -352,6 +352,14 @@ all'ampli non si può chiedere quali modelli conosce: l'unica prova è che compa
 nell'elenco ufficiale o in un preset uscito dall'ampli. La tendina tiene in fondo un gruppo
 «fuori dall'elenco Positive Grid» — oggi vuoto — che li raccoglierebbe.
 
+**Gli effetti Hendrix stanno in fondo a ogni tendina, sotto «Jimi Hendrix Pack»**
+(`SparkEffetti.GRUPPO_HENDRIX`, una stringa sola per tutti e quattro i blocchi che ne
+hanno). Chiesto dall'utente il 26 agosto 2026, e non è solo ordine: sono l'unico contenuto
+a pagamento e l'unico che può entrare in catena e restare muto, quindi sparsi in mezzo agli
+altri sembravano effetti come tutti gli altri. Per gli ampli è una famiglia di
+`GRUPPI_AMPLI` come le altre, ed è l'ultima; per gli altri blocchi, che famiglie non hanno,
+l'elenco si costruisce in due passate.
+
 ## Protocollo — quello che non va dimenticato mai
 
 Dettaglio, derivazioni e misure: `docs/protocollo-spark2.md`.

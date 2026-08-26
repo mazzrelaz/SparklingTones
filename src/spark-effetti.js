@@ -285,6 +285,19 @@ window.SparkEffetti = (function () {
    * nomi che lo Spark 2 potrebbe non avere (è già successo con
    * `TrebleBooster`). La UI li tiene in fondo, in un gruppo a parte.
    */
+  /**
+   * L'intestazione sotto cui la UI raccoglie **tutti** gli effetti Hendrix, in
+   * fondo a ogni elenco di modelli. Chiesta dall'utente il 26 agosto 2026, e
+   * non è solo ordine: sono l'unico contenuto a pagamento dell'ampli e l'unico
+   * che può restare muto (vedi `eHendrix`), quindi stanno insieme e si vedono
+   * per quello che sono, invece di essere sparsi in mezzo agli altri.
+   *
+   * Sta qui perché è **una stringa sola**: la usano sia la mappa `AMPLI`, dove
+   * gli ampli Hendrix sono una famiglia come le altre, sia gli elenchi degli
+   * altri blocchi, che famiglie non ne hanno.
+   */
+  const GRUPPO_HENDRIX = 'Jimi Hendrix Pack';
+
   const AMPLI = {
     RolandJC120:        { reale: 'Roland JC120',                gruppo: 'Clean' },
     Twin:               { reale: 'Fender Twin Reverb',          gruppo: 'Clean' },
@@ -326,17 +339,17 @@ window.SparkEffetti = (function () {
     W600:               { reale: 'Eden WTP600',                 gruppo: 'Basso' },
     Hammer500:          { reale: 'Aguilar Tone Hammer 500',     gruppo: 'Basso' },
 
-    'JH.JTM45':         { reale: 'Marshall JTM45/100',          gruppo: 'Hendrix' },
-    'JH.SuperLead100':  { reale: 'Marshall Super Lead 100',     gruppo: 'Hendrix' },
-    'JH.Bassman50Silver': { reale: 'Fender Bassman 50 (1968)',  gruppo: 'Hendrix' },
-    'JH.DualShowman':   { reale: 'Fender Dual Showman',         gruppo: 'Hendrix' },
-    'JH.Sunn100':       { reale: 'Sunn 100S',                   gruppo: 'Hendrix' },
-    'JH.SoundCity100':  { reale: 'Sound City One Hundred',      gruppo: 'Hendrix' },
+    'JH.JTM45':         { reale: 'Marshall JTM45/100',          gruppo: GRUPPO_HENDRIX },
+    'JH.SuperLead100':  { reale: 'Marshall Super Lead 100',     gruppo: GRUPPO_HENDRIX },
+    'JH.Bassman50Silver': { reale: 'Fender Bassman 50 (1968)',  gruppo: GRUPPO_HENDRIX },
+    'JH.DualShowman':   { reale: 'Fender Dual Showman',         gruppo: GRUPPO_HENDRIX },
+    'JH.Sunn100':       { reale: 'Sunn 100S',                   gruppo: GRUPPO_HENDRIX },
+    'JH.SoundCity100':  { reale: 'Sound City One Hundred',      gruppo: GRUPPO_HENDRIX },
   };
 
   /** L'ordine dei gruppi è quello dell'elenco ufficiale, non alfabetico. */
   const GRUPPI_AMPLI = ['Clean', 'Glassy', 'Crunch', 'High gain', 'Metal',
-                        'Acustico', 'Basso', 'Preamp', 'Hendrix'];
+                        'Acustico', 'Basso', 'Preamp', GRUPPO_HENDRIX];
 
   /** A quale apparecchio vero è ispirato questo modello, se lo sappiamo. */
   function ampliReale(id) {
@@ -535,5 +548,5 @@ window.SparkEffetti = (function () {
   return { TABELLA, MODELLI, AMPLI, GRUPPI_AMPLI, nome, manopola, extra, nomeExtra,
            affidabile, ampliReale, ampliGruppo, aCursori, quanteManopole,
            quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi,
-           eHendrix, hendrixNellaCatena };
+           eHendrix, hendrixNellaCatena, GRUPPO_HENDRIX };
 })();
