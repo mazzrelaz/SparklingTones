@@ -90,7 +90,7 @@ window.SparkEffetti = (function () {
     /* ---- Ampli ---- */
     'RolandJC120': { nome: 'Silver 120',
       manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
-    'Twin': { nome: 'Blackface Duo',
+    'Twin': { nome: 'Black Duo',
       manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
     'ADClean': { nome: 'AD Clean', manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
     '94MatchDCV2': { nome: 'Match DC',
@@ -115,7 +115,7 @@ window.SparkEffetti = (function () {
       manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
     'AmericanHighGain': { nome: 'American High Gain',
       manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
-    'SLO100': { nome: 'Slo 100', manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
+    'SLO100': { nome: 'SLO 100', manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
     'YJM100': { nome: 'YJM100', manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
     'Rectifier': { nome: 'Treadplate',
       manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
@@ -154,9 +154,20 @@ window.SparkEffetti = (function () {
     'ODS50CN': { nome: 'ODS 50', manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
     'BluesJrTweed': { nome: 'Blues Boy',
       manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
-    'JH.JTM45': { nome: 'Marshall JTM45/100',
+    // I nomi sono quelli che l'app ufficiale mostra sull'ampli dell'utente
+    // (verificati sui suoi screenshot il 26 agosto 2026): prima qui c'era il
+    // nome dell'apparecchio vero, che adesso sta nella mappa `AMPLI`.
+    'JH.JTM45': { nome: 'J.H. 45/100',
       manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
-    'JH.SuperLead100': { nome: 'Marshall Super Lead 100',
+    'JH.SuperLead100': { nome: 'J.H. Super 100',
+      manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
+    'JH.DualShowman': { nome: 'J.H. D-Show Master',
+      manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
+    'JH.Sunn100': { nome: 'J.H. Sun 100S',
+      manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
+    'JH.Bassman50Silver': { nome: 'J.H. Bass Master',
+      manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
+    'JH.SoundCity100': { nome: 'J.H. Tone City 100',
       manopole: ['Gain', 'Treble', 'Middle', 'Bass', 'Master'] },
 
     /* ---- Modulazione ---- */
@@ -299,8 +310,6 @@ window.SparkEffetti = (function () {
     W600:               { reale: 'Eden WTP600',                 gruppo: 'Basso' },
     Hammer500:          { reale: 'Aguilar Tone Hammer 500',     gruppo: 'Basso' },
 
-    Preamp73:           { reale: 'preamplificatore da voce',    gruppo: 'Preamp' },
-
     'JH.JTM45':         { reale: 'Marshall JTM45/100',          gruppo: 'Hendrix' },
     'JH.SuperLead100':  { reale: 'Marshall Super Lead 100',     gruppo: 'Hendrix' },
     'JH.Bassman50Silver': { reale: 'Fender Bassman 50 (1968)',  gruppo: 'Hendrix' },
@@ -338,10 +347,19 @@ window.SparkEffetti = (function () {
       'TwoStoneSP50', 'Deluxe65', 'Plexi', 'OverDrivenJM45', 'OverDrivenLuxVerb', 'Bogner',
       'OrangeAD30', 'AmericanHighGain', 'SLO100', 'YJM100', 'Rectifier', 'EVH',
       'SwitchAxeLead', 'Invader', 'BE101', 'Acoustic', 'AcousticAmpV2', 'FatAcousticV2',
-      'FlatAcoustic', 'GK800', 'Sunny3000', 'W600', 'Hammer500', 'JCM800', 'MatchlessDC30',
-      'DrZ', 'Hiwatt103', 'B15', 'Acoustic360', 'GK700RBII', '6505Plus', 'ODS50CN',
+      'FlatAcoustic', 'GK800', 'Sunny3000', 'W600', 'Hammer500', '6505Plus', 'ODS50CN',
       'BluesJrTweed', 'JH.JTM45', 'JH.SuperLead100',
-      'JH.DualShowman', 'JH.Sunn100', 'JH.Bassman50Silver', 'JH.SoundCity100', 'Preamp73',
+      'JH.DualShowman', 'JH.Sunn100', 'JH.Bassman50Silver', 'JH.SoundCity100',
+      // **Trentanove, ed è il numero giusto.** Il 26 agosto 2026 l'utente ha
+      // fotografato l'elenco intero dell'app ufficiale sul suo Spark 2 e il
+      // confronto uno per uno ha tolto otto nomi che il catalogo di Soundshed
+      // aveva e l'ampli no: `JCM800`, `MatchlessDC30`, `DrZ`, `Hiwatt103`,
+      // `B15`, `Acoustic360`, `GK700RBII` — e `Preamp73`, che esiste ma solo
+      // sugli Spark LIVE ed EDGE, sul canale del microfono.
+      // Erano otto `TrebleBooster` in attesa: chiedere un modello che l'ampli
+      // non ha vuol dire fargli ricostruire un blocco DSP inesistente. Restano
+      // nella TABELLA dei nomi, che è innocua, e per un preset importato da
+      // altrove servono ancora a dare un nome alle manopole.
     ],
     [
       'Tremolo', 'ChorusAnalog', 'Flanger', 'Phaser', 'Vibrato01', 'UniVibe', 'Cloner',

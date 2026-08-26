@@ -660,13 +660,37 @@
   .blocco.aFuoco .nome-effetto:hover { border-color:var(--cat); }
   .blocco.aFuoco .nome-effetto:disabled { color:var(--dim); cursor:not-allowed;
                                           background-image:none; }
-  .blocco.aFuoco .nome-effetto option { font-size:0.85rem; font-weight:600; }
-  .blocco.aFuoco .nome-effetto optgroup { font-size:0.78rem; font-weight:700;
-                                          color:var(--dim); background:#17181c; }
+  /* ---- L'elenco dei modelli, disegnato invece che di sistema -------------
+     Sul telefono un `<select>` apre il menu di Android: caratteri suoi, e le
+     voci lunghe a capo su due righe. Qui ogni voce sta su una riga sola. */
+  .velo-elenco { position:fixed; inset:0; z-index:80; padding:18px;
+                 background:rgba(0,0,0,0.74); display:flex;
+                 align-items:center; justify-content:center; }
+  .elenco-scelta { width:min(430px, 100%); max-height:80vh; background:#101216;
+                   border:1px solid var(--line); border-radius:15px;
+                   display:flex; flex-direction:column; overflow:hidden;
+                   box-shadow:0 22px 60px rgba(0,0,0,0.7); }
+  .elenco-testa { padding:13px 15px; font-family:var(--strumento); font-size:0.7rem;
+                  text-transform:uppercase; letter-spacing:0.1em; font-weight:700;
+                  color:var(--cat, var(--dim)); border-bottom:1px solid var(--line-soft); }
+  .elenco-corpo { overflow-y:auto; padding:6px; overscroll-behavior:contain; }
+  .elenco-gruppo { padding:11px 10px 5px; font-family:var(--strumento);
+                   font-size:0.64rem; text-transform:uppercase; letter-spacing:0.12em;
+                   font-weight:700; color:var(--faint);
+                   border-top:1px solid var(--line-soft); margin-top:5px; }
+  .elenco-corpo > .elenco-gruppo:first-child { border-top:none; margin-top:0; }
+  /* Una riga per voce: se il nome non ci sta si tronca, non raddoppia. */
+  .elenco-voce { display:block; width:100%; text-align:left; background:none;
+                 border:none; border-radius:8px; padding:10px;
+                 font-family:var(--strumento); font-size:0.82rem; font-weight:600;
+                 color:var(--text); white-space:nowrap; overflow:hidden;
+                 text-overflow:ellipsis; }
+  .elenco-voce:hover:not(:disabled) { background:#1c1f25; }
+  .elenco-voce.scelta { background:#1c1f25; color:var(--cat, var(--text)); }
   /* Le voci che senza ampli non si possono scegliere: si leggono, non si
-     prendono. Meglio spente che tolte — una tendina che si accorcia da sola
+     prendono. Meglio spente che tolte — un elenco che si accorcia da solo
      sembra un catalogo che è sparito. */
-  .blocco.aFuoco .nome-effetto option:disabled { color:var(--faint); }
+  .elenco-voce.spenta { color:var(--faint); cursor:not-allowed; }
   .blocco.aFuoco .interruttore { display:block; width:100%; margin:8px 0 0;
                                  font-size:0.75rem; padding:10px; }
   /* Il titolo di un blocco che non ha niente da scegliere: stessa taglia e
@@ -2769,6 +2793,71 @@ function barraPosizione(posizione) {
  * pulsante al nome che stava leggendo.
  */
 /**
+ * L'elenco da cui si sceglie un modello o un tipo.
+ *
+ * Disegnato invece di usare un `<select>` perché sul telefono quello apre il
+ * menu di sistema: caratteri suoi, che i nostri fogli di stile non toccano, e
+ * ogni voce lunga mandata a capo su due righe. Trentanove ampli così sono uno
+ * schermo e mezzo da scorrere. Qui ogni voce sta su **una riga**, e se il nome
+ * non ci sta si tronca invece di raddoppiare l'altezza.
+ *
+ * `voci` è una lista di `{ valore, testo, gruppo, spento, title }`: il gruppo
+ * fa da intestazione quando cambia, e le voci spente si leggono ma non si
+ * prendono.
+ */
+function apriElenco(titolo, voci, scelto, quando) {
+  const velo = document.createElement('div');
+  velo.className = 'velo-elenco';
+  const box = document.createElement('div');
+  box.className = 'elenco-scelta';
+
+  const testa = document.createElement('div');
+  testa.className = 'elenco-testa';
+  testa.textContent = titolo;
+  const lista = document.createElement('div');
+  lista.className = 'elenco-corpo';
+
+  let gruppoOra = null;
+  for (const voce of voci) {
+    if (voce.gruppo && voce.gruppo !== gruppoOra) {
+      gruppoOra = voce.gruppo;
+      const g = document.createElement('div');
+      g.className = 'elenco-gruppo';
+      g.textContent = voce.gruppo;
+      lista.appendChild(g);
+    }
+    const riga = document.createElement('button');
+    riga.type = 'button';
+    riga.className = 'elenco-voce' + (voce.valore === scelto ? ' scelta' : '') +
+                     (voce.spento ? ' spenta' : '');
+    riga.textContent = voce.testo;
+    riga.title = voce.title || voce.testo;
+    if (voce.spento) riga.disabled = true;
+    else riga.addEventListener('click', () => { chiudi(); quando(voce.valore); });
+    lista.appendChild(riga);
+  }
+
+  box.append(testa, lista);
+  velo.appendChild(box);
+  document.body.appendChild(velo);
+
+  function chiudi() {
+    velo.remove();
+    document.removeEventListener('keydown', tasto);
+  }
+  function tasto(evento) { if (evento.key === 'Escape') chiudi(); }
+  document.addEventListener('keydown', tasto);
+  velo.addEventListener('click', evento => { if (evento.target === velo) chiudi(); });
+
+  // L'elenco si apre **su quello che c'è adesso**, non in cima: con trentanove
+  // voci, arrivare e non vedere la propria vuol dire scorrere a caso.
+  requestAnimationFrame(() => {
+    const qui = lista.querySelector('.scelta');
+    if (qui) lista.scrollTop = qui.offsetTop - lista.clientHeight / 2 + qui.offsetHeight / 2;
+  });
+}
+
+/**
  * Il parametro che **sceglie fra cose** invece di dosare — il tipo di
  * riverbero è l'unico che conosciamo. Serve saperlo in due posti, perché
  * quando il modello è uno solo è questo che finisce nella tendina grande.
@@ -2814,9 +2903,15 @@ function intestazioneBlocco(effetto, posizione) {
                  : intestazioneFissa(effetto);
   }
 
-  const scelta = document.createElement('select');
+  // **Non è un `<select>`**, e la ragione è il telefono: lì il menu di sistema
+  // ignora i nostri caratteri, e con «Silver 120 — Roland JC120» manda ogni
+  // voce a capo su due righe — trentanove ampli così sono uno schermo e mezzo
+  // da scorrere. Un elenco disegnato da noi tiene ogni ampli su **una riga**.
+  const scelta = document.createElement('button');
+  scelta.type = 'button';
   scelta.className = 'nome-effetto';
   scelta.title = 'tocca per mettere un altro modello in questa posizione';
+  const voci = [];
 
   // I modelli **usciti da questo ampli** vengono per primi: esistono di sicuro.
   // Gli altri arrivano dal catalogo di Soundshed e non sono verificati —
@@ -2826,20 +2921,20 @@ function intestazioneBlocco(effetto, posizione) {
   // La distinzione resta, ma **senza scritte**: una riga separatrice fra i due
   // mucchi. Le intestazioni dicevano la stessa cosa occupando due righe di
   // parole in un elenco che si sfoglia col pollice.
-  const metti = (modello, dove) => {
-    const opzione = document.createElement('option');
-    opzione.value = modello;
+  const metti = (modello, gruppo) => {
     // Accanto al nome di fantasia, l'apparecchio vero: «Silver 120» non dice
     // niente, «Roland JC120» sì, e chi cerca un suono pensa a quello.
     const reale = SparkEffetti.ampliReale(modello);
-    opzione.textContent = SparkEffetti.nome(modello) + (reale ? ' — ' + reale : '');
-    opzione.title = modello;
-    if (spento(modello)) {
-      opzione.disabled = true;
-      opzione.title = modello + ' — serve l\'ampli: la tua libreria non l\'ha mai ' +
-                      'visto, quindi non sappiamo quante manopole abbia';
-    }
-    (dove || scelta).appendChild(opzione);
+    voci.push({
+      valore: modello,
+      testo: SparkEffetti.nome(modello) + (reale ? ' — ' + reale : ''),
+      gruppo: gruppo || null,
+      spento: spento(modello),
+      title: spento(modello)
+        ? modello + ' — serve l\'ampli: la tua libreria non l\'ha mai visto, ' +
+          'quindi non sappiamo quante manopole abbia'
+        : modello,
+    });
   };
 
   // **Gli amplificatori si dividono per famiglia** — clean, crunch, metal… —
@@ -2850,47 +2945,31 @@ function intestazioneBlocco(effetto, posizione) {
   const raggruppa = tutte.some(m => SparkEffetti.ampliGruppo(m));
   if (raggruppa) {
     for (const gruppo of SparkEffetti.GRUPPI_AMPLI) {
-      const dentro = tutte.filter(m => SparkEffetti.ampliGruppo(m) === gruppo);
-      if (!dentro.length) continue;
-      const box = document.createElement('optgroup');
-      box.label = gruppo;
-      dentro.forEach(m => metti(m, box));
-      scelta.appendChild(box);
+      tutte.filter(m => SparkEffetti.ampliGruppo(m) === gruppo)
+           .forEach(m => metti(m, gruppo));
     }
     // Chi non sta nell'elenco ufficiale finisce qui, ed è un avvertimento più
     // preciso di quello di prima: di questi non sappiamo nemmeno se l'ampli li
-    // abbia — vengono dal catalogo di Soundshed, ed è da lì che era saltato
-    // fuori `TrebleBooster`, che lo mandava in palla.
-    const fuori = tutte.filter(m => !SparkEffetti.ampliGruppo(m));
-    if (fuori.length) {
-      const box = document.createElement('optgroup');
-      box.label = 'fuori dall\'elenco Positive Grid';
-      fuori.forEach(m => metti(m, box));
-      scelta.appendChild(box);
-    }
+    // abbia. Dal 26 agosto 2026 il gruppo è vuoto — l'utente ha fotografato
+    // l'elenco vero e gli otto di troppo sono stati tolti — ma il codice resta
+    // per il giorno che al catalogo si aggiunge un nome nuovo.
+    tutte.filter(m => !SparkEffetti.ampliGruppo(m))
+         .forEach(m => metti(m, 'fuori dall\'elenco Positive Grid'));
   } else {
     // I modelli **usciti da questo ampli** vengono per primi: esistono di
-    // sicuro. Gli altri arrivano dal catalogo e non sono verificati. La
-    // distinzione è **senza scritte**: una riga separatrice fra i due mucchi.
+    // sicuro. Gli altri arrivano dal catalogo e non sono verificati.
     sicuri.forEach(m => metti(m));
-    if (sicuri.length && daProva.length) {
-      const riga = document.createElement('option');
-      riga.disabled = true;
-      riga.textContent = '──────────';
-      scelta.appendChild(riga);
-    }
-    daProva.forEach(m => metti(m));
+    daProva.forEach(m => metti(m, sicuri.length ? 'dal catalogo, da provare' : null));
   }
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
   // fonte elenca, e senza questa via non ci si arriverebbe mai. Senza ampli
   // però non c'è: un nome scritto a mano non si può né verificare né misurare.
   if (!inModifica.offline) {
-    const aMano = document.createElement('option');
-    aMano.value = ' amano';
-    aMano.textContent = 'altro modello, a mano…';
-    scelta.appendChild(aMano);
+    voci.push({ valore: ' amano', testo: 'altro modello, a mano…', gruppo: null });
   }
-  scelta.value = effetto.name;
+
+  const reale = SparkEffetti.ampliReale(effetto.name);
+  scelta.textContent = SparkEffetti.nome(effetto.name) + (reale ? ' — ' + reale : '');
 
   // Senza ampli il modello **si cambia dal 26 agosto 2026**, chiesto
   // dall'utente. Prima era spento, e la ragione era buona: cambiarlo vuol dire
@@ -2904,14 +2983,15 @@ function intestazioneBlocco(effetto, posizione) {
                    'ha già visto: di quello sappiamo quante manopole ha';
   }
 
-  scelta.addEventListener('change', () => {
-    if (scelta.value === ' amano') {
-      scelta.value = effetto.name;
-      const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
-      if (nome && nome.trim()) cambiaModello(posizione, nome.trim());
-      return;
-    }
-    cambiaModello(posizione, scelta.value);
+  scelta.addEventListener('click', () => {
+    apriElenco(Spark.CATENA[posizione], voci, effetto.name, valore => {
+      if (valore === ' amano') {
+        const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
+        if (nome && nome.trim()) cambiaModello(posizione, nome.trim());
+        return;
+      }
+      cambiaModello(posizione, valore);
+    });
   });
 
   const riga = document.createElement('div');
@@ -2974,14 +3054,36 @@ function intestazioneScelta(effetto, param) {
   const riga = document.createElement('div');
   riga.className = 'riga-modello';
 
-  const menu = document.createElement('select');
+  const menu = document.createElement('button');
+  menu.type = 'button';
   menu.className = 'nome-effetto';
   menu.title = 'tocca per cambiare tipo';
-  riempiScelta(menu, effetto, param);
-  menu.addEventListener('change', () => {
-    param.value = Number(menu.value);
-    aggiornaBarrette();
-    mandaParametro(effetto.name, param.index, param.value);
+
+  const quante = SparkEffetti.posizioni(effetto.name, param.index);
+  const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
+  const voci = [];
+  for (let n = 0; n < quante; n++) {
+    voci.push({ valore: String(SparkEffetti.valorePosizione(n)),
+                testo: nomi ? nomi[n] : 'posizione ' + (n + 1) });
+  }
+  const dove = SparkEffetti.posizioneDi(param.value, quante);
+  // L'ampli riporta un valore che non è nessuna delle posizioni note: si
+  // aggiunge invece di spostarlo di nascosto su quella più vicina.
+  if (dove === -1) {
+    voci.push({ valore: String(param.value),
+                testo: 'valore dell\'ampli (' + mostraValore(param.value) + ')' });
+  }
+  const ora = String(dove === -1 ? param.value : SparkEffetti.valorePosizione(dove));
+  menu.textContent = (voci.find(v => v.valore === ora) || {}).testo ||
+                     SparkEffetti.nome(effetto.name);
+
+  menu.addEventListener('click', () => {
+    apriElenco(Spark.CATENA[Spark.CATENA.length - 1], voci, ora, valore => {
+      param.value = Number(valore);
+      aggiornaBarrette();
+      mandaParametro(effetto.name, param.index, param.value);
+      disegnaCatena();
+    });
   });
 
   riga.append(menu, interruttoreDi(effetto));
