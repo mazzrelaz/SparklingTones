@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tre modi di mettere in ordine la barra in alto</title>
+<style>
+  /* Questa pagina NON è l'app: serve solo a scegliere. Ogni proposta è
+     mostrata due volte, a larghezza da computer e a larghezza da telefono,
+     perché il disordine si vede soprattutto sul telefono, dove i pulsanti
+     vanno a capo in un ordine diverso a ogni cambio di stato. */
+  @font-face { font-family:'Inter'; src:url('../fonts/inter-latin.woff2') format('woff2');
+               font-weight:400 700; font-display:swap; }
+  @font-face { font-family:'Space Grotesk'; src:url('../fonts/space-grotesk-latin.woff2') format('woff2');
+               font-weight:500 700; font-display:swap; }
+  * { box-sizing:border-box; }
+  :root {
+    --bg:#000; --panel:#121316; --line:#26282e; --line-soft:#1b1d21;
+    --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
+    --accent:#e30613; --green:#7fe08a; --rosso:#ff8080;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --strumento:'Space Grotesk','Inter',-apple-system,sans-serif;
+  }
+  body { margin:0; background:#08090b; color:var(--text); font-family:var(--font);
+         font-size:15px; padding:26px 22px 70px; -webkit-font-smoothing:antialiased; }
+  h1 { font-family:var(--strumento); font-size:1.35rem; margin:0 0 6px; }
+  .intro { color:var(--dim); max-width:70ch; line-height:1.55; margin:0 0 30px; }
+  h2 { font-family:var(--strumento); font-size:1.05rem; margin:34px 0 4px;
+       display:flex; align-items:baseline; gap:10px; }
+  h2 .lettera { color:var(--accent); font-size:1.5rem; }
+  .nota { color:var(--dim); max-width:74ch; line-height:1.5; margin:0 0 14px; font-size:0.92rem; }
+  .nota b { color:var(--text); font-weight:600; }
+  .coppia { display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; }
+  .schermo { background:var(--bg); border:1px solid var(--line);
+             border-radius:14px; overflow:hidden; }
+  .schermo.computer { flex:1 1 520px; min-width:0; }
+  .schermo.telefono { flex:0 0 375px; }
+  .didascalia { font-family:var(--strumento); font-size:0.68rem; color:var(--faint);
+                letter-spacing:0.08em; text-transform:uppercase; margin:0 0 5px; }
+
+  /* ---- il vestito dell'app, copiato da index.html ---- */
+  header { padding:12px 16px 10px; border-bottom:1px solid var(--line); }
+  .logo { height:26px; width:auto; display:block; flex:none; }
+  .telefono .logo { height:22px; }
+  .status { padding:3px 10px; border-radius:11px; font-size:0.72rem; font-weight:700;
+            white-space:nowrap; font-family:var(--strumento); letter-spacing:0.02em;
+            background:#3a2020; color:var(--rosso); }
+  button { font-family:var(--strumento); font-size:0.84rem; font-weight:600;
+           letter-spacing:0.01em; cursor:pointer; background:#16181d;
+           border:1px solid var(--line); color:var(--text);
+           padding:9px 14px; border-radius:10px; white-space:nowrap; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff;
+                   box-shadow:0 0 16px -5px var(--accent); }
+  button:disabled { background:#131519; border-color:var(--line-soft); color:#4d525b; }
+  .cerca { display:flex; gap:8px; margin-top:10px; }
+  .cerca input { flex:1; min-width:0; background:#121316; border:1px solid var(--line);
+                 border-radius:10px; padding:10px 12px; color:var(--dim); font-family:inherit; }
+
+  /* ---------- A: schede segmentate ---------- */
+  .a-riga1 { display:flex; align-items:center; gap:10px; }
+  .a-riga1 .logo { margin-right:auto; }
+  .a-schede { display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .a-gruppo { display:flex; flex:1; min-width:0; background:#101216;
+              border:1px solid var(--line); border-radius:11px; padding:3px; gap:3px; }
+  .a-gruppo button { flex:1 1 auto; min-width:0; background:none; border:none; border-radius:8px;
+                     padding:8px 10px; overflow:hidden; text-overflow:ellipsis; }
+  .a-gruppo button:disabled { background:none; }
+  /* Sul telefono i tre scomparti si dividono lo spazio in parti uguali: è quello
+     che li tiene fermi sempre nello stesso posto. Sul computer no, o «Leggi
+     dall'ampli» verrebbe troncato per far posto a «Altro» che non ne ha bisogno. */
+  .telefono .a-gruppo button { font-size:0.78rem; padding:8px 6px; }
+  .a-vista { background:none; border:none; color:var(--accent); padding:8px 2px; }
+
+  /* ---------- B: due zone separate ---------- */
+  .b-riga { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .b-riga .logo { margin-right:auto; }
+  .b-zona { display:flex; align-items:center; gap:8px; }
+  .b-sep { width:1px; height:26px; background:var(--line); }
+  .telefono .b-riga { display:block; }
+  .telefono .b-riga .logo { margin-bottom:10px; }
+  .telefono .b-basso { display:flex; align-items:center; gap:8px; justify-content:space-between; flex-wrap:wrap; }
+  .telefono .b-zona { flex-wrap:wrap; }
+  .b-vista { background:none; border:none; color:var(--accent); padding:8px 2px; }
+
+  /* ---------- C: l'essenziale, il resto in un menu ---------- */
+  .c-riga { display:flex; align-items:center; gap:10px; }
+  .c-riga .logo { margin-right:auto; }
+  .c-menu { font-size:1.05rem; padding:8px 12px; line-height:1; }
+  .c-tendina { margin:10px 0 0 auto; width:230px; background:#101216;
+               border:1px solid var(--line); border-radius:12px; padding:6px;
+               box-shadow:0 12px 30px rgba(0,0,0,0.6); }
+  .c-tendina button { display:block; width:100%; text-align:left; background:none;
+                      border:none; padding:10px 12px; border-radius:8px; }
+  .c-tendina button:hover { background:#1c1f25; }
+  .c-vista { background:none; border:none; color:var(--accent); padding:8px 2px; }
+  .ombra { font-size:0.8rem; color:var(--faint); font-family:var(--strumento);
+           margin:6px 0 0; text-align:right; }
+</style>
+</head>
+<body>
+
+<h1>La barra in alto, tre modi di metterla in ordine</h1>
+<p class="intro">Oggi sulla stessa riga stanno cinque cose che fanno mestieri diversi — il
+marchio, lo stato della connessione, il tasto che connette, le azioni sull'ampli, i pannelli
+e il passaggio alla vista Live — tutte con lo stesso peso e con <b>a capo</b> libero: sul
+telefono l'ordine delle righe cambia da solo appena lo stato si accorcia da «non connesso» a
+«connesso». Ogni proposta qui sotto è mostrata <b>a larghezza da computer e da telefono</b>.
+Vale identica nella vista Live, dove al posto di «Leggi dall'ampli / Categorie / Altro» ci
+sono «Modifica / Pedale».</p>
+
+<h2><span class="lettera">A</span> Schede segmentate</h2>
+<p class="nota">Due righe con due mestieri distinti: sopra <b>chi sei e se sei connesso</b>,
+sotto <b>dove vuoi andare</b>. Le tre voci diventano una barra unica divisa in scomparti, come
+il selettore di canale di un ampli: si dividono la larghezza in parti uguali, quindi
+<b>non vanno mai a capo</b> e stanno sempre nello stesso posto. «Live →» resta fuori dal
+gruppo, perché è l'unica che cambia pagina.</p>
+<div class="coppia">
+  <div>
+    <p class="didascalia">computer</p>
+    <div class="schermo computer">
+      <header>
+        <div class="a-riga1">
+          <img class="logo" src="../icons/logo.svg" alt="">
+          <span class="status">non connesso</span>
+          <button class="primary">Connetti</button>
+        </div>
+        <div class="a-schede">
+          <div class="a-gruppo">
+            <button disabled>Leggi dall'ampli</button>
+            <button>Categorie</button>
+            <button>Altro</button>
+          </div>
+          <button class="a-vista">Live →</button>
+        </div>
+        <div class="cerca"><input placeholder="cerca un preset…"></div>
+      </header>
+    </div>
+  </div>
+  <div>
+    <p class="didascalia">telefono</p>
+    <div class="schermo telefono">
+      <header>
+        <div class="a-riga1">
+          <img class="logo" src="../icons/logo.svg" alt="">
+          <span class="status">non connesso</span>
+          <button class="primary">Connetti</button>
+        </div>
+        <div class="a-schede">
+          <div class="a-gruppo">
+            <button disabled>Leggi</button>
+            <button>Categorie</button>
+            <button>Altro</button>
+          </div>
+          <button class="a-vista">Live →</button>
+        </div>
+        <div class="cerca"><input placeholder="cerca un preset…"></div>
+      </header>
+    </div>
+  </div>
+</div>
+
+<h2><span class="lettera">B</span> Due zone, con una riga di stacco</h2>
+<p class="nota">I pulsanti restano quelli di adesso, ma smettono di essere una fila sola:
+<b>a sinistra l'ampli</b> (connetti, leggi), <b>a destra gli attrezzi</b> (categorie, altro),
+separati da una linea verticale. Ogni zona resta intera anche quando lo spazio manca: sul
+telefono va a capo <b>il gruppo</b>, mai il singolo tasto, quindi la disposizione non cambia
+più da sola.</p>
+<div class="coppia">
+  <div>
+    <p class="didascalia">computer</p>
+    <div class="schermo computer">
+      <header>
+        <div class="b-riga">
+          <img class="logo" src="../icons/logo.svg" alt="">
+          <div class="b-zona">
+            <span class="status">non connesso</span>
+            <button class="primary">Connetti</button>
+            <button disabled>Leggi dall'ampli</button>
+          </div>
+          <div class="b-sep"></div>
+          <div class="b-zona">
+            <button>Categorie</button>
+            <button>Altro</button>
+            <button class="b-vista">Live →</button>
+          </div>
+        </div>
+        <div class="cerca"><input placeholder="cerca un preset…"></div>
+      </header>
+    </div>
+  </div>
+  <div>
+    <p class="didascalia">telefono</p>
+    <div class="schermo telefono">
+      <header>
+        <div class="b-riga">
+          <img class="logo" src="../icons/logo.svg" alt="">
+          <div class="b-basso">
+            <div class="b-zona">
+              <span class="status">non connesso</span>
+              <button class="primary">Connetti</button>
+            </div>
+            <div class="b-zona">
+              <button>Categorie</button>
+              <button>Altro</button>
+              <button class="b-vista">Live →</button>
+            </div>
+          </div>
+        </div>
+        <div class="cerca"><input placeholder="cerca un preset…"></div>
+      </header>
+    </div>
+  </div>
+</div>
+
+<h2><span class="lettera">C</span> Solo l'essenziale, il resto dentro un menu</h2>
+<p class="nota">In barra restano <b>tre cose sole</b>: se sei connesso, il tasto per
+connetterti, e il passaggio a Live. Tutto il resto — leggi dall'ampli, categorie, altro —
+sta dietro un <b>⋯</b> che apre un elenco. È la più pulita e l'unica che sul telefono sta
+sicuramente su una riga sola per sempre; in cambio ogni voce costa <b>un tocco in più</b>, e
+«Leggi dall'ampli», che si usa spesso, non è più lì davanti.</p>
+<div class="coppia">
+  <div>
+    <p class="didascalia">computer</p>
+    <div class="schermo computer">
+      <header>
+        <div class="c-riga">
+          <img class="logo" src="../icons/logo.svg" alt="">
+          <span class="status">non connesso</span>
+          <button class="primary">Connetti</button>
+          <button class="c-menu">⋯</button>
+          <button class="c-vista">Live →</button>
+        </div>
+        <div class="cerca"><input placeholder="cerca un preset…"></div>
+      </header>
+    </div>
+    <div class="c-tendina">
+      <button>Leggi dall'ampli</button>
+      <button>Categorie</button>
+      <button>Altro</button>
+    </div>
+    <p class="ombra">↑ quello che si apre toccando ⋯</p>
+  </div>
+  <div>
+    <p class="didascalia">telefono</p>
+    <div class="schermo telefono">
+      <header>
+        <div class="c-riga">
+          <img class="logo" src="../icons/logo.svg" alt="">
+          <span class="status">non connesso</span>
+          <button class="primary">Connetti</button>
+          <button class="c-menu">⋯</button>
+        </div>
+        <div class="cerca"><input placeholder="cerca un preset…"></div>
+      </header>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

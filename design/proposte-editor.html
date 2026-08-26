@@ -539,7 +539,7 @@ function pomello(blocco, indice) {
     const v = blocco.valori[indice];
     const giro = 2 * Math.PI * 34 * 0.75;
     arco.setAttribute('stroke-dasharray', `${giro * v} 999`);
-    tacca.setAttribute('transform', `rotate(${135 + v * 270} 50 50)`);
+    tacca.setAttribute('transform', `rotate(${-135 + v * 270} 50 50)`);
     valore.textContent = v.toFixed(2);
   };
   disegna();
