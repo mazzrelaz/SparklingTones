@@ -54,6 +54,17 @@ niente. Adesso: provare e regolare insieme, poi lo slot dell'ampli, poi il banco
 **Elimina da sola** perché è l'unica che non si torna indietro. In ogni riga **il tasto
 sta prima della sua tendina**: si legge cosa si sta per fare e poi dove.
 
+> **Rifatte il 26 agosto 2026**, chiesto dall'utente («la scheda è troppo incasinata»).
+> Cinque righe erano troppe. Adesso sono tre, e ognuna ha una forma sua:
+> **Attiva · Regola · Duplica · Elimina** su una riga sola a quattro colonne uguali —
+> `Elimina` non è più isolata, ma resta ultima e la conferma è lì per quello — e sotto le
+> due che vogliono un «dove», **con la stessa identica griglia** (`170px` + tendina), così
+> i pulsanti sono larghi uguali e le tendine partono dalla stessa riga verticale. Le tre
+> righe hanno anche la **stessa larghezza totale**: senza, su uno schermo largo i quattro
+> pulsanti si stiravano mentre le righe sotto restavano corte, ed era il blocco a sembrare
+> storto. «Seleziona A1» sta in una riga sua sopra: non è un'azione sul preset ma
+> sull'ampli, e compare solo aprendo uno degli otto posti hardware.
+
 `pastiglieCatena` **non si tocca**: serve ancora al dettaglio degli slot dell'ampli, dove
 la catena continua ad avere senso.
 

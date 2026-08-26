@@ -321,9 +321,29 @@
      Regola, tendina» e poi «Invia a preset HW» da solo, che non vuol dire
      niente. Adesso ogni riga è un'azione, e **il tasto viene prima della sua
      tendina**: si legge cosa si sta per fare e poi dove. */
-  .azioni-blocchi { display:flex; flex-direction:column; gap:8px; }
+  /* Tutte le righe di azioni larghe uguali: la misura è quella della coppia
+     «pulsante + tendina», e le altre si fermano lì. Su uno schermo largo,
+     senza questo, i quattro pulsanti si stiravano a mezzo metro l'uno mentre
+     le righe sotto restavano corte, ed era il blocco a sembrare storto. */
+  .azioni-blocchi { display:flex; flex-direction:column; gap:8px;
+                    max-width:calc(170px + 8px + 340px); }
   .azioni-riga { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   .azioni-riga select { flex:1; min-width:0; max-width:340px; }
+  /* Le quattro azioni sul preset: una riga sola, quattro colonne uguali. In
+     `flex` andavano a capo dove capitava e ogni pulsante era largo quanto la
+     sua parola, il che le faceva sembrare quattro cose scollegate. */
+  .azioni-riga.quattro { display:grid; grid-template-columns:repeat(4, 1fr);
+                         gap:8px; align-items:stretch; }
+  .azioni-riga.quattro button { padding-left:6px; padding-right:6px;
+                                min-width:0; overflow:hidden;
+                                text-overflow:ellipsis; white-space:nowrap; }
+  /* «Invia a preset HW» e «Metti nel banco» sono due righe che fanno la stessa
+     cosa — un'azione più un «dove» — quindi devono incolonnarsi: stessa
+     griglia per tutt'e due, così i pulsanti finiscono larghi uguali e le
+     tendine partono dalla stessa riga verticale. */
+  .azioni-riga.coppia { display:grid; grid-template-columns:170px minmax(0, 340px);
+                        gap:8px; align-items:center; justify-content:start; }
+  .azioni-riga.coppia select { flex:none; max-width:none; width:100%; }
   .scelte { display:flex; gap:6px; flex-wrap:wrap; }
   .scelta { background:#1e2025; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
             border-radius:12px; cursor:pointer; border:1px solid transparent; }
@@ -1853,13 +1873,18 @@ function dettaglio(record, slot) {
   /* azioni -------------------------------------------------------- */
   const azioni = document.createElement('div');
   azioni.className = 'azioni-blocchi';
-  const riga = () => {
+  const riga = (extra = '') => {
     const r = document.createElement('div');
-    r.className = 'azioni-riga';
+    r.className = 'azioni-riga' + (extra ? ' ' + extra : '');
     azioni.appendChild(r);
     return r;
   };
-  const rigaSuono = riga();          // provare e regolare: non salva niente
+  // Le quattro azioni che si fanno sul preset — provarlo, regolarlo,
+  // copiarlo, buttarlo — stanno su **una riga sola e larghe uguali**, chiesto
+  // dall'utente il 26 agosto 2026: prima erano sparse su tre righe e la scheda
+  // sembrava un elenco di cose scollegate. Sotto, le due che vogliono un
+  // «dove» hanno la loro griglia, così i pulsanti e le tendine si incolonnano.
+  const rigaSuono = riga('quattro');
 
   let avvisoAltriSlot = null;
   if (slot !== null) {
@@ -1871,6 +1896,9 @@ function dettaglio(record, slot) {
         altri.map(s => Spark.slotLabel(s).label).join(', ') + '.';
     }
 
+    // Sta in una riga sua, sopra le quattro: non è un'azione sul preset ma
+    // sull'ampli — gli dice quale slot mettere davanti — e compare solo
+    // aprendo uno degli otto posti hardware.
     const attiva = document.createElement('button');
     attiva.textContent = 'Seleziona ' + Spark.slotLabel(slot).label;
     attiva.title = 'seleziona lo slot sull\'ampli, senza scrivere nulla';
@@ -1879,7 +1907,7 @@ function dettaglio(record, slot) {
       await spark.send(Spark.commands.changePreset(slot));
       logLine(`selezionato ${nomeSlot(slot)}`);
     });
-    rigaSuono.appendChild(attiva);
+    azioni.insertBefore(riga('sola'), rigaSuono).appendChild(attiva);
   }
 
   // Caricare nel suono corrente non tocca nulla di salvato: è il modo
@@ -1926,7 +1954,7 @@ function dettaglio(record, slot) {
     if (!confirm(avviso)) return;
     mandaPreset(record, dove);
   });
-  const rigaSlot = riga();
+  const rigaSlot = riga('coppia');
   rigaSlot.append(scrivi, scelta);      // prima cosa fa, poi dove
 
   /* Mettere un preset in un banco live senza passare dalla vista Live.
@@ -1971,7 +1999,7 @@ function dettaglio(record, slot) {
       disegnaPreset();
       disegnaLive();
     });
-    riga().append(metti, banco);        // prima cosa fa, poi dove
+    riga('coppia').append(metti, banco);   // prima cosa fa, poi dove
   }
 
   // Duplicare è il modo vero di fare un preset nuovo: si parte da un suono
@@ -1988,7 +2016,7 @@ function dettaglio(record, slot) {
     disegnaPreset();
     disegnaLive();
   });
-  riga().appendChild(duplica);
+  rigaSuono.appendChild(duplica);
 
   const elimina = document.createElement('button');
   elimina.className = 'pericolo';
@@ -2002,7 +2030,9 @@ function dettaglio(record, slot) {
     disegnaPreset();
     disegnaLive();
   });
-  riga().appendChild(elimina);          // da sola: è l'unica che non si torna indietro
+  // Ultima delle quattro: resta quella che non si torna indietro, e la
+  // conferma è lì per quello.
+  rigaSuono.appendChild(elimina);
 
   // Niente riga di identificativi in fondo: c'erano l'UUID e i BPM, tolti su
   // richiesta il 14 agosto 2026. L'UUID serve al codice per riconoscere un
