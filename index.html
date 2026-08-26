@@ -3034,12 +3034,17 @@ function intestazioneBlocco(effetto, posizione) {
     candidati.filter(m => !SparkEffetti.ampliGruppo(m))
              .forEach(m => metti(m, 'fuori dall\'elenco Positive Grid'));
   } else {
-    // Nessuna intestazione e nessun rimescolamento: **l'ordine è quello
-    // dell'app ufficiale**, com'è scritto in `MODELLI`. Fino al 26 agosto 2026
-    // i modelli mai visti finivano in fondo sotto «dal catalogo, da provare»,
-    // che aveva senso finché il catalogo era incerto: adesso è verificato tutto
-    // contro l'app, quindi quella scritta diceva una cosa non più vera.
-    candidati.forEach(m => metti(m));
+    // **L'ordine è quello dell'app ufficiale**, com'è scritto in `MODELLI`, con
+    // una sola eccezione: **gli Hendrix vanno in fondo**, sotto la loro
+    // intestazione. Chiesto dall'utente il 26 agosto 2026, e per una ragione
+    // che vale più dell'ordine — sono l'unico contenuto a pagamento, l'unico
+    // che può entrare in catena e restare muto, e sparsi in mezzo agli altri
+    // sembravano effetti come tutti gli altri. Fino a ieri i modelli mai visti
+    // finivano in fondo sotto «dal catalogo, da provare», che aveva senso
+    // finché il catalogo era incerto: adesso è verificato tutto contro l'app.
+    candidati.filter(m => !SparkEffetti.eHendrix(m)).forEach(m => metti(m));
+    candidati.filter(m => SparkEffetti.eHendrix(m))
+             .forEach(m => metti(m, SparkEffetti.GRUPPO_HENDRIX));
   }
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
   // fonte elenca, e senza questa via non ci si arriverebbe mai. Senza ampli
