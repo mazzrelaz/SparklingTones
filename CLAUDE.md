@@ -341,6 +341,34 @@ rimostrarlo (`riga.hidden = false`) — è quello che fa `statoDelPannello`. Sen
 viene scritto sempre e non si vede mai: due giri di diagnostica finiti in un elemento
 invisibile.
 
+### Finestre e tendine: nell'app non c'è più niente del sistema
+
+**Mai più `confirm()`, `alert()`, `prompt()` o `<select>`** (26 agosto 2026, chiesto
+dall'utente: «sulla prima pagina sono ancora i menu di sistema»). Aprono la roba del
+sistema operativo — carattere suo, fondo chiaro in un'app tutta nera, e sul telefono il
+menu di Android manda a capo le voci lunghe — e soprattutto **un `confirm()` ha due vie
+sole**, che è il problema che aveva già fatto nascere la domanda dell'editor.
+
+Al loro posto, tutte costruite sulla stessa scatola `.elenco-scelta`:
+
+| invece di | si usa | torna |
+|---|---|---|
+| `<select>` | `tendinaFinta(titolo, voci, valore, quando)` | il valore sta in `.valore` (non `.value`), `aggiorna(v)` lo cambia da fuori |
+| `confirm()` | `await conferma(titolo, testo, {ok, pericolo})` | `true`/`false` |
+| `alert()` | `await avvisa(titolo, testo)` | — |
+| `prompt()` | `await chiediTesto(titolo, testo, valore, {ok, invito})` | il testo, o `null` |
+| tre o più vie | `await finestra({titolo, testo, campo, azioni})` | il `valore` dell'azione, `null` se si esce |
+
+Tutte sono **asincrone**, quindi il gestore che le chiama va `async`. `testo` è **HTML** —
+il grassetto va sulla parte che conta — e un nome che viene dai dati ci entra solo passando
+da **`testoConNome()`**, che lo scappa. Esc e il tocco fuori tornano sempre `null`, che è la
+via che non fa niente.
+
+**Le scorciatoie «campo vuoto = elimina» sono sparite**, ed erano due: il nome del banco e
+il nome di una manopola. Erano una regola scritta fra parentesi che nessuno legge, e chi
+svuotava il campo per riscriverlo si trovava a rispondere di un'eliminazione mai chiesta.
+Adesso sono bottoni che dicono quello che fanno.
+
 ### I nomi degli effetti e delle manopole (`src/spark-effetti.js`)
 
 Vengono dal catalogo di **Soundshed** (MIT), non da Positive Grid, quindi restano
@@ -634,7 +662,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v60` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v61` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.

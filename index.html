@@ -194,6 +194,9 @@
 
   .cerca { display:flex; gap:8px; align-items:center; margin-top:10px; }
   .cerca input { flex:1; min-width:0; font-size:1rem; padding:10px 12px; }
+  /* La tendina dell'ordinamento sta larga quanto la sua parola: la riga è
+     della ricerca, che è quella che deve prendersi lo spazio. */
+  .cerca .tendina-finta { flex:none; }
 
   /* Le categorie sono pastiglie da toccare, non una tendina: sul telefono
      una tendina costa due gesti e nasconde quello che c'è. */
@@ -378,7 +381,8 @@
   .azioni-blocchi { display:flex; flex-direction:column; gap:8px;
                     max-width:calc(170px + 8px + 340px); }
   .azioni-riga { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .azioni-riga select { flex:1; min-width:0; max-width:340px; }
+  .azioni-riga select,
+  .azioni-riga .tendina-finta { flex:1; min-width:0; max-width:340px; }
   /* Le quattro azioni sul preset: una riga sola, quattro colonne uguali. In
      `flex` andavano a capo dove capitava e ogni pulsante era largo quanto la
      sua parola, il che le faceva sembrare quattro cose scollegate. */
@@ -393,7 +397,8 @@
      tendine partono dalla stessa riga verticale. */
   .azioni-riga.coppia { display:grid; grid-template-columns:170px minmax(0, 340px);
                         gap:8px; align-items:center; justify-content:start; }
-  .azioni-riga.coppia select { flex:none; max-width:none; width:100%; }
+  .azioni-riga.coppia select,
+  .azioni-riga.coppia .tendina-finta { flex:none; max-width:none; width:100%; }
   .scelte { display:flex; gap:6px; flex-wrap:wrap; }
   .scelta { background:#1e2025; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
             border-radius:12px; cursor:pointer; border:1px solid transparent; }
@@ -771,6 +776,25 @@
   .elenco-azioni { display:flex; flex-direction:column; gap:8px;
                    padding:0 15px 15px; }
   .elenco-azioni button { width:100%; padding:12px; }
+  /* Il campo da riempire quando la domanda ne ha uno: largo quanto la scatola,
+     che è la misura di tutto il resto qui dentro. */
+  .elenco-campo { width:calc(100% - 30px); margin:0 15px 13px; font-size:0.95rem; }
+
+  /* ---- le tendine, disegnate anche fuori dall'editor -------------------
+     Fuori sono un campo come gli altri — stesso fondo, stesso bordo, stesso
+     angolo degli `input` — e dentro aprono l'elenco. Il carattere è quello
+     «strumento» perché stanno accanto ai pulsanti, non in mezzo al testo. */
+  .tendina-finta { display:flex; align-items:center; gap:8px; max-width:100%;
+                   background:#0e1014; border:1px solid var(--line);
+                   color:var(--text); padding:10px 12px; border-radius:10px;
+                   font-family:var(--strumento); font-size:0.82rem; font-weight:600;
+                   text-align:left; }
+  .tendina-finta:hover { background:#0e1014; border-color:#4a515c; }
+  .tendina-finta:disabled { background:#131519; border-color:var(--line-soft); }
+  /* Il nome ci sta su una riga sola: se è lungo si tronca, come nell'elenco. */
+  .tendina-finta .testo { flex:1; min-width:0; overflow:hidden;
+                          text-overflow:ellipsis; white-space:nowrap; }
+  .tendina-finta .freccia { flex:none; color:var(--faint); font-size:0.68rem; }
 
   /* ---- il tasto «Salva» dice se c'è qualcosa da salvare ---------------
      Chiesto dall'utente il 26 agosto 2026: premendo «Salva» non si aveva la
@@ -845,10 +869,16 @@
 
   .pomello.scelta { display:flex; flex-direction:column; justify-content:center;
                     cursor:default; }
-  .pomello.scelta select { width:100%; background:#0e1014; color:var(--cat);
-                           border:1px solid var(--cat); border-radius:8px;
-                           padding:7px 4px; font-size:0.72rem; font-family:inherit;
-                           margin-bottom:5px; }
+  /* Anche questa è una tendina nostra, dal 26 agosto 2026: era l'ultimo
+     `<select>` di sistema rimasto nell'editor. Qui però porta i colori del
+     blocco, come tutto quello che gli sta intorno. */
+  .pomello.scelta .tendina-finta { width:100%; background:#0e1014; color:var(--cat);
+                                   border:1px solid var(--cat); border-radius:8px;
+                                   padding:7px 6px; font-size:0.72rem;
+                                   font-family:inherit; font-weight:400;
+                                   margin-bottom:5px; }
+  .pomello.scelta .tendina-finta:hover { border-color:var(--cat); background:#0e1014; }
+  .pomello.scelta .tendina-finta .freccia { color:var(--cat); }
   /* Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
   .bolla { position:fixed; z-index:60; font-family:var(--strumento); transform:translate(-50%,-150%);
            background:var(--text); color:#101216; font-weight:700; font-size:1.2rem;
@@ -1008,12 +1038,9 @@
   </div>
   <div class="cerca solo-preset">
     <input type="search" id="search" placeholder="cerca un preset…">
-    <select id="ordina" title="come ordinare la libreria">
-      <option value="nome">nome</option>
-      <option value="aggiunto">aggiunti di recente</option>
-      <option value="modificato">modificati di recente</option>
-      <option value="famiglia">famiglia di suono</option>
-    </select>
+    <!-- La tendina la monta `montaTendinaOrdine()`: è disegnata da noi, non
+         dal sistema. Qui resta solo il posto dove va. -->
+    <span id="postoOrdina"></span>
   </div>
   <div class="pastiglie solo-preset" id="filtriCategoria"></div>
 </header>
@@ -1324,8 +1351,9 @@
       e non suona: è così per scelta, un padrone alla volta. Appena stacchi se lo riprende
       da solo. I banchi restano nel pedale anche a corrente staccata.</p>
     <div class="barra-alta">
-      <select id="bancoDaMandare" title="quale banco mandare" style="flex:1"></select>
-      <select id="slotPedale" title="in quale slot del pedale"></select>
+      <!-- Anche queste due le monta il JS: tendine nostre, non del sistema. -->
+      <span id="postoBancoDaMandare" style="flex:1"></span>
+      <span id="postoSlotPedale"></span>
       <button id="btnMandaAlPedale" class="primary" disabled>Invia</button>
     </div>
     <p class="spiega" id="notaBancoDaMandare"></p>
@@ -1411,6 +1439,8 @@ let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic
 // nei record e nello store — cancellarlo butterebbe via delle scelte già
 // fatte — ma non si vede e non filtra più niente.
 const vista = { cerca: '', categoria: '', aperto: null, ordine: 'nome' };
+/** La tendina dell'ordinamento: sta nell'intestazione e vive quanto la pagina. */
+let tendinaOrdine = null;
 const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false,
                 sposta: null };   // il posto che si sta spostando, in modifica
 
@@ -1703,7 +1733,7 @@ const filtroAttivo = () => !!(vista.cerca || vista.categoria);
 
 function disegnaPreset() {
   disegnaFiltriCategoria();
-  $('ordina').value = vista.ordine;
+  if (tendinaOrdine) tendinaOrdine.aggiorna(vista.ordine);
 
   // Gli otto slot non sono righe di libreria: sono il pannello dell'ampli,
   // due banchi da quattro con i colori dei LED, disposti come li vedi
@@ -2089,8 +2119,10 @@ function dettaglio(record, slot) {
   nuova.className = 'scelta';
   nuova.textContent = '＋ nuova…';
   nuova.addEventListener('click', async () => {
-    const nome = prompt('Nome della nuova categoria:');
-    if (!nome || !nome.trim()) return;
+    const nome = await chiediTesto('nuova categoria',
+      'Come si chiama? La userai per filtrare la libreria dalle pastiglie in alto.',
+      '', { ok: 'Crea e assegna', invito: 'blues, prove, casa…' });
+    if (!nome) return;
     await store.addCategory(nome);
     await store.addTag(record.id, nome.trim());
     await ricarica();
@@ -2175,29 +2207,33 @@ function dettaglio(record, slot) {
   regola.addEventListener('click', () => apriEditor(record));
   rigaSuono.appendChild(regola);
 
-  const scelta = document.createElement('select');
-  scelta.title = 'slot di destinazione';
+  // Gli otto posti dell'ampli, col LED che si vede sul pannello: la sigla da
+  // sola (A1, B3) dice poco a chi guarda l'apparecchio invece dello schermo.
+  const posti = [];
   for (let i = 0; i < 8; i++) {
     const posizione = Spark.slotLabel(i);
-    const opzione = document.createElement('option');
-    opzione.value = i;
-    opzione.textContent = `${posizione.label} — LED ${posizione.color} ${posizione.position}`;
-    scelta.appendChild(opzione);
+    posti.push({ valore: i,
+                 testo: `${posizione.label} — LED ${posizione.color} ${posizione.position}` });
   }
-  if (slot !== null) scelta.value = slot;
+  const scelta = tendinaFinta('dove scriverlo sull\'ampli', posti,
+                              slot !== null ? slot : 0);
 
   const scrivi = document.createElement('button');
   scrivi.className = 'neon oro';
   scrivi.textContent = 'Invia a preset HW';
   scrivi.title = 'sovrascrive il preset presente in quello slot';
   scrivi.disabled = !spark.connected;
-  scrivi.addEventListener('click', () => {
-    const dove = Number(scelta.value);
+  scrivi.addEventListener('click', async () => {
+    const dove = scelta.valore;
     const chiCera = suAmpli[dove];
-    const avviso = `Scrivere «${record.name}» in ${nomeSlot(dove)} sull'ampli?\n\n` +
-      (chiCera && chiCera.id !== record.id ? `Sovrascrive «${chiCera.name}», che è già lì.\n` : '') +
-      'La copia in libreria resta comunque al sicuro.';
-    if (!confirm(avviso)) return;
+    const avviso =
+      `Scrivere <strong>${testoConNome(record.name)}</strong> in ${nomeSlot(dove)} ` +
+      'sull\'ampli? ' +
+      (chiCera && chiCera.id !== record.id
+        ? `Sovrascrive «${testoConNome(chiCera.name)}», che è già lì — ma la sua copia ` +
+          'in libreria resta al sicuro, e ricompare nella lista qui sotto.'
+        : 'La copia in libreria resta comunque al sicuro.');
+    if (!await conferma('scrivere sull\'ampli', avviso, { ok: 'Scrivi ' + nomeSlot(dove) })) return;
     mandaPreset(record, dove);
   });
   const rigaSlot = riga('coppia');
@@ -2210,22 +2246,19 @@ function dettaglio(record, slot) {
      è una cosa che si decide col piede davanti, non da qui, e nella vista Live
      si sposta. Non tocca l'ampli — i banchi inventati non ci scrivono mai. */
   if (banchi.length) {
-    const banco = document.createElement('select');
-    banco.title = 'in quale banco live';
-    for (const b of banchi) {
-      const o = document.createElement('option');
-      o.value = b.id;
+    const quali = banchi.map(b => {
       const liberi = b.posti.filter(p => p === null).length;
-      o.textContent = b.nome + (liberi ? ` — ${liberi} posti liberi` : ' — pieno');
-      banco.appendChild(o);
-    }
+      return { valore: b.id,
+               testo: b.nome + (liberi ? ` — ${liberi} posti liberi` : ' — pieno') };
+    });
+    const banco = tendinaFinta('in quale banco live', quali, banchi[0].id);
 
     const metti = document.createElement('button');
     metti.className = 'neon blu';
     metti.textContent = 'Metti nel banco';
     metti.title = 'aggiunge il preset al banco live, senza toccare l\'ampli';
     metti.addEventListener('click', async () => {
-      const id = Number(banco.value);
+      const id = banco.valore;
       const scelto = banchi.find(b => b.id === id);
       if (!scelto) return;
 
@@ -2236,8 +2269,9 @@ function dettaglio(record, slot) {
       }
       const libero = scelto.posti.indexOf(null);
       if (libero === -1) {
-        alert(`«${scelto.nome}» è pieno: tutti e otto i posti sono occupati.\n\n` +
-              'Liberane uno dalla vista Live, oppure scegli un altro banco.');
+        await avvisa('banco pieno',
+          `<strong>${testoConNome(scelto.nome)}</strong> ha tutti e otto i posti ` +
+          'occupati. Liberane uno dalla vista Live, oppure scegli un altro banco.');
         return;
       }
       await store.setBankSlot(id, libero, record.id);
@@ -2269,7 +2303,10 @@ function dettaglio(record, slot) {
   elimina.className = 'pericolo';
   elimina.textContent = 'Elimina';
   elimina.addEventListener('click', async () => {
-    if (!confirm(`Eliminare «${record.name}» dalla libreria? L'ampli non viene toccato.`)) return;
+    if (!await conferma('eliminare dalla libreria',
+      `Eliminare <strong>${testoConNome(record.name)}</strong> dalla libreria? ` +
+      'L\'ampli non viene toccato: se è caricato in uno slot continua a suonare.',
+      { ok: 'Elimina', pericolo: true })) return;
     await store.remove(record.id);
     vista.aperto = null;
     logLine(`«${record.name}» eliminato dalla libreria`);
@@ -2443,7 +2480,9 @@ function disegnaBanchi() {
   piu.className = 'banco aggiungi';
   piu.textContent = '＋ banco';
   piu.addEventListener('click', async () => {
-    const nome = prompt('Nome del nuovo banco:', `Banco ${banchi.length + 1}`);
+    const nome = await chiediTesto('nuovo banco',
+      'Otto posti, quattro per piede. I banchi inventati non scrivono mai sull\'ampli.',
+      `Banco ${banchi.length + 1}`, { ok: 'Crea il banco' });
     if (nome === null) return;
     const banco = await store.addBank(nome);
     await ricarica();
@@ -2454,15 +2493,35 @@ function disegnaBanchi() {
   barra.appendChild(piu);
 }
 
+/**
+ * Il nome del banco, o via il banco.
+ *
+ * Erano due finestre di sistema in fila — un `prompt` in cui **svuotare il
+ * campo** voleva dire «eliminalo», e poi un `confirm` — e quella scorciatoia
+ * non la indovinava nessuno: chi cancellava il nome per riscriverlo si trovava
+ * a rispondere di un'eliminazione che non aveva chiesto. Adesso sono due
+ * bottoni che dicono quello che fanno, più la via d'uscita.
+ */
+const ELIMINA_BANCO = {};   // un valore che non è nessun nome possibile
+
 async function rinominaOElimina(banco) {
-  const nome = prompt(`Nome del banco (vuoto per eliminarlo):`, banco.nome);
-  if (nome === null) return;
-  if (!nome.trim()) {
-    if (!confirm(`Eliminare il banco «${banco.nome}»? I preset restano in libreria.`)) return;
+  const scelto = await finestra({
+    titolo: 'banco live',
+    testo: 'Cambiagli nome, oppure eliminalo: <strong>i preset restano in ' +
+           'libreria</strong>, sparisce solo l\'ordine in cui li avevi messi.',
+    campo: { valore: banco.nome },
+    azioni: [
+      { testo: 'Salva il nome', classe: 'primary', vuoleTesto: true },
+      { testo: 'Elimina il banco', classe: 'pericolo', valore: ELIMINA_BANCO },
+      { testo: 'Annulla', valore: null },
+    ],
+  });
+  if (scelto === null) return;
+  if (scelto === ELIMINA_BANCO) {
     await store.removeBank(banco.id);
     live.banco = BANCO_AMPLI;
   } else {
-    await store.renameBank(banco.id, nome);
+    await store.renameBank(banco.id, scelto);
   }
   await ricarica();
   disegnaLive();
@@ -3032,6 +3091,179 @@ function apriElenco(titolo, voci, scelto, quando) {
 }
 
 /**
+ * Una tendina che si apre con `apriElenco` invece che col menu del sistema.
+ *
+ * Fuori è un campo come gli altri, dentro è l'elenco dell'editor. Serve perché
+ * un `<select>` vero lo disegna il sistema operativo: sul telefono arriva il
+ * menu di Android — carattere suo, fondo chiaro in un'app tutta nera, e le voci
+ * lunghe a capo su due righe — e non c'è foglio di stile che lo tocchi.
+ *
+ * Il valore scelto sta in `.valore`, che è quello che prima si leggeva da
+ * `.value`. `aggiorna(v)` lo cambia da fuori, come faceva `select.value = …`.
+ */
+function tendinaFinta(titolo, voci, valore, quando) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'tendina-finta';
+  b.valore = valore;
+
+  const testo = document.createElement('span');
+  testo.className = 'testo';
+  const freccia = document.createElement('span');
+  freccia.className = 'freccia';
+  freccia.textContent = '▾';
+  b.append(testo, freccia);
+
+  b.aggiorna = nuovo => {
+    if (nuovo !== undefined) b.valore = nuovo;
+    const voce = voci.find(v => v.valore === b.valore);
+    testo.textContent = voce ? voce.testo : '';
+    b.title = voce ? (voce.title || voce.testo) : titolo;
+  };
+  b.aggiorna();
+
+  b.addEventListener('click', () => apriElenco(titolo, voci, b.valore, scelto => {
+    b.aggiorna(scelto);
+    if (quando) quando(scelto);
+  }));
+  return b;
+}
+
+/* --------------------------------------------------------------------
+   Le finestre nostre, al posto di quelle del browser
+
+   `confirm()`, `alert()` e `prompt()` aprono la finestra del sistema, ed è la
+   stessa ragione della tendina: carattere suo, fondo chiaro, e sul telefono il
+   nome del sito scritto in cima come su un sito qualunque. Ma ce n'è una più
+   grossa, ed è la stessa che ha fatto nascere la domanda dell'editor: **un
+   `confirm()` ha due vie sole**, e quando la risposta giusta è una terza va
+   infilata per forza in una delle due.
+
+   Stessa scatola dell'elenco dei modelli e della domanda dell'editor: è
+   l'unica finestra che questa app apre sopra il resto, e ne basta una.
+   -------------------------------------------------------------------- */
+
+/**
+ * Una domanda con dei bottoni, e all'occorrenza un campo da riempire.
+ *
+ * Torna il valore del bottone premuto, e **`null` se si esce senza scegliere**
+ * — Esc, tocco fuori — che è la via d'uscita che rimette tutto com'era.
+ * Un'azione con `vuoleTesto` torna invece quello che c'è scritto nel campo.
+ *
+ * @param azioni lista di `{ testo, valore, classe, vuoleTesto }`
+ * @param campo  `{ valore, invito }` se la domanda ha qualcosa da scrivere
+ */
+function finestra({ titolo, testo, azioni, campo }) {
+  return new Promise(risolvi => {
+    const velo = document.createElement('div');
+    velo.className = 'velo-elenco';
+    const box = document.createElement('div');
+    box.className = 'elenco-scelta';
+
+    const testa = document.createElement('div');
+    testa.className = 'elenco-testa';
+    testa.textContent = titolo;
+    box.appendChild(testa);
+
+    if (testo) {
+      const domanda = document.createElement('div');
+      domanda.className = 'elenco-domanda';
+      // `innerHTML` perché le domande hanno il grassetto sulla parte che
+      // conta, come nell'editor. I testi sono nostri, non arrivano da fuori;
+      // i nomi dei preset ci entrano solo da `testoConNome`, che li scappa.
+      domanda.innerHTML = testo;
+      box.appendChild(domanda);
+    }
+
+    let ingresso = null;
+    if (campo) {
+      ingresso = document.createElement('input');
+      ingresso.type = 'text';
+      ingresso.className = 'elenco-campo';
+      ingresso.value = campo.valore || '';
+      if (campo.invito) ingresso.placeholder = campo.invito;
+      box.appendChild(ingresso);
+    }
+
+    const riga = document.createElement('div');
+    riga.className = 'elenco-azioni';
+    let primo = null;
+    for (const azione of azioni) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      if (azione.classe) b.className = azione.classe;
+      b.textContent = azione.testo;
+      b.addEventListener('click', () => {
+        if (azione.vuoleTesto) {
+          const scritto = ingresso.value.trim();
+          if (!scritto) { ingresso.focus(); return; }   // niente nome, niente da fare
+          chiudi(scritto);
+        } else {
+          chiudi(azione.valore);
+        }
+      });
+      if (!primo) primo = b;
+      riga.appendChild(b);
+    }
+    box.appendChild(riga);
+    velo.appendChild(box);
+    document.body.appendChild(velo);
+
+    // Col campo il dito è già lì: si scrive e si preme invio. Senza, il fuoco
+    // va sulla prima azione, che è quella che si vuole quasi sempre.
+    if (ingresso) { ingresso.focus(); ingresso.select(); }
+    else if (primo) primo.focus();
+
+    if (ingresso) ingresso.addEventListener('keydown', evento => {
+      if (evento.key === 'Enter') { evento.preventDefault(); primo.click(); }
+    });
+
+    function chiudi(valore) {
+      velo.remove();
+      document.removeEventListener('keydown', tasto);
+      risolvi(valore === undefined ? null : valore);
+    }
+    function tasto(evento) { if (evento.key === 'Escape') chiudi(null); }
+    document.addEventListener('keydown', tasto);
+    velo.addEventListener('click', evento => { if (evento.target === velo) chiudi(null); });
+  });
+}
+
+/** Un nome che viene dai dati, messo dentro una domanda che è HTML. */
+function testoConNome(nome) {
+  return String(nome).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Sì o no. Il no è sempre l'ultima riga, ed è anche Esc e il tocco fuori. */
+function conferma(titolo, testo, { ok = 'Procedi', pericolo = false } = {}) {
+  return finestra({
+    titolo, testo,
+    azioni: [
+      { testo: ok, valore: true, classe: pericolo ? 'pericolo' : 'primary' },
+      { testo: 'Annulla', valore: false },
+    ],
+  }).then(scelto => scelto === true);
+}
+
+/** Una cosa da sapere e basta: un bottone solo, che non decide niente. */
+function avvisa(titolo, testo) {
+  return finestra({ titolo, testo,
+                    azioni: [{ testo: 'Ho capito', valore: true, classe: 'primary' }] });
+}
+
+/** Qualcosa da scrivere. Torna il testo, o `null` se non se n'è fatto niente. */
+function chiediTesto(titolo, testo, valore = '', { ok = 'Salva', invito } = {}) {
+  return finestra({
+    titolo, testo,
+    campo: { valore, invito },
+    azioni: [
+      { testo: ok, classe: 'primary', vuoleTesto: true },
+      { testo: 'Annulla', valore: null },
+    ],
+  });
+}
+
+/**
  * Il parametro che **sceglie fra cose** invece di dosare — il tipo di
  * riverbero è l'unico che conosciamo. Serve saperlo in due posti, perché
  * quando il modello è uno solo è questo che finisce nella tendina grande.
@@ -3372,9 +3604,20 @@ function etichettaDi(effetto, param, quante) {
       : 'tocca per dargli un nome: varrà per ogni preset che usa ' + effetto.name;
   nome.addEventListener('click', async evento => {
     evento.stopPropagation();
-    const scelto = prompt(
-      `Nome del parametro ${param.index + 1} di ${SparkEffetti.nome(effetto.name)}\n` +
-      '(vuoto per tornare al valore di partenza):', dato || proposto || '');
+    // Anche qui la scorciatoia «campo vuoto = rimetti quello di prima» era
+    // una regola scritta fra parentesi che nessuno legge: adesso è un bottone.
+    const azioni = [{ testo: 'Salva il nome', classe: 'primary', vuoleTesto: true }];
+    if (dato) azioni.push({ testo: 'Rimetti quello di partenza', valore: '' });
+    azioni.push({ testo: 'Annulla', valore: null });
+
+    const scelto = await finestra({
+      titolo: `manopola ${param.index + 1} di ${SparkEffetti.nome(effetto.name)}`,
+      testo: 'Il nome vale per <strong>ogni preset che usa ' +
+             testoConNome(SparkEffetti.nome(effetto.name)) + '</strong>, non solo ' +
+             'per questo. Gira e senti cosa fa, poi chiamala come la chiami tu.',
+      campo: { valore: dato || proposto || '', invito: 'tono, mix, tempo…' },
+      azioni,
+    });
     if (scelto === null) return;
     await store.setParamName(effetto.name, param.index, scelto);
     nomiParam = await store.getParamNames();
@@ -3523,39 +3766,34 @@ function cursore(effetto, param) {
 }
 
 /** Il tipo di riverbero e compagnia: un elenco in mezzo ai pomelli. */
-/** Le posizioni di un parametro a scelta dentro una tendina, già selezionata. */
-function riempiScelta(menu, effetto, param) {
+/** Le posizioni di un parametro a scelta, e quale è quella di adesso. */
+function vociScelta(effetto, param) {
   const quante = SparkEffetti.posizioni(effetto.name, param.index);
   const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
+  const voci = [];
   for (let n = 0; n < quante; n++) {
-    const opzione = document.createElement('option');
-    opzione.value = SparkEffetti.valorePosizione(n);
-    opzione.textContent = nomi ? nomi[n] : 'posizione ' + (n + 1);
-    opzione.title = `posizione ${n + 1}`;
-    menu.appendChild(opzione);
+    voci.push({ valore: SparkEffetti.valorePosizione(n),
+                testo: nomi ? nomi[n] : 'posizione ' + (n + 1),
+                title: `posizione ${n + 1}` });
   }
   const dove = SparkEffetti.posizioneDi(param.value, quante);
   if (dove === -1) {
     // L'ampli riporta un valore che non è nessuna delle posizioni note: si
     // aggiunge invece di spostarlo di nascosto su quella più vicina.
-    const suo = document.createElement('option');
-    suo.value = param.value;
-    suo.textContent = 'valore dell\'ampli (' + mostraValore(param.value) + ')';
-    menu.appendChild(suo);
-    menu.value = String(param.value);
-  } else {
-    menu.value = String(SparkEffetti.valorePosizione(dove));
+    voci.push({ valore: param.value,
+                testo: 'valore dell\'ampli (' + mostraValore(param.value) + ')' });
+    return { voci, valore: param.value };
   }
+  return { voci, valore: SparkEffetti.valorePosizione(dove) };
 }
 
 function cellaScelta(effetto, param, quante) {
   const box = document.createElement('div');
   box.className = 'pomello scelta';
 
-  const menu = document.createElement('select');
-  riempiScelta(menu, effetto, param);
-  menu.addEventListener('change', () => {
-    param.value = Number(menu.value);
+  const { voci, valore } = vociScelta(effetto, param);
+  const menu = tendinaFinta(SparkEffetti.nome(effetto.name), voci, valore, scelto => {
+    param.value = scelto;
     aggiornaBarrette();
     mandaParametro(effetto.name, param.index, param.value);
   });
@@ -4208,10 +4446,12 @@ function disegnaElencoCategorie() {
     via.textContent = '✕';
     via.title = 'elimina la categoria';
     via.addEventListener('click', async () => {
-      const avviso = quanti === 0
-        ? `Eliminare la categoria «${nome}»?`
-        : `Eliminare «${nome}»? La perdono ${quanti} preset, che restano in libreria.`;
-      if (!confirm(avviso)) return;
+      const avviso = `Eliminare la categoria <strong>${testoConNome(nome)}</strong>? ` +
+        (quanti === 0
+          ? 'Non ce l\'ha nessun preset.'
+          : `La perdono ${quanti} preset, che restano tutti in libreria.`);
+      if (!await conferma('eliminare la categoria', avviso,
+                          { ok: 'Elimina', pericolo: true })) return;
       await store.removeCategory(nome);
       await ricarica();
       disegnaElencoCategorie();
@@ -4239,9 +4479,10 @@ $('nuovaCategoria').addEventListener('keydown', event => {
 
 $('btnAzzeraCategorie').addEventListener('click', async () => {
   if (categorie.length === 0) return;
-  if (!confirm(`Togliere tutte e ${categorie.length} le categorie?\n\n` +
-               'I preset restano tutti, perdono solo l\'etichetta. ' +
-               'Serve a ripartire da zero dopo un import.')) return;
+  if (!await conferma('togliere tutte le categorie',
+    `Togliere tutte e ${categorie.length} le categorie? <strong>I preset restano ` +
+    'tutti</strong>, perdono solo l\'etichetta. Serve a ripartire da zero dopo un import.',
+    { ok: `Togli le ${categorie.length} categorie`, pericolo: true })) return;
   const quante = await store.clearCategories();
   logLine(`tolte ${quante} categorie: i preset sono tutti al loro posto`);
   await ricarica();
@@ -4335,10 +4576,13 @@ $('btnLive').addEventListener('click', async () => {
 
     const esistente = corrente.uuid ? await store.byUuid(corrente.uuid) : null;
     const domanda = esistente
-      ? `«${esistente.name}» è già in libreria.\n\nAggiornarne il suono con quello ` +
-        'che l\'ampli sta suonando adesso? Tag, note e famiglia restano.'
-      : `Salvare «${corrente.name}» in libreria come preset nuovo?`;
-    if (confirm(domanda)) {
+      ? `<strong>${testoConNome(esistente.name)}</strong> è già in libreria. ` +
+        'Aggiornarne il suono con quello che l\'ampli sta suonando adesso? ' +
+        'Tag, note e famiglia restano.'
+      : `Salvare <strong>${testoConNome(corrente.name)}</strong> in libreria ` +
+        'come preset nuovo?';
+    if (await conferma(esistente ? 'aggiornare il suono' : 'salvare in libreria', domanda,
+                       { ok: esistente ? 'Aggiorna il suono' : 'Salva in libreria' })) {
       const { added } = await store.importFromAmp([corrente]);
       logLine(added ? `«${corrente.name}» aggiunto alla libreria`
                     : `«${corrente.name}» aggiornato in libreria`);
@@ -4360,11 +4604,24 @@ $('search').addEventListener('input', event => {
   disegnaPreset();
 });
 
-$('ordina').addEventListener('change', async event => {
-  vista.ordine = event.target.value;
-  disegnaPreset();                       // prima si vede, poi si salva
-  await store.setSetting('ordineLibreria', vista.ordine);
-});
+/**
+ * La tendina dell'ordinamento, montata una volta sola: sta nell'intestazione,
+ * che non viene ridisegnata, quindi il bottone campa quanto la pagina e
+ * `disegnaPreset` gli dice solo cosa mostrare.
+ */
+const ORDINI = [
+  { valore: 'nome',       testo: 'nome' },
+  { valore: 'aggiunto',   testo: 'aggiunti di recente' },
+  { valore: 'modificato', testo: 'modificati di recente' },
+  { valore: 'famiglia',   testo: 'famiglia di suono' },
+];
+tendinaOrdine = tendinaFinta('come ordinare la libreria', ORDINI, vista.ordine,
+  async scelto => {
+    vista.ordine = scelto;
+    disegnaPreset();                     // prima si vede, poi si salva
+    await store.setSetting('ordineLibreria', vista.ordine);
+  });
+$('postoOrdina').replaceWith(tendinaOrdine);
 
 $('btnExport').addEventListener('click', async () => {
   const backup = await store.exportAll();
@@ -4547,9 +4804,11 @@ $('btnDropboxSu').addEventListener('click', async () => {
 $('btnDropboxGiu').addEventListener('click', async () => {
   // Prendere può anche togliere: un preset cancellato sull'altro apparecchio
   // sparisce anche qui. È il gesto meno reversibile dei due, e va chiesto.
-  if (!confirm('Prendere la libreria da Dropbox e fonderla con questa?\n\n' +
-               'Quello che è stato cancellato sull\'altro apparecchio sparisce anche qui, ' +
-               'se qui non l\'hai toccato dopo.')) return;
+  if (!await conferma('prendere da Dropbox',
+    'Prendere la libreria da Dropbox e fonderla con questa? ' +
+    '<strong>Quello che è stato cancellato sull\'altro apparecchio sparisce anche ' +
+    'qui</strong>, se qui non l\'hai toccato dopo.',
+    { ok: 'Prendi e fondi' })) return;
   statoDelPannello('prendo la libreria da Dropbox…');
   try {
     const testo  = await dropbox.scarica();
@@ -4565,7 +4824,9 @@ $('btnDropboxGiu').addEventListener('click', async () => {
 });
 
 $('btnDropboxVia').addEventListener('click', async () => {
-  if (!confirm('Scollegare Dropbox? La libreria qui e quella lassù restano dove sono.')) return;
+  if (!await conferma('scollegare Dropbox',
+    'Scollegare Dropbox? La libreria qui e quella lassù restano dove sono: ' +
+    'smettono solo di parlarsi.', { ok: 'Scollega' })) return;
   await dropbox.scollega();
   disegnaDropbox();
   logLine('Dropbox scollegato');
@@ -4586,11 +4847,14 @@ $('btnSvuota').addEventListener('click', async () => {
     statoDelPannello('non c\'è niente da togliere: in libreria ci sono solo gli otto dell\'ampli');
     return;
   }
-  if (!confirm(`Eliminare ${quanti} preset dalla libreria?\n\n` +
-               'Restano solo quelli caricati sull\'ampli. L\'ampli non viene toccato.')) return;
-  if (!confirm(`Ultima conferma: ${quanti} preset, e non si torna indietro.\n\n` +
-               'Se usi Dropbox, al prossimo «Manda su» spariranno anche dagli altri ' +
-               'apparecchi.')) return;
+  if (!await conferma('svuotare la libreria',
+    `Eliminare <strong>${quanti} preset</strong> dalla libreria? Restano solo quelli ` +
+    'caricati sull\'ampli, e l\'ampli non viene toccato.',
+    { ok: `Elimina ${quanti} preset`, pericolo: true })) return;
+  if (!await conferma('ultima conferma',
+    `<strong>${quanti} preset, e non si torna indietro.</strong> Se usi Dropbox, al ` +
+    'prossimo «Manda su» spariranno anche dagli altri apparecchi.',
+    { ok: 'Sì, elimina', pericolo: true })) return;
 
   statoDelPannello('elimino…');
   const tolti = await store.svuotaTranneAmpli();
@@ -4703,8 +4967,12 @@ function postiDiBanco(banco) {
   return banco.posti.map(id => (id === null ? null : perId(id)));
 }
 
+/** Le due tendine del pannello «Pedale», rimontate ogni volta che si apre. */
+let tendinaBancoPedale = null;
+let tendinaSlotPedale = null;
+
 function bancoDaMandare() {
-  const id = Number($('bancoDaMandare').value);
+  const id = tendinaBancoPedale ? tendinaBancoPedale.valore : null;
   return banchi.find(b => b.id === id) || null;
 }
 
@@ -4717,18 +4985,26 @@ function bancoDaMandare() {
  * pedale non vuol dire niente.
  */
 function riempiSceltaBanco() {
-  const sel = $('bancoDaMandare');
-  const primaScelto = Number(sel.value);
-  sel.innerHTML = banchi.map(b => {
+  const primaScelto = tendinaBancoPedale ? tendinaBancoPedale.valore : null;
+  const voci = banchi.map(b => {
     const quanti = postiDiBanco(b).filter(Boolean).length;
-    return `<option value="${b.id}">${b.nome} — ${quanti} preset</option>`;
-  }).join('');
-  if (!banchi.length) sel.innerHTML = '<option value="">nessun banco in libreria</option>';
+    return { valore: b.id, testo: `${b.nome} — ${quanti} preset` };
+  });
+  if (!banchi.length) voci.push({ valore: null, testo: 'nessun banco in libreria' });
   // Si riparte da quello che stavi guardando in Live, che quasi sempre è
   // quello che vuoi mandare; se non è un banco vero, dal primo.
   const preferito = banchi.some(b => b.id === primaScelto) ? primaScelto
                   : (bancoCorrente() ? bancoCorrente().id : (banchi[0] || {}).id);
-  if (preferito !== undefined) sel.value = String(preferito);
+
+  const nuova = tendinaFinta('quale banco mandare', voci,
+                             preferito === undefined ? null : preferito,
+                             aggiornaInvioPedale);
+  if (tendinaBancoPedale) tendinaBancoPedale.replaceWith(nuova);
+  else                    $('postoBancoDaMandare').replaceWith(nuova);
+  // La misura stava sul `<span>` che c'era prima: la riga è del banco, e lo
+  // slot accanto è largo quanto la sua parola.
+  nuova.style.flex = '1';
+  tendinaBancoPedale = nuova;
 }
 
 function aggiornaInvioPedale() {
@@ -4948,7 +5224,7 @@ async function mandaBancoAlPedale() {
   const banco = bancoDaMandare();
   if (!banco) return;
   const posti = postiDiBanco(banco);
-  const slot  = Number($('slotPedale').value);
+  const slot  = tendinaSlotPedale.valore;
   const barra = $('avanzamentoPedale').firstElementChild;
 
   $('btnMandaAlPedale').disabled = true;
@@ -4971,7 +5247,6 @@ async function mandaBancoAlPedale() {
   aggiornaInvioPedale();
 }
 
-$('bancoDaMandare').addEventListener('change', aggiornaInvioPedale);
 
 /**
  * Copiare il log serve a riportarlo, e in vista live il testo non si
@@ -4997,8 +5272,12 @@ $('btnCopiaLogPedale').addEventListener('click', async () => {
 });
 
 $('btnPedale').addEventListener('click', () => {
-  $('slotPedale').innerHTML = Array.from({ length: PedalePonte.POSTI },
-    (_, i) => `<option value="${i}">slot ${i + 1}</option>`).join('');
+  if (!tendinaSlotPedale) {
+    const posti = Array.from({ length: PedalePonte.POSTI },
+                             (_, i) => ({ valore: i, testo: `slot ${i + 1}` }));
+    tendinaSlotPedale = tendinaFinta('in quale slot del pedale', posti, 0);
+    $('postoSlotPedale').replaceWith(tendinaSlotPedale);
+  }
   riempiSceltaBanco();
   aggiornaInvioPedale();
   disegnaSlotsPedale();
