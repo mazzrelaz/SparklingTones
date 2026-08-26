@@ -1242,6 +1242,33 @@ function modelliVisti() {
 }
 
 /**
+ * Un blocco vero con quel modello dentro, pescato dalla libreria.
+ *
+ * Serve a cambiare modello **senza ampli**: da fermi non sappiamo quante
+ * manopole abbia un modello, e inventarne il numero vuol dire costruire il
+ * preset che pianta l'ampli. Ma se quel modello sta in un preset **uscito
+ * dall'ampli**, allora esiste, e quel blocco dice esattamente quanti
+ * parametri ha e con che valori l'ampli li ha mandati: si copia quello,
+ * invece di indovinare. È la stessa regola con cui si costruisce un preset
+ * nuovo — lo scheletro si prende da uno vero, mai dal catalogo.
+ *
+ * Torna `{ params, da }` — `da` è il nome del preset da cui viene, che serve
+ * a dirlo nel log: chi gira le manopole ha diritto di sapere da dove
+ * arrivano i valori che si ritrova.
+ */
+function campioneModello(nome) {
+  for (const record of tutti) {
+    for (const e of (record.effects || [])) {
+      if (e.name === nome && (e.params || []).length) {
+        return { params: e.params.map(p => ({ index: p.index, value: p.value })),
+                 da: record.name || '(senza nome)' };
+      }
+    }
+  }
+  return null;
+}
+
+/**
  * L'ordine della libreria. È una scelta dell'utente e va ricordata: cambiarla
  * a ogni ricaricamento sarebbe un fastidio quotidiano, quindi sta fra le
  * preferenze.
@@ -2675,7 +2702,11 @@ function intestazioneBlocco(effetto, posizione) {
   // parole in un elenco che si sfoglia col pollice.
   const visti = modelliVisti();
   const sicuri  = candidati.filter(m =>  visti.has(m));
-  const daProva = candidati.filter(m => !visti.has(m));
+  // **Senza ampli si sceglie solo fra i sicuri**, e la ragione è la stessa che
+  // prima teneva la tendina spenta: di un modello mai visto non sappiamo
+  // quante manopole abbia, e non c'è nessuno a cui chiederlo. Di uno visto sì,
+  // perché sta in un preset uscito dall'ampli — vedi `campioneModello`.
+  const daProva = inModifica.offline ? [] : candidati.filter(m => !visti.has(m));
 
   const metti = modello => {
     const opzione = document.createElement('option');
@@ -2693,22 +2724,26 @@ function intestazioneBlocco(effetto, posizione) {
   }
   daProva.forEach(metti);
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
-  // fonte elenca, e senza questa via non ci si arriverebbe mai.
-  const aMano = document.createElement('option');
-  aMano.value = ' amano';
-  aMano.textContent = 'altro modello, a mano…';
-  scelta.appendChild(aMano);
+  // fonte elenca, e senza questa via non ci si arriverebbe mai. Senza ampli
+  // però non c'è: un nome scritto a mano non si può né verificare né misurare.
+  if (!inModifica.offline) {
+    const aMano = document.createElement('option');
+    aMano.value = ' amano';
+    aMano.textContent = 'altro modello, a mano…';
+    scelta.appendChild(aMano);
+  }
   scelta.value = effetto.name;
 
-  // Senza ampli il modello non si cambia, e non è pigrizia: cambiarlo vuol
-  // dire fargli ricostruire un blocco DSP e poi **rileggere quanti parametri
-  // ha quello nuovo**. Deciderlo alla cieca vorrebbe dire tenersi i parametri
-  // del modello di prima e darli a un modello che ne vuole altri — cioè
-  // costruire a tavolino il preset che pianta l'ampli.
+  // Senza ampli il modello **si cambia dal 26 agosto 2026**, chiesto
+  // dall'utente. Prima era spento, e la ragione era buona: cambiarlo vuol dire
+  // fargli ricostruire un blocco DSP e poi rileggere quanti parametri ha
+  // quello nuovo, e inventarne il numero è come costruire a tavolino il preset
+  // che pianta l'ampli. La via d'uscita non è tirare a indovinare: è **copiare
+  // un blocco vero**, preso da un preset della libreria che quel modello ce
+  // l'ha già. Per questo qui offline restano solo i modelli visti.
   if (inModifica.offline) {
-    scelta.disabled = true;
-    scelta.title = 'serve l\'ampli: cambiare modello vuol dire fargli ricostruire ' +
-                   'un blocco, e poi rileggere quanti parametri ha quello nuovo';
+    scelta.title = 'senza ampli si può mettere solo un modello che la libreria ' +
+                   'ha già visto: di quello sappiamo quante manopole ha';
   }
 
   scelta.addEventListener('change', () => {
@@ -2752,12 +2787,13 @@ function intestazioneBlocco(effetto, posizione) {
   riga.append(scelta, interruttore);
 
   if (inModifica.offline) {
-    // Spegnere un comando senza dire perché è il modo migliore di far cercare
-    // a vuoto: qui la ragione sta scritta sotto, non solo nel suggerimento.
+    // Un elenco più corto del solito, senza dire perché, si legge come un
+    // difetto. La ragione sta scritta sotto, non solo nel suggerimento.
     const nota = document.createElement('p');
     nota.className = 'senza-ampli';
-    nota.textContent = 'Senza ampli il modello non si cambia: l\'ampli deve ' +
-                       'ricostruire il blocco e dire quante manopole ha quello nuovo.';
+    nota.textContent = 'Senza ampli si scelgono solo i modelli che la tua libreria ' +
+                       'ha già visto, e le manopole partono da com\'erano lì: di un ' +
+                       'modello mai visto non sappiamo quante ne ha.';
     riga.appendChild(nota);
   }
   return riga;
@@ -3111,10 +3147,37 @@ async function cambiaModello(posizione, nuovo) {
   // L'editor aperto senza ampli resta senza ampli anche se nel frattempo la
   // connessione arriva: quello che l'ampli suona adesso è un altro suono, e
   // rileggerlo sostituirebbe di soppiatto la catena su cui si sta lavorando.
-  if (inModifica.offline || !spark.connected) {
-    logLine(inModifica.offline
-      ? 'senza ampli il modello non si cambia: chiudi, connetti e riapri «Regola».'
-      : 'ampli non connesso: il cambio non è partito.', true);
+  // Senza ampli il cambio si fa **copiando un blocco vero**: nome, numero di
+  // parametri e valori vengono da un preset della libreria che quel modello
+  // ce l'ha già, quindi il blocco che ne esce è uno che l'ampli ha davvero
+  // prodotto. Non si inventa niente, ed è la stessa regola con cui si
+  // costruisce un preset nuovo. Resta acceso o spento com'era: quello è una
+  // scelta dell'utente, non una proprietà del modello.
+  if (inModifica.offline) {
+    const blocco = inModifica.effetti[posizione];
+    if (!blocco) { logLine('quel blocco non esiste nella catena.', true); return; }
+    if (nuovo === blocco.name) { logLine(`${nuovo} c'era già.`); return; }
+
+    const campione = campioneModello(nuovo);
+    if (!campione) {
+      logLine(`senza ampli non posso mettere ${SparkEffetti.nome(nuovo)}: non sta ` +
+              'in nessun preset della libreria, quindi non so quante manopole ' +
+              'abbia. Connetti l\'ampli e riapri «Regola».', true);
+      disegnaCatena();                  // la tendina torna a dire la verità
+      return;
+    }
+    const vecchio = blocco.name;
+    blocco.name = nuovo;
+    blocco.params = campione.params;
+    disegnaCatena();
+    logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
+            `manopole che aveva in «${campione.da}». Senza ampli non si sente: ` +
+            'si salva in libreria e si prova alla prossima connessione.');
+    return;
+  }
+
+  if (!spark.connected) {
+    logLine('ampli non connesso: il cambio non è partito.', true);
     disegnaCatena();                    // la tendina torna a dire la verità
     return;
   }
