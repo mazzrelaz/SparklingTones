@@ -355,3 +355,79 @@ presenza di `navigator.bluetooth`, che è il fatto vero. Attenzione al controllo
 iPadOS 13 un iPad si dichiara `MacIntel`, quindi serve anche `maxTouchPoints > 1` per
 distinguerlo da un Mac. Il controllo sta **prima** di `store.open()`: non dipende dal
 database, e se il database tardasse l'avviso si deve vedere lo stesso.
+
+
+## Il vestito dell'app — rifatto il 25 agosto 2026
+
+Estratto da `CLAUDE.md` il 26 agosto 2026.
+
+
+Chiesto dall'utente dopo l'editor nuovo: uniformare il resto e usare un carattere più
+moderno. **Due caratteri, e stanno in casa** (`fonts/`, 70 KB in due, sottoinsieme latino,
+nel guscio del service worker): **Space Grotesk** per etichette, numeri e pulsanti — la
+parte «strumento», dove le cifre devono staccare da un metro e mezzo — e **Inter** per il
+testo che si legge. Presi da una rete sarebbero l'unica cosa che manca proprio davanti
+all'ampli col telefono senza campo. Attribuzione OFL in `NOTICE`.
+
+Pulsanti, schede e campi hanno il vestito dei tasselli: fondo più scuro della pagina, un
+bordo sottile, angolo tondo. **I pulsantoni della vista live** sono la stessa cosa in
+grande, e da accesi hanno l'alone **verde**, come il loro LED e non come l'accento rosso
+dell'app: su un pedale è la lampadina che colora tutto l'interruttore.
+
+**Le trappole grafiche pagate qui**, che valgono oltre questo caso:
+
+- **un alone che sborda va disegnato dentro qualcosa che lo lascia sbordare.** Il bagliore
+  dei pomelli veniva tagliato di netto dal viewport dell'SVG e attorno a ogni manopola
+  compariva un quadrato più chiaro. `overflow:visible`, **e** il disegno più stretto del
+  riquadro, che serve dove il browser non lascia sconfinare;
+- **`.pannello h2` è più specifico di una classe.** Il nome del preset non è mai stato
+  grande come diceva il suo CSS, e alzare la classe non serviva a niente: la regola va per
+  id. Costato tre giri con l'utente che continuava a vederlo piccolo;
+- **il flex schiaccia prima di far scorrere.** Striscia e riquadro delle regolazioni vanno
+  a `flex:0 0 auto` / `flex:1 0 auto`, o su uno schermo basso i pomelli diventano ellissi
+  invece di far comparire la barra di scorrimento;
+- **un conto sulle misure va fatto dopo un giro di disegno.** All'apertura il pannello è
+  ancora nascosto e un elemento nascosto è largo zero: `requestAnimationFrame`, o la
+  striscia resta ferma sul primo tassello.
+
+
+
+## Editor della catena effetti — come si presenta (25 agosto 2026)
+
+Estratto da `CLAUDE.md` il 26 agosto 2026. Le regole operative dell'editor
+(offline, strozzamento degli invii, `.stato-pannello`) restano in `CLAUDE.md`.
+
+**Come si presenta, dal 25 agosto 2026**: in cima i sette blocchi nell'ordine del segnale,
+un tassello ciascuno col colore della categoria, il LED acceso/spento e le barrettine dei
+valori — la forma del suono senza aprirlo; sotto, **un blocco solo alla volta** con le sue
+manopole a pomello. Prima erano sette blocchi aperti: tre schermate, e non si sapeva mai a
+che punto della catena si stessero mettendo le mani. La scelta è dell'utente, fatta
+guardando le tre disposizioni di `design/proposte-editor.html`.
+
+Le regole di quel disegno, tutte chieste o approvate dall'utente:
+
+- **i valori si leggono da 0 a 10 con un decimale** («6.1» dice qualcosa a chi suona,
+  «0.61» no). All'ampli continua ad andare 0..1: `mostraValore` non entra mai in un comando;
+- **i pomelli si girano trascinando in verticale**, 300 px da zero a dieci — in cerchio col
+  dito è un terno al lotto — e il valore compare in una bolla grande, perché sotto il dito
+  il numerino non si vede;
+- **si dispongono a piramide**, ultima riga in centro: 4 fanno 2 e 2, 3 fanno 2 e 1, 5 fanno
+  3 e 2, 7 fanno 4 e 3. Vale anche per l'ampli, che tiene però l'ordine del frontale (Gain,
+  Bass, Middle, Treble, Master) riconosciuto **dai nomi della tabella**, non dalla posizione
+  nella catena;
+- **il nome del modello è il titolo del blocco ed è la tendina che lo cambia**, in centro,
+  con l'interruttore sotto a tutta larghezza. Era un titolo con una freccina accanto e
+  l'utente non trovava il modo di cambiare effetto — due volte colpa mia, perché senza ampli
+  era anche spento senza dire perché;
+- nella tendina **niente intestazioni**: prima i modelli usciti da questo ampli, poi una riga
+  separatrice senza parole, poi quelli dal catalogo. La distinzione è di sicurezza e resta;
+- **il nome del preset è un'insegna al neon** del colore della sua famiglia (clean, drive,
+  acoustic), bianca se non ne ha — inventarle un colore farebbe leggere una famiglia che non
+  c'è. Sta centrata fra il menu e la catena, e il riquadro delle regolazioni si allunga fino
+  in fondo: lo spazio che avanza non resta mai vuoto;
+- **la riga di stato compare solo se qualcosa non va**, ed è rossa. Le conferme («modifiche
+  salvate», «catena riletta») restano nel log della vista preset: in quel pannello lo schermo
+  serve alla catena. Il pannello è marcato `data-solo-risposte` e `logLine` ha un secondo
+  argomento che dice se il messaggio è un problema;
+- la guida sta dietro un **«?»** in cima e si richiude da sé riaprendo l'editor.
+
