@@ -240,6 +240,89 @@ window.SparkEffetti = (function () {
    * Non è detto sia esaustivo: lo Spark 2 potrebbe conoscerne altri, per
    * questo la UI lascia sempre scrivere un nome a mano.
    */
+  /**
+   * Gli amplificatori: a che apparecchio vero è ispirato ognuno, e in che
+   * famiglia Positive Grid lo mette.
+   *
+   * Copiato dall'elenco ufficiale — help.positivegrid.com, «Amp & Effect
+   * List» — e non dedotto: «Silver 120» *è* un Roland JC120 e «Blackface Duo»
+   * un Fender Twin Reverb, ma i nomi di fantasia non lo dicono, e chi cerca un
+   * suono pensa all'apparecchio vero. Le famiglie sono le loro, nel loro
+   * ordine: è come sono raggruppati nell'app ufficiale.
+   *
+   * I nomi di terzi sono marchi dei rispettivi proprietari, citati per dire a
+   * cosa un modello somiglia: è la stessa nota che mette Positive Grid.
+   *
+   * **Chi non è in questa mappa non è nell'elenco ufficiale**, e questo dice
+   * più di quanto sembri: `MODELLI` viene dal catalogo di Soundshed e contiene
+   * nomi che lo Spark 2 potrebbe non avere (è già successo con
+   * `TrebleBooster`). La UI li tiene in fondo, in un gruppo a parte.
+   */
+  const AMPLI = {
+    RolandJC120:        { reale: 'Roland JC120',                gruppo: 'Clean' },
+    Twin:               { reale: 'Fender Twin Reverb',          gruppo: 'Clean' },
+    ADClean:            { reale: 'Orange AD 30',                gruppo: 'Clean' },
+    '94MatchDCV2':      { reale: 'Matchless DC30',              gruppo: 'Clean' },
+    ODS50CN:            { reale: 'Dumble ODS 50 HRM',           gruppo: 'Clean' },
+
+    Bassman:            { reale: 'Fender Bassman',              gruppo: 'Glassy' },
+    'AC Boost':         { reale: 'Vox AC30',                    gruppo: 'Glassy' },
+    Checkmate:          { reale: 'Teisco Checkmate 20',         gruppo: 'Glassy' },
+    TwoStoneSP50:       { reale: 'Two Rock Studio Pro 50',      gruppo: 'Glassy' },
+
+    Deluxe65:           { reale: "Fender '57 Custom Deluxe",    gruppo: 'Crunch' },
+    Plexi:              { reale: 'Marshall Super Lead 100',     gruppo: 'Crunch' },
+    OverDrivenJM45:     { reale: 'Marshall JTM45',              gruppo: 'Crunch' },
+    OverDrivenLuxVerb:  { reale: 'Fender Deluxe Reverb',        gruppo: 'Crunch' },
+    BluesJrTweed:       { reale: 'Fender Blues Junior',         gruppo: 'Crunch' },
+
+    Bogner:             { reale: 'Bogner Ecstasy 101',          gruppo: 'High gain' },
+    OrangeAD30:         { reale: 'Orange AD30',                 gruppo: 'High gain' },
+    AmericanHighGain:   { reale: 'Mesa Boogie JP-2C',           gruppo: 'High gain' },
+    SLO100:             { reale: 'Soldano SLO-100',             gruppo: 'High gain' },
+    YJM100:             { reale: 'Marshall YJM100 Signature',   gruppo: 'High gain' },
+
+    Rectifier:          { reale: 'Mesa Boogie Triple Rectifier', gruppo: 'Metal' },
+    EVH:                { reale: 'EVH 5150 III',                gruppo: 'Metal' },
+    SwitchAxeLead:      { reale: 'H&K Switch Blade',            gruppo: 'Metal' },
+    Invader:            { reale: 'Orange Rockerverb 50',        gruppo: 'Metal' },
+    BE101:              { reale: 'Friedman BE100',              gruppo: 'Metal' },
+    '6505Plus':         { reale: 'Peavey 6505',                 gruppo: 'Metal' },
+
+    Acoustic:           { reale: 'originale Positive Grid',     gruppo: 'Acustico' },
+    AcousticAmpV2:      { reale: 'Fishman Acoustic Amp',        gruppo: 'Acustico' },
+    FatAcousticV2:      { reale: 'originale Positive Grid',     gruppo: 'Acustico' },
+    FlatAcoustic:       { reale: 'originale Positive Grid',     gruppo: 'Acustico' },
+
+    GK800:              { reale: 'Gallien-Krueger 800RB',       gruppo: 'Basso' },
+    Sunny3000:          { reale: 'Sunn 300T',                   gruppo: 'Basso' },
+    W600:               { reale: 'Eden WTP600',                 gruppo: 'Basso' },
+    Hammer500:          { reale: 'Aguilar Tone Hammer 500',     gruppo: 'Basso' },
+
+    Preamp73:           { reale: 'preamplificatore da voce',    gruppo: 'Preamp' },
+
+    'JH.JTM45':         { reale: 'Marshall JTM45/100',          gruppo: 'Hendrix' },
+    'JH.SuperLead100':  { reale: 'Marshall Super Lead 100',     gruppo: 'Hendrix' },
+    'JH.Bassman50Silver': { reale: 'Fender Bassman 50 (1968)',  gruppo: 'Hendrix' },
+    'JH.DualShowman':   { reale: 'Fender Dual Showman',         gruppo: 'Hendrix' },
+    'JH.Sunn100':       { reale: 'Sunn 100S',                   gruppo: 'Hendrix' },
+    'JH.SoundCity100':  { reale: 'Sound City One Hundred',      gruppo: 'Hendrix' },
+  };
+
+  /** L'ordine dei gruppi è quello dell'elenco ufficiale, non alfabetico. */
+  const GRUPPI_AMPLI = ['Clean', 'Glassy', 'Crunch', 'High gain', 'Metal',
+                        'Acustico', 'Basso', 'Preamp', 'Hendrix'];
+
+  /** A quale apparecchio vero è ispirato questo modello, se lo sappiamo. */
+  function ampliReale(id) {
+    return (AMPLI[id] && AMPLI[id].reale) || null;
+  }
+
+  /** In che famiglia lo mette Positive Grid, o null se non è nel loro elenco. */
+  function ampliGruppo(id) {
+    return (AMPLI[id] && AMPLI[id].gruppo) || null;
+  }
+
   const MODELLI = [
     ['bias.noisegate'],
     ['LA2AComp', 'BlueComp', 'Compressor', 'BassComp', 'BBEOpticalComp', 'JH.Vox846',
@@ -365,6 +448,7 @@ window.SparkEffetti = (function () {
     return Object.keys(TABELLA).length;
   }
 
-  return { TABELLA, MODELLI, nome, manopola, extra, nomeExtra, affidabile,
+  return { TABELLA, MODELLI, AMPLI, GRUPPI_AMPLI, nome, manopola, extra, nomeExtra,
+           affidabile, ampliReale, ampliGruppo,
            quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi };
 })();
