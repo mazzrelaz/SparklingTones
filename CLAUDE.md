@@ -1211,9 +1211,11 @@ l'apparecchio che va all'ampli.
 il salvataggio del suono letto dall'ampli, e l'editor che si apre anche senza ampli.
 
 **Il 25 agosto** (guscio `v39`): l'editor rifatto — la catena al neon scelta dall'utente in
-`design/proposte-editor.html` — e il vestito nuovo per tutta l'app, caratteri compresi. Le
-due sezioni qui sopra raccontano com'è fatto e perché; qui basta sapere che **è tutto
-pubblicato e niente di quello è ancora stato toccato con l'ampli acceso**.
+`design/proposte-editor.html` — e il vestito nuovo per tutta l'app, caratteri compresi. Poi
+**tutta la ferramenta del pedale è stata scelta**, pezzo per pezzo, con l'utente che
+ordinava: la sezione del pedale qui sopra dice cosa e perché. Le due sezioni dell'editor
+raccontano com'è fatto; qui basta sapere che **è tutto pubblicato e niente di quello è
+ancora stato toccato con l'ampli acceso**.
 
 Le suite sono verdi — protocol 125, transport 48, store 136, backup 33, dropbox 34 — ma
 **`index.html` non è coperto da nessuna suite**: tutto il lavoro di questi due giorni si
@@ -1228,9 +1230,18 @@ verifica solo aprendo l'app. Le mie prove sono contro un ampli finto, nel browse
    è stato reso autocadenzato ma **la correzione non è verificata**: il blocco non si
    riproduce a comando. Se ricapita, le manopole da girare sono `PAUSA_PARAMETRO` e poi
    `SEND_GAP_MS` — vedi la sezione dell'editor.
-3. **Comprare i componenti del pedale**: OLED 3,12" 256×64 SSD1322 (SPI), MCP23017,
-   cinque footswitch, due pulsantini, striscia WS2812, una scatola. Tutto il resto è già
-   deciso e scritto qui.
+3. **Il pedale: i pezzi sono decisi, si aspetta che arrivino.** Scelti guardando e
+   misurando, non a occhio — le sezioni qui sopra dicono perché: **XIAO ESP32-C6** (la C3
+   era finita, e la C6 è meglio: nessuno strapping sul connettore, partitore di batteria a
+   bordo, antenna integrata), **OLED 2,42" 128×64 SSD1309 in SPI a 7 pin**, **KAmod
+   I2C-IOexp16**, **XTAR 18650-330PCM protetta** in portacella, quattro LED bicolore sulle
+   uscite dell'espansore. Mancano footswitch e pulsantini, che arrivano dalla Cina — ma
+   **per il firmware bastano i pulsanti da arcade che l'utente ha in casa**.
+
+   Quando arriva la roba, in quest'ordine: display sulla C6 con quattro cavetti, e vedere
+   se scrive; poi l'espansore con **un pulsante solo**, per sapere se il bus I²C legge;
+   poi il firmware, che è tutto software. Il porting da C3 a C6 dovrebbe essere di peso,
+   ma **i tempi BLE vanno rimisurati**.
 4. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due
    lati.
