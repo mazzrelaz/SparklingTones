@@ -215,8 +215,13 @@
   .banco-eti.a { color:#ff9b9b; }
   .banco-eti.b { color:#9be0a8; }
 
+  /* **Altezza fissa, non minima.** Le due colonne sono due griglie separate,
+     quindi un nome che va su due righe alzava la sua casella e basta: le otto
+     non erano più in pari, e sul telefono, dove i nomi ci stanno più stretti,
+     si vedeva subito. Il nome resta a due righe e poi si tronca (per intero
+     nel titolo). */
   .slotcard { background:#0e1014; border:1px solid var(--line); border-radius:12px;
-              padding:9px 10px; min-height:70px; cursor:pointer;
+              padding:9px 10px; height:72px; cursor:pointer;
               display:flex; flex-direction:column; justify-content:space-between;
               gap:6px; position:relative; overflow:hidden; }
   .slotcard.libero { border-style:dashed; background:none; cursor:default; }
@@ -230,8 +235,6 @@
                          overflow:hidden; display:-webkit-box; -webkit-line-clamp:2;
                          -webkit-box-orient:vertical; }
   .slotcard.libero .nome-slot { color:var(--faint); font-weight:400; font-size:0.78rem; }
-  .slotcard .suono { font-size:0.7rem; color:var(--dim); margin-top:3px;
-                     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .led { width:8px; height:8px; border-radius:50%; flex:none; }
   /* I LED dei banchi, accesi come quelli dell'editor: l'alone li fa lampadine
      invece che pallini disegnati. */
@@ -806,7 +809,7 @@
 <main id="vistaPreset">
   <div id="senzaBluetooth" class="avviso-grosso" hidden></div>
   <div class="sezione" id="sezAmpli">
-    <h2>Sull'ampli <span class="nota">gli otto slot, istantanei</span></h2>
+    <h2>Preset hardware</h2>
     <div id="listaAmpli"></div>
   </div>
   <div class="sezione" id="sezLibreria">
@@ -1575,17 +1578,17 @@ function schedaSlot(record, slot) {
   alto.append(led, sigla);
   card.appendChild(alto);
 
+  // Nella scheda ci stanno la posizione e il nome, e basta: l'ampli e il drive
+  // c'erano ed è stato l'utente a toglierli il 26 agosto 2026. Sono otto
+  // caselle che si guardano tutte insieme, e otto righe di effetti in più
+  // facevano rumore senza aggiungere niente a chi il preset lo conosce già.
+  // La catena resta nel dettaglio, che è dove quel preset lo si guarda davvero.
   const basso = document.createElement('div');
   const nome = document.createElement('div');
   nome.className = 'nome-slot';
   nome.textContent = record ? (record.name || '(senza nome)') : 'non ancora letto';
+  if (record) nome.title = record.name || '';   // per intero, se è troncato
   basso.appendChild(nome);
-  if (record) {
-    const suono = document.createElement('div');
-    suono.className = 'suono';
-    suono.textContent = sommarioSuono(record);
-    basso.appendChild(suono);
-  }
   card.appendChild(basso);
 
   if (record) {
@@ -1636,15 +1639,6 @@ function nomePastiglia(effetto, posizione) {
     if (dove !== -1) return nomi[dove];
   }
   return SparkEffetti.nome(effetto.name);
-}
-
-/** Ampli e drive: le due cose che dicono di che suono si tratta. */
-function sommarioSuono(record) {
-  const effetti = record.effects || [];
-  const pezzi = [];
-  if (effetti[3]) pezzi.push(SparkEffetti.nome(effetti[3].name));
-  if (effetti[2] && effetti[2].enabled) pezzi.push(SparkEffetti.nome(effetti[2].name));
-  return pezzi.join(' · ');
 }
 
 /**

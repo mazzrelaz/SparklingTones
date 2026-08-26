@@ -21,6 +21,15 @@ LED del suo banco, il nome e — al posto della catena intera — **l'ampli e il
 sono quello che si cerca. Il dettaglio di uno slot si apre **a tutta larghezza sotto la
 griglia**: dentro una cella sfonderebbe la colonna.
 
+> **Il 26 agosto 2026 l'utente ha tolto anche l'ampli e il drive**: nella casella restano
+> la posizione e il nome. Sono otto caselle che si guardano tutte insieme, e otto righe di
+> effetti facevano rumore senza dire niente a chi il preset lo conosce già; la catena resta
+> nel dettaglio. Nella stessa passata il titolo è diventato **«Preset hardware»** (era
+> «Sull'ampli — gli otto slot, istantanei») e la casella ha **altezza fissa**: le due
+> colonne sono due griglie separate, quindi un nome su due righe alzava la sua casella e
+> basta, e le otto non erano più in pari. Il nome si tronca a due righe e per intero sta
+> nel titolo.
+
 **La riga di libreria è solo il nome**, dal 14 agosto 2026 e su richiesta. Prima portava
 anche la catena a pastiglie e le categorie, che insieme raddoppiavano l'altezza di ogni
 riga: nella libreria però si **scorre per cercare un suono che si conosce già**, e per
