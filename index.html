@@ -2894,9 +2894,6 @@ function candidatiModello(effetto, posizione) {
 
 function intestazioneBlocco(effetto, posizione) {
   const candidati = candidatiModello(effetto, posizione);
-  const visti = modelliVisti();
-  const sicuri  = candidati.filter(m =>  visti.has(m));
-  const daProva = candidati.filter(m => !visti.has(m));
   // **Senza ampli i modelli mai visti restano nell'elenco, ma spenti.** Prima
   // li toglievo, ed era sbagliato: la tendina passava da quaranta voci a sette
   // e sembrava che il catalogo fosse sparito. Spenti si vedono, si legge a cosa
@@ -2971,25 +2968,26 @@ function intestazioneBlocco(effetto, posizione) {
   // come nell'elenco ufficiale di Positive Grid: sono quaranta, e una fila
   // unica non la sfoglia nessuno. Gli altri effetti restano una fila sola,
   // che sono pochi.
-  const tutte = sicuri.concat(daProva);
-  const raggruppa = tutte.some(m => SparkEffetti.ampliGruppo(m));
+  const raggruppa = candidati.some(m => SparkEffetti.ampliGruppo(m));
   if (raggruppa) {
     for (const gruppo of SparkEffetti.GRUPPI_AMPLI) {
-      tutte.filter(m => SparkEffetti.ampliGruppo(m) === gruppo)
-           .forEach(m => metti(m, gruppo));
+      candidati.filter(m => SparkEffetti.ampliGruppo(m) === gruppo)
+               .forEach(m => metti(m, gruppo));
     }
     // Chi non sta nell'elenco ufficiale finisce qui, ed è un avvertimento più
     // preciso di quello di prima: di questi non sappiamo nemmeno se l'ampli li
     // abbia. Dal 26 agosto 2026 il gruppo è vuoto — l'utente ha fotografato
     // l'elenco vero e gli otto di troppo sono stati tolti — ma il codice resta
     // per il giorno che al catalogo si aggiunge un nome nuovo.
-    tutte.filter(m => !SparkEffetti.ampliGruppo(m))
-         .forEach(m => metti(m, 'fuori dall\'elenco Positive Grid'));
+    candidati.filter(m => !SparkEffetti.ampliGruppo(m))
+             .forEach(m => metti(m, 'fuori dall\'elenco Positive Grid'));
   } else {
-    // I modelli **usciti da questo ampli** vengono per primi: esistono di
-    // sicuro. Gli altri arrivano dal catalogo e non sono verificati.
-    sicuri.forEach(m => metti(m));
-    daProva.forEach(m => metti(m, sicuri.length ? 'dal catalogo, da provare' : null));
+    // Nessuna intestazione e nessun rimescolamento: **l'ordine è quello
+    // dell'app ufficiale**, com'è scritto in `MODELLI`. Fino al 26 agosto 2026
+    // i modelli mai visti finivano in fondo sotto «dal catalogo, da provare»,
+    // che aveva senso finché il catalogo era incerto: adesso è verificato tutto
+    // contro l'app, quindi quella scritta diceva una cosa non più vera.
+    candidati.forEach(m => metti(m));
   }
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
   // fonte elenca, e senza questa via non ci si arriverebbe mai. Senza ampli
