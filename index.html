@@ -2905,22 +2905,19 @@ function intestazioneBlocco(effetto, posizione) {
   // mai visto non sappiamo quante manopole abbia, e senza ampli non c'è nessuno
   // a cui chiederlo. Di uno visto sì, perché sta in un preset uscito
   // dall'ampli — vedi `campioneModello`.
-  // **Gli amplificatori si scelgono tutti, anche senza ampli collegato.** La
-  // regola vera non è «solo quelli già visti», è «solo quelli di cui sappiamo
-  // com'è fatto il blocco» — e degli ampli lo sappiamo: hanno **tutti e
-  // trentanove le stesse cinque manopole**, Gain, Treble, Middle, Bass,
-  // Master. Misurato due volte, il 26 agosto 2026: sui preset veri usciti
-  // dall'ampli in `captures/` (sette modelli diversi, da Twin a Rectifier a
-  // FatAcousticV2, tutti con cinque parametri) e sulla tabella dei nomi, che
-  // dice cinque per tutti e trentanove. Cambiare ampli non cambia la forma del
-  // blocco: cambia il nome, e i valori restano quelli, che per di più vogliono
-  // dire la stessa cosa da un ampli all'altro.
+  // **Senza ampli si sceglie qualunque modello**, e non è un cedimento: è che
+  // adesso sappiamo com'è fatto ogni blocco. La regola non è mai stata «solo
+  // quelli già visti», era «solo quelli di cui sappiamo quante manopole hanno»
+  // — e da quando il catalogo è verificato contro l'app ufficiale, la tabella
+  // lo dice per **tutti e settantotto** i modelli cambiabili.
   //
-  // Per gli altri blocchi la limitazione resta, e lì è reale: due drive o due
-  // delay hanno numeri di manopole diversi, quindi senza ampli si può mettere
-  // solo un modello che la libreria ha già visto — da lì si copia un blocco
-  // vero (`campioneModello`) invece di inventarne uno.
-  const spento = m => inModifica.offline && !visti.has(m) && !SparkEffetti.ampliGruppo(m);
+  // Che il numero della tabella sia quello vero l'ha detto la misura, il 26
+  // agosto 2026: nei ventiquattro blocchi dei preset usciti dall'ampli in
+  // `captures/`, ventidue modelli diversi, il numero di parametri coincide
+  // sempre con il numero di nomi. Le due eccezioni — noise gate e riverbero,
+  // che hanno un parametro in più, l'acceso/spento — sono proprio i due blocchi
+  // con **un modello solo**, che quindi non si cambiano mai.
+  const spento = () => false;
 
   // **Dove non c'è niente da scegliere, la tendina non c'è.** Il noise gate ha
   // un modello e basta; il riverbero pure, e offline può restare a voce sola
@@ -3572,21 +3569,40 @@ async function cambiaModello(posizione, nuovo) {
       return;
     }
 
+    const vecchio = blocco.name;
+
+    // **Prima si copia, poi si costruisce.** Se quel modello sta già in un
+    // preset della libreria si prendono numero di parametri *e* valori da lì:
+    // è un blocco che l'ampli ha davvero prodotto, quindi non c'è niente da
+    // indovinare. Solo se non c'è si costruisce dalla tabella, che dice quante
+    // manopole ha ogni modello — verificato sui preset veri, vedi
+    // `intestazioneBlocco` — e i valori partono da metà corsa.
     const campione = campioneModello(nuovo);
-    if (!campione) {
-      logLine(`senza ampli non posso mettere ${SparkEffetti.nome(nuovo)}: non sta ` +
-              'in nessun preset della libreria, quindi non so quante manopole ' +
-              'abbia. Connetti l\'ampli e riapri «Regola».', true);
+    if (campione) {
+      blocco.name = nuovo;
+      blocco.params = campione.params;
+      disegnaCatena();
+      logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
+              `manopole che aveva in «${campione.da}». Senza ampli non si sente: ` +
+              'si salva in libreria e si prova alla prossima connessione.');
+      return;
+    }
+
+    const quante = SparkEffetti.quanteManopole(nuovo);
+    if (!quante) {
+      logLine(`senza ampli non posso mettere ${SparkEffetti.nome(nuovo)}: non so ` +
+              'quante manopole abbia. Connetti l\'ampli e riapri «Regola».', true);
       disegnaCatena();                  // la tendina torna a dire la verità
       return;
     }
-    const vecchio = blocco.name;
     blocco.name = nuovo;
-    blocco.params = campione.params;
+    blocco.params = Array.from({ length: quante },
+                               (_, i) => ({ index: i, value: 0.5 }));
     disegnaCatena();
     logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
-            `manopole che aveva in «${campione.da}». Senza ampli non si sente: ` +
-            'si salva in libreria e si prova alla prossima connessione.');
+            `${quante} manopole a metà corsa: la tua libreria non ha nessun preset ` +
+            'con quel modello da cui copiarle. Senza ampli non si sente: si salva ' +
+            'in libreria e si prova alla prossima connessione.');
     return;
   }
 

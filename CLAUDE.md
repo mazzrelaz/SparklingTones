@@ -256,24 +256,24 @@ record sono un'istantanea vera di quel suono. `inModifica.offline` governa la di
 
 - **niente parte sulla radio**: `mandaParametro` non accoda nemmeno, o un arretrato
   partirebbe tutto insieme se l'ampli si connettesse a metà;
-- **il modello si cambia** (dal 26 agosto 2026, chiesto dall'utente; prima la tendina era
-  spenta). La regola non è «solo quelli già visti», è **«solo quelli di cui sappiamo com'è
-  fatto il blocco»**, e i casi sono due:
-  - **gli amplificatori si scelgono tutti**, perché hanno **tutti e trentanove le stesse
-    cinque manopole** — Gain, Treble, Middle, Bass, Master. Misurato due volte: sui preset
-    veri in `captures/` (sette modelli diversi, tutti a cinque parametri) e sulla `TABELLA`,
-    che dice cinque per tutti. Cambiare ampli cambia il nome e basta;
-  - **per gli altri blocchi solo quelli che la libreria ha già visto**, e lì il pericolo è
-    reale: due drive o due delay hanno numeri di manopole diversi, e dare al modello nuovo
-    i parametri del vecchio vuol dire costruire a tavolino il preset che pianta l'ampli. La
-    via d'uscita non è indovinare, è **copiare un blocco vero**: `campioneModello(nome)`
-    pesca da un preset della libreria un blocco con quel modello dentro e ne prende
-    **numero di parametri e valori**. Gli altri restano nell'elenco ma **spenti** — toglierli
-    faceva sembrare che il catalogo fosse sparito, ed è successo davvero.
+- **il modello si cambia, qualunque, anche senza ampli** (dal 26 agosto 2026, chiesto
+  dall'utente in tre passi: prima la tendina era spenta, poi si aprivano i soli modelli
+  visti, ora tutti). Non è un cedimento sulla sicurezza: la regola è sempre stata **«solo
+  quelli di cui sappiamo com'è fatto il blocco»**, e adesso lo sappiamo per tutti e
+  **settantotto** i modelli cambiabili, perché il catalogo è verificato contro l'app
+  ufficiale e la `TABELLA` dichiara le manopole di ognuno.
 
-  In tutti e due i casi il blocco resta acceso o spento com'era, che è una scelta
-  dell'utente e non una proprietà del modello. Offline sparisce solo la voce «a mano»: un
-  nome che nessuno ha mai visto non si può né verificare né misurare;
+  Che quel numero sia quello vero **è misurato**: nei ventiquattro blocchi dei preset usciti
+  dall'ampli in `captures/` — ventidue modelli diversi — i parametri sono sempre tanti
+  quanti i nomi. Le due eccezioni, noise gate e riverbero, ne hanno uno in più
+  (l'acceso/spento) e sono proprio i due blocchi con **un modello solo**, che non si cambiano
+  mai.
+
+  Nel cambio, **prima si copia e poi si costruisce**: se quel modello sta già in un preset
+  della libreria, `campioneModello(nome)` ne prende numero di parametri *e* valori — è un
+  blocco che l'ampli ha davvero prodotto. Solo se non c'è si costruisce dalla tabella, con i
+  valori a metà corsa. Il blocco resta acceso o spento com'era, che è una scelta dell'utente
+  e non una proprietà del modello;
 - **la modalità si decide all'apertura e non cambia più**, anche se l'ampli si connette
   dopo: rileggere la catena a metà lavoro sostituirebbe di soppiatto quello che si sta
   modificando con quello che l'ampli sta suonando, che è un altro suono.

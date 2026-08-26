@@ -353,6 +353,25 @@ window.SparkEffetti = (function () {
     return !!(TABELLA[id] && TABELLA[id].cursori);
   }
 
+  /**
+   * Quanti parametri ha il blocco di questo modello, o 0 se non lo sappiamo.
+   *
+   * Serve a costruire un blocco **senza avere l'ampli davanti**: è il numero
+   * che decide se un modello si può mettere da fermi. Che sia quello vero l'ha
+   * detto la misura del 26 agosto 2026 — nei ventiquattro blocchi dei preset
+   * usciti dall'ampli in `captures/`, ventidue modelli diversi, i parametri
+   * sono sempre tanti quanti i nomi qui sotto.
+   *
+   * **Le due eccezioni sono noise gate e riverbero**, che ne hanno uno in più:
+   * l'acceso/spento (vedi `nomeExtra`). Sono anche i due blocchi con un modello
+   * solo, quindi non si cambiano mai e questo numero non li riguarda — ma se un
+   * giorno servisse costruirli, va aggiunto quel parametro.
+   */
+  function quanteManopole(id) {
+    const voce = TABELLA[id];
+    return voce && voce.manopole ? voce.manopole.length : 0;
+  }
+
   const MODELLI = [
     ['bias.noisegate'],
     // Sei, contati sull'app ufficiale. `Comp76` esiste, ma **solo su Spark
@@ -493,6 +512,6 @@ window.SparkEffetti = (function () {
   }
 
   return { TABELLA, MODELLI, AMPLI, GRUPPI_AMPLI, nome, manopola, extra, nomeExtra,
-           affidabile, ampliReale, ampliGruppo, aCursori,
+           affidabile, ampliReale, ampliGruppo, aCursori, quanteManopole,
            quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi };
 })();
