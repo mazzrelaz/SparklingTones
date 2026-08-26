@@ -186,7 +186,15 @@ le variabili di colore — la vista live è più scura — e la media query del 
 
 **Gli otto preset caricati sull'ampli stanno per conto loro**, sopra, con l'etichetta
 A1…B4 e i colori dei LED (rosso il banco A, verde il B). Tutti gli altri stanno sotto. Un
-preset non compare mai in tutti e due i posti.
+preset non compare mai in tutti e due i posti. **Niente striscia della famiglia sulle otto
+caselle** (tolta il 26 agosto 2026): resta sulle righe di libreria e sul LED dei
+pulsantoni live.
+
+**Sovrascrivere uno slot non perde il preset che c'era**, e la domanda è venuta
+(26 agosto 2026): `assignSlots` → `_sistemaSlot` gli toglie lo slot, quindi da lì in poi
+cade in `altri` e **ricompare da solo nella lista sotto**, con tag, note e famiglia. Il
+record non si cancella mai, cambia solo `slots`. L'utente ha deciso di lasciarla così:
+niente duplicazione fra i due posti.
 
 **Il bollo «JH» marca i preset che hanno un effetto Hendrix in catena**, sulle schede degli
 slot e sulle righe di libreria (`bolloHendrix`, e `SparkEffetti.hendrixNellaCatena` che è
