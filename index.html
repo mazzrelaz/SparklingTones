@@ -537,7 +537,12 @@
   #pannelloEditor #catena { flex:1; display:flex; flex-direction:column; }
   /* La striscia non si restringe mai: su uno schermo basso il flex la
      schiaccerebbe invece di far scorrere il pannello. */
-  #pannelloEditor .striscia { flex:0 0 auto; }
+  /* Lo stacco fra la catena e il riquadro delle regolazioni è il doppio di
+     quello che si ha con la sola imbottitura della striscia: attaccate, le due
+     cose si leggono come un blocco solo, mentre sono due — dove sei nella
+     catena, e cosa stai girando. I 9 px in meno li cede il nome qui sopra, così
+     a salire è la catena e il riquadro resta dov'è. */
+  #pannelloEditor .striscia { flex:0 0 auto; margin-bottom:9px; }
   /* Lo spazio che avanza **non resta vuoto**: se lo prende il riquadro delle
      regolazioni, che si allunga fino in fondo e distribuisce le manopole
      dentro. L'aria sta sopra il nome del preset — quella è voluta — ma fra il
@@ -562,7 +567,7 @@
   /* Il nome tiene meno della metà dello spazio che avanza (era `1`): così la
      catena e il riquadro salgono di un po' e restano più vicini alle dita,
      senza spostare il nome da dove sta. */
-  #pannelloEditor .testa-editor { flex:0.2 0 auto; display:flex;
+  #pannelloEditor .testa-editor { flex:0.14 0 auto; display:flex;
                                   flex-direction:column; justify-content:center; }
   #pannelloEditor .blocco.aFuoco { flex:1 0 auto; display:flex; flex-direction:column; }
   /* Due righe di manopole, sempre: 94 px l'una, 18 di stacco e i 26 di
