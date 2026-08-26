@@ -380,16 +380,26 @@ Stato: **completo e verificato sull'ampli**. `0x0201` lettura, `0x0138` cambio p
   distingue i due casi: 0 messaggi = ampli muto o connessione morta; più di 0 = parla e
   siamo noi a scartare. Senza quel numero i due casi si vedono uguali — è costato una
   serata.
-- **Gli effetti Hendrix (`JH.*`) non suonano finché l'ampli non ha caricato un preset
-  Hendrix dal suo pannello.** Osservato dall'utente il 26 agosto 2026: «Hey Jimi Solo»
-  mandato dall'app suonava senza fuzz e con l'ampli sbagliato — anche scritto in uno
-  slot — ma bastava selezionare un suono Hendrix **dal pannello dell'ampli** e da lì in
-  poi tutto funzionava, app compresa. **Il pacchetto Hendrix l'utente ce l'ha.** Il nome
-  del modello entra in catena e la rilettura lo conferma (è quello che aveva «verificato»
-  il cambio a `JH.SupaFuzz` il 13 agosto), ma il DSP resta muto: **la catena riletta non
-  dice se un blocco suona davvero**, e questa è la lezione che vale oltre gli Hendrix.
-  Ha tutta la faccia del caricamento pigro di un modulo DSP a pagamento. Cosa lo faccia
-  scattare **non è ancora misurato** — vedi «Dove si riprende».
+- **Gli effetti Hendrix (`JH.*`) non suonano finché l'app ufficiale non li sblocca**, e
+  non c'è niente che possiamo farci. Osservato dall'utente il 26 agosto 2026: i `JH.*`
+  mandati dalla nostra app restano muti — «Hey Jimi Solo» suona senza fuzz e con l'ampli
+  sbagliato, anche scritto in uno slot — e **nemmeno il pannello dell'ampli li sblocca**
+  (ci ha creduto per un momento e si è ricreduto). Basta invece **connettere l'app
+  ufficiale**: da lì in poi funziona tutto, e **lo sblocco resta nell'ampli anche dopo
+  che l'app ufficiale si è disconnessa**. Il pacchetto lui ce l'ha comprato.
+  È l'unico contenuto a pagamento dello Spark 2, e chi lo abilita è la **license key
+  `0x0170`** che l'app ufficiale manda appena connessa. **Non è forgiabile**: spacchettata
+  dalle due catture in `captures/2026-08-14-app-ufficiale-looper.txt` sono **64 byte tondi,
+  completamente diversi fra le due sessioni**, cioè una firma con dentro un nonce — e
+  rigiocata l'ampli la rifiuta (`0x0470` con `fe` invece di `00 00`, vedi `docs/looper.md`).
+  Cavare la chiave dall'app ufficiale è protezione di contenuto a pagamento e non si fa.
+  **Ed è legata all'account**: sull'app ufficiale i suoni Hendrix si vedono **solo dopo il
+  login** (detto dall'utente), quindi la chiave arriva dai server di Positive Grid a valle
+  dell'autenticazione. Non è materiale che possiamo produrre, in nessun modo.
+  **La cosa da ricordare è che non è un difetto nostro**, così non ci si torna sopra.
+  E ne resta una lezione che vale oltre gli Hendrix: **la catena riletta conferma il nome
+  del modello, non che quel blocco suoni** — è quello che aveva «verificato» il cambio a
+  `JH.SupaFuzz` il 13 agosto, mentre il fuzz era muto.
 
 **Le due strade per scrivere un preset sono diverse**, e questo è costato mezza giornata:
 
@@ -555,39 +565,24 @@ trappole del rientro, il verifier che si riusa, i 34 test contro un fetch finto 
 
 ## Dove si riprende — 26 agosto 2026
 
-**Prima cosa, il 27: caratterizzare il risveglio degli effetti Hendrix.** Il 26 agosto
-l'utente ha provato tutti gli effetti uno per uno: **nessuno pianta lo Spark**, ma i `JH.*`
-non suonavano — wah, drive e ampli muti. Poi la scoperta, sua: **basta che l'ampli abbia
-caricato un suono Hendrix dal proprio pannello e da lì in poi funziona tutto**, app
-compresa (vedi la trappola in «Protocollo»). Il pacchetto ce l'ha.
+**Gli effetti Hendrix: capitolo chiuso il 26 agosto 2026, e la risposta è «non si può».**
+L'utente ha provato tutti gli effetti uno per uno: **nessuno pianta lo Spark**, ma i `JH.*`
+restavano muti. La causa è la license key `0x0170` dell'app ufficiale, legata al suo
+account — tutto il ragionamento sta nella trappola in «Protocollo», che è dove va cercato,
+non qui. **Non è un difetto nostro e non c'è niente da correggere.**
 
-Le ipotesi di ieri sono cadute tutte e due: gli identificativi erano giusti — lo si sapeva
-già dai preset usciti dall'ampli in `captures/2026-08-10-libreria-8-preset.json` — e
-`0x0106` era accettato, tant'è che la rilettura confermava. **Non serve la license key
-`0x0170`**: senza averla mai mandata, adesso gli Hendrix suonano.
+Le due ipotesi che avevo scritto sono cadute tutte e due, e vale la pena saperlo: gli
+identificativi erano giusti (lo dicevano già i preset usciti dall'ampli in
+`captures/2026-08-10-libreria-8-preset.json`), e `0x0106` **era** accettato — la rilettura
+confermava il nome mentre il blocco non suonava.
 
-Resta da misurare **cosa fa scattare il caricamento**, e sono tre domande in fila. Vanno
-fatte tutte **partendo dall'ampli appena riacceso**, che è l'unico modo di rimetterlo nello
-stato di prima:
-
-1. **il risveglio sopravvive allo spegnimento?** Riaccendi, e senza toccare il pannello
-   manda «Hey Jimi Solo» dall'app. Se il fuzz c'è, il modulo resta caricato e non c'è
-   niente da fare. Se non c'è, si va avanti.
-2. **si può svegliarlo dall'app?** Riaccendi, vista Live, banco «Ampli», premi **B4** —
-   è «Hey Jimi Solo», slot 7, e il tasto manda `0x0138` su uno slot vero, che è
-   esattamente quello che fa il pannello. Poi manda un preset Hendrix qualunque. Se
-   funziona **abbiamo la soluzione**: prima di mandare un preset con un `JH.*` si passa
-   per uno slot che ne contiene uno.
-3. **si sveglia tutto il pacchetto o un modello alla volta?** A ampli sveglio con «Hey
-   Jimi Solo» (che usa `JH.FuzzTone` e `JH.JTM45`), cambia il drive in **J.H. Octave
-   Fuzz** — un modello che non era nel preset. Se suona, il pacchetto si carica intero e
-   un solo slot basta a svegliare tutto; se resta muto, ogni modello vuole il suo, e
-   allora la strada del punto 2 non porta lontano.
+Resta aperta **solo la convivenza**: l'app dovrebbe dire all'utente che un `JH.*` vuole
+l'app ufficiale connessa una volta dopo ogni accensione, invece di lasciarlo davanti a un
+effetto muto. Deciso il come, è mezz'ora di lavoro.
 
 Poi, indipendente da tutto questo: **i nomi delle manopole dei quattro fuzz e del vibe
 sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.js`). Se le
-manopole fanno la cosa sbagliata è l'ordine degli indici, si corregge in due righe, e non
-c'entra col caricamento.
+manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
 Guscio `v39`. Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
