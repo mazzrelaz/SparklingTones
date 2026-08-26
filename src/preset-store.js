@@ -27,11 +27,15 @@ window.PresetStore = (function () {
    * leggerlo — e più di tre colori non si distinguono con un'occhiata.
    * I colori si cambiano (`setColoreFamiglia`): questi servono solo a
    * partire da qualcosa di distinguibile sul fondo scuro.
+   *
+   * **Il verde non è di nessuna delle tre, ed è voluto**: nella vista live è il
+   * LED di chi la famiglia non ce l'ha, quindi darlo anche a una famiglia
+   * farebbe sembrare acoustic ogni preset non catalogato.
    */
   const FAMIGLIE = [
     { id: 'clean',    nome: 'Clean',    colore: '#0a84ff' },   // blu elettrico
     { id: 'drive',    nome: 'Drive',    colore: '#ff3b30' },   // rosso
-    { id: 'acoustic', nome: 'Acoustic', colore: '#34c759' },   // verde
+    { id: 'acoustic', nome: 'Acoustic', colore: '#ffd21e' },   // giallo
   ];
 
   /**

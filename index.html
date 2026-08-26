@@ -39,7 +39,12 @@
     /* Il rosso è quello del logo (#e30613), non uno scelto a parte: sulla
        stessa barra il marchio e il pulsante «Connetti» si toccano, e due
        rossi diversi si vedono. */
+    /* L'azzurro è quello della catena (`COLORI_CATENA`), non uno nuovo: lo
+       usano il tasto «Metti nel banco» e i pulsantoni accesi della vista live,
+       e sono due cose che vanno insieme — mettere un preset in un banco e poi
+       sentirlo lì dentro. */
     --accent:#e30613; --green:#7fe08a; --gold:#f0c040; --rosso:#ff8080;
+    --blu:#3aa0ff;
     --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
     /* Etichette, numeri, pulsanti: tutto quello che si guarda invece di
        leggerlo. Le cifre di Space Grotesk stanno larghe e si distinguono a
@@ -127,7 +132,7 @@
      l'alone prometterebbe una cosa che non si può fare. */
   button.neon:disabled { background:#131519; border-color:var(--line-soft);
                          color:#4d525b; text-shadow:none; box-shadow:none; }
-  button.neon.blu { --neon:#3aa0ff; }
+  button.neon.blu { --neon:var(--blu); }
   button.neon.oro { --neon:#ffd21e; }
   /* Il passaggio fra le due viste è l'unico tasto che cambia pagina, e va
      trovato col pollice senza guardare: più grande degli altri e chiuso in una
@@ -442,24 +447,43 @@
 
   /* Un LED per pulsante, come su una pedaliera vera: spento è un vetrino scuro,
      acceso è il preset che sta suonando. Ce n'è uno anche sui posti vuoti — su
-     una pedaliera i led ci sono sempre, ed è quello che rende la fila coerente. */
+     una pedaliera i led ci sono sempre, ed è quello che rende la fila coerente.
+
+     **Il colore lo dà la famiglia del preset** (`--led`, che mette `coloreLed`):
+     clean azzurro, drive rosso, acoustic giallo, e **verde** per chi non ne ha
+     una — il verde è l'unico che nessuna famiglia usa. Qui un colore
+     per tutti ci vuole, mentre nelle schede della vista preset chi non ha
+     famiglia resta in grigio: lì la striscia o c'è o non c'è, qui il LED c'è
+     comunque, e lasciarne uno scolorito in mezzo agli altri lo farebbe sembrare
+     un pulsante rotto invece di un preset senza famiglia.
+
+     Spento il vetrino è **tinto ma scuro**, come una lente colorata che nessuno
+     ha ancora acceso: così le otto famiglie si leggono tutte insieme, e quello
+     che suona lo dice l'alone, non il fatto di essere l'unico colorato. */
   .pad .ledpad { position:absolute; top:9px; left:11px; width:11px; height:11px;
-                 border-radius:50%; background:#15201a; border:1px solid #24312a;
+                 border-radius:50%;
+                 background:color-mix(in srgb, var(--led, #6b7280) 42%, #0b0d10);
+                 border:1px solid color-mix(in srgb, var(--led, #6b7280) 58%, #1a1d22);
                  box-shadow:inset 0 1px 2px rgba(0,0,0,0.7); }
-  .pad.attivo .ledpad { background:var(--green); border-color:#8fe6a2;
-                        box-shadow:0 0 8px var(--green), 0 0 20px var(--green),
+  .pad.attivo .ledpad { background:var(--led, var(--blu));
+                        border-color:color-mix(in srgb, var(--led, var(--blu)) 55%, #ffffff);
+                        box-shadow:0 0 8px var(--led, var(--blu)),
+                                   0 0 20px var(--led, var(--blu)),
                                    inset 0 0 3px rgba(255,255,255,0.6); }
   .pad .sub { font-size:0.72rem; font-weight:600; color:var(--dim);
               letter-spacing:0.01em; }
   /* `.istantaneo` e `.caricamento` erano i pallini verde e oro che dicevano se
      un preset parte subito o va trasmesso. Tolti col testo, il 14 agosto 2026.
 
-     Acceso è **verde**, come il suo LED e non come l'accento dell'app: su un
-     pedale è la lampadina che colora tutto l'interruttore, e un alone rosso
-     sopra un LED verde direbbe due cose diverse insieme. */
-  .pad.attivo { border-color:var(--green); background:#0c1410;
-                box-shadow:0 0 0 1px var(--green) inset,
-                           0 0 12px -2px var(--green), 0 0 32px -10px var(--green); }
+     Acceso è **azzurro**, non l'accento rosso dell'app e non più il verde: il
+     verde adesso è il LED di chi non ha famiglia, e un alone verde attorno a un
+     LED rosso avrebbe detto due cose diverse insieme. L'alone non deve dire
+     *quale* preset è, ma solo che quello sta suonando — quello lo dice il LED,
+     e i due non si devono pestare. L'azzurro serve a questo, ed è lo stesso del
+     tasto «Metti nel banco» nella vista preset. */
+  .pad.attivo { border-color:var(--blu); background:#0b1017;
+                box-shadow:0 0 0 1px var(--blu) inset,
+                           0 0 12px -2px var(--blu), 0 0 32px -10px var(--blu); }
   .pad.occupato { opacity:0.55; }
   .pad.libero { border-style:dashed; background:none; color:var(--faint); font-weight:400; }
   .pad.inModifica { border-color:var(--gold); border-style:dashed;
@@ -1884,6 +1908,19 @@ function coloraFamiglia(elemento, record) {
   elemento.style.setProperty('--famiglia', scelta.colore);
 }
 
+/**
+ * Il colore del LED di un pulsantone della vista live: quello della famiglia
+ * del preset, e **verde** per chi non ne ha una. È l'unico posto dell'app dove
+ * chi è senza famiglia prende un colore lo stesso, e il perché sta nel CSS di
+ * `.ledpad`. I colori delle famiglie li cambia l'utente, quindi si leggono da
+ * `famiglie` e non si scrivono qui.
+ */
+function coloreLed(record) {
+  const scelta = record && record.famiglia &&
+                 famiglie.find(f => f.id === record.famiglia);
+  return scelta ? scelta.colore : '#34c759';   // il verde, che nessuna famiglia usa
+}
+
 function etichettaSlot(slot) {
   const posizione = Spark.slotLabel(slot);
   const el = document.createElement('span');
@@ -2310,6 +2347,7 @@ function disegnaLive() {
 
     const ledpad = document.createElement('span');
     ledpad.className = 'ledpad';
+    if (!vuoto) ledpad.style.setProperty('--led', coloreLed(record));
 
     const numero = document.createElement('span');
     numero.className = 'n';
