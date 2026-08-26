@@ -663,6 +663,10 @@
   .blocco.aFuoco .nome-effetto option { font-size:0.85rem; font-weight:600; }
   .blocco.aFuoco .nome-effetto optgroup { font-size:0.78rem; font-weight:700;
                                           color:var(--dim); background:#17181c; }
+  /* Le voci che senza ampli non si possono scegliere: si leggono, non si
+     prendono. Meglio spente che tolte — una tendina che si accorcia da sola
+     sembra un catalogo che è sparito. */
+  .blocco.aFuoco .nome-effetto option:disabled { color:var(--faint); }
   .blocco.aFuoco .interruttore { display:block; width:100%; margin:8px 0 0;
                                  font-size:0.75rem; padding:10px; }
   /* Il titolo di un blocco che non ha niente da scegliere: stessa taglia e
@@ -2785,11 +2789,16 @@ function intestazioneBlocco(effetto, posizione) {
   const candidati = candidatiModello(effetto, posizione);
   const visti = modelliVisti();
   const sicuri  = candidati.filter(m =>  visti.has(m));
-  // **Senza ampli si sceglie solo fra i sicuri**, e la ragione è la stessa che
-  // prima teneva la tendina spenta: di un modello mai visto non sappiamo
-  // quante manopole abbia, e non c'è nessuno a cui chiederlo. Di uno visto sì,
-  // perché sta in un preset uscito dall'ampli — vedi `campioneModello`.
-  const daProva = inModifica.offline ? [] : candidati.filter(m => !visti.has(m));
+  const daProva = candidati.filter(m => !visti.has(m));
+  // **Senza ampli i modelli mai visti restano nell'elenco, ma spenti.** Prima
+  // li toglievo, ed era sbagliato: la tendina passava da quaranta voci a sette
+  // e sembrava che il catalogo fosse sparito. Spenti si vedono, si legge a cosa
+  // sono ispirati, e non si possono scegliere — che è tutto quello che serviva.
+  // La ragione per cui non si possono scegliere non è cambiata: di un modello
+  // mai visto non sappiamo quante manopole abbia, e senza ampli non c'è nessuno
+  // a cui chiederlo. Di uno visto sì, perché sta in un preset uscito
+  // dall'ampli — vedi `campioneModello`.
+  const spento = m => inModifica.offline && !visti.has(m);
 
   // **Dove non c'è niente da scegliere, la tendina non c'è.** Il noise gate ha
   // un modello e basta; il riverbero pure, e offline può restare a voce sola
@@ -2799,7 +2808,7 @@ function intestazioneBlocco(effetto, posizione) {
   // ci va quella scelta lì, che è quella vera di quel blocco (chiesto
   // dall'utente il 26 agosto 2026: stava in una casella in fondo alle manopole
   // e non la trovava nessuno).
-  if (sicuri.length + daProva.length < 2 && (candidati.length < 2 || inModifica.offline)) {
+  if (candidati.length < 2) {
     const param = paramScelta(effetto);
     return param ? intestazioneScelta(effetto, param)
                  : intestazioneFissa(effetto);
@@ -2825,6 +2834,11 @@ function intestazioneBlocco(effetto, posizione) {
     const reale = SparkEffetti.ampliReale(modello);
     opzione.textContent = SparkEffetti.nome(modello) + (reale ? ' — ' + reale : '');
     opzione.title = modello;
+    if (spento(modello)) {
+      opzione.disabled = true;
+      opzione.title = modello + ' — serve l\'ampli: la tua libreria non l\'ha mai ' +
+                      'visto, quindi non sappiamo quante manopole abbia';
+    }
     (dove || scelta).appendChild(opzione);
   };
 
