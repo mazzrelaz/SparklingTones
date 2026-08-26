@@ -588,6 +588,15 @@ pressione. Servono **SPST normalmente aperti, momentanei** (in polacco *chwilowy
 i pull-up interni. Nessuna resistenza da aggiungere, e l'antirimbalzo è già in firmware —
 nella forma giusta, quella che aspetta che il segnale stia fermo.
 
+**Per provare bastano i pulsanti da arcade**, che l'utente ha già in casa (25 agosto 2026).
+Dentro hanno un microswitch a tre piedini — **COM, NO, NC** — e si usano **COM e NO**,
+esattamente come i footswitch veri: COM a massa, NO all'ingresso dell'espansore. Se la
+serigrafia non si legge, il NO è la coppia che **si chiude premendo**, e lo dice un tester
+in continuità. Elettricamente sono la stessa cosa, quindi **tutto il firmware si può
+scrivere e verificare senza aspettare i footswitch**: la logica delle due metà, i tasti
+banco, i LED, il display, il BLE. Quando arrivano i pedali veri è uno scambio meccanico,
+non una riga di codice.
+
 **LED: erano una striscia WS2812, dal 25 agosto 2026 sono discreti** sull'espansore — vedi
 la sezione della batteria qui sotto: un WS2812 vuole 3,5 V minimi e una cella LiPo scende
 fino a 3,0. La convenzione resta quella del pannello dell'ampli: rosso banco A, verde
