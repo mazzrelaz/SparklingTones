@@ -108,6 +108,27 @@
   button.piccolo { font-size:0.75rem; padding:6px 10px; }
   button.pericolo { background:#1d1013; border-color:#4a2226; color:var(--rosso); }
   button.pericolo:hover { background:#26161a; border-color:#6a2f35; }
+  /* I due tasti che **mettono il preset da qualche parte** — «Invia a preset
+     HW» sull'ampli, «Metti nel banco» in un banco live — sono le uniche azioni
+     del dettaglio che cambiano qualcosa fuori dalla libreria, e vanno viste per
+     prime. Stesso trattamento dei tasselli accesi dell'editor: fondo appena
+     tinto sul buio, bordo del colore e l'alone, che è quello che fa il neon.
+     I colori non sono scelti a caso: sono due della catena (`COLORI_CATENA`),
+     l'azzurro e il giallo, così l'app resta con una tavolozza sola. */
+  button.neon { --neon:var(--accent);
+                background:color-mix(in srgb, var(--neon) 10%, #0e1014);
+                border-color:var(--neon); color:var(--neon);
+                text-shadow:0 0 8px var(--neon);
+                box-shadow:0 0 0 1px var(--neon) inset, 0 0 13px -3px var(--neon); }
+  button.neon:hover { background:color-mix(in srgb, var(--neon) 18%, #0e1014);
+                      border-color:var(--neon);
+                      box-shadow:0 0 0 1px var(--neon) inset, 0 0 20px -3px var(--neon); }
+  /* Spento vuol dire spento: senza ampli il tasto non deve restare acceso, o
+     l'alone prometterebbe una cosa che non si può fare. */
+  button.neon:disabled { background:#131519; border-color:var(--line-soft);
+                         color:#4d525b; text-shadow:none; box-shadow:none; }
+  button.neon.blu { --neon:#3aa0ff; }
+  button.neon.oro { --neon:#ffd21e; }
   /* Il passaggio fra le due viste è l'unico tasto che cambia pagina, e va
      trovato col pollice senza guardare: più grande degli altri e chiuso in una
      cornice rossa sottile, che lo stacca dai pannelli senza farne un pulsante
@@ -225,8 +246,16 @@
               display:flex; flex-direction:column; justify-content:space-between;
               gap:6px; position:relative; overflow:hidden; }
   .slotcard.libero { border-style:dashed; background:none; cursor:default; }
+  /* Lo slot aperto si accende come i tasselli dell'editor — anello interno e
+     alone, non il solo bordo colorato: fra otto caselle uguali un filo rosso
+     da un pixel si perdeva. Il colore resta quello di prima. */
   .slotcard.attivo { border-color:var(--accent);
-                     box-shadow:0 0 12px -4px var(--accent); }
+                     background:color-mix(in srgb, var(--accent) 9%, #0e1014);
+                     box-shadow:0 0 0 1px var(--accent) inset,
+                                0 0 10px -1px var(--accent),
+                                0 0 26px -6px var(--accent); }
+  .slotcard.attivo .sigla { color:var(--accent);
+                            text-shadow:0 0 8px var(--accent); }
   .slotcard .alto { display:flex; align-items:center; gap:6px; }
   /* Il nome sta **in mezzo** allo spazio che avanza sotto la sigla, non
      appoggiato in fondo: con l'altezza fissa e un nome corto, in fondo si
@@ -2119,6 +2148,7 @@ function dettaglio(record, slot) {
   if (slot !== null) scelta.value = slot;
 
   const scrivi = document.createElement('button');
+  scrivi.className = 'neon oro';
   scrivi.textContent = 'Invia a preset HW';
   scrivi.title = 'sovrascrive il preset presente in quello slot';
   scrivi.disabled = !spark.connected;
@@ -2152,6 +2182,7 @@ function dettaglio(record, slot) {
     }
 
     const metti = document.createElement('button');
+    metti.className = 'neon blu';
     metti.textContent = 'Metti nel banco';
     metti.title = 'aggiunge il preset al banco live, senza toccare l\'ampli';
     metti.addEventListener('click', async () => {
