@@ -86,13 +86,16 @@ window.SparkEffetti = (function () {
       manopole: ['Level', 'EQ Low', 'EQ Middle', 'EQ High', 'EQ Mid Band', 'Distortion'] },
     'TrebleBooster': { nome: 'Treble Booster', manopole: ['P3', 'P2', 'P1'] },
     'KlonCentaurSilver': { nome: 'Clone Drive', manopole: ['Output', 'Treble', 'Gain'] },
-    // I quattro fuzz del pacchetto Hendrix: i nomi sono quelli che l'app
-    // ufficiale mostra sull'ampli dell'utente (verificati sui suoi screenshot
-    // il 26 agosto 2026). Le manopole non le sappiamo ancora: restano numerate.
-    'JH.AxisFuzz': { nome: 'J.H. Axle Fuzz' },
-    'JH.SupaFuzz': { nome: 'J.H. Super Fuzz' },
-    'JH.Octavia': { nome: 'J.H. Octave Fuzz' },
-    'JH.FuzzTone': { nome: 'J.H. Fuzz Zone' },
+    // I quattro fuzz del pacchetto Hendrix. I nomi degli effetti sono quelli
+    // che l'app ufficiale mostra sull'ampli dell'utente; i nomi delle manopole
+    // sono **letti sui pedali disegnati nell'app** (screenshot del 26 agosto
+    // 2026), quindi sono proposte come tutte le altre: l'ordine sullo schermo
+    // non è l'ordine degli indici, e qui non c'è nessuna cattura che lo dica.
+    // Se una manopola non risponde a quello che dice il nome, si scambiano.
+    'JH.AxisFuzz': { nome: 'J.H. Axle Fuzz', manopole: ['Volume', 'Drive'] },
+    'JH.SupaFuzz': { nome: 'J.H. Super Fuzz', manopole: ['Volume', 'Filter'] },
+    'JH.Octavia': { nome: 'J.H. Octave Fuzz', manopole: ['Level', 'Fuzz'] },
+    'JH.FuzzTone': { nome: 'J.H. Fuzz Zone', manopole: ['Volume', 'Attack'] },
 
     /* ---- Ampli ---- */
     'RolandJC120': { nome: 'Silver 120',
@@ -185,17 +188,19 @@ window.SparkEffetti = (function () {
     'Phaser': { nome: 'Phaser', manopole: ['Speed', 'Intensity'] },
     'Vibrato01': { nome: 'Vibrato', manopole: ['Speed', 'Depth'] },
     'UniVibe': { nome: 'UniVibe', manopole: ['Speed', 'Chorus / Vibrato', 'Intensity'] },
-    'Cloner': { nome: 'Cloner Chorus', manopole: ['Rate', 'Depth (High / Low)'] },
+    'Cloner': { nome: 'Cloner Chorus', manopole: ['Rate', 'Depth'] },
     'MiniVibe': { nome: 'Classic Vibe', manopole: ['Speed', 'Intensity'] },
     'Tremolator': { nome: 'Tremolator', manopole: ['Depth', 'Speed', 'BPM'] },
     'TremoloSquare': { nome: 'Tremolo Square', manopole: ['Speed', 'Depth', 'Level'] },
     'MuTron': { nome: 'MuTron III',
       manopole: ['Mode', 'Peak', 'Depth', 'Range', 'Position'] },
-    'GuitarEQ6': { nome: 'Guitar EQ',
+    // I due equalizzatori sono **cursori, non manopole**: sul pedale vero sono
+    // sei slider verticali più il livello, e una fila di pomelli non si legge
+    // come una curva. `cursori: true` lo dice alla UI (chiesto dall'utente il
+    // 26 agosto 2026). Le frequenze sono quelle stampate sui pedali nell'app.
+    'GuitarEQ6': { nome: 'Guitar EQ', cursori: true,
       manopole: ['Level', '100', '200', '400', '800', '1.6K', '3.2K'] },
-    // Le frequenze sono quelle stampate sul pedale nell'app: 50, 120, 400,
-    // 800, 4.5K, 10K, più il livello.
-    'BassEQ6': { nome: 'Bass EQ',
+    'BassEQ6': { nome: 'Bass EQ', cursori: true,
       manopole: ['Level', '50', '120', '400', '800', '4.5K', '10K'] },
     'JH.VoodooVibeJr': { nome: 'J.H. Legendary Vibe',
       manopole: ['Speed', 'Sweep', 'Intensity', 'Chorus/Vibrato'] },
@@ -343,6 +348,11 @@ window.SparkEffetti = (function () {
     return (AMPLI[id] && AMPLI[id].gruppo) || null;
   }
 
+  /** Vero per gli effetti che si regolano a cursori invece che a manopole. */
+  function aCursori(id) {
+    return !!(TABELLA[id] && TABELLA[id].cursori);
+  }
+
   const MODELLI = [
     ['bias.noisegate'],
     // Sei, contati sull'app ufficiale. `Comp76` esiste, ma **solo su Spark
@@ -483,6 +493,6 @@ window.SparkEffetti = (function () {
   }
 
   return { TABELLA, MODELLI, AMPLI, GRUPPI_AMPLI, nome, manopola, extra, nomeExtra,
-           affidabile, ampliReale, ampliGruppo,
+           affidabile, ampliReale, ampliGruppo, aCursori,
            quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi };
 })();
