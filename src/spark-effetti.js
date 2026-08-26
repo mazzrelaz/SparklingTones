@@ -511,7 +511,29 @@ window.SparkEffetti = (function () {
     return Object.keys(TABELLA).length;
   }
 
+  /**
+   * Questo modello è del pacchetto Jimi Hendrix?
+   *
+   * Il prefisso `JH.` è l'unico segno che ci dà l'ampli, e basta: sono i soli
+   * identificativi puntati oltre a `bias.noisegate` e `bias.reverb`.
+   *
+   * Serve perché **il pacchetto Hendrix è l'unico contenuto a pagamento dello
+   * Spark 2**, e non suona finché l'app ufficiale non l'ha sbloccato con la
+   * sua license key `0x0170` — che è firmata in locale con una chiave che non
+   * abbiamo e non possiamo avere (vedi `CLAUDE.md`). Un `JH.*` mandato da qui,
+   * su un ampli appena acceso, entra in catena e resta muto: l'app deve poterlo
+   * dire prima, invece di lasciare l'utente davanti a un effetto che non si
+   * sente e a una rilettura che gli dà ragione.
+   */
+  const eHendrix = id => typeof id === 'string' && id.startsWith('JH.');
+
+  /** Gli Hendrix presenti in una catena di effetti, per nome dell'ampli. */
+  function hendrixNellaCatena(effetti) {
+    return (effetti || []).map(e => e && e.name).filter(eHendrix);
+  }
+
   return { TABELLA, MODELLI, AMPLI, GRUPPI_AMPLI, nome, manopola, extra, nomeExtra,
            affidabile, ampliReale, ampliGruppo, aCursori, quanteManopole,
-           quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi };
+           quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi,
+           eHendrix, hendrixNellaCatena };
 })();
