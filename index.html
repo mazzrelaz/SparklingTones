@@ -246,6 +246,23 @@
   .led.a { background:#ff5f6d; box-shadow:0 0 6px #ff5f6d, 0 0 14px #ff5f6d; }
   .led.b { background:#4ade80; box-shadow:0 0 6px #4ade80, 0 0 14px #4ade80; }
   .led.spento { background:#33373e; box-shadow:none; }
+
+  /* ---- il bollo «JH» ---------------------------------------------------
+     Un preset con un effetto del pacchetto Jimi Hendrix in catena non suona
+     come dice finché l'app ufficiale non l'ha sbloccato (vedi `CLAUDE.md`),
+     e questo va saputo **prima** di sceglierlo, non dopo averlo sentito
+     muto. Rosso perché è un avviso, piccolo perché non è un guasto: quei
+     preset funzionano, chiedono solo un gesto in più.
+     Il LED è più piccolo di quelli dei banchi e senza alone — quelli sono
+     i LED veri dell'ampli, e due cose diverse non devono somigliarsi. */
+  .jh { display:inline-flex; align-items:center; gap:4px; flex:none;
+        font-family:'SF Mono',Consolas,monospace; font-size:0.66rem;
+        letter-spacing:0.04em; color:#ff9b9b;
+        border:1px solid #4a2a2a; border-radius:5px; padding:1px 5px; }
+  .jh .pallino { width:6px; height:6px; border-radius:50%; flex:none;
+                 background:#ff3b30; }
+  .slotcard .jh { margin-left:auto; }
+
   .aperta-sotto { margin-top:8px; }
 
   /* ---- famiglia di suono ---------------------------------------------
@@ -1725,6 +1742,10 @@ function schedaSlot(record, slot) {
   sigla.textContent = posizione.label;
   sigla.title = `slot ${slot} — LED ${posizione.color} numero ${posizione.position}`;
   alto.append(led, sigla);
+  // Il bollo va **in cima e a destra**: la riga della sigla è l'unica che ha
+  // spazio, e il nome sotto sta su due righe e non ne ha da cedere.
+  const bollo = bolloHendrix(record);
+  if (bollo) alto.appendChild(bollo);
   card.appendChild(alto);
 
   // Nella scheda ci stanno la posizione e il nome, e basta: l'ampli e il drive
@@ -1812,6 +1833,35 @@ function etichettaSlot(slot) {
   return el;
 }
 
+/**
+ * Il bollo «JH» dei preset che hanno un effetto Hendrix in catena, o null.
+ *
+ * **Il pacchetto Hendrix è l'unico contenuto a pagamento dello Spark 2**, e
+ * l'ampli lo tiene spento finché l'app ufficiale non gli manda la sua license
+ * key — che è firmata con una chiave che non abbiamo (vedi `CLAUDE.md`). Un
+ * preset così, mandato da qui su un ampli appena acceso, parte senza fare
+ * rumore dove dovrebbe farne: il fuzz non c'è e l'ampli è un altro.
+ *
+ * Il bollo lo dice **prima di sceglierlo**, che è l'unico momento in cui
+ * serve. Non blocca niente e non chiede niente: quei preset funzionano, dopo
+ * che l'app ufficiale si è connessa una volta da quando l'ampli è acceso.
+ */
+function bolloHendrix(record) {
+  const dentro = SparkEffetti.hendrixNellaCatena(record && record.effects);
+  if (dentro.length === 0) return null;
+
+  const bollo = document.createElement('span');
+  bollo.className = 'jh';
+  const pallino = document.createElement('span');
+  pallino.className = 'pallino';
+  bollo.append(pallino, 'JH');
+  bollo.title = dentro.map(n => SparkEffetti.nome(n)).join(' · ') +
+    ' — pacchetto Jimi Hendrix. Suonano solo dopo che l\'app ufficiale si è ' +
+    'connessa all\'ampli almeno una volta da quando è acceso: prima restano ' +
+    'muti, senza dare nessun errore.';
+  return bollo;
+}
+
 function rigaPreset(record, slot) {
   const riga = document.createElement('div');
   riga.className = 'row';
@@ -1830,6 +1880,8 @@ function rigaPreset(record, slot) {
   naming.appendChild(nome);
 
   head.appendChild(naming);
+  const bollo = bolloHendrix(record);
+  if (bollo) head.appendChild(bollo);
   if (slot !== null) head.appendChild(etichettaSlot(slot));
 
   // Provare un preset è l'azione che si fa più spesso, e stava sepolta nel

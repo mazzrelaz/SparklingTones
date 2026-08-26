@@ -188,6 +188,12 @@ le variabili di colore — la vista live è più scura — e la media query del 
 A1…B4 e i colori dei LED (rosso il banco A, verde il B). Tutti gli altri stanno sotto. Un
 preset non compare mai in tutti e due i posti.
 
+**Il bollo «JH» marca i preset che hanno un effetto Hendrix in catena**, sulle schede degli
+slot e sulle righe di libreria (`bolloHendrix`, e `SparkEffetti.hendrixNellaCatena` che è
+solo il prefisso `JH.`). Serve perché quei preset **non suonano come dicono** finché l'app
+ufficiale non ha sbloccato il pacchetto — vedi la trappola in «Protocollo» — e va saputo
+prima di sceglierne uno, non dopo averlo sentito muto.
+
 **Alla connessione la lettura degli otto slot parte da sola** (`leggiDallAmpli`, dopo
 `identify`). Durante la lettura i pulsantoni della vista live restano spenti: l'ampli sta
 rispondendo a otto richieste in fila e premerne uno infilerebbe un comando dentro una
@@ -581,16 +587,18 @@ identificativi erano giusti (lo dicevano già i preset usciti dall'ampli in
 `captures/2026-08-10-libreria-8-preset.json`), e `0x0106` **era** accettato — la rilettura
 confermava il nome mentre il blocco non suonava.
 
-Resta aperta **solo la convivenza**: l'app dovrebbe dire all'utente che un `JH.*` vuole
-l'app ufficiale connessa una volta dopo ogni accensione, invece di lasciarlo davanti a un
-effetto muto. Deciso il come, è mezz'ora di lavoro.
+La convivenza è fatta: **il bollo «JH»** sulle schede della vista preset, chiesto
+dall'utente. Resta da decidere se dirlo anche **nell'editor**, quando si sceglie un `JH.*`
+dalla tendina — lì il momento è quello giusto, ma la riga di stato del pannello è già
+occupata da quello che sta succedendo sulla radio.
 
 Poi, indipendente da tutto questo: **i nomi delle manopole dei quattro fuzz e del vibe
 sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.js`). Se le
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v39`. Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
+Guscio `v55` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
 
