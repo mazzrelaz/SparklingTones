@@ -559,7 +559,10 @@
      schiacciare o tagliare niente. Bloccare l'altezza del riquadro invece
      tagliava le manopole del riverbero, e il nome del preset resta com'era —
      la sua posizione è una cosa decisa, e questo difetto non c'entrava. */
-  #pannelloEditor .testa-editor { flex:1 0 auto; display:flex;
+  /* Il nome tiene meno della metà dello spazio che avanza (era `1`): così la
+     catena e il riquadro salgono di un po' e restano più vicini alle dita,
+     senza spostare il nome da dove sta. */
+  #pannelloEditor .testa-editor { flex:0.2 0 auto; display:flex;
                                   flex-direction:column; justify-content:center; }
   #pannelloEditor .blocco.aFuoco { flex:1 0 auto; display:flex; flex-direction:column; }
   /* Due righe di manopole, sempre: 94 px l'una, 18 di stacco e i 26 di
@@ -2710,8 +2713,11 @@ function bloccoAFuoco(effetto, posizione) {
   // spento lo dicono già l'interruttore, che porta scritto «spento», e il
   // blocco intero che si smorza.
 
-  const cassetto = cassettoExtra(effetto);
-  if (cassetto) blocco.appendChild(cassetto);
+  // Il cassetto dei parametri che non sono manopole non compare più (26 agosto
+  // 2026, su richiesta): era l'ultima riga di testo rimasta in questo pannello,
+  // e quel parametro in più è l'acceso/spento del blocco, che l'interruttore
+  // qui sopra già comanda. `cassettoExtra` resta, se un giorno servisse
+  // rivederli.
   return blocco;
 }
 
