@@ -537,10 +537,11 @@ premuto all'accensione, impedisce l'avvio (il 9 è il BOOT). Pin sicuri per uno 
 | dati WS2812 | `6` |
 | liberi | `7`, `10`, più `2`, `8`, `9` come sole uscite (strapping) |
 
-**Se la scheda è una XIAO ESP32C3** (chiesto dall'utente il 25 agosto 2026, mentre
-ordinava): stesso chip, stesso codice, ma **GPIO 0 e 1 non sono portati sul connettore** —
-la XIAO espone solo `2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 21`. Tolti i tre di strapping restano
-**otto pin sicuri, ed è esattamente il fabbisogno**:
+**Com'era il piano con la XIAO ESP32C3** — la scheda scelta prima che finisse, tenuta qui
+perché il ragionamento sui pin di strapping vale ancora se un giorno si torna su un C3.
+**La mappa buona è quella della C6**, più avanti. Sul C3 **GPIO 0 e 1 non sono portati sul
+connettore** — la XIAO espone solo `2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 21`. Tolti i tre di
+strapping restavano **otto pin sicuri, esattamente il fabbisogno**:
 
 | cosa | pin XIAO |
 |---|---|
@@ -578,6 +579,15 @@ Cosa controllare quando arriva: **se il modulo ha i pull-up sull'I²C**. La sche
 dice, e la XIAO non ne ha: se il bus non parte, quello è il primo sospetto, e si risolve
 con due resistenze da 4,7 kΩ.
 
+**Gli interruttori: momentanei a due pin, non a ritenuta.** Chiesto dall'utente il 25
+agosto 2026 mentre ordinava, e la distinzione è la cosa più facile da sbagliare comprando:
+i pedali per chitarra montano di serie **3PDT a ritenuta**, che restano premuti — con
+quelli la logica del pedale non funziona, perché il firmware legge un livello e non una
+pressione. Servono **SPST normalmente aperti, momentanei** (in polacco *chwilowy* o
+*monostabilny*, «NO»): due piedini, uno a massa e uno all'ingresso dell'espansore, che ha
+i pull-up interni. Nessuna resistenza da aggiungere, e l'antirimbalzo è già in firmware —
+nella forma giusta, quella che aspetta che il segnale stia fermo.
+
 **LED: erano una striscia WS2812, dal 25 agosto 2026 sono discreti** sull'espansore — vedi
 la sezione della batteria qui sotto: un WS2812 vuole 3,5 V minimi e una cella LiPo scende
 fino a 3,0. La convenzione resta quella del pannello dell'ampli: rosso banco A, verde
@@ -613,20 +623,37 @@ sedici e ne usa sette per gli interruttori: **ci stanno senza aggiungere niente*
 alimentano a 3,3 V, e la corrente la decide la resistenza in serie. Si perde il colore
 libero per LED, che non serviva: la convenzione è rosso banco A / verde banco B.
 
-Con i LED sull'espansore si libera anche un pin del C3, e il piano diventa:
+**La scheda è la XIAO ESP32-C6** (deciso il 25 agosto 2026: la C3 era finita, e la C6 si è
+rivelata migliore, non un ripiego). Stesso chip di famiglia, stesso codice, stessa
+dimensione, ~33 zł. Cambia **tutta la mappa dei pin**, quindi quella del C3 qui sotto vale
+solo come storia.
 
-| cosa | pin XIAO |
-|---|---|
-| MCP23017 in I²C (SDA, SCL) — i piedini D4/D5 | `6`, `7` |
-| display SSD1322 in SPI: SCK, MOSI | `8`, `10` (i pin SPI della scheda) |
-| display: CS, DC, RST | `20`, `21`, `5` |
-| lettura della tensione di batteria (partitore, ADC1) | `3` |
-| libero, ADC1 — un pedale d'espressione starebbe qui | `4` |
-| non usati: strapping e BOOT | `2`, `9` |
+| piedino | GPIO | a cosa serve |
+|---|---|---|
+| D4 / D5 | `22`, `23` | MCP23017 in I²C (SDA, SCL) — sono i default della scheda |
+| D8 / D10 | `19`, `18` | display in SPI: SCK e MOSI, i default della scheda |
+| D3, D6, D7 | `21`, `16`, `17` | display: CS, DC, RST |
+| D0 (A0) | `0` | tensione di batteria — **il partitore è già a bordo**, 1:2 |
+| D1, D2, D9 | `1`, `2`, `20` | liberi; D1 e D2 sono analogici |
 
-`8` è un pin di strapping ma è anche l'SCK di serie della XIAO: l'ingresso del display è ad
-alta impedenza e non lo tira giù all'accensione, quindi va bene — **è l'unico strapping che
-usiamo, e solo come uscita**.
+Tre cose la rendono migliore della C3 per questo lavoro:
+
+- **nessuno degli undici piedini è un pin di strapping.** Sul C6 lo strapping sta su GPIO
+  4, 5, 8, 9, 15, e nessuno di quelli è portato sul connettore: cade tutta la prudenza che
+  serviva sul C3;
+- **il partitore per leggere la batteria è già sulla scheda**, sull'ingresso A0. Due
+  resistenze in meno da montare;
+- **l'antenna è a bordo** ed è attiva di serie (quella esterna si abilita via GPIO14, che
+  non usiamo). Sulla C3 andava attaccata l'antennina, e nella scatola andava trovato il
+  posto.
+
+Restano **tre piedini liberi**, due dei quali analogici: un pedale d'espressione ha già il
+suo posto senza spostare niente.
+
+**Quello che non è verificato**: le misure BLE — intervallo di connessione, 400 ms per un
+preset — sono state fatte su un **C3**. La libreria è la stessa (NimBLE sotto `BLEDevice.h`
+col core esp32 3.x, che per il C6 è obbligatorio) e l'API `updateConnParams` non cambia,
+quindi il firmware dovrebbe portarsi di peso; i tempi vanno rimisurati.
 
 **Tre cose pratiche della batteria in scatola**, da non riscoprire col saldatore in mano:
 la cella dev'essere **protetta** (il caricabatterie della XIAO gestisce la carica, non la
