@@ -190,6 +190,26 @@ sedici e ne usa sette per gli interruttori: **ci stanno senza aggiungere niente*
 alimentano a 3,3 V, e la corrente la decide la resistenza in serie. Si perde il colore
 libero per LED, che non serviva: la convenzione è rosso banco A / verde banco B.
 
+**E i LED non si comprano: ci sono già, in quantità** (26 agosto 2026). Sono quelli del
+**progetto Timer dell'utente**, `C:\Users\massi\Timer` — `Timer.ino` righe 54-59 li
+documenta: **RGB 5 mm diffusi a catodo comune, quattro piedini**, con le resistenze **già
+tarate sugli stessi 3,3 V**: **verde 100 Ω, rosso 220 Ω** (il blu 100, e qui non si usa).
+Quelle due resistenze diverse sono anche la conferma pratica del perché il verde va
+trattato a parte: è InGaN e cade a 3,0–3,2 V, quindi dei 3,3 V ne restano due decimi per la
+resistenza, mentre il rosso a 2,0 V ne ha un volt e mezzo.
+
+Tre conseguenze da non riscoprire:
+
+- **catodo comune** vuol dire comune a massa e MCP che **eroga** corrente per accendere
+  (source, non sink). Regge 25 mA per piedino e ne servono ~10 su quattro canali accesi
+  per volta: si sta larghi. Con un anodo comune il cablaggio sarebbe l'opposto;
+- **l'MCP23017 non ha il PWM**: acceso o spento, punto. Nel Timer la luminosità si regola
+  dal telefono con `analogWrite` e una curva quadratica, e c'è il giallo miscelato: qui
+  niente di tutto questo, e non serve — la convenzione è due colori pieni. Se un giorno
+  servisse davvero, l'unica strada sarebbe portare i LED sui pin liberi della XIAO, che
+  sono tre;
+- **quattro dello stesso lotto**: su quattro LED in fila due sfumature di verde si vedono.
+
 **La scheda è la XIAO ESP32-C6** (deciso il 25 agosto 2026: la C3 era finita, e la C6 si è
 rivelata migliore, non un ripiego). Stesso chip di famiglia, stesso codice, stessa
 dimensione, ~33 zł. Cambia **tutta la mappa dei pin**, quindi quella del C3 qui sotto vale
