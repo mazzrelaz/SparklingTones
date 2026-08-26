@@ -228,6 +228,11 @@
   .slotcard.attivo { border-color:var(--accent);
                      box-shadow:0 0 12px -4px var(--accent); }
   .slotcard .alto { display:flex; align-items:center; gap:6px; }
+  /* Il nome sta **in mezzo** allo spazio che avanza sotto la sigla, non
+     appoggiato in fondo: con l'altezza fissa e un nome corto, in fondo si
+     legge come una cosa caduta giù. Si prende tutto lo spazio libero e ci si
+     centra dentro, così una riga o due stanno sempre nello stesso posto. */
+  .slotcard .basso { flex:1; display:flex; align-items:center; min-height:0; }
   .slotcard .sigla { font-family:'SF Mono',Consolas,monospace; font-size:0.7rem;
                      color:var(--faint); }
   .slotcard .nome-slot { font-family:var(--strumento); font-size:0.86rem;
@@ -1584,6 +1589,7 @@ function schedaSlot(record, slot) {
   // facevano rumore senza aggiungere niente a chi il preset lo conosce già.
   // La catena resta nel dettaglio, che è dove quel preset lo si guarda davvero.
   const basso = document.createElement('div');
+  basso.className = 'basso';
   const nome = document.createElement('div');
   nome.className = 'nome-slot';
   nome.textContent = record ? (record.name || '(senza nome)') : 'non ancora letto';
