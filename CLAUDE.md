@@ -545,6 +545,31 @@ trappole del rientro, il verifier che si riusa, i 34 test contro un fetch finto 
 
 ## Dove si riprende — 26 agosto 2026
 
+**Prima cosa, il 27: gli effetti Jimi Hendrix non funzionano.** L'utente ha provato tutti
+gli effetti uno per uno sull'ampli acceso. La buona notizia è che **nessuno pianta lo
+Spark**. Ma i `JH.*` non rispondono: **wah, drive e ampli non fanno niente**, e una
+modulazione funziona «ma male». Il dettaglio lo dà lui domani — non aveva più token.
+
+Quello che sappiamo già, e che vale come punto di partenza:
+
+- **gli identificativi sono giusti, almeno due.** In
+  `captures/2026-08-10-libreria-8-preset.json` ci sono preset **usciti dall'ampli** che
+  contengono `JH.JTM45` (l'ampli di «Hey Jimi Solo») e `JH.FuzzTone`. Quindi lo Spark 2
+  quei nomi li produce, e il problema non è come li scriviamo;
+- **il pacchetto Hendrix era un acquisto in-app**, non più in vendita dal 30 aprile 2026.
+  È l'unica famiglia di effetti a pagamento, e questo apre l'ipotesi che i suoi modelli
+  vogliano qualcosa che gli altri non chiedono — la **license key `0x0170`, che non abbiamo
+  mai inviato** (vedi «Protocollo» qui sopra e `docs/looper.md`). Sarebbe la prima volta che
+  serve;
+- l'altra ipotesi, più banale: `0x0106` verso un modello Hendrix fallisce come falliva verso
+  un modello inesistente — ack regolare e niente applicato. Si distingue **rileggendo la
+  catena dall'ampli dopo il cambio**, che è quello che `cambiaModello` già fa: se dopo il
+  comando il blocco riporta ancora il modello vecchio, il comando non è stato accettato;
+- i quattro fuzz hanno i nomi delle manopole presi **dalle foto dei pedali**, non da una
+  cattura: se «funziona ma male» vuol dire che le manopole fanno la cosa sbagliata, il primo
+  sospetto è l'ordine degli indici, non l'effetto.
+
+
 Guscio `v39`. Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
