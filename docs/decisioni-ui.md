@@ -59,6 +59,10 @@ lo stesso giorno: più grosso non sta sulla riga con «Leggi dall'ampli», «Cat
 «Altro», e manda a capo l'intestazione. Se un giorno lo si vuole davvero più visibile,
 prima bisogna liberare spazio su quella riga — non basta cambiare il padding.
 
+> **Rovesciato il 26 agosto 2026**, e nel modo che quella nota indicava: lo spazio è stato
+> liberato per davvero — «Connetti» è confluito nello stato e le tre voci sono finite in un
+> menu — e solo allora il tasto è stato ingrandito. Vedi «La barra in alto» in fondo.
+
 **Dal dettaglio si mette un preset in un banco live**, senza passare dalla vista Live.
 Chiesto dall'utente: si sta già guardando il preset, e doverlo ricordare, cambiare vista e
 ritrovarlo lì dentro è un giro inutile. Una tendina coi banchi — con accanto quanti posti
@@ -430,4 +434,62 @@ Le regole di quel disegno, tutte chieste o approvate dall'utente:
   serve alla catena. Il pannello è marcato `data-solo-risposte` e `logLine` ha un secondo
   argomento che dice se il messaggio è un problema;
 - la guida sta dietro un **«?»** in cima e si richiude da sé riaprendo l'editor.
+  **Dal 26 agosto 2026 il «?» non c'è più**: la guida è una voce del menu ⋯ e si
+  chiama «Come funziona», perché in un elenco un punto interrogativo da solo non
+  dice cosa apre. Il posto in cima è lo stesso, il gesto uno in più.
 
+
+
+## La barra in alto — rifatta il 26 agosto 2026
+
+Chiesto dall'utente: «le schede in alto sono disordinate, troviamo un modo per renderle
+più gradevoli». Il disordine aveva una causa precisa, ed è quella che va ricordata: sulla
+stessa riga stavano **cinque cose con cinque mestieri diversi** — il marchio, lo stato
+della connessione, il tasto che connette, le azioni, il passaggio alla vista Live — tutte
+con lo stesso peso visivo e con `flex-wrap` libero. Sul telefono l'ordine delle righe
+**cambiava da solo** appena lo stato si accorciava da «non connesso» a «connesso»:
+tre righe di intestazione, disposte diversamente a ogni connessione.
+
+Scelta dall'utente fra tre disposizioni messe a confronto in `design/proposte-menu.html`
+(schede segmentate / due zone separate / l'essenziale più un menu), guardandole a
+larghezza da computer e da telefono. Ha preso la terza, con modifiche sue.
+
+**Com'è adesso, e perché ogni pezzo è così:**
+
+- **lo stato della connessione *è* il pulsante che connette.** Erano due cose che dicevano
+  la stessa cosa una accanto all'altra («non connesso» e «Connetti»). Ora è uno solo:
+  rosso pieno **CONNETTI** quando l'ampli non c'è, verde **CONNESSO** quando c'è, giallo
+  con la scritta dell'attesa mentre si collega, grigio e spento dove il browser non ha il
+  Bluetooth. Maiuscolo, perché si legge di sguardo come le scritte sul frontale;
+- **da connesso il tasto è spento ma non deve *sembrare* spento.** `button:disabled` lo
+  sbiadirebbe come un comando non disponibile, mentre lì vuol dire che la cosa è a posto:
+  il verde va ripetuto sulla variante `:disabled`, o si perde;
+- **il nome dell'amplificatore non sta più nel pulsante**, ci sta scritto «CONNESSO». Il
+  nome è lungo e cambiava la larghezza della barra a ogni connessione. È nel titolo;
+- **tre cose in barra, in quest'ordine: connessione, vista, menu** — l'ordine l'ha chiesto
+  l'utente, col menu in fondo a destra dove arriva il pollice;
+- **Live → più grande e con la cornice rossa sottile.** Rovescia la nota del 14 agosto
+  2026, che l'aveva rimpicciolito perché non ci stava sulla riga: adesso ci sta, perché
+  quella riga ha tre pulsanti in meno;
+- **le altre azioni stanno dietro un ⋯.** Non sono pulsanti nuovi: sono gli stessi,
+  spostati dentro la tendina, quindi tengono `id`, listener e acceso/spento. In vista
+  preset sono «Leggi dall'ampli / Categorie / Altro», in live «Modifica / Pedale», e la
+  differenza la fanno le classi `.solo-preset` / `.solo-live` di sempre;
+- **lo stesso menu è nell'editor** (chiesto il 26 agosto): davanti restano «Salva» e
+  «Fatto», dietro il menu «Rileggi dall'ampli» e «Come funziona».
+
+**Le trappole pagate qui, che valgono per qualunque tendina:**
+
+- **una tendina che si appoggia al bordo destro del suo tasto esce dallo schermo se il
+  tasto finisce a sinistra**, e basta una barra che va a capo. Succedeva davvero nella
+  barra dell'editor sul telefono: il ⋯ scendeva a capo a sinistra e la tendina si apriva
+  a `x = -144`. Due rimedi, e servono tutti e due: la barra non va a capo
+  (`flex-wrap:nowrap` più le etichette accorciate sotto i 600 px), e all'apertura la
+  tendina **si misura e nel caso si ribalta** su `left:0`;
+- **sul telefono la riga sta in piedi per pochi pixel.** A 375 avanzano 16 px, a 360 zero.
+  Sotto, è il **marchio** che cede: `flex:0 1 auto` più `object-fit:contain`, così si
+  rimpicciolisce invece di schiacciarsi — ed è giusto che ceda lui, perché è l'unica cosa
+  della riga che non serve a fare niente. Verificato a 375, 360 e 320;
+- **misurare invece di guardare.** Le posizioni degli elementi della barra lette con
+  `getBoundingClientRect` da `localhost` hanno mostrato in un colpo solo cosa andava a
+  capo e dove; a occhio, su uno screenshot, si vedeva solo che «era disordinato».
