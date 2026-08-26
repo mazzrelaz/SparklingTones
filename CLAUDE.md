@@ -467,8 +467,11 @@ in una volta.
 
 **Ferramenta comprata** (25 agosto 2026, scelte e perché in `docs/pedale.md`): **XIAO
 ESP32-C6**, OLED **2,42" 128×64 SSD1309 in SPI a 7 pin**, espansore **KAmod I2C-IOexp16**
-(MCP23017), cella **XTAR 18650-330PCM protetta** in portacella, quattro LED bicolore sulle
-uscite dell'espansore. Mancano footswitch e pulsantini dalla Cina, ma **per il firmware
+(MCP23017), cella **XTAR 18650-330PCM protetta** in portacella. **I LED non si comprano**:
+sono i RGB 5 mm **a catodo comune** che l'utente ha già in casa a mucchi, quelli del suo
+progetto `Timer` — resistenze già tarate a 3,3 V, **verde 100 Ω e rosso 220 Ω**, e il blu
+non si usa perché quattro LED per due colori sono già le otto uscite libere
+dell'espansore. Attenzione: **l'MCP23017 non ha PWM**, quindi acceso/spento e basta. Mancano footswitch e pulsantini dalla Cina, ma **per il firmware
 bastano i pulsanti da arcade che l'utente ha in casa** (COM e NO del microswitch: sono la
 stessa cosa elettrica).
 
