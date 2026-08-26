@@ -69,7 +69,7 @@ window.SparkEffetti = (function () {
     'Compressor': { nome: 'Red Comp', manopole: ['Output', 'Sensitivity'] },
     'BassComp': { nome: 'Bass Comp', manopole: ['Comp', 'Gain'] },
     'BBEOpticalComp': { nome: 'Optical Comp', manopole: ['Volume', 'Comp', 'Pad'] },
-    'JH.Vox846': { nome: 'Vox 846 Wah', manopole: ['P1', 'Mode', 'P3', 'P4', 'P5'] },
+    'JH.Vox846': { nome: 'J.H. Legendary Wah', manopole: ['P1', 'Mode', 'P3', 'P4', 'P5'] },
 
     /* ---- Drive ---- */
     'Booster': { nome: 'Booster', manopole: ['Gain'] },
@@ -86,6 +86,13 @@ window.SparkEffetti = (function () {
       manopole: ['Level', 'EQ Low', 'EQ Middle', 'EQ High', 'EQ Mid Band', 'Distortion'] },
     'TrebleBooster': { nome: 'Treble Booster', manopole: ['P3', 'P2', 'P1'] },
     'KlonCentaurSilver': { nome: 'Clone Drive', manopole: ['Output', 'Treble', 'Gain'] },
+    // I quattro fuzz del pacchetto Hendrix: i nomi sono quelli che l'app
+    // ufficiale mostra sull'ampli dell'utente (verificati sui suoi screenshot
+    // il 26 agosto 2026). Le manopole non le sappiamo ancora: restano numerate.
+    'JH.AxisFuzz': { nome: 'J.H. Axle Fuzz' },
+    'JH.SupaFuzz': { nome: 'J.H. Super Fuzz' },
+    'JH.Octavia': { nome: 'J.H. Octave Fuzz' },
+    'JH.FuzzTone': { nome: 'J.H. Fuzz Zone' },
 
     /* ---- Ampli ---- */
     'RolandJC120': { nome: 'Silver 120',
@@ -172,27 +179,31 @@ window.SparkEffetti = (function () {
 
     /* ---- Modulazione ---- */
     'Tremolo': { nome: 'Tremolo', manopole: ['Speed', 'Depth', 'Level'] },
-    'ChorusAnalog': { nome: 'Digital Chorus',
+    'ChorusAnalog': { nome: 'Chorus',
       manopole: ['E.Level', 'Rate', 'Depth', 'Tone'] },
     'Flanger': { nome: 'Flanger', manopole: ['Rate', 'Mix', 'Depth'] },
     'Phaser': { nome: 'Phaser', manopole: ['Speed', 'Intensity'] },
     'Vibrato01': { nome: 'Vibrato', manopole: ['Speed', 'Depth'] },
-    'UniVibe': { nome: 'Vibe', manopole: ['Speed', 'Chorus / Vibrato', 'Intensity'] },
+    'UniVibe': { nome: 'UniVibe', manopole: ['Speed', 'Chorus / Vibrato', 'Intensity'] },
     'Cloner': { nome: 'Cloner Chorus', manopole: ['Rate', 'Depth (High / Low)'] },
-    'MiniVibe': { nome: 'Mini Vibe', manopole: ['Speed', 'Intensity'] },
+    'MiniVibe': { nome: 'Classic Vibe', manopole: ['Speed', 'Intensity'] },
     'Tremolator': { nome: 'Tremolator', manopole: ['Depth', 'Speed', 'BPM'] },
     'TremoloSquare': { nome: 'Tremolo Square', manopole: ['Speed', 'Depth', 'Level'] },
     'MuTron': { nome: 'MuTron III',
       manopole: ['Mode', 'Peak', 'Depth', 'Range', 'Position'] },
     'GuitarEQ6': { nome: 'Guitar EQ',
       manopole: ['Level', '100', '200', '400', '800', '1.6K', '3.2K'] },
-    'JH.VoodooVibeJr': { nome: 'Voodoo Vibe Junior',
+    // Le frequenze sono quelle stampate sul pedale nell'app: 50, 120, 400,
+    // 800, 4.5K, 10K, più il livello.
+    'BassEQ6': { nome: 'Bass EQ',
+      manopole: ['Level', '50', '120', '400', '800', '4.5K', '10K'] },
+    'JH.VoodooVibeJr': { nome: 'J.H. Legendary Vibe',
       manopole: ['Speed', 'Sweep', 'Intensity', 'Chorus/Vibrato'] },
 
     /* ---- Delay ---- */
     'DelayMono': { nome: 'Digital Delay',
       manopole: ['E.Level', 'F.Back', 'D.Time', 'Mode', 'BPM'] },
-    'DelayEchoFilt': { nome: 'Delay/Echo',
+    'DelayEchoFilt': { nome: 'Echo Filt',
       manopole: ['Delay', 'Feedback', 'Level', 'Tone', 'BPM'] },
     'VintageDelay': { nome: 'Vintage Delay',
       manopole: ['Repeat Rate', 'Intensity', 'Echo', 'BPM'] },
@@ -334,13 +345,16 @@ window.SparkEffetti = (function () {
 
   const MODELLI = [
     ['bias.noisegate'],
-    ['LA2AComp', 'BlueComp', 'Compressor', 'BassComp', 'BBEOpticalComp', 'JH.Vox846',
-     'Comp76'],
+    // Sei, contati sull'app ufficiale. `Comp76` esiste, ma **solo su Spark
+    // LIVE ed EDGE**, sul canale del microfono: sullo Spark 2 non c'è.
+    ['LA2AComp', 'BlueComp', 'Compressor', 'BassComp', 'BBEOpticalComp', 'JH.Vox846'],
     [
-      'Booster', 'DistortionTS9', 'Overdrive', 'Fuzz', 'ProCoRat', 'BassBigMuff',
-      'GuitarMuff', 'MaestroBassmaster', 'SABdriver', 'MetalZoneMT2',
-      'KlonCentaurSilver',
+      // Quattordici, contati sull'app ufficiale. `MetalZoneMT2` non c'è —
+      // stesso catalogo, stesso rischio di `TrebleBooster`.
+      'Booster', 'KlonCentaurSilver', 'DistortionTS9', 'Overdrive',
       'JH.AxisFuzz', 'JH.SupaFuzz', 'JH.Octavia', 'JH.FuzzTone',
+      'Fuzz', 'ProCoRat', 'BassBigMuff', 'GuitarMuff', 'MaestroBassmaster',
+      'SABdriver',
     ],
     [
       'RolandJC120', 'Twin', 'ADClean', '94MatchDCV2', 'Bassman', 'AC Boost', 'Checkmate',
@@ -362,9 +376,11 @@ window.SparkEffetti = (function () {
       // altrove servono ancora a dare un nome alle manopole.
     ],
     [
-      'Tremolo', 'ChorusAnalog', 'Flanger', 'Phaser', 'Vibrato01', 'UniVibe', 'Cloner',
-      'MiniVibe', 'Tremolator', 'TremoloSquare', 'MuTron', 'GuitarEQ6', 'JH.VoodooVibeJr',
-      'BassEQ6',
+      // Tredici, contati sull'app ufficiale. `MuTron` non c'è: era l'ultimo
+      // avanzo del catalogo di Soundshed in questa posizione.
+      'Tremolo', 'ChorusAnalog', 'Flanger', 'Phaser', 'Vibrato01', 'UniVibe',
+      'JH.VoodooVibeJr', 'Cloner', 'MiniVibe', 'Tremolator', 'TremoloSquare',
+      'GuitarEQ6', 'BassEQ6',
     ],
     [
       'DelayMono', 'DelayEchoFilt', 'VintageDelay', 'DelayReverse', 'DelayMultiHead',
