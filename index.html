@@ -552,17 +552,22 @@
      sembrava senza motivo). Il motivo c'era — `flex:1 0 auto` parte dal
      contenuto, e un blocco con sette manopole è più alto di uno con una — ma
      il risultato era che la catena e il nome si spostavano sotto le dita.
-     Adesso il nome si prende quello che gli serve e basta, e il riquadro delle
-     regolazioni **tutto il resto** con `flex:1 1 0` — base zero, quindi
-     l'altezza non dipende più da quante manopole ci sono dentro. Se non ci
-     stanno scorre il riquadro, non il pannello. Attenzione a `.testa-editor`:
-     è sorella di `#catena`, non figlia, quindi dandole `flex:1` si prendeva
-     mezzo schermo lasciando le manopole schiacciate in fondo. */
-  #pannelloEditor .testa-editor { flex:0 0 auto; display:flex;
+     Si fissa **il contenuto, non il contenitore**: le manopole non sono mai
+     più di due righe (`righeDi` non ne fa mai una terza, nemmeno con otto),
+     quindi il posto per due righe si tiene sempre, anche quando il blocco ne
+     ha una sola. Così tutti e sette i blocchi vengono alti uguali senza dover
+     schiacciare o tagliare niente. Bloccare l'altezza del riquadro invece
+     tagliava le manopole del riverbero, e il nome del preset resta com'era —
+     la sua posizione è una cosa decisa, e questo difetto non c'entrava. */
+  #pannelloEditor .testa-editor { flex:1 0 auto; display:flex;
                                   flex-direction:column; justify-content:center; }
-  #pannelloEditor .blocco.aFuoco { flex:1 1 0; min-height:0; overflow-y:auto;
-                                   display:flex; flex-direction:column; }
-  #pannelloEditor .pomelli { flex:1; justify-content:space-evenly; }
+  #pannelloEditor .blocco.aFuoco { flex:1 0 auto; display:flex; flex-direction:column; }
+  /* Due righe di manopole, sempre: 94 px l'una, 18 di stacco e i 26 di
+     imbottitura del riquadro (che con `border-box` stanno dentro la misura).
+     Un blocco con una manopola sola tiene lo stesso il posto per due, e uno
+     con sette non ne chiede mai una terza. */
+  #pannelloEditor .pomelli { flex:1; justify-content:space-evenly;
+                             min-height:calc(94px * 2 + 18px + 26px); }
   /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
      Il fondo dentro è più scuro della pagina, non più chiaro: il neon si vede
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
