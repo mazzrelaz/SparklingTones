@@ -708,6 +708,30 @@
      prendono. Meglio spente che tolte — un elenco che si accorcia da solo
      sembra un catalogo che è sparito. */
   .elenco-voce.spenta { color:var(--faint); cursor:not-allowed; }
+
+  /* ---- la domanda prima di uscire dall'editor -------------------------
+     Stessa scatola dell'elenco dei modelli, che è l'unica finestra che
+     questa app apre sopra il resto: due finestre diverse per due domande
+     diverse sarebbero due cose da imparare invece di una. */
+  .elenco-domanda { padding:15px; font-size:0.88rem; line-height:1.5;
+                    color:var(--dim); }
+  .elenco-domanda strong { color:var(--text); }
+  .elenco-azioni { display:flex; flex-direction:column; gap:8px;
+                   padding:0 15px 15px; }
+  .elenco-azioni button { width:100%; padding:12px; }
+
+  /* ---- il tasto «Salva» dice se c'è qualcosa da salvare ---------------
+     Chiesto dall'utente il 26 agosto 2026: premendo «Salva» non si aveva la
+     certezza di niente, perché in questo pannello **non deve comparire
+     nessun messaggio** — scelta sua, poche ore prima. Quindi la risposta la
+     dà il tasto stesso, che è anche il posto dove si sta già guardando.
+     Acceso e con un pallino quando c'è del lavoro non salvato; spento e con
+     la spunta subito dopo aver salvato. */
+  #btnSalvaModifiche.da-salvare { border-color:var(--accent); color:#ffd7d9;
+                                  background:#2a1417; }
+  #btnSalvaModifiche.da-salvare::before { content:'• '; color:var(--accent); }
+  #btnSalvaModifiche.salvato { border-color:#2a4a32; color:#9be0a8;
+                               background:#12211a; }
   .blocco.aFuoco .interruttore { display:block; width:100%; margin:8px 0 0;
                                  font-size:0.75rem; padding:10px; }
   /* Il titolo di un blocco che non ha niente da scegliere: stessa taglia e
@@ -1590,6 +1614,13 @@ function chiudiPannelli() {
 
 document.querySelectorAll('[data-chiudi]').forEach(b => {
   b.addEventListener('click', () => {
+    // L'editor è l'unico pannello dove «Fatto» può buttare via del lavoro: è
+    // a un dito di distanza da «Salva» e non chiedeva niente. Se c'è qualcosa
+    // di non salvato si chiede, e la chiusura la fa la risposta.
+    if (b.dataset.chiudi === 'pannelloEditor' && inModifica && inModifica.toccato) {
+      chiediPrimaDiUscire();
+      return;
+    }
     chiudiPannelli();
     if (b.dataset.chiudi === 'pannelloScegli') sceltaInCorso = null;
     if (b.dataset.chiudi === 'pannelloEditor') inModifica = null;
@@ -2620,6 +2651,7 @@ async function apriEditor(record) {
     $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
     disegnaCatena();
     apriPannello('pannelloEditor');
+    aggiornaTastoSalva();   // editor appena aperto: niente in sospeso
     logLine(`«${record.name}»: regolazioni senza ampli, sulla copia in libreria.`);
     return;
   }
@@ -2650,6 +2682,7 @@ async function apriEditor(record) {
   $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
   disegnaCatena();
   apriPannello('pannelloEditor');
+  aggiornaTastoSalva();   // editor appena aperto: niente in sospeso
   // Non finisce nella riga di stato del pannello: nessuno l'ha chiesto, e lì
   // ci vanno solo le risposte a un gesto. Nel log resta.
   logLine(`«${record.name}» è sull'ampli: gira pure.`);
@@ -3088,6 +3121,7 @@ function interruttoreDi(effetto) {
   interruttore.textContent = effetto.enabled ? 'acceso' : 'spento';
   interruttore.addEventListener('click', async () => {
     effetto.enabled = !effetto.enabled;
+    segnaModificato();
     if (!inModifica.offline) {
       try {
         await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
@@ -3617,6 +3651,7 @@ async function cambiaModello(posizione, nuovo) {
     if (SparkEffetti.ampliGruppo(nuovo) && blocco.params.length === 5) {
       const vecchio = blocco.name;
       blocco.name = nuovo;
+      segnaModificato();
       disegnaCatena();
       logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
               'stesse manopole. Senza ampli non si sente: si salva in libreria ' +
@@ -3635,6 +3670,7 @@ async function cambiaModello(posizione, nuovo) {
     const campione = campioneModello(nuovo);
     if (campione) {
       blocco.name = nuovo;
+      segnaModificato();
       blocco.params = campione.params;
       disegnaCatena();
       logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
@@ -3651,6 +3687,7 @@ async function cambiaModello(posizione, nuovo) {
       return;
     }
     blocco.name = nuovo;
+    segnaModificato();
     blocco.params = Array.from({ length: quante },
                                (_, i) => ({ index: i, value: 0.5 }));
     disegnaCatena();
@@ -3696,6 +3733,7 @@ async function cambiaModello(posizione, nuovo) {
 
     logProgress(`sostituisco ${vecchio} con ${nuovo}…`);
     await spark.send(Spark.commands.changeEffectModel(vecchio, nuovo));
+    segnaModificato();
     // Cambiare modello vuol dire ricostruire un blocco DSP: è il comando più
     // pesante che gli mandiamo, e la lettura che segue è la più impegnativa.
     // Un secondo di respiro costa meno di un ampli da riavviare.
@@ -3768,6 +3806,11 @@ const inAttesa = new Map();
 let invioInCorso = false, timerInvio = null;
 
 function mandaParametro(nomeEffetto, indice, valore) {
+  // Tutte e cinque le manopole — pomello, cursore, tendina, trascinamento —
+  // passano di qui dopo aver scritto il valore nella catena di lavoro, quindi
+  // è il posto giusto per accorgersi che c'è del lavoro da salvare. **Prima
+  // del ritorno di sotto**: senza ampli il valore è cambiato lo stesso.
+  segnaModificato();
   // Senza ampli il valore è già stato scritto nella catena di lavoro dal
   // chiamante: qui non c'è niente da mandare, e mettere in coda comandi che
   // nessuno spedirà lascerebbe solo un arretrato pronto a partire tutto
@@ -3825,11 +3868,74 @@ $('btnRileggi').addEventListener('click', async () => {
     !catena);
 });
 
-$('btnSalvaModifiche').addEventListener('click', async () => {
-  if (!inModifica) return;
+/* ---- il lavoro non salvato, e come si vede -------------------------------
+   Due richieste dell'utente del 26 agosto 2026, e sono la stessa cosa vista da
+   due lati: **premendo «Salva» non si aveva la certezza di niente**, e **con
+   «Fatto» si buttava via tutto per sbaglio**. In mezzo c'è un dato solo — c'è
+   del lavoro non salvato, sì o no — che prima non esisteva da nessuna parte.
+
+   La risposta la dà **il tasto «Salva»**, e non un messaggio: in questo
+   pannello non deve comparirne nessuno, deciso dall'utente poche ore prima.
+   Il tasto è anche il posto dove si sta già guardando quando ci si chiede se
+   è stato salvato. */
+
+/** Qualcosa è cambiato: da qui in poi uscire vuol dire perdere del lavoro. */
+function segnaModificato() {
+  if (!inModifica || inModifica.toccato) return;
+  inModifica.toccato = true;
+  aggiornaTastoSalva();
+}
+
+let timerSalvato = null;
+
+/**
+ * Il tasto «Salva» racconta lo stato: acceso col pallino se c'è del lavoro da
+ * salvare, con la spunta verde per qualche secondo appena salvato, spento e
+ * normale quando non c'è niente in sospeso.
+ *
+ * **Non si disabilita mai quando non c'è niente di toccato**, e non è una
+ * dimenticanza: aperto l'editor con l'ampli acceso, la catena viene da una
+ * lettura vera, che può già essere diversa da quella in libreria — una
+ * manopola girata sull'ampli, l'app ufficiale. Salvare in quel momento è
+ * un'operazione che ha senso, ed è quella che porta in libreria quello che
+ * l'ampli sta suonando.
+ */
+function aggiornaTastoSalva(appenaSalvato) {
+  const tasto = $('btnSalvaModifiche');
+  clearTimeout(timerSalvato);
+  tasto.classList.remove('da-salvare', 'salvato');
+
+  if (appenaSalvato) {
+    tasto.textContent = '✓ Salvato';
+    tasto.classList.add('salvato');
+    // Poi torna com'era: una spunta che resta per sempre finirebbe per dire
+    // «salvato» anche dopo la prossima manopola girata.
+    timerSalvato = setTimeout(() => aggiornaTastoSalva(), 2600);
+    return;
+  }
+
+  // Il testo lungo sparisce sul telefono: quelle due parole in più sono la
+  // differenza fra una riga sola e una barra che va a capo.
+  tasto.textContent = 'Salva';
+  const lungo = document.createElement('span');
+  lungo.className = 'solo-largo';
+  lungo.textContent = ' in libreria';
+  tasto.appendChild(lungo);
+  if (inModifica && inModifica.toccato) tasto.classList.add('da-salvare');
+}
+
+/**
+ * Scrive la catena dell'editor sul record in libreria.
+ *
+ * Torna `true` solo se ha davvero salvato: chi la chiama per uscire deve
+ * sapere se può chiudere, e chiudere dopo un salvataggio fallito sarebbe
+ * esattamente il modo di perdere il lavoro che si stava cercando di salvare.
+ */
+async function salvaModifiche() {
+  if (!inModifica) return false;
   const { record, effetti } = inModifica;
   const aggiornato = await store.get(record.id);
-  if (!aggiornato) { logLine('il preset non è più in libreria.', true); return; }
+  if (!aggiornato) { logLine('il preset non è più in libreria.', true); return false; }
 
   aggiornato.effects = effetti.map(e => ({
     name: e.name,
@@ -3837,12 +3943,100 @@ $('btnSalvaModifiche').addEventListener('click', async () => {
     params: e.params.map(p => ({ index: p.index, value: p.value })),
   }));
   await store.put(aggiornato);
+  inModifica.toccato = false;
+  aggiornaTastoSalva(true);
   logLine(`modifiche salvate su «${aggiornato.name}» in libreria. ` +
           'Sull\'ampli il preset salvato non cambia finché non lo riscrivi in uno slot.');
   await ricarica();
   disegnaPreset();
   disegnaLive();
-});
+  return true;
+}
+
+$('btnSalvaModifiche').addEventListener('click', () => salvaModifiche());
+
+/** Chiude l'editor per davvero: il pannello se ne va e lo stato con lui. */
+function chiudiEditor() {
+  chiudiPannelli();
+  inModifica = null;
+  clearTimeout(timerSalvato);
+}
+
+/**
+ * La domanda prima di uscire con del lavoro non salvato.
+ *
+ * **Tre vie, non due**, e la terza è il punto: con un `confirm()` di sistema
+ * l'unica alternativa a «salva» è «butta via», e un dito che sbaglia bottone
+ * perde il lavoro proprio nel momento in cui gli si stava chiedendo di
+ * salvarlo. «Torna all'editor» è la via d'uscita che rimette tutto com'era, ed
+ * è anche quella che si prende toccando fuori o premendo Esc.
+ */
+function chiediPrimaDiUscire(dopo) {
+  const velo = document.createElement('div');
+  velo.className = 'velo-elenco';
+  const box = document.createElement('div');
+  box.className = 'elenco-scelta';
+
+  const testa = document.createElement('div');
+  testa.className = 'elenco-testa';
+  testa.textContent = 'modifiche non salvate';
+
+  // Dove vanno a finire le modifiche buttate via **dipende dalla modalità**, e
+  // dire «restano sull'ampli» a chi sta lavorando sul divano sarebbe una bugia:
+  // senza ampli non è mai partito niente e si perde tutto.
+  const domanda = document.createElement('div');
+  domanda.className = 'elenco-domanda';
+  domanda.innerHTML = 'Hai girato qualcosa e <strong>non l\'hai ancora salvato ' +
+    'in libreria</strong>. ' + (inModifica && inModifica.offline
+      ? 'Uscendo così vanno perse: senza ampli non sono andate da nessuna parte.'
+      : 'Uscendo così le perdi: l\'ampli continua a suonarle finché non cambi ' +
+        'preset, ma in libreria non ne resta niente.');
+
+  const azioni = document.createElement('div');
+  azioni.className = 'elenco-azioni';
+
+  const salva = document.createElement('button');
+  salva.className = 'primary';
+  salva.textContent = 'Salva ed esci';
+  salva.addEventListener('click', async () => {
+    salva.disabled = true;
+    // Se il salvataggio non riesce non si chiude niente: la domanda resta lì e
+    // il log dice cos'è andato storto.
+    if (await salvaModifiche()) esci();
+    else salva.disabled = false;
+  });
+
+  const butta = document.createElement('button');
+  butta.textContent = 'Esci senza salvare';
+  butta.addEventListener('click', esci);
+
+  // Chi ha chiesto di uscire può volere anche dell'altro — il logo, per dire,
+  // chiude l'editor **e** torna ai preset. Quel seguito parte solo quando si
+  // esce davvero, mai quando si torna indietro.
+  function esci() {
+    chiudi();
+    chiudiEditor();
+    if (dopo) dopo();
+  }
+
+  const torna = document.createElement('button');
+  torna.textContent = 'Torna all\'editor';
+  torna.addEventListener('click', () => chiudi());
+
+  azioni.append(salva, butta, torna);
+  box.append(testa, domanda, azioni);
+  velo.appendChild(box);
+  document.body.appendChild(velo);
+  salva.focus();
+
+  function chiudi() {
+    velo.remove();
+    document.removeEventListener('keydown', tasto);
+  }
+  function tasto(evento) { if (evento.key === 'Escape') chiudi(); }
+  document.addEventListener('keydown', tasto);
+  velo.addEventListener('click', evento => { if (evento.target === velo) chiudi(); });
+}
 
 /* ====================================================================
    Categorie
@@ -4353,6 +4547,15 @@ $('btnSvuota').addEventListener('click', async () => {
  */
 document.addEventListener('click', evento => {
   if (!evento.target.classList.contains('logo')) return;
+
+  // Il logo sta anche in cima all'editor, e da lì butterebbe via il lavoro
+  // esattamente come faceva «Fatto». Stessa domanda, e il ritorno ai preset
+  // parte solo se si esce davvero.
+  if (inModifica && inModifica.toccato) {
+    chiediPrimaDiUscire(() => { sceltaInCorso = null; if (inLive()) location.hash = '#preset'; });
+    return;
+  }
+
   chiudiPannelli();
   inModifica = null;          // il pannello si chiude: lo stato va con lui
   sceltaInCorso = null;

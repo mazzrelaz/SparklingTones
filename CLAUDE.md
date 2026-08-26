@@ -304,6 +304,27 @@ valore per manopola, e l'ultimo parte sempre. **Non è verificato che risolva**:
 non si riproduce a comando. Se ricapita, la manopola da girare è `PAUSA_PARAMETRO`, poi
 `SEND_GAP_MS` in `spark-transport.js` (30 ms, più svelto di un intervallo di connessione).
 
+**L'editor sa se c'è del lavoro non salvato, e non lo lascia buttare via per sbaglio.**
+`inModifica.toccato` è il dato, e nasce in `segnaModificato()`: lo alzano `mandaParametro`
+(dove passano **tutte e cinque** le manopole — pomello, cursore, tendina, i due
+trascinamenti — subito **prima** del ritorno che scarta l'invio offline), l'interruttore
+acceso/spento, e ogni ramo di `cambiaModello`. Da lì:
+
+- **«Fatto» e il logo chiedono**, con `chiediPrimaDiUscire()`. **Tre vie, non due**: con un
+  `confirm()` di sistema l'alternativa a «salva» è «butta via», e un dito che sbaglia
+  bottone perde il lavoro proprio mentre glielo si chiedeva. La terza — «Torna all'editor»
+  — è anche quella di Esc e del tocco fuori. Il logo passa un seguito, che parte **solo se
+  si esce davvero**: chiude l'editor *e* torna ai preset.
+- **Se il salvataggio fallisce non si chiude niente**, e per questo `salvaModifiche()`
+  torna `true`/`false`: chiudere dopo un salvataggio fallito è il modo esatto di perdere
+  il lavoro che si stava salvando.
+- **Il segno che ha salvato lo dà il tasto**, non un messaggio — in questo pannello non ne
+  deve comparire nessuno, ed è per quello che l'utente non aveva «la certezza di nulla».
+  Pallino rosso e bordo acceso quando c'è del lavoro in sospeso, `✓ Salvato` verde per 2,6
+  secondi dopo, poi normale. **Non si disabilita mai quando niente è toccato**: con l'ampli
+  la catena viene da una lettura vera e può già essere diversa da quella in libreria —
+  salvare in quel momento è proprio come si porta in libreria quello che l'ampli suona.
+
 **Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**, e `logLine`/
 `logProgress` ci scrivono l'ultimo messaggio: un pannello a tutto schermo copre il log, e
 senza quello un comando fallito è indistinguibile da un comando che non fa niente.
