@@ -328,17 +328,23 @@ non esiste nessuna tabella da cui dedurli. Sono salvati **per modello di effetto
 **aggiunge** invece di sovrascrivere: reimportare un backup vecchio non deve cancellare i
 battesimi fatti da allora.
 
-**L'elenco dei modelli (`MODELLI`) non è verificato, e un nome sbagliato fa danni.** Viene
-dal catalogo di Soundshed: se l'ampli quel modello non ce l'ha, `0x0106` gli chiede di
-**ricostruire un blocco DSP che non esiste** — il comando più pesante che gli mandiamo.
-**`TrebleBooster` mandava in palla l'ampli** (18 agosto 2026: sullo Spark 2 c'è solo
-`Booster`), ed è stato tolto. Resta nella `TABELLA` dei nomi, che è innocua.
+**`MODELLI` adesso è verificato tutto, contro l'app ufficiale** (26 agosto 2026): l'utente
+ha fotografato l'elenco intero sul suo Spark 2 e il confronto voce per voce ha tolto
+**dodici** nomi che il catalogo di Soundshed aveva e l'ampli no. I conti tornano con i suoi
+screenshot: **noise gate 1, comp/wah 6, drive 14, ampli 39, modulazione 13, delay 6,
+riverbero 1 con 9 tipi**.
 
-**Non si può chiedere all'ampli quali modelli conosce.** L'unica prova è che un modello
-**compaia in un preset uscito dall'ampli**: allora esiste di sicuro. Per questo la tendina
-dell'editor divide in due gruppi, «sul tuo ampli» e «dal catalogo, da provare»
-(`modelliVisti()` in `index.html`). Quando se ne trova un altro che non esiste, si toglie da
-`MODELLI`.
+I dodici: `JCM800`, `MatchlessDC30`, `DrZ`, `Hiwatt103`, `B15`, `Acoustic360`, `GK700RBII`,
+`MetalZoneMT2`, `MuTron` — e tre che **esistono ma solo su Spark LIVE ed EDGE**, sul canale
+del microfono: `Preamp73`, `Comp76`, più i «vocal» che non avevamo. Erano tutti
+`TrebleBooster` in attesa (18 agosto 2026: sullo Spark 2 c'è solo `Booster`, e chiederne
+uno inesistente lo mandava in palla). Restano nella `TABELLA` dei nomi, che è innocua e
+serve ancora a dare un nome alle manopole di un preset importato da altrove.
+
+**Se si aggiunge un nome nuovo a `MODELLI`, va verificato allo stesso modo**, perché
+all'ampli non si può chiedere quali modelli conosce: l'unica prova è che compaia
+nell'elenco ufficiale o in un preset uscito dall'ampli. La tendina tiene in fondo un gruppo
+«fuori dall'elenco Positive Grid» — oggi vuoto — che li raccoglierebbe.
 
 ## Protocollo — quello che non va dimenticato mai
 
