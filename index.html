@@ -645,7 +645,10 @@
                                  border:1px solid var(--line); border-radius:10px;
                                  padding:8px 34px 8px 18px; text-align:center;
                                  text-align-last:center;
-                                 font-family:var(--strumento); font-size:1.1rem;
+                                 /* Più piccolo di prima: il titolo adesso porta
+                                    anche l'apparecchio vero — «Silver 120 —
+                                    Roland JC120» — e a 1.1rem non ci stava. */
+                                 font-family:var(--strumento); font-size:0.92rem;
                                  font-weight:700; letter-spacing:-0.01em;
                                  color:var(--text); cursor:pointer;
                                  background-image:
@@ -657,7 +660,9 @@
   .blocco.aFuoco .nome-effetto:hover { border-color:var(--cat); }
   .blocco.aFuoco .nome-effetto:disabled { color:var(--dim); cursor:not-allowed;
                                           background-image:none; }
-  .blocco.aFuoco .nome-effetto option { font-size:0.95rem; font-weight:600; }
+  .blocco.aFuoco .nome-effetto option { font-size:0.85rem; font-weight:600; }
+  .blocco.aFuoco .nome-effetto optgroup { font-size:0.78rem; font-weight:700;
+                                          color:var(--dim); background:#17181c; }
   .blocco.aFuoco .interruttore { display:block; width:100%; margin:8px 0 0;
                                  font-size:0.75rem; padding:10px; }
   /* Il titolo di un blocco che non ha niente da scegliere: stessa taglia e
@@ -2812,21 +2817,56 @@ function intestazioneBlocco(effetto, posizione) {
   // La distinzione resta, ma **senza scritte**: una riga separatrice fra i due
   // mucchi. Le intestazioni dicevano la stessa cosa occupando due righe di
   // parole in un elenco che si sfoglia col pollice.
-  const metti = modello => {
+  const metti = (modello, dove) => {
     const opzione = document.createElement('option');
     opzione.value = modello;
-    opzione.textContent = SparkEffetti.nome(modello);
+    // Accanto al nome di fantasia, l'apparecchio vero: «Silver 120» non dice
+    // niente, «Roland JC120» sì, e chi cerca un suono pensa a quello.
+    const reale = SparkEffetti.ampliReale(modello);
+    opzione.textContent = SparkEffetti.nome(modello) + (reale ? ' — ' + reale : '');
     opzione.title = modello;
-    scelta.appendChild(opzione);
+    (dove || scelta).appendChild(opzione);
   };
-  sicuri.forEach(metti);
-  if (sicuri.length && daProva.length) {
-    const riga = document.createElement('option');
-    riga.disabled = true;
-    riga.textContent = '──────────';
-    scelta.appendChild(riga);
+
+  // **Gli amplificatori si dividono per famiglia** — clean, crunch, metal… —
+  // come nell'elenco ufficiale di Positive Grid: sono quaranta, e una fila
+  // unica non la sfoglia nessuno. Gli altri effetti restano una fila sola,
+  // che sono pochi.
+  const tutte = sicuri.concat(daProva);
+  const raggruppa = tutte.some(m => SparkEffetti.ampliGruppo(m));
+  if (raggruppa) {
+    for (const gruppo of SparkEffetti.GRUPPI_AMPLI) {
+      const dentro = tutte.filter(m => SparkEffetti.ampliGruppo(m) === gruppo);
+      if (!dentro.length) continue;
+      const box = document.createElement('optgroup');
+      box.label = gruppo;
+      dentro.forEach(m => metti(m, box));
+      scelta.appendChild(box);
+    }
+    // Chi non sta nell'elenco ufficiale finisce qui, ed è un avvertimento più
+    // preciso di quello di prima: di questi non sappiamo nemmeno se l'ampli li
+    // abbia — vengono dal catalogo di Soundshed, ed è da lì che era saltato
+    // fuori `TrebleBooster`, che lo mandava in palla.
+    const fuori = tutte.filter(m => !SparkEffetti.ampliGruppo(m));
+    if (fuori.length) {
+      const box = document.createElement('optgroup');
+      box.label = 'fuori dall\'elenco Positive Grid';
+      fuori.forEach(m => metti(m, box));
+      scelta.appendChild(box);
+    }
+  } else {
+    // I modelli **usciti da questo ampli** vengono per primi: esistono di
+    // sicuro. Gli altri arrivano dal catalogo e non sono verificati. La
+    // distinzione è **senza scritte**: una riga separatrice fra i due mucchi.
+    sicuri.forEach(m => metti(m));
+    if (sicuri.length && daProva.length) {
+      const riga = document.createElement('option');
+      riga.disabled = true;
+      riga.textContent = '──────────';
+      scelta.appendChild(riga);
+    }
+    daProva.forEach(m => metti(m));
   }
-  daProva.forEach(metti);
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
   // fonte elenca, e senza questa via non ci si arriverebbe mai. Senza ampli
   // però non c'è: un nome scritto a mano non si può né verificare né misurare.
