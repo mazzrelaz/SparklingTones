@@ -380,6 +380,16 @@ Stato: **completo e verificato sull'ampli**. `0x0201` lettura, `0x0138` cambio p
   distingue i due casi: 0 messaggi = ampli muto o connessione morta; più di 0 = parla e
   siamo noi a scartare. Senza quel numero i due casi si vedono uguali — è costato una
   serata.
+- **Gli effetti Hendrix (`JH.*`) non suonano finché l'ampli non ha caricato un preset
+  Hendrix dal suo pannello.** Osservato dall'utente il 26 agosto 2026: «Hey Jimi Solo»
+  mandato dall'app suonava senza fuzz e con l'ampli sbagliato — anche scritto in uno
+  slot — ma bastava selezionare un suono Hendrix **dal pannello dell'ampli** e da lì in
+  poi tutto funzionava, app compresa. **Il pacchetto Hendrix l'utente ce l'ha.** Il nome
+  del modello entra in catena e la rilettura lo conferma (è quello che aveva «verificato»
+  il cambio a `JH.SupaFuzz` il 13 agosto), ma il DSP resta muto: **la catena riletta non
+  dice se un blocco suona davvero**, e questa è la lezione che vale oltre gli Hendrix.
+  Ha tutta la faccia del caricamento pigro di un modulo DSP a pagamento. Cosa lo faccia
+  scattare **non è ancora misurato** — vedi «Dove si riprende».
 
 **Le due strade per scrivere un preset sono diverse**, e questo è costato mezza giornata:
 
@@ -545,29 +555,39 @@ trappole del rientro, il verifier che si riusa, i 34 test contro un fetch finto 
 
 ## Dove si riprende — 26 agosto 2026
 
-**Prima cosa, il 27: gli effetti Jimi Hendrix non funzionano.** L'utente ha provato tutti
-gli effetti uno per uno sull'ampli acceso. La buona notizia è che **nessuno pianta lo
-Spark**. Ma i `JH.*` non rispondono: **wah, drive e ampli non fanno niente**, e una
-modulazione funziona «ma male». Il dettaglio lo dà lui domani — non aveva più token.
+**Prima cosa, il 27: caratterizzare il risveglio degli effetti Hendrix.** Il 26 agosto
+l'utente ha provato tutti gli effetti uno per uno: **nessuno pianta lo Spark**, ma i `JH.*`
+non suonavano — wah, drive e ampli muti. Poi la scoperta, sua: **basta che l'ampli abbia
+caricato un suono Hendrix dal proprio pannello e da lì in poi funziona tutto**, app
+compresa (vedi la trappola in «Protocollo»). Il pacchetto ce l'ha.
 
-Quello che sappiamo già, e che vale come punto di partenza:
+Le ipotesi di ieri sono cadute tutte e due: gli identificativi erano giusti — lo si sapeva
+già dai preset usciti dall'ampli in `captures/2026-08-10-libreria-8-preset.json` — e
+`0x0106` era accettato, tant'è che la rilettura confermava. **Non serve la license key
+`0x0170`**: senza averla mai mandata, adesso gli Hendrix suonano.
 
-- **gli identificativi sono giusti, almeno due.** In
-  `captures/2026-08-10-libreria-8-preset.json` ci sono preset **usciti dall'ampli** che
-  contengono `JH.JTM45` (l'ampli di «Hey Jimi Solo») e `JH.FuzzTone`. Quindi lo Spark 2
-  quei nomi li produce, e il problema non è come li scriviamo;
-- **il pacchetto Hendrix era un acquisto in-app**, non più in vendita dal 30 aprile 2026.
-  È l'unica famiglia di effetti a pagamento, e questo apre l'ipotesi che i suoi modelli
-  vogliano qualcosa che gli altri non chiedono — la **license key `0x0170`, che non abbiamo
-  mai inviato** (vedi «Protocollo» qui sopra e `docs/looper.md`). Sarebbe la prima volta che
-  serve;
-- l'altra ipotesi, più banale: `0x0106` verso un modello Hendrix fallisce come falliva verso
-  un modello inesistente — ack regolare e niente applicato. Si distingue **rileggendo la
-  catena dall'ampli dopo il cambio**, che è quello che `cambiaModello` già fa: se dopo il
-  comando il blocco riporta ancora il modello vecchio, il comando non è stato accettato;
-- i quattro fuzz hanno i nomi delle manopole presi **dalle foto dei pedali**, non da una
-  cattura: se «funziona ma male» vuol dire che le manopole fanno la cosa sbagliata, il primo
-  sospetto è l'ordine degli indici, non l'effetto.
+Resta da misurare **cosa fa scattare il caricamento**, e sono tre domande in fila. Vanno
+fatte tutte **partendo dall'ampli appena riacceso**, che è l'unico modo di rimetterlo nello
+stato di prima:
+
+1. **il risveglio sopravvive allo spegnimento?** Riaccendi, e senza toccare il pannello
+   manda «Hey Jimi Solo» dall'app. Se il fuzz c'è, il modulo resta caricato e non c'è
+   niente da fare. Se non c'è, si va avanti.
+2. **si può svegliarlo dall'app?** Riaccendi, vista Live, banco «Ampli», premi **B4** —
+   è «Hey Jimi Solo», slot 7, e il tasto manda `0x0138` su uno slot vero, che è
+   esattamente quello che fa il pannello. Poi manda un preset Hendrix qualunque. Se
+   funziona **abbiamo la soluzione**: prima di mandare un preset con un `JH.*` si passa
+   per uno slot che ne contiene uno.
+3. **si sveglia tutto il pacchetto o un modello alla volta?** A ampli sveglio con «Hey
+   Jimi Solo» (che usa `JH.FuzzTone` e `JH.JTM45`), cambia il drive in **J.H. Octave
+   Fuzz** — un modello che non era nel preset. Se suona, il pacchetto si carica intero e
+   un solo slot basta a svegliare tutto; se resta muto, ogni modello vuole il suo, e
+   allora la strada del punto 2 non porta lontano.
+
+Poi, indipendente da tutto questo: **i nomi delle manopole dei quattro fuzz e del vibe
+sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.js`). Se le
+manopole fanno la cosa sbagliata è l'ordine degli indici, si corregge in due righe, e non
+c'entra col caricamento.
 
 
 Guscio `v39`. Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
