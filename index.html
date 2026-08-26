@@ -308,7 +308,6 @@
   .con-famiglia::before { content:''; position:absolute; left:0; top:0; bottom:0;
                           width:4px; background:var(--famiglia); }
   .con-famiglia > .head { padding-left:16px; }
-  .slotcard.con-famiglia { padding-left:14px; }
   .scelta.famiglia.dentro { background:var(--famiglia); color:#000; font-weight:700; }
   .nota-famiglia { color:var(--faint); font-size:0.72rem; margin-top:6px; }
 
@@ -1814,7 +1813,10 @@ function schedaSlot(record, slot) {
   const posizione = Spark.slotLabel(slot);
   const card = document.createElement('div');
   card.className = 'slotcard' + (record ? '' : ' libero');
-  coloraFamiglia(card, record);
+  // Niente striscia della famiglia qui: tolta su richiesta il 26 agosto 2026.
+  // Le otto caselle si guardano tutte insieme, e otto strisce colorate erano
+  // un secondo reticolo sopra quello dei bordi. La famiglia resta dov'è utile:
+  // nelle righe di libreria qui sotto, e sul LED dei pulsantoni della vista live.
 
   const alto = document.createElement('div');
   alto.className = 'alto';
