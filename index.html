@@ -741,6 +741,11 @@
        torna il difetto che si stava sistemando. */
     .titlebar { gap:8px; flex-wrap:nowrap; }
     #status { font-size:0.72rem; padding:8px 10px; letter-spacing:0.04em; }
+    /* Anche la barra dell'editor sta su una riga sola: se va a capo, il tasto
+       del menu finisce a sinistra e la tendina, che si appoggia al bordo
+       destro del suo tasto, uscirebbe dallo schermo. */
+    .solo-largo { display:none; }
+    #pannelloEditor > .barra-alta { flex-wrap:nowrap; gap:8px; }
     #btnMenu { padding:8px 11px; font-size:1rem; }
     #btnVista { font-size:0.86rem; padding:8px 12px; }
   }
@@ -1013,13 +1018,22 @@
 <div class="pannello" id="pannelloEditor">
   <div class="barra-alta">
     <span style="flex:1"></span>
-    <button id="btnRileggi" class="piccolo">Rileggi dall'ampli</button>
-    <!-- La guida sta dietro un punto di domanda invece che sotto il titolo:
-         due paragrafi di spiegazione si leggono una volta e poi rubano lo
-         schermo per sempre, e qui lo schermo serve alla catena. -->
-    <button id="btnAiutoEditor" class="piccolo" title="come funziona">?</button>
-    <button id="btnSalvaModifiche">Salva in libreria</button>
+    <!-- Sul telefono resta «Salva»: quelle due parole in più sono la
+         differenza fra una riga sola e una barra che va a capo. -->
+    <button id="btnSalvaModifiche">Salva<span class="solo-largo"> in libreria</span></button>
     <button class="primary" data-chiudi="pannelloEditor">Fatto</button>
+    <!-- Come nell'intestazione: davanti restano le due cose che si fanno
+         girando le manopole — salvare e uscire — e il resto sta dietro il
+         menu. La guida non è più un «?» solitario: in un elenco un punto
+         interrogativo da solo non dice cosa apre. -->
+    <div class="menu-wrap">
+      <button id="btnMenuEditor" aria-haspopup="true" aria-expanded="false"
+              title="le altre azioni">⋯</button>
+      <div id="menuEditor" class="tendina" hidden>
+        <button id="btnRileggi">Rileggi dall'ampli</button>
+        <button id="btnAiutoEditor">Come funziona</button>
+      </div>
+    </div>
   </div>
   <!-- Il nome del preset, dentro un'insegna al neon del colore della sua
        famiglia di suono: clean, drive, acoustic. Chi non ne ha resta bianco —
@@ -1293,28 +1307,44 @@ $('btnVista').addEventListener('click', () => {
  * non c'è nessun posto «fuori» ovvio dove toccare. La voce non la esegue
  * questo codice: dentro ci sono i pulsanti di sempre, coi loro listener.
  */
-const menuAltro = $('menuAltro');
-function apriMenu(aperto) {
-  menuAltro.hidden = !aperto;
-  $('btnMenu').setAttribute('aria-expanded', aperto ? 'true' : 'false');
-  $('btnMenu').classList.toggle('aperto', aperto);
+function collegaMenu(idTasto, idTendina) {
+  const tasto = $(idTasto), tendina = $(idTendina), wrap = tasto.closest('.menu-wrap');
+  const apri = aperto => {
+    tendina.hidden = !aperto;
+    tasto.setAttribute('aria-expanded', aperto ? 'true' : 'false');
+    tasto.classList.toggle('aperto', aperto);
+    // La tendina si appoggia al bordo destro del suo tasto, che è giusto
+    // finché il tasto sta a destra. Se un giorno finisse a sinistra — una
+    // barra che va a capo basta — uscirebbe dallo schermo: qui si misura e
+    // nel caso si ribalta. Costa una lettura, e solo all'apertura.
+    if (aperto) {
+      tendina.style.left = tendina.style.right = '';
+      if (tendina.getBoundingClientRect().left < 8) {
+        tendina.style.left = '0'; tendina.style.right = 'auto';
+      }
+    }
+  };
+  tasto.addEventListener('click', evento => {
+    evento.stopPropagation();
+    apri(tendina.hidden);
+  });
+  // Scegliere una voce chiude: quello che la voce fa lo fa il suo listener,
+  // che è quello di sempre — qui i pulsanti sono gli stessi di prima.
+  tendina.addEventListener('click', evento => {
+    if (evento.target.closest('button')) apri(false);
+  });
+  document.addEventListener('click', evento => {
+    if (!tendina.hidden && !wrap.contains(evento.target)) apri(false);
+  });
+  document.addEventListener('keydown', evento => {
+    if (evento.key === 'Escape' && !tendina.hidden) apri(false);
+  });
+  // Cambiando vista il menu contiene altre voci: lasciarlo aperto mostrerebbe
+  // per un istante quelle della vista che si sta lasciando.
+  window.addEventListener('hashchange', () => apri(false));
 }
-$('btnMenu').addEventListener('click', evento => {
-  evento.stopPropagation();
-  apriMenu(menuAltro.hidden);
-});
-menuAltro.addEventListener('click', evento => {
-  if (evento.target.closest('button')) apriMenu(false);
-});
-document.addEventListener('click', evento => {
-  if (!menuAltro.hidden && !evento.target.closest('.menu-wrap')) apriMenu(false);
-});
-document.addEventListener('keydown', evento => {
-  if (evento.key === 'Escape' && !menuAltro.hidden) apriMenu(false);
-});
-// Cambiando vista il menu contiene altre voci: lasciarlo aperto mostrerebbe
-// per un istante quelle della vista che si sta lasciando.
-window.addEventListener('hashchange', () => apriMenu(false));
+collegaMenu('btnMenu', 'menuAltro');
+collegaMenu('btnMenuEditor', 'menuEditor');
 
 /* ====================================================================
    Log
