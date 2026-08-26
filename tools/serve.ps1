@@ -16,6 +16,11 @@ $mime = @{
   '.json' = 'application/json; charset=utf-8'
   '.webmanifest' = 'application/manifest+json; charset=utf-8'
   '.png'  = 'image/png'
+  # Senza questi due il browser li prende per file da scaricare: il logo non
+  # compare e i caratteri tornano a quelli di sistema, e sembra un difetto
+  # dell'app mentre è solo questo server.
+  '.svg'  = 'image/svg+xml'
+  '.woff2'= 'font/woff2'
   '.css'  = 'text/css; charset=utf-8'
   '.zip'  = 'application/zip'
   '.txt'  = 'text/plain; charset=utf-8'

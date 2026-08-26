@@ -108,10 +108,54 @@
   button.piccolo { font-size:0.75rem; padding:6px 10px; }
   button.pericolo { background:#1d1013; border-color:#4a2226; color:var(--rosso); }
   button.pericolo:hover { background:#26161a; border-color:#6a2f35; }
-  /* Ingrandito e rimesso com'era il 14 agosto 2026: più grosso non ci sta sulla
-     riga con «Leggi dall'ampli», «Categorie» e «Altro», e mandare a capo
-     l'intestazione costa più di quanto valga il tasto. */
-  #btnVista { background:none; color:var(--accent); padding:8px 4px; }
+  /* Il passaggio fra le due viste è l'unico tasto che cambia pagina, e va
+     trovato col pollice senza guardare: più grande degli altri e chiuso in una
+     cornice rossa sottile, che lo stacca dai pannelli senza farne un pulsante
+     pieno — quello è già «Connetti». Ci sta, da quando la riga ha un pulsante
+     in meno. */
+  #btnVista { background:none; color:var(--accent); border:1px solid var(--accent);
+              font-size:0.95rem; padding:10px 18px; border-radius:11px;
+              box-shadow:0 0 14px -8px var(--accent); }
+  #btnVista:hover { background:rgba(227,6,19,0.12); border-color:var(--accent); }
+
+  /* Il menu delle altre azioni. La tendina esce da sotto il suo tasto e si
+     appoggia al bordo destro, che è il lato da cui la si apre col pollice.
+     Il contenitore è `relative` perché la tendina non deve spostare niente
+     aprendosi: sopra sta la barra, sotto la ricerca, e se si facesse spazio
+     la pagina ballerebbe a ogni tocco. */
+  .menu-wrap { position:relative; }
+  #btnMenu { font-size:1.1rem; line-height:1; padding:9px 13px; }
+  #btnMenu.aperto { border-color:#3d434c; background:#1c1f25; }
+  .tendina { position:absolute; top:calc(100% + 7px); right:0; z-index:20;
+             min-width:200px; background:#101216; border:1px solid var(--line);
+             border-radius:12px; padding:6px;
+             box-shadow:0 14px 34px rgba(0,0,0,0.65); }
+  .tendina button { display:block; width:100%; text-align:left; background:none;
+                    border:none; border-radius:8px; padding:11px 12px; }
+  .tendina button:hover:not(:disabled) { background:#1c1f25; }
+  .tendina button:disabled { background:none; }
+
+  /* Il tasto della connessione: fa da spia e da interruttore insieme. Rosso
+     pieno quando l'ampli non c'è — è l'unica cosa da fare in quel momento — e
+     verde quando c'è, dove non è più premibile ma resta acceso come il LED di
+     un apparecchio. Il giallo è l'attesa. Maiuscolo tutti e tre: si legge di
+     sguardo, da un metro e mezzo, come le scritte sul frontale. */
+  #status { text-transform:uppercase; letter-spacing:0.06em; font-size:0.78rem; }
+  #status.off { background:var(--accent); border-color:var(--accent); color:#fff;
+                box-shadow:0 0 16px -5px var(--accent); }
+  #status.off:hover { background:#f5121f; border-color:#f5121f; }
+  /* Rosso e spento insieme vuol dire una cosa sola: questo browser non ha il
+     Bluetooth. Lì il tasto deve sembrare quello che è, cioè non premibile. */
+  #status.off:disabled { background:#131519; border-color:var(--line-soft);
+                         color:#4d525b; box-shadow:none; cursor:not-allowed; }
+  #status.wait, #status.wait:disabled { background:#3a3520; border-color:#5c5227;
+                                        color:#f0d060; box-shadow:none; }
+  /* Da connesso il tasto è spento ma non deve *sembrare* spento: `:disabled`
+     lo sbiadirebbe come un comando non disponibile, mentre qui vuol dire che
+     la cosa è a posto. Per questo il verde va ripetuto sulla variante spenta. */
+  #status.on, #status.on:disabled { background:#12301a; border-color:var(--green);
+                                    color:var(--green); cursor:default;
+                                    box-shadow:0 0 16px -6px var(--green); }
 
   input[type=text], input[type=search], select, textarea {
     background:#0e1014; border:1px solid var(--line); color:var(--text);
@@ -686,7 +730,19 @@
     /* Sul telefono il marchio si rimpicciolisce un po' e lascia il resto
        della riga ai pulsanti, che vanno a capo da soli — ma resta uguale in
        tutte le schermate, vista live e pannelli compresi. */
-    .logo { height:22px; max-width:45vw; }
+    /* Su uno schermo strettissimo (i telefoni da 320) qualcosa deve cedere, e
+       cede il marchio: si rimpicciolisce invece di schiacciarsi, e resta lui
+       l'unica cosa della riga che non serve a fare niente. */
+    .logo { height:20px; max-width:45vw; flex:0 1 auto; min-width:0;
+            object-fit:contain; object-position:left center; }
+    /* Sul telefono la barra deve stare su **una riga sola**: marchio, stato,
+       menu e passaggio all'altra vista. Ci sta per pochi pixel, quindi tutto
+       si stringe un po' — e nessuno di questi quattro può andare a capo, o
+       torna il difetto che si stava sistemando. */
+    .titlebar { gap:8px; flex-wrap:nowrap; }
+    #status { font-size:0.72rem; padding:8px 10px; letter-spacing:0.04em; }
+    #btnMenu { padding:8px 11px; font-size:1rem; }
+    #btnVista { font-size:0.86rem; padding:8px 12px; }
   }
 </style>
 </head>
@@ -703,14 +759,32 @@
     <img class="logo" src="icons/logo.svg" alt="SparklingTones" title="torna ai preset"
          onerror="if (this.dataset.provato) { this.remove(); }
                   else { this.dataset.provato = '1'; this.src = 'icons/logo.png'; }">
-    <span id="status" class="status off">non connesso</span>
-    <button id="btnConnect" class="primary">Connetti</button>
-    <button id="btnRead" class="solo-preset" disabled>Leggi dall'ampli</button>
-    <button id="btnCategorie" class="solo-preset">Categorie</button>
-    <button id="btnAltro" class="solo-preset">Altro</button>
-    <button id="btnModifica" class="solo-live">Modifica</button>
-    <button id="btnPedale" class="solo-live">Pedale</button>
+    <!-- Lo stato della connessione **è** il pulsante che connette: due cose che
+         dicevano la stessa cosa una accanto all'altra («non connesso» e
+         «Connetti») adesso sono una sola, rossa quando manca l'ampli e verde
+         quando c'è. Il nome vero dell'amplificatore finisce nel titolo. -->
+    <button id="status" class="stato-conn off">CONNETTI</button>
+    <!-- Le altre azioni stanno dietro un tasto solo. Non sono pulsanti nuovi:
+         sono gli stessi di prima, spostati qui dentro, quindi tengono i loro
+         id, i loro comportamenti e il loro acceso/spento. In barra restano tre
+         cose — se sei connesso, il menu, e il passaggio all'altra vista — e
+         così l'intestazione non va più a capo in un ordine diverso a ogni
+         cambio di stato. -->
     <button id="btnVista">Live →</button>
+    <!-- Il menu è l'ultimo a destra, dove arriva il pollice: prima le due cose
+         che si usano suonando — se sei connesso, e il passaggio all'altra
+         vista — e in fondo tutto il resto. -->
+    <div class="menu-wrap">
+      <button id="btnMenu" aria-haspopup="true" aria-expanded="false"
+              title="le altre azioni">⋯</button>
+      <div id="menuAltro" class="tendina" hidden>
+        <button id="btnRead" class="solo-preset" disabled>Leggi dall'ampli</button>
+        <button id="btnCategorie" class="solo-preset">Categorie</button>
+        <button id="btnAltro" class="solo-preset">Altro</button>
+        <button id="btnModifica" class="solo-live">Modifica</button>
+        <button id="btnPedale" class="solo-live">Pedale</button>
+      </div>
+    </div>
   </div>
   <div class="cerca solo-preset">
     <input type="search" id="search" placeholder="cerca un preset…">
@@ -1064,9 +1138,15 @@ const store = new PresetStore();
 const spark = new SparkTransport({
   onStatus: (state, label) => {
     const el = $('status');
-    el.className = 'status ' + (state === 'connected' ? 'on' : state === 'connecting' ? 'wait' : 'off');
-    el.textContent = state === 'connected' ? label : state === 'connecting' ? label : 'non connesso';
-    $('btnConnect').disabled = state === 'connected';
+    const acceso = state === 'connected';
+    el.className = 'stato-conn ' + (acceso ? 'on' : state === 'connecting' ? 'wait' : 'off');
+    // Da connesso il pulsante dice «CONNESSO» e non il nome dell'ampli: il nome
+    // è lungo, cambia la larghezza della barra, e a chi suona non dice niente
+    // che non sappia già. Resta nel titolo, per chi ha due amplificatori.
+    el.textContent = acceso ? 'CONNESSO' : state === 'connecting' ? label : 'CONNETTI';
+    el.title = acceso ? (spark.state.name || 'connesso')
+                      : 'collega l\'amplificatore via Bluetooth';
+    el.disabled = acceso || state === 'connecting';
     $('btnRead').disabled    = state !== 'connected';
     $('btnLive').disabled    = state !== 'connected';
     disegnaPreset();
@@ -1204,6 +1284,37 @@ window.addEventListener('hashchange', () => { applicaVista(); });
 $('btnVista').addEventListener('click', () => {
   location.hash = inLive() ? 'preset' : 'live';
 });
+
+/**
+ * Il menu delle altre azioni.
+ *
+ * Si chiude da sola in tre modi — scegliendo una voce, toccando fuori, con
+ * Esc — perché una tendina che resta aperta copre la libreria e sul telefono
+ * non c'è nessun posto «fuori» ovvio dove toccare. La voce non la esegue
+ * questo codice: dentro ci sono i pulsanti di sempre, coi loro listener.
+ */
+const menuAltro = $('menuAltro');
+function apriMenu(aperto) {
+  menuAltro.hidden = !aperto;
+  $('btnMenu').setAttribute('aria-expanded', aperto ? 'true' : 'false');
+  $('btnMenu').classList.toggle('aperto', aperto);
+}
+$('btnMenu').addEventListener('click', evento => {
+  evento.stopPropagation();
+  apriMenu(menuAltro.hidden);
+});
+menuAltro.addEventListener('click', evento => {
+  if (evento.target.closest('button')) apriMenu(false);
+});
+document.addEventListener('click', evento => {
+  if (!menuAltro.hidden && !evento.target.closest('.menu-wrap')) apriMenu(false);
+});
+document.addEventListener('keydown', evento => {
+  if (evento.key === 'Escape' && !menuAltro.hidden) apriMenu(false);
+});
+// Cambiando vista il menu contiene altre voci: lasciarlo aperto mostrerebbe
+// per un istante quelle della vista che si sta lasciando.
+window.addEventListener('hashchange', () => apriMenu(false));
 
 /* ====================================================================
    Log
@@ -2759,9 +2870,14 @@ function pomello(effetto, param) {
   valore.className = 'val';
   box.append(svg, etichettaDi(effetto, param, manopoleVere(effetto).length), valore);
 
+  /* La tacca deve stare sulla punta dell'arco, e le due cose partono da posti
+     diversi: l'arco è un cerchio, che in SVG comincia a ore 3 e il CSS ruota
+     di 135° per farlo partire da ore 7:30; la tacca invece è disegnata verso
+     l'alto, quindi il suo zero è ore 12. Da lì i **−135°**: la corsa va da ore
+     7:30 a ore 4:30, con la zona morta in basso, come su un ampli vero. */
   const disegna = () => {
     arco.setAttribute('stroke-dasharray', `${GIRO * param.value} 999`);
-    tacca.setAttribute('transform', `rotate(${135 + param.value * 270} 50 50)`);
+    tacca.setAttribute('transform', `rotate(${-135 + param.value * 270} 50 50)`);
     valore.textContent = mostraValore(param.value);
   };
   disegna();
@@ -3308,11 +3424,12 @@ $('btnAiutoEditor').addEventListener('click', () => {
   guida.hidden = !guida.hidden;
 });
 
-$('btnConnect').addEventListener('click', async () => {
+$('status').addEventListener('click', async () => {
+  if ($('status').disabled) return;          // connesso: la spia non riconnette
   try {
     await spark.connect();
     await spark.identify();
-    $('status').textContent = spark.state.name || 'connesso';
+    $('status').title = spark.state.name || 'connesso';
     // Appena connessi si legge da soli: la prima cosa che serve sapere è
     // cosa c'è davvero negli otto slot, e chiederlo a mano ogni volta è un
     // passaggio che si dimentica. `importFromAmp` non tocca il lavoro
@@ -4070,9 +4187,9 @@ function mela() {
   // Apple, quindi anche Chrome lì non ce l'ha. Meglio dirlo, e dire cosa
   // funziona lo stesso.
   if (!navigator.bluetooth) {
-    $('btnConnect').disabled = true;
-    $('btnConnect').title = 'questo browser non può parlare col Bluetooth';
-    $('btnRead').title = $('btnConnect').title;
+    $('status').disabled = true;
+    $('status').title = 'questo browser non può parlare col Bluetooth';
+    $('btnRead').title = $('status').title;
     const avviso = $('senzaBluetooth');
     avviso.hidden = false;
     avviso.innerHTML = mela()
