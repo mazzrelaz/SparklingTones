@@ -732,6 +732,24 @@
   .pomello .val { font-family:var(--strumento); font-size:0.82rem; color:var(--cat); font-weight:700;
                   font-variant-numeric:tabular-nums; text-shadow:0 0 8px var(--cat); }
   .riga-pomelli:has(> :nth-child(4)) .pomello .nome { font-size:0.64rem; }
+  /* ---- I cursori dei due equalizzatori ----
+     Sette in fila, stretti: la fila delle tacche è la curva. Si trascinano
+     come i pomelli, stessa corsa, così il gesto è uno solo. */
+  .riga-cursori { display:flex; justify-content:center; gap:4px; align-items:flex-end; }
+  .riga-cursori > * { flex:1 1 0; min-width:0; max-width:56px; }
+  .cursore { text-align:center; cursor:ns-resize; touch-action:none;
+             color:var(--cat); user-select:none; -webkit-user-select:none; }
+  .cursore .pista { position:relative; height:104px; width:8px; margin:0 auto 6px;
+                    background:#262b33; border-radius:4px; }
+  .cursore .riempi { position:absolute; left:0; right:0; bottom:0;
+                     background:var(--cat); border-radius:4px; opacity:0.55; }
+  .cursore .tacca-cursore { position:absolute; left:50%; width:26px; height:10px;
+                            margin-left:-13px; border-radius:3px;
+                            background:#0e1014; border:1px solid var(--cat);
+                            box-shadow:0 0 6px -1px var(--cat), 0 0 14px -4px var(--cat); }
+  .cursore .nome { font-size:0.62rem; }
+  .cursore .val { font-size:0.72rem; }
+
   .pomello.scelta { display:flex; flex-direction:column; justify-content:center;
                     cursor:default; }
   .pomello.scelta select { width:100%; background:#0e1014; color:var(--cat);
@@ -2979,9 +2997,10 @@ function intestazioneBlocco(effetto, posizione) {
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
   // fonte elenca, e senza questa via non ci si arriverebbe mai. Senza ampli
   // però non c'è: un nome scritto a mano non si può né verificare né misurare.
-  if (!inModifica.offline) {
-    voci.push({ valore: ' amano', testo: 'altro modello, a mano…', gruppo: null });
-  }
+  // Qui c'era «altro modello, a mano…», per i modelli che nessuna fonte
+  // elenca. Tolta il 26 agosto 2026 su richiesta: da quando il catalogo è
+  // stato verificato contro l'app ufficiale, l'elenco è quello completo, e una
+  // voce che chiede di scrivere un nome a mano non serve più a niente.
 
   const reale = SparkEffetti.ampliReale(effetto.name);
   scelta.textContent = SparkEffetti.nome(effetto.name) + (reale ? ' — ' + reale : '');
@@ -2999,14 +3018,8 @@ function intestazioneBlocco(effetto, posizione) {
   }
 
   scelta.addEventListener('click', () => {
-    apriElenco(Spark.CATENA[posizione], voci, effetto.name, valore => {
-      if (valore === ' amano') {
-        const nome = prompt('Nome esatto del modello, come lo chiama l\'ampli:');
-        if (nome && nome.trim()) cambiaModello(posizione, nome.trim());
-        return;
-      }
-      cambiaModello(posizione, valore);
-    });
+    apriElenco(Spark.CATENA[posizione], voci, effetto.name,
+               valore => cambiaModello(posizione, valore));
   });
 
   const riga = document.createElement('div');
@@ -3135,6 +3148,20 @@ function righeDi(quante) {
 
 function griglia(effetto, posizione) {
   let vere = manopoleVere(effetto);
+
+  // **Gli equalizzatori si regolano a cursori**, tutti in fila come sul pedale
+  // vero: sei bande più il livello, e la posizione delle tacche disegna la
+  // curva. Sette pomelli invece non si leggono come una curva, si leggono uno
+  // per uno (chiesto dall'utente il 26 agosto 2026).
+  if (SparkEffetti.aCursori(effetto.name)) {
+    const box = document.createElement('div');
+    box.className = 'pomelli cursori';
+    const riga = document.createElement('div');
+    riga.className = 'riga-cursori';
+    vere.forEach(param => riga.appendChild(cursore(effetto, param)));
+    box.appendChild(riga);
+    return box;
+  }
   // Il parametro finito nel titolo non si ripete qui sotto: quando il modello
   // è unico, la tendina grande è già quella dei tipi.
   if (candidatiModello(effetto, posizione).length < 2) {
@@ -3256,6 +3283,61 @@ function pomello(effetto, param) {
   const disegna = () => {
     arco.setAttribute('stroke-dasharray', `${GIRO * param.value} 999`);
     tacca.setAttribute('transform', `rotate(${-135 + param.value * 270} 50 50)`);
+    valore.textContent = mostraValore(param.value);
+  };
+  disegna();
+
+  let partenzaY = null, partenzaV = 0;
+  box.addEventListener('pointerdown', evento => {
+    if (evento.target.classList.contains('nome')) return;   // lì si battezza
+    partenzaY = evento.clientY;
+    partenzaV = param.value;
+    box.setPointerCapture(evento.pointerId);
+    mostraBolla(box, param.value);
+  });
+  box.addEventListener('pointermove', evento => {
+    if (partenzaY === null) return;
+    const passo = (partenzaY - evento.clientY) / CORSA_PX;
+    param.value = Math.min(1, Math.max(0, partenzaV + passo));
+    disegna();
+    mostraBolla(box, param.value);
+    aggiornaBarrette();
+    mandaParametro(effetto.name, param.index, param.value);
+  });
+  const fine = () => { partenzaY = null; nascondiBolla(); };
+  box.addEventListener('pointerup', fine);
+  box.addEventListener('pointercancel', fine);
+  return box;
+}
+
+/**
+ * Un cursore verticale, per gli equalizzatori.
+ *
+ * Si trascina come un pomello — stessa corsa in pixel, così il dito impara un
+ * gesto solo — ma qui la posizione della tacca **è** il valore, e sette tacche
+ * in fila disegnano la curva senza doverle leggere una per una. È come sono
+ * fatti i due pedali EQ nell'app ufficiale.
+ */
+function cursore(effetto, param) {
+  const box = document.createElement('div');
+  box.className = 'cursore';
+
+  const pista = document.createElement('div');
+  pista.className = 'pista';
+  const tacca = document.createElement('div');
+  tacca.className = 'tacca-cursore';
+  const riempi = document.createElement('div');
+  riempi.className = 'riempi';
+  pista.append(riempi, tacca);
+
+  const valore = document.createElement('div');
+  valore.className = 'val';
+  box.append(pista, etichettaDi(effetto, param, manopoleVere(effetto).length), valore);
+
+  const disegna = () => {
+    // Da sotto verso l'alto: zero in fondo, dieci in cima, come uno slider vero.
+    tacca.style.bottom = `calc(${param.value * 100}% - 5px)`;
+    riempi.style.height = `${param.value * 100}%`;
     valore.textContent = mostraValore(param.value);
   };
   disegna();
