@@ -639,7 +639,23 @@ dropbox.com/developers e incollare l'app key nel pannello «Altro». Tutto il re
 trappole del rientro, il verifier che si riusa, i 34 test contro un fetch finto — è in
 `docs/dropbox.md`.
 
-## Dove si riprende — 26 agosto 2026
+## Dove si riprende — 26 agosto 2026, sera
+
+**La giornata è finita sul vestito, non sul protocollo.** In fila: i due tasti che spostano
+il preset e lo slot aperto accesi al neon; la vista live con l'alone azzurro e il LED che
+dice la famiglia (acoustic da verde a **giallo**, e il verde è passato a chi famiglia non ne
+ha); via la striscia della famiglia dalle otto caselle dell'ampli; e infine **tutte le
+finestre e le tendine del sistema sostituite con le nostre** — la sezione «Finestre e
+tendine» qui sopra è la regola, questa è solo la data.
+
+Tutto verificato **solo sull'app che gira in locale, con preset finti**: `index.html` non ha
+suite. Le suite toccate quel giorno erano store (136) e backup (33), verdi.
+
+**Come si prova in locale**: `file://` e `localhost` non hanno la libreria dell'utente —
+altra origine, altro IndexedDB — quindi o si popolano dei preset finti da console
+(`store.importFromAmp([...])` con `{uuid, name, effects, slot}` inventati), **oppure si
+pusha**, perché lui guarda l'app pubblicata. Detto da lui il 26 agosto 2026, dopo che avevo
+committato e basta. Da allora **i commit visibili si pushano senza chiederlo**.
 
 **Gli effetti Hendrix: capitolo chiuso il 26 agosto 2026, e la risposta è «non si può».**
 L'utente ha provato tutti gli effetti uno per uno: **nessuno pianta lo Spark**, ma i `JH.*`
@@ -667,23 +683,26 @@ se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backu
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
 
-1. **Provare l'editor nuovo con l'ampli acceso.** È la cosa che il banco non può dare:
+1. **Guardare il vestito nuovo sul telefono**, che è dove le finestre di sistema davano più
+   fastidio: le tendine nostre, le domande, e i LED delle famiglie sui pulsantoni live. Le
+   mie prove sono su schermo largo e con dati finti.
+2. **Provare l'editor nuovo con l'ampli acceso.** È la cosa che il banco non può dare:
    girare un pomello e sentire se il suono segue, cambiare un modello e vedere se la catena
    si rilegge, salvare e riscrivere il preset per sentire se ha salvato la cosa giusta. Se
    qualcosa non torna, il primo sospetto sono i comandi — non il disegno, che è solo un modo
    diverso di mostrare gli stessi.
-2. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri è
+3. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri è
    stato reso autocadenzato ma **la correzione non è verificata**. Se ricapita: prima
    `PAUSA_PARAMETRO`, poi `SEND_GAP_MS`.
-3. **Il pedale: i pezzi sono comprati, si aspetta che arrivino.** Quando arriva la roba, in
+4. **Il pedale: i pezzi sono comprati, si aspetta che arrivino.** Quando arriva la roba, in
    quest'ordine: display sulla C6 con quattro cavetti, e vedere se scrive; poi l'espansore
    con **un pulsante solo**, per sapere se il bus I²C legge; poi il firmware, che è tutto
    software. Il porting da C3 a C6 dovrebbe essere di peso, ma **i tempi BLE vanno
    rimisurati**.
-4. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
+5. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due
    lati.
-5. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` è stato
+6. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` è stato
    trovato dall'utente; l'elenco viene da Soundshed e non è verificato. La tendina mette per
    primi i modelli visti sull'ampli, quindi il prossimo si trova più in fretta.
 
