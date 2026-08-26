@@ -2887,7 +2887,22 @@ function intestazioneBlocco(effetto, posizione) {
   // mai visto non sappiamo quante manopole abbia, e senza ampli non c'è nessuno
   // a cui chiederlo. Di uno visto sì, perché sta in un preset uscito
   // dall'ampli — vedi `campioneModello`.
-  const spento = m => inModifica.offline && !visti.has(m);
+  // **Gli amplificatori si scelgono tutti, anche senza ampli collegato.** La
+  // regola vera non è «solo quelli già visti», è «solo quelli di cui sappiamo
+  // com'è fatto il blocco» — e degli ampli lo sappiamo: hanno **tutti e
+  // trentanove le stesse cinque manopole**, Gain, Treble, Middle, Bass,
+  // Master. Misurato due volte, il 26 agosto 2026: sui preset veri usciti
+  // dall'ampli in `captures/` (sette modelli diversi, da Twin a Rectifier a
+  // FatAcousticV2, tutti con cinque parametri) e sulla tabella dei nomi, che
+  // dice cinque per tutti e trentanove. Cambiare ampli non cambia la forma del
+  // blocco: cambia il nome, e i valori restano quelli, che per di più vogliono
+  // dire la stessa cosa da un ampli all'altro.
+  //
+  // Per gli altri blocchi la limitazione resta, e lì è reale: due drive o due
+  // delay hanno numeri di manopole diversi, quindi senza ampli si può mettere
+  // solo un modello che la libreria ha già visto — da lì si copia un blocco
+  // vero (`campioneModello`) invece di inventarne uno.
+  const spento = m => inModifica.offline && !visti.has(m) && !SparkEffetti.ampliGruppo(m);
 
   // **Dove non c'è niente da scegliere, la tendina non c'è.** Il noise gate ha
   // un modello e basta; il riverbero pure, e offline può restare a voce sola
@@ -3460,6 +3475,20 @@ async function cambiaModello(posizione, nuovo) {
     const blocco = inModifica.effetti[posizione];
     if (!blocco) { logLine('quel blocco non esiste nella catena.', true); return; }
     if (nuovo === blocco.name) { logLine(`${nuovo} c'era già.`); return; }
+
+    // Un ampli si mette anche se la libreria non l'ha mai visto: hanno tutti e
+    // trentanove le stesse cinque manopole (misurato, vedi `intestazioneBlocco`),
+    // quindi il blocco resta com'è e cambia solo il nome — e i valori vogliono
+    // dire la stessa cosa da un ampli all'altro.
+    if (SparkEffetti.ampliGruppo(nuovo) && blocco.params.length === 5) {
+      const vecchio = blocco.name;
+      blocco.name = nuovo;
+      disegnaCatena();
+      logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
+              'stesse manopole. Senza ampli non si sente: si salva in libreria ' +
+              'e si prova alla prossima connessione.');
+      return;
+    }
 
     const campione = campioneModello(nuovo);
     if (!campione) {
