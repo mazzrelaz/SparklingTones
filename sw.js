@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v41';
+const VERSIONE = 'v42';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */

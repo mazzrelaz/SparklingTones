@@ -554,8 +554,20 @@
   /* ---- La catena in cima: sette tasselli, accesi come un'insegna ----
      Il fondo dentro è più scuro della pagina, non più chiaro: il neon si vede
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
+  /* Quando i sette tasselli ci stanno tutti, la fila va **in mezzo**: allineata
+     a sinistra lasciava un vuoto a destra e sembrava caduta da una parte. */
   .striscia { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 9px;
-              scroll-snap-type:x proximity; }
+              justify-content:center; scroll-snap-type:x proximity; }
+  /* Quando invece non ci stanno — sotto gli ~820 px la fila è più larga dello
+     schermo — si scorre, e allora `center` va tolto o taglia il primo tassello.
+     Al suo posto un'imbottitura larga mezza striscia meno mezzo tassello: senza,
+     il primo e l'ultimo non possono **mai** arrivare in mezzo, perché oltre il
+     bordo non c'è niente da scorrere, e aprendo l'editor sul noise gate o sul
+     riverbero la catena resta storta. */
+  @media (max-width: 820px) {
+    .striscia { justify-content:flex-start;
+                padding-left:calc(50% - 53px); padding-right:calc(50% - 53px); }
+  }
   .striscia::-webkit-scrollbar { height:0; }
   .tassello { position:relative; flex:0 0 106px; scroll-snap-align:center;
               background:#0e1014; border:1px solid var(--line); border-radius:12px;
