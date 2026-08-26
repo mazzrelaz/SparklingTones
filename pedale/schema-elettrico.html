@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Pedale SparklingTones — schema elettrico</title>
+<style>
+  /* Un foglio A4 orizzontale, pensato per essere stampato in PDF con
+     Edge headless (`--print-to-pdf`). Niente colori di fondo: si stampa
+     anche in bianco e nero e resta leggibile. */
+  @page { size: A4 landscape; margin: 8mm; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Segoe UI',system-ui,sans-serif; color:#111;
+         background:#fff; }
+  svg { width:100%; height:auto; display:block; }
+  .titolo { font-size:15px; font-weight:700; }
+  .sotto  { font-size:8.5px; fill:#555; }
+  text { font-size:8px; fill:#111; }
+  .blocco { fill:#fff; stroke:#111; stroke-width:1.2; }
+  .blocco-nome { font-size:9.5px; font-weight:700; }
+  .blocco-sotto { font-size:7px; fill:#555; }
+  .pin { font-size:7.2px; fill:#111; }
+  .filo { stroke:#111; stroke-width:1; fill:none; }
+  .filo-pos { stroke:#c00; stroke-width:1.3; fill:none; }
+  .filo-gnd { stroke:#111; stroke-width:1.3; fill:none; }
+  .filo-tratto { stroke:#111; stroke-width:1; fill:none; stroke-dasharray:3 2; }
+  .etichetta { font-size:7px; fill:#333; }
+  .nota { font-size:7.4px; fill:#333; }
+  .nota-t { font-size:8px; font-weight:700; fill:#111; }
+  .gruppo { fill:none; stroke:#999; stroke-width:0.7; stroke-dasharray:4 3; }
+  .gruppo-nome { font-size:7.5px; fill:#666; font-weight:700; letter-spacing:0.5px; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1120 760" xmlns="http://www.w3.org/2000/svg">
+
+  <text class="titolo" x="10" y="18">Pedale SparklingTones — schema elettrico</text>
+  <text class="sotto" x="10" y="32">
+    XIAO ESP32-C6 · MCP23017 · OLED 2,42" SSD1309 SPI · 5 footswitch + 2 tasti · 4 LED bicolore · 18650 protetta
+  </text>
+  <text class="sotto" x="10" y="44">
+    26 agosto 2026 — pin verificati sui datasheet, non ancora sul rame
+  </text>
+
+  <!-- ================= ALIMENTAZIONE ================= -->
+  <rect class="gruppo" x="8" y="60" width="250" height="215" rx="6"/>
+  <text class="gruppo-nome" x="18" y="76">ALIMENTAZIONE</text>
+
+  <rect class="blocco" x="26" y="92" width="120" height="66" rx="4"/>
+  <text class="blocco-nome" x="36" y="112">Cella 18650</text>
+  <text class="blocco-sotto" x="36" y="124">XTAR 18650-330PCM</text>
+  <text class="blocco-sotto" x="36" y="135">protetta, in portacella</text>
+  <text class="blocco-sotto" x="36" y="147">3,0 – 4,2 V</text>
+  <text class="pin" x="152" y="110">+</text>
+  <text class="pin" x="152" y="150">−</text>
+
+  <!-- interruttore generale -->
+  <path class="filo-pos" d="M146 105 H 180"/>
+  <circle cx="184" cy="105" r="2.6" fill="#fff" stroke="#c00"/>
+  <path class="filo-pos" d="M186 103 L 204 95"/>
+  <circle cx="208" cy="94" r="2.6" fill="#fff" stroke="#c00"/>
+  <text class="etichetta" x="170" y="82">SW gen.</text>
+  <path class="filo-pos" d="M210 94 H 240 V 300"/>
+
+  <path class="filo-gnd" d="M146 145 H 240 V 300"/>
+  <text class="etichetta" x="180" y="140">GND</text>
+
+  <text class="nota" x="26" y="180">La cella è protetta: il caricabatterie</text>
+  <text class="nota" x="26" y="192">della XIAO gestisce la carica, non la</text>
+  <text class="nota" x="26" y="204">scarica profonda.</text>
+  <text class="nota" x="26" y="222">L'interruttore stacca il positivo:</text>
+  <text class="nota" x="26" y="234">il pedale in borsa non deve restare</text>
+  <text class="nota" x="26" y="246">acceso.</text>
+  <text class="nota" x="26" y="264">USB-C portata sul pannello: carica</text>
+  <text class="nota" x="26" y="276">e riprogrammazione.</text>
+
+  <!-- ================= XIAO ================= -->
+  <rect class="blocco" x="300" y="150" width="190" height="300" rx="6"/>
+  <text class="blocco-nome" x="330" y="176">XIAO ESP32-C6</text>
+  <text class="blocco-sotto" x="330" y="188">Seeed Studio</text>
+  <text class="blocco-sotto" x="316" y="205">caricabatterie a bordo sui pin BAT</text>
+
+  <!-- pin sinistra -->
+  <text class="pin" x="308" y="232">BAT+</text>
+  <text class="pin" x="308" y="252">BAT−</text>
+  <text class="pin" x="308" y="282">3V3</text>
+  <text class="pin" x="308" y="302">GND</text>
+  <text class="pin" x="308" y="332">D0 / GPIO0</text>
+  <text class="pin" x="308" y="352">USB-C</text>
+
+  <!-- pin destra -->
+  <text class="pin" x="410" y="232">D4 / GPIO22</text>
+  <text class="pin" x="410" y="252">D5 / GPIO23</text>
+  <text class="pin" x="410" y="282">D8 / GPIO19</text>
+  <text class="pin" x="410" y="302">D10 / GPIO18</text>
+  <text class="pin" x="410" y="322">D3 / GPIO21</text>
+  <text class="pin" x="410" y="342">D6 / GPIO16</text>
+  <text class="pin" x="410" y="362">D7 / GPIO17</text>
+  <text class="pin" x="410" y="400">D1, D2, D9</text>
+  <text class="blocco-sotto" x="410" y="412">liberi</text>
+
+  <!-- batteria alla XIAO -->
+  <path class="filo-pos" d="M240 300 V 228 H 300"/>
+  <text class="etichetta" x="248" y="222">+</text>
+  <path class="filo-gnd" d="M240 300 H 300 M240 300 V 248 H 300"/>
+  <text class="etichetta" x="248" y="262">−</text>
+
+  <!-- lettura batteria -->
+  <path class="filo-tratto" d="M300 328 H 268 V 236"/>
+  <text class="etichetta" x="196" y="332">lettura batteria:</text>
+  <text class="etichetta" x="196" y="343">partitore 1:2 già a bordo</text>
+
+  <!-- ================= OLED ================= -->
+  <rect class="gruppo" x="620" y="60" width="480" height="180" rx="6"/>
+  <text class="gruppo-nome" x="630" y="76">DISPLAY</text>
+
+  <rect class="blocco" x="800" y="92" width="240" height="120" rx="4"/>
+  <text class="blocco-nome" x="826" y="116">OLED 2,42" 128×64</text>
+  <text class="blocco-sotto" x="826" y="128">SSD1309, SPI a 7 pin</text>
+  <text class="blocco-sotto" x="826" y="140">modulo 71 × 43,5 mm</text>
+  <text class="pin" x="810" y="162">VCC 3,3 V</text>
+  <text class="pin" x="810" y="176">GND</text>
+  <text class="pin" x="810" y="190">SCK · MOSI · CS · DC · RST</text>
+
+  <!-- I cinque fili del display salgono paralleli, senza incrociarsi: ognuno
+       gira alla sua altezza e l'etichetta sta all'inizio, dove si legge. -->
+  <path class="filo" d="M490 282 H 716 V 150 H 806"/>
+  <text class="etichetta" x="498" y="278">SCK</text>
+  <path class="filo" d="M490 302 H 730 V 158 H 806"/>
+  <text class="etichetta" x="498" y="298">MOSI</text>
+  <path class="filo" d="M490 322 H 744 V 166 H 806"/>
+  <text class="etichetta" x="498" y="318">CS</text>
+  <path class="filo" d="M490 342 H 758 V 174 H 806"/>
+  <text class="etichetta" x="498" y="338">DC</text>
+  <path class="filo" d="M490 362 H 772 V 182 H 806"/>
+  <text class="etichetta" x="498" y="358">RST</text>
+  <text class="etichetta" x="700" y="256">i cinque fili del display</text>
+  <text class="etichetta" x="700" y="267">non si incrociano</text>
+
+  <path class="filo-pos" d="M300 278 H 286 V 70 H 900 V 92"/>
+  <text class="etichetta" x="560" y="66">3,3 V a display ed espansore</text>
+  <path class="filo-gnd" d="M300 298 H 276 V 84 H 940 V 92"/>
+  <text class="etichetta" x="560" y="80">GND comune</text>
+
+  <!-- ================= MCP23017 ================= -->
+  <rect class="blocco" x="620" y="300" width="180" height="270" rx="6"/>
+  <text class="blocco-nome" x="644" y="326">MCP23017</text>
+  <text class="blocco-sotto" x="634" y="338">KAmod I2C-IOexp16</text>
+  <text class="blocco-sotto" x="634" y="352">16 I/O, indirizzo 0x20</text>
+  <text class="blocco-sotto" x="634" y="364">pull-up interni sugli ingressi</text>
+
+  <text class="pin" x="628" y="392">SDA</text>
+  <text class="pin" x="628" y="410">SCL</text>
+  <text class="pin" x="628" y="432">3V3 · GND</text>
+
+  <text class="pin" x="628" y="464">PORT A — ingressi</text>
+  <text class="pin" x="636" y="480">GPA0 … GPA6  (7)</text>
+  <text class="pin" x="628" y="512">PORT B — uscite</text>
+  <text class="pin" x="636" y="528">GPB0 … GPB7  (8)</text>
+  <text class="blocco-sotto" x="628" y="552">1 pin libero</text>
+
+  <!-- I2C -->
+  <path class="filo" d="M490 228 H 560 V 388 H 620"/>
+  <text class="etichetta" x="512" y="222">SDA</text>
+  <path class="filo" d="M490 248 H 540 V 406 H 620"/>
+  <text class="etichetta" x="512" y="264">SCL</text>
+
+  <!-- pull-up I2C -->
+  <path class="filo-tratto" d="M560 388 V 356 H 590 V 340"/>
+  <path class="filo-tratto" d="M540 406 V 366 H 578 V 340"/>
+  <rect x="580" y="316" width="20" height="24" fill="#fff" stroke="#111" stroke-width="0.9"/>
+  <text class="etichetta" x="516" y="308">2 × 4,7 kΩ a 3,3 V</text>
+  <text class="etichetta" x="516" y="318">solo se il modulo</text>
+  <text class="etichetta" x="516" y="328">non li ha già</text>
+
+  <!-- ================= FOOTSWITCH ================= -->
+  <rect class="gruppo" x="830" y="270" width="270" height="180" rx="6"/>
+  <text class="gruppo-nome" x="840" y="286">INTERRUTTORI → PORT A</text>
+
+  <g>
+    <text class="pin" x="848" y="308">GPA0</text>
+    <text class="pin" x="848" y="326">GPA1</text>
+    <text class="pin" x="848" y="344">GPA2</text>
+    <text class="pin" x="848" y="362">GPA3</text>
+    <text class="pin" x="848" y="380">GPA4</text>
+    <text class="pin" x="848" y="404">GPA5</text>
+    <text class="pin" x="848" y="422">GPA6</text>
+
+    <text class="etichetta" x="960" y="308">FS1 — suono 1</text>
+    <text class="etichetta" x="960" y="326">FS2 — suono 2</text>
+    <text class="etichetta" x="960" y="344">FS3 — suono 3</text>
+    <text class="etichetta" x="960" y="362">FS4 — suono 4</text>
+    <text class="etichetta" x="960" y="380">FS5 — cambia metà</text>
+    <text class="etichetta" x="960" y="404">banco +   (a mano)</text>
+    <text class="etichetta" x="960" y="422">banco −   (a mano)</text>
+  </g>
+
+  <!-- simboli interruttore -->
+  <g>
+    <path class="filo" d="M884 304 H 900 M910 304 H 926"/>
+    <path class="filo" d="M900 304 L 910 298"/>
+    <path class="filo" d="M884 322 H 900 M910 322 H 926"/>
+    <path class="filo" d="M900 322 L 910 316"/>
+    <path class="filo" d="M884 340 H 900 M910 340 H 926"/>
+    <path class="filo" d="M900 340 L 910 334"/>
+    <path class="filo" d="M884 358 H 900 M910 358 H 926"/>
+    <path class="filo" d="M900 358 L 910 352"/>
+    <path class="filo" d="M884 376 H 900 M910 376 H 926"/>
+    <path class="filo" d="M900 376 L 910 370"/>
+    <path class="filo" d="M884 400 H 900 M910 400 H 926"/>
+    <path class="filo" d="M900 400 L 910 394"/>
+    <path class="filo" d="M884 418 H 900 M910 418 H 926"/>
+    <path class="filo" d="M900 418 L 910 412"/>
+  </g>
+  <path class="filo-gnd" d="M926 304 H 940 V 430 M926 322 H 940 M926 340 H 940
+                            M926 358 H 940 M926 376 H 940 M926 400 H 940 M926 418 H 940"/>
+  <path class="filo-gnd" d="M940 430 V 440 H 930 M934 444 H 946 M937 448 H 943"/>
+  <text class="etichetta" x="952" y="444">GND</text>
+  <path class="filo" d="M800 470 H 820 V 300 H 848"/>
+  <text class="etichetta" x="806" y="466">port A</text>
+
+  <!-- ================= LED ================= -->
+  <rect class="gruppo" x="830" y="470" width="270" height="270" rx="6"/>
+  <text class="gruppo-nome" x="840" y="488">LED BICOLORE → PORT B</text>
+  <text class="etichetta" x="840" y="502">RGB 5 mm a catodo comune (dal progetto Timer)</text>
+  <text class="etichetta" x="840" y="514">il piedino blu resta scollegato</text>
+
+  <!-- Un LED disegnato per intero, gli altri tre uguali: due resistenze
+       diverse (il verde ne vuole meno) e il catodo in comune a massa. -->
+  <g>
+    <text class="pin" x="846" y="540">GPB0</text>
+    <path class="filo" d="M878 536 H 894"/>
+    <rect x="894" y="530" width="22" height="11" fill="#fff" stroke="#111" stroke-width="0.9"/>
+    <text class="etichetta" x="920" y="540">220 Ω</text>
+    <path class="filo" d="M916 536 H 960"/>
+    <path d="M960 530 L 972 536 L 960 542 Z" fill="#fff" stroke="#111" stroke-width="0.9"/>
+    <path class="filo" d="M972 528 V 544"/>
+    <text class="etichetta" x="978" y="540">rosso</text>
+
+    <text class="pin" x="846" y="562">GPB1</text>
+    <path class="filo" d="M878 558 H 894"/>
+    <rect x="894" y="552" width="22" height="11" fill="#fff" stroke="#111" stroke-width="0.9"/>
+    <text class="etichetta" x="920" y="562">100 Ω</text>
+    <path class="filo" d="M916 558 H 960"/>
+    <path d="M960 552 L 972 558 L 960 564 Z" fill="#fff" stroke="#111" stroke-width="0.9"/>
+    <path class="filo" d="M972 550 V 566"/>
+    <text class="etichetta" x="978" y="562">verde</text>
+
+    <path class="filo" d="M972 536 H 1030 M972 558 H 1030"/>
+    <text class="etichetta" x="1000" y="530">LED 1</text>
+    <text class="etichetta" x="846" y="592">GPB2 · GPB3</text>
+    <text class="etichetta" x="940" y="592">LED 2 — uguale</text>
+    <text class="etichetta" x="846" y="612">GPB4 · GPB5</text>
+    <text class="etichetta" x="940" y="612">LED 3 — uguale</text>
+    <text class="etichetta" x="846" y="632">GPB6 · GPB7</text>
+    <text class="etichetta" x="940" y="632">LED 4 — uguale</text>
+    <path class="filo" d="M1030 588 H 1042 M1030 608 H 1042 M1030 628 H 1042"/>
+    <path class="filo" d="M916 588 H 1030 M916 608 H 1030 M916 628 H 1030"/>
+  </g>
+  <path class="filo-gnd" d="M1030 536 V 660 H 1020 M1024 664 H 1036 M1027 668 H 1033"/>
+  <text class="etichetta" x="920" y="664">catodi comuni → GND</text>
+  <text class="etichetta" x="846" y="692">Il rosso è il banco A, il verde il banco B:</text>
+  <text class="etichetta" x="846" y="704">i quattro LED cambiano sempre tutti insieme.</text>
+  <text class="etichetta" x="846" y="722">Piedino blu: non collegato — quattro LED per</text>
+  <text class="etichetta" x="846" y="734">tre colori sarebbero dodici uscite, e ce ne sono otto.</text>
+  <path class="filo" d="M800 520 H 812 V 534 H 848"/>
+  <text class="etichetta" x="800" y="516">port B</text>
+
+  <!-- ================= NOTE ================= -->
+  <rect class="gruppo" x="8" y="470" width="800" height="270" rx="6"/>
+  <text class="gruppo-nome" x="18" y="488">NOTE DI MONTAGGIO</text>
+
+  <text class="nota-t" x="20" y="512">Interruttori</text>
+  <text class="nota" x="20" y="526">SPST momentanei, normalmente aperti (NO), due piedini, foro M12. Un capo a massa, l'altro</text>
+  <text class="nota" x="20" y="538">all'ingresso dell'MCP: i pull-up interni bastano, nessuna resistenza esterna. L'antirimbalzo è</text>
+  <text class="nota" x="20" y="550">nel firmware. Il filetto tipico è 9 mm: su un pannello di legno più spesso va svasato da sotto.</text>
+
+  <text class="nota-t" x="20" y="574">LED</text>
+  <text class="nota" x="20" y="588">Catodo comune: il comune va a GND e l'MCP eroga corrente per accendere. Le resistenze sono</text>
+  <text class="nota" x="20" y="600">quelle già tarate a 3,3 V nel progetto Timer — verde 100 Ω, rosso 220 Ω: il verde è InGaN e</text>
+  <text class="nota" x="20" y="612">cade a 3,0–3,2 V, quindi gli resta poca tensione e vuole più corrente del rosso.</text>
+  <text class="nota" x="20" y="624">L'MCP23017 non ha PWM: acceso o spento, niente luminosità regolabile e niente giallo.</text>
+
+  <text class="nota-t" x="20" y="648">I²C</text>
+  <text class="nota" x="20" y="662">Se il bus non parte, il primo sospetto sono i pull-up: due resistenze da 4,7 kΩ verso 3,3 V.</text>
+  <text class="nota" x="20" y="674">Non è verificato se il modulo KAmod li abbia già a bordo.</text>
+
+  <text class="nota-t" x="20" y="698">Da verificare sul rame</text>
+  <text class="nota" x="20" y="712">Nessuno degli undici piedini della XIAO C6 è di strapping, quindi non ci sono pin da evitare</text>
+  <text class="nota" x="20" y="724">all'avvio. I tempi BLE sono stati misurati sul C3: sul C6 vanno rimisurati.</text>
+
+</svg>
+</body>
+</html>
