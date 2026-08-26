@@ -256,10 +256,17 @@ record sono un'istantanea vera di quel suono. `inModifica.offline` governa la di
 
 - **niente parte sulla radio**: `mandaParametro` non accoda nemmeno, o un arretrato
   partirebbe tutto insieme se l'ampli si connettesse a metà;
-- **il modello non si cambia**, e la tendina è spenta: cambiarlo vuol dire far ricostruire
-  un blocco DSP e poi **rileggere quanti parametri ha quello nuovo**. Deciderlo alla cieca
-  vorrebbe dire dare al modello nuovo i parametri del vecchio — cioè costruire a tavolino
-  il preset che pianta l'ampli;
+- **il modello si cambia, ma solo scegliendo fra quelli che la libreria ha già visto**
+  (dal 26 agosto 2026, chiesto dall'utente; prima la tendina era spenta). Il pericolo che
+  la teneva spenta è reale e non è cambiato: di un modello mai visto non sappiamo **quante
+  manopole abbia**, e dargli i parametri del modello di prima vuol dire costruire a
+  tavolino il preset che pianta l'ampli. La via d'uscita non è indovinare, è **copiare un
+  blocco vero**: `campioneModello(nome)` pesca da un preset della libreria un blocco con
+  quel modello dentro e ne prende **numero di parametri e valori**, così quello che ne esce
+  è un blocco che l'ampli ha davvero prodotto. Resta acceso o spento com'era, che è una
+  scelta dell'utente e non una proprietà del modello. Offline spariscono quindi il gruppo
+  «dal catalogo, da provare» e la voce «a mano»: un nome che nessuno ha mai visto non si
+  può né verificare né misurare;
 - **la modalità si decide all'apertura e non cambia più**, anche se l'ampli si connette
   dopo: rileggere la catena a metà lavoro sostituirebbe di soppiatto quello che si sta
   modificando con quello che l'ampli sta suonando, che è un altro suono.
