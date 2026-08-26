@@ -501,7 +501,17 @@ sospetto, e si risolve con due resistenze da 4,7 kΩ.
   fare danni o di ripercorrere una strada chiusa**. Il racconto di *come* ci si è arrivati
   va in `docs/`, sempre.
 - Segnare sempre cosa è verificato sull'hardware e cosa no.
-- Italiano nei commenti e nella UI.
+- Italiano nei commenti e nella UI. **L'inglese ci sarà, ma non adesso** — deciso il 26
+  agosto 2026 dopo aver misurato: sono **~270 stringhe** (169 nel JS, 87 nel corpo HTML,
+  12 fra `title` e `placeholder`), e **93 sono messaggi di log**, cioè prosa che spiega il
+  comportamento e che quindi si riscrive ogni volta che il comportamento cambia.
+  Tradurre adesso vuol dire tradurre due volte e rendere doppia ogni modifica alla UI;
+  aspettare non accumula debito, perché i messaggi sono già frasi intere con i valori
+  dentro e non pezzi cuciti insieme. Il momento è **quando Preset, Live ed editor smettono
+  di cambiare forma** — non «a progetto finito», che il pedale può andare avanti senza
+  toccare una riga di testo dell'app. Allora: `src/lingua.js` con due dizionari e una
+  `t()`, `data-t` sugli elementi statici, nessuna libreria e nessun build step. L'utente ha
+  detto «non c'è fretta»: è per sé, non per pubblicarla ad altri.
 - I byte nei log e nella documentazione si scrivono in hex minuscolo separato da spazi.
 
 ## Il sync con Dropbox — in tre righe
