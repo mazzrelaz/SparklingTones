@@ -900,7 +900,11 @@ del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un am
    quest'ordine: display sulla C6 con quattro cavetti, e vedere se scrive; poi l'espansore
    con **un pulsante solo**, per sapere se il bus I²C legge; poi il firmware, che è tutto
    software. Il porting da C3 a C6 dovrebbe essere di peso, ma **i tempi BLE vanno
-   rimisurati**.
+   rimisurati**. **L'alimentazione è chiusa il 27 agosto 2026** — modulo di ricarica, due
+   codini USB-C da pannello, interruttore, partitore, indicatore di batteria: tutto deciso e
+   scritto in `docs/pedale.md`, niente più da decidere finché non arrivano i pezzi. **Il
+   primo lavoro fisico che l'utente farà è il foro per i LED del modulo**, e vuole il modulo
+   in mano prima di disegnarlo.
 5. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due
    lati.
