@@ -639,9 +639,46 @@ dropbox.com/developers e incollare l'app key nel pannello «Altro». Tutto il re
 trappole del rientro, il verifier che si riusa, i 34 test contro un fetch finto — è in
 `docs/dropbox.md`.
 
-## Dove si riprende — 26 agosto 2026, sera
+## Il sito di presentazione — fuori da questo repo
 
-**La giornata è finita sul vestito, non sul protocollo.** In fila: i due tasti che spostano
+Dal **27 agosto 2026** c'è una vetrina su **`sparklingtones.com`**, e **non sta qui**:
+`C:\Users\massi\sparklingtones-sito`, repo `mazzrelaz/sparklingtones-sito`. Un solo
+`index.html`, font e logo copiati dall'app, nessuna dipendenza.
+
+**L'app non si è spostata**, e la ragione è la trappola da ricordare: **un dominio custom
+su GitHub Pages vale per l'intero repo**. Messo su `SparklingTones` avrebbe portato via
+anche l'app, e con lei la PWA installata sul telefono e l'IndexedDB della libreria — altra
+origine, altro database. Quindi repo separato, e il sito ci manda con dei link.
+
+DNS su register.it: quattro record `A` agli IP di GitHub (`185.199.108-111.153`) più il
+`CNAME` del `www`; il dominio lo dichiara il file `CNAME` dentro il repo del sito. Attivo e
+verificato, https compreso.
+
+**I video non ci sono ancora**: i blocchi `<video>` sono in `index.html` **commentati**, e
+`media/LEGGIMI.md` dice quali servono e come registrarli. Se l'utente dice «il video», è
+quello. **Capitolo in stand by** per sua richiesta, il 27 agosto 2026.
+
+Non fatto perché è la facciata pubblica e la decide lui: il `README.md` dell'app punta
+ancora solo a `github.io`, senza il link al sito. La domanda gli è stata fatta e non ha
+risposto.
+
+## Dove si riprende — 27 agosto 2026
+
+**Il 27 agosto è andato tutto nel sito**, non nell'app: comprato il dominio, configurato il
+DNS, scritta e pubblicata la pagina. Vedi la sezione qui sopra. L'app non è stata toccata.
+
+**Il pezzo di lavoro già a fuoco, e l'utente ha aperto una sessione apposta: il bollo «JH»
+nell'editor.** Il bollo c'è sulle schede della vista preset e sulle righe di libreria, ma
+**non nel momento in cui si sceglie un effetto Hendrix dalla tendina dei modelli** — che è
+il momento giusto per saperlo, prima di sentirlo muto. Era rimasto in sospeso per un motivo
+concreto: **la `.stato-pannello` dell'editor è già occupata** da quello che sta succedendo
+sulla radio, quindi il posto va trovato altrove.
+
+Quello che segue è di ieri e vale ancora.
+
+### 26 agosto 2026, sera
+
+**La giornata era finita sul vestito, non sul protocollo.** In fila: i due tasti che spostano
 il preset e lo slot aperto accesi al neon; la vista live con l'alone azzurro e il LED che
 dice la famiglia (acoustic da verde a **giallo**, e il verde è passato a chi famiglia non ne
 ha); via la striscia della famiglia dalle otto caselle dell'ampli; e infine **tutte le
