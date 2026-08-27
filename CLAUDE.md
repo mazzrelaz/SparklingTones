@@ -45,7 +45,7 @@ src/spark-backup.js               legge preset_backup.zip dell'app ufficiale, se
 src/dropbox-sync.js               sync della libreria: OAuth PKCE, niente server
 src/pedale-ponte.js               sponda app del ponte BLE verso il pedale
 src/pwa.js                        service worker, «installa», «versione nuova»
-src/snake-pedali.js               la goliardata: Snake a 8 bit, dentro «Altro»
+src/snake-pedali.js               la goliardata: StompSnake, a 8 bit, dentro «Altro»
 pedale/prova-ble/                 firmware: si collega, cambia preset, riceve un banco
   banchi.h  preset_frames.h       formato del banco; frame preserializzati dall'app
 pedale/prova-usb/                 sketch vuoto, per isolare i guai di USB/alimentazione
@@ -642,12 +642,25 @@ sul port B. **Non verificato sul C6**: i tempi BLE (misurati su C3, libreria ide
 il modulo espansore abbia i pull-up sull'I²C — se il bus non parte, quello è il primo
 sospetto, e si risolve con due resistenze da 4,7 kΩ.
 
-## La goliardata: Snake dei pedalini
+## La goliardata: StompSnake
 
 Chiesto dall'utente il **27 agosto 2026**: «un passatempo fra una canzone e l'altra». Un
 Snake a 8 bit dove il serpente è una catena di pedalini attaccati col cavo e mangia
 **batterie da 9 volt**. Sta in `src/snake-pedali.js` e si apre da un tasto in fondo ad
 «Altro».
+
+**Si chiama StompSnake, ma il file resta `snake-pedali.js`**: il nome gliel'ha dato
+l'utente il 27 agosto, a gioco fatto, e rinominare il file vorrebbe dire toccare anche
+`index.html` e il `GUSCIO` di `sw.js` per niente.
+
+**Sopra il campo c'è la fascia del marchio**, alta 46 px, che aspetta
+`icons/stompsnake.png` — l'utente lo prepara a parte. Finché il file non c'è si vede la
+scritta «STOMPSNAKE», che occupa lo stesso spazio, e l'immagine si scopre da sé quando
+arriva (`load` la mostra, `error` non fa niente). Due cose da ricordare: **il file va
+aggiunto al `GUSCIO` di `sw.js` solo dopo che esiste** — `cache.addAll` fallisce in blocco
+su un 404 e l'app resterebbe senza guscio offline — e **l'attributo `hidden` da solo non
+nasconde l'immagine**, perché il nostro `display:block` lo scavalca: senza la regola
+`img[hidden] { display:none }` il segnaposto rotto si vede.
 
 - **Non tocca niente**: non parla con l'ampli, non legge la libreria, non ha stato in comune
   con l'app. L'unico contatto è `SnakePedali.apri()`. Record e «muto» stanno in
@@ -755,14 +768,18 @@ messaggi**: la risposta è che sui tasselli non serve niente — quei modelli si
 «J.H. Fuzz Zone» e il nome li identifica da solo — e quello che mancava era **cosa
 comporta**, detto nei due momenti in cui conta.
 
-**E poi, sempre il 27, la goliardata**: lo Snake dei pedalini, in «Altro». Regole e trappole
+**E poi, sempre il 27, la goliardata**: StompSnake, in «Altro». Regole e trappole
 nella sezione qui sopra. Tre giri in un pomeriggio, tutti chiesti da lui: prima il gioco,
 poi **«un po' troppo veloce»** (adesso si parte a 330 ms e si scende di dieci a batteria),
-poi **il wah come premio e una cornice attorno al campo**. È **provato solo sul banco e in
-headless**: sul telefono, col dito, non l'ha ancora visto nessuno — ed è lì che si gioca. Se
-riapre il capitolo, le manopole sono i quattro `WAH_*` e i tre della cadenza, tutti in cima
-a `src/snake-pedali.js`; e **il wah in una partita vera non l'ho mai visto comparire**,
-perché per arrivarci servono dieci batterie giocate a mano.
+poi **il wah come premio e una cornice attorno al campo**; infine l'ha provato sul telefono
+e **i comandi funzionano** — detto da lui, ed è l'unica cosa che il banco non poteva dire.
+Da lì il nome, **StompSnake**, e la fascia per il logo che sta preparando.
+
+Se riapre il capitolo, le manopole sono i quattro `WAH_*` e i tre della cadenza, tutti in
+cima a `src/snake-pedali.js`. Resta da vedere **il wah in una partita vera**: non l'ho mai
+visto comparire, perché per arrivarci servono dieci batterie giocate a mano. E **quando
+arriva `icons/stompsnake.png` va messo nel `GUSCIO` di `sw.js`**, che è l'unico passo che
+non si fa da sé.
 
 Quello che segue è del 26 e vale ancora.
 
@@ -803,7 +820,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v66` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v67` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
