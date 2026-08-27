@@ -325,15 +325,19 @@ Cosa comprare, verificato su Allegro il 25 agosto 2026:
   corrente è ridicola (~100 mA), conta solo che sia robusto. **Va sul retro o sul fianco,
   non sul piano di calpestio**, o si spezza al primo pestone;
 - **due resistenze da 200 kΩ** per il partitore di A0, che sulla C6 non è a bordo;
-- **modulo di ricarica: «MODUŁ ŁADOWANIA Li-Ion 18650 USB-C TP4056», 3,70 zł da 100hz_pl**
-  (offerta 15103942260, scelta il 27 agosto 2026). USB-C, 1 A, 26 × 17 mm, piazzole
-  `B+`/`B-`, `OUT+`/`OUT-`, codice `CA-033-TC`. **È la versione con la protezione** (DW01,
-  scarica sotto 2,5 V e sovracorrente a 3 A) e va bene lo stesso, perché **quella protezione
-  non si usa**: il carico si prende dalla cella attraverso l'interruttore, non da `OUT`, e la
-  protezione che conta è quella già a bordo della XTAR. Dalle `OUT` non si guadagnerebbe
-  niente comunque, il load sharing manca in tutti e due i casi. Nota: **il modulo resta
-  attaccato alla cella anche a pedale spento**, perché sta a monte dell'interruttore —
-  decine di µA, qualche decina di mAh al mese su 3300, irrilevante;
+- **modulo di ricarica: [Aideepen TC4056 USB-C, sei pezzi per 11,87 zł su Amazon.pl](https://www.amazon.pl/dp/B0BZSB3SBN)**
+  (ASIN `B0BZSB3SBN`, scelto il 27 agosto 2026, 4,5 su 292 valutazioni). USB-C, 1 A, 25 × 16,5
+  mm, LED rosso `CHARGE` e verde `FULL`. **Sei pezzi costano meno di uno solo comprato su
+  Allegro** (3,70 + 10,49 di consegna), e su un modulo che si salda, che sta attaccato a un
+  litio e che prima o poi se ne brucia uno, i ricambi non sono spreco. Scartata l'offerta
+  Allegro 15103942260, equivalente ma più cara. **È la versione con la protezione** (4,28 V in
+  sovraccarica, 3 A in sovracorrente) e va bene lo stesso, perché **quella protezione non si
+  usa**: il carico si prende dalla cella attraverso l'interruttore, non da `OUT`, e la
+  protezione che conta è quella già a bordo della XTAR. Dalle `OUT` non si guadagnerebbe niente
+  comunque, il load sharing manca in tutti e due i casi — e per lo stesso motivo si ignora
+  l'avvertenza del venditore sul primo collegamento che «attiva il circuito di protezione».
+  Nota: **il modulo resta attaccato alla cella anche a pedale spento**, perché sta a monte
+  dell'interruttore — decine di µA, qualche decina di mAh al mese su 3300, irrilevante;
 - 3300 mAh su ~60 mA fanno **una quarantina d'ore vere**.
 
 **Il montaggio è la parte che decide se è davvero sicuro**: la cella va **bloccata** — una
@@ -420,8 +424,14 @@ Quello che fa la differenza col saldatore in mano:
 **Lo dicono i due LED del modulo**: rosso `CHARGE` acceso mentre carica, **verde `FULL`
 quando ha finito**. Il TP4056 termina a C/10 (~100 mA) ed è lì che il verde si accende. Da
 cui **una conseguenza sul montaggio**: il modulo va posizionato in modo che **quei due LED si
-vedano**. Stanno accanto al connettore, quindi con la presa a filo del pannello bastano due
-forellini sopra, o un'asola. Altrimenti la ricarica è muta.
+vedano**, o la ricarica è muta. Due forellini da 3 mm allineati ai LED.
+
+**Col codino BTFO quel vincolo si scioglie**, ed è un vantaggio che non era previsto: il
+maschio USB-C entra nella presa del modulo e ci resta per sempre, mentre è la flangia sul
+pannello a prendere le pedalate. Quindi **il modulo non deve più stare dietro il connettore** e
+si mette dove fa comodo per i due forellini — trenta centimetri di cavo danno libertà totale.
+Unica accortezza: **fissarlo** (colla a caldo o un distanziale), o il peso e la piega del cavo
+gli tirano il connettore.
 
 **Con l'interruttore chiuso il verde può non accendersi mai**, ed è la stessa ragione del
 load sharing: la corrente che si beve il pedale tiene il modulo sopra la soglia di fine
