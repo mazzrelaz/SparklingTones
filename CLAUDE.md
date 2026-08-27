@@ -655,7 +655,9 @@ XIAO programma. **TP4056 e TC4056A sono lo stesso chip**, si sceglie per il conn
 e per la sezione di protezione (**meglio senza**: la XTAR è già protetta). La trappola è che
 **il TP4056 non fa load sharing**: si carica a **interruttore generale spento**, e
 l'interruttore va **fra la cella e la XIAO**, col `B+`/`B-` del modulo attaccato alla cella
-*prima* dell'interruttore. Il resto in `docs/pedale.md`.
+*prima* dell'interruttore. **Il modulo va montato coi suoi due LED in vista** (verde `FULL` =
+finita), e **le due prese vanno etichettate**, o il caricabatterie finisce in quella sbagliata.
+Cablaggio, saldature e il resto in `docs/pedale.md`.
 
 Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
 sul port B. **Non verificato sul C6**: i tempi BLE (misurati su C3, libreria identica) e se
