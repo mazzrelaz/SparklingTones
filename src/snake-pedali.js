@@ -1,6 +1,10 @@
 'use strict';
 /**
- * Snake dei pedalini — il passatempo fra una canzone e l'altra.
+ * StompSnake — il passatempo fra una canzone e l'altra.
+ *
+ * Il file si chiama ancora `snake-pedali.js`: il nome sullo schermo gliel'ha
+ * dato l'utente dopo, e rinominare il file vorrebbe dire toccare anche
+ * `index.html` e il guscio in `sw.js` per niente.
  *
  * Sta in un file suo e non in `index.html` per una ragione sola: è una
  * goliardata, e una goliardata non deve pesare su un file che già costa
@@ -59,13 +63,27 @@ window.SnakePedali = (function () {
     { corpo: '#2fb6c0', luce: '#7fe8f0', ombra: '#14646c', nome: 'WHAM-WHAM' },
   ];
 
+  /* Il logo del gioco, che l'utente prepara a parte. Finché il file non c'è
+     la fascia mostra la scritta, e l'immagine compare da sé il giorno che
+     arriva — senza toccare una riga qui. **Quando c'è va aggiunto anche al
+     `GUSCIO` di `sw.js`**, o sarà l'unica cosa che manca offline; e non un
+     minuto prima, perché `cache.addAll` fallisce in blocco su un 404. */
+  const LOGO = 'icons/stompsnake.png';
+
   const SCHERMO =
     '<div class="barra-alta">' +
-      '<h2 style="flex:1">Snake dei pedalini</h2>' +
+      '<h2 style="flex:1">StompSnake</h2>' +
       '<button class="piccolo" data-snake="suono">suono</button>' +
       '<button class="primary" data-snake="chiudi">Fatto</button>' +
     '</div>' +
     '<div class="snake-scena">' +
+      // Il marchio sopra il campo. Finché l'immagine non c'è si vede la
+      // scritta, che tiene lo stesso spazio: così il campo non salta in su
+      // il giorno che il file arriva.
+      '<div class="snake-marchio">' +
+        '<img data-snake="marchio" src="' + LOGO + '" alt="StompSnake" hidden>' +
+        '<span data-snake="marchioScritto">STOMP<b>SNAKE</b></span>' +
+      '</div>' +
       '<div class="snake-hud">' +
         '<span>Pedali <b data-snake="punti">0</b></span>' +
         '<span class="snake-nome" data-snake="nome">&nbsp;</span>' +
@@ -95,7 +113,21 @@ window.SnakePedali = (function () {
     // La tela è alta quanto è larga, e una tela larga quanto il telefono
     // spingerebbe la pulsantiera sotto il bordo dello schermo: la larghezza
     // la decide l'altezza che c'è.
-    '.snake-scena { max-width:min(420px, 58vh); margin:0 auto; }' +
+    '.snake-scena { max-width:min(420px, 46vh); margin:0 auto; }' +
+    // La fascia del marchio: altezza fissa, così il campo sta sempre allo
+    // stesso posto con o senza immagine.
+    '.snake-marchio { height:46px; display:flex; align-items:center;' +
+      ' justify-content:center; margin-bottom:8px; overflow:hidden; }' +
+    '.snake-marchio img { max-height:46px; max-width:100%; width:auto;' +
+      ' image-rendering:pixelated; display:block; }' +
+    // `hidden` da solo qui non basta: è `display:none` di sistema, e qualunque
+    // `display` scritto da noi lo scavalca. Senza questa riga il segnaposto
+    // dell'immagine mancante si vede, rotto, accanto alla scritta.
+    '.snake-marchio img[hidden], .snake-marchio span[hidden] { display:none; }' +
+    '.snake-marchio span { font-family:var(--strumento);' +
+      ' font-size:clamp(1rem, 6vw, 1.35rem); font-weight:700;' +
+      ' letter-spacing:0.14em; color:var(--text); white-space:nowrap; }' +
+    '.snake-marchio b { color:var(--accent); }' +
     '.snake-hud { display:flex; justify-content:space-between; align-items:baseline;' +
       ' gap:8px; margin-bottom:6px; font-family:var(--strumento); font-size:0.72rem;' +
       ' letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); }' +
@@ -171,6 +203,12 @@ window.SnakePedali = (function () {
     ctx = tela.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
+    // Il marchio si scopre solo se il file c'è davvero: `onerror` non fa
+    // niente e resta la scritta. `complete` copre il caso in cui l'immagine
+    // fosse già in cache e il carico fosse finito prima di arrivare qui.
+    parti.marchio.addEventListener('load', mostraMarchio);
+    if (parti.marchio.complete && parti.marchio.naturalWidth) mostraMarchio();
+
     parti.chiudi.addEventListener('click', chiudi);
     parti.ancora.addEventListener('click', () => { partita = nuova(); });
     parti.suono.addEventListener('click', () => {
@@ -202,6 +240,11 @@ window.SnakePedali = (function () {
     tela.addEventListener('pointercancel', () => { partenza = null; });
 
     document.addEventListener('keydown', tasto);
+  }
+
+  function mostraMarchio() {
+    parti.marchio.hidden = false;
+    parti.marchioScritto.hidden = true;
   }
 
   function mostraSuono() {
