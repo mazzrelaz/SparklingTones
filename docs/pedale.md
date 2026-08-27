@@ -434,6 +434,23 @@ quando ha finito**. Il TP4056 termina a C/10 (~100 mA) ed è lì che il verde si
 cui **una conseguenza sul montaggio**: il modulo va posizionato in modo che **quei due LED si
 vedano**, o la ricarica è muta. Due forellini da 3 mm allineati ai LED.
 
+**Il punto da non fraintendere** (l'utente l'ha chiesto il 27 agosto 2026: «a pedale spento non
+c'è modo di sapere quando è carica?»): **quello è proprio il caso che funziona sempre.** Il
+modulo non è alimentato dal pedale ma **dal cavo USB**, quindi a interruttore aperto, XIAO
+spenta e display nero i suoi due LED sono accesi lo stesso. A pedale spento non si può
+**scriverlo sul display**, che ha bisogno del firmware; ma la domanda «è carica?» ha risposta,
+ed è quel verde.
+
+**Versione migliore dei due forellini, se allineare due LED SMD è scomodo:** `CHRG` e `STDBY`
+del TP4056 sono a **collettore aperto** — sono i piedini che pilotano quei LED. Ci si attaccano
+**due LED da 3 o 5 mm veri**, montati sul pannello dove si vuole, anodo al `+` d'ingresso con
+la sua resistenza e catodo al piedino (sinkano pochi mA, uno basta). Restano alimentati
+dall'USB, quindi **funzionano a pedale spento** come gli originali, ma sono grossi e il modulo
+si butta in un angolo senza allineare niente. E siccome sono gli stessi due segnali che
+servirebbero al display, tanto vale portarli **anche** ai due GPIO liberi: quattro fili, e si
+hanno tutte e due le cose. Con sei moduli in mano, il primo su cui si prova la saldatura fine
+sui pad dei LED non è un problema.
+
 **Col codino BTFO quel vincolo si scioglie**, ed è un vantaggio che non era previsto: il
 maschio USB-C entra nella presa del modulo e ci resta per sempre, mentre è la flangia sul
 pannello a prendere le pedalate. Quindi **il modulo non deve più stare dietro il connettore** e
