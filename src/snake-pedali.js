@@ -38,6 +38,17 @@ window.SnakePedali = (function () {
   const WAH_LAMPEGGIA = 3000;       // gli ultimi secondi, per dire che scappa
   const WAH_VALE = 3;
 
+  /* Ogni cinque pedalini raccolti parte un accordo, e non è sempre lo stesso:
+     quattro power chord in fila — tonica, quinta, ottava — che girano. Un bip
+     non festeggia niente. */
+  const ACCORDO_OGNI = 5;
+  const ACCORDI = [
+    [82.41, 123.47, 164.81],    // MI
+    [98.00, 146.83, 196.00],    // SOL
+    [110.00, 164.81, 220.00],   // LA
+    [146.83, 220.00, 293.66],   // RE
+  ];
+
   /* La cadenza: millisecondi per casella. Si parte **piano** — a 210 era già
      svelta al primo tasto, e con una catena corta non c'è niente da capire,
      solo da reagire. La fretta se la deve guadagnare la partita: ogni
@@ -351,6 +362,8 @@ window.SnakePedali = (function () {
       batteria: null,
       wah: null,          // { x, y, resta } quando il premio è in campo
       prossimoWah: WAH_OGNI,
+      prossimoAccordo: ACCORDO_OGNI,
+      accordo: 0,         // quale power chord tocca al prossimo traguardo
       cresci: 0,          // caselle da allungare ancora, senza tagliare la coda
       finita: null,
       pausa: false,
@@ -397,6 +410,7 @@ window.SnakePedali = (function () {
     }
 
     p.catena.unshift(testa);
+    let mangiataBatteria = false;
 
     if (p.batteria && testa.x === p.batteria.x && testa.y === p.batteria.y) {
       p.punti++;
@@ -405,7 +419,7 @@ window.SnakePedali = (function () {
       parti.nome.textContent = '+ ' + PEDALI[p.punti % PEDALI.length].nome;
       bip(660, 0.05);
       setTimeout(() => bip(990, 0.06), 55);
-      if (p.punti >= p.prossimoWah) facciaIlWah(p);
+      mangiataBatteria = true;
     } else if (p.wah && testa.x === p.wah.x && testa.y === p.wah.y) {
       p.punti += WAH_VALE;
       p.cresci += WAH_VALE;
@@ -420,6 +434,20 @@ window.SnakePedali = (function () {
     p.passo = Math.max(PASSO_MINIMO, PASSO_INIZIALE - p.punti * CALO);
     parti.punti.textContent = p.punti;
 
+    // L'accordo del traguardo. La soglia si porta avanti con un `while` e non
+    // con un resto: il wah vale tre pedalini in un colpo, quindi il conto può
+    // scavalcare il cinque invece di posarcisi sopra.
+    let festa = false;
+    if (p.punti >= p.prossimoAccordo) {
+      while (p.punti >= p.prossimoAccordo) p.prossimoAccordo += ACCORDO_OGNI;
+      accordo(ACCORDI[p.accordo++ % ACCORDI.length]);
+      festa = true;
+    }
+
+    // Il wah arriva dopo l'accordo, e se l'accordo è appena partito entra
+    // zitto: due suoni sopra lo stesso passo diventano una poltiglia.
+    if (mangiataBatteria && p.punti >= p.prossimoWah) facciaIlWah(p, !festa);
+
     // La coda si taglia sempre, tranne per le caselle che la catena deve
     // ancora allungarsi: così il wah, che ne vale tre, cresce di tre passi
     // invece che di tre pezzi comparsi tutti insieme dal nulla.
@@ -430,12 +458,13 @@ window.SnakePedali = (function () {
   }
 
   /** Il premio compare, e da lì comincia a scappare. */
-  function facciaIlWah(p) {
+  function facciaIlWah(p, conSuono) {
     p.prossimoWah += WAH_OGNI;
     const posto = postoLibero(p, [p.batteria]);
     if (!posto) return;               // non c'è dove metterlo, pazienza
     p.wah = { x: posto.x, y: posto.y, resta: WAH_DURATA };
     parti.nome.textContent = 'un wah! prendilo';
+    if (!conSuono) return;
     bip(520, 0.05);
     setTimeout(() => bip(700, 0.05), 70);
     setTimeout(() => bip(900, 0.07), 140);
@@ -638,22 +667,101 @@ window.SnakePedali = (function () {
      comunque si può spegnere — fra una canzone e l'altra c'è chi ha ancora
      le cuffie in testa.
      ------------------------------------------------------------------ */
-  function bip(frequenza, durata) {
-    if (!suonoAcceso) return;
+  /** Il motore audio, acceso alla prima nota e non prima. */
+  function motore() {
+    if (!suonoAcceso) return null;
     try {
       if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+      // I browser tengono l'audio sospeso finché non c'è un gesto: qui il
+      // gesto c'è sempre, perché si suona premendo qualcosa.
       if (audio.state === 'suspended') audio.resume();
-      const oscillatore = audio.createOscillator(), volume = audio.createGain();
+      return audio;
+    } catch (errore) { return null; }   // senza audio si gioca uguale
+  }
+
+  function bip(frequenza, durata) {
+    const a = motore();
+    if (!a) return;
+    try {
+      const oscillatore = a.createOscillator(), volume = a.createGain();
       oscillatore.type = 'square';
       oscillatore.frequency.value = frequenza;
       oscillatore.connect(volume);
-      volume.connect(audio.destination);
-      const ora = audio.currentTime;
+      volume.connect(a.destination);
+      const ora = a.currentTime;
       volume.gain.setValueAtTime(0.05, ora);
       volume.gain.exponentialRampToValueAtTime(0.0001, ora + durata);
       oscillatore.start(ora);
       oscillatore.stop(ora + durata + 0.02);
-    } catch (errore) { /* senza audio si gioca uguale */ }
+    } catch (errore) { /* pazienza */ }
+  }
+
+  /**
+   * La curva del distorsore: è quella classica, e quello che fa è schiacciare
+   * i picchi dell'onda. Si calcola una volta sola perché sono 256 numeri che
+   * non cambiano mai.
+   */
+  let curvaDistorsione = null;
+  function curva() {
+    if (curvaDistorsione) return curvaDistorsione;
+    const punti = 256, quanto = 42;
+    curvaDistorsione = new Float32Array(punti);
+    for (let i = 0; i < punti; i++) {
+      const x = (i * 2) / punti - 1;
+      curvaDistorsione[i] = ((3 + quanto) * x * 20 * Math.PI / 180) /
+                            (Math.PI + quanto * Math.abs(x));
+    }
+    return curvaDistorsione;
+  }
+
+  /**
+   * L'accordo di premio, ogni cinque pedalini. Non è un campione: sono tre
+   * corde — tonica, quinta, ottava — fatte con onde a dente di sega, due voci
+   * per corda leggermente scordate fra loro perché una sola suona finta, e
+   * tutte dentro un distorsore. Le corde partono **sfalsate di diciotto
+   * millisecondi**: è la pennata, ed è quella a far sentire una chitarra
+   * invece di un organo. Il filtro in fondo toglie lo stridulo che la
+   * distorsione tira fuori dal dente di sega.
+   */
+  function accordo(corde) {
+    const a = motore();
+    if (!a) return;
+    try {
+      const ora = a.currentTime;
+      const distorsore = a.createWaveShaper();
+      distorsore.curve = curva();
+      distorsore.oversample = '4x';
+      // Le sei voci entrano nel distorsore **abbassate**: a piena ampiezza la
+      // somma arriva a sei volte il fondoscala e la curva schiaccia tutto in
+      // un'onda quadra, che è un rumore, non un accordo. Con lo 0,3 la curva
+      // lavora sul ginocchio, che è dove si sente la chitarra.
+      const ingresso = a.createGain();
+      ingresso.gain.value = 0.3;
+      ingresso.connect(distorsore);
+
+      const filtro = a.createBiquadFilter();
+      filtro.type = 'lowpass';
+      filtro.frequency.value = 2400;
+      const volume = a.createGain();
+      volume.gain.setValueAtTime(0.0001, ora);
+      volume.gain.exponentialRampToValueAtTime(0.07, ora + 0.014);
+      volume.gain.exponentialRampToValueAtTime(0.0001, ora + 0.5);
+      distorsore.connect(filtro);
+      filtro.connect(volume);
+      volume.connect(a.destination);
+
+      corde.forEach((frequenza, i) => {
+        [-7, 7].forEach(scordatura => {
+          const o = a.createOscillator();
+          o.type = 'sawtooth';
+          o.frequency.value = frequenza;
+          o.detune.value = scordatura;
+          o.connect(ingresso);
+          o.start(ora + i * 0.018);
+          o.stop(ora + 0.56);
+        });
+      });
+    } catch (errore) { /* pazienza */ }
   }
 
   /* ------------------------------------------------------------------

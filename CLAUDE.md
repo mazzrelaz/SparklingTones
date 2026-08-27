@@ -672,6 +672,17 @@ ritagliato dei margini vuoti. Tre cose da ricordare:
   `display:block` lo scavalca — senza la regola `img[hidden] { display:none }` il
   segnaposto rotto si vede accanto alla scritta.
 
+**Ogni cinque pedalini parte un accordo distorto** (chiesto il 27 agosto 2026), e non è un
+campione: sono tre corde — tonica, quinta, ottava — di onde a dente di sega, **due voci per
+corda leggermente scordate** perché una sola suona finta, dentro un `WaveShaper`. Due cose
+che fanno la differenza fra una chitarra e un rumore: le corde partono **sfalsate di 18 ms**
+(è la pennata), e le sei voci entrano nel distorsore **abbassate a 0,3** — a piena ampiezza
+la somma arriva a sei volte il fondoscala e la curva schiaccia tutto in un'onda quadra. La
+soglia avanza con un `while` e non con un resto, perché il wah vale tre pedalini e il conto
+può **scavalcare** il cinque; e se l'accordo è appena partito, il wah che compare nello
+stesso passo entra zitto. **Il banco lo verifica contando le onde**, con un `AudioContext`
+finto: quadre = bip, dente di sega = accordo.
+
 **Il campo e i tasti hanno un bordo al neon che fa l'onda** (chiesto il 27 agosto 2026).
 Il trucco sono due sfondi sovrapposti — il nero ritagliato sul riquadro interno, l'arcobaleno
 su tutto compreso il bordo, largo il doppio — e uno scorrimento di `200%`, che torna al
@@ -838,7 +849,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v68` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v69` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
