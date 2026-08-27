@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v63';
+const VERSIONE = 'v64';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -31,6 +31,7 @@ const GUSCIO = [
   './src/pedale-ponte.js',
   './src/spark-backup.js',
   './src/pwa.js',
+  './src/snake-pedali.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
