@@ -441,6 +441,22 @@ spenta e display nero i suoi due LED sono accesi lo stesso. A pedale spento non 
 **scriverlo sul display**, che ha bisogno del firmware; ma la domanda «è carica?» ha risposta,
 ed è quel verde.
 
+**Come si vedono da fuori, in concreto** (l'utente ha dovuto chiederlo due volte, quindi qui
+sta scritto passo per passo). Tre modi, dal più facile al più bello:
+
+1. **Un foro solo, non due allineati.** I due LED SMD sono a pochi millimetri l'uno dall'altro:
+   invece di due forellini da 3 mm da centrare al decimo, **un foro unico da 6–8 mm** o
+   un'asola, col modulo incollato dietro e i due LED dentro l'apertura. Si distingue benissimo
+   il rosso dal verde. Per finirlo, un pezzetto di plexi o una goccia di colla a caldo
+   trasparente dietro il foro. **Tolleranza generosa, zero elettronica in più: è la via da cui
+   partire.**
+2. **Due spezzoni di filamento trasparente** da stampante 3D (1,75 mm) o di lenza spessa, uno
+   sopra ciascun LED e infilato in un forellino del pannello: fanno da fibra ottica. Tolleranza
+   altissima, il modulo va dove si vuole, si fissa con la colla a caldo.
+3. **Due LED veri sul pannello**, sotto. Il più bello, ma **i punti dove saldare vanno trovati
+   col tester**, perché su questi moduli la disposizione varia. Con sei moduli in mano il primo
+   si sacrifica per capire dov'è cosa.
+
 **Versione migliore dei due forellini, se allineare due LED SMD è scomodo:** `CHRG` e `STDBY`
 del TP4056 sono a **collettore aperto** — sono i piedini che pilotano quei LED. Ci si attaccano
 **due LED da 3 o 5 mm veri**, montati sul pannello dove si vuole, anodo al `+` d'ingresso con
