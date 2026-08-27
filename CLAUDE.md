@@ -797,18 +797,20 @@ messaggi**: la risposta è che sui tasselli non serve niente — quei modelli si
 «J.H. Fuzz Zone» e il nome li identifica da solo — e quello che mancava era **cosa
 comporta**, detto nei due momenti in cui conta.
 
-**E poi, sempre il 27, la goliardata**: StompSnake, in «Altro». Regole e trappole
-nella sezione qui sopra. Tre giri in un pomeriggio, tutti chiesti da lui: prima il gioco,
-poi **«un po' troppo veloce»** (adesso si parte a 330 ms e si scende di dieci a batteria),
-poi **il wah come premio e una cornice attorno al campo**; infine l'ha provato sul telefono
-e **i comandi funzionano** — detto da lui, ed è l'unica cosa che il banco non poteva dire.
-Da lì il nome, **StompSnake**, e la fascia per il logo che sta preparando.
+**E poi, sempre il 27, la goliardata**: StompSnake. Regole e trappole nella sezione qui
+sopra. È venuta fuori in un pomeriggio, un giro alla volta, tutti chiesti da lui: il gioco;
+poi **«un po' troppo veloce»** (adesso si parte a 330 ms e si scende di dieci a batteria);
+il **wah come premio** e la **cassa attorno al campo**; poi l'ha provato sul telefono e **i
+comandi funzionano** — detto da lui, ed è l'unica cosa che il banco non poteva dire. Da lì
+il **nome** e il **logo**, che ha disegnato lui; lo spostamento dell'accesso nel **menu «⋯»
+alla voce «Fai una pausa»**; il **neon a onda** su campo e tasti; e infine **l'accordo
+distorto ogni cinque pedalini**. Pubblicato, guscio `v69`, verificato sull'indirizzo vero.
 
-Se riapre il capitolo, le manopole sono i quattro `WAH_*` e i tre della cadenza, tutti in
-cima a `src/snake-pedali.js`. Resta da vedere **il wah in una partita vera**: non l'ho mai
-visto comparire, perché per arrivarci servono dieci batterie giocate a mano. E **quando
-arriva `icons/stompsnake.png` va messo nel `GUSCIO` di `sw.js`**, che è l'unico passo che
-non si fa da sé.
+Se riapre il capitolo, tutte le manopole stanno in cima a `src/snake-pedali.js`: i quattro
+`WAH_*`, i tre della cadenza, `ACCORDO_OGNI` e la tabella `ACCORDI`. **Due cose non le ho
+viste io e le sa solo lui**: come suona davvero l'accordo — volume, cattiveria della
+distorsione, filtro — e **il wah in una partita vera**, perché per arrivarci servono dieci
+batterie giocate a mano.
 
 Quello che segue è del 26 e vale ancora.
 
