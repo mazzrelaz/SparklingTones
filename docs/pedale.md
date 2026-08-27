@@ -567,9 +567,24 @@ Due cose da mettere in conto, nessuna bloccante:
   maschio e il raggio di curvatura — spazio da verificare sul disegno prima di comprare la
   scatola;
 - **la flangia vuole un foro rettangolare più due fori per le viti**, non un foro tondo di
-  trapano: lima o Dremel. L'alternativa a **un solo foro tondo** sarebbe il tipo **a vite
-  M11**, che però ricade fra le prese a due fili, col dubbio sul CC. Il foro rettangolare è il
-  prezzo della certezza.
+  trapano: lima o Dremel.
+
+**Trovata l'alternativa che toglie il rettangolo — 27 agosto 2026:
+[HENGBIRD, 25,99 zł](https://www.amazon.pl/dp/B0G37T13JJ)** (ASIN `B0G37T13JJ`). Stessa
+topologia (femmina + 30 cm + maschio) e stesso pinout pieno (USB 3.0 5 Gbps con PD, quindi il
+CC c'è), ma **si monta con filetto M21×1,5 e dado: foro tondo da 22 mm**, pannello fino a 8 mm.
+Cioè **come un jack da chitarra o come l'interruttore**, invece che a lima. Su una scatola da
+pedale è la differenza fra un lavoro fatto apposta e un rattoppo, e costa 6 zł in più a pezzo.
+
+Due verifiche prima di ordinarlo: **come si fa un foro da 22 mm** — serve una punta a gradini
+che ci arrivi (**la 4–20 comune non basta**) o una sega a tazza; e **lo spazio sul pannello**,
+perché due fori da 22 affiancati vogliono una cinquantina di millimetri più i bordi, e sulla
+stessa faccia va anche l'interruttore.
+
+**Idea da valutare al montaggio: uno HENGBIRD per la carica e il BTFO per il firmware.** Quello
+della carica si usa sempre e sta in vista, l'altro di rado e può stare dietro — e siccome sono
+fisicamente diversi, **la confusione fra le due prese sparisce per forma invece che per
+etichetta**, che è sempre meglio perché le etichette si staccano.
 
 Scartate: la presa 2-pin da ~3 zł (CC ignoto e non aggiungibile, e una recensione avverte che i
 fili sono da bassa corrente) e il breakout 4-pin da 3,48 zł (le 5,1 kΩ di solito ci sono ma non
