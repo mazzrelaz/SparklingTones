@@ -789,7 +789,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v64` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v65` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
