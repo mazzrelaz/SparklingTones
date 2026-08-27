@@ -287,12 +287,30 @@ che servono per ragionarci:
 Il rabbocco notturno quindi non è inutile: ridà più ore di quante ne serva un weekend. E a
 0,03C la cella non soffre — è una carica gentile, solo lenta.
 
-**Se un giorno servisse caricare senza aprire la scatola**, l'aggiunta sensata è **un
-TP4056 dedicato con la sua USB-C sul pannello**: due zloty, Rprog a 1,2 kΩ per 1 A (~3,5
-h), versione base perché la protezione è già sulla cella. La trappola sono i **due
-caricabatterie sulla stessa cella**: sul pannello va la presa del TP4056, e quella della
-XIAO resta interna, per il firmware, **da usare a cella tolta**. Cambiare la resistenza
-PROG sulla XIAO no: è un SMD minuscolo sull'unica scheda del progetto.
+#### Due prese sul pannello, e un TP4056 per la carica — chiesto dall'utente il 27 agosto 2026
+
+La risposta al 100 mA è **un caricabatterie dedicato con la sua presa**, accanto a quella
+della XIAO: due zloty, ~3,5 h invece di 35, e le due prese fanno due mestieri separati —
+quella del TP4056 carica, quella della XIAO programma. (Cambiare la resistenza PROG sulla
+XIAO no: è un SMD minuscolo sull'unica scheda del progetto.)
+
+**TP4056 o TC4056A è la stessa cosa**: il primo è l'originale di Top Power ASIC, il secondo
+è la versione pin-compatibile di un altro produttore, stesse specifiche — e moltissimi
+moduli venduti come «TP4056» hanno sopra un TC4056A. Non è quello il criterio. I tre veri:
+
+- **connettore USB-C**, uguale a quello della XIAO: un cavo solo nella custodia;
+- **versione liscia, senza la sezione di protezione** (DW01 + i due MOSFET): la XTAR è già
+  protetta sulla cella. Due protezioni in serie con soglie diverse non fanno danni, ma sono
+  un pezzo in più che può intervenire per conto suo. Se si trova solo quella protetta va
+  bene lo stesso;
+- **Rprog `R3` da 1,2 kΩ = 1 A**, che sulla 3300 è 0,3 C. I moduli arrivano quasi sempre
+  già così.
+
+**La trappola non è il chip, è il load sharing: il TP4056 non ce l'ha.** Col pedale acceso
+mentre carica, la corrente che si beve lui confonde il rilevamento di fine carica e il
+modulo può non terminare mai. Quindi **si carica a interruttore generale spento**, e
+l'interruttore va **fra la cella e la XIAO**, con `B+`/`B-` del TP4056 attaccati alla cella
+*prima* dell'interruttore. Massa in comune fra tutto.
 
 Cosa comprare, verificato su Allegro il 25 agosto 2026:
 

@@ -641,9 +641,15 @@ serviva sul C3:
 3300 mAh sono 35–40 ore. Non è un guaio perché la cella si estrae e si carica in un
 caricabatterie vero (~2 h), che era già il piano; la presa sul pannello serve al **firmware**
 più un rabbocco — una notte attaccato vale ~13 ore di uso, su ~40 di autonomia. Se un giorno
-servisse caricare senza aprire, si aggiunge un **TP4056 con la sua presa**: il ragionamento e
-la trappola dei due caricabatterie sono in `docs/pedale.md`. **La cifra «380 mA» che c'era qui
-era del C3.**
+servisse caricare senza aprire, si aggiunge un **TP4056 con la sua presa**. **La cifra
+«380 mA» che c'era qui era del C3.**
+
+**Due prese sul pannello, deciso il 27 agosto 2026**: quella del TP4056 carica, quella della
+XIAO programma. **TP4056 e TC4056A sono lo stesso chip**, si sceglie per il connettore (USB-C)
+e per la sezione di protezione (**meglio senza**: la XTAR è già protetta). La trappola è che
+**il TP4056 non fa load sharing**: si carica a **interruttore generale spento**, e
+l'interruttore va **fra la cella e la XIAO**, col `B+`/`B-` del modulo attaccato alla cella
+*prima* dell'interruttore. Il resto in `docs/pedale.md`.
 
 Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
 sul port B. **Non verificato sul C6**: i tempi BLE (misurati su C3, libreria identica) e se
