@@ -364,6 +364,97 @@ alla cella prima): **a interruttore aperto la USB della XIAO programma ma non ca
 il suo caricabatterie sbuca proprio sulla piazzola `BAT` che l'interruttore ha staccato. I due
 mestieri delle due prese restano separati anche per sbaglio.
 
+#### Come si collega l'interruttore
+
+```
+            portacella 18650
+            ┌──────────────┐
+            │   [ cella ]  │
+            └──┬────────┬──┘
+        rosso (+)      (−) nero
+               │        │
+       ┌───────┴──┐     ├──────────────────┐
+       │          │     │                  │
+       │        ┌─┴─────┴─┐                │
+       │        │ B+   B− │  TP4056        │
+       │        │  [USB-C]│  (OUT+ / OUT−  │
+       │        └─────────┘   non si usano)│
+       │                                   │
+   ┌───┴───┐                               │
+   │  ○ ←──┼── linguetta centrale          │
+   │  ○ ───┼── una laterale ──┐            │
+   │  ○    │  (l'altra libera)│            │
+   └───────┘  interruttore    │            │
+                              │            │
+                          ┌───┴────────────┴───┐
+                          │ BAT+          BAT− │  XIAO ESP32-C6
+                          └────────────────────┘
+```
+
+Quattro saldature: positivo della cella alla **linguetta centrale**; laterale a **`BAT+`**;
+negativo della cella a **`BAT−`**; e positivo e negativo della cella anche a **`B+`/`B−`** del
+TP4056, allo stesso punto dei fili del portacella, **prima** dell'interruttore.
+
+Quello che fa la differenza col saldatore in mano:
+
+- **le piazzole `BAT` della C6 stanno sotto la scheda e sono facili da invertire**: il wiki
+  di Seeed dice che **il negativo è dal lato della serigrafia `D8`, il positivo dal lato di
+  `D5`**. Si guarda la serigrafia, non «quello a destra»;
+- **se l'interruttore ha tre linguette è uno SPDT**: centrale più una esterna, la terza resta
+  libera. Con due sole è uno SPST e non ha polarità. **Prima di montarlo si prova col tester
+  da che parte è acceso**, che al contrario si scopre a scatola chiusa;
+- **si commuta il positivo, mai il negativo**: il negativo è la massa comune col TP4056 e con
+  tutto il resto;
+- **fra la cella e l'interruttore il filo è permanentemente in tensione e non protetto da
+  nulla**: corto, **guaina termorestringente su ogni linguetta**, nessun rame scoperto. Due
+  linguette nude che si toccano sono un corto secco su un litio, ed è l'unico modo serio di
+  farsi male con questo progetto;
+- **mai saldare sulla cella** (è il motivo del portacella), e **cella fuori mentre si salda**;
+- filo **24–26 AWG**: la sezione non conta a 100 mA, ma quello sottilissimo si spezza alla
+  base della saldatura dopo un po' di pedalate;
+- **i due fili `BAT` si saldano alla XIAO prima di montarla** nella scatola: dopo quelle
+  piazzole sono irraggiungibili.
+
+#### Come si capisce che la ricarica è finita
+
+**Lo dicono i due LED del modulo**: rosso `CHARGE` acceso mentre carica, **verde `FULL`
+quando ha finito**. Il TP4056 termina a C/10 (~100 mA) ed è lì che il verde si accende. Da
+cui **una conseguenza sul montaggio**: il modulo va posizionato in modo che **quei due LED si
+vedano**. Stanno accanto al connettore, quindi con la presa a filo del pannello bastano due
+forellini sopra, o un'asola. Altrimenti la ricarica è muta.
+
+**Con l'interruttore chiuso il verde può non accendersi mai**, ed è la stessa ragione del
+load sharing: la corrente che si beve il pedale tiene il modulo sopra la soglia di fine
+carica. Un motivo in più per caricare a pedale spento.
+
+Il tempo è comunque prevedibile: **1 A su 3300 mAh fanno ~3,5 h**, quindi attaccato e
+ripreso dopo quattro ore è finito, LED o non LED.
+
+**La tensione su A0 non serve a questo**: durante la carica il modulo tiene la cella a 4,2 V
+anche quando piena non è, quindi il valore letto non distingue «in carica» da «carica». E
+comunque a pedale spento il firmware non gira. Il partitore serve all'altra domanda — **quanto
+ne resta mentre si suona** — che è l'indicatore da mettere sull'OLED.
+
+Se un giorno si caricasse dalla presa della XIAO (i 100 mA, per un rabbocco), l'indicatore è
+il suo LED rosso a bordo: **lampeggia mentre carica e si spegne a fine carica**.
+
+#### La presa della XIAO non alimenta più niente: firmware e log, e basta
+
+Conseguenza di tutto quanto sopra, messa a fuoco dall'utente il 27 agosto 2026. Quella presa
+serve a **caricare il firmware** e a **leggere il log seriale** (`tools/pedale-seriale.html`,
+che apre la porta senza resettare la scheda). Dell'alimentazione non si occupa: a interruttore
+aperto non arriva nemmeno alla cella.
+
+**La trappola che nasce da qui sono le due USB-C identiche affiancate.** Attaccare il
+caricabatterie in quella sbagliata non rompe niente — a interruttore chiuso la XIAO si mette a
+caricare per conto suo a 100 mA — ma il verde `FULL` non si accende mai e dopo quattro ore la
+cella è come prima. Si risolve **scrivendoci sopra** («CARICA» / «FIRMWARE») o separandole
+fisicamente, retro contro fianco, o una incassata.
+
+Da valutare quando il firmware si assesta: **la presa del firmware potrebbe stare dentro**,
+raggiungibile aprendo la scatola. Un foro in meno e niente da confondere. Durante lo sviluppo
+no, che la si apre in continuazione.
+
 **Elettricamente non cambia niente**: 3,7 V nominali, 4,2 V a fine carica, le stesse due
 piazzole `BAT`. Se un giorno la scatola dovesse costringere alla busta piatta, si torna
 indietro senza toccare altro.
