@@ -54,6 +54,27 @@
 </style>
 <pre id="esito">in corso</pre>
 <script>
+  // Un motore audio finto al posto di quello vero: il banco non sente, ma
+  // può contare che onde sono state accese. Le quadre sono i bip, quelle a
+  // dente di sega sono le corde dell'accordo di premio.
+  window.onde = { square: 0, sawtooth: 0 };
+  const niente = () => {};
+  const nodo = () => ({ connect: niente, disconnect: niente, gain: valore(), frequency: valore(),
+                        detune: valore(), curve: null, oversample: '', type: '' });
+  function valore() { return { value: 0, setValueAtTime: niente, exponentialRampToValueAtTime: niente }; }
+  window.AudioContext = function () {
+    return {
+      currentTime: 0, state: 'running', destination: nodo(), resume: niente,
+      createGain: nodo, createWaveShaper: nodo, createBiquadFilter: nodo,
+      createOscillator: () => {
+        const o = nodo();
+        o.start = () => { if (window.onde[o.type] !== undefined) window.onde[o.type]++; };
+        o.stop = niente;
+        return o;
+      },
+    };
+  };
+
   // Con `Math.random` fissa la batteria finisce sempre nella stessa casella,
   // che con questo valore è quella davanti alla testa: la partita diventa
   // ripetibile, e «ha mangiato» si può affermare invece di sperarlo.
@@ -88,6 +109,10 @@ setTimeout(() => {
   righe.push('titolo: ' + hud('titolo'));
   righe.push('motivo: ' + hud('motivo'));
   righe.push('punti finali: ' + hud('punti') + ' — record: ' + hud('record'));
+  // Le onde a dente di sega sono l'accordo di premio: con una sola batteria
+  // mangiata non ne deve essere partito nessuno (il traguardo è a cinque).
+  righe.push('onde: quadre=' + onde.square + ' dente=' + onde.sawtooth +
+             (onde.sawtooth === 0 ? ' (giusto: traguardo non raggiunto)' : ' (ACCORDO)'));
   esito.textContent = righe.join('\n');
 }, 6000);
 </script>
