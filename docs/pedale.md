@@ -455,6 +455,34 @@ Da valutare quando il firmware si assesta: **la presa del firmware potrebbe star
 raggiungibile aprendo la scatola. Un foro in meno e niente da confondere. Durante lo sviluppo
 no, che la si apre in continuazione.
 
+#### Le prese da pannello, e la trappola del CC — 27 agosto 2026
+
+Le USB-C sono saldate sulle schede e non si portano fuori così com'è: notato dall'utente. Le
+due prese però non hanno lo stesso problema.
+
+**Per la carica non serve un passante**, perché il modulo ha **due piazzole `+` e `−` accanto
+alla presa** apposta per alimentarlo da fuori (lo dice la sua descrizione). Bastano due fili a
+un connettore da pannello — che è anche **meccanicamente giusto**: la forza di inserimento del
+cavo deve scaricarsi sul pannello, non su una schedina da 26 × 17 mm tenuta da quattro
+saldature.
+
+**Per il firmware un passante servirebbe davvero**: la USB della XIAO porta i dati e i piedini
+`D+`/`D−` non sono sui pettini, quindi con due fili non si rifà. Ed è la ragione in più per
+**lasciarla dentro**.
+
+**La trappola è il CC: una presa USB-C nuda non prende corrente da un cavo C-a-C.** Servono
+**due resistenze da 5,1 kΩ verso massa su CC1 e CC2**, o il caricatore non vede nessun
+consumatore e non manda i 5 V. Le prese «2-pin» da 3 zł non dicono se ce le hanno, e con due
+soli pin **non si possono aggiungere**. I breakout 4-pin di solito le hanno a bordo — è il
+motivo per cui il CC non è portato fuori — ma nemmeno loro lo dichiarano.
+
+**Per questo la scelta cade sul raccordo da pannello metallico femmina-femmina** ([BTE,
+21,28 zł da GOTRONIK_PL](https://allegro.pl/produkt/gniazdo-przylaczeniowe-usb-c-usb-c-do-zabudowy-na-panel-czarny-9877b93a-197e-4cc8-a787-dadda7dba04f)),
+con dentro un cavetto C-C corto fino alla presa del TP4056: **la presa vera resta quella del
+modulo**, quindi il CC è affar suo e la questione non si pone. Il metallo con la flangia manda
+la forza sul pannello. Costa dieci volte una presa da 3 zł ed è l'unica che non è una
+scommessa; ed è lo stesso pezzo se un giorno si porta fuori anche la presa del firmware.
+
 **Elettricamente non cambia niente**: 3,7 V nominali, 4,2 V a fine carica, le stesse due
 piazzole `BAT`. Se un giorno la scatola dovesse costringere alla busta piatta, si torna
 indietro senza toccare altro.
