@@ -202,6 +202,17 @@ solo il prefisso `JH.`). Serve perché quei preset **non suonano come dicono** f
 ufficiale non ha sbloccato il pacchetto — vedi la trappola in «Protocollo» — e va saputo
 prima di sceglierne uno, non dopo averlo sentito muto.
 
+**In tutto, gli Hendrix si dicono in quattro posti, e quattro devono restare**: le schede
+della vista preset, la tendina dei modelli, il blocco a fuoco dell'editor (questi due in
+«Editor della catena effetti») e **una riga nel log quando il preset parte per l'ampli**,
+in `mandaPreset`, che è il momento in cui il suono esce sbagliato. Quest'ultima si dice
+**prima dell'invio** e non nella verifica, così è una sola invece che in ognuno dei rami.
+**È un avviso al buio**: all'ampli non si può chiedere se il pacchetto sia sbloccato,
+quindi parla anche quando va tutto bene — ed è la ragione per cui i posti sono quattro e
+non dieci. Restano scoperti **la vista live** (decisione dell'utente, non presa: i
+pulsantoni li ha disegnati lui e il LED porta già la famiglia) e **il pedale**, che un
+banco con dentro un Hendrix lo suonerebbe muto senza nessuna app che lo spieghi.
+
 **Alla connessione la lettura degli otto slot parte da sola** (`leggiDallAmpli`, dopo
 `identify`). Durante la lettura i pulsantoni della vista live restano spenti: l'ampli sta
 rispondendo a otto richieste in fila e premerne uno infilerebbe un comando dentro una
