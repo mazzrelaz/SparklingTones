@@ -220,19 +220,22 @@ solo come storia.
 | D4 / D5 | `22`, `23` | MCP23017 in I²C (SDA, SCL) — sono i default della scheda |
 | D8 / D10 | `19`, `18` | display in SPI: SCK e MOSI, i default della scheda |
 | D3, D6, D7 | `21`, `16`, `17` | display: CS, DC, RST |
-| D0 (A0) | `0` | tensione di batteria — **il partitore è già a bordo**, 1:2 |
+| D0 (A0) | `0` | tensione di batteria — **il partitore va saldato**, 200 kΩ, 1:2 |
 | D1, D2, D9 | `1`, `2`, `20` | liberi; D1 e D2 sono analogici |
 
-Tre cose la rendono migliore della C3 per questo lavoro:
+Due cose la rendono migliore della C3 per questo lavoro:
 
 - **nessuno degli undici piedini è un pin di strapping.** Sul C6 lo strapping sta su GPIO
   4, 5, 8, 9, 15, e nessuno di quelli è portato sul connettore: cade tutta la prudenza che
   serviva sul C3;
-- **il partitore per leggere la batteria è già sulla scheda**, sull'ingresso A0. Due
-  resistenze in meno da montare;
 - **l'antenna è a bordo** ed è attiva di serie (quella esterna si abilita via GPIO14, che
   non usiamo). Sulla C3 andava attaccata l'antennina, e nella scatola andava trovato il
   posto.
+
+**Corretto il 27 agosto 2026, e prima c'era scritto il contrario:** il partitore per
+leggere la batteria su A0 **non è a bordo sulla C6**. Il wiki di Seeed dice di saldare una
+**200 kΩ**, in configurazione 1:2. Sono due resistenze in più da mettere in conto, non due
+in meno.
 
 Restano **tre piedini liberi**, due dei quali analogici: un pedale d'espressione ha già il
 suo posto senza spostare niente.
@@ -261,8 +264,35 @@ di tutte.
 
 E ci sono due vantaggi che con la busta non si hanno affatto: **si porta una cella carica
 di riserva** — dimenticarsi di caricare non fa più saltare la serata — e **si carica fuori,
-in un caricabatterie vero**, in un paio d'ore invece delle ~9 che ci metterebbe la XIAO a
-380 mA. In quel caso l'USB del pedale torna a servire solo per il firmware.
+in un caricabatterie vero**, in un paio d'ore. In quel caso l'USB del pedale torna a
+servire solo per il firmware.
+
+#### La XIAO carica a 100 mA, e non è una via di ricarica — misurato sul wiki il 27 agosto 2026
+
+Qui c'era scritto «~9 ore a 380 mA»: **era sbagliato**, quello è il C3 (~350 mA). La
+**C6 carica a 100 mA**, che è il dato dichiarato da Seeed. Su una cella da 3300 mAh fanno
+**35–40 ore vere** contando la fase finale a tensione costante: da vuoto a pieno, via USB
+del pedale, **non si fa**. L'ha notato l'utente prima di me.
+
+Non ribalta la scelta dell'18650 estraibile: la ribadisce. Cambia il ruolo della presa sul
+pannello — **non è la via di ricarica, è la via del firmware**, più un rabbocco. I numeri
+che servono per ragionarci:
+
+| | |
+|---|---|
+| consumo del pedale | ~60 mA → **~40 h** di autonomia |
+| una notte attaccato (8 h × 100 mA) | ~800 mAh → **~13 h di uso** |
+| caricatore esterno a 1 A / 2 A | ~3,5 h / ~2 h |
+
+Il rabbocco notturno quindi non è inutile: ridà più ore di quante ne serva un weekend. E a
+0,03C la cella non soffre — è una carica gentile, solo lenta.
+
+**Se un giorno servisse caricare senza aprire la scatola**, l'aggiunta sensata è **un
+TP4056 dedicato con la sua USB-C sul pannello**: due zloty, Rprog a 1,2 kΩ per 1 A (~3,5
+h), versione base perché la protezione è già sulla cella. La trappola sono i **due
+caricabatterie sulla stessa cella**: sul pannello va la presa del TP4056, e quella della
+XIAO resta interna, per il firmware, **da usare a cella tolta**. Cambiare la resistenza
+PROG sulla XIAO no: è un SMD minuscolo sull'unica scheda del progetto.
 
 Cosa comprare, verificato su Allegro il 25 agosto 2026:
 
