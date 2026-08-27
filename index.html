@@ -2690,6 +2690,24 @@ async function mandaPreset(record, slot) {
   }
   if (controllo.avvisi.length) logLine(`nota su «${record.name}»: ${controllo.avvisi.join('; ')}`);
 
+  // **L'unico posto dove il sintomo arrivava senza spiegazione.** Il preset
+  // parte, l'ampli conferma tutto, la rilettura dice che è quello giusto — e il
+  // fuzz non c'è. Si dice **prima**, e non nella verifica: il punto è saperlo
+  // mentre si porge l'orecchio, non dopo aver dato la colpa all'app. E si dice
+  // qui una volta sola, invece che in ognuno dei rami di verifica qui sotto.
+  //
+  // Resta un avviso **al buio**: all'ampli non si può chiedere se il pacchetto
+  // sia sbloccato, quindi questa riga parla anche quando va tutto bene. È il
+  // motivo per cui di posti così ce n'è uno, e non cinque: una scritta che
+  // grida al lupo ogni volta smette di essere letta.
+  const hendrix = SparkEffetti.hendrixNellaCatena(record.effects);
+  if (hendrix.length) {
+    logLine(`«${record.name}» ha ${hendrix.length === 1 ? 'un effetto' : 'effetti'} ` +
+            `del pacchetto Jimi Hendrix (${hendrix.map(n => SparkEffetti.nome(n)).join(', ')}). ` +
+            'Se non li senti, collega una volta l\'app ufficiale all\'ampli e riprova: ' +
+            'lo sblocco resta finché non lo spegni.');
+  }
+
   try {
     const avanzamento = (i, total) =>
       logProgress(`invio «${record.name}» → ${dove}: chunk ${i + 1} di ${total}…`);
