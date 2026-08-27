@@ -1183,6 +1183,7 @@
   <div class="stato-pannello" hidden></div>
   <div style="margin-top:20px">
     <button id="btnAbout" class="piccolo">Informazioni, licenze e responsabilità</button>
+    <button id="btnSnake" class="piccolo">Snake dei pedalini</button>
   </div>
 </div>
 
@@ -1395,6 +1396,7 @@
 <script src="src/pedale-ponte.js"></script>
 <script src="src/spark-backup.js"></script>
 <script src="src/pwa.js"></script>
+<script src="src/snake-pedali.js"></script>
 <script>
 'use strict';
 
@@ -4565,6 +4567,11 @@ $('btnAltro').addEventListener('click', () => {
   leggiDataDropbox();          // la data di lassù si legge aprendo, non a ogni avvio
 });
 $('btnAbout').addEventListener('click', () => apriPannello('pannelloAbout'));
+
+// La goliardata, fra una canzone e l'altra. Si apre **sopra** «Altro» invece
+// che al posto suo — `apriPannello` chiuderebbe tutto — così «Fatto» riporta
+// dov'era. Il gioco non tocca niente: né la radio, né la libreria.
+$('btnSnake').addEventListener('click', () => SnakePedali.apri());
 
 // La guida dell'editor serve una volta sola, poi è un muro di testo fra te e
 // le manopole. Sta dietro il «?» in cima, e si chiude da sé riaprendo

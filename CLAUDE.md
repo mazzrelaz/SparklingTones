@@ -45,6 +45,7 @@ src/spark-backup.js               legge preset_backup.zip dell'app ufficiale, se
 src/dropbox-sync.js               sync della libreria: OAuth PKCE, niente server
 src/pedale-ponte.js               sponda app del ponte BLE verso il pedale
 src/pwa.js                        service worker, «installa», «versione nuova»
+src/snake-pedali.js               la goliardata: Snake a 8 bit, dentro «Altro»
 pedale/prova-ble/                 firmware: si collega, cambia preset, riceve un banco
   banchi.h  preset_frames.h       formato del banco; frame preserializzati dall'app
 pedale/prova-usb/                 sketch vuoto, per isolare i guai di USB/alimentazione
@@ -53,6 +54,7 @@ tools/frames-pedale.html          genera preset_frames.h per il firmware
 tools/ponte-prova.html            sonda del ponte, sponda app
 tools/pedale-seriale.html         log del pedale via Web Serial (non resetta la scheda)
 tools/serve.ps1                   server statico su localhost, per provare la PWA
+tools/snake-banco.html            fa girare il gioco da solo e dice cosa è successo
 tools/make-icons.ps1              rigenera icons/
 tools/leggi-btsnoop.ps1           legge uno snoop log HCI di Android
 tools/reader.html                 legge la libreria dall'ampli, esporta in JSON
@@ -128,6 +130,26 @@ verificato** se sia un limite suo o un difetto nostro.
 
 **In una scheda in secondo piano i timer vengono strozzati**, e una suite da un secondo
 sembra piantata per minuti. Basta portarla in primo piano.
+
+**Nel browser del riquadro `requestAnimationFrame` non gira**, e in Edge headless nemmeno:
+misurato il 27 agosto 2026 con una sonda che contava i fotogrammi — **uno solo**, in tutti
+e due. La pagina non compone, quindi rAF non scatta mai (e per lo stesso motivo lì lo
+screenshot del riquadro fallisce: «not compositing frames»). Conseguenza pratica: **niente
+che si muova da sé si può provare con rAF**, e infatti il ciclo del gioco è un
+`setInterval`. Le catture di una pagina che *gira* si fanno con `--screenshot` e
+`--virtual-time-budget`.
+
+**Il service worker serve a Edge headless i file della corsa precedente.** Il profilo resta
+sul disco, l'app ci registra `sw.js`, e da lì in poi ogni `--screenshot` guarda una copia
+vecchia: si perde mezz'ora a chiedersi perché una modifica non si vede. Tre rimedi, in
+ordine di comodità: una **query in coda** all'url (la chiave di cache comprende la query),
+un profilo nuovo, oppure disiscrivere il service worker dalla pagina. Attenzione che il
+profilo nuovo ne porta un'altra: **da freddo IndexedDB non fa in tempo a rispondere** col
+tempo virtuale, quindi l'app resta a metà avvio.
+
+**L'avvio dell'app chiude i pannelli.** `applicaVista()` chiama `chiudiPannelli()` quando il
+database ha risposto: una prova automatica che apre un pannello troppo presto se lo vede
+chiudere in faccia, e sembra un difetto del pannello.
 
 **Lo stdout di Edge headless non torna alla shell**: `$out = & msedge …` dà **stringa
 vuota** anche su una pagina che funziona. Va redirezionato su file con
@@ -620,6 +642,37 @@ sul port B. **Non verificato sul C6**: i tempi BLE (misurati su C3, libreria ide
 il modulo espansore abbia i pull-up sull'I²C — se il bus non parte, quello è il primo
 sospetto, e si risolve con due resistenze da 4,7 kΩ.
 
+## La goliardata: Snake dei pedalini
+
+Chiesto dall'utente il **27 agosto 2026**: «un passatempo fra una canzone e l'altra». Un
+Snake a 8 bit dove il serpente è una catena di pedalini attaccati col cavo e mangia
+**batterie da 9 volt**. Sta in `src/snake-pedali.js` e si apre da un tasto in fondo ad
+«Altro».
+
+- **Non tocca niente**: non parla con l'ampli, non legge la libreria, non ha stato in comune
+  con l'app. L'unico contatto è `SnakePedali.apri()`. Record e «muto» stanno in
+  `localStorage` — non in `settings`, perché non devono finire in un backup né su Dropbox.
+- **Vive in un file suo e non in `index.html`**: quello costa già ~55.000 token a lettura, e
+  uno scherzo non deve pesarci sopra. Si costruisce il pannello da sé, ma riusa le classi
+  dell'app (`.pannello`, `.primary`, `.piccolo`, `.spiega`) e le variabili di colore. Il
+  pannello ha `z-index:20` e si apre **sopra** «Altro» senza passare da `apriPannello`, che
+  chiuderebbe tutto: così «Fatto» riporta dov'era.
+- **Il ciclo è un `setInterval`, non `requestAnimationFrame`, ed è una scelta**: qui non si
+  interpola niente — tutto si muove di una casella alla volta — e rAF non gira in nessuno
+  dei due browser che ho (vedi «Trappole dell'ambiente»), quindi con rAF non potrei provare
+  il gioco affatto. Se i pannelli vengono chiusi da fuori, il ciclo se ne accorge e si
+  ferma.
+- **Qualunque comando fa partire la partita**, anche quello che non gira niente. Legandola
+  alla sola sterzata utile, il primo tasto che viene in mente — «su», la direzione in cui il
+  serpente già guarda — non faceva succedere nulla.
+- Il disegno è su una tela da 200×216 **pixel veri**, ingrandita con
+  `image-rendering:pixelated`. Un pedalino sta in tredici pixel: manopole **agli angoli** e
+  pulsantone largo in basso, perché con le manopole in mezzo veniva fuori una faccina. Il
+  cavo fra due scatolette è **grigio**: nero, sul pavimento quasi nero, non si vedeva.
+
+`tools/snake-banco.html` lo fa girare da solo e dice se muove, mangia, si ferma in pausa e
+finisce contro il muro. Gira anche in headless.
+
 ## Convenzioni
 
 - **I commit li gestisco io**, senza che l'utente li chieda: quando un pezzo di lavoro sta
@@ -693,6 +746,10 @@ messaggi**: la risposta è che sui tasselli non serve niente — quei modelli si
 «J.H. Fuzz Zone» e il nome li identifica da solo — e quello che mancava era **cosa
 comporta**, detto nei due momenti in cui conta.
 
+**E poi, sempre il 27, la goliardata**: lo Snake dei pedalini, in «Altro». Regole e trappole
+nella sezione qui sopra. È **provato solo sul banco e in headless**: sul telefono, col dito,
+non l'ha ancora visto nessuno — ed è lì che si gioca.
+
 Quello che segue è del 26 e vale ancora.
 
 ### 26 agosto 2026, sera
@@ -732,7 +789,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v61` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v64` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
