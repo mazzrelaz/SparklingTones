@@ -22,11 +22,14 @@ e **va letto solo quando si rimette in discussione quella cosa lì**:
 | `docs/decisioni-ui.md` | si rimette in discussione una scelta grafica o di flusso |
 | `docs/dropbox.md` | il sync si rompe o si cambia trasporto |
 | `docs/looper.md` | si riapre il looper (capitolo archiviato) |
+| `docs/snake.md` | si riapre StompSnake: disegno, wah, accordo, neon, manopole |
 | `docs/HANDOFF-2026-08-10.md` | ricerca originale: comandi, tipi dati, catture |
 
-Snellito due volte: il 14 agosto 2026 (era 27.700 token) e il **26 agosto 2026**, quando
-era ricresciuto a ~27.000 — metà erano il pedale. Tolti ~17.000 token per sessione senza
-buttare via niente: tutto è in `docs/`.
+Snellito tre volte: il 14 agosto 2026 (era 27.700 token), il 26 agosto (era risalito a
+~27.000, metà erano il pedale), e il **27 agosto**, quando in un giorno solo era tornato a
+~17.700 — StompSnake da solo pesava quanto il protocollo dell'ampli. **Ogni volta non si
+butta via niente: si sposta in `docs/`.** La regola che decide è sempre la stessa: qui resta
+ciò che mi impedisce di fare danni, il resto è un rimando.
 
 ## Struttura
 
@@ -45,7 +48,7 @@ src/spark-backup.js               legge preset_backup.zip dell'app ufficiale, se
 src/dropbox-sync.js               sync della libreria: OAuth PKCE, niente server
 src/pedale-ponte.js               sponda app del ponte BLE verso il pedale
 src/pwa.js                        service worker, «installa», «versione nuova»
-src/snake-pedali.js               la goliardata: StompSnake, a 8 bit, dentro «Altro»
+src/snake-pedali.js               la goliardata: StompSnake, a 8 bit, in «Fai una pausa»
 pedale/prova-ble/                 firmware: si collega, cambia preset, riceve un banco
   banchi.h  preset_frames.h       formato del banco; frame preserializzati dall'app
 pedale/prova-usb/                 sketch vuoto, per isolare i guai di USB/alimentazione
@@ -637,34 +640,25 @@ serviva sul C3:
 | D0 (A0) | `0` | tensione di batteria — **il partitore va saldato**, 200 kΩ, 1:2 |
 | D1, D2, D9 | `1`, `2`, `20` | liberi; D1 e D2 sono analogici |
 
-**La XIAO carica la cella a 100 mA, quindi la sua USB non è una via di ricarica**: su una
-3300 mAh sono 35–40 ore. Non è un guaio perché la cella si estrae e si carica in un
-caricabatterie vero (~2 h), che era già il piano; la presa sul pannello serve al **firmware**
-più un rabbocco — una notte attaccato vale ~13 ore di uso, su ~40 di autonomia. Se un giorno
-servisse caricare senza aprire, si aggiunge un **TP4056 con la sua presa**. **La cifra
-«380 mA» che c'era qui era del C3.**
+**L'alimentazione è decisa e comprata** (27 agosto 2026). Le cinque cose che fanno danni se le
+dimentico; tutto il resto — cablaggio, saldature, indicatore di batteria, scelta dei pezzi —
+sta in `docs/pedale.md`:
 
-**Serve un interruttore generale fisico, e il deep sleep non lo sostituisce** (27 agosto 2026):
-in borsa un footswitch si preme da solo e il pedale si risveglia. Levetta SPST **sul retro o
-sul fianco, mai sul piano di calpestio**, sul positivo fra la cella e la XIAO. Niente
-auto-spegnimento per inattività: sul palco è la sorpresa che non si vuole. Ancora da comprare,
-con **due resistenze da 200 kΩ** e il modulo di ricarica.
-
-**Due prese sul pannello, deciso il 27 agosto 2026**: quella del TP4056 carica, quella della
-XIAO programma. **TP4056 e TC4056A sono lo stesso chip**, si sceglie per il connettore (USB-C)
-e per la sezione di protezione (**meglio senza**: la XTAR è già protetta). La trappola è che
-**il TP4056 non fa load sharing**: si carica a **interruttore generale spento**, e
-l'interruttore va **fra la cella e la XIAO**, col `B+`/`B-` del modulo attaccato alla cella
-*prima* dell'interruttore. **Il modulo va montato coi suoi due LED in vista** (verde `FULL` =
-finita), e **le due prese vanno etichettate**, o il caricabatterie finisce in quella sbagliata.
-Cablaggio, saldature e il resto in `docs/pedale.md`.
-
-**L'indicatore di batteria è firmware ancora da scrivere**, e sono due cose distinte: **la
-carica finita la dicono solo i LED del modulo**, perché mentre carica il pedale è spento; **il
-livello mentre si suona va sull'OLED**, ed è il motivo del partitore su `A0`. **Niente
-percentuali** — la tensione di un litio è piatta nel mezzo — ma quattro tacche a soglie e
-**sotto 3,50 V un avviso impossibile da non vedere**, che la protezione della cella taglia a
-2,5 V e il pedale muore a metà canzone. Dettagli e trappole di misura in `docs/pedale.md`.
+- **la XIAO carica a 100 mA, non a 380** (quella era del C3): 35–40 ore su una 3300, quindi
+  **la sua USB non è una via di ricarica**. Si carica con un **modulo TC4056 dedicato** e la
+  sua presa; la cella si può anche estrarre e caricare fuori;
+- **il TP4056 non fa load sharing**: per fidarsi del verde `FULL` si carica a **interruttore
+  generale spento**. Usarlo mentre carica funziona lo stesso, non è un divieto;
+- **interruttore generale fisico**, sul positivo **fra la cella e la XIAO**, col modulo
+  attaccato alla cella *prima*. Il deep sleep non lo sostituisce: in borsa un footswitch si
+  preme da solo. **Niente auto-spegnimento per inattività**, che sul palco è la sorpresa che
+  non si vuole;
+- **due prese sul pannello, da etichettare**: una carica, l'altra fa firmware e log seriale.
+  Sono identiche, e il caricatore nella sbagliata non carica senza dirlo;
+- **il partitore di A0 va saldato** (sulla C6 non è a bordo), e **l'indicatore di batteria è
+  firmware da scrivere**: quattro tacche a soglie, **mai percentuali** — la tensione di un
+  litio è piatta nel mezzo — e sotto **3,50 V** un avviso impossibile da non vedere, che la
+  protezione della cella taglia a 2,5 V e il pedale muore a metà canzone.
 
 Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
 sul port B. **Non verificato sul C6**: i tempi BLE (misurati su C3, libreria identica) e se
@@ -673,85 +667,15 @@ sospetto, e si risolve con due resistenze da 4,7 kΩ.
 
 ## La goliardata: StompSnake
 
-Chiesto dall'utente il **27 agosto 2026**: «un passatempo fra una canzone e l'altra». Un
-Snake a 8 bit dove il serpente è una catena di pedalini attaccati col cavo e mangia
-**batterie da 9 volt**. Sta in `src/snake-pedali.js` e si apre da un tasto in fondo ad
-«Altro».
-
-**Si chiama StompSnake, ma il file resta `snake-pedali.js`**: il nome gliel'ha dato
-l'utente il 27 agosto, a gioco fatto, e rinominare il file vorrebbe dire toccare anche
-`index.html` e il `GUSCIO` di `sw.js` per niente.
-
-**Si entra dal menu «⋯» della schermata principale, alla voce «Fai una pausa»** (spostata
-lì il 27 agosto 2026, su richiesta): a un passatempo non ci si arriva passando da un
-pannello di manutenzione. Dentro «Altro» non c'è più niente del gioco.
-
-**Sopra il campo c'è il logo**, `icons/stompsnake.jpg`, disegnato dall'utente e qui
-ritagliato dei margini vuoti. Tre cose da ricordare:
-
-- **è un JPEG su fondo nero, non un PNG trasparente**, e non è una svista: il pannello è
-  nero pieno in tutte e due le viste, quindi si vede uguale, e il PNG con l'alfa pesava
-  **384 KB contro 76**;
-- **non sta nel `GUSCIO` di `sw.js`**, apposta: il guscio è quello che serve a far partire
-  l'app da spenta. Il logo se lo prende da sé la prima volta che si apre il gioco, e da
-  allora c'è anche offline. (E così non c'è il rischio di metterci un file che non esiste
-  ancora: `cache.addAll` fallisce in blocco su un 404.)
-- se il file non rispondesse resta la scritta «STOMPSNAKE», che tiene lo stesso spazio. Ma
-  attenzione: **l'attributo `hidden` da solo non nasconde l'immagine**, perché il nostro
-  `display:block` lo scavalca — senza la regola `img[hidden] { display:none }` il
-  segnaposto rotto si vede accanto alla scritta.
-
-**Ogni cinque pedalini parte un accordo distorto** (chiesto il 27 agosto 2026), e non è un
-campione: sono tre corde — tonica, quinta, ottava — di onde a dente di sega, **due voci per
-corda leggermente scordate** perché una sola suona finta, dentro un `WaveShaper`. Due cose
-che fanno la differenza fra una chitarra e un rumore: le corde partono **sfalsate di 18 ms**
-(è la pennata), e le sei voci entrano nel distorsore **abbassate a 0,3** — a piena ampiezza
-la somma arriva a sei volte il fondoscala e la curva schiaccia tutto in un'onda quadra. La
-soglia avanza con un `while` e non con un resto, perché il wah vale tre pedalini e il conto
-può **scavalcare** il cinque; e se l'accordo è appena partito, il wah che compare nello
-stesso passo entra zitto. **Il banco lo verifica contando le onde**, con un `AudioContext`
-finto: quadre = bip, dente di sega = accordo.
-
-**Il campo e i tasti hanno un bordo al neon che fa l'onda** (chiesto il 27 agosto 2026).
-Il trucco sono due sfondi sovrapposti — il nero ritagliato sul riquadro interno, l'arcobaleno
-su tutto compreso il bordo, largo il doppio — e uno scorrimento di `200%`, che torna al
-punto di partenza senza scatti. **Il bordo dev'essere `transparent`**, o coprirebbe
-l'arcobaleno. Ogni tasto parte con un ritardo suo, così l'onda gira intorno alla
-pulsantiera invece di lampeggiare tutta insieme; l'alone è lo stesso arcobaleno sfocato in
-un `::before` dietro. `prefers-reduced-motion` ferma l'onda e lascia il bordo.
-
-- **Non tocca niente**: non parla con l'ampli, non legge la libreria, non ha stato in comune
-  con l'app. L'unico contatto è `SnakePedali.apri()`. Record e «muto» stanno in
-  `localStorage` — non in `settings`, perché non devono finire in un backup né su Dropbox.
-- **Vive in un file suo e non in `index.html`**: quello costa già ~55.000 token a lettura, e
-  uno scherzo non deve pesarci sopra. Si costruisce il pannello da sé, ma riusa le classi
-  dell'app (`.pannello`, `.primary`, `.piccolo`, `.spiega`) e le variabili di colore. Il
-  pannello ha `z-index:20` e si apre **sopra** «Altro» senza passare da `apriPannello`, che
-  chiuderebbe tutto: così «Fatto» riporta dov'era.
-- **Il ciclo è un `setInterval`, non `requestAnimationFrame`, ed è una scelta**: qui non si
-  interpola niente — tutto si muove di una casella alla volta — e rAF non gira in nessuno
-  dei due browser che ho (vedi «Trappole dell'ambiente»), quindi con rAF non potrei provare
-  il gioco affatto. Se i pannelli vengono chiusi da fuori, il ciclo se ne accorge e si
-  ferma.
-- **Qualunque comando fa partire la partita**, anche quello che non gira niente. Legandola
-  alla sola sterzata utile, il primo tasto che viene in mente — «su», la direzione in cui il
-  serpente già guarda — non faceva succedere nulla.
-- Il disegno è su una tela da 208×224 **pixel veri**, ingrandita con
-  `image-rendering:pixelated`. Un pedalino sta in tredici pixel: manopole **agli angoli** e
-  pulsantone largo in basso, perché con le manopole in mezzo veniva fuori una faccina. Il
-  cavo fra due scatolette è **grigio**: nero, sul pavimento quasi nero, non si vedeva. La
-  cornice è una **cassa da trasporto disegnata dentro la tela** — squadrette e viti agli
-  angoli — e per questo la tela **non ha bordo CSS**: sarebbero due cornici.
-- **Il wah è il premio** (chiesto dall'utente il 27 agosto 2026): compare ogni dieci
-  batterie, vale tre pedalini e **se ne va da solo** dopo nove secondi, lampeggiando negli
-  ultimi tre. Scappa **a tempo e non a passi**, o stando fermi non ci sarebbe fretta. La
-  catena si allunga con un contatore (`cresci`) e non aggiungendo tre pezzi in un colpo: i
-  tre pedalini spuntano un passo alla volta, invece che dal nulla tutti insieme.
-
-`tools/snake-banco.html` lo fa girare da solo e dice se muove, mangia, si ferma in pausa e
-finisce contro il muro. Gira anche in headless, e con **`?zoom`** in coda all'indirizzo
-ingrandisce la tela quattro volte, che è l'unico modo di guardare i pixel di un pedalino.
-**Il wah il banco non lo prova**: per vederlo si mette `WAH_OGNI` a 1 e si rimette a 10.
+Un Snake a 8 bit in «Fai una pausa» (menu «⋯»), chiesto dall'utente il 27 agosto 2026.
+**Non tocca niente**: non parla con l'ampli, non legge la libreria, non ha stato in comune con
+l'app — l'unico contatto è `SnakePedali.apri()`, e record e «muto» stanno in `localStorage`,
+non in `settings`, perché non devono finire in un backup né su Dropbox. **Vive in
+`src/snake-pedali.js` e non in `index.html`**, che costa già ~55.000 token a lettura. Il ciclo
+è un `setInterval` e non `requestAnimationFrame`, che nei miei due browser non gira (vedi
+«Trappole dell'ambiente»). `tools/snake-banco.html` lo fa girare da solo e dice cosa è
+successo. **Tutto il resto — il disegno, il wah, l'accordo, il neon, il logo, le manopole —
+sta in `docs/snake.md`.**
 
 ## Convenzioni
 
@@ -826,20 +750,14 @@ messaggi**: la risposta è che sui tasselli non serve niente — quei modelli si
 «J.H. Fuzz Zone» e il nome li identifica da solo — e quello che mancava era **cosa
 comporta**, detto nei due momenti in cui conta.
 
-**E poi, sempre il 27, la goliardata**: StompSnake. Regole e trappole nella sezione qui
-sopra. È venuta fuori in un pomeriggio, un giro alla volta, tutti chiesti da lui: il gioco;
-poi **«un po' troppo veloce»** (adesso si parte a 330 ms e si scende di dieci a batteria);
-il **wah come premio** e la **cassa attorno al campo**; poi l'ha provato sul telefono e **i
-comandi funzionano** — detto da lui, ed è l'unica cosa che il banco non poteva dire. Da lì
-il **nome** e il **logo**, che ha disegnato lui; lo spostamento dell'accesso nel **menu «⋯»
-alla voce «Fai una pausa»**; il **neon a onda** su campo e tasti; e infine **l'accordo
-distorto ogni cinque pedalini**. Pubblicato, guscio `v69`, verificato sull'indirizzo vero.
+**E poi, sempre il 27, la goliardata**: StompSnake, venuta fuori in un pomeriggio un giro
+alla volta, tutti chiesti da lui. Pubblicato, guscio `v69`, verificato sull'indirizzo vero.
+Com'è andata e cosa resta aperto: `docs/snake.md`.
 
-Se riapre il capitolo, tutte le manopole stanno in cima a `src/snake-pedali.js`: i quattro
-`WAH_*`, i tre della cadenza, `ACCORDO_OGNI` e la tabella `ACCORDI`. **Due cose non le ho
-viste io e le sa solo lui**: come suona davvero l'accordo — volume, cattiveria della
-distorsione, filtro — e **il wah in una partita vera**, perché per arrivarci servono dieci
-batterie giocate a mano.
+**Il 27 si è anche chiusa l'alimentazione del pedale**, senza toccare l'app: la XIAO carica a
+100 mA e non a 380, quindi modulo TP4056 con la sua presa, interruttore generale fisico, due
+codini USB-C da pannello, partitore da saldare, indicatore di batteria da scrivere. Tutto in
+`docs/pedale.md`; i pezzi sono ordinati.
 
 Quello che segue è del 26 e vale ancora.
 
