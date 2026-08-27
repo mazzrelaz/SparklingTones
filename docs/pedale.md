@@ -476,12 +476,31 @@ consumatore e non manda i 5 V. Le prese «2-pin» da 3 zł non dicono se ce le h
 soli pin **non si possono aggiungere**. I breakout 4-pin di solito le hanno a bordo — è il
 motivo per cui il CC non è portato fuori — ma nemmeno loro lo dichiarano.
 
-**Per questo la scelta cade sul raccordo da pannello metallico femmina-femmina** ([BTE,
-21,28 zł da GOTRONIK_PL](https://allegro.pl/produkt/gniazdo-przylaczeniowe-usb-c-usb-c-do-zabudowy-na-panel-czarny-9877b93a-197e-4cc8-a787-dadda7dba04f)),
-con dentro un cavetto C-C corto fino alla presa del TP4056: **la presa vera resta quella del
-modulo**, quindi il CC è affar suo e la questione non si pone. Il metallo con la flangia manda
-la forza sul pannello. Costa dieci volte una presa da 3 zł ed è l'unica che non è una
-scommessa; ed è lo stesso pezzo se un giorno si porta fuori anche la presa del firmware.
+**Per questo si prende un passante, non una presa da due fili**: la presa vera resta quella del
+modulo, il CC è affar suo e la questione non si pone.
+
+**Scelto dall'utente il 27 agosto 2026: [BTFO adapter panelowy USB-C maschio-femmina, 19,99 zł
+su Amazon.pl](https://www.amazon.pl/dp/B0H7S5WSC5)** (ASIN `B0H7S5WSC5`), consegna gratis, due
+viti incluse. **È un codino e non un raccordo** — femmina con flangia, 30 cm di cavo, maschio
+che entra diretto nel TP4056 — quindi non serve nessun cavetto C-C in più. Ed **è dichiarato
+USB 3.1 a 20 Gbps, cioè pinout completo**: il CC c'è di sicuro. Per la stessa ragione **lo
+stesso pezzo andrebbe bene anche per la presa del firmware**, se un giorno si porta fuori,
+perché porta i dati.
+
+Due cose da mettere in conto, nessuna bloccante:
+
+- **30 cm di cavo dentro la scatola sono tanti**: va arrotolato e fascettato, **lontano dalla
+  meccanica dei footswitch**. E dietro il pannello servono **3–4 cm liberi** fra il connettore
+  maschio e il raggio di curvatura — spazio da verificare sul disegno prima di comprare la
+  scatola;
+- **la flangia vuole un foro rettangolare più due fori per le viti**, non un foro tondo di
+  trapano: lima o Dremel. L'alternativa a **un solo foro tondo** sarebbe il tipo **a vite
+  M11**, che però ricade fra le prese a due fili, col dubbio sul CC. Il foro rettangolare è il
+  prezzo della certezza.
+
+Scartate: la presa 2-pin da ~3 zł (CC ignoto e non aggiungibile, e una recensione avverte che i
+fili sono da bassa corrente) e il breakout 4-pin da 3,48 zł (le 5,1 kΩ di solito ci sono ma non
+è dichiarato, e la forza del cavo finirebbe sulla schedina invece che sul pannello).
 
 **Elettricamente non cambia niente**: 3,7 V nominali, 4,2 V a fine carica, le stesse due
 piazzole `BAT`. Se un giorno la scatola dovesse costringere alla busta piatta, si torna
