@@ -321,11 +321,40 @@ Cosa comprare, verificato su Allegro il 25 agosto 2026:
 - **portacella 1× 18650 con i fili**, quelli da qualche zloty. Trappola nota: **le celle
   protette sono più lunghe (~69 mm invece di 65)** e in certi portacella stretti non
   entrano;
+- **interruttore generale a levetta SPST con dado**, metallico, roba da qualche zloty: la
+  corrente è ridicola (~100 mA), conta solo che sia robusto. **Va sul retro o sul fianco,
+  non sul piano di calpestio**, o si spezza al primo pestone;
+- **due resistenze da 200 kΩ** per il partitore di A0, che sulla C6 non è a bordo;
+- **modulo TP4056/TC4056A USB-C** per la ricarica vera, vedi sopra;
 - 3300 mAh su ~60 mA fanno **una quarantina d'ore vere**.
 
 **Il montaggio è la parte che decide se è davvero sicuro**: la cella va **bloccata** — una
 pedalata non deve farla saltare fuori dalle mollette — i terminali isolati, i fili lontani
 dalla meccanica dei footswitch, e l'interruttore generale sul positivo.
+
+#### L'interruttore è fisico, e il deep sleep non lo sostituisce — 27 agosto 2026
+
+Era scritto tre volte qui dentro ma **non era mai finito nella lista della spesa**, e
+l'utente se n'è accorto. La domanda che ha fatto è quella giusta: serve davvero, o basta
+dormire? In teoria i conti tornerebbero — deep sleep del C6 con risveglio sull'interrupt
+dell'MCP23017, e a ~100 µA la cella durerebbe anni. **Ma non può essere la sola difesa**,
+per tre motivi:
+
+- **in borsa un footswitch si preme da solo**, e il pedale si risveglia e resta acceso tutta
+  la notte. Con l'interruttore aperto non può succedere per costruzione;
+- **il consumo a riposo di questa scheda non è misurato**, e le XIAO hanno perdite note a
+  valle del regolatore. Fra l'altro **il partitore di A0 che dobbiamo saldare è esso stesso
+  una perdita permanente**: 400 kΩ su 4,2 V sono ~10 µA, sempre, anche a chip dormiente;
+- staccato è la posizione più sicura per un litio in una scatola che prende pedalate.
+
+Il deep sleep semmai si aggiunge **dopo**, come risparmio durante le pause, non come
+spegnimento. **L'auto-spegnimento per inattività no**: sul palco è esattamente la sorpresa
+che non si vuole, ed è la stessa regola per cui il quinto footswitch non cambia il suono.
+
+**Conseguenza comoda del cablaggio** (positivo, fra la cella e la XIAO, col TP4056 attaccato
+alla cella prima): **a interruttore aperto la USB della XIAO programma ma non carica**, perché
+il suo caricabatterie sbuca proprio sulla piazzola `BAT` che l'interruttore ha staccato. I due
+mestieri delle due prese restano separati anche per sbaglio.
 
 **Elettricamente non cambia niente**: 3,7 V nominali, 4,2 V a fine carica, le stesse due
 piazzole `BAT`. Se un giorno la scatola dovesse costringere alla busta piatta, si torna

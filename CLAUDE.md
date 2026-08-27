@@ -644,6 +644,12 @@ più un rabbocco — una notte attaccato vale ~13 ore di uso, su ~40 di autonomi
 servisse caricare senza aprire, si aggiunge un **TP4056 con la sua presa**. **La cifra
 «380 mA» che c'era qui era del C3.**
 
+**Serve un interruttore generale fisico, e il deep sleep non lo sostituisce** (27 agosto 2026):
+in borsa un footswitch si preme da solo e il pedale si risveglia. Levetta SPST **sul retro o
+sul fianco, mai sul piano di calpestio**, sul positivo fra la cella e la XIAO. Niente
+auto-spegnimento per inattività: sul palco è la sorpresa che non si vuole. Ancora da comprare,
+con **due resistenze da 200 kΩ** e il modulo di ricarica.
+
 **Due prese sul pannello, deciso il 27 agosto 2026**: quella del TP4056 carica, quella della
 XIAO programma. **TP4056 e TC4056A sono lo stesso chip**, si sceglie per il connettore (USB-C)
 e per la sezione di protezione (**meglio senza**: la XTAR è già protetta). La trappola è che
