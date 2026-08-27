@@ -325,7 +325,15 @@ Cosa comprare, verificato su Allegro il 25 agosto 2026:
   corrente è ridicola (~100 mA), conta solo che sia robusto. **Va sul retro o sul fianco,
   non sul piano di calpestio**, o si spezza al primo pestone;
 - **due resistenze da 200 kΩ** per il partitore di A0, che sulla C6 non è a bordo;
-- **modulo TP4056/TC4056A USB-C** per la ricarica vera, vedi sopra;
+- **modulo di ricarica: «MODUŁ ŁADOWANIA Li-Ion 18650 USB-C TP4056», 3,70 zł da 100hz_pl**
+  (offerta 15103942260, scelta il 27 agosto 2026). USB-C, 1 A, 26 × 17 mm, piazzole
+  `B+`/`B-`, `OUT+`/`OUT-`, codice `CA-033-TC`. **È la versione con la protezione** (DW01,
+  scarica sotto 2,5 V e sovracorrente a 3 A) e va bene lo stesso, perché **quella protezione
+  non si usa**: il carico si prende dalla cella attraverso l'interruttore, non da `OUT`, e la
+  protezione che conta è quella già a bordo della XTAR. Dalle `OUT` non si guadagnerebbe
+  niente comunque, il load sharing manca in tutti e due i casi. Nota: **il modulo resta
+  attaccato alla cella anche a pedale spento**, perché sta a monte dell'interruttore —
+  decine di µA, qualche decina di mAh al mese su 3300, irrilevante;
 - 3300 mAh su ~60 mA fanno **una quarantina d'ore vere**.
 
 **Il montaggio è la parte che decide se è davvero sicuro**: la cella va **bloccata** — una
