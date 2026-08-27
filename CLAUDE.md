@@ -756,8 +756,13 @@ messaggi**: la risposta è che sui tasselli non serve niente — quei modelli si
 comporta**, detto nei due momenti in cui conta.
 
 **E poi, sempre il 27, la goliardata**: lo Snake dei pedalini, in «Altro». Regole e trappole
-nella sezione qui sopra. È **provato solo sul banco e in headless**: sul telefono, col dito,
-non l'ha ancora visto nessuno — ed è lì che si gioca.
+nella sezione qui sopra. Tre giri in un pomeriggio, tutti chiesti da lui: prima il gioco,
+poi **«un po' troppo veloce»** (adesso si parte a 330 ms e si scende di dieci a batteria),
+poi **il wah come premio e una cornice attorno al campo**. È **provato solo sul banco e in
+headless**: sul telefono, col dito, non l'ha ancora visto nessuno — ed è lì che si gioca. Se
+riapre il capitolo, le manopole sono i quattro `WAH_*` e i tre della cadenza, tutti in cima
+a `src/snake-pedali.js`; e **il wah in una partita vera non l'ho mai visto comparire**,
+perché per arrivarci servono dieci batterie giocate a mano.
 
 Quello che segue è del 26 e vale ancora.
 
