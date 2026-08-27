@@ -808,6 +808,21 @@
   #btnSalvaModifiche.da-salvare::before { content:'• '; color:var(--accent); }
   #btnSalvaModifiche.salvato { border-color:#2a4a32; color:#9be0a8;
                                background:#12211a; }
+
+  /* ---- il pacchetto Hendrix, dentro l'editor --------------------------
+     Sui tasselli della catena non serve nessun bollo: quei modelli si
+     chiamano già «J.H. Fuzz Zone», e il nome li identifica da solo. Quello
+     che manca è **cosa comporta**, e va detto in due momenti — quando li si
+     sceglie, e finché quel blocco è quello. */
+  .elenco-nota { padding:0 10px 7px; font-size:0.73rem; line-height:1.45;
+                 color:var(--faint); }
+  /* È uno **stato del blocco**, non un messaggio: sta lì finché c'è un
+     Hendrix in quella posizione, come «offline» sta sotto il nome del preset.
+     In questo pannello i messaggi non ci vanno, e questo non lo è. */
+  .nota-jh { display:flex; align-items:center; justify-content:center;
+             flex-wrap:wrap; gap:6px; margin:8px 0 0;
+             font-size:0.72rem; line-height:1.35; color:#ff9b9b;
+             text-align:center; }
   .blocco.aFuoco .interruttore { display:block; width:100%; margin:8px 0 0;
                                  font-size:0.75rem; padding:10px; }
   /* Il titolo di un blocco che non ha niente da scegliere: stessa taglia e
@@ -3058,6 +3073,20 @@ function apriElenco(titolo, voci, scelto, quando) {
       g.className = 'elenco-gruppo';
       g.textContent = voce.gruppo;
       lista.appendChild(g);
+
+      // **Il momento della scelta è questo**, e non dopo aver sentito il
+      // silenzio: questi modelli entrano in catena e restano muti finché
+      // l'app ufficiale non li sblocca (vedi `CLAUDE.md`). La nota sta qui e
+      // non su ogni voce — sotto l'intestazione vale per tutte, e ripeterla
+      // quattordici volte sarebbe rumore.
+      if (voce.gruppo === SparkEffetti.GRUPPO_HENDRIX) {
+        const nota = document.createElement('div');
+        nota.className = 'elenco-nota';
+        nota.textContent = 'Suonano solo se l\'app ufficiale si è collegata ' +
+          'all\'ampli almeno una volta da quando è acceso. Altrimenti li vedi ' +
+          'in catena ma non li senti.';
+        lista.appendChild(nota);
+      }
     }
     const riga = document.createElement('button');
     riga.type = 'button';
@@ -3412,7 +3441,26 @@ function intestazioneBlocco(effetto, posizione) {
 
   const riga = document.createElement('div');
   riga.className = 'riga-modello';
-  riga.append(scelta, interruttoreDi(effetto));
+  riga.appendChild(scelta);
+
+  // Scelto un Hendrix, la ragione per cui non si sente resta scritta finché
+  // quel blocco è quello: sceglierlo e sentirlo muto sono due momenti diversi,
+  // e in mezzo può passare tutto il tempo che serve a dimenticarsene.
+  if (SparkEffetti.eHendrix(effetto.name)) {
+    const nota = document.createElement('div');
+    nota.className = 'nota-jh';
+    const bollo = document.createElement('span');
+    bollo.className = 'jh';
+    const pallino = document.createElement('span');
+    pallino.className = 'pallino';
+    bollo.append(pallino, 'JH');
+    const testo = document.createElement('span');
+    testo.textContent = 'non si sente finché l\'app ufficiale non lo sblocca';
+    nota.append(bollo, testo);
+    riga.appendChild(nota);
+  }
+
+  riga.appendChild(interruttoreDi(effetto));
   return riga;
 }
 

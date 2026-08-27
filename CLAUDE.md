@@ -333,6 +333,15 @@ acceso/spento, e ogni ramo di `cambiaModello`. Da lì:
   la catena viene da una lettura vera e può già essere diversa da quella in libreria —
   salvare in quel momento è proprio come si porta in libreria quello che l'ampli suona.
 
+**Gli Hendrix si dicono in due momenti, e sui tasselli non si dicono affatto.** Quei
+modelli si chiamano già «J.H. Fuzz Zone»: il nome li identifica da solo, e un bollo in più
+su una casella da 106 px sarebbe rumore. Quello che manca è **cosa comporta**, e va nei due
+momenti in cui conta: una `.elenco-nota` sotto l'intestazione «Jimi Hendrix Pack» della
+tendina — **una sola, non su ogni voce** — e una `.nota-jh` sotto il nome del modello nel
+blocco a fuoco, che resta lì finché quel modello è quello. La seconda **è uno stato, non un
+messaggio**, che in questo pannello non ne devono comparire: sta al nome del blocco come
+«offline» sta al nome del preset.
+
 **Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**, e `logLine`/
 `logProgress` ci scrivono l'ultimo messaggio: un pannello a tutto schermo copre il log, e
 senza quello un comando fallito è indistinguibile da un comando che non fa niente.
@@ -667,14 +676,13 @@ risposto.
 **Il 27 agosto è andato tutto nel sito**, non nell'app: comprato il dominio, configurato il
 DNS, scritta e pubblicata la pagina. Vedi la sezione qui sopra. L'app non è stata toccata.
 
-**Il pezzo di lavoro già a fuoco, e l'utente ha aperto una sessione apposta: il bollo «JH»
-nell'editor.** Il bollo c'è sulle schede della vista preset e sulle righe di libreria, ma
-**non nel momento in cui si sceglie un effetto Hendrix dalla tendina dei modelli** — che è
-il momento giusto per saperlo, prima di sentirlo muto. Era rimasto in sospeso per un motivo
-concreto: **la `.stato-pannello` dell'editor è già occupata** da quello che sta succedendo
-sulla radio, quindi il posto va trovato altrove.
+**Il 27 l'utente ha riaperto il bollo «JH» nell'editor, ed è fatto** (vedi «Editor della
+catena effetti»). Il problema era dove metterlo, perché nell'editor **non ci vanno
+messaggi**: la risposta è che sui tasselli non serve niente — quei modelli si chiamano già
+«J.H. Fuzz Zone» e il nome li identifica da solo — e quello che mancava era **cosa
+comporta**, detto nei due momenti in cui conta.
 
-Quello che segue è di ieri e vale ancora.
+Quello che segue è del 26 e vale ancora.
 
 ### 26 agosto 2026, sera
 
@@ -706,9 +714,7 @@ identificativi erano giusti (lo dicevano già i preset usciti dall'ampli in
 confermava il nome mentre il blocco non suonava.
 
 La convivenza è fatta: **il bollo «JH»** sulle schede della vista preset, chiesto
-dall'utente. Resta da decidere se dirlo anche **nell'editor**, quando si sceglie un `JH.*`
-dalla tendina — lì il momento è quello giusto, ma la riga di stato del pannello è già
-occupata da quello che sta succedendo sulla radio.
+dall'utente, e il 27 anche nell'editor.
 
 Poi, indipendente da tutto questo: **i nomi delle manopole dei quattro fuzz e del vibe
 sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.js`). Se le
