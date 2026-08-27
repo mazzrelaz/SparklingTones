@@ -665,13 +665,22 @@ Snake a 8 bit dove il serpente è una catena di pedalini attaccati col cavo e ma
 - **Qualunque comando fa partire la partita**, anche quello che non gira niente. Legandola
   alla sola sterzata utile, il primo tasto che viene in mente — «su», la direzione in cui il
   serpente già guarda — non faceva succedere nulla.
-- Il disegno è su una tela da 200×216 **pixel veri**, ingrandita con
+- Il disegno è su una tela da 208×224 **pixel veri**, ingrandita con
   `image-rendering:pixelated`. Un pedalino sta in tredici pixel: manopole **agli angoli** e
   pulsantone largo in basso, perché con le manopole in mezzo veniva fuori una faccina. Il
-  cavo fra due scatolette è **grigio**: nero, sul pavimento quasi nero, non si vedeva.
+  cavo fra due scatolette è **grigio**: nero, sul pavimento quasi nero, non si vedeva. La
+  cornice è una **cassa da trasporto disegnata dentro la tela** — squadrette e viti agli
+  angoli — e per questo la tela **non ha bordo CSS**: sarebbero due cornici.
+- **Il wah è il premio** (chiesto dall'utente il 27 agosto 2026): compare ogni dieci
+  batterie, vale tre pedalini e **se ne va da solo** dopo nove secondi, lampeggiando negli
+  ultimi tre. Scappa **a tempo e non a passi**, o stando fermi non ci sarebbe fretta. La
+  catena si allunga con un contatore (`cresci`) e non aggiungendo tre pezzi in un colpo: i
+  tre pedalini spuntano un passo alla volta, invece che dal nulla tutti insieme.
 
 `tools/snake-banco.html` lo fa girare da solo e dice se muove, mangia, si ferma in pausa e
-finisce contro il muro. Gira anche in headless.
+finisce contro il muro. Gira anche in headless, e con **`?zoom`** in coda all'indirizzo
+ingrandisce la tela quattro volte, che è l'unico modo di guardare i pixel di un pedalino.
+**Il wah il banco non lo prova**: per vederlo si mette `WAH_OGNI` a 1 e si rimette a 10.
 
 ## Convenzioni
 
@@ -789,7 +798,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v65` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v66` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.

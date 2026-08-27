@@ -9,7 +9,7 @@
  * Bluetooth, né la libreria, né lo stato. L'unico contatto con il resto del
  * mondo è `SnakePedali.apri()`.
  *
- * Il vestito è a 8 bit sul serio: si disegna su una tela da 200×216 pixel
+ * Il vestito è a 8 bit sul serio: si disegna su una tela da 208×224 pixel
  * veri e la si ingrandisce con `image-rendering:pixelated`. Disegnare grande
  * e rimpicciolire darebbe pixel sfumati, che è l'esatto contrario.
  *
@@ -22,9 +22,17 @@ window.SnakePedali = (function () {
   /* ---- misure ---- */
   const CELLA = 16;                 // un pedalino sta in sedici pixel
   const COLONNE = 12, RIGHE = 13;
-  const BORDO = 4;                  // la cornice della pedaliera
+  const BORDO = 8;                  // la custodia intorno al campo
   const LARG = COLONNE * CELLA + BORDO * 2;
   const ALT = RIGHE * CELLA + BORDO * 2;
+
+  /* Il wah è il premio: compare ogni dieci batterie, resta lì il tempo che
+     ha e poi se ne va. Vale tre pedalini in un colpo solo — un wah, in una
+     catena, si sente. */
+  const WAH_OGNI = 10;
+  const WAH_DURATA = 9000;
+  const WAH_LAMPEGGIA = 3000;       // gli ultimi secondi, per dire che scappa
+  const WAH_VALE = 3;
 
   /* La cadenza: millisecondi per casella. Si parte **piano** — a 210 era già
      svelta al primo tasto, e con una catena corta non c'è niente da capire,
@@ -97,7 +105,10 @@ window.SnakePedali = (function () {
     '.snake-tela { position:relative; }' +
     '.snake-tela canvas { display:block; width:100%; height:auto; background:#0a0a0c;' +
       ' image-rendering:pixelated; image-rendering:crisp-edges;' +
-      ' border:1px solid var(--line); border-radius:4px; touch-action:none; }' +
+      // Nessun bordo qui: la cornice è disegnata dentro la tela, coi suoi
+      // pixel, e un bordo CSS sopra farebbe due cornici. L'ombra invece
+      // stacca la cassa dal nero della pagina.
+      ' box-shadow:0 8px 22px rgba(0,0,0,0.65); touch-action:none; }' +
     '.snake-fine { position:absolute; inset:0; display:flex; flex-direction:column;' +
       ' align-items:center; justify-content:center; gap:10px; text-align:center;' +
       ' padding:16px; background:rgba(0,0,0,0.82); border-radius:4px;' +
@@ -256,6 +267,9 @@ window.SnakePedali = (function () {
       punti: 0,
       passo: PASSO_INIZIALE,
       batteria: null,
+      wah: null,          // { x, y, resta } quando il premio è in campo
+      prossimoWah: WAH_OGNI,
+      cresci: 0,          // caselle da allungare ancora, senza tagliare la coda
       finita: null,
       pausa: false,
       partito: false,     // finché non si tocca un tasto la catena sta ferma
@@ -270,11 +284,13 @@ window.SnakePedali = (function () {
     return p;
   }
 
-  function postoLibero(p) {
+  /** Una casella libera a caso: né sotto la catena, né sotto quello che c'è già. */
+  function postoLibero(p, ancheQuesti) {
+    const presi = p.catena.concat(ancheQuesti || []);
     const liberi = [];
     for (let y = 0; y < RIGHE; y++) {
       for (let x = 0; x < COLONNE; x++) {
-        if (!p.catena.some(s => s.x === x && s.y === y)) liberi.push({ x: x, y: y });
+        if (!presi.some(s => s && s.x === x && s.y === y)) liberi.push({ x: x, y: y });
       }
     }
     if (!liberi.length) return null;   // pedaliera piena: bravo
@@ -302,16 +318,45 @@ window.SnakePedali = (function () {
 
     if (p.batteria && testa.x === p.batteria.x && testa.y === p.batteria.y) {
       p.punti++;
-      p.passo = Math.max(PASSO_MINIMO, PASSO_INIZIALE - p.punti * CALO);
-      p.batteria = postoLibero(p);
+      p.cresci++;
+      p.batteria = postoLibero(p, [p.wah]);
       parti.nome.textContent = '+ ' + PEDALI[p.punti % PEDALI.length].nome;
-      parti.punti.textContent = p.punti;
       bip(660, 0.05);
       setTimeout(() => bip(990, 0.06), 55);
-      if (!p.batteria) morte('Pedaliera piena. Non ci sta più niente.');
-    } else {
-      p.catena.pop();
+      if (p.punti >= p.prossimoWah) facciaIlWah(p);
+    } else if (p.wah && testa.x === p.wah.x && testa.y === p.wah.y) {
+      p.punti += WAH_VALE;
+      p.cresci += WAH_VALE;
+      p.wah = null;
+      parti.nome.textContent = '+ WAH! ne vale ' + WAH_VALE;
+      // due note che salgono e ridiscendono: è un wah, si sente
+      bip(440, 0.06);
+      setTimeout(() => bip(880, 0.06), 60);
+      setTimeout(() => bip(560, 0.10), 130);
     }
+
+    p.passo = Math.max(PASSO_MINIMO, PASSO_INIZIALE - p.punti * CALO);
+    parti.punti.textContent = p.punti;
+
+    // La coda si taglia sempre, tranne per le caselle che la catena deve
+    // ancora allungarsi: così il wah, che ne vale tre, cresce di tre passi
+    // invece che di tre pezzi comparsi tutti insieme dal nulla.
+    if (p.cresci > 0) p.cresci--;
+    else p.catena.pop();
+
+    if (!p.batteria) morte('Pedaliera piena. Non ci sta più niente.');
+  }
+
+  /** Il premio compare, e da lì comincia a scappare. */
+  function facciaIlWah(p) {
+    p.prossimoWah += WAH_OGNI;
+    const posto = postoLibero(p, [p.batteria]);
+    if (!posto) return;               // non c'è dove metterlo, pazienza
+    p.wah = { x: posto.x, y: posto.y, resta: WAH_DURATA };
+    parti.nome.textContent = 'un wah! prendilo';
+    bip(520, 0.05);
+    setTimeout(() => bip(700, 0.05), 70);
+    setTimeout(() => bip(900, 0.07), 140);
   }
 
   function morte(motivo) {
@@ -355,12 +400,10 @@ window.SnakePedali = (function () {
       const sfasa = ((y - BORDO) / 8) % 2 ? 4 : 0;
       for (let x = BORDO + sfasa; x < LARG - BORDO; x += 8) ctx.fillRect(x, y, 1, 1);
     }
-    // la cornice: chiara sopra e a sinistra, scura sotto e a destra, che è
-    // quanto basta perché il piano sembri stare dentro qualcosa
-    r(0, 0, LARG, 2, '#33363d'); r(0, 0, 2, ALT, '#33363d');
-    r(0, ALT - 2, LARG, 2, '#1a1c20'); r(LARG - 2, 0, 2, ALT, '#1a1c20');
+    cornice();
 
     if (p.batteria) batteria(p.batteria, p.battito);
+    if (p.wah) wahwah(p.wah, p.battito);
 
     // i cavi prima, i pedalini sopra: così del cavo si vede solo il pezzo che
     // passa fra una scatoletta e l'altra, come sul pavimento vero
@@ -376,6 +419,68 @@ window.SnakePedali = (function () {
       ctx.textAlign = 'center';
       ctx.fillText('PAUSA', LARG / 2, Math.floor(ALT / 2) + 4);
     }
+  }
+
+  /**
+   * La custodia: il campo sta dentro una cassa da trasporto, con le
+   * squadrette di metallo agli angoli e la vite che le tiene. Serve a dare
+   * un bordo a un rettangolo che altrimenti finisce nel nero della pagina —
+   * e a un gioco di pedalini una cassa da pedaliera sta bene addosso.
+   */
+  function cornice() {
+    const legno = '#2a2c33', metallo = '#8d929c';
+
+    // la cassa, con la luce che viene da sopra a sinistra
+    r(0, 0, LARG, BORDO, legno); r(0, ALT - BORDO, LARG, BORDO, legno);
+    r(0, 0, BORDO, ALT, legno); r(LARG - BORDO, 0, BORDO, ALT, legno);
+    r(0, 0, LARG, 1, '#4a4e57'); r(0, 0, 1, ALT, '#4a4e57');
+    r(0, ALT - 1, LARG, 1, '#15161a'); r(LARG - 1, 0, 1, ALT, '#15161a');
+
+    // lo scalino attorno alla vasca, che dà profondità
+    const dentro = BORDO - 1;
+    r(dentro, dentro, LARG - dentro * 2, 1, '#15161a');
+    r(dentro, dentro, 1, ALT - dentro * 2, '#15161a');
+    r(dentro, ALT - dentro - 1, LARG - dentro * 2, 1, '#4a4e57');
+    r(LARG - dentro - 1, dentro, 1, ALT - dentro * 2, '#4a4e57');
+
+    // le quattro squadrette, ognuna con la sua vite
+    squadretta(1, 1, 1, 1);
+    squadretta(LARG - 2, 1, -1, 1);
+    squadretta(1, ALT - 2, 1, -1);
+    squadretta(LARG - 2, ALT - 2, -1, -1);
+
+    function squadretta(x, y, versoX, versoY) {
+      const lungo = 9, spesso = 3;
+      const sinistra = versoX > 0 ? x : x - lungo + 1;
+      const alto = versoY > 0 ? y : y - lungo + 1;
+      r(sinistra, versoY > 0 ? y : y - spesso + 1, lungo, spesso, metallo);
+      r(versoX > 0 ? x : x - spesso + 1, alto, spesso, lungo, metallo);
+      // la vite nel gomito, col taglio del cacciavite
+      const vx = versoX > 0 ? x + 4 : x - 5, vy = versoY > 0 ? y : y - 2;
+      r(vx, vy, 3, 3, '#d8d8dc');
+      r(vx + 1, vy + 1, 1, 1, '#5a5f68');
+    }
+  }
+
+  /**
+   * Il wah: il premio. Visto di fianco, com'è davvero — una rampa che sale,
+   * la piastra di metallo sopra, la base sotto. Quando sta per scappare
+   * lampeggia, e i tre gradini si accendono a turno come una spazzata.
+   */
+  function wahwah(cella, battito) {
+    const x = px(cella.x), y = px(cella.y);
+    const quasiFinito = partita.wah.resta <= WAH_LAMPEGGIA;
+    if (quasiFinito && battito % 2) return;
+
+    r(x + 1, y + 11, 14, 3, '#5a5f68');      // la base
+    r(x + 1, y + 13, 14, 1, '#15161a');
+    for (let i = 0; i < 4; i++) {
+      const sinistra = x + 2 + i * 3, alto = y + 8 - i * 2;
+      r(sinistra, alto, 3, y + 12 - alto, '#3a3b45');
+      r(sinistra, alto, 3, 1, i === 3 ? '#e8ecf2' : '#b6bcc6');
+    }
+    r(x + 2, y + 9, 2, 2, '#f0c040');        // la punta, dove si preme
+    r(x + 12, y + 9, 2, 2, '#ff3b30');       // il LED, sul tacco
   }
 
   /**
@@ -500,6 +605,17 @@ window.SnakePedali = (function () {
       p.partito = true;
       accumulo += passato;
       while (accumulo >= p.passo && !p.finita) { accumulo -= p.passo; avanza(); }
+
+      // Il wah scappa a tempo, non a passi: dev'essere una fretta che si
+      // sente anche stando fermi a guardarlo.
+      if (p.wah) {
+        p.wah.resta -= passato;
+        if (p.wah.resta <= 0) {
+          p.wah = null;
+          parti.nome.textContent = 'il wah se n\'è andato';
+          bip(300, 0.09);
+        }
+      }
     }
     disegna();
   }

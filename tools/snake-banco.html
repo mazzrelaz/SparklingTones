@@ -30,6 +30,10 @@
            border-radius:8px; padding:8px 12px; }
   button.primary { background:#e30613; border-color:#e30613; color:#fff; }
   .spiega { color:#8a8f98; font-size:0.8rem; }
+  /* Con `?zoom` in coda all'indirizzo la tela viene ingrandita quattro volte:
+     è l'unico modo di guardare davvero i pixel di un pedalino. */
+  body.zoom .snake-scena { max-width:none; }
+  body.zoom .snake-tela canvas { width:832px; height:896px; }
   #esito { position:fixed; right:8px; bottom:8px; z-index:50; color:#8f8;
            font:12px monospace; white-space:pre; background:#000; padding:6px; }
 </style>
@@ -46,6 +50,7 @@ const righe = [];
 const esito = document.getElementById('esito');
 const hud = nome => document.querySelector('#pannelloSnake [data-snake=' + nome + ']').textContent;
 
+if (location.search.indexOf('zoom') >= 0) document.body.classList.add('zoom');
 SnakePedali.apri();
 righe.push('aperto: ' + !!document.querySelector('#pannelloSnake canvas'));
 document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
