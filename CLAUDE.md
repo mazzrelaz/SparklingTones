@@ -634,8 +634,16 @@ serviva sul C3:
 | D4 / D5 | `22`, `23` | MCP23017 in I²C (SDA, SCL) |
 | D8 / D10 | `19`, `18` | display SPI: SCK, MOSI |
 | D3, D6, D7 | `21`, `16`, `17` | display: CS, DC, RST |
-| D0 (A0) | `0` | tensione di batteria — **partitore già a bordo**, 1:2 |
+| D0 (A0) | `0` | tensione di batteria — **il partitore va saldato**, 200 kΩ, 1:2 |
 | D1, D2, D9 | `1`, `2`, `20` | liberi; D1 e D2 sono analogici |
+
+**La XIAO carica la cella a 100 mA, quindi la sua USB non è una via di ricarica**: su una
+3300 mAh sono 35–40 ore. Non è un guaio perché la cella si estrae e si carica in un
+caricabatterie vero (~2 h), che era già il piano; la presa sul pannello serve al **firmware**
+più un rabbocco — una notte attaccato vale ~13 ore di uso, su ~40 di autonomia. Se un giorno
+servisse caricare senza aprire, si aggiunge un **TP4056 con la sua presa**: il ragionamento e
+la trappola dei due caricabatterie sono in `docs/pedale.md`. **La cifra «380 mA» che c'era qui
+era del C3.**
 
 Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
 sul port B. **Non verificato sul C6**: i tempi BLE (misurati su C3, libreria identica) e se
