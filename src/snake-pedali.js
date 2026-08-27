@@ -26,8 +26,15 @@ window.SnakePedali = (function () {
   const LARG = COLONNE * CELLA + BORDO * 2;
   const ALT = RIGHE * CELLA + BORDO * 2;
 
-  const PASSO_INIZIALE = 210;       // millisecondi per casella
-  const PASSO_MINIMO = 85;
+  /* La cadenza: millisecondi per casella. Si parte **piano** — a 210 era già
+     svelta al primo tasto, e con una catena corta non c'è niente da capire,
+     solo da reagire. La fretta se la deve guadagnare la partita: ogni
+     batteria toglie `CALO`, e sotto `PASSO_MINIMO` non si scende. Al minimo
+     ci si arriva alla ventitreesima batteria, che a quel punto la catena è
+     lunga mezza pedaliera e il difficile è quella, non la velocità. */
+  const PASSO_INIZIALE = 330;
+  const PASSO_MINIMO = 110;
+  const CALO = 10;
   const CHIAVE_RECORD = 'snake-pedali-record';
   const CHIAVE_SUONO = 'snake-pedali-suono';
 
@@ -295,7 +302,7 @@ window.SnakePedali = (function () {
 
     if (p.batteria && testa.x === p.batteria.x && testa.y === p.batteria.y) {
       p.punti++;
-      p.passo = Math.max(PASSO_MINIMO, PASSO_INIZIALE - p.punti * 7);
+      p.passo = Math.max(PASSO_MINIMO, PASSO_INIZIALE - p.punti * CALO);
       p.batteria = postoLibero(p);
       parti.nome.textContent = '+ ' + PEDALI[p.punti % PEDALI.length].nome;
       parti.punti.textContent = p.punti;
