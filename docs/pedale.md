@@ -321,10 +321,18 @@ Cosa comprare, verificato su Allegro il 25 agosto 2026:
 - **portacella 1× 18650 con i fili**, quelli da qualche zloty. Trappola nota: **le celle
   protette sono più lunghe (~69 mm invece di 65)** e in certi portacella stretti non
   entrano;
-- **interruttore generale a levetta SPST con dado**, metallico, roba da qualche zloty: la
-  corrente è ridicola (~100 mA), conta solo che sia robusto. **Va sul retro o sul fianco,
-  non sul piano di calpestio**, o si spezza al primo pestone;
-- **due resistenze da 200 kΩ** per il partitore di A0, che sulla C6 non è a bordo;
+- **interruttore generale a levetta SPST con dado**, metallico: la corrente è ridicola
+  (~100 mA), conta solo che sia robusto. **Va sul retro o sul fianco, non sul piano di
+  calpestio**, o si spezza al primo pestone. **L'utente ce l'ha già** (27 agosto 2026);
+- **due resistenze per il partitore di A0**, che sulla C6 non è a bordo. **Non devono essere
+  200 kΩ**: serve che siano **uguali** (il rapporto 1:2 è quello che conta) e fra 100 k e
+  220 k — più alte scaricano meno la cella, più basse le legge meglio l'ADC. **L'utente ne ha
+  già in casa** (27 agosto 2026), dal progetto `Timer`. Due avvertenze:
+  **misurare prima di saldare**, perché il wiki dice «*una* resistenza da 200 k» al singolare e
+  potrebbe essercene già una a bordo — tester fra `A0` e `BAT+` e fra `A0` e massa; e
+  **mettere un 100 nF fra `A0` e massa**, perché con due 200 k l'ADC vede una sorgente da
+  100 kΩ, troppo alta per il suo campionatore, e la lettura sballa di quel tanto che su questa
+  curva piatta vale una tacca intera;
 - **modulo di ricarica: [Aideepen TC4056 USB-C, sei pezzi per 11,87 zł su Amazon.pl](https://www.amazon.pl/dp/B0BZSB3SBN)**
   (ASIN `B0BZSB3SBN`, scelto il 27 agosto 2026, 4,5 su 292 valutazioni). USB-C, 1 A, 25 × 16,5
   mm, LED rosso `CHARGE` e verde `FULL`. **Sei pezzi costano meno di uno solo comprato su
