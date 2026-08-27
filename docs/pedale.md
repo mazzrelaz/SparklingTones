@@ -433,9 +433,24 @@ si mette dove fa comodo per i due forellini — trenta centimetri di cavo danno 
 Unica accortezza: **fissarlo** (colla a caldo o un distanziale), o il peso e la piega del cavo
 gli tirano il connettore.
 
-**Con l'interruttore chiuso il verde può non accendersi mai**, ed è la stessa ragione del
-load sharing: la corrente che si beve il pedale tiene il modulo sopra la soglia di fine
-carica. Un motivo in più per caricare a pedale spento.
+**Ma non è un divieto, ed è bene dirlo perché scritto male sembrava tale** (chiesto
+dall'utente il 27 agosto 2026: «quindi mentre è in carica non posso usare il pedale?»).
+**Si può usare mentre carica.** Funziona e non è pericoloso: entra 1 A, il pedale se ne beve
+60 mA, alla cella ne arrivano ~940 — il 94% della velocità. Quello che si perde è **il verde
+`FULL`**, perché quei 60 mA possono tenere il modulo sopra la soglia di C/10 e la carica non
+termina mai, o termina e riparte a cicli. Non è un guasto, è un'indicazione di cui non ci si
+può fidare. La regola giusta è quindi:
+
+> **Usalo pure mentre carica se serve.** Ma per il caso «lo attacco la sera e lo voglio
+> trovare pieno», si spegne l'interruttore: è l'unico modo di fidarsi del verde.
+
+**E c'è una seconda conseguenza, sull'indicatore dell'OLED**: mentre carica la tensione su
+`A0` sta a 4,2 V anche a cella mezza vuota, quindi la tacca direbbe «pieno» mentendo, e il
+firmware da solo non può accorgersene. Se un giorno si vuole risolvere: **il TP4056 ha due
+uscite `CHRG` e `STDBY`**, a collettore aperto verso massa, che sono quelle che pilotano i due
+LED. Portate a due dei tre GPIO liberi della XIAO (con pull-up interno, attive basse), il
+firmware **sa** se sta caricando e se ha finito, e sul display si scrive «in carica» e «carica
+completa» invece di una tacca che mente. Saldatura fine sui pad dei LED, ma sono due fili.
 
 Il tempo è comunque prevedibile: **1 A su 3300 mAh fanno ~3,5 h**, quindi attaccato e
 ripreso dopo quattro ore è finito, LED o non LED.
@@ -461,9 +476,16 @@ caricare per conto suo a 100 mA — ma il verde `FULL` non si accende mai e dopo
 cella è come prima. Si risolve **scrivendoci sopra** («CARICA» / «FIRMWARE») o separandole
 fisicamente, retro contro fianco, o una incassata.
 
-Da valutare quando il firmware si assesta: **la presa del firmware potrebbe stare dentro**,
-raggiungibile aprendo la scatola. Un foro in meno e niente da confondere. Durante lo sviluppo
-no, che la si apre in continuazione.
+**Deciso il 27 agosto 2026: escono tutte e due, due codini.** Avevo proposto di lasciare quella
+del firmware dentro la scatola, ma valeva finché costava un foro: dal momento che il pezzo si
+compra comunque, con venti zloty ci carichi il firmware **e** leggi il log seriale
+(`tools/pedale-seriale.html`) **a scatola chiusa, col pedale per terra e il piede sopra** — che
+per misurare i tempi BLE in condizioni vere vale molto più del prezzo. Il codino porta i dati
+(pinout pieno) e per l'USB nativo del C6, full-speed a 12 Mbps, 30 cm non sono niente.
+
+In cambio: **60 cm di cavo arrotolato dentro** invece di 30 — due matassine fascettate, lontane
+dalla meccanica dei footswitch — **due fori rettangolari** da fare a lima, e **le due prese
+identiche da etichettare in fase di montaggio**, non «poi mi ricordo».
 
 #### Le prese da pannello, e la trappola del CC — 27 agosto 2026
 
@@ -809,6 +831,34 @@ risposta. Funziona; si può accorciare, ma è ottimizzazione.
 **Ancora da fare: il pedale non ricorda quale banco stava suonando.** Al riavvio carica il
 primo che trova. Con più banchi in memoria non basta più, e ha senso farlo insieme ai
 tasti banco veri — sono la stessa funzione vista da due lati.
+
+**Ancora da fare: l'indicatore di batteria sull'OLED.** Chiesto dall'utente il 27 agosto 2026,
+firmware non scritto. La domanda era «come si capirà che è carica», e sono **due domande in
+stati opposti del pedale**:
+
+- **carica finita** → i due LED del modulo, e non c'è alternativa: mentre carica il pedale è
+  **spento** (regola del load sharing), quindi firmware e display non possono dire niente. Due
+  forellini da 3 mm;
+- **quanta ne resta mentre si suona** → il display, ed è il vero motivo del partitore su `A0`.
+
+**Niente percentuali, perché la tensione di un litio mente**: 4,2 V da pieno, poi piatta sui
+3,7 per la maggior parte della scarica, poi crolla. Un «73%» sarebbe inventato proprio nel
+mezzo. Quello che funziona è grossolano e vero — quattro tacche a soglie (>4,05 / 3,85 / 3,70 /
+3,50) e sotto i **3,50 V un avviso, non un'icona**.
+
+**Il momento che conta è l'ultimo**: la protezione della XTAR taglia sui 2,5 V e il pedale
+muore a metà canzone. Stesso spirito della regola del quinto footswitch — sul palco la sorpresa
+è il difetto peggiore — quindi l'avviso dev'essere impossibile da non vedere.
+
+Tre trappole di misura, che con quaranta ore di autonomia si scoprirebbero fra sei mesi:
+**mediana di più letture** (l'ADC è rumoroso e i picchi BLE fanno ballare il valore);
+**`analogReadMilliVolts()` e non `analogRead()`**, che usa la calibrazione di fabbrica
+nell'eFuse e su questa curva vale una tacca intera; e **filtro lento, senza far risalire
+l'indicatore**, che una tacca che balla è peggio di nessuna tacca.
+
+**Un LED di stato in più no**: le otto uscite dell'espansore sono già tutte dei quattro LED
+bicolore, e i tre GPIO liberi sulla XIAO non risolverebbero niente — a pedale spento non è
+acceso nemmeno quello, e a pedale acceso il display lo dice meglio.
 
 **Chiuso il 16 agosto 2026: il footswitch col banco ricevuto funziona.** Contatori alla
 mano, **6 fronti grezzi per 3 pressioni** — due a testa, zero rimbalzi — e tutte e tre

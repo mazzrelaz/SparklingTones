@@ -659,6 +659,13 @@ l'interruttore va **fra la cella e la XIAO**, col `B+`/`B-` del modulo attaccato
 finita), e **le due prese vanno etichettate**, o il caricabatterie finisce in quella sbagliata.
 Cablaggio, saldature e il resto in `docs/pedale.md`.
 
+**L'indicatore di batteria è firmware ancora da scrivere**, e sono due cose distinte: **la
+carica finita la dicono solo i LED del modulo**, perché mentre carica il pedale è spento; **il
+livello mentre si suona va sull'OLED**, ed è il motivo del partitore su `A0`. **Niente
+percentuali** — la tensione di un litio è piatta nel mezzo — ma quattro tacche a soglie e
+**sotto 3,50 V un avviso impossibile da non vedere**, che la protezione della cella taglia a
+2,5 V e il pedale muore a metà canzone. Dettagli e trappole di misura in `docs/pedale.md`.
+
 Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
 sul port B. **Non verificato sul C6**: i tempi BLE (misurati su C3, libreria identica) e se
 il modulo espansore abbia i pull-up sull'I²C — se il bus non parte, quello è il primo
