@@ -63,12 +63,20 @@ window.SnakePedali = (function () {
     { corpo: '#2fb6c0', luce: '#7fe8f0', ombra: '#14646c', nome: 'WHAM-WHAM' },
   ];
 
-  /* Il logo del gioco, che l'utente prepara a parte. Finché il file non c'è
-     la fascia mostra la scritta, e l'immagine compare da sé il giorno che
-     arriva — senza toccare una riga qui. **Quando c'è va aggiunto anche al
-     `GUSCIO` di `sw.js`**, o sarà l'unica cosa che manca offline; e non un
-     minuto prima, perché `cache.addAll` fallisce in blocco su un 404. */
-  const LOGO = 'icons/stompsnake.png';
+  /* Il logo che ha fatto l'utente, senza i margini vuoti intorno. Se il file
+     non rispondesse — non c'è, o non è ancora arrivato in cache — resta la
+     scritta, che occupa lo stesso spazio: la fascia non cambia altezza e il
+     campo non salta.
+
+     **È un JPEG su fondo nero e non un PNG trasparente**, ed è una scelta:
+     il pannello è nero pieno in tutte e due le viste, quindi si vede uguale,
+     e il PNG con l'alfa pesava 384 KB contro 76.
+
+     **Non sta nel `GUSCIO` di `sw.js` apposta**: il guscio è quello che serve
+     a far partire l'app da spenta, e il logo di un passatempo lì dentro non
+     ci va. Se lo prende da sé la prima volta che si apre il gioco, e da
+     allora c'è anche offline. */
+  const LOGO = 'icons/stompsnake.jpg';
 
   const SCHERMO =
     '<div class="barra-alta">' +
@@ -103,23 +111,36 @@ window.SnakePedali = (function () {
         '<button data-dir="giu" aria-label="giu">&#9660;</button>' +
         '<button data-dir="dx" aria-label="destra">&#9654;</button>' +
       '</div>' +
-      '<p class="spiega snake-aiuto">Frecce o WASD, spazio per la pausa. ' +
-        'Col dito si scorre sullo schermo, oppure si usano i tasti qui sopra. ' +
-        'L&#39;ampli non c&#39;entra niente: da qui non parte nessun comando.</p>' +
+      // Corta di proposito: il logo si è preso lo spazio, e questa riga la si
+      // legge una volta sola. L'ampli non c'entra niente comunque.
+      '<p class="spiega snake-aiuto">Col dito sul campo, o coi tasti qui sopra. ' +
+        'Frecce e WASD, spazio per la pausa.</p>' +
     '</div>';
 
   const CSS =
-    '#pannelloSnake { z-index:20; }' +
+    // L'arcobaleno del neon sta scritto una volta sola: lo usano il bordo del
+    // campo, il suo alone e i tasti, e devono essere lo stesso arcobaleno o
+    // l'onda non sembra una sola.
+    '#pannelloSnake { z-index:20;' +
+      ' --arcobaleno:linear-gradient(90deg,#ff2d55,#ff9500,#ffe600,#34e07a,' +
+      '#00c8ff,#7a5cff,#ff2d55); }' +
+    '@keyframes snake-onda { to { background-position:200% 50%; } }' +
+    // Chi ha chiesto meno animazioni non se le ritrova addosso: il bordo
+    // resta, l'onda si ferma.
+    '@media (prefers-reduced-motion: reduce) { #pannelloSnake * { animation:none !important; } }' +
     // La tela è alta quanto è larga, e una tela larga quanto il telefono
     // spingerebbe la pulsantiera sotto il bordo dello schermo: la larghezza
     // la decide l'altezza che c'è.
-    '.snake-scena { max-width:min(420px, 46vh); margin:0 auto; }' +
+    '.snake-scena { max-width:min(420px, 37vh); margin:0 auto; }' +
     // La fascia del marchio: altezza fissa, così il campo sta sempre allo
     // stesso posto con o senza immagine.
-    '.snake-marchio { height:46px; display:flex; align-items:center;' +
+    '.snake-marchio { height:min(140px, 19vh); display:flex; align-items:center;' +
       ' justify-content:center; margin-bottom:8px; overflow:hidden; }' +
-    '.snake-marchio img { max-height:46px; max-width:100%; width:auto;' +
-      ' image-rendering:pixelated; display:block; }' +
+    // Qui **non** va `image-rendering:pixelated`: il logo è un disegno grande
+    // rimpicciolito, non pixel art a misura, e a pixel secchi si sgranerebbe.
+    // La tela è l'opposto e infatti lì ci va.
+    '.snake-marchio img { max-height:100%; max-width:100%; width:auto;' +
+      ' display:block; }' +
     // `hidden` da solo qui non basta: è `display:none` di sistema, e qualunque
     // `display` scritto da noi lo scavalca. Senza questa riga il segnaposto
     // dell'immagine mancante si vede, rotto, accanto alla scritta.
@@ -134,13 +155,25 @@ window.SnakePedali = (function () {
     '.snake-hud b { color:var(--text); font-size:0.95rem; }' +
     '.snake-nome { color:var(--gold); text-align:center; flex:1;' +
       ' overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }' +
-    '.snake-tela { position:relative; }' +
+    // Il bordo al neon. Il trucco sono due sfondi sovrapposti: il nero pieno
+    // ritagliato sul riquadro interno, l'arcobaleno su tutto — bordo
+    // compreso — e largo il doppio, così scorrendo di 200% fa un'onda che
+    // torna al punto di partenza senza scatti. Il bordo dev'essere
+    // trasparente, o coprirebbe l'arcobaleno.
+    '.snake-tela { position:relative; z-index:0; border:3px solid transparent;' +
+      ' border-radius:10px; background-image:linear-gradient(#000,#000), var(--arcobaleno);' +
+      ' background-origin:border-box; background-clip:padding-box, border-box;' +
+      ' background-size:auto, 200% 100%; animation:snake-onda 5s linear infinite; }' +
+    // L'alone: lo stesso arcobaleno sfocato dietro, che è quello che fa
+    // sembrare acceso un bordo invece che disegnato.
+    '.snake-tela::before { content:""; position:absolute; inset:-5px; z-index:-1;' +
+      ' border-radius:14px; background:var(--arcobaleno); background-size:200% 100%;' +
+      ' filter:blur(11px); opacity:0.5; animation:snake-onda 5s linear infinite; }' +
     '.snake-tela canvas { display:block; width:100%; height:auto; background:#0a0a0c;' +
       ' image-rendering:pixelated; image-rendering:crisp-edges;' +
-      // Nessun bordo qui: la cornice è disegnata dentro la tela, coi suoi
-      // pixel, e un bordo CSS sopra farebbe due cornici. L'ombra invece
-      // stacca la cassa dal nero della pagina.
-      ' box-shadow:0 8px 22px rgba(0,0,0,0.65); touch-action:none; }' +
+      // La cassa è disegnata dentro la tela, coi suoi pixel: qui niente
+      // bordo, o sarebbero due cornici dentro il neon.
+      ' border-radius:7px; touch-action:none; }' +
     '.snake-fine { position:absolute; inset:0; display:flex; flex-direction:column;' +
       ' align-items:center; justify-content:center; gap:10px; text-align:center;' +
       ' padding:16px; background:rgba(0,0,0,0.82); border-radius:4px;' +
@@ -151,11 +184,17 @@ window.SnakePedali = (function () {
     '.snake-motivo { font-size:0.82rem; color:var(--text); max-width:26ch; line-height:1.45; }' +
     '.snake-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px;' +
       ' max-width:270px; margin:12px auto 0; }' +
-    '.snake-pad button { font-size:1.1rem; padding:13px 0; font-family:var(--strumento); }' +
-    '.snake-pad [data-dir="su"] { grid-column:2; grid-row:1; }' +
-    '.snake-pad [data-dir="sx"] { grid-column:1; grid-row:2; }' +
-    '.snake-pad [data-dir="giu"] { grid-column:2; grid-row:2; }' +
-    '.snake-pad [data-dir="dx"] { grid-column:3; grid-row:2; }' +
+    // I tasti hanno lo stesso bordo del campo, e ognuno parte con un ritardo
+    // suo: l'onda non lampeggia tutta insieme, gira intorno alla pulsantiera.
+    '.snake-pad button { font-size:1.1rem; padding:13px 0; font-family:var(--strumento);' +
+      ' position:relative; z-index:0; border:2px solid transparent; border-radius:10px;' +
+      ' background-image:linear-gradient(var(--panel),var(--panel)), var(--arcobaleno);' +
+      ' background-origin:border-box; background-clip:padding-box, border-box;' +
+      ' background-size:auto, 200% 100%; animation:snake-onda 5s linear infinite; }' +
+    '.snake-pad [data-dir="su"] { grid-column:2; grid-row:1; animation-delay:0s; }' +
+    '.snake-pad [data-dir="dx"] { grid-column:3; grid-row:2; animation-delay:-1.25s; }' +
+    '.snake-pad [data-dir="giu"] { grid-column:2; grid-row:2; animation-delay:-2.5s; }' +
+    '.snake-pad [data-dir="sx"] { grid-column:1; grid-row:2; animation-delay:-3.75s; }' +
     '.snake-aiuto { margin-top:14px; text-align:center; }';
 
   let pannello = null, tela = null, ctx = null;

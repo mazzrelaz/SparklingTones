@@ -653,14 +653,32 @@ Snake a 8 bit dove il serpente è una catena di pedalini attaccati col cavo e ma
 l'utente il 27 agosto, a gioco fatto, e rinominare il file vorrebbe dire toccare anche
 `index.html` e il `GUSCIO` di `sw.js` per niente.
 
-**Sopra il campo c'è la fascia del marchio**, alta 46 px, che aspetta
-`icons/stompsnake.png` — l'utente lo prepara a parte. Finché il file non c'è si vede la
-scritta «STOMPSNAKE», che occupa lo stesso spazio, e l'immagine si scopre da sé quando
-arriva (`load` la mostra, `error` non fa niente). Due cose da ricordare: **il file va
-aggiunto al `GUSCIO` di `sw.js` solo dopo che esiste** — `cache.addAll` fallisce in blocco
-su un 404 e l'app resterebbe senza guscio offline — e **l'attributo `hidden` da solo non
-nasconde l'immagine**, perché il nostro `display:block` lo scavalca: senza la regola
-`img[hidden] { display:none }` il segnaposto rotto si vede.
+**Si entra dal menu «⋯» della schermata principale, alla voce «Fai una pausa»** (spostata
+lì il 27 agosto 2026, su richiesta): a un passatempo non ci si arriva passando da un
+pannello di manutenzione. Dentro «Altro» non c'è più niente del gioco.
+
+**Sopra il campo c'è il logo**, `icons/stompsnake.jpg`, disegnato dall'utente e qui
+ritagliato dei margini vuoti. Tre cose da ricordare:
+
+- **è un JPEG su fondo nero, non un PNG trasparente**, e non è una svista: il pannello è
+  nero pieno in tutte e due le viste, quindi si vede uguale, e il PNG con l'alfa pesava
+  **384 KB contro 76**;
+- **non sta nel `GUSCIO` di `sw.js`**, apposta: il guscio è quello che serve a far partire
+  l'app da spenta. Il logo se lo prende da sé la prima volta che si apre il gioco, e da
+  allora c'è anche offline. (E così non c'è il rischio di metterci un file che non esiste
+  ancora: `cache.addAll` fallisce in blocco su un 404.)
+- se il file non rispondesse resta la scritta «STOMPSNAKE», che tiene lo stesso spazio. Ma
+  attenzione: **l'attributo `hidden` da solo non nasconde l'immagine**, perché il nostro
+  `display:block` lo scavalca — senza la regola `img[hidden] { display:none }` il
+  segnaposto rotto si vede accanto alla scritta.
+
+**Il campo e i tasti hanno un bordo al neon che fa l'onda** (chiesto il 27 agosto 2026).
+Il trucco sono due sfondi sovrapposti — il nero ritagliato sul riquadro interno, l'arcobaleno
+su tutto compreso il bordo, largo il doppio — e uno scorrimento di `200%`, che torna al
+punto di partenza senza scatti. **Il bordo dev'essere `transparent`**, o coprirebbe
+l'arcobaleno. Ogni tasto parte con un ritardo suo, così l'onda gira intorno alla
+pulsantiera invece di lampeggiare tutta insieme; l'alone è lo stesso arcobaleno sfocato in
+un `::before` dietro. `prefers-reduced-motion` ferma l'onda e lascia il bordo.
 
 - **Non tocca niente**: non parla con l'ampli, non legge la libreria, non ha stato in comune
   con l'app. L'unico contatto è `SnakePedali.apri()`. Record e «muto» stanno in
@@ -820,7 +838,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v67` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v68` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.

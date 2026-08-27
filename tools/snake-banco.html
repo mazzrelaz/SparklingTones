@@ -1,6 +1,9 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>Banco di prova — StompSnake</title>
+<!-- Gli indirizzi si contano dalla radice del sito: il gioco chiede
+     `icons/stompsnake.png`, che da `tools/` non esisterebbe. -->
+<base href="/">
 <!--
   Fa girare `src/snake-pedali.js` da solo, senza l'app intorno, e racconta
   cosa è successo. Serve perché il gioco non è coperto da nessuna suite e
@@ -19,14 +22,25 @@
     questa pagina non carica l'app: non le serve, e da sola parte subito;
   - il service worker dell'app serve i file della corsa precedente anche qui,
     e per questo il gioco si carica con una query in coda.
+
+  **Qui il vestito non è quello dell'app**: il CSS qui sotto è una copia
+  ridotta di quattro classi, e la scena può risultare spostata o larga in modo
+  diverso. Per giudicare l'impaginazione si guarda l'app vera, misurandola —
+  `document.documentElement.scrollWidth` contro `clientWidth`. Questo è un
+  banco per la logica.
 -->
 <style>
-  /* Il minimo indispensabile di quello che il gioco si aspetta dall'app. */
+  /* Il minimo indispensabile di quello che il gioco si aspetta dall'app:
+     le variabili di colore e quattro classi. Senza le variabili il neon dei
+     tasti resta senza fondo e sembra rotto, ma è il banco a mancare. */
+  :root { --bg:#000; --panel:#121316; --line:#26282e; --text:#e8e8ea; --dim:#8a8f98;
+          --accent:#e30613; --gold:#f0c040; --strumento:'Space Grotesk',monospace; }
   body { margin:0; background:#000; color:#e8e8ea; font-family:sans-serif; }
   .pannello { display:none; position:fixed; inset:0; background:#000; z-index:10;
                overflow:auto; padding:14px; }
   .pannello.aperto { display:block; }
-  .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px;
+                flex-wrap:wrap; }
   button { background:#1a1c20; color:#e8e8ea; border:1px solid #26282e;
            border-radius:8px; padding:8px 12px; }
   button.primary { background:#e30613; border-color:#e30613; color:#fff; }
@@ -44,7 +58,7 @@
   // che con questo valore è quella davanti alla testa: la partita diventa
   // ripetibile, e «ha mangiato» si può affermare invece di sperarlo.
   Math.random = () => 0.582;
-  document.write('<script src="../src/snake-pedali.js?banco=' + Date.now() + '"><\/script>');
+  document.write('<script src="src/snake-pedali.js?banco=' + Date.now() + '"><\/script>');
 </script>
 <script>
 const righe = [];
