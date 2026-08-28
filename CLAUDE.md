@@ -563,13 +563,20 @@ Il giro via e ritorno non è decorazione: senza, lo slot riporta il contenuto ve
 pannello ha **4 LED bicolore**: rosso banco A (0–3), verde banco B (4–7).
 `Spark.slotLabel(n)` fa la conversione e la UI mostra A1…B4.
 
-Nessuna autenticazione è richiesta: la license key `0x0170` non è mai stata inviata (ma
-vale per i comandi che usiamo — vedi `docs/looper.md`).
+**Nessuna autenticazione è richiesta, e dal 28 agosto 2026 è misurato e non supposto**: la
+license key `0x0170` **abilita il contenuto a pagamento, non i comandi**. Con l'ampli
+sbloccato davvero — l'app ufficiale connessa prima, senza staccare la corrente — il
+conteggio del looper resta ignorato identico a quando la chiave non c'era. Gli Hendrix la
+vogliono, il protocollo no. Vedi `docs/looper.md`.
 
 **Looper**, in due righe: si comanda con `0x0175` e un byte (`04` rec, `05` stop rec, `08`
 play, `09` stop, `0b` dub, `0c` stop dub, `0a` delete); si legge posizione (`0x0377`), bpm
-(`0x0363`) e impostazioni (`0x0376`). Manca solo la battuta di conteggio col click. Capitolo
-**archiviato**: tutto in `docs/looper.md`, comprese le strade già escluse.
+(`0x0363`) e impostazioni (`0x0376`). **La battuta di conteggio col click non si comanda, e
+non è più un'ipotesi aperta**: `02` riceve l'ack e viene buttato via, e il 28 agosto 2026 è
+caduta anche l'ultima spiegazione rimasta (la chiave). Capitolo **chiuso per esaurimento**,
+non per spiegazione — l'app ufficiale manda quei byte e l'ampli conta, e non sappiamo
+perché. Tutto in `docs/looper.md`, comprese le strade già escluse. **Non riaprirlo senza un
+fatto nuovo da fuori** (un altro snoop log, un firmware diverso): dall'interno è finito.
 
 ### Regole di metodo, che valgono oltre il looper
 
@@ -766,6 +773,14 @@ risposto.
 
 ## Dove si riprende — 28 agosto 2026
 
+**Il looper è chiuso davvero.** L'utente ha chiesto di riprendere il discorso, e la ripresa
+è durata una prova sola: la scoperta sugli Hendrix del 26 agosto — **lo sblocco resta
+nell'ampli dopo che l'app ufficiale si è scollegata** — rendeva verificabile l'unica
+ipotesi che il 14 agosto era stata archiviata come non verificabile. Verificata, e caduta:
+con l'ampli sbloccato (controllato subito dopo, mandando un preset `JH.*` e sentendo il
+fuzz) `02` riceve l'ack e non fa niente, uguale a prima. **La chiave abilita i suoni a
+pagamento, non i comandi.** Da qui non si riapre: serve un fatto nuovo da fuori.
+
 **Le famiglie di suono adesso sono quattro**: è arrivata **Bass**, in viola `#bf5af2`
 (`FAMIGLIE` in `preset-store.js`). L'utente se n'era dimenticato all'inizio, e un suono di
 basso non è né clean né drive. Non c'era niente di cablato sul numero tre: tutta la UI —
@@ -887,6 +902,7 @@ dall'ampli, e il risultato si prova **solo sul buffer `0x7f`**, mai in uno slot.
 API key dell'utente, e sarebbe la prima funzione dell'app che non funziona offline. L'AI non
 sente: dà un punto di partenza, non un suono finito.
 
-**Non aperti, e vanno bene così:** il conteggio col click del looper (archiviato), e il
+**Non aperti, e vanno bene così:** il conteggio col click del looper (chiuso il 28 agosto
+2026, ipotesi esaurite — non riaprirlo dall'interno), e il
 trasferimento di un banco al pedale che costa ~6 s — funziona, si può accorciare, ma è
 ottimizzazione.
