@@ -263,7 +263,7 @@ Dropbox» rimetterebbe dentro tutto. Due conferme, e la seconda dice che la cosa
 
 **Un preset nuovo si fa in tre modi, e nessuno parte dal nulla**: «Duplica» nel dettaglio
 (`store.duplicate`, che cambia **UUID, slot e nome** — l'UUID perché altrimenti la lettura
-dall'ampli scambierebbe la copia per l'originale), «Leggi il suono corrente» in «Altro»,
+dall'ampli scambierebbe la copia per l'originale), «Importa preset attuale» nel menu «⋯»,
 che offre di salvare quello che l'ampli sta suonando — se quell'UUID c'è già aggiorna solo
 la parte sonora, che è la regola di `importFromAmp` — e **«Importa un file»**, che dal
 28 agosto 2026 prende anche **un preset singolo** dell'app ufficiale e non solo il backup
@@ -285,7 +285,7 @@ Da lì in poi è la strada del backup — stesso `convertiPreset`, stessa `impor
 quindi valgono le regole della libreria. Senza `meta.id` **l'UUID glielo diamo noi** e lo
 si dice nel log: reimportando lo stesso file si fa un doppione invece di aggiornare.
 **Il file non è l'unica via, e spesso non è la più comoda**: un tono che l'app ufficiale
-sta già facendo suonare si prende con «Leggi il suono corrente», senza esportare niente.
+sta già facendo suonare si prende con «Importa preset attuale», senza esportare niente.
 
 ### Sezione Live
 
@@ -429,6 +429,15 @@ via che non fa niente.
 il nome di una manopola. Erano una regola scritta fra parentesi che nessuno legge, e chi
 svuotava il campo per riscriverlo si trovava a rispondere di un'eliminazione mai chiesta.
 Adesso sono bottoni che dicono quello che fanno.
+
+**Nella tendina «⋯» nessuna voce si spegne**, e il motivo è misurato: **un pulsante
+`disabled` non riceve il clic**, quindi non scatta nemmeno il gestore che chiude la
+tendina — la tendina resta aperta, non compare niente da nessuna parte, e si vede
+un'app rotta. È quello che è successo il 28 agosto 2026 con «Importa preset attuale»
+(«non succede nulla»). Quindi «Leggi dall'ampli» e «Importa preset attuale» restano
+sempre premibili e, senza ampli, **rispondono**: `senzaAmpli(cosa)` compone la riga di
+log, una sola, che dice cosa manca e cosa fare. La stessa trappola vale per qualunque
+voce si aggiunga lì dentro.
 
 ### I nomi degli effetti e delle manopole (`src/spark-effetti.js`)
 
@@ -770,7 +779,14 @@ con un file vero**, che è la cosa che qui non ho: le mie prove sono contro un p
 ufficiale ricostruito a mano da `captures/2026-08-10-libreria-8-preset.json`, incartato in
 `{data:{tone:…}}` per vedere se lo trova lo stesso. Se il file dell'utente non entra, il
 posto da guardare è `trovaPresetUfficiali` — e la cosa da chiedergli sono **i primi byte
-del file**, non l'estensione. Guscio `v71`, backup 41 test.
+del file**, non l'estensione. Backup 41 test.
+
+**«Leggi il suono corrente» adesso si chiama «Importa preset attuale» e sta nel menu «⋯»**,
+non più nel pannello «Altro»: là dentro era una voce di manutenzione fra le esportazioni e
+Dropbox, mentre è la strada più corta per portarsi in libreria un suono dell'app ufficiale,
+e si usa con l'ampli acceso davanti. **Ed è così che è saltata fuori la trappola del
+pulsante spento** (vedi «Finestre e tendine»): l'utente l'ha premuto da disconnesso e non è
+successo niente, perché un `disabled` si mangia il clic. Guscio `v72`.
 
 Quello che segue è del 27.
 
@@ -831,7 +847,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v71` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v72` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
