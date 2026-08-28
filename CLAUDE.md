@@ -799,7 +799,23 @@ risposto.
 
 ## Dove si riprende — 28 agosto 2026
 
-**Il looper è chiuso davvero.** L'utente ha chiesto di riprendere il discorso, e la ripresa
+**Il looper è chiuso, e il bpm si scrive.** Due risultati in una sessione, il secondo più
+utile del primo.
+
+**Il bpm** (dettaglio in `docs/protocollo-spark2.md`, «Il tempo (bpm) si scrive»): `0x0176`
+**senza** il byte `0x00` finale, payload costruito dall'ultimo `0x0376` ricevuto cambiando
+il solo bpm. Col byte in coda il tempo non cambia e **il delay parte in ripetizione
+infinita** — l'ampli legge i campi spostati. Serve al pedale per il conteggio e agli
+effetti a tempo, che seguono da soli perché l'accoppiamento è dentro l'ampli.
+
+**Nota di metodo, e per come è finita la sessione vale più del resto:** l'utente ha smesso
+di seguire («non ho capito un cazzo, fai quel che devi») dopo una serie di risposte piene
+di byte, tabelle di esclusione e ipotesi. Il contenuto era giusto, la forma no: era un
+diario dell'indagine invece che un risultato. **Con lui si dice cosa è successo e cosa
+cambia per lui, e il resto va in `docs/`.** Le istruzioni passo passo hanno funzionato,
+i ragionamenti lunghi in mezzo no.
+
+**Il looper.** L'utente ha chiesto di riprendere il discorso, e la ripresa
 è durata una prova sola: la scoperta sugli Hendrix del 26 agosto — **lo sblocco resta
 nell'ampli dopo che l'app ufficiale si è scollegata** — rendeva verificabile l'unica
 ipotesi che il 14 agosto era stata archiviata come non verificabile. Verificata, e caduta:
@@ -923,6 +939,14 @@ del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un am
 5. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due
    lati.
+5-bis. **Il looper sul pedale, col conteggio fatto in casa.** Il protocollo è tutto lì e
+   verificato; manca solo il firmware. Il conteggio col click **non si comanda** (vedi
+   «Protocollo»), quindi lo produce il pedale: legge il bpm, conta quattro tempi
+   lampeggiando un LED — o con un buzzer — e **40 ms prima dell'uno** manda `0x0175` con
+   `04`, che registra all'istante. Quei 40 ms sono il tempo di volo misurato del comando.
+   Il tempo si può anche **scrivere** (`0x0176`, vedi «Protocollo»), quindi il pedale può
+   avere il suo tap tempo e gli effetti a tempo lo seguono. In Signal Detection Mode
+   (click spento) il conteggio non serve: parte al primo suono di chitarra.
 6. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` è stato
    trovato dall'utente; l'elenco viene da Soundshed e non è verificato. La tendina mette per
    primi i modelli visti sull'ampli, quindi il prossimo si trova più in fretta.
