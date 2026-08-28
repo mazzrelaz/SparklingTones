@@ -365,9 +365,21 @@ dove non abbiamo ancora guardato.
    con l'app ufficiale invece **è appaiato all'ampli**, perché lo Spark è anche una cassa
    Bluetooth e ci si manda l'audio. Se il firmware volesse un link cifrato per certi
    comandi, l'ack arriverebbe lo stesso e il comando verrebbe scartato — che è la sagoma
-   esatta di quello che vediamo. **È l'unica delle due che possiamo provare**, e si prova
-   appaiando l'ampli al PC dalle impostazioni Bluetooth di Windows, poi riconnettendo la
-   sonda.
+   esatta di quello che vediamo.
+
+   **Provato appaiando l'ampli al PC (28 agosto 2026): niente, ack e basta, col loop
+   vuoto.** Ma la prova **non è pulita**, e va detto: appaiare lo Spark da Windows lo
+   appaia come **cassa audio**, cioè crea un legame **BR/EDR**, che non è il legame **LE**.
+   Su un apparecchio dual-mode i due sono distinti, e la chiave si condivide fra i due
+   trasporti solo se l'appaiamento è avvenuto in un certo modo. Quindi non sappiamo se il
+   collegamento LE della sonda fosse davvero cifrato: il risultato negativo non chiude
+   l'ipotesi.
+
+   **La versione pulita della stessa prova è far girare la sonda sul telefono**, in Chrome
+   per Android — *lo stesso* telefono che fa suonare il conteggio con l'app ufficiale.
+   Stesso apparecchio, stesso stack Bluetooth, **stesso stato di legame con l'ampli**: se lì
+   `02` fallisce lo stesso, il legame è escluso per costruzione, e la differenza è
+   **dentro il processo dell'app**. Se invece funziona, era il PC.
 2. **La sessione autorizzata.** Sappiamo che lo sblocco dei suoni a pagamento **resta
    nell'ampli** dopo che l'app si scollega — misurato col fuzz. Ma potrebbero essere due
    cose diverse: uno sblocco *globale* dei contenuti, e un flag *per connessione* «questo
