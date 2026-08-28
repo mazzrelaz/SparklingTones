@@ -602,6 +602,31 @@
                  font-weight:700; color:var(--gold); margin:0 0 18px;
                  text-shadow:0 0 10px rgba(240,192,64,0.5); }
 
+  /* Il tempo del preset. Sta qui e non nella vista live — chiesto dall'utente
+     il 28 agosto 2026: là si suona e basta, il tempo è una cosa che si sceglie
+     mentre si costruisce il suono, come una manopola. Ed è **del preset**: il
+     bpm è un campo del preset, quindi viaggia con lui e torna quando lo si
+     rimanda all'ampli. Il «tap» è il modo naturale di dirlo: si batte, non si
+     digita. */
+  .riga-tempo { display:flex; align-items:center; justify-content:center;
+                gap:10px; margin:0 0 16px; font-family:var(--strumento); }
+  .riga-tempo .eti { font-size:0.68rem; text-transform:uppercase;
+                     letter-spacing:0.08em; opacity:0.55; }
+  .riga-tempo button { font-family:var(--strumento); }
+  .riga-tempo .passo { min-width:2.2em; padding:4px 8px; font-size:1rem; }
+  #valoreTempo { font-size:1.5rem; font-weight:700; min-width:2.6em;
+                 text-align:center; font-variant-numeric:tabular-nums;
+                 color:var(--gold); text-shadow:0 0 10px rgba(240,192,64,0.45); }
+  #valoreTempo .un { font-size:0.62rem; opacity:0.6; margin-left:2px;
+                     text-shadow:none; }
+  /* Il tap si accende a ogni battuta: senza un segno, chi batte non sa se il
+     tocco è stato preso. */
+  #btnTap { padding:6px 16px; letter-spacing:0.08em; text-transform:uppercase;
+            font-size:0.72rem; font-weight:700; }
+  #btnTap.batte { border-color:var(--gold); color:var(--gold);
+                  box-shadow:0 0 14px rgba(240,192,64,0.55); }
+  @media (max-width:560px) { .riga-tempo { gap:7px; } }
+
   /* Il riquadro delle regolazioni sta **in fondo allo schermo**: è dove
      arrivano i pollici, e lascia la catena in alto dove la si guarda. Se il
      blocco è alto — sette manopole più il cassetto — il pannello torna a
@@ -1318,6 +1343,17 @@
     <!-- La modalita' e' uno stato, non un messaggio: sta sotto il nome e non
          nella riga di stato, che deve restare libera per le risposte. -->
     <div id="modoEditor" class="modo-editor" hidden>offline</div>
+  </div>
+  <!-- Il tempo del preset: è un campo del preset, quindi si salva con lui e
+       torna quando lo si rimanda all'ampli. Col «tap» si batte invece di
+       digitare, ed è il modo in cui il tempo si dice davvero. Con l'ampli
+       attaccato parte subito, e gli effetti a tempo lo seguono da soli. -->
+  <div class="riga-tempo" id="rigaTempo">
+    <span class="eti">tempo</span>
+    <button class="passo" id="btnTempoGiu" title="un bpm in meno">−</button>
+    <span id="valoreTempo">120<span class="un">bpm</span></span>
+    <button class="passo" id="btnTempoSu" title="un bpm in più">+</button>
+    <button id="btnTap" title="batti il tempo: due tocchi bastano">tap</button>
   </div>
   <div id="aiutoEditor" hidden>
     <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente
@@ -2828,7 +2864,10 @@ async function apriEditor(record) {
       offline: true,
       attendibile: false,          // non c'è nessun ampli di cui fidarsi
       effetti: copiaEffetti(record.effects),
+      bpm: bpmDelRecord(record),
     };
+    battute = [];
+    disegnaTempo();
     accendiInsegna(record);
     $('modoEditor').hidden = false;   // lo stato sta sotto il nome, non nel log
     $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
@@ -2859,7 +2898,12 @@ async function apriEditor(record) {
     // fallisce, ci si può fidare senza richiederla ogni volta.
     attendibile: true,
     effetti: copiaEffetti(attuale.effects),
+    // Il tempo si prende dalla lettura, come la catena: se è stato cambiato
+    // col TAP dell'ampli o dall'app ufficiale, la verità è lì e non nel record.
+    bpm: bpmDelRecord(attuale),
   };
+  battute = [];
+  disegnaTempo();
   accendiInsegna(record);
   $('modoEditor').hidden = true;
   $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
@@ -2870,6 +2914,83 @@ async function apriEditor(record) {
   // ci vanno solo le risposte a un gesto. Nel log resta.
   logLine(`«${record.name}» è sull'ampli: gira pure.`);
 }
+
+/* --------------------------------------------------------------------
+   Il tempo del preset
+
+   Il bpm **è un campo del preset** (`preset.bpm`, serializzato in `0x0101`),
+   non una preferenza dell'app: si salva con lui e torna quando lo si rimanda
+   all'ampli. Per questo sta nell'editor e non nella vista live — là si suona,
+   qui si costruisce il suono.
+
+   Con l'ampli attaccato il cambio parte subito con `0x0176`, e **gli effetti a
+   tempo lo seguono da soli**: l'accoppiamento è dentro l'ampli, lo stesso che
+   fa muovere il delay quando si preme TAP sul pannello.
+   -------------------------------------------------------------------- */
+
+const TEMPO_PREDEFINITO = 120;    // per i record vecchi, che il bpm non ce l'hanno
+const TAP_PAUSA_MS      = 2500;   // oltre questa, è un gesto nuovo e non un tempo
+const TAP_MEMORIA       = 5;      // quante battute entrano nella media
+
+let battute  = [];                // gli istanti degli ultimi tap
+let timerTap = null;
+
+function bpmDelRecord(record) {
+  const v = Math.round((record && record.bpm) || 0);
+  return (v >= Spark.BPM_MIN && v <= Spark.BPM_MAX) ? v : TEMPO_PREDEFINITO;
+}
+
+function disegnaTempo() {
+  if (!inModifica) return;
+  $('valoreTempo').innerHTML = `${inModifica.bpm}<span class="un">bpm</span>`;
+}
+
+/**
+ * Cambia il tempo. Senza ampli **non parte niente sulla radio**: è la stessa
+ * regola delle manopole, e per lo stesso motivo — un arretrato partirebbe tutto
+ * insieme se l'ampli si connettesse a metà lavoro.
+ */
+async function cambiaTempo(bpm) {
+  if (!inModifica) return;
+  const n = Math.max(Spark.BPM_MIN, Math.min(Spark.BPM_MAX, Math.round(bpm)));
+  if (!isFinite(n) || n === inModifica.bpm) return;
+  inModifica.bpm = n;
+  disegnaTempo();
+  segnaModificato();
+  if (inModifica.offline || !spark.connected) return;
+  await spark.setBpm(n);
+}
+
+/* Il lampeggio è tutto il riscontro che il tap può avere: in questo pannello
+   non compare nessun messaggio, e senza un segno chi batte non sa se il tocco
+   è stato preso. */
+function lampeggiaTap() {
+  const b = $('btnTap');
+  b.classList.add('batte');
+  clearTimeout(timerTap);
+  timerTap = setTimeout(() => b.classList.remove('batte'), 130);
+}
+
+function battiIlTempo() {
+  if (!inModifica) return;
+  const ora = performance.now();
+  // Una pausa lunga vuol dire «ricomincio»: due tocchi a distanza di secondi
+  // non sono un tempo lento, sono due gesti diversi.
+  if (battute.length && ora - battute[battute.length - 1] > TAP_PAUSA_MS) battute = [];
+  battute.push(ora);
+  if (battute.length > TAP_MEMORIA) battute.shift();
+  lampeggiaTap();
+  if (battute.length < 2) return;          // con un tocco solo non c'è nessun intervallo
+  let somma = 0;
+  for (let i = 1; i < battute.length; i++) somma += battute[i] - battute[i - 1];
+  cambiaTempo(60000 / (somma / (battute.length - 1)));
+}
+
+$('btnTap').addEventListener('click', battiIlTempo);
+$('btnTempoGiu').addEventListener('click',
+  () => { if (inModifica) cambiaTempo(inModifica.bpm - 1); });
+$('btnTempoSu').addEventListener('click',
+  () => { if (inModifica) cambiaTempo(inModifica.bpm + 1); });
 
 /* ====================================================================
    Il disegno dell'editor: la catena in cima, un blocco alla volta sotto
@@ -4337,6 +4458,9 @@ async function salvaModifiche() {
     enabled: e.enabled,
     params: e.params.map(p => ({ index: p.index, value: p.value })),
   }));
+  // Il tempo è un campo del preset come gli altri: si salva qui e riparte con
+  // lui la prossima volta che il preset va all'ampli.
+  if (inModifica.bpm) aggiornato.bpm = inModifica.bpm;
   await store.put(aggiornato);
   inModifica.toccato = false;
   aggiornaTastoSalva(true);

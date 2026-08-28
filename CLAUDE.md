@@ -67,7 +67,7 @@ tools/looper-probe.html           ascolta l'ampli mentre si usa il looper
 tools/explorer.html               diagnostico single-file per Android, CONGELATO
 tools/explorer-v1.html            la sua versione vecchia, non aperta da nessuno: si può togliere
 tools/banco-di-prova.js           otto preset veri per frames-pedale.html (da captures/)
-test/*.html                       protocol 125, transport 48, store 136, backup 41, dropbox 34
+test/*.html                       protocol 139, transport 60, store 136, backup 41, dropbox 34
 test/fixtures/preset0.js          catture condivise fra le suite
 design/proposte-*.html            le proposte grafiche a confronto, non è l'app
 captures/                         log grezzi dall'ampli
@@ -348,6 +348,21 @@ Il titolo dice «— senza ampli» e la riga di stato lo ripete.
 
 **Le sette posizioni sono etichettate per categoria** (`Spark.CATENA`): noise gate,
 compressore, drive, ampli, modulazione, delay, riverbero.
+
+**Il tempo sta qui, e solo qui** (28 agosto 2026, chiesto dall'utente e poi ristretto da
+lui: «non nella vista live, non serve»). La ragione è che **il bpm è un campo del preset**
+— `preset.bpm`, che `serializePreset` scrive dentro `0x0101` — quindi viaggia col preset e
+torna quando lo si rimanda all'ampli: è una cosa che si sceglie mentre si costruisce il
+suono, come una manopola, non mentre si suona. Si batte col **tap** (due tocchi bastano,
+media delle ultime cinque battute, una pausa oltre 2,5 s ricomincia) o si aggiusta di un
+bpm coi due tasti. Il riscontro del tap è **il lampeggio del tasto** e non un messaggio,
+che in questo pannello non ne devono comparire.
+
+Con l'ampli attaccato il cambio parte subito con `0x0176` (`spark.setBpm`), **e gli effetti
+a tempo lo seguono da soli**: l'accoppiamento è dentro l'ampli. Senza ampli **non parte
+niente sulla radio**, come per le manopole. All'apertura il valore si prende dalla lettura
+dell'ampli quando c'è, dal record quando non c'è, e 120 per i record vecchi che il campo
+non ce l'hanno. `salvaModifiche` lo scrive nel record.
 
 **Il cursore va strozzato, e lo strozzamento dev'essere autocadenzato.** Un trascinamento
 genera decine di eventi al secondo e ogni comando è una scrittura BLE.
@@ -911,8 +926,8 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v72` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
-se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
+Guscio `v73` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+se non torna). Le suite sono verdi (protocol 139, transport 60, store 136, backup 41,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
 

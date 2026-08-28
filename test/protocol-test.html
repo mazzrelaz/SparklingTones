@@ -464,6 +464,61 @@ show('descrizione', JSON.stringify(preset.description));
 preset.effects.forEach(e => show('  ' + e.name + (e.enabled ? ' [on]' : ' [off]'),
   e.params.map(p => p.index + '=' + p.value.toFixed(3)).join(' ')));
 
+/* ---------- il bpm dentro le impostazioni del looper ----------
+   Le due catture vere: il 13 agosto l'ampli ha dichiarato 133 bpm col prefisso
+   0xcc e la durata come uint16, il 28 agosto 120 bpm nudi e la durata come byte.
+   Sono proprio i due casi che rendono impossibile costruire il payload da una
+   costante, ed è per questo che `impostazioniConBpm` parte sempre dalle sue. */
+
+const IMP_133 = [0xcc, 0x85, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0xcd, 0xea, 0x60];
+const IMP_120 = [0x78, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0x3c];
+
+check('bpm letto dalla cattura del 13 agosto (col prefisso 0xcc)',
+      Spark.bpmDaImpostazioni(IMP_133), 133);
+check('bpm letto dalla cattura del 28 agosto (fixint nudo)',
+      Spark.bpmDaImpostazioni(IMP_120), 120);
+check('payload vuoto: nessun bpm da leggere',
+      Spark.bpmDaImpostazioni([]), null);
+
+check('scendere sotto 128 toglie il prefisso e non tocca gli altri campi',
+      Spark.impostazioniConBpm(IMP_133, 100),
+      [0x64, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0xcd, 0xea, 0x60]);
+check('salire sopra 127 mette il prefisso e non tocca gli altri campi',
+      Spark.impostazioniConBpm(IMP_120, 140),
+      [0xcc, 0x8c, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0x3c]);
+check('127 e 128 stanno ai due lati del prefisso',
+      [Spark.impostazioniConBpm(IMP_120, 127)[0], Spark.impostazioniConBpm(IMP_120, 128)[0]],
+      [0x7f, 0xcc]);
+check('il bpm si arrotonda, che il tap tempo dà numeri con la virgola',
+      Spark.bpmDaImpostazioni(Spark.impostazioniConBpm(IMP_120, 119.6)), 120);
+check('andata e ritorno: quello che scrivo è quello che rileggo',
+      Spark.bpmDaImpostazioni(Spark.impostazioniConBpm(IMP_133, 96)), 96);
+check('la lunghezza non cambia se il prefisso non cambia',
+      Spark.impostazioniConBpm(IMP_120, 90).length, IMP_120.length);
+
+let rifiutati = 0;
+for (const cattivo of [0, 19, 301, 1000, NaN]) {
+  try { Spark.impostazioniConBpm(IMP_120, cattivo); } catch (e) { rifiutati++; }
+}
+check('i bpm fuori scala vengono rifiutati invece che troncati', rifiutati, 5);
+
+try { Spark.impostazioniConBpm(null, 120); rifiutati = -1; } catch (e) { rifiutati = 1; }
+check('senza le impostazioni dell\'ampli non si costruisce niente', rifiutati, 1);
+
+/* Il byte 0x00 finale: 0x0176 sta con 0x0138 e 0x0175, non con i comandi degli
+   effetti. Con quello in coda il tempo non cambia e il delay parte in
+   ripetizione infinita — verificato sull'ampli il 28 agosto 2026. */
+check('setLooperSettings non aggiunge il byte 0x00 finale',
+      Spark.commands.setLooperSettings(IMP_120).data, IMP_120);
+check('getLooperSettings è una domanda senza payload',
+      [Spark.commands.getLooperSettings().cmd, Spark.commands.getLooperSettings().sub,
+       Spark.commands.getLooperSettings().data.length],
+      [Spark.CMD_QUERY, 0x76, 0]);
+check('setLooperSettings è una scrittura 0x0176',
+      [Spark.commands.setLooperSettings(IMP_120).cmd,
+       Spark.commands.setLooperSettings(IMP_120).sub],
+      [Spark.CMD_ACTION, 0x76]);
+
 /* ---------- riepilogo ---------- */
 
 const s = document.getElementById('summary');
