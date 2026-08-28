@@ -108,6 +108,20 @@ la write <i>con</i> risposta, che non abbiamo mai usato — e che nello snoop lo
 mai controllato quale fosse.</div>
 <div class="griglia" id="prove"></div>
 
+<h2>5 — Il tempo (bpm)</h2>
+<div class="sub" style="margin-bottom:8px">Questo non serve al looper ma <b>al pedale e agli
+effetti a tempo</b>. Il TAP dell'ampli manda insieme <code>0x0363</code>, <code>0x0376</code>
+e <code>0x0337</code> sul parametro 4 di <code>DelayRe201</code>: il tempo è già accoppiato
+agli effetti dentro l'ampli. Se il bpm si scrive, il delay dovrebbe seguire da solo — e la
+prova è vedere se arriva quel <code>0x0337</code>.<br>
+Ordine: prima <b>configurazione</b> qui sopra (serve l'ultimo <code>0x0376</code>), poi
+scrivi, poi <b>configurazione</b> di nuovo per rileggere.</div>
+<div style="margin-bottom:8px">
+  <label>bpm <input id="bpm" type="number" min="20" max="300" value="100"
+         style="width:5em;font:inherit"></label>
+</div>
+<div class="griglia" id="tempo"></div>
+
 <div id="log"></div>
 
 <script src="../src/spark-protocol.js"></script>
@@ -186,6 +200,11 @@ const spark = new SparkTransport({
     $('btnExport').disabled = sessione.length === 0;
   },
   onMessage: (msg) => {
+    /* Le impostazioni servono per riscriverle col solo bpm cambiato: vedi
+       `scriviBpm`. Si tiene sempre l'ultima che l'ampli ha dichiarato. */
+    if (msg.cmd === 0x03 && msg.sub === 0x76 && !msg.demo) {
+      ultimeImpostazioni = Array.from(msg.data);
+    }
     if (!msg.demo) {                    // i finti non contano: vedi sotto
       rxTot++;
       if (!msg.checksumOk) rxKo++;
@@ -338,6 +357,43 @@ for (const q of QUERY) {
    **click acceso**, 60 s di durata massima. Rimandargliele non cambia niente di
    quello che ha già: serve a vedere se è la scrittura in sé ad armare il click. */
 const IMPOSTAZIONI = [0xcc, 0x85, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0xcd, 0xea, 0x60];
+
+/* ---- scrivere il bpm ----------------------------------------------------------
+   Non serve al looper: serve **al pedale e agli effetti a tempo**. Nella cattura
+   del 13 agosto 2026 il TAP dell'ampli manda tre cose insieme — `0x0363` il bpm,
+   `0x0376` le impostazioni, e `0x0337` sul parametro 4 di `DelayRe201`. Cioè il
+   tempo è già accoppiato agli effetti **dentro l'ampli**: se il bpm si scrive, il
+   delay dovrebbe seguire da solo, e la prova è proprio guardare se arriva quel
+   `0x0337`.
+
+   L'unica strada nota è `0x0176`, le impostazioni del looper: è quello che usa
+   Ignitron (`updateLooperSettings`), con la stessa regola del prefisso `0xcc`
+   sopra i 127. Che l'ampli **accetti** `0x0176` lo sappiamo già dalle prove sul
+   click; quello che non sappiamo è se cambi il tempo *globale* o solo il suo.
+
+   Il payload non si costruisce da una costante ma **dall'ultimo `0x0376` che
+   l'ampli ha mandato**: l'ultimo campo cambia forma da una sessione all'altra
+   (`3c` contro `cd ea 60`), quindi l'unica versione sicura è ridargli la sua con
+   il solo bpm cambiato. */
+let ultimeImpostazioni = null;      // il payload dell'ultimo 0x0376 ricevuto
+
+function bpmInBytes(bpm) {
+  return bpm >= 128 ? [0xcc, bpm] : [bpm];
+}
+
+function scriviBpm(bpm) {
+  if (!ultimeImpostazioni) {
+    riga('err', 'prima premi «configurazione» qui sopra: mi serve l\'ultimo 0x0376 ' +
+                'dell\'ampli per non inventarmi gli altri campi');
+    return;
+  }
+  if (!(bpm >= 20 && bpm <= 300)) { riga('err', 'bpm fuori da 20–300'); return; }
+  const vecchie = ultimeImpostazioni;
+  const salta   = vecchie[0] === 0xcc ? 2 : 1;      // quanto occupa il bpm di adesso
+  const nuove   = bpmInBytes(bpm).concat(Array.from(vecchie).slice(salta));
+  riga('log', `impostazioni di adesso: ${hexList(vecchie)} → nuove: ${hexList(nuove)}`);
+  invia(0x01, 0x76, nuove, `bpm ${bpm}`);
+}
 
 /* Come lo fa Ignitron: `sparkLooperRec()` manda **due** comandi, COUNTIN se il
    click è acceso e subito dopo REC. Da soli non funzionano né l'uno né l'altro —
@@ -522,6 +578,38 @@ for (const p of PROVE) {
   b.innerHTML = `${p.n}<small>${p.d}</small>`;
   b.onclick = p.f;
   $('prove').appendChild(b);
+}
+
+/* Il banco del tempo. Una variante alla volta, come sempre: prima la strada nota
+   (`0x0176`, quella di Ignitron), e solo se non basta i tentativi su `0x0163` —
+   che è il «set» che starebbe sotto la notifica `0x0363`, ma **non lo dice nessuna
+   fonte**: è una congettura, e va marcata come tale nel log. */
+const TEMPO = [
+  { n: 'scrivi il bpm con 0x0176', d: 'la strada nota: impostazioni del looper',
+    f: () => scriviBpm(parseInt($('bpm').value, 10)) },
+  { n: '0x0163 con il bpm come byte', d: 'congettura: il «set» sotto 0x0363',
+    f: () => invia(0x01, 0x63, bpmInBytes(parseInt($('bpm').value, 10)), 'bpm (byte)') },
+  { n: '0x0163 con il bpm come float', d: 'idem, ma come lo manda 0x0363',
+    f: () => invia(0x01, 0x63, floatMsgpack(parseInt($('bpm').value, 10)), 'bpm (float)') },
+  { n: 'chiedi il bpm con 0x0263', d: 'congettura: esiste la domanda?',
+    f: () => invia(0x02, 0x63, [], 'bpm?') },
+];
+
+/* `0x0363` manda il bpm come float msgpack: `ca` più quattro byte big endian.
+   Se `0x0163` esiste, è la forma più probabile che si aspetti. */
+function floatMsgpack(v) {
+  const b = new Uint8Array(4);
+  new DataView(b.buffer).setFloat32(0, v, false);   // big endian
+  return [0xca, b[0], b[1], b[2], b[3]];
+}
+
+for (const p of TEMPO) {
+  const b = document.createElement('button');
+  b.dataset.invia = '1';
+  b.disabled = true;
+  b.innerHTML = `${p.n}<small>${p.d}</small>`;
+  b.onclick = p.f;
+  $('tempo').appendChild(b);
 }
 
 $('btnConnect').onclick = () => spark.connect()
