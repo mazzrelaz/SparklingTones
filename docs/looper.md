@@ -314,18 +314,57 @@ c'è un corollario sgradevole: siccome lo script fondeva in un flusso solo le sc
 *tutti* gli handle, se l'app ha scritto anche altrove quella cattura è **un miscuglio di due
 canali** presentato come una conversazione sola.
 
-Da qui si riprende, in questo ordine:
+**E anche l'handle si è chiuso, lo stesso giorno.** La mappa GATT presa con nRF Connect
+(28 agosto 2026) è tutta qui:
 
-1. **La mappa GATT dell'ampli, con un'app da telefono** (nRF Connect o simile). Elenca
-   servizi, caratteristiche, proprietà e **handle**, in due minuti e senza scrivere codice.
-   È la domanda strutturale: *esiste un altro posto dove scrivere?* Se `0xFFC0` con
-   `0xFFC1`/`0xFFC2` è tutto quello che c'è, allora l'app ha per forza mandato `02` dove lo
-   mandiamo noi e come lo mandiamo noi, e il canale è escluso — il che riporta il mistero ai
-   byte, ma con una scatola chiusa in meno. Se invece salta fuori un'altra caratteristica
-   scrivibile, **quella è la pista**.
-2. **Una cattura nuova dello snoop log.** Lo script adesso stampa in testa quali handle e
-   quali opcode ha usato il telefono, e mette la colonna `via` su ogni riga `APP`. Serve
-   comunque se il punto 1 trova più di una strada, perché dice *quale* ha preso l'app.
+| servizio | caratteristica | proprietà |
+|---|---|---|
+| `0x1801` Generic Attribute | `0x2A05` Service Changed | INDICATE |
+| `0x1800` Generic Access | `0x2A00`, `0x2A01`, `0x2AA6` | READ |
+| `0xFFC0` | `0xFFC1` | **WRITE NO RESPONSE** |
+| | `0xFFC2` | NOTIFY, READ |
 
-E resta il punto onesto: finché una di queste due non parla, **il fenomeno non è
-spiegato**. Scrivere «non si può» sarebbe raccontarsela.
+**`0xFFC1` è l'unica cosa scrivibile dell'intero dispositivo.** Quindi l'app ufficiale non
+aveva un'altra strada: `02` è per forza passato di lì, con l'unico opcode che quella
+caratteristica accetta. **Il canale è escluso**, e per giunta la cattura del 14 agosto ne
+esce riabilitata — il flusso concatenato non poteva contenere altro che scritture su
+`0xFFC1` (più i due byte `01 00` sul CCCD `0x2902` per accendere le notifiche).
+
+## Quello che regge tutto, e non è mai stato verificato
+
+Escluso il canale, resta un solo anello inferito invece che misurato, ed è **l'anello da
+cui pende l'intero paradosso**: che il `0x0175 02` dell'app a 11,749 s **abbia causato** il
+conteggio a 12,726 s. Non lo sappiamo. Lo abbiamo dedotto dall'adiacenza, e ci sono due
+crepe:
+
+- **977 ms** fra il comando e il conteggio. Ogni comando vero produce il suo `0x0375` entro
+  40 ms.
+- il tasto fisico produce **due** `0x0375 02` a 5 ms l'uno dall'altro (misurato nella
+  cattura del 13 agosto); lì ce n'è **uno solo**. Le due firme sono diverse, e non sappiamo
+  di chi sia quella che abbiamo visto.
+
+C'è una lettura alternativa che spiega *tutto* senza nessun mistero: **anche per l'app quel
+`02` è stato inerte**, e il conteggio è partito perché qualcuno ha premuto il tasto
+sull'ampli un secondo dopo. Uno snoop log non vede le dita.
+
+**Si decide in trenta secondi, senza attrezzi**: aprire l'app ufficiale, andare nel looper,
+premere REC **nell'app** e non toccare l'ampli. Se conta, il paradosso è reale e si va al
+punto 2. Se non conta, non c'è nessun paradosso: `02` non è un comando per nessuno, e il
+capitolo si chiude davvero.
+
+## Due piste ancora vive
+
+1. **Il legame (bonding).** nRF Connect dice `CONNECTED / NOT BONDED`, e questo vale anche
+   per noi: Web Bluetooth da Chrome apre un collegamento **non cifrato e non appaiato**. Il
+   telefono con l'app ufficiale invece **è appaiato all'ampli**, perché lo Spark è anche una
+   cassa Bluetooth e ci si collega l'audio. Se il firmware richiedesse un collegamento
+   cifrato per certi comandi, l'ack arriverebbe lo stesso e il comando verrebbe scartato —
+   che è la sagoma esatta di quello che vediamo. **Si prova appaiando l'ampli al PC** dalle
+   impostazioni Bluetooth di Windows e poi riconnettendo la sonda.
+2. **Una cattura nuova dello snoop log**, ma fatta come esperimento: premere REC **solo
+   nell'app**, più volte, senza mai toccare l'ampli. Se ogni `02` è seguito da un conteggio,
+   la causalità è dimostrata. Lo script adesso stampa handle e opcode e mette la colonna
+   `via` su ogni riga `APP`.
+
+E resta il punto onesto: finché una di queste non parla, **il fenomeno non è spiegato**.
+Scrivere «non si può» sarebbe raccontarsela.

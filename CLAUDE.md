@@ -578,12 +578,16 @@ ragione è quella che ha detto l'utente: se l'app lo fa partire, un modo c'è. Q
 finito è l'elenco delle ipotesi sui *byte*; **il canale non era mai stato guardato** —
 `leggi-btsnoop.ps1` concatenava tutte le write buttando via **handle e opcode ATT**, quindi
 «byte identici a quelli dell'app» era verificato e «sullo stesso canale» no. Metà è già
-chiusa: **`0xFFC1` dichiara solo `writeWithoutResponse`** (letto dalle proprietà il 28
-agosto 2026), quindi nemmeno l'app poteva usare un opcode diverso lì. **Resta l'handle**, e
-il btsnoop grezzo non c'è più: si riprende dalla **mappa GATT dell'ampli** presa con nRF
-Connect — esiste un'altra caratteristica scrivibile? — e, se serve, da una cattura nuova.
-Tutto in `docs/looper.md`, «Il buco nel metodo». **Non aggiungere sonde sui byte**: quelle
-sono esaurite.
+chiuso: **`0xFFC1` dichiara solo `writeWithoutResponse`**, e la **mappa GATT presa con nRF
+Connect** dice che è **l'unica cosa scrivibile dell'intero dispositivo** (28 agosto 2026,
+tutta in `docs/looper.md`). L'app non aveva un'altra strada: stesso canale, stesso opcode,
+stessi byte. **Quello che resta è un anello inferito e mai misurato**: che il `02` dell'app
+abbia *causato* il conteggio, dedotto dall'adiacenza mentre fra i due passano 977 ms e la
+firma non combacia con quella del tasto fisico (che ne manda due a 5 ms). **Si decide in
+trenta secondi**: premere REC nell'app ufficiale senza toccare l'ampli. Se non conta, non
+c'è nessun paradosso. Piste ancora vive: quella, il **bonding** (noi siamo `NOT BONDED`, il
+telefono è appaiato per l'audio), e una cattura nuova fatta come esperimento. **Non
+aggiungere sonde sui byte**: quelle sono esaurite.
 
 ### Regole di metodo, che valgono oltre il looper
 
