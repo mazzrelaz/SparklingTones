@@ -22,20 +22,21 @@ window.PresetStore = (function () {
   const POSTI_PER_BANCO = 8;
 
   /**
-   * Le tre famiglie di suono, con un colore di partenza ciascuna. Sono
-   * fisse: tre, non di più, perché servono a riconoscere un preset senza
-   * leggerlo — e più di tre colori non si distinguono con un'occhiata.
+   * Le quattro famiglie di suono, con un colore di partenza ciascuna. Sono
+   * fisse: quattro, non di più, perché servono a riconoscere un preset senza
+   * leggerlo — e più colori di così non si distinguono con un'occhiata.
    * I colori si cambiano (`setColoreFamiglia`): questi servono solo a
    * partire da qualcosa di distinguibile sul fondo scuro.
    *
-   * **Il verde non è di nessuna delle tre, ed è voluto**: nella vista live è il
-   * LED di chi la famiglia non ce l'ha, quindi darlo anche a una famiglia
+   * **Il verde non è di nessuna delle quattro, ed è voluto**: nella vista live è
+   * il LED di chi la famiglia non ce l'ha, quindi darlo anche a una famiglia
    * farebbe sembrare acoustic ogni preset non catalogato.
    */
   const FAMIGLIE = [
     { id: 'clean',    nome: 'Clean',    colore: '#0a84ff' },   // blu elettrico
     { id: 'drive',    nome: 'Drive',    colore: '#ff3b30' },   // rosso
     { id: 'acoustic', nome: 'Acoustic', colore: '#ffd21e' },   // giallo
+    { id: 'bass',     nome: 'Bass',     colore: '#bf5af2' },   // viola
   ];
 
   /**
@@ -623,7 +624,7 @@ window.PresetStore = (function () {
       });
     },
 
-    /** Le tre famiglie col colore in uso: quello scelto dall'utente o il nostro. */
+    /** Le famiglie col colore in uso: quello scelto dall'utente o il nostro. */
     async getFamiglie() {
       const scelti = await this.getSetting('coloriFamiglia', {});
       return FAMIGLIE.map(f => ({

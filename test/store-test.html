@@ -368,8 +368,9 @@ const DB_NAME = 'spark-test-' + Date.now();
   // la famiglia è che tipo di suono è, ed è una sola. Chi non ce l'ha resta
   // senza colore, e va bene così.
 
-  check('le famiglie sono tre',
-        (await store.getFamiglie()).map(f => f.id), ['clean', 'drive', 'acoustic']);
+  check('le famiglie sono quattro',
+        (await store.getFamiglie()).map(f => f.id),
+        ['clean', 'drive', 'acoustic', 'bass']);
   check('un preset a cui non è stata data non ce l\'ha',
         (await store.get(idJimi)).famiglia, undefined);
 

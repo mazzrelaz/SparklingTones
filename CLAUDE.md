@@ -739,7 +739,16 @@ Non fatto perché è la facciata pubblica e la decide lui: il `README.md` dell'a
 ancora solo a `github.io`, senza il link al sito. La domanda gli è stata fatta e non ha
 risposto.
 
-## Dove si riprende — 27 agosto 2026
+## Dove si riprende — 28 agosto 2026
+
+**Le famiglie di suono adesso sono quattro**: è arrivata **Bass**, in viola `#bf5af2`
+(`FAMIGLIE` in `preset-store.js`). L'utente se n'era dimenticato all'inizio, e un suono di
+basso non è né clean né drive. Non c'era niente di cablato sul numero tre: tutta la UI —
+schede, LED live, insegna al neon, ordinamento, pannello dei colori — cicla su `famiglie`,
+quindi è bastata la riga in più più i commenti che dicevano «tre». **Il verde resta di
+nessuna famiglia**, che nella vista live è il LED di chi famiglia non ne ha. Guscio `v70`.
+
+Quello che segue è del 27.
 
 **Il 27 agosto è andato tutto nel sito**, non nell'app: comprato il dominio, configurato il
 DNS, scritta e pubblicata la pagina. Vedi la sezione qui sopra. L'app non è stata toccata.
@@ -798,7 +807,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v69` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v70` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
