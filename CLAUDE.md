@@ -501,7 +501,17 @@ Stato: **completo e verificato sull'ampli**. `0x0201` lettura, `0x0138` cambio p
 **Le trappole, tutte verificate sull'hardware:**
 
 - **`0x0115`, `0x0104` e `0x0106` vogliono un byte `0x00` in coda al payload logico.**
-  Senza, ack regolare e comando non applicato. `0x0138` e `0x0175` no.
+  Senza, ack regolare e comando non applicato. `0x0138`, `0x0175` e `0x0176` no — e su
+  `0x0176` il byte di troppo **non è innocuo**: il bpm non cambia e **il delay parte in
+  ripetizione infinita** (28 agosto 2026), perché l'ampli legge i campi spostati. Si
+  recupera premendo un tasto preset sul pannello. Quindi **un payload malformato può
+  muovere qualcosa che non c'entra**, non solo essere ignorato.
+- **Il bpm si scrive con `0x0176`, e gli effetti a tempo seguono da soli** (verificato il
+  28 agosto 2026). Il payload si costruisce **dall'ultimo `0x0376` ricevuto** cambiando il
+  solo bpm, mai da una costante: l'ultimo campo cambia forma fra sessioni (`3c` contro
+  `cd ea 60`). Il TAP dell'ampli manda insieme `0x0363`, `0x0376` e `0x0337` sul parametro
+  4 di `DelayRe201`: l'accoppiamento tempo→effetti è dentro l'ampli, non tocca a noi.
+  Dettaglio in `docs/protocollo-spark2.md`.
 - **L'ack conferma la ricezione, non l'esecuzione.** E `writeWithoutResponse` fa sembrare
   riuscita ogni scrittura lato browser. **L'assenza di errori non è una verifica**: vale
   solo l'effetto sull'ampli o una risposta in RX.

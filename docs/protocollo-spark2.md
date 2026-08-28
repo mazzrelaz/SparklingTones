@@ -41,9 +41,39 @@ nostro 0x0115: 0b ab "bias.reverb" c2 00     <- identico a meno di on/off
 ampli 0x0337:  0b ab "bias.reverb" 00 ca 3f 5c 1f dc 00
 ```
 
-`0x0138` (cambio preset) e `0x0175` (looper) funzionano **senza** il byte finale: non è
-quindi un requisito universale. Probabilmente è un argomento aggiuntivo che lo Spark 2
-si aspetta sui comandi riferiti a un effetto.
+`0x0138` (cambio preset), `0x0175` (looper) e `0x0176` (impostazioni del looper)
+funzionano **senza** il byte finale: non è quindi un requisito universale. Probabilmente è
+un argomento aggiuntivo che lo Spark 2 si aspetta sui comandi riferiti a un effetto.
+
+**Su `0x0176` il byte di troppo non è innocuo, ed è la prova che il silenzio non è l'unico
+modo di sbagliare** (28 agosto 2026). Mandate le impostazioni **con** il byte in coda: il
+bpm non cambia *e* il delay parte in **ripetizione infinita** — l'ampli ha letto i campi
+spostati e ne ha ricavato un tempo di delay fuori scala. Si recupera premendo un tasto
+preset sul pannello, che ricarica tutti i parametri degli effetti. Tolto il byte, la stessa
+scrittura funziona. Da qui due cose da ricordare:
+
+- **un payload malformato può muovere qualcosa che non c'entra**, non solo essere ignorato.
+  Vale per ogni comando nuovo: si prova con l'ampli su un preset che non dispiace perdere.
+- **la spunta «byte `0x00` finale» delle sonde va guardata prima di ogni prova.** Nel banco
+  del tempo di `tools/looper-probe.html` adesso è scavalcata: si manda esattamente il
+  payload di Ignitron, così una variante alla volta resta una variante alla volta.
+
+## Il tempo (bpm) si scrive, e con lui vanno gli effetti
+
+**`0x0176` scrive il bpm**, verificato sull'ampli il 28 agosto 2026. È il comando delle
+impostazioni del looper — quello che usa Ignitron in `updateLooperSettings` — e i campi
+sono `<bpm> <count> <battute> <freeIndicator> <click> <flag3> <durata>`, col prefisso
+`0xcc` sopra i 127 esattamente come in lettura.
+
+**Il payload si costruisce dall'ultimo `0x0376` che l'ampli ha mandato, cambiando il solo
+bpm.** Non da una costante: l'ultimo campo cambia forma da una sessione all'altra — visto
+`cd ea 60` (uint16 60000) il 13 agosto e `3c` (60) il 28 — quindi l'unica versione sicura è
+ridargli le sue.
+
+Perché conta oltre il looper: premendo TAP l'ampli manda **tre** messaggi insieme —
+`0x0363` (bpm), `0x0376` (impostazioni) e `0x0337` sul parametro 4 di `DelayRe201`. Cioè
+**il tempo è già accoppiato agli effetti dentro l'ampli**, e non tocca a noi mappare
+bpm → posizione della manopola.
 
 ## Ack
 
