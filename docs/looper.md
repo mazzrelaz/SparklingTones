@@ -25,13 +25,17 @@ l'ampli **sbloccato davvero** — non con la chiave rigiocata — `02` riceve l'
 fa niente esattamente come prima. **La chiave abilita il contenuto a pagamento, non i
 comandi.**
 
-**Quindi non si riprende da nessuna parte**: le ipotesi sono finite. Non vuol dire che
-il fenomeno sia spiegato — l'app ufficiale manda quei byte e l'ampli conta — vuol dire
-che **tutto ciò che sapevamo distinguere fra noi e lei è stato reso uguale e misurato**.
-Riaprire ha senso solo con un fatto nuovo che oggi non abbiamo: un altro snoop log, un
-firmware diverso, un'altra sorgente. Gli attrezzi restano pronti —
-`tools/looper-probe.html` con ventinove pulsanti e `tools/leggi-btsnoop.ps1` per
-leggere altri snoop log.
+**Ma il capitolo non è chiuso, e per una ragione che l'utente ha detto meglio di me:
+se l'app lo fa partire, un modo c'è.** Quello che è finito è l'elenco delle ipotesi sui
+*byte*. Rileggendo — non la cattura, ma **il modo in cui l'avevamo letta** — è venuto
+fuori che una differenza intera non è mai stata guardata: **il canale**. Vedi
+«Il buco nel metodo», in fondo. In breve: sapevamo che i byte erano identici, non
+sapevamo che fossero andati sullo stesso handle e con lo stesso opcode ATT, perché lo
+script che leggeva lo snoop log **buttava via tutte e due le informazioni**.
+
+Gli attrezzi sono pronti e aggiornati: `tools/looper-probe.html` (⑧ e ⑨: le proprietà
+di `0xFFC1` e la write *con* risposta) e `tools/leggi-btsnoop.ps1`, che adesso registra
+handle e opcode di ogni scrittura.
 
 **Non è una perdita grave, ed è importante non ricordarselo peggio di com'è.** Dal
 pedale funziona tutto il resto: registrare, chiudere, suonare, sovraincidere,
@@ -270,5 +274,43 @@ Cosa ne segue, e vale più del looper:
   che regge tutto era già questa — `02` non produce mai un `0x0375`, `04` lo produce
   sempre entro 40 ms — ma aveva la chiave come alibi. Non ce l'ha più.
 - **Quello che resta è che non lo sappiamo.** L'app ufficiale manda quegli stessi byte e
-  l'ampli conta; noi li mandiamo identici e non conta. Chiuso **per esaurimento delle
-  ipotesi**, non per spiegazione: scriverlo diverso sarebbe raccontarsela.
+  l'ampli conta; noi li mandiamo identici e non conta.
+
+## Il buco nel metodo — 28 agosto 2026
+
+Messo davanti al «e allora com'è che l'app ci riesce?», il posto dove guardare non era
+un'altra sonda: era **come abbiamo misurato**. `tools/leggi-btsnoop.ps1`, il 14 agosto,
+faceva così: prendeva ogni ATT write dal telefono, **concatenava tutti i payload in un
+unico flusso**, e dentro quel flusso cercava `f0 01 … f7`. Funziona, ed è stata la mossa
+giusta per ricostruire i messaggi spezzati in write da 20. Ma butta via due cose:
+
+- **l'handle di destinazione.** Nessuno ha mai controllato che le scritture del looper
+  siano andate su `0xFFC1`. Lo abbiamo dedotto dai byte, che è esattamente il ragionamento
+  che non regge: i byte li riconosciamo perché li conosciamo, non perché sappiamo da dove
+  sono passati. Se l'app scrive certi comandi su un'altra caratteristica, il nostro `02`
+  su `0xFFC1` riceverebbe l'ack e verrebbe scartato — cioè **esattamente quello che si
+  osserva**.
+- **l'opcode ATT.** Lo script accetta `0x52` (Write Command, senza risposta) *e* `0x12`
+  (Write Request, con risposta) e non registra quale fosse. Noi mandiamo sempre `0x52`,
+  perché `spark-transport.js` dice «0xFFC1 supporta solo writeWithoutResponse» — una frase
+  che **non è mai stata verificata leggendo le proprietà della caratteristica**.
+
+Le due cose insieme fanno la stessa domanda: *i byte erano identici, ma erano sullo stesso
+canale?* Non lo sappiamo, e non lo possiamo più ricavare — **il btsnoop grezzo non c'è
+più**, in `captures/` è rimasto solo il testo decodificato.
+
+Da qui si riprende, in questo ordine — il primo passo non costa niente e può chiudere la
+faccenda da solo:
+
+1. **`tools/looper-probe.html`, pulsante ⑧.** Alla connessione la sonda adesso scrive cosa
+   `0xFFC1` dichiara. Se compare `write` oltre a `writeWithoutResponse`, allora la write
+   con risposta è possibile e non l'abbiamo **mai** provata: ⑧ manda `02` così, ⑨ manda
+   `04` allo stesso modo come controllo. Se invece `write` non c'è, la strada è chiusa —
+   ma diventa una misura invece di una frase di commento.
+2. **Un nuovo snoop log.** Lo script adesso stampa in testa quali handle e quali opcode il
+   telefono ha usato, e mette su ogni riga `APP` la colonna `via`. Basta rifare la cattura
+   com'è descritto in cima allo script, aprire il looper nell'app ufficiale e far partire
+   la registrazione col conteggio. Se in testa compare più di un handle, la risposta è lì.
+
+E resta il punto onesto: finché una di queste due non parla, **il fenomeno non è
+spiegato**. Scrivere «non si può» sarebbe raccontarsela.

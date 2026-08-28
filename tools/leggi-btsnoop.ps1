@@ -39,6 +39,9 @@ function Hex($by) { ($by | ForEach-Object { '{0:x2}' -f $_ }) -join ' ' }
 
 $flusso = New-Object System.Collections.ArrayList   # byte scritti verso l'ampli, in fila
 $tempi  = New-Object System.Collections.ArrayList
+$mani   = New-Object System.Collections.ArrayList   # l'handle ATT da cui viene ogni byte
+$opcodi = New-Object System.Collections.ArrayList   # e con quale opcode è stato scritto
+$scritt = @{}                                       # riepilogo: handle+opcode -> quante
 $ev     = New-Object System.Collections.ArrayList
 $off    = 16                                        # header btsnoop
 
@@ -55,15 +58,27 @@ while ($off + 24 -le $b.Length) {
     $opc = $b[$p+9]
 
     if (($flags -band 1) -eq 0 -and $cid -eq 4 -and ($opc -eq 0x52 -or $opc -eq 0x12)) {
-      $vp = $p + 12                                  # dopo opcode e handle
-      $vl = $l2 - 3
+      $hnd = $b[$p+10] -bor ($b[$p+11] -shl 8)       # l'handle di destinazione
+      $vp  = $p + 12                                 # dopo opcode e handle
+      $vl  = $l2 - 3
       if ($vl -gt 0 -and $vp + $vl -le $p + $incl) {
+        # Riepilogo per handle e opcode. **Questa è la domanda che il 14 agosto 2026
+        # non ci eravamo fatti**: le scritture venivano concatenate tutte insieme e i
+        # frame cercati nel flusso, quindi «i byte sono identici a quelli dell'app»
+        # era verificato, ma «sono andati sullo stesso canale, con lo stesso opcode»
+        # non lo era. Con 0x52 (Write Command) e 0x12 (Write Request) accettati tutti
+        # e due senza distinguerli, una differenza sarebbe passata invisibile.
+        $k = '{0:x4}/{1:x2}' -f $hnd, $opc
+        if (-not $scritt.ContainsKey($k)) { $scritt[$k] = [pscustomobject]@{ n = 0; byte = 0 } }
+        $scritt[$k].n++; $scritt[$k].byte += $vl
+
         $salta = 0
         if ($vl -ge 16 -and $b[$vp] -eq 0x01 -and $b[$vp+1] -eq 0xfe -and $b[$vp+4] -eq 0x53) {
           $salta = 16                                # intestazione di blocco dell'app
         }
         for ($i = $vp + $salta; $i -lt $vp + $vl; $i++) {
           [void]$flusso.Add($b[$i]); [void]$tempi.Add($ts)
+          [void]$mani.Add($hnd);     [void]$opcodi.Add($opc)
         }
       }
     }
@@ -89,6 +104,7 @@ while ($off + 24 -le $b.Length) {
 }
 
 $f = $flusso.ToArray(); $t = $tempi.ToArray()
+$mh = $mani.ToArray();  $mo = $opcodi.ToArray()
 for ($i = 0; $i -lt $f.Length - 6; $i++) {
   if ($f[$i] -eq 0xf0 -and $f[$i+1] -eq 0x01) {
     $j = $i + 2
@@ -97,7 +113,8 @@ for ($i = 0; $i -lt $f.Length - 6; $i++) {
     if ($j -lt $f.Length -and $len -le 300) {
       $by = New-Object byte[] $len; [Array]::Copy($f, $i, $by, 0, $len)
       [void]$ev.Add([pscustomobject]@{
-        ts = $t[$i]; dir = 'APP'; cmd = $by[4]; sub = $by[5]; hex = (Hex $by) })
+        ts = $t[$i]; dir = 'APP'; cmd = $by[4]; sub = $by[5]; hex = (Hex $by)
+        via = ('h{0:x4} op{1:x2}' -f $mh[$i], $mo[$i]) })
       $i = $j
     }
   }
@@ -108,14 +125,26 @@ if ($ord.Count -eq 0) { "nessun messaggio Spark trovato"; return }
 $t0 = $ord[0].ts
 $micro = [double]1000000
 
+$canali = @($scritt.Keys | Sort-Object | ForEach-Object {
+  "#   handle 0x$($_.Split('/')[0])  opcode 0x$($_.Split('/')[1])  " +
+  "$($scritt[$_].n) scritture, $($scritt[$_].byte) byte"
+})
+
 $righe = @(
   "# Conversazione con lo Spark ricavata da un btsnoop_hci.log.",
   "# APP = mandato dal telefono, ampli = notifica in arrivo.",
   "# messaggi: $($ord.Count)  (dall'app: $(@($ord | Where-Object { $_.dir -eq 'APP' }).Count))",
+  "#",
+  "# Dove ha scritto il telefono. Se compare piu' di un handle, le scritture NON sono",
+  "# andate tutte sulla stessa caratteristica, e i frame qui sotto non vengono tutti",
+  "# da 0xFFC1: la colonna 'via' di ogni riga APP dice da quale. Opcode 0x52 = Write",
+  "# Command (senza risposta), 0x12 = Write Request (con risposta)."
+) + $canali + @(
   ""
 ) + ($ord | ForEach-Object {
   $sec = [math]::Round(([double]($_.ts - $t0)) / $micro, 3)
-  "{0,9:n3}s  {1,-5}  0x{2:x2}{3:x2}   {4}" -f $sec, $_.dir, $_.cmd, $_.sub, $_.hex
+  $via = if ($_.dir -eq 'APP') { '  ' + $_.via } else { '' }
+  "{0,9:n3}s  {1,-5}  0x{2:x2}{3:x2}{4}   {5}" -f $sec, $_.dir, $_.cmd, $_.sub, $via, $_.hex
 })
 
 if ($Uscita) {
