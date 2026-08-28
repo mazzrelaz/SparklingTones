@@ -823,6 +823,13 @@ il solo bpm. Col byte in coda il tempo non cambia e **il delay parte in ripetizi
 infinita** — l'ampli legge i campi spostati. Serve al pedale per il conteggio e agli
 effetti a tempo, che seguono da soli perché l'accoppiamento è dentro l'ampli.
 
+**Ed è già nell'editor**, col tap tempo: vedi «Editor della catena effetti». **Quello che
+manca è la prova sull'hardware**, ed è la prima cosa da fare quando l'ampli si riaccende:
+aprire l'editor con l'ampli attaccato, battere il tap, e sentire se il tempo cambia *e* se
+il delay ci va dentro. Il banco non lo può dare: le mie prove sono contro un ampli finto,
+e la scrittura vera è stata provata solo dalla sonda, non dall'app. In `tools/looper-probe.html`
+c'è la sezione «5 — Il tempo», che fa la stessa cosa a mano se serve confrontare.
+
 **Nota di metodo, e per come è finita la sessione vale più del resto:** l'utente ha smesso
 di seguire («non ho capito un cazzo, fai quel che devi») dopo una serie di risposte piene
 di byte, tabelle di esclusione e ipotesi. Il contenuto era giusto, la forma no: era un
