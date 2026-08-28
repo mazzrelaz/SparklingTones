@@ -303,7 +303,7 @@
   .aperta-sotto { margin-top:8px; }
 
   /* ---- famiglia di suono ---------------------------------------------
-     Tre sole famiglie, un colore per una, e chi non ne ha resta senza:
+     Quattro sole famiglie, un colore per una, e chi non ne ha resta senza:
      il colore si legge senza pensarci, quindi inventarlo sarebbe peggio
      che lasciare la scheda in grigio. */
 
@@ -454,8 +454,8 @@
      una pedaliera i led ci sono sempre, ed è quello che rende la fila coerente.
 
      **Il colore lo dà la famiglia del preset** (`--led`, che mette `coloreLed`):
-     clean azzurro, drive rosso, acoustic giallo, e **verde** per chi non ne ha
-     una — il verde è l'unico che nessuna famiglia usa. Qui un colore
+     clean azzurro, drive rosso, acoustic giallo, bass viola, e **verde** per chi
+     non ne ha una — il verde è l'unico che nessuna famiglia usa. Qui un colore
      per tutti ci vuole, mentre nelle schede della vista preset chi non ha
      famiglia resta in grigio: lì la striscia o c'è o non c'è, qui il LED c'è
      comunque, e lasciarne uno scolorito in mezzo agli altri lo farebbe sembrare
@@ -582,7 +582,7 @@
   /* Il nome del preset che si sta regolando, dentro un'insegna al neon: è la
      prima cosa da leggere in un pannello che cambia il suono sotto le dita —
      sapere *quale* suono. Il colore è quello della sua famiglia (clean, drive,
-     acoustic); chi non ne ha resta bianco, perché un colore inventato qui si
+     acoustic, bass); chi non ne ha resta bianco, perché un colore inventato qui si
      leggerebbe come una famiglia che non c'è.
 
      Il titolo va per id e non per classe: `.pannello h2` è più specifico di una
@@ -1297,7 +1297,7 @@
     </div>
   </div>
   <!-- Il nome del preset, dentro un'insegna al neon del colore della sua
-       famiglia di suono: clean, drive, acoustic. Chi non ne ha resta bianco —
+       famiglia di suono: clean, drive, acoustic, bass. Chi non ne ha resta bianco —
        un colore inventato qui si leggerebbe come una famiglia che non c'è. -->
   <!-- Nome e modalità stanno insieme, e insieme si centrano nello spazio fra
        il menu in alto e la catena. -->
@@ -1453,7 +1453,7 @@ let suAmpli    = [];      // otto posti: il record che sta in quello slot, o nul
 let categorie  = [];      // {nome, quanti}
 let banchi     = [];      // banchi salvati, quelli inventati dall'utente
 let nomiParam  = {};      // nomi dati dall'utente ai parametri, per modello
-let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic
+let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic, bass
 
 // Niente preferiti: tolti su richiesta dell'utente. Il campo `favorite` resta
 // nei record e nello store — cancellarlo butterebbe via delle scelte già
@@ -4429,7 +4429,7 @@ $('btnCategorie').addEventListener('click', () => {
 });
 
 /**
- * Le tre famiglie con quanti preset le portano e il colore, che qui si
+ * Le famiglie con quanti preset le portano e il colore, che qui si
  * cambia. Il colore è una scelta dell'utente come i nomi dei parametri: si
  * salva nelle preferenze e va nel backup.
  */

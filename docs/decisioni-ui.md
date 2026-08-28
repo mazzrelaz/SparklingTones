@@ -155,10 +155,15 @@ lì, che valgono ogni volta che si fa uno screenshot headless:
 ### Famiglia di suono, e categorie
 
 **Le categorie sono lo stile** (Pink Floyd, jazz, il pezzo) e un preset ne può avere quante
-ne vuole; **la famiglia dice che tipo di suono è** — Clean, Drive, Acoustic — è una sola, e
-serve a riconoscerlo dal colore senza leggere niente.
+ne vuole; **la famiglia dice che tipo di suono è** — Clean, Drive, Acoustic, Bass — è una
+sola, e serve a riconoscerlo dal colore senza leggere niente.
 
-Tre e non di più, perché più di tre colori non si distinguono con un'occhiata. Si
+**Bass è arrivata il 28 agosto 2026**, chiesta dall'utente: era dimenticata dall'inizio, e
+un suono di basso non è né clean né drive — è un altro strumento. Il suo colore di partenza
+è il **viola** `#bf5af2`, che è l'unico distinguibile a colpo d'occhio dagli altri tre e
+non è il verde, riservato a chi famiglia non ne ha.
+
+Quattro e non di più, perché più colori di così non si distinguono con un'occhiata. Si
 assegnano **a mano** dal dettaglio del preset: nessuno prova a indovinarle dal modello di
 ampli. **Chi non ne ha resta senza colore**, ed è deliberato — un colore inventato qui si
 legge senza pensarci, quindi è peggio di nessun colore.
@@ -446,8 +451,8 @@ Le regole di quel disegno, tutte chieste o approvate dall'utente:
 - nella tendina **niente intestazioni**: prima i modelli usciti da questo ampli, poi una riga
   separatrice senza parole, poi quelli dal catalogo. La distinzione è di sicurezza e resta;
 - **il nome del preset è un'insegna al neon** del colore della sua famiglia (clean, drive,
-  acoustic), bianca se non ne ha — inventarle un colore farebbe leggere una famiglia che non
-  c'è. Sta centrata fra il menu e la catena, e il riquadro delle regolazioni si allunga fino
+  acoustic, bass), bianca se non ne ha — inventarle un colore farebbe leggere una famiglia
+  che non c'è. Sta centrata fra il menu e la catena, e il riquadro delle regolazioni si allunga fino
   in fondo: lo spazio che avanza non resta mai vuoto;
 - **la riga di stato compare solo se qualcosa non va**, ed è rossa. Le conferme («modifiche
   salvate», «catena riletta») restano nel log della vista preset: in quel pannello lo schermo
