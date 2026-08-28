@@ -583,12 +583,16 @@ Connect** dice che è **l'unica cosa scrivibile dell'intero dispositivo** (28 ag
 tutta in `docs/looper.md`). L'app non aveva un'altra strada: stesso canale, stesso opcode,
 stessi byte. E **il paradosso è reale**, misurato il 28 agosto 2026: REC premuto nell'app
 ufficiale, mani lontane dal pannello, **conta** — quindi non era un dito sull'ampli.
-**Allora la differenza è in chi manda, non in cosa manda**, e restano due piste: il
-**bonding** (noi `NOT BONDED` e non cifrati, il telefono appaiato all'ampli per l'audio —
-**l'unica provabile**, appaiando l'ampli al PC) e la **sessione autorizzata** (lo sblocco
-dei suoni resta nell'ampli, ma un flag «questo client ha mandato una chiave valida» sarebbe
-per connessione, e per noi irraggiungibile). Tutto in `docs/looper.md`. **Non aggiungere
-sonde sui byte**: quelle sono esaurite.
+**Allora la differenza è in chi manda, non in cosa manda.** Il **bonding** è escluso per
+costruzione: la sonda fatta girare **sullo stesso telefono** che con l'app ufficiale fa
+contare l'ampli fallisce lo stesso. Resta **la sessione autorizzata**, ed è la conclusione:
+lo sblocco dei suoni resta nell'ampli, ma un flag «questo client ha mandato una chiave
+valida» è per connessione, e in nessuna prova ne abbiamo mai avuta una. **Quindi il modo
+c'è ed è la chiave `0x0170`, e non è una porta che apriamo** — sarebbe estrarre una chiave
+di firma dall'app ufficiale. La tabella di tutto ciò che è stato eliminato sta in
+`docs/looper.md`, «Come si conclude». **Non aggiungere sonde sui byte.** L'unica cosa che
+resterebbe da fare è **chiedere a Ignitron**, che manda COUNTIN senza nessuna chiave: se a
+loro funziona, la conclusione cade.
 
 ### Regole di metodo, che valgono oltre il looper
 
