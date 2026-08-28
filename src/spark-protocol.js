@@ -271,6 +271,15 @@ window.Spark = (function () {
       data: [...encPrefixedString(oldName), ...encPrefixedString(newName), 0x00],
     }),
 
+    /**
+     * Le impostazioni del looper, che sono anche **dove sta il bpm**.
+     * `0x0176` non vuole il byte `0x00` finale: sta con `0x0138` e `0x0175`.
+     * Col byte in coda l'ampli legge i campi spostati, il tempo non cambia e il
+     * delay parte in ripetizione infinita — verificato il 28 agosto 2026.
+     */
+    getLooperSettings: () => ({ cmd: CMD_QUERY,  sub: 0x76, data: [] }),
+    setLooperSettings: d  => ({ cmd: CMD_ACTION, sub: 0x76, data: Array.from(d) }),
+
     getPreset:        n  => ({ cmd: CMD_QUERY, sub: 0x01, data: [0x00, n & 0xff] }),
     getLiveState:     () => ({ cmd: CMD_QUERY, sub: 0x01, data: [0x01, 0x00] }),
     getCurrentPreset: () => ({ cmd: CMD_QUERY, sub: 0x10, data: [] }),
@@ -280,6 +289,46 @@ window.Spark = (function () {
   };
 
   const clamp01 = v => Math.max(0, Math.min(1, v));
+
+  /* ----------------------------------------------------------------------
+     Il bpm, che vive dentro le impostazioni del looper
+     ----------------------------------------------------------------------
+     Il payload di `0x0376` è `<bpm> <count> <battute> <freeIndicator> <click>
+     <flag3> <durata>`. Il bpm usa la codifica msgpack di un intero positivo:
+     sotto 128 è il byte nudo, da 128 in su vuole il prefisso `0xcc`.
+
+     **Il resto dei campi non si costruisce mai da zero.** L'ultimo campo cambia
+     forma da una sessione all'altra — visto `3c` (60) e `cd ea 60` (uint16
+     60000) — quindi l'unico modo sicuro di cambiare il tempo è ridare all'ampli
+     le impostazioni che ha appena dichiarato, con il solo bpm sostituito. */
+
+  const BPM_MIN = 20, BPM_MAX = 300;
+
+  /** Quanti byte occupa il campo bpm in testa alle impostazioni. */
+  function _lunghezzaBpm(data) { return data[0] === 0xcc ? 2 : 1; }
+
+  /** Il bpm dentro un payload di `0x0376`, o `null` se il payload è vuoto. */
+  function bpmDaImpostazioni(data) {
+    if (!data || data.length === 0) return null;
+    return data[0] === 0xcc ? data[1] : data[0];
+  }
+
+  /**
+   * Le stesse impostazioni, col solo bpm cambiato. `precedenti` è il payload di
+   * un `0x0376` appena letto dall'ampli: senza, non si può fare, e il chiamante
+   * deve leggerlo prima invece di inventarsi gli altri campi.
+   */
+  function impostazioniConBpm(precedenti, bpm) {
+    if (!precedenti || precedenti.length === 0) {
+      throw new Error('servono le impostazioni lette dall\'ampli');
+    }
+    const n = Math.round(bpm);
+    if (!(n >= BPM_MIN && n <= BPM_MAX)) {
+      throw new Error(`bpm fuori da ${BPM_MIN}–${BPM_MAX}: ${bpm}`);
+    }
+    const testa = n >= 128 ? [0xcc, n] : [n];
+    return testa.concat(Array.from(precedenti).slice(_lunghezzaBpm(precedenti)));
+  }
 
   /** Trasforma il risultato di commands.* nei byte da scrivere sulla 0xFFC1. */
   function encode(command, seq, withBlockHeader) {
@@ -653,6 +702,7 @@ window.Spark = (function () {
     presetChecksum, PARAM_MARKER, PRESET_CHUNK_SIZE,
     LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET, CATENA,
     slotLabel, SLOTS_PER_BANK,
+    bpmDaImpostazioni, impostazioniConBpm, BPM_MIN, BPM_MAX,
     CMD_ACTION, CMD_QUERY, CMD_NOTIFY, CMD_ACK, TYPE,
   };
 })();

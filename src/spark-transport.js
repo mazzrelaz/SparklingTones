@@ -236,6 +236,16 @@ window.SparkTransport = (function () {
           this.state.name = new Spark.Reader(msg.data).prefixedString();
         } else if (msg.sub === 0x23) {
           this.state.serial = new Spark.Reader(msg.data).prefixedString();
+        } else if (msg.sub === 0x76) {
+          // Le impostazioni del looper, dove vive il bpm. Si tengono perché
+          // riscriverle vuol dire ridare all'ampli le *sue*, col solo bpm
+          // cambiato: gli altri campi non si inventano.
+          this.state.impostazioniLooper = Array.from(msg.data);
+          this.state.bpm = Spark.bpmDaImpostazioni(msg.data);
+        } else if (msg.sub === 0x63) {
+          // Il bpm da solo, come lo manda il TAP dell'ampli: float msgpack.
+          const v = new Spark.Reader(msg.data).float();
+          if (isFinite(v)) this.state.bpm = Math.round(v);
         }
       } catch (e) {
         // messaggio inatteso: lo stato resta com'era, non è un errore fatale
@@ -259,6 +269,61 @@ window.SparkTransport = (function () {
     /** Legge il suono attualmente attivo, che non è uno degli slot salvati. */
     readLiveState(timeoutMs) {
       return this._readPresetVia(Spark.commands.getLiveState(), 'stato live', timeoutMs);
+    },
+
+    /* ----------------------------------------------------------------
+       Il tempo (bpm)
+       Vive dentro le impostazioni del looper, e l'ampli lo tiene accoppiato
+       agli effetti a tempo: cambiandolo, il delay lo segue da solo.
+       ---------------------------------------------------------------- */
+
+    /** @returns il payload di `0x0376`, o `null` se l'ampli non risponde. */
+    async readLooperSettings(timeoutMs) {
+      const pending = this._wait(
+        m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x76,
+        timeoutMs || DEFAULT_TIMEOUT);
+      await this.send(Spark.commands.getLooperSettings());
+      const msg = await pending;
+      return msg ? Array.from(msg.data) : null;
+    },
+
+    /** Il bpm che l'ampli sta usando adesso, o `null` se non risponde. */
+    async readBpm(timeoutMs) {
+      const impostazioni = await this.readLooperSettings(timeoutMs);
+      return impostazioni ? Spark.bpmDaImpostazioni(impostazioni) : null;
+    },
+
+    /**
+     * Scrive il bpm.
+     *
+     * Gli altri campi delle impostazioni non si inventano, quindi servono quelle
+     * che l'ampli ha dichiarato: si usano quelle in cache se ci sono — ogni
+     * `0x0376` che passa le aggiorna — e solo altrimenti si fa una lettura. Così
+     * un tap tempo non paga un giro di lettura a ogni battuta.
+     *
+     * **Niente byte `0x00` finale**: con quello l'ampli legge i campi spostati,
+     * il tempo non cambia e il delay parte in ripetizione infinita.
+     *
+     * @returns `true` se il comando è partito.
+     */
+    async setBpm(bpm, timeoutMs) {
+      let precedenti = this.state.impostazioniLooper;
+      if (!precedenti) precedenti = await this.readLooperSettings(timeoutMs);
+      if (!precedenti) {
+        this.onLog('l\'ampli non ha mandato le impostazioni: tempo non scritto');
+        return false;
+      }
+      let nuove;
+      try {
+        nuove = Spark.impostazioniConBpm(precedenti, bpm);
+      } catch (err) {
+        this.onLog(err.message);
+        return false;
+      }
+      await this.send(Spark.commands.setLooperSettings(nuove));
+      this.state.impostazioniLooper = nuove;      // la nostra migliore idea, finché non rilegge
+      this.state.bpm = Math.round(bpm);
+      return true;
     },
 
     async _readPresetVia(command, label, timeoutMs) {

@@ -322,6 +322,48 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('il seriale resta nullo se non decodificabile', t.state.serial, null);
   }
 
+  /* ---------- il tempo (bpm) ---------- */
+  {
+    const t = fakeTransport(0x01);
+    const IMP = [0x78, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0x3c];   // 120 bpm, cattura del 28 agosto
+
+    feed(t, [Spark.buildChunk(0x03, 0x76, IMP, 0x01)]);
+    check('le impostazioni del looper finiscono nello stato', t.state.impostazioniLooper, IMP);
+    check('e da lì si legge il bpm', t.state.bpm, 120);
+
+    // Il TAP dell'ampli manda il bpm da solo, come float.
+    feed(t, [Spark.buildChunk(0x03, 0x63, Spark.encFloat(96), 0x02)]);
+    check('il bpm del TAP aggiorna lo stato', t.state.bpm, 96);
+
+    // Con le impostazioni in cache, setBpm non deve fare un giro di lettura:
+    // un tap tempo scrive a ogni battuta e non può pagare una risposta ogni volta.
+    const scritto = await t.setBpm(140);
+    check('setBpm riesce con le impostazioni già viste', scritto, true);
+    const ultimo = t.sent[t.sent.length - 1];
+    check('scrive con 0x0176', [ultimo.cmd, ultimo.sub], [Spark.CMD_ACTION, 0x76]);
+    check('sostituisce il bpm e lascia stare il resto',
+          ultimo.data, [0xcc, 0x8c, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0x3c]);
+    check('nessuna lettura in mezzo: una sola scrittura', t.sent.length, 1);
+    check('lo stato segue senza aspettare la rilettura', t.state.bpm, 140);
+  }
+
+  {
+    const t = fakeTransport(0x01);
+    // Senza impostazioni in cache e senza risposta dall'ampli non si scrive
+    // niente: gli altri campi non si inventano.
+    const esito = await t.setBpm(120, 20);
+    check('senza impostazioni dall\'ampli il tempo non si scrive', esito, false);
+    check('e non parte nessuna scrittura 0x0176',
+          t.sent.filter(c => c.cmd === Spark.CMD_ACTION && c.sub === 0x76).length, 0);
+  }
+
+  {
+    const t = fakeTransport(0x01);
+    feed(t, [Spark.buildChunk(0x03, 0x76, [0x78, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0x3c], 0x01)]);
+    check('un bpm fuori scala non parte', await t.setBpm(999), false);
+    check('e lo stato resta quello di prima', t.state.bpm, 120);
+  }
+
   /* ---------- riepilogo ---------- */
   const s = document.getElementById('summary');
   s.className = failed === 0 ? 'ok' : 'bad';
