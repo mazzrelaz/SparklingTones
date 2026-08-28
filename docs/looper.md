@@ -293,24 +293,39 @@ giusta per ricostruire i messaggi spezzati in write da 20. Ma butta via due cose
 - **l'opcode ATT.** Lo script accetta `0x52` (Write Command, senza risposta) *e* `0x12`
   (Write Request, con risposta) e non registra quale fosse. Noi mandiamo sempre `0x52`,
   perché `spark-transport.js` dice «0xFFC1 supporta solo writeWithoutResponse» — una frase
-  che **non è mai stata verificata leggendo le proprietà della caratteristica**.
+  che non era mai stata verificata leggendo le proprietà della caratteristica.
 
-Le due cose insieme fanno la stessa domanda: *i byte erano identici, ma erano sullo stesso
-canale?* Non lo sappiamo, e non lo possiamo più ricavare — **il btsnoop grezzo non c'è
-più**, in `captures/` è rimasto solo il testo decodificato.
+**La metà dell'opcode si è chiusa lo stesso giorno, ed è una misura.** La sonda adesso
+legge `writeChar.properties` alla connessione, e l'ampli risponde:
 
-Da qui si riprende, in questo ordine — il primo passo non costa niente e può chiudere la
-faccenda da solo:
+```
+005.097  FFC1 dichiara: writeWithoutResponse
+```
 
-1. **`tools/looper-probe.html`, pulsante ⑧.** Alla connessione la sonda adesso scrive cosa
-   `0xFFC1` dichiara. Se compare `write` oltre a `writeWithoutResponse`, allora la write
-   con risposta è possibile e non l'abbiamo **mai** provata: ⑧ manda `02` così, ⑨ manda
-   `04` allo stesso modo come controllo. Se invece `write` non c'è, la strada è chiusa —
-   ma diventa una misura invece di una frase di commento.
-2. **Un nuovo snoop log.** Lo script adesso stampa in testa quali handle e quali opcode il
-   telefono ha usato, e mette su ogni riga `APP` la colonna `via`. Basta rifare la cattura
-   com'è descritto in cima allo script, aprire il looper nell'app ufficiale e far partire
-   la registrazione col conteggio. Se in testa compare più di un handle, la risposta è lì.
+Solo quella. Il pulsante ⑧ si rifiuta di partire, che è il comportamento giusto. **Ne segue
+un fatto che vale più del rifiuto: nemmeno l'app ufficiale può aver scritto su `0xFFC1` con
+una Write Request** — a una caratteristica che non dichiara `write` il peripheral
+risponderebbe con un errore ATT. Quindi su `0xFFC1` app e noi siamo identici per byte *e*
+per opcode, e la riga di commento in `spark-transport.js` da oggi è verificata.
+
+**Resta la metà che conta: l'handle.** Non lo possiamo più ricavare da quello che abbiamo —
+**il btsnoop grezzo non c'è più**, in `captures/` è rimasto solo il testo decodificato. E
+c'è un corollario sgradevole: siccome lo script fondeva in un flusso solo le scritture di
+*tutti* gli handle, se l'app ha scritto anche altrove quella cattura è **un miscuglio di due
+canali** presentato come una conversazione sola.
+
+Da qui si riprende, in questo ordine:
+
+1. **La mappa GATT dell'ampli, con un'app da telefono** (nRF Connect o simile). Elenca
+   servizi, caratteristiche, proprietà e **handle**, in due minuti e senza scrivere codice.
+   È la domanda strutturale: *esiste un altro posto dove scrivere?* Se `0xFFC0` con
+   `0xFFC1`/`0xFFC2` è tutto quello che c'è, allora l'app ha per forza mandato `02` dove lo
+   mandiamo noi e come lo mandiamo noi, e il canale è escluso — il che riporta il mistero ai
+   byte, ma con una scatola chiusa in meno. Se invece salta fuori un'altra caratteristica
+   scrivibile, **quella è la pista**.
+2. **Una cattura nuova dello snoop log.** Lo script adesso stampa in testa quali handle e
+   quali opcode ha usato il telefono, e mette la colonna `via` su ogni riga `APP`. Serve
+   comunque se il punto 1 trova più di una strada, perché dice *quale* ha preso l'app.
 
 E resta il punto onesto: finché una di queste due non parla, **il fenomeno non è
 spiegato**. Scrivere «non si può» sarebbe raccontarsela.

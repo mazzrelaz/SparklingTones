@@ -575,12 +575,15 @@ play, `09` stop, `0b` dub, `0c` stop dub, `0a` delete); si legge posizione (`0x0
 non è più un'ipotesi aperta**: `02` riceve l'ack e viene buttato via, e il 28 agosto 2026 è
 caduta anche l'ultima spiegazione rimasta sui byte (la chiave). **Ma non è chiuso**, e la
 ragione è quella che ha detto l'utente: se l'app lo fa partire, un modo c'è. Quello che è
-finito è l'elenco delle ipotesi sui *byte*; **il canale non è mai stato guardato** —
+finito è l'elenco delle ipotesi sui *byte*; **il canale non era mai stato guardato** —
 `leggi-btsnoop.ps1` concatenava tutte le write buttando via **handle e opcode ATT**, quindi
-«byte identici a quelli dell'app» era verificato e «sullo stesso canale» no. Due passi, in
-`docs/looper.md` (sezione «Il buco nel metodo»): il pulsante **⑧** della sonda, che dice
-cosa `0xFFC1` dichiara e prova la write *con* risposta, e **una cattura nuova** — lo script
-adesso stampa handle e opcode. **Non aggiungere sonde sui byte**: quelle sono esaurite.
+«byte identici a quelli dell'app» era verificato e «sullo stesso canale» no. Metà è già
+chiusa: **`0xFFC1` dichiara solo `writeWithoutResponse`** (letto dalle proprietà il 28
+agosto 2026), quindi nemmeno l'app poteva usare un opcode diverso lì. **Resta l'handle**, e
+il btsnoop grezzo non c'è più: si riprende dalla **mappa GATT dell'ampli** presa con nRF
+Connect — esiste un'altra caratteristica scrivibile? — e, se serve, da una cattura nuova.
+Tutto in `docs/looper.md`, «Il buco nel metodo». **Non aggiungere sonde sui byte**: quelle
+sono esaurite.
 
 ### Regole di metodo, che valgono oltre il looper
 

@@ -7,7 +7,10 @@
  *
  * Vincoli dell'hardware, verificati sul dispositivo:
  *   - 0xFFC1 supporta solo writeWithoutResponse: nessun errore GATT viene
- *     sollevato se l'ampli scarta il messaggio
+ *     sollevato se l'ampli scarta il messaggio. **Letto dalle proprietà della
+ *     caratteristica il 28 agosto 2026**, non più dedotto: `properties` dichiara
+ *     `writeWithoutResponse` e basta. Ne segue che nemmeno l'app ufficiale può
+ *     scrivere qui con una Write Request — vedi `docs/looper.md`
  *   - una singola write per messaggio va bene fino ad almeno 44 byte, e
  *     l'ampli notifica pacchetti da 39: l'MTU negoziato è ampio
  *   - le scritture ricevono un ack 0x04nn con lo stesso sub-comando e sequence,
