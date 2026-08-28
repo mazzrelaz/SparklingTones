@@ -1043,7 +1043,14 @@
       <button id="btnMenu" aria-haspopup="true" aria-expanded="false"
               title="le altre azioni">⋯</button>
       <div id="menuAltro" class="tendina" hidden>
-        <button id="btnRead" class="solo-preset" disabled>Leggi dall'ampli</button>
+        <!-- Le due letture stanno in cima e vicine: una prende gli otto slot,
+             l'altra il suono che sta suonando adesso. Nessuna delle due si
+             spegne da disconnessi — un pulsante spento dentro una tendina non
+             riceve nemmeno il clic, quindi la tendina non si chiude e sembra
+             che l'app ti ignori. Spiegano loro perché non possono. -->
+        <button id="btnRead" class="solo-preset">Leggi dall'ampli</button>
+        <button id="btnLive" class="solo-preset"
+                title="prende in libreria il suono che l&#39;ampli sta facendo adesso; l&#39;ampli non viene toccato">Importa preset attuale</button>
         <button id="btnCategorie" class="solo-preset">Categorie</button>
         <button id="btnAltro" class="solo-preset">Altro</button>
         <button id="btnModifica" class="solo-live">Modifica</button>
@@ -1127,7 +1134,6 @@
   <div class="azioni">
     <button id="btnExport">Esporta la libreria</button>
     <button id="btnImport">Importa un file</button>
-    <button id="btnLive" disabled title="legge quello che l&#39;ampli sta suonando e te lo offre da salvare; l&#39;ampli non viene toccato">Leggi il suono corrente</button>
     <!-- Niente `accept`: il file si riconosce dal contenuto. Un tono condiviso
          dall'app ufficiale può avere un'estensione che non conosciamo, e con
          un filtro non si riuscirebbe nemmeno a sceglierlo. -->
@@ -1136,7 +1142,8 @@
   <p class="spiega" style="margin-top:12px">Si importano i backup di quest'app (.json), il
     <code>preset_backup.zip</code> dell'app ufficiale e <strong>un preset singolo</strong>
     esportato da lì. Se ce l'hai già, se ne aggiorna il suono: tag, note e famiglia
-    restano.</p>
+    restano. Un suono che l'ampli sta già facendo non ha bisogno di nessun file:
+    si prende con <strong>«Importa preset attuale»</strong>, nel menu «⋯».</p>
 
   <!-- Dropbox: la stessa libreria sul computer e sul telefono. -->
   <div class="sezione-pannello" style="margin-top:22px">
@@ -1432,8 +1439,11 @@ const spark = new SparkTransport({
     el.title = acceso ? (spark.state.name || 'connesso')
                       : 'collega l\'amplificatore via Bluetooth';
     el.disabled = acceso || state === 'connecting';
-    $('btnRead').disabled    = state !== 'connected';
-    $('btnLive').disabled    = state !== 'connected';
+    // «Leggi dall'ampli» e «Importa preset attuale» **non si spengono qui**:
+    // stanno nella tendina «⋯», e un pulsante spento non riceve il clic —
+    // quindi la tendina resterebbe aperta senza che succeda niente, che è
+    // esattamente come si vede un'app rotta. Da disconnessi rispondono, e
+    // dicono che manca la connessione.
     disegnaPreset();
     disegnaLive();
   },
@@ -4608,6 +4618,13 @@ $('status').addEventListener('click', async () => {
 $('btnRead').addEventListener('click', () => leggiDallAmpli());
 
 /**
+ * La riga che spiega un pulsante premuto senza ampli. Una sola, perché il
+ * motivo è sempre lo stesso e cambia solo cosa si stava per fare.
+ */
+const senzaAmpli = cosa =>
+  `per ${cosa} serve l'amplificatore: premi CONNETTI in alto e riprova.`;
+
+/**
  * Legge gli otto slot e li riversa in libreria.
  *
  * Durante la lettura i pulsantoni della vista live restano spenti: l'ampli
@@ -4615,7 +4632,7 @@ $('btnRead').addEventListener('click', () => leggiDallAmpli());
  * infilerebbe un comando dentro una conversazione già in corso.
  */
 async function leggiDallAmpli() {
-  if (!spark.connected) return;
+  if (!spark.connected) return logLine(senzaAmpli('leggere gli otto slot'));
   $('btnRead').disabled = true;
   live.occupato = true;
   disegnaLive();
@@ -4631,25 +4648,33 @@ async function leggiDallAmpli() {
   }
 
   live.occupato = false;
-  $('btnRead').disabled = !spark.connected;
+  $('btnRead').disabled = false;
   await ricarica();
   disegnaPreset();
   disegnaLive();
 }
 
 /**
- * Legge quello che l'ampli sta suonando e lo offre alla libreria. È l'altro
- * modo di fare un preset nuovo: si gira le manopole vere — o si usa l'app
- * ufficiale — e poi lo si prende. `readLiveState` non torna nessuno slot, e
- * va bene così: quel suono sta nel buffer, non in uno degli otto.
+ * «Importa preset attuale»: legge quello che l'ampli sta suonando e lo offre
+ * alla libreria. È l'altro modo di fare un preset nuovo — si girano le
+ * manopole vere, o si sceglie un tono dall'app ufficiale, e poi lo si prende.
+ * `readLiveState` non torna nessuno slot, e va bene così: quel suono sta nel
+ * buffer, non in uno degli otto.
+ *
+ * **Sta nella tendina «⋯» e non nel pannello «Altro»** (28 agosto 2026,
+ * chiesto dall'utente): là dentro è una voce di manutenzione fra esportazioni
+ * e Dropbox, mentre questa è la strada più corta per portarsi in libreria un
+ * suono dell'app ufficiale, e si usa con l'ampli acceso davanti.
  *
  * Se quell'UUID è già in libreria non se ne fa un doppione: si aggiorna la
  * parte sonora e basta, che è la regola di `importFromAmp` — tag, note,
  * famiglia e ordine sono lavoro dell'utente e non si toccano.
  */
 $('btnLive').addEventListener('click', async () => {
+  if (!spark.connected) return logLine(senzaAmpli('prendere il suono di adesso'));
   $('btnLive').disabled = true;
   spark.lastFailedPayload = null;
+  logProgress('leggo il suono che l\'ampli sta facendo…');
   const corrente = await spark.readLiveState();
   if (corrente) {
     const catena = corrente.effects.filter(e => e.enabled).map(e => e.name).join(' · ');
@@ -4677,7 +4702,7 @@ $('btnLive').addEventListener('click', async () => {
   } else {
     logLine('nessuna risposta alla lettura del suono corrente.');
   }
-  $('btnLive').disabled = !spark.connected;
+  $('btnLive').disabled = false;
 });
 
 $('search').addEventListener('input', event => {
