@@ -573,10 +573,14 @@ vogliono, il protocollo no. Vedi `docs/looper.md`.
 play, `09` stop, `0b` dub, `0c` stop dub, `0a` delete); si legge posizione (`0x0377`), bpm
 (`0x0363`) e impostazioni (`0x0376`). **La battuta di conteggio col click non si comanda, e
 non è più un'ipotesi aperta**: `02` riceve l'ack e viene buttato via, e il 28 agosto 2026 è
-caduta anche l'ultima spiegazione rimasta (la chiave). Capitolo **chiuso per esaurimento**,
-non per spiegazione — l'app ufficiale manda quei byte e l'ampli conta, e non sappiamo
-perché. Tutto in `docs/looper.md`, comprese le strade già escluse. **Non riaprirlo senza un
-fatto nuovo da fuori** (un altro snoop log, un firmware diverso): dall'interno è finito.
+caduta anche l'ultima spiegazione rimasta sui byte (la chiave). **Ma non è chiuso**, e la
+ragione è quella che ha detto l'utente: se l'app lo fa partire, un modo c'è. Quello che è
+finito è l'elenco delle ipotesi sui *byte*; **il canale non è mai stato guardato** —
+`leggi-btsnoop.ps1` concatenava tutte le write buttando via **handle e opcode ATT**, quindi
+«byte identici a quelli dell'app» era verificato e «sullo stesso canale» no. Due passi, in
+`docs/looper.md` (sezione «Il buco nel metodo»): il pulsante **⑧** della sonda, che dice
+cosa `0xFFC1` dichiara e prova la write *con* risposta, e **una cattura nuova** — lo script
+adesso stampa handle e opcode. **Non aggiungere sonde sui byte**: quelle sono esaurite.
 
 ### Regole di metodo, che valgono oltre il looper
 
@@ -779,7 +783,14 @@ nell'ampli dopo che l'app ufficiale si è scollegata** — rendeva verificabile 
 ipotesi che il 14 agosto era stata archiviata come non verificabile. Verificata, e caduta:
 con l'ampli sbloccato (controllato subito dopo, mandando un preset `JH.*` e sentendo il
 fuzz) `02` riceve l'ack e non fa niente, uguale a prima. **La chiave abilita i suoni a
-pagamento, non i comandi.** Da qui non si riapre: serve un fatto nuovo da fuori.
+pagamento, non i comandi.**
+
+Poi l'utente ha obiettato la cosa giusta — «se l'app ufficiale lo fa partire un modo deve
+esserci» — e aveva ragione: il posto dove guardare non era un'altra sonda sui byte ma
+**come avevamo misurato**. `leggi-btsnoop.ps1` buttava via handle e opcode ATT di ogni
+scrittura, quindi non sappiamo se l'app avesse scritto su `0xFFC1` né con quale opcode.
+Sonda e script sono aggiornati; il grezzo del btsnoop non c'è più, quindi il passo 2 vuole
+una cattura nuova. Dettaglio in `docs/looper.md`, «Il buco nel metodo».
 
 **Le famiglie di suono adesso sono quattro**: è arrivata **Bass**, in viola `#bf5af2`
 (`FAMIGLIE` in `preset-store.js`). L'utente se n'era dimenticato all'inizio, e un suono di
@@ -902,7 +913,6 @@ dall'ampli, e il risultato si prova **solo sul buffer `0x7f`**, mai in uno slot.
 API key dell'utente, e sarebbe la prima funzione dell'app che non funziona offline. L'AI non
 sente: dà un punto di partenza, non un suono finito.
 
-**Non aperti, e vanno bene così:** il conteggio col click del looper (chiuso il 28 agosto
-2026, ipotesi esaurite — non riaprirlo dall'interno), e il
+**Non aperti, e vanno bene così:** il
 trasferimento di un banco al pedale che costa ~6 s — funziona, si può accorciare, ma è
 ottimizzazione.

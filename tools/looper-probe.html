@@ -101,9 +101,11 @@ pronta. Questi segnaposto servono solo a separare due prove, o a marcare un sile
 
 <h2>4 — Il click: le prove che restano</h2>
 <div class="sub" style="margin-bottom:8px"><code>0x0175</code> con <code>02</code> è
-confermato e ignorato, con e senza il byte finale. Resta da vedere se il click si accenda
-scrivendo prima le impostazioni — <code>0x0176</code> con gli stessi byte che l'ampli
-dichiara suoi.</div>
+confermato e ignorato: byte identici a quelli dell'app, con e senza intestazione di blocco,
+con e senza license key, con l'ampli sbloccato davvero e col loop vuoto. Quello che resta
+non è nei byte ma <b>nel canale</b>: <b>⑧</b> dice cosa <code>0xFFC1</code> dichiara e prova
+la write <i>con</i> risposta, che non abbiamo mai usato — e che nello snoop log non abbiamo
+mai controllato quale fosse.</div>
 <div class="griglia" id="prove"></div>
 
 <div id="log"></div>
@@ -429,7 +431,54 @@ function inviaComeLApp(cmd, sub, data, etichetta) {
        .catch(err => riga('err', 'errore invio: ' + err.message));
 }
 
+/* **Come** la write arriva sull'ATT: l'ultima differenza mai controllata, trovata il
+   28 agosto 2026 rileggendo non la cattura ma il modo in cui l'abbiamo letta.
+   `tools/leggi-btsnoop.ps1` accetta **tutti e due** gli opcode — `0x52` Write Command
+   e `0x12` Write Request — e non registra quale fosse: quindi non sappiamo con quale
+   dei due l'app abbia mandato `02`. Noi usiamo sempre `writeValueWithoutResponse`,
+   cioè `0x52`, sulla fede di una riga di commento in `spark-transport.js` che dice
+   «0xFFC1 supporta solo writeWithoutResponse» e che **non è mai stata verificata
+   leggendo le proprietà della caratteristica**.
+
+   Questo pulsante fa le due cose insieme: dice cosa FFC1 dichiara davvero, e se
+   dichiara anche `write` manda il comando come Write Request. */
+async function inviaConRisposta(cmd, sub, data, etichetta) {
+  const ch = spark.writeChar;
+  if (!ch) { riga('err', 'non connesso'); return; }
+  if (!ch.properties.write) {
+    riga('err', 'FFC1 non dichiara write-with-response: la strada è chiusa — ma adesso ' +
+                'è verificato invece che supposto, ed è comunque un risultato');
+    return;
+  }
+  const seq   = spark._nextSeq();
+  const bytes = new Uint8Array(Spark.encode({ cmd, sub, data: data.slice() }, seq, false));
+  riga('tx', `TX 0x${hex(cmd)}${hex(sub)} ${etichetta} — write CON risposta (ATT 0x12), ` +
+             `seq=0x${hex(seq)}`, { cmd, sub, data: data.slice(), conRisposta: true });
+  try {
+    await ch.writeValueWithResponse(bytes);
+    riga('log', 'la write con risposta è stata accettata dal GATT');
+  } catch (err) {
+    riga('err', 'write con risposta rifiutata: ' + err.message);
+  }
+}
+
+/* Le proprietà che FFC1 dichiara. Si legge una volta alla connessione: è la riga che
+   trasforma in misura la frase «writeWithoutResponse only» di `spark-transport.js`. */
+function diProprietaFFC1() {
+  const ch = spark.writeChar;
+  if (!ch || !ch.properties) return;
+  const p = ch.properties;
+  const nomi = ['broadcast', 'read', 'writeWithoutResponse', 'write', 'notify',
+                'indicate', 'authenticatedSignedWrites', 'reliableWrite',
+                'writableAuxiliaries'].filter(n => p[n]);
+  riga('log', 'FFC1 dichiara: ' + (nomi.join(', ') || 'niente?'));
+}
+
 const PROVE = [
+  { n: '⑧ COUNTIN con write CON risposta', d: 'ATT 0x12 invece di 0x52 — mai provato',
+    f: () => inviaConRisposta(0x01, 0x75, [0x02], 'COUNTIN') },
+  { n: '⑨ REC con write CON risposta', d: 'il controllo: se 04 passa, il canale è buono',
+    f: () => inviaConRisposta(0x01, 0x75, [0x04], 'REC') },
   { n: '⑥ COUNTIN come lo manda l\'app', d: 'intestazione di blocco + write da 20',
     f: () => inviaComeLApp(0x01, 0x75, [0x02], 'COUNTIN') },
   { n: '⑦ REC come lo manda l\'app', d: 'idem con 04, per confronto',
@@ -475,7 +524,9 @@ for (const p of PROVE) {
   $('prove').appendChild(b);
 }
 
-$('btnConnect').onclick = () => spark.connect().catch(err => riga('err', err.message));
+$('btnConnect').onclick = () => spark.connect()
+  .then(diProprietaFFC1)
+  .catch(err => riga('err', err.message));
 
 $('btnClear').onclick = () => { $('log').textContent = ''; raffica = null; };
 
