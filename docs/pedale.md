@@ -996,3 +996,37 @@ formato.
   prova. Ma con l'ESP32 la domanda non si pone: interruttori sui GPIO sono un
   `digitalRead` con antirimbalzo, niente accoppiamento, niente seconda batteria.
 
+
+## Il looper sul pedale, e il conteggio fatto in casa
+
+Deciso il 28 agosto 2026, dopo aver chiuso l'indagine sul conteggio (`docs/looper.md`).
+Il protocollo del looper è tutto verificato e non manca niente: registra, chiudi, suona,
+sovraincidi, annulla, cancella, e la posizione nel loop arriva cinque volte al secondo.
+**Manca solo il conteggio col click, che non si comanda** — è la conclusione dell'indagine,
+e non è un difetto nostro.
+
+**Quindi il conteggio lo fa il pedale.** Non è un ripiego: il conteggio non è un suono, è
+*sapere quando parte la registrazione*. Premuto il footswitch, il pedale:
+
+1. legge il bpm dall'ampli (`0x0363`, oppure il campo dentro `0x0376`);
+2. conta quattro tempi a quel bpm lampeggiando un LED, o con un buzzer se ce ne sarà uno;
+3. **40 ms prima dell'uno** manda `0x0175` con `04`, che fa partire la registrazione
+   all'istante.
+
+I 40 ms non sono inventati: è il tempo entro cui l'ampli risponde a `04` con il suo
+`0x0375`, misurato nelle catture. Con l'hardware in mano si rimisura e si aggiusta.
+
+Per chi suona il risultato è lo stesso — quattro segnali a tempo, e alla quinta pulsazione
+stai registrando. Cambia che il segnale arriva dai piedi invece che dalla cassa, e che lo
+**vedi**. Con l'ampli a volume su un palco è probabilmente più leggibile di un click.
+
+**In Signal Detection Mode il conteggio non serve**: la registrazione parte da sé al primo
+suono di chitarra. È il modo col click spento, e si cambia tenendo premuto PLAY/STOP
+sull'ampli — o scrivendo il flag con `0x0176`.
+
+**E il tempo si può anche scrivere**, il che apre una funzione in più: il pedale può avere
+il suo **tap tempo**. `0x0176` **senza** il byte `0x00` finale, con il payload costruito
+dall'ultimo `0x0376` ricevuto cambiando il solo bpm — i dettagli e la trappola (col byte in
+coda il delay parte in ripetizione infinita) stanno in `docs/protocollo-spark2.md`. E
+siccome dentro l'ampli il tempo è già accoppiato agli effetti, **il delay segue da solo**:
+non tocca a noi mappare bpm su posizione della manopola.
