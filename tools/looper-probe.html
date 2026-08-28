@@ -115,7 +115,12 @@ e <code>0x0337</code> sul parametro 4 di <code>DelayRe201</code>: il tempo è gi
 agli effetti dentro l'ampli. Se il bpm si scrive, il delay dovrebbe seguire da solo — e la
 prova è vedere se arriva quel <code>0x0337</code>.<br>
 Ordine: prima <b>configurazione</b> qui sopra (serve l'ultimo <code>0x0376</code>), poi
-scrivi, poi <b>configurazione</b> di nuovo per rileggere.</div>
+scrivi, poi <b>configurazione</b> di nuovo per rileggere.<br>
+<b>Attenzione, misurato il 28 agosto 2026:</b> la prima scrittura di <code>0x0176</code>
+non ha cambiato il tempo e ha mandato <b>il delay in ripetizione infinita</b>. Si recupera
+premendo un tasto preset sul pannello, che ricarica tutti i parametri. Qui la spunta del
+byte <code>0x00</code> finale <b>non viene applicata</b>: si manda esattamente quello che
+manda Ignitron.</div>
 <div style="margin-bottom:8px">
   <label>bpm <input id="bpm" type="number" min="20" max="300" value="100"
          style="width:5em;font:inherit"></label>
@@ -392,7 +397,12 @@ function scriviBpm(bpm) {
   const salta   = vecchie[0] === 0xcc ? 2 : 1;      // quanto occupa il bpm di adesso
   const nuove   = bpmInBytes(bpm).concat(Array.from(vecchie).slice(salta));
   riga('log', `impostazioni di adesso: ${hexList(vecchie)} → nuove: ${hexList(nuove)}`);
-  invia(0x01, 0x76, nuove, `bpm ${bpm}`);
+  /* **Grezzo, non `invia`**: la spunta «byte 0x00 finale» non deve entrarci. Ignitron
+     manda `0x0176` senza, e questa è la strada nota che stiamo replicando — con la
+     spunta messa avremmo mandato un campo in più e non sapremmo a cosa attribuire il
+     risultato. Costato il 28 agosto 2026: la prima scrittura non ha cambiato il tempo
+     e ha mandato il delay in ripetizione infinita. */
+  inviaGrezzo(0x01, 0x76, nuove, `bpm ${bpm}`);
 }
 
 /* Come lo fa Ignitron: `sparkLooperRec()` manda **due** comandi, COUNTIN se il
