@@ -581,13 +581,14 @@ finito è l'elenco delle ipotesi sui *byte*; **il canale non era mai stato guard
 chiuso: **`0xFFC1` dichiara solo `writeWithoutResponse`**, e la **mappa GATT presa con nRF
 Connect** dice che è **l'unica cosa scrivibile dell'intero dispositivo** (28 agosto 2026,
 tutta in `docs/looper.md`). L'app non aveva un'altra strada: stesso canale, stesso opcode,
-stessi byte. **Quello che resta è un anello inferito e mai misurato**: che il `02` dell'app
-abbia *causato* il conteggio, dedotto dall'adiacenza mentre fra i due passano 977 ms e la
-firma non combacia con quella del tasto fisico (che ne manda due a 5 ms). **Si decide in
-trenta secondi**: premere REC nell'app ufficiale senza toccare l'ampli. Se non conta, non
-c'è nessun paradosso. Piste ancora vive: quella, il **bonding** (noi siamo `NOT BONDED`, il
-telefono è appaiato per l'audio), e una cattura nuova fatta come esperimento. **Non
-aggiungere sonde sui byte**: quelle sono esaurite.
+stessi byte. E **il paradosso è reale**, misurato il 28 agosto 2026: REC premuto nell'app
+ufficiale, mani lontane dal pannello, **conta** — quindi non era un dito sull'ampli.
+**Allora la differenza è in chi manda, non in cosa manda**, e restano due piste: il
+**bonding** (noi `NOT BONDED` e non cifrati, il telefono appaiato all'ampli per l'audio —
+**l'unica provabile**, appaiando l'ampli al PC) e la **sessione autorizzata** (lo sblocco
+dei suoni resta nell'ampli, ma un flag «questo client ha mandato una chiave valida» sarebbe
+per connessione, e per noi irraggiungibile). Tutto in `docs/looper.md`. **Non aggiungere
+sonde sui byte**: quelle sono esaurite.
 
 ### Regole di metodo, che valgono oltre il looper
 

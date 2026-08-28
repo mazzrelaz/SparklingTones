@@ -343,28 +343,44 @@ crepe:
   cattura del 13 agosto); lì ce n'è **uno solo**. Le due firme sono diverse, e non sappiamo
   di chi sia quella che abbiamo visto.
 
-C'è una lettura alternativa che spiega *tutto* senza nessun mistero: **anche per l'app quel
-`02` è stato inerte**, e il conteggio è partito perché qualcuno ha premuto il tasto
-sull'ampli un secondo dopo. Uno snoop log non vede le dita.
+C'era una lettura alternativa che spiegava *tutto* senza nessun mistero: che anche per
+l'app quel `02` fosse inerte, e che il conteggio l'avesse fatto partire un dito sull'ampli
+un secondo dopo. Uno snoop log non vede le dita.
 
-**Si decide in trenta secondi, senza attrezzi**: aprire l'app ufficiale, andare nel looper,
-premere REC **nell'app** e non toccare l'ampli. Se conta, il paradosso è reale e si va al
-punto 2. Se non conta, non c'è nessun paradosso: `02` non è un comando per nessuno, e il
-capitolo si chiude davvero.
+**Provata il 28 agosto 2026, ed è caduta.** REC premuto **nell'app ufficiale**, mani
+lontane dal pannello: **conta**. Quindi la causalità è dimostrata e **il paradosso è
+reale**: gli stessi byte, sullo stesso canale, con lo stesso opcode, dallo stesso stato
+(loop vuoto) funzionano dall'app e non da noi.
 
-## Due piste ancora vive
+*(Nota operativa emersa lì: prima bisogna cancellare il loop memorizzato. Il looper
+dell'ampli si era impiantato durante le prove — succede, e si sblocca con delete.)*
 
-1. **Il legame (bonding).** nRF Connect dice `CONNECTED / NOT BONDED`, e questo vale anche
-   per noi: Web Bluetooth da Chrome apre un collegamento **non cifrato e non appaiato**. Il
-   telefono con l'app ufficiale invece **è appaiato all'ampli**, perché lo Spark è anche una
-   cassa Bluetooth e ci si collega l'audio. Se il firmware richiedesse un collegamento
-   cifrato per certi comandi, l'ack arriverebbe lo stesso e il comando verrebbe scartato —
-   che è la sagoma esatta di quello che vediamo. **Si prova appaiando l'ampli al PC** dalle
-   impostazioni Bluetooth di Windows e poi riconnettendo la sonda.
-2. **Una cattura nuova dello snoop log**, ma fatta come esperimento: premere REC **solo
-   nell'app**, più volte, senza mai toccare l'ampli. Se ogni `02` è seguito da un conteggio,
-   la causalità è dimostrata. Lo script adesso stampa handle e opcode e mette la colonna
-   `via` su ogni riga `APP`.
+**Ne segue che la differenza non è nel messaggio ma in chi lo manda**, ed è l'unico posto
+dove non abbiamo ancora guardato.
+
+## Le due piste rimaste, che sono sul client e non sul messaggio
+
+1. **Il legame (bonding).** nRF Connect dice `CONNECTED / NOT BONDED`, e vale anche per noi:
+   Web Bluetooth da Chrome apre un collegamento **non appaiato e non cifrato**. Il telefono
+   con l'app ufficiale invece **è appaiato all'ampli**, perché lo Spark è anche una cassa
+   Bluetooth e ci si manda l'audio. Se il firmware volesse un link cifrato per certi
+   comandi, l'ack arriverebbe lo stesso e il comando verrebbe scartato — che è la sagoma
+   esatta di quello che vediamo. **È l'unica delle due che possiamo provare**, e si prova
+   appaiando l'ampli al PC dalle impostazioni Bluetooth di Windows, poi riconnettendo la
+   sonda.
+2. **La sessione autorizzata.** Sappiamo che lo sblocco dei suoni a pagamento **resta
+   nell'ampli** dopo che l'app si scollega — misurato col fuzz. Ma potrebbero essere due
+   cose diverse: uno sblocco *globale* dei contenuti, e un flag *per connessione* «questo
+   client ha mandato una chiave valida». Se `02` volesse il secondo, per noi sarebbe
+   irraggiungibile: la chiave porta un nonce di sessione, rigiocarla dà `fe`, e cavarla
+   dall'app è protezione di contenuto a pagamento e non si fa. **Non è verificabile
+   direttamente**, ma se il punto 1 fallisce resta la spiegazione più economica rimasta.
+
+   Un modo indiretto ci sarebbe: **Ignitron** (`stangreg/Ignitron`) comanda il looper interno
+   dello Spark 2 da un ESP32, manda COUNTIN e **non manda nessuna license key**. Se a un suo
+   utente il conteggio parte, il punto 2 cade — e con esso, probabilmente, anche il punto 1,
+   perché un client NimBLE non è appaiato. Nel loro tracker non c'è niente in proposito
+   (cercato il 28 agosto 2026): servirebbe chiederlo.
 
 E resta il punto onesto: finché una di queste non parla, **il fenomeno non è spiegato**.
 Scrivere «non si può» sarebbe raccontarsela.
