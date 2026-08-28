@@ -1128,10 +1128,15 @@
     <button id="btnExport">Esporta la libreria</button>
     <button id="btnImport">Importa un file</button>
     <button id="btnLive" disabled title="legge quello che l&#39;ampli sta suonando e te lo offre da salvare; l&#39;ampli non viene toccato">Leggi il suono corrente</button>
-    <input type="file" id="fileInput" accept=".json,.zip" hidden>
+    <!-- Niente `accept`: il file si riconosce dal contenuto. Un tono condiviso
+         dall'app ufficiale può avere un'estensione che non conosciamo, e con
+         un filtro non si riuscirebbe nemmeno a sceglierlo. -->
+    <input type="file" id="fileInput" hidden>
   </div>
-  <p class="spiega" style="margin-top:12px">Si importano sia i backup di quest'app (.json)
-    sia il <code>preset_backup.zip</code> dell'app ufficiale.</p>
+  <p class="spiega" style="margin-top:12px">Si importano i backup di quest'app (.json), il
+    <code>preset_backup.zip</code> dell'app ufficiale e <strong>un preset singolo</strong>
+    esportato da lì. Se ce l'hai già, se ne aggiorna il suono: tag, note e famiglia
+    restano.</p>
 
   <!-- Dropbox: la stessa libreria sul computer e sul telefono. -->
   <div class="sezione-pannello" style="margin-top:22px">
@@ -4711,12 +4716,22 @@ $('btnExport').addEventListener('click', async () => {
 
 $('btnImport').addEventListener('click', () => $('fileInput').click());
 
+/**
+ * Un file solo, e tre cose diverse dentro: il nostro backup, il
+ * `preset_backup.zip` dell'app ufficiale, o **un preset singolo** uscito da
+ * lì. Si decide dal **contenuto e non dall'estensione**: un tono condiviso
+ * dall'app ufficiale può chiamarsi in qualunque modo, e uno zip lo dice da sé
+ * coi suoi primi due byte (`PK`). Chiedere all'utente di sapere che cos'ha in
+ * mano sarebbe chiedergli la cosa che non sa.
+ */
 $('fileInput').addEventListener('change', async event => {
   const file = event.target.files[0];
   if (!file) return;
   try {
-    if (file.name.toLowerCase().endsWith('.zip')) await importaBackupUfficiale(file);
-    else                                          await importaBackupNostro(file);
+    const buffer = await file.arrayBuffer();
+    const bytes  = new Uint8Array(buffer);
+    if (bytes[0] === 0x50 && bytes[1] === 0x4b) await importaBackupUfficiale(file, buffer);
+    else                                        await importaJson(file, bytes);
     await ricarica();
     disegnaPreset();
     disegnaLive();
@@ -4726,16 +4741,85 @@ $('fileInput').addEventListener('change', async event => {
   event.target.value = '';
 });
 
-async function importaBackupNostro(file) {
-  const backup = JSON.parse(await file.text());
-  const quanti = await store.importBackup(backup);
-  logLine(`importati ${quanti} preset da ${file.name}`);
+/**
+ * Il file non è uno zip: o è il nostro backup, o è roba dell'app ufficiale.
+ * Il nostro si riconosce da `presets`, che è la sua unica forma; tutto il
+ * resto lo guarda `trovaPresetUfficiali`, che cerca la catena e non l'incarto.
+ */
+async function importaJson(file, bytes) {
+  let json;
+  try {
+    json = JSON.parse(new TextDecoder().decode(bytes));
+  } catch (err) {
+    throw new Error(`${file.name} non è né uno zip né un JSON`);
+  }
+
+  if (json && Array.isArray(json.presets)) {
+    const quanti = await store.importBackup(json);
+    logLine(`importati ${quanti} preset da ${file.name}`);
+    return;
+  }
+
+  const grezzi = SparkBackup.trovaPresetUfficiali(json);
+  if (grezzi.length === 0) {
+    throw new Error(`in ${file.name} non c'è nessun preset che sappia leggere`);
+  }
+  await importaPresetSciolti(grezzi, file.name);
+}
+
+/**
+ * Preset singoli dell'app ufficiale, fuori dal backup: un tono esportato o
+ * condiviso. Passano dallo stesso `convertiPreset` del backup — è lì che i
+ * booleani diventano numeri e gli indici byte — e dalla stessa
+ * `importFromBackup`, quindi valgono le regole della libreria: se quell'UUID
+ * c'è già si aggiorna il suono e **tag, note e famiglia restano**.
+ *
+ * **Senza `meta.id` gliene diamo uno noi**, perché un tono condiviso può
+ * arrivare senza: è meglio di un'importazione che fallisce, ma va detto —
+ * reimportando lo stesso file si fa un doppione invece di aggiornare.
+ */
+async function importaPresetSciolti(grezzi, nomeFile) {
+  const presets = [];
+  let inventati = 0;
+  const saltati = [];
+
+  for (const grezzo of grezzi) {
+    const meta = grezzo.meta || {};
+    const conId = meta.id ? grezzo
+      : (inventati++, Object.assign({}, grezzo,
+          { meta: Object.assign({}, meta, { id: crypto.randomUUID() }) }));
+    try {
+      presets.push(SparkBackup.convertiPreset(conId, null));
+    } catch (err) {
+      saltati.push(err.message);
+    }
+  }
+  if (presets.length === 0) {
+    throw new Error(`${nomeFile}: ${saltati[0] || 'nessun preset leggibile'}`);
+  }
+
+  const nomi = presets.map(p => p.name).join(' · ');
+  const uno  = presets.length === 1;
+  if (!await conferma(uno ? 'importare il preset' : 'importare i preset',
+    (uno ? `Mettere in libreria <strong>${testoConNome(presets[0].name)}</strong>?`
+         : `Mettere in libreria <strong>${presets.length} preset</strong> ` +
+           `(${testoConNome(nomi)})?`) +
+    ' Se ce l\'hai già, se ne aggiorna il suono: tag, note e famiglia restano.',
+    { ok: uno ? 'Importa il preset' : 'Importa' })) return;
+
+  const { added, updated } = await store.importFromBackup(presets);
+  logLine(`da ${nomeFile}: ${added} nuovi, ${updated} aggiornati — ${nomi}`);
+  if (inventati) {
+    logLine(`${inventati} preset non portavano un identificativo: gliene ho dato uno io, ` +
+            'quindi reimportando lo stesso file se ne fa un doppione.');
+  }
+  if (saltati.length) logLine(`${saltati.length} saltati: ${saltati[0]}`);
 }
 
 /** preset_backup.zip dell'app ufficiale: le sue categorie restano fuori. */
-async function importaBackupUfficiale(file) {
+async function importaBackupUfficiale(file, buffer) {
   logLine(`leggo ${file.name}…`);
-  const { presets, saltati } = await SparkBackup.parseBackup(await file.arrayBuffer());
+  const { presets, saltati } = await SparkBackup.parseBackup(buffer);
 
   const { added, updated } = await store.importFromBackup(presets);
   logLine(`${presets.length} preset dal backup dell'app: ${added} nuovi, ${updated} aggiornati`);

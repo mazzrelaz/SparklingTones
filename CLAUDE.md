@@ -67,7 +67,7 @@ tools/looper-probe.html           ascolta l'ampli mentre si usa il looper
 tools/explorer.html               diagnostico single-file per Android, CONGELATO
 tools/explorer-v1.html            la sua versione vecchia, non aperta da nessuno: si può togliere
 tools/banco-di-prova.js           otto preset veri per frames-pedale.html (da captures/)
-test/*.html                       protocol 125, transport 48, store 136, backup 33, dropbox 34
+test/*.html                       protocol 125, transport 48, store 136, backup 41, dropbox 34
 test/fixtures/preset0.js          catture condivise fra le suite
 design/proposte-*.html            le proposte grafiche a confronto, non è l'app
 captures/                         log grezzi dall'ampli
@@ -261,15 +261,31 @@ prudenza: quelli l'ampli li suona, quindi la prima lettura li rimetterebbe dentr
 `svuotaTranneAmpli` passa da `remove`, quindi lascia le lapidi: senza, il primo «Prendi da
 Dropbox» rimetterebbe dentro tutto. Due conferme, e la seconda dice che la cosa viaggia.
 
-**Un preset nuovo si fa in due modi, e nessuno parte dal nulla**: «Duplica» nel dettaglio
+**Un preset nuovo si fa in tre modi, e nessuno parte dal nulla**: «Duplica» nel dettaglio
 (`store.duplicate`, che cambia **UUID, slot e nome** — l'UUID perché altrimenti la lettura
-dall'ampli scambierebbe la copia per l'originale), e «Leggi il suono corrente» in «Altro»,
+dall'ampli scambierebbe la copia per l'originale), «Leggi il suono corrente» in «Altro»,
 che offre di salvare quello che l'ampli sta suonando — se quell'UUID c'è già aggiorna solo
-la parte sonora, che è la regola di `importFromAmp`. **Dal nulla non si fa, ed è
+la parte sonora, che è la regola di `importFromAmp` — e **«Importa un file»**, che dal
+28 agosto 2026 prende anche **un preset singolo** dell'app ufficiale e non solo il backup
+intero (vedi «Importare un preset solo» qui sotto). **Dal nulla non si fa, ed è
 deliberato**: un preset inventato dovrebbe dichiarare sette blocchi con modelli che l'ampli
 ha davvero, e un modello inesistente è quello che l'ha già piantato una volta (vedi
 `TrebleBooster`). Se un giorno servisse, lo scheletro va preso da un preset **uscito
 dall'ampli**, non dal catalogo.
+
+**Importare un preset solo** (28 agosto 2026). «Importa un file» accetta tre cose e le
+distingue **dal contenuto, non dall'estensione**: uno zip lo dicono i suoi primi due byte
+(`PK`), il nostro backup lo dice il campo `presets`, e tutto il resto lo guarda
+`SparkBackup.trovaPresetUfficiali`, che scende nel JSON in cerca di **un oggetto con
+`sigpath`** invece di indovinare il nome dell'incarto — di un tono esportato o condiviso
+dall'app ufficiale **non abbiamo un esemplare**, quindi la forma dell'involucro non la
+sappiamo, ma la catena sì. Per questo l'`<input type=file>` **non ha `accept`**: con un
+filtro, un'estensione che non conosciamo non si riuscirebbe nemmeno a scegliere.
+Da lì in poi è la strada del backup — stesso `convertiPreset`, stessa `importFromBackup` —
+quindi valgono le regole della libreria. Senza `meta.id` **l'UUID glielo diamo noi** e lo
+si dice nel log: reimportando lo stesso file si fa un doppione invece di aggiornare.
+**Il file non è l'unica via, e spesso non è la più comoda**: un tono che l'app ufficiale
+sta già facendo suonare si prende con «Leggi il suono corrente», senza esportare niente.
 
 ### Sezione Live
 
@@ -746,7 +762,15 @@ risposto.
 basso non è né clean né drive. Non c'era niente di cablato sul numero tre: tutta la UI —
 schede, LED live, insegna al neon, ordinamento, pannello dei colori — cicla su `famiglie`,
 quindi è bastata la riga in più più i commenti che dicevano «tre». **Il verde resta di
-nessuna famiglia**, che nella vista live è il LED di chi famiglia non ne ha. Guscio `v70`.
+nessuna famiglia**, che nella vista live è il LED di chi famiglia non ne ha.
+
+**E «Importa un file» adesso prende anche un preset solo** dell'app ufficiale, non più il
+solo backup intero: la regola sta in «Importare un preset solo», qui sopra. **Va provato
+con un file vero**, che è la cosa che qui non ho: le mie prove sono contro un preset
+ufficiale ricostruito a mano da `captures/2026-08-10-libreria-8-preset.json`, incartato in
+`{data:{tone:…}}` per vedere se lo trova lo stesso. Se il file dell'utente non entra, il
+posto da guardare è `trovaPresetUfficiali` — e la cosa da chiedergli sono **i primi byte
+del file**, non l'estensione. Guscio `v71`, backup 41 test.
 
 Quello che segue è del 27.
 
@@ -807,7 +831,7 @@ sono presi dalle foto dei pedali veri**, non da una cattura (`src/spark-effetti.
 manopole fanno la cosa sbagliata è l'ordine degli indici, e si corregge in due righe.
 
 
-Guscio `v70` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
+Guscio `v71` (il numero qui era rimasto a `v39`: sta in `sw.js`, non fidarsi di questa riga
 se non torna). Le suite sono verdi (protocol 125, transport 48, store 136, backup 33,
 dropbox 34), ma **`index.html` non è coperto da nessuna suite**: l'editor nuovo e il vestito
 del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un ampli finto.
