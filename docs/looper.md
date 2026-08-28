@@ -1,4 +1,4 @@
-# Il looper dello Spark 2 — indagine archiviata il 14 agosto 2026
+# Il looper dello Spark 2 — indagine archiviata il 14 agosto 2026, richiusa il 28
 
 Spostato qui da `CLAUDE.md` il 14 agosto 2026: è un capitolo chiuso, e teneva
 seimila token di memoria di lavoro occupati a ogni sessione. In `CLAUDE.md` restano
@@ -11,7 +11,7 @@ Funzionano `04` rec, `05` stop rec, `08` play, `09` stop, `0b` dub, `0c` stop du
 `0a` delete, e si legge la posizione nel loop (`0x0377`), il bpm (`0x0363`) e le
 impostazioni (`0x0376`).
 
-**Sul conteggio siamo arrivati al fondo di quello che si può fare senza la chiave.**
+**Sul conteggio siamo arrivati al fondo, e adesso anche oltre la chiave.**
 Escluso per misura, tutto: il valore del byte (sedici provati), il byte `0x00` finale,
 le impostazioni scritte prima, la coppia `02`+`04` in due distanze, le interrogazioni
 prima, l'intera sequenza di avvio dell'app rigiocata con e senza chiave, e
@@ -19,16 +19,19 @@ l'intestazione di blocco. Ogni messaggio rigiocato riceve dall'ampli la **stessa
 identica risposta** che riceve l'app: la riproduzione è fedele, il comando è byte per
 byte lo stesso, e non funziona.
 
-**Resta una sola differenza, e non è replicabile: la license key accettata.** L'app
-manda `0x0170` e riceve `0x0470` con `00 00`; noi rigiocando la sua riceviamo `fe`,
-cioè −2. La chiave è legata alla sessione. **È quindi l'unica spiegazione rimasta in
-piedi**, e sarebbe strana — nessun altro comando è protetto — ma è l'unica cosa che
-non abbiamo potuto rendere uguale. Per verificarla servirebbe capire come la chiave è
-derivata, che è un lavoro di un altro ordine di grandezza.
+**E il 28 agosto 2026 è caduta anche l'ultima**, che era la license key: misurata, non
+più supposta. Il come sta in fondo, in «L'ultima ipotesi è caduta». Il riassunto: con
+l'ampli **sbloccato davvero** — non con la chiave rigiocata — `02` riceve l'ack e non
+fa niente esattamente come prima. **La chiave abilita il contenuto a pagamento, non i
+comandi.**
 
-**Se si riprende, si riprende da lì**, non dalle sonde: tutto il resto è già escluso.
-Gli attrezzi restano pronti — `tools/looper-probe.html` con ventinove pulsanti e
-`tools/leggi-btsnoop.ps1` per leggere altri snoop log.
+**Quindi non si riprende da nessuna parte**: le ipotesi sono finite. Non vuol dire che
+il fenomeno sia spiegato — l'app ufficiale manda quei byte e l'ampli conta — vuol dire
+che **tutto ciò che sapevamo distinguere fra noi e lei è stato reso uguale e misurato**.
+Riaprire ha senso solo con un fatto nuovo che oggi non abbiamo: un altro snoop log, un
+firmware diverso, un'altra sorgente. Gli attrezzi restano pronti —
+`tools/looper-probe.html` con ventinove pulsanti e `tools/leggi-btsnoop.ps1` per
+leggere altri snoop log.
 
 **Non è una perdita grave, ed è importante non ricordarselo peggio di com'è.** Dal
 pedale funziona tutto il resto: registrare, chiudere, suonare, sovraincidere,
@@ -231,3 +234,41 @@ l'abbiamo mandata in **una write sola da 109 byte**, e l'ampli **non ha risposto
 l'ack** — non era un rifiuto, il messaggio non è mai arrivato. Da lì è nata la scoperta
 di `sendSpezzato` (vedi `CLAUDE.md`, che è il pezzo di questo capitolo che vale oltre il
 looper).
+
+## L'ultima ipotesi è caduta — 28 agosto 2026
+
+**Il fatto nuovo non è venuto dal looper**: è venuto dagli Hendrix, il 26 agosto. Lì si è
+scoperto che lo sblocco della license key **resta nell'ampli anche dopo che l'app
+ufficiale si è disconnessa** — è stato dell'ampli, non della sessione BLE. Il 14 agosto
+non lo sapevamo, e per questo la chiave sembrava non verificabile: si pensava di doverla
+derivare. Non serve derivarla. **Basta arrivare dopo.**
+
+La prova, senza mai staccare la corrente all'ampli: app ufficiale connessa fino in fondo
+→ app ufficiale chiusa, radio libera → `tools/looper-probe.html` connesso → COUNTIN.
+
+```
+005.464  connesso a Spark 2 BLE
+028.787  TX 0x0175 COUNTIN — payload 02
+028.899  RX 0x0475 seq=0x01              <- l'ack, e basta
+```
+
+**Nessun `0x0375` di ritorno, nessun click, nessuna registrazione.** Identico al
+14 agosto. Con `04` quel `0x0375` torna sempre entro 40 ms.
+
+**Il controllo è la parte che rende la misura valida**, ed è quello che il 13 agosto era
+mancato senza che ce ne accorgessimo: subito dopo, con la nostra app, un preset `JH.*` —
+**il fuzz c'era**. Cioè l'ampli era sbloccato *mentre* `02` veniva buttato via. Senza
+quella verifica uno stacco di corrente in mezzo avrebbe chiuso il capitolo per sbaglio.
+
+Cosa ne segue, e vale più del looper:
+
+- **la license key `0x0170` abilita il contenuto a pagamento, non i comandi.** Gli
+  effetti Hendrix la vogliono, `0x0175` no. Quindi non è «l'autenticazione del
+  protocollo»: la riga di `CLAUDE.md` che dice che nessun comando nostro la richiede
+  adesso è **misurata**, non supposta.
+- **`02` non è un comando, e adesso non resta niente a spiegarlo altrimenti.** La misura
+  che regge tutto era già questa — `02` non produce mai un `0x0375`, `04` lo produce
+  sempre entro 40 ms — ma aveva la chiave come alibi. Non ce l'ha più.
+- **Quello che resta è che non lo sappiamo.** L'app ufficiale manda quegli stessi byte e
+  l'ampli conta; noi li mandiamo identici e non conta. Chiuso **per esaurimento delle
+  ipotesi**, non per spiegazione: scriverlo diverso sarebbe raccontarsela.
