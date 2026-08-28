@@ -375,24 +375,49 @@ dove non abbiamo ancora guardato.
    collegamento LE della sonda fosse davvero cifrato: il risultato negativo non chiude
    l'ipotesi.
 
-   **La versione pulita della stessa prova è far girare la sonda sul telefono**, in Chrome
-   per Android — *lo stesso* telefono che fa suonare il conteggio con l'app ufficiale.
-   Stesso apparecchio, stesso stack Bluetooth, **stesso stato di legame con l'ampli**: se lì
-   `02` fallisce lo stesso, il legame è escluso per costruzione, e la differenza è
-   **dentro il processo dell'app**. Se invece funziona, era il PC.
-2. **La sessione autorizzata.** Sappiamo che lo sblocco dei suoni a pagamento **resta
-   nell'ampli** dopo che l'app si scollega — misurato col fuzz. Ma potrebbero essere due
-   cose diverse: uno sblocco *globale* dei contenuti, e un flag *per connessione* «questo
-   client ha mandato una chiave valida». Se `02` volesse il secondo, per noi sarebbe
+   **E la versione pulita ha risposto: niente.** La sonda fatta girare in Chrome **sullo
+   stesso telefono** che con l'app ufficiale fa contare l'ampli — stesso apparecchio, stesso
+   stack Bluetooth, stesso stato di legame — riceve l'ack e nient'altro. **Il legame è
+   escluso per costruzione**: l'unica cosa che cambia fra i due tentativi è il programma che
+   manda i byte.
+2. **La sessione autorizzata**, che è quella rimasta. Sappiamo che lo sblocco dei suoni a
+   pagamento **resta nell'ampli** dopo che l'app si scollega — misurato col fuzz. Ma sono
+   due cose diverse: uno sblocco *globale* dei contenuti, e un flag *per connessione*
+   «questo client ha mandato una chiave valida». Se `02` vuole il secondo, per noi è
    irraggiungibile: la chiave porta un nonce di sessione, rigiocarla dà `fe`, e cavarla
-   dall'app è protezione di contenuto a pagamento e non si fa. **Non è verificabile
-   direttamente**, ma se il punto 1 fallisce resta la spiegazione più economica rimasta.
+   dall'app è protezione di contenuto a pagamento e non si fa. **In nessuna delle prove di
+   agosto o del 28 abbiamo mai avuto una sessione autorizzata** — è l'unica variabile che
+   non siamo mai riusciti a rendere uguale, e adesso è anche l'unica rimasta.
 
-   Un modo indiretto ci sarebbe: **Ignitron** (`stangreg/Ignitron`) comanda il looper interno
-   dello Spark 2 da un ESP32, manda COUNTIN e **non manda nessuna license key**. Se a un suo
-   utente il conteggio parte, il punto 2 cade — e con esso, probabilmente, anche il punto 1,
-   perché un client NimBLE non è appaiato. Nel loro tracker non c'è niente in proposito
-   (cercato il 28 agosto 2026): servirebbe chiederlo.
+## Come si conclude, il 28 agosto 2026
 
-E resta il punto onesto: finché una di queste non parla, **il fenomeno non è spiegato**.
-Scrivere «non si può» sarebbe raccontarsela.
+Il ragionamento è per eliminazione, e l'elenco eliminato è lungo — vale la pena scriverlo
+tutto, perché è quello che regge la conclusione:
+
+| cosa | esito |
+|---|---|
+| i byte del messaggio | identici a quelli dell'app, verificato sul frame |
+| l'intestazione di blocco e lo spezzettamento | riprodotti identici |
+| il contesto (avvio, interrogazioni, impostazioni) | rigiocato, ogni risposta giusta |
+| lo stato del loop | vuoto in tutt'e due i casi |
+| lo sblocco del contenuto a pagamento | ampli sbloccato davvero, controllato col fuzz |
+| la caratteristica | `0xFFC1` è l'unica scrivibile dell'apparecchio |
+| l'opcode ATT | `0xFFC1` accetta solo write-senza-risposta: nessuna scelta |
+| la causalità del `02` dell'app | dimostrata: REC nell'app, mani lontane, conta |
+| il legame e la cifratura | escluso: la sonda **sullo stesso telefono** fallisce lo stesso |
+| **la sessione autorizzata** | **mai avuta, mai ottenibile** |
+
+**La risposta al «se l'app lo fa, un modo c'è» è quindi: sì, e il modo è la chiave.**
+Non è un difetto nostro, non è un byte sbagliato, e non è una porta che apriamo: sarebbe
+estrarre una chiave di firma dall'app ufficiale, cioè aggirare la protezione di un
+contenuto a pagamento.
+
+Ne resta una cosa da fare, gratis, e vale la pena: **chiedere a Ignitron**
+(`stangreg/Ignitron`), che comanda questo stesso looper da un ESP32, manda COUNTIN e **non
+manda nessuna license key**. Se a loro il conteggio parte, tutta questa conclusione cade e
+si impara cosa fanno di diverso. Nel loro tracker non c'è niente in proposito (cercato il
+28 agosto 2026).
+
+E per il pedale la cosa non cambia niente: **il click se lo fa da sé**. Il bpm glielo
+dicono `0x0363` e `0x0376`, e quattro lampeggi di un LED — o un buzzer — prima di mandare
+`04` sono venti righe di firmware.
