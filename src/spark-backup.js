@@ -128,9 +128,41 @@ window.SparkBackup = (function () {
       tail:        [],
       checksum:    null,
       slot:        null,
-      tags:        [categoria],
+      tags:        categoria ? [categoria] : [],
       origine:     'app ufficiale',
     };
+  }
+
+  /**
+   * Trova i preset dentro un JSON qualunque dell'app ufficiale.
+   *
+   * Un `preset.json` tirato fuori dal backup è già la cosa giusta, ma un tono
+   * esportato o condiviso da solo può arrivare incartato in un oggetto —
+   * `{preset: …}`, `{data: …}`, una risposta di ToneCloud — e **l'incarto non
+   * lo conosciamo**: non abbiamo un esemplare di ogni forma che l'app
+   * ufficiale sa produrre. Quindi non si indovina il nome del contenitore, si
+   * cerca **la forma che sappiamo leggere**: un oggetto con `sigpath` che è
+   * una lista. Se domani l'incarto cambia, questo continua a funzionare.
+   *
+   * La discesa si ferma a sei livelli: un JSON malformato non deve poter far
+   * girare la ricorsione più di così.
+   */
+  function trovaPresetUfficiali(nodo, out, profondita) {
+    out = out || [];
+    profondita = profondita || 0;
+    if (!nodo || typeof nodo !== 'object' || profondita > 6) return out;
+
+    if (Array.isArray(nodo)) {
+      for (const voce of nodo) trovaPresetUfficiali(voce, out, profondita + 1);
+      return out;
+    }
+    // Trovato: non si scende dentro, o i suoi effetti diventerebbero preset.
+    if (Array.isArray(nodo.sigpath)) { out.push(nodo); return out; }
+
+    for (const valore of Object.values(nodo)) {
+      trovaPresetUfficiali(valore, out, profondita + 1);
+    }
+    return out;
   }
 
   function convertiEffetto(fx) {
@@ -173,5 +205,5 @@ window.SparkBackup = (function () {
     return String(v);
   }
 
-  return { readZip, parseBackup, convertiPreset };
+  return { readZip, parseBackup, convertiPreset, trovaPresetUfficiali };
 })();

@@ -255,6 +255,40 @@ const percorso = (categoria, uuid) =>
           'nessun preset trovato: è il backup dell\'app Spark?');
   }
 
+  /* ------------------------------------------------------------------ */
+  group('un preset solo, fuori dal backup');
+
+  // Un tono esportato o condiviso dall'app ufficiale non arriva in uno zip e
+  // non sappiamo com'è incartato: si cerca la forma che sappiamo leggere.
+  {
+    const soli = SparkBackup.trovaPresetUfficiali(PRESET_REALE);
+    check('un preset nudo si trova da sé', soli.length, 1);
+    check('ed è proprio quello', soli[0].meta.id, PRESET_REALE.meta.id);
+
+    check('senza categoria non nasce un tag inventato',
+          SparkBackup.convertiPreset(soli[0], null).tags, []);
+
+    check('dentro un incarto qualsiasi si trova lo stesso',
+          SparkBackup.trovaPresetUfficiali({ data: { tone: { preset: PRESET_REALE } } })
+            .map(p => p.meta.name),
+          [PRESET_REALE.meta.name]);
+
+    check('una lista ne dà quanti sono',
+          SparkBackup.trovaPresetUfficiali([PRESET_REALE, PRESET_REALE]).length, 2);
+
+    // Dentro un preset trovato non si scende: `sigpath` è pieno di oggetti, e
+    // uno di quelli scambiato per un preset diventerebbe un preset fantasma.
+    check('gli effetti del preset non diventano preset',
+          SparkBackup.trovaPresetUfficiali({ tutti: [PRESET_REALE] }).length, 1);
+
+    check('un JSON che non c\'entra niente non dà nessun preset',
+          SparkBackup.trovaPresetUfficiali({ a: 1, b: [{ c: 'no' }] }), []);
+
+    check('e nemmeno una cosa che non è un oggetto',
+          [SparkBackup.trovaPresetUfficiali(null),
+           SparkBackup.trovaPresetUfficiali('ciao')], [[], []]);
+  }
+
   const s = document.getElementById('summary');
   s.className = failed === 0 ? 'ok' : 'bad';
   s.textContent = `${passed} passati, ${failed} falliti`;
