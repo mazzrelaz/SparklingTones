@@ -257,21 +257,33 @@ Tre conseguenze da non riscoprire:
 > non si perde niente; se no, il log passa dalla UART su D6/D7 e per ricaricare il firmware
 > si tiene premuto BOOT e si tocca RESET.
 
-#### L'antenna: la stilo su bulkhead, non il foglietto — deciso il 29 agosto 2026
+#### L'antenna: si prova il foglietto, la stilo è la riserva — 29 agosto 2026
 
-Nella scatola della S3 c'è l'antennina **a foglietto**, e funziona. Ma l'utente ne ha già in
-casa una migliore per questo lavoro, e la sceglie lei: **codino u.FL → bulkhead SMA con dado →
-stilo di gomma che si avvita da fuori**. Non si compra niente.
+**L'utente le ha tutte e due** — il foglietto di serie della S3 e, già in casa, un codino
+u.FL con **bulkhead SMA e stilo avvitabile** — e ha deciso l'ordine: **prima il foglietto,
+perché l'antenna non la vuole vedere**. La stilo resta la seconda possibilità, non la scelta.
+**Non si compra niente in nessuno dei due casi.**
 
-**La ragione non è il guadagno, è dove va montata.** Il bulkhead attraversa il pannello come
-l'interruttore o un jack da chitarra, quindi **l'antenna sta fuori dalla scatola**. Le scatole
-da pedale sono quasi sempre di alluminio, e una scatola di metallo è una gabbia di Faraday:
-un foglietto chiuso dentro darebbe il guasto peggiore che ci sia, cioè **non «non funziona» ma
-«funziona a mezzo metro e cade a due»**, che si scopre sul palco. Con l'antenna fuori il
-problema non esiste, qualunque scatola si scelga poi — e la scatola l'utente la vedrà
-all'ultimo.
+**Quello che decideva era la scatola, e la scatola sarà di legno** (detto dall'utente il
+29 agosto 2026, ed è la prima volta che il materiale è deciso). **Il legno è trasparente ai
+2,4 GHz**, quindi la preoccupazione che rendeva interessante la stilo — l'alluminio, che è
+una gabbia di Faraday e darebbe il guasto peggiore che c'è, «funziona a mezzo metro e cade a
+due», cioè passa la prova sul banco e si scopre sul palco — **qui non si pone**. Il foglietto
+dentro va bene.
 
-Quattro cose da non riscoprire col trapano in mano:
+**L'unica accortezza è interna: lontano dal metallo che c'è dentro.** La cella 18650 è un
+barattolo d'acciaio e il display ha la sua cornice metallica: il foglietto va incollato su una
+parete di legno, con qualche centimetro da quei due, e non sopra la piastra dell'espansore.
+
+**La prova, comunque, si fa a scatola chiusa e a tre o quattro metri** — la distanza vera fra
+il pedale e l'ampli. A mezzo metro funziona qualunque cosa, e non dimostra niente.
+
+Se contro ogni previsione non bastasse, ci sono due gradini prima della stilo: spostare il
+foglietto su un'altra parete, e incollarlo **fuori, sotto il fondo** — invisibile da sopra.
+
+Della stilo, se un giorno si arriva lì, le quattro cose da non riscoprire col trapano in mano
+(il bulkhead attraversa il pannello con un dado, come l'interruttore o un jack da chitarra,
+quindi l'antenna sta fuori):
 
 - **un foro tondo in più**, sui 6,5 mm — da misurare sul filetto del dado prima di forare. È
   lo stesso lavoro degli altri fori e la punta a gradini ci arriva (al contrario dei 22 mm dei
@@ -651,8 +663,13 @@ CC c'è), ma **si monta con filetto M21×1,5 e dado: foro tondo da 22 mm**, pann
 Cioè **come un jack da chitarra o come l'interruttore**, invece che a lima. Su una scatola da
 pedale è la differenza fra un lavoro fatto apposta e un rattoppo, e costa 6 zł in più a pezzo.
 
-Due verifiche prima di ordinarlo: **come si fa un foro da 22 mm** — serve una punta a gradini
-che ci arrivi (**la 4–20 comune non basta**) o una sega a tazza; e **lo spazio sul pannello**,
+**Aggiornamento del 29 agosto 2026: la scatola sarà di legno**, e questo scioglie da solo la
+prima delle due verifiche qui sotto — **nel legno un foro da 22 mm è una punta Forstner**, che
+è l'attrezzo normale per quel lavoro, non un ripiego. La seconda, lo spazio sul pannello,
+resta.
+
+Due verifiche prima di ordinarlo: **come si fa un foro da 22 mm** — nel metallo serve una
+punta a gradini che ci arrivi (**la 4–20 comune non basta**) o una sega a tazza; e **lo spazio sul pannello**,
 perché due fori da 22 affiancati vogliono una cinquantina di millimetri più i bordi, e sulla
 stessa faccia va anche l'interruttore.
 

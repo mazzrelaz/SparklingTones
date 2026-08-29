@@ -719,11 +719,12 @@ questo file e in `docs/pedale.md` è storia**.
 
 Le tre differenze che fanno danni se le dimentico: **l'antenna non è a bordo** (solo u.FL, e
 senza antennina **non funziona il BLE** — non è l'antenna del Wi-Fi, che qui non serve: la
-radio a 2,4 GHz è una sola e la condividono). **Risolta senza comprare niente**: si usa una
-**stilo su bulkhead SMA** che l'utente ha in casa, montata **attraverso il pannello**, non il
-foglietto di serie — in una scatola di alluminio un'antenna chiusa dentro darebbe il guasto
-peggiore, quello che si vede solo lontano dall'ampli. Foro da ~6,5 mm; dettagli in
-`docs/pedale.md`, «L'antenna»; **carica a 50 mA** invece di 100, il che non cambia niente perché si carica col
+radio a 2,4 GHz è una sola e la condividono). **Non si compra niente**: si usa il **foglietto**
+di serie, dentro la scatola, perché l'antenna l'utente non la vuole vedere — e **la scatola
+sarà di legno**, che ai 2,4 GHz è trasparente, quindi la gabbia di Faraday dell'alluminio non
+è un problema nostro. L'unica accortezza è **lontano dal metallo interno** (cella 18650,
+cornice del display). Una stilo su bulkhead ce l'ha in casa e resta la riserva. **La prova si
+fa a scatola chiusa e a tre-quattro metri**, che a mezzo metro funziona qualunque cosa; **carica a 50 mA** invece di 100, il che non cambia niente perché si carica col
 TP4056; e **il log seriale sull'USB potrebbe non convivere con la porta MIDI** — se non
 convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto BOOT e si
 tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.
