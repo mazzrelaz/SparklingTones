@@ -717,10 +717,13 @@ questo file e in `docs/pedale.md` è storia**.
 | D6 / D7 | `43`, `44` | UART: il log seriale, **da tenere libero** |
 | D2 | `3` | libero — è l'unico strapping portato fuori, si usa per ultimo |
 
-Le tre differenze che fanno danni se le dimentico: **l'antenna non è a bordo** (solo u.FL, va
-montata l'antennina o **non funziona il BLE** — non è l'antenna del Wi-Fi, che qui non serve:
-la radio a 2,4 GHz è una sola e la condividono — e nella scatola vuole il suo posto lontano
-dalla cella); **carica a 50 mA** invece di 100, il che non cambia niente perché si carica col
+Le tre differenze che fanno danni se le dimentico: **l'antenna non è a bordo** (solo u.FL, e
+senza antennina **non funziona il BLE** — non è l'antenna del Wi-Fi, che qui non serve: la
+radio a 2,4 GHz è una sola e la condividono). **Risolta senza comprare niente**: si usa una
+**stilo su bulkhead SMA** che l'utente ha in casa, montata **attraverso il pannello**, non il
+foglietto di serie — in una scatola di alluminio un'antenna chiusa dentro darebbe il guasto
+peggiore, quello che si vede solo lontano dall'ampli. Foro da ~6,5 mm; dettagli in
+`docs/pedale.md`, «L'antenna»; **carica a 50 mA** invece di 100, il che non cambia niente perché si carica col
 TP4056; e **il log seriale sull'USB potrebbe non convivere con la porta MIDI** — se non
 convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto BOOT e si
 tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.

@@ -237,8 +237,7 @@ Tre conseguenze da non riscoprire:
 >   esterna. **Non è «l'antenna del Wi-Fi»**, che qui non serve a niente: è l'antenna della
 >   radio a 2,4 GHz, che Wi-Fi e Bluetooth condividono — **senza, non funziona il BLE verso lo
 >   Spark**, cioè l'unica cosa che al pedale serve. Sulla C6 era integrata e attiva di serie.
->   **È l'unica cosa che si perde**, e si paga nella scatola: l'antenna vuole il suo posto e
->   non deve stare schiacciata contro la cella o contro qualcosa di metallico;
+>   **Risolta il 29 agosto 2026, e senza comprare niente**: vedi «L'antenna» qui sotto;
 > - **carica a 50 mA, non a 100** (la versione Plus fa 100). Non cambia niente, perché la
 >   ricarica passa dal TP4056 e non dalla XIAO — semmai **rafforza** quella decisione;
 > - **lo strapping quasi non c'è, ma non è zero**: sui piedini portati fuori l'unico è
@@ -257,6 +256,34 @@ Tre conseguenze da non riscoprire:
 > porta MIDI e il log seriale sull'USB (TinyUSB il dispositivo composito lo sa fare). Se sì,
 > non si perde niente; se no, il log passa dalla UART su D6/D7 e per ricaricare il firmware
 > si tiene premuto BOOT e si tocca RESET.
+
+#### L'antenna: la stilo su bulkhead, non il foglietto — deciso il 29 agosto 2026
+
+Nella scatola della S3 c'è l'antennina **a foglietto**, e funziona. Ma l'utente ne ha già in
+casa una migliore per questo lavoro, e la sceglie lei: **codino u.FL → bulkhead SMA con dado →
+stilo di gomma che si avvita da fuori**. Non si compra niente.
+
+**La ragione non è il guadagno, è dove va montata.** Il bulkhead attraversa il pannello come
+l'interruttore o un jack da chitarra, quindi **l'antenna sta fuori dalla scatola**. Le scatole
+da pedale sono quasi sempre di alluminio, e una scatola di metallo è una gabbia di Faraday:
+un foglietto chiuso dentro darebbe il guasto peggiore che ci sia, cioè **non «non funziona» ma
+«funziona a mezzo metro e cade a due»**, che si scopre sul palco. Con l'antenna fuori il
+problema non esiste, qualunque scatola si scelga poi — e la scatola l'utente la vedrà
+all'ultimo.
+
+Quattro cose da non riscoprire col trapano in mano:
+
+- **un foro tondo in più**, sui 6,5 mm — da misurare sul filetto del dado prima di forare. È
+  lo stesso lavoro degli altri fori e la punta a gradini ci arriva (al contrario dei 22 mm dei
+  codini USB-C, che vogliono la sega a tazza);
+- **stilo e bulkhead restano una coppia.** SMA e RP-SMA si somigliano e non si accoppiano:
+  quei due sono nati insieme. Un'altra stilo presa dal cassetto va controllata prima;
+- **non sulla faccia che prende le pedate.** Retro o spigolo alto; la stilo è snodata e si
+  ripiega per la borsa;
+- **l'u.FL sulla scheda regge pochi innesti**: si attacca una volta sola e il codino si blocca
+  con una fascetta vicino alla XIAO, o un tiro sul cavo strappa il connettore dalla scheda.
+
+Il pezzo di coassiale è irrilevante come perdita, a quella lunghezza.
 
 **La scheda era la XIAO ESP32-C6** (deciso il 25 agosto 2026: la C3 era finita, e la C6 si è
 rivelata migliore, non un ripiego). Stesso chip di famiglia, stesso codice, stessa
