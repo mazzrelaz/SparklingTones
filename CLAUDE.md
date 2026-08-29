@@ -17,7 +17,7 @@ e **va letto solo quando si rimette in discussione quella cosa lì**:
 
 | file | quando aprirlo |
 |---|---|
-| `docs/pedale.md` | si lavora sul pedale: forma, ferramenta, misure BLE, ponte, simulatore |
+| `docs/pedale.md` | si lavora sul pedale: forma, ferramenta, misure BLE, ponte, simulatore, modo MIDI |
 | `docs/protocollo-spark2.md` | si tocca il protocollo, l'encoder, la scrittura dei preset |
 | `docs/decisioni-ui.md` | si rimette in discussione una scelta grafica o di flusso |
 | `docs/dropbox.md` | il sync si rompe o si cambia trasporto |
@@ -972,6 +972,14 @@ del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un am
 6. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` è stato
    trovato dall'utente; l'elenco viene da Soundshed e non è verificato. La tendina mette per
    primi i modelli visti sull'ampli, quindi il prossimo si trova più in fretta.
+
+**Discusso e non aperto: il pedale in modalità MIDI** (29 agosto 2026), per comandare
+AmpliTube sul PC con lo stesso pedale — modo Spark e modo MIDI. Hardware invariato, cambia
+solo cosa parte alla pressione. Due cose da ricordare senza aprire il documento: **la C6 non
+può fare USB-MIDI** (ha il solo USB Serial/JTAG, a funzione fissa), e **la prova che decide
+è da dieci minuti e non vuole firmware** — un'app BLE-MIDI qualsiasi, e vedere se AmpliTube
+la sente su Windows. Se sì BLE-MIDI, se no MIDI seriale sul cavo che c'è già. Tutto il resto
+in `docs/pedale.md`, «Modalità MIDI».
 
 **Discusso e non aperto: creare un preset con l'AI** («voglio il suono dell'assolo di
 Gilmour in Mother»). L'utente ha chiesto solo di ragionarci. Il punto: il vocabolario dei
