@@ -210,7 +210,53 @@ Tre conseguenze da non riscoprire:
   sono tre;
 - **quattro dello stesso lotto**: su quattro LED in fila due sfumature di verde si vedono.
 
-**La scheda è la XIAO ESP32-C6** (deciso il 25 agosto 2026: la C3 era finita, e la C6 si è
+> **Aggiornamento del 29 agosto 2026: la scheda è la XIAO ESP32-S3.** L'utente ha deciso di
+> comprarla dopo che la prova BLE-MIDI ha chiuso la strada del Bluetooth su Windows (vedi
+> «Modalità MIDI», in fondo): **solo l'S3 ha l'USB-OTG vero**, quindi solo lui può presentarsi
+> al computer come pedaliera MIDI senza driver né programmi ponte. Quello che segue sulla C6
+> resta come storia — la scelta era giusta con le informazioni di allora — ma **la mappa dei
+> pin buona è quella nuova, qui sotto**.
+>
+> | piedino | GPIO | a cosa serve |
+> |---|---|---|
+> | D4 / D5 | `5`, `6` | MCP23017 in I²C (SDA, SCL) — default della scheda |
+> | D8 / D10 | `7`, `9` | display in SPI: SCK e MOSI, default della scheda |
+> | D3, D1, D9 | `4`, `2`, `8` | display: CS, DC, RST |
+> | D0 (A0) | `1` | tensione di batteria — **il partitore va saldato**, come sulla C6 |
+> | D6 / D7 | `43`, `44` | UART: **il log seriale**, che qui va tenuto libero apposta |
+> | D2 | `3` | libero — ultimo da usare, vedi sotto |
+>
+> **Perché CS/DC/RST non stanno più su D6/D7 come sulla C6**: lì c'è la UART, e in modalità
+> USB-MIDI la porta USB potrebbe non portare più il log seriale. Tenere i due piedini liberi
+> costa niente e salva la diagnostica. **D9 è MISO e resta libero** perché il display si
+> scrive e non si legge.
+>
+> **Le tre differenze vere rispetto alla C6**, tutte da tenere a mente:
+>
+> - **l'antenna non è a bordo.** La S3 ha solo il connettore u.FL e va montata l'antennina
+>   esterna: senza, non trasmette. Sulla C6 era integrata e attiva di serie. **È l'unica cosa
+>   che si perde**, e si paga nella scatola: l'antenna vuole il suo posto e non deve stare
+>   schiacciata contro la cella o contro qualcosa di metallico;
+> - **carica a 50 mA, non a 100** (la versione Plus fa 100). Non cambia niente, perché la
+>   ricarica passa dal TP4056 e non dalla XIAO — semmai **rafforza** quella decisione;
+> - **lo strapping quasi non c'è, ma non è zero**: sui piedini portati fuori l'unico è
+>   **D2 = GPIO3** (selezione della sorgente JTAG). GPIO0, 45 e 46 non sono sul connettore.
+>   Quindi D2 si usa per ultimo, ed è il posto sbagliato per qualcosa che sia pilotato
+>   all'accensione.
+>
+> **Cosa non cambia**: display SSD1309 in SPI, espansore MCP23017 in I²C, LED sul port B,
+> cella 18650 protetta, TP4056, interruttore generale, due prese sul pannello, partitore di
+> A0 da saldare, indicatore di batteria da scrivere. Tutta la ferramenta comprata resta buona.
+> **Cosa va rimisurato**: i tempi BLE (erano su C3, e vanno rifatti comunque) e **l'autonomia**,
+> perché l'S3 è un doppio core a 240 MHz e consuma più della C6 — le ~40 ore stimate su una
+> 3300 saranno meno, quanto non si sa.
+>
+> **Da verificare quando arriva**: se in modalità USB-OTG si possano avere **insieme** la
+> porta MIDI e il log seriale sull'USB (TinyUSB il dispositivo composito lo sa fare). Se sì,
+> non si perde niente; se no, il log passa dalla UART su D6/D7 e per ricaricare il firmware
+> si tiene premuto BOOT e si tocca RESET.
+
+**La scheda era la XIAO ESP32-C6** (deciso il 25 agosto 2026: la C3 era finita, e la C6 si è
 rivelata migliore, non un ripiego). Stesso chip di famiglia, stesso codice, stessa
 dimensione, ~33 zł. Cambia **tutta la mappa dei pin**, quindi quella del C3 qui sotto vale
 solo come storia.
