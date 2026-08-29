@@ -1131,3 +1131,62 @@ Intel con LE, **MIDI-OX** (monitor), **Bome Virtual MIDI** (porte virtuali, util
 un ponte) e AmpliTube 5. Il servizio `midisrv` c'è, ma è quello storico: **non risulta
 installato il nuovo stack Windows MIDI Services**, ed è proprio lui che deciderebbe se il
 BLE-MIDI si vede senza intermediari.
+
+### Come è finita la prova: Windows non sa fare BLE-MIDI (29 agosto 2026)
+
+**Risultato, e chiude la questione BLE su PC**: la scheda funziona, Windows la vede, ci si
+collega e le legge dentro il servizio BLE-MIDI — ed è proprio questo che rende la risposta
+sicura. **Non è Windows che non arriva al dispositivo: è Windows che non lo trasforma in una
+porta MIDI.** Il supporto BLE-MIDI nativo non c'è, nemmeno nel nuovo stack Windows MIDI
+Services: è dichiarato *in backlog*, non implementato. Chi usa pedaliere BLE su Windows passa
+per forza da un programma di terzi che fa da ponte (il driver KORG BLE-MIDI, «Perfect
+Bluetooth MIDI For Windows», MIDIberry).
+
+Le misure, per non rifarle:
+
+- il dispositivo si annuncia correttamente (flag di scopribilità compresi: il default della
+  libreria è già `GEN_DISC | BREDR_NOT_SPT`) e Windows lo elenca fra i BLE non accoppiati;
+- `BluetoothLEDevice.FromBluetoothAddressAsync` + `GetGattServicesAsync` tornano `Success` e
+  mostrano `03b80e5a-…`, cioè **il servizio MIDI è raggiungibile dal PC**;
+- l'accoppiamento fallisce (`DevicePairingResult.Status = Failed`) con e senza livello di
+  protezione, anche dopo aver abilitato bonding e Secure Connections sullo sketch. **Non è
+  stato approfondito, perché non cambia la conclusione**: anche accoppiato, Windows non
+  creerebbe la porta MIDI;
+- sul PC dell'utente **non esiste nessuna porta MIDI in ingresso**, né WinRT né WinMM
+  (verificato via `MidiInPort.GetDeviceSelector()` e `midiInGetNumDevs`). Quindi AmpliTube
+  oggi non ha nessuna sorgente MIDI da cui partire.
+
+**Una lettura da non ripetere**: `DeviceInformation.Pairing.CanPair` preso da `FindAllAsync`
+vale `False` per **tutti** i dispositivi, TV comprese — non dice niente sul nostro. Diventa
+`True` solo su un `DeviceInformation` ricavato da un dispositivo già connesso. Ci ho creduto
+per un giro.
+
+**Nota d'ambiente**: PowerShell 5.1 **non può sottoscrivere eventi WinRT**
+(`Register-ObjectEvent` fallisce), quindi niente `BluetoothLEAdvertisementWatcher` né
+`DeviceWatcher` da script. Le chiamate `…Async` invece si aspettano con
+`System.Runtime.WindowsRuntime` e `AsTask`, ed è così che sono state fatte tutte le misure
+qui sopra. Un aiutante in C# non si compila: manca il targeting pack, e il `csc` del .NET
+Framework non digerisce gli eventi WinRT dei `winmd` di sistema.
+
+### Allora la strada è un altro chip: XIAO ESP32-S3
+
+**L'ESP32-S3 ha l'USB-OTG vero**, quindi con la modalità «USB OTG (TinyUSB)» del core Arduino
+si presenta al computer come **dispositivo USB-MIDI class compliant**: nessun driver, nessun
+programma ponte, nessun accoppiamento — si attacca il cavo e AmpliTube lo trova. Sulla XIAO
+ESP32-S3 è verificato da altri e la scheda ha lo stesso formato della C6.
+
+**Quindi, se la modalità MIDI conta davvero, il cervello del pedale è la S3 e non la C6** — e
+il momento per deciderlo è adesso, che non c'è ancora niente di saldato. La S3 fa anche il
+BLE verso lo Spark, quindi non si perde niente del progetto originale; si perde il Wi-Fi 6 e
+il Bluetooth 5.3 della C6, che qui non servono a nulla.
+
+Cosa andrebbe rifatto passando alla S3, da mettere in conto:
+- **la mappa dei piedini**: numeri GPIO diversi, e sulla S3 alcuni sono di strapping — cade
+  la comodità della C6, dove nessuno degli undici lo era;
+- **i tempi BLE**, che vanno rimisurati comunque (erano su C3);
+- **il modo di riprogrammarla**: in USB OTG la scheda non compare più come porta seriale, e
+  per ricaricare il firmware si tiene premuto BOOT e si tocca RESET. Il log seriale passa
+  dai piedini UART o si rinuncia.
+
+**Non deciso**: se comprare la S3. Sono pochi euro e non butta via la C6, che resta buona per
+il modo Spark puro.
