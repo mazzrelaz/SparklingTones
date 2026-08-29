@@ -1030,3 +1030,81 @@ dall'ultimo `0x0376` ricevuto cambiando il solo bpm — i dettagli e la trappola
 coda il delay parte in ripetizione infinita) stanno in `docs/protocollo-spark2.md`. E
 siccome dentro l'ampli il tempo è già accoppiato agli effetti, **il delay segue da solo**:
 non tocca a noi mappare bpm su posizione della manopola.
+
+
+## Modalità MIDI: lo stesso pedale per AmpliTube — discusso, non aperto
+
+Chiesto dall'utente il **29 agosto 2026**: usare lo stesso pedale anche come pedaliera MIDI
+per un programma sul PC (AmpliTube), con due modalità distinte — modo Spark e modo MIDI.
+Qui c'è il ragionamento fatto quel giorno, perché quando arriveranno i pezzi non si riparta
+da capo. **Niente di questo è misurato**: è ricognizione, e il punto che decide tutto è una
+prova da dieci minuti che si può fare *prima* di scrivere una riga di firmware.
+
+**L'hardware è già quello giusto e non si tocca**: cinque footswitch, due tasti a mano,
+OLED, LED, batteria. Fra le due modalità cambia solo *cosa parte quando si preme*.
+
+### Come arriva il MIDI al PC — tre vie, e la prima è preclusa
+
+- **USB-MIDI nativo: no sulla XIAO C6.** L'ESP32-C6 ha il solo **USB Serial/JTAG**, che è a
+  funzione fissa (una porta seriale), non il controller USB-OTG dell'S2/S3. Non può
+  presentarsi al PC come dispositivo MIDI class-compliant: non è una libreria che manca, è
+  il silicio. **Da riverificare con la scheda in mano**, ma è la cosa che chiude in partenza
+  la strada più comoda. Se un giorno servisse davvero USB-MIDI, la via è un altro chip
+  (S3) o un adattatore esterno, non una modifica al firmware.
+- **BLE-MIDI: la via naturale, con un'incognita su Windows.** Sull'ESP32 il servizio BLE
+  MIDI si fa senza attriti, e un esemplare ce l'abbiamo già sotto gli occhi:
+  `reference/paulhamsh/SparkComms.h:49` usa `PEDAL_SERVICE = 03b80e5a-…`, che è proprio
+  quello. Zero cavi, coerente col resto del pedale. **L'incognita è il PC**: Windows non ha
+  mai esposto il BLE MIDI ai programmi come una normale porta MIDI, e serviva un aiuto
+  esterno (loopMIDI più un ponte tipo MIDIberry). Microsoft ha rifatto lo stack MIDI di
+  Windows e il BLE dovrebbe esserci dentro, ma **sul PC dell'utente va provato**.
+- **MIDI seriale sul cavo che c'è già: certo di funzionare.** La seconda presa USB-C del
+  pannello — quella del firmware e dei log, vedi «L'alimentazione» — porta i byte MIDI sulla
+  CDC, e sul PC un programmino li mette su una porta MIDI virtuale. Costa un cavo e un
+  programma acceso, ma non può fallire.
+- **DIN-5 vero**: in uscita sono un connettore e due resistenze, quindi è quasi gratis
+  aggiungerlo se un giorno ci fosse un apparecchio con l'ingresso. Al PC però non serve:
+  vorrebbe un'interfaccia MIDI in mezzo.
+
+**La prova che decide, e si fa prima di tutto**: un'app BLE-MIDI qualsiasi sul telefono e
+vedere se AmpliTube sul PC la sente come sorgente MIDI. Se sì → BLE-MIDI. Se no → seriale.
+Dieci minuti, nessun firmware, nessun pezzo da comprare.
+
+### Cosa serve saper mandare
+
+**Niente di specifico per AmpliTube.** Ha il MIDI learn: qualunque comando si mappa su
+qualunque cosa (preset, stomp on/off, wah). Quindi al pedale basta saper mandare **Program
+Change e Control Change** con canale, numero e valore scelti dall'utente. La stessa
+modalità vale per qualunque altro programma, che è il motivo per cui conviene farla così e
+non «per AmpliTube».
+
+### Cosa cambia nel firmware
+
+Poco, se l'indirezione la si mette adesso: oggi «premuto il tasto n» significa «manda il
+frame del preset n allo Spark». Diventa «premuto il tasto n» → **chiedi alla modalità
+corrente cosa fare**. Antirimbalzo, OLED, LED, lettura batteria non si toccano, e valgono
+identiche le regole di sempre (mai operazioni BLE dentro un callback BLE, niente attese
+bloccanti che non guardino gli ingressi).
+
+**In modo MIDI l'ampli non serve**, quindi il vincolo «un padrone alla volta» non si pone
+nemmeno: il pedale smette di fare da client verso lo Spark e fa solo da peripheral verso il
+PC. Le due cose insieme — comandare Spark e AmpliTube con la stessa pressione — vorrebbero
+NimBLE central e peripheral contemporaneamente: si può, ma è un'altra cosa e adesso non
+serve.
+
+### Le due decisioni da prendere quando ci si arriva
+
+- **Come si cambia modalità.** Non con un footswitch da solo: sul palco la sorpresa è il
+  difetto peggiore, ed è la stessa ragione per cui il quinto footswitch cambia metà senza
+  toccare il suono. Meglio i **due tasti a mano premuti insieme**, e la modalità **si deve
+  ricordare al riavvio** — che è lo stesso lavoro del banco, che oggi non si ricorda
+  (punto 5 di «Dove si riprende»): tanto vale farli insieme. L'OLED dice sempre in che
+  modalità sta.
+- **Chi scrive la mappa dei comandi.** Il pannello «Pedale» dell'app, che già compone i
+  banchi offline e li manda sul ponte: otto righe con canale, tipo, numero, valore e il
+  nome da mostrare sull'OLED. Vale la trappola del banco: **il formato sta in due file che
+  vanno cambiati insieme** (`src/pedale-ponte.js` che lo costruisce, l'header del firmware
+  che lo legge), e nel firmware è l'unico punto dove entrano byte non nostri.
+
+**Costo in ferramenta: zero. Rischio sul modo Spark: zero**, non lo tocca. L'unico rischio
+vero è il BLE-MIDI su Windows, e si misura prima.
