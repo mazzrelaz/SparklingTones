@@ -36,6 +36,7 @@
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
+#include <BLESecurity.h>
 
 #define SERVIZIO_MIDI   "03B80E5A-EDE8-4B33-A751-6CE34EC4C700"
 #define CARATTERISTICA  "7772E5DB-3868-4112-A1A9-F2669D106BF3"
@@ -95,6 +96,14 @@ void setup() {
   Serial.println(F("\n=== prova-midi: la scheda si finge una pedaliera BLE-MIDI ==="));
 
   BLEDevice::init("SparkPedale MIDI");
+  /* Senza questo Windows dice "non accoppiabile" e il dispositivo non compare
+   * nella finestra Aggiungi dispositivo: li dentro ci finiscono solo quelli che
+   * si possono accoppiare. Bonding senza codice e senza schermo (Just Works). */
+  BLESecurity::setAuthenticationMode(true, false, true);   // bonding, niente MITM, secure connections
+  BLESecurity::setCapability(ESP_IO_CAP_NONE);
+  BLESecurity::setInitEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
+  BLESecurity::setRespEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
+
   BLEServer* server = BLEDevice::createServer();
   server->setCallbacks(new Sessione());
 

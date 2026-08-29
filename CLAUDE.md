@@ -975,11 +975,24 @@ del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un am
 
 **Discusso e non aperto: il pedale in modalità MIDI** (29 agosto 2026), per comandare
 AmpliTube sul PC con lo stesso pedale — modo Spark e modo MIDI. Hardware invariato, cambia
-solo cosa parte alla pressione. Due cose da ricordare senza aprire il documento: **la C6 non
-può fare USB-MIDI** (ha il solo USB Serial/JTAG, a funzione fissa), e **la prova che decide
-è da dieci minuti e non vuole firmware** — un'app BLE-MIDI qualsiasi, e vedere se AmpliTube
-la sente su Windows. Se sì BLE-MIDI, se no MIDI seriale sul cavo che c'è già. Tutto il resto
-in `docs/pedale.md`, «Modalità MIDI».
+solo cosa parte alla pressione; il cambio modalità è **primo e ultimo footswitch insieme**.
+Tre cose misurate quel giorno, e non vanno ripercorse:
+
+- **Windows non sa fare BLE-MIDI**, nemmeno col nuovo Windows MIDI Services (è in backlog).
+  Sul PC dell'utente non esiste nessuna porta MIDI in ingresso, né moderna né classica. La
+  scheda però funziona: Windows ci si collega e le legge dentro il servizio MIDI. **Quindi
+  il BLE su PC vuole per forza un programma ponte di terzi**, e non è la strada.
+- **La C6 non può fare USB-MIDI**: ha il solo USB Serial/JTAG, a funzione fissa. **L'S3 sì**
+  (USB-OTG vero, TinyUSB): si attacca il cavo e il computer lo vede come pedaliera MIDI,
+  senza driver e senza accoppiamenti. Se la modalità MIDI conta, **il cervello è la XIAO
+  ESP32-S3 e non la C6**, e si decide adesso che non c'è niente di saldato.
+- Lo strumento della prova è **`pedale/prova-midi/`**, che fa fingere alla devkit una
+  pedaliera BLE-MIDI vera.
+
+Trappole d'ambiente scoperte lì e valide sempre: **PowerShell 5.1 non può sottoscrivere
+eventi WinRT** (niente watcher BLE da script; le `…Async` invece si aspettano con
+`AsTask`), e **`Pairing.CanPair` da `FindAllAsync` è `False` per tutti i dispositivi**,
+quindi non dice niente. Tutto il resto in `docs/pedale.md`, «Modalità MIDI».
 
 **Discusso e non aperto: creare un preset con l'AI** («voglio il suono dell'assolo di
 Gilmour in Mother»). L'utente ha chiesto solo di ragionarci. Il punto: il vocabolario dei
