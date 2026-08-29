@@ -117,8 +117,14 @@ static size_t   dentro = 0;
  * strapping: **tenuto premuto mentre la scheda si accende, il C3 parte in
  * modalita' programmazione e non esegue lo sketch**. Va benissimo per provare,
  * e nel pedale vero il footswitch non ci va mai sopra.
+ *
+ * ATTENZIONE portando questo sketch sulla XIAO ESP32-S3 (la scheda decisa il
+ * 29 agosto 2026): li' il tasto BOOT e' **GPIO0**, non GPIO9. Sull'S3 il 9 e'
+ * D10/MOSI, che resta flottante: il tasto sembrerebbe semplicemente non
+ * funzionare, o peggio rimbalzare da solo. Cambiare la costante qui sotto e'
+ * l'unica riga chip-dipendente di tutto il firmware.
  */
-static const uint8_t PIN_TASTO = 9;
+static const uint8_t PIN_TASTO = 9;   // C3: BOOT. Sull'S3 diventa 0.
 static const uint32_t ANTIRIMBALZO = 25;   // ms
 
 /* Antirimbalzo «aspetta che stia fermo», non «ignora i cambi ravvicinati».

@@ -693,7 +693,7 @@ riavvio, footswitch. Il pannello «Pedale» nell'app compone il riordino offline
 in una volta.
 
 **Ferramenta comprata** (25 agosto 2026, scelte e perché in `docs/pedale.md`): **XIAO
-ESP32-C6**, OLED **2,42" 128×64 SSD1309 in SPI a 7 pin**, espansore **KAmod I2C-IOexp16**
+ESP32-S3** (era la C6 fino al 29 agosto 2026, vedi sotto), OLED **2,42" 128×64 SSD1309 in SPI a 7 pin**, espansore **KAmod I2C-IOexp16**
 (MCP23017), cella **XTAR 18650-330PCM protetta** in portacella. **I LED non si comprano**:
 sono i RGB 5 mm **a catodo comune** che l'utente ha già in casa a mucchi, quelli del suo
 progetto `Timer` — resistenze già tarate a 3,3 V, **verde 100 Ω e rosso 220 Ω**, e il blu
@@ -702,41 +702,54 @@ dell'espansore. Attenzione: **l'MCP23017 non ha PWM**, quindi acceso/spento e ba
 bastano i pulsanti da arcade che l'utente ha in casa** (COM e NO del microswitch: sono la
 stessa cosa elettrica).
 
-Pin della C6 — **nessuno degli undici piedini è di strapping**, quindi cade la prudenza che
-serviva sul C3:
+**Il 29 agosto 2026 la scheda è passata dalla C6 alla XIAO ESP32-S3**, comprata dall'utente:
+**solo l'S3 ha l'USB-OTG vero**, quindi è l'unica che può fare la modalità MIDI da sola, senza
+programmi ponte (vedi «Discusso e non aperto: il pedale in modalità MIDI»). Tutta la
+ferramenta comprata resta buona; cambia la mappa dei pin, e **quella della C6 nel resto di
+questo file e in `docs/pedale.md` è storia**.
 
 | piedino | GPIO | a cosa serve |
 |---|---|---|
-| D4 / D5 | `22`, `23` | MCP23017 in I²C (SDA, SCL) |
-| D8 / D10 | `19`, `18` | display SPI: SCK, MOSI |
-| D3, D6, D7 | `21`, `16`, `17` | display: CS, DC, RST |
-| D0 (A0) | `0` | tensione di batteria — **il partitore va saldato**, 200 kΩ, 1:2 |
-| D1, D2, D9 | `1`, `2`, `20` | liberi; D1 e D2 sono analogici |
+| D4 / D5 | `5`, `6` | MCP23017 in I²C (SDA, SCL) |
+| D8 / D10 | `7`, `9` | display SPI: SCK, MOSI |
+| D3, D1, D9 | `4`, `2`, `8` | display: CS, DC, RST |
+| D0 (A0) | `1` | tensione di batteria — **il partitore va saldato** |
+| D6 / D7 | `43`, `44` | UART: il log seriale, **da tenere libero** |
+| D2 | `3` | libero — è l'unico strapping portato fuori, si usa per ultimo |
+
+Le tre differenze che fanno danni se le dimentico: **l'antenna non è a bordo** (solo u.FL,
+va montata l'antennina o non trasmette, e nella scatola vuole il suo posto lontano dalla
+cella); **carica a 50 mA** invece di 100, il che non cambia niente perché si carica col
+TP4056; e **il log seriale sull'USB potrebbe non convivere con la porta MIDI** — se non
+convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto BOOT e si
+tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.
 
 **L'alimentazione è decisa e comprata** (27 agosto 2026). Le cinque cose che fanno danni se le
 dimentico; tutto il resto — cablaggio, saldature, indicatore di batteria, scelta dei pezzi —
 sta in `docs/pedale.md`:
 
-- **la XIAO carica a 100 mA, non a 380** (quella era del C3): 35–40 ore su una 3300, quindi
-  **la sua USB non è una via di ricarica**. Si carica con un **modulo TC4056 dedicato** e la
-  sua presa; la cella si può anche estrarre e caricare fuori;
+- **la XIAO carica pianissimo** — 100 mA la C6, **50 mA l'S3** che l'ha sostituita, e non i
+  380 del C3: decine di ore su una 3300, quindi **la sua USB non è una via di ricarica**. Si
+  carica con un **modulo TC4056 dedicato** e la sua presa; la cella si può anche estrarre e
+  caricare fuori;
 - **il TP4056 non fa load sharing**: per fidarsi del verde `FULL` si carica a **interruttore
   generale spento**. Usarlo mentre carica funziona lo stesso, non è un divieto;
 - **interruttore generale fisico**, sul positivo **fra la cella e la XIAO**, col modulo
   attaccato alla cella *prima*. Il deep sleep non lo sostituisce: in borsa un footswitch si
   preme da solo. **Niente auto-spegnimento per inattività**, che sul palco è la sorpresa che
   non si vuole;
-- **due prese sul pannello, da etichettare**: una carica, l'altra fa firmware e log seriale.
-  Sono identiche, e il caricatore nella sbagliata non carica senza dirlo;
-- **il partitore di A0 va saldato** (sulla C6 non è a bordo), e **l'indicatore di batteria è
+- **due prese sul pannello, da etichettare**: una carica, l'altra fa firmware, log seriale
+  **e, con l'S3, il MIDI verso il computer**. Sono identiche, e il caricatore nella sbagliata
+  non carica senza dirlo;
+- **il partitore di A0 va saldato** (non è a bordo né sulla C6 né sull'S3), e **l'indicatore di batteria è
   firmware da scrivere**: quattro tacche a soglie, **mai percentuali** — la tensione di un
   litio è piatta nel mezzo — e sotto **3,50 V** un avviso impossibile da non vedere, che la
   protezione della cella taglia a 2,5 V e il pedale muore a metà canzone.
 
 Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
-sul port B. **Non verificato sul C6**: i tempi BLE (misurati su C3, libreria identica) e se
-il modulo espansore abbia i pull-up sull'I²C — se il bus non parte, quello è il primo
-sospetto, e si risolve con due resistenze da 4,7 kΩ.
+sul port B. **Non verificato sull'S3**: i tempi BLE (misurati su C3, libreria identica),
+l'autonomia, e se il modulo espansore abbia i pull-up sull'I²C — se il bus non parte, quello
+è il primo sospetto, e si risolve con due resistenze da 4,7 kΩ.
 
 ## La goliardata: StompSnake
 
@@ -950,10 +963,11 @@ del 25 agosto si verificano solo aprendo l'app, e le mie prove sono contro un am
    stato reso autocadenzato ma **la correzione non è verificata**. Se ricapita: prima
    `PAUSA_PARAMETRO`, poi `SEND_GAP_MS`.
 4. **Il pedale: i pezzi sono comprati, si aspetta che arrivino.** Quando arriva la roba, in
-   quest'ordine: display sulla C6 con quattro cavetti, e vedere se scrive; poi l'espansore
+   quest'ordine: **montare l'antennina u.FL, che sull'S3 non è a bordo e senza non trasmette**;
+   display con quattro cavetti, e vedere se scrive; poi l'espansore
    con **un pulsante solo**, per sapere se il bus I²C legge; poi il firmware, che è tutto
-   software. Il porting da C3 a C6 dovrebbe essere di peso, ma **i tempi BLE vanno
-   rimisurati**. **L'alimentazione è chiusa il 27 agosto 2026** — modulo di ricarica, due
+   software. Il porting da C3 a S3 dovrebbe essere di peso, ma **i tempi BLE e l'autonomia
+   vanno rimisurati**. **L'alimentazione è chiusa il 27 agosto 2026** — modulo di ricarica, due
    codini USB-C da pannello, interruttore, partitore, indicatore di batteria: tutto deciso e
    scritto in `docs/pedale.md`, niente più da decidere finché non arrivano i pezzi. **Il
    primo lavoro fisico che l'utente farà è il foro per i LED del modulo**, e vuole il modulo
@@ -984,8 +998,8 @@ Tre cose misurate quel giorno, e non vanno ripercorse:
   il BLE su PC vuole per forza un programma ponte di terzi**, e non è la strada.
 - **La C6 non può fare USB-MIDI**: ha il solo USB Serial/JTAG, a funzione fissa. **L'S3 sì**
   (USB-OTG vero, TinyUSB): si attacca il cavo e il computer lo vede come pedaliera MIDI,
-  senza driver e senza accoppiamenti. Se la modalità MIDI conta, **il cervello è la XIAO
-  ESP32-S3 e non la C6**, e si decide adesso che non c'è niente di saldato.
+  senza driver e senza accoppiamenti. **Deciso, e la S3 è comprata** (29 agosto 2026): la
+  mappa dei pin nuova è nella sezione «Il pedale ESP32» qui sopra.
 - Lo strumento della prova è **`pedale/prova-midi/`**, che fa fingere alla devkit una
   pedaliera BLE-MIDI vera.
 
