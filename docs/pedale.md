@@ -1094,10 +1094,11 @@ serve.
 
 ### Le due decisioni da prendere quando ci si arriva
 
-- **Come si cambia modalità.** Non con un footswitch da solo: sul palco la sorpresa è il
+- **Come si cambia modalità: il primo e l'ultimo footswitch premuti insieme**, deciso
+  dall'utente il 29 agosto 2026. Non con un footswitch da solo — sul palco la sorpresa è il
   difetto peggiore, ed è la stessa ragione per cui il quinto footswitch cambia metà senza
-  toccare il suono. Meglio i **due tasti a mano premuti insieme**, e la modalità **si deve
-  ricordare al riavvio** — che è lo stesso lavoro del banco, che oggi non si ricorda
+  toccare il suono — e quei due sono i più lontani fra loro, quindi un piede non li prende
+  per sbaglio. La modalità **si deve ricordare al riavvio** — che è lo stesso lavoro del banco, che oggi non si ricorda
   (punto 5 di «Dove si riprende»): tanto vale farli insieme. L'OLED dice sempre in che
   modalità sta.
 - **Chi scrive la mappa dei comandi.** Il pannello «Pedale» dell'app, che già compone i
@@ -1108,3 +1109,25 @@ serve.
 
 **Costo in ferramenta: zero. Rischio sul modo Spark: zero**, non lo tocca. L'unico rischio
 vero è il BLE-MIDI su Windows, e si misura prima.
+
+### La prova, e come rifarla (29 agosto 2026)
+
+Lo strumento c'è ed è verificato che compili e giri: **`pedale/prova-midi/`**, uno sketch che
+fa fingere alla devkit C3 una pedaliera BLE-MIDI vera — servizio `03B80E5A-…`,
+caratteristica `7772E5DB-…`, si annuncia come **SparkPedale MIDI** e manda Program Change,
+Control Change o una nota ogni due secondi, comandato dal monitor seriale. Nessuna libreria
+da installare: `BLEDevice.h` del core esp32, come `prova-ble`. Il nome sta nella **risposta
+alla scansione** e non nell'annuncio, perché il solo UUID a 128 bit si mangia 18 dei 31 byte
+disponibili — col nome dentro l'annuncio non parte e la scheda resta invisibile.
+
+Caricato e fatto girare sulla C3 il 29 agosto 2026 (`esp32:esp32:esp32c3:CDCOnBoot=cdc`).
+**La prova su Windows non è stata portata a termine**: la scheda è stata poi cancellata su
+richiesta dell'utente, quindi **non sappiamo ancora se Windows veda il dispositivo né se
+AmpliTube lo senta** — che è la domanda che decide tutto. Per rifarla: ricaricare lo sketch,
+accoppiare da Bluetooth di Windows, e guardare in **MIDI-OX** se compare fra i MIDI Inputs.
+
+Sul PC dell'utente c'è già tutto il necessario, verificato il 29 agosto 2026: Bluetooth
+Intel con LE, **MIDI-OX** (monitor), **Bome Virtual MIDI** (porte virtuali, utile se serve
+un ponte) e AmpliTube 5. Il servizio `midisrv` c'è, ma è quello storico: **non risulta
+installato il nuovo stack Windows MIDI Services**, ed è proprio lui che deciderebbe se il
+BLE-MIDI si vede senza intermediari.
