@@ -234,9 +234,11 @@ Tre conseguenze da non riscoprire:
 > **Le tre differenze vere rispetto alla C6**, tutte da tenere a mente:
 >
 > - **l'antenna non è a bordo.** La S3 ha solo il connettore u.FL e va montata l'antennina
->   esterna: senza, non trasmette. Sulla C6 era integrata e attiva di serie. **È l'unica cosa
->   che si perde**, e si paga nella scatola: l'antenna vuole il suo posto e non deve stare
->   schiacciata contro la cella o contro qualcosa di metallico;
+>   esterna. **Non è «l'antenna del Wi-Fi»**, che qui non serve a niente: è l'antenna della
+>   radio a 2,4 GHz, che Wi-Fi e Bluetooth condividono — **senza, non funziona il BLE verso lo
+>   Spark**, cioè l'unica cosa che al pedale serve. Sulla C6 era integrata e attiva di serie.
+>   **È l'unica cosa che si perde**, e si paga nella scatola: l'antenna vuole il suo posto e
+>   non deve stare schiacciata contro la cella o contro qualcosa di metallico;
 > - **carica a 50 mA, non a 100** (la versione Plus fa 100). Non cambia niente, perché la
 >   ricarica passa dal TP4056 e non dalla XIAO — semmai **rafforza** quella decisione;
 > - **lo strapping quasi non c'è, ma non è zero**: sui piedini portati fuori l'unico è
