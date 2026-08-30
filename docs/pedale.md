@@ -1289,24 +1289,27 @@ il modo Spark puro.
 Stima chiesta dall'utente. **La misura non la decidono i componenti: la decide il piede.**
 L'elettronica ci sta larga in qualunque scatola capace di reggere cinque footswitch.
 
-### Le due misure
+### La misura, decisa col piede e non a tavolino
 
-| | esterno, L × P × H |
-|---|---|
-| **scelta dall'utente il 29 agosto 2026** | ~**295 × 125 × 35 mm** |
-| comoda, cinque pedali in fila a 50 mm | ~260 × 145 × 50 mm |
-| minima vera, in fila a 45 mm | ~235 × 140 × 50 mm |
+**Definitiva, 29 agosto 2026: pannello utile 340 × 100, esterno 360 × 120 × 35 mm**,
+interassi **70 + 70 + 70 + 90**.
 
-**Sotto i 45 mm da centro a centro non si scende**: con una scarpa vera se ne premono due
-insieme, che è il guasto peggiore possibile sul palco. 50 mm è comodo.
+**Il numero l'ha deciso una prova col piede, e ha battuto la mia stima di parecchio.** Avevo
+scritto «45 mm il minimo, 50 comodo» ragionando su una scarpa media: **l'utente ha provato e a
+60 mm ne premeva ancora due insieme**, perché ha il piede grande. Da lì i 70. È la lezione che
+conta più del numero: **la spaziatura dei footswitch si misura col proprio piede, non si
+stima**, e la stima sbagliava del cinquanta per cento.
 
-**La disposizione scelta è 55 + 55 + 55 + 70 mm**, cioè 235 mm fra il primo e l'ultimo centro,
-più ~30 mm di bordo per lato. **I 70 mm fra il quarto e il quinto non sono spazio in più: sono
-un riferimento tattile.** Il quinto pedale fa una cosa diversa dagli altri quattro — cambia
-metà senza toccare il suono — e con un vuoto più largo il piede lo trova senza guardare.
-Per riferimento, un Boss ES-5 ha cinque pedali in 300 × 130 mm: le proporzioni sono quelle
-normali del genere. La campata più larga fra due nervature resta quella da 70 mm, tranquilla
-per il rovere da 5.
+**I 90 mm fra il quarto e il quinto non sono spazio in più: sono un riferimento tattile.** Il
+quinto pedale fa una cosa diversa dagli altri quattro — cambia metà senza toccare il suono — e
+con un vuoto più largo il piede lo trova senza guardare.
+
+Ne viene una scatola lunga: per riferimento un Boss ES-5 mette cinque pedali in 300 × 130 mm,
+quindi 360 × 120 è più largo e meno profondo. **Da tenere presente per la borsa e per una
+eventuale pedaliera**, dove 360 mm non entrano dappertutto.
+
+Per confronto, le stime che erano state fatte prima della prova e che restano solo come
+storia: ~295 × 125 × 35 con interassi 55+55+55+70, e ~235 × 140 con interassi da 45.
 
 Da dove vengono i numeri:
 

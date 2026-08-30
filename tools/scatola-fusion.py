@@ -32,42 +32,43 @@ import traceback
 
 # ----------------------------------------------------------------- misure --
 
-L = 295.0      # larghezza esterna
-P = 125.0      # profondita' esterna
+L = 360.0      # larghezza esterna (pannello utile 340 + 2 sponde)
+P = 120.0      # profondita' esterna (pannello utile 100 + 2 sponde)
 H = 35.0       # altezza esterna: la danno le sponde
 SP = 10.0      # spessore delle sponde (mogano)
 PAN = 5.0      # spessore di top e fondo (rovere)
 
-# Footswitch: interassi 55 + 55 + 55 + 70. Il vuoto largo non e' spazio in
-# piu', e' il riferimento tattile del quinto pedale, quello che cambia meta'.
-FS_INTERASSI = [55.0, 55.0, 55.0, 70.0]
+# Footswitch: interassi 70 + 70 + 70 + 90, misurati col piede dall'utente il
+# 29 agosto 2026: a 60 mm ne premeva due insieme. Il vuoto largo non e' spazio
+# in piu', e' il riferimento tattile del quinto pedale, quello che cambia meta'.
+FS_INTERASSI = [70.0, 70.0, 70.0, 90.0]
 FS_FORO = 12.0        # STIMA: filetto del footswitch, da misurare
-FS_Y = 28.0           # distanza del centro dal bordo davanti
+FS_Y = 30.0           # distanza del centro dal bordo davanti
 
 LED_FORO = 5.0        # RGB 5 mm, uno sopra ognuno dei primi quattro
-LED_Y = 48.0
+LED_Y = 50.0
 
 DISPLAY_W = 55.0      # area attiva del 2,42" 128x64
 DISPLAY_H = 27.5
-DISPLAY_Y = 68.0      # bordo davanti della finestra
+DISPLAY_Y = 65.0      # bordo davanti della finestra
 
 # I due tasti a mano per i banchi stanno **ai fianchi del display**, non
-# dietro: il display e' largo 55 su una scatola larga 295, quindi ai suoi
-# lati ci sono un centinaio di millimetri vuoti per parte. Metterli li'
-# accorcia la scatola di 30 mm e da' un tasto per mano.
+# dietro: il display e' largo 55 su un pannello largo 340, quindi ai suoi
+# lati ci sono oltre cento millimetri vuoti per parte. Metterli li' accorcia
+# la scatola di 30 mm e da' un tasto banco per mano.
 TASTO_FORO = 12.0
-TASTO_Y = 82.0        # alla stessa quota del centro del display
+TASTO_Y = 79.0        # alla stessa quota del centro del display
 TASTO_DX = 55.0       # distanza dall'asse della scatola
 
 NERV_SP = 10.0        # nervature fra un footswitch e l'altro
-NERV_FINO_A = 58.0    # da dietro la sponda davanti fino a questa quota
+NERV_FINO_A = 50.0    # da dietro la sponda davanti fino a questa quota
 
 # Prese USB-C sulla sponda dietro. Foro tondo da 22 (HENGBIRD, filetto
 # M21x1,5): su una sponda da 35 restano 6,5 mm di legno sopra e sotto.
 # Il dado vuole un appoggio piano di ~26-28 mm all'interno: e' l'unica cosa
 # da tenere d'occhio quando si decide la giunzione.
 USB_FORO = 22.0
-USB_X = [90.0, 205.0]
+USB_X = [110.0, 250.0]
 USB_Z = 17.5          # mezz'altezza della sponda
 
 INTER_FORO = 12.0     # interruttore generale, sulla sponda sinistra
@@ -75,7 +76,7 @@ INTER_Y = 35.0
 INTER_Z = 17.5
 
 LED_CARICA_FORO = 6.0   # finestrella sui due LED del TP4056
-LED_CARICA_Y = 62.0
+LED_CARICA_Y = 60.0
 LED_CARICA_Z = 17.5
 
 # --------------------------------------------------------------- aiutanti --
