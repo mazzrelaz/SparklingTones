@@ -732,17 +732,20 @@ TP4056; e **il log seriale sull'USB potrebbe non convivere con la porta MIDI** �
 convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto BOOT e si
 tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.
 
-**La scatola: ~295 × 125 mm**, scelta dall'utente — interassi **55 + 55 + 55 + 70**. La
-profondità è scesa da 145 perché **i due tasti a mano vanno ai fianchi del display, non
-dietro**: il display è largo 55 su una scatola larga 295, e ai suoi lati lo spazio avanza.
+**La scatola: pannello utile 340 × 100, esterno 360 × 120 × 35 mm**, interassi
+**70 + 70 + 70 + 90**. **Il numero l'ha deciso il piede dell'utente, non un calcolo**: a 60 mm
+ne premeva ancora due insieme, e la mia stima («45 il minimo, 50 comodo») sbagliava del
+cinquanta per cento. La lezione vale oltre questo pedale: **la spaziatura dei footswitch si
+misura col proprio piede.** La profondità è 100 perché **i due tasti a mano vanno ai fianchi
+del display, non dietro**: il display è largo 55 su un pannello largo 340.
 **Altezza 35 mm**, sponde da 35 con top e fondo incassati: restano **25 mm liberi dentro**, e
 **non sappiamo quanto sporga il footswitch sotto il pannello** — sopra i ~25 mm non ci sta e
 servirebbero 42-45 esterni. **Non si taglia il legno finché quel pezzo non è in mano.** La
-bozza in Fusion la genera **`tools/scatola-fusion.py`**, misure in cima al file. **La
-misura la decide il piede, non i componenti**: l'elettronica occupa un quinto del pianale. Il
-minimo assoluto sarebbe 45 mm d'interasse (sotto, con una scarpa vera se ne premono due
-insieme), e **i 70 mm fra il quarto e il quinto sono un riferimento tattile**: quel pedale
-cambia metà senza toccare il suono, e il vuoto lo fa trovare senza guardare. Materiali scelti il 29 agosto 2026: **sponde in mogano da 10 mm,
+bozza in Fusion la genera **`tools/scatola-fusion.py`**, misure in cima al file, ed è
+installata anche fra gli script di Fusion come **ScatolaPedale**. **La misura la decide il
+piede, non i componenti**: l'elettronica occupa un ventesimo del pianale. **I 90 mm fra il
+quarto e il quinto sono un riferimento tattile**: quel pedale cambia metà senza toccare il
+suono, e il vuoto lo fa trovare senza guardare. Materiali scelti il 29 agosto 2026: **sponde in mogano da 10 mm,
 top e fondo in rovere da 5 mm**, con rinforzi interni. Due trappole che vengono da lì: **le
 prese USB-C accettano un pannello fino a 8 mm**, quindi nella sponda da 10 va svasato
 dall'interno; e **i rinforzi vanno fra un footswitch e l'altro** — così al foro restano 5 mm e
