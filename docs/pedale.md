@@ -1366,8 +1366,14 @@ di avvitamento del fondo.
 
 ### L'altezza: 35 mm si può, ma dipende da una misura che non abbiamo
 
-L'utente punta a **35 mm esterni** (29 agosto 2026). Tolti i 5 mm di rovere sopra e i 5 sotto
-restano **25 mm liberi dentro**, ed è quello il numero contro cui va confrontato tutto.
+L'utente punta a **35 mm esterni** (29 agosto 2026). **Le sponde di mogano sono alte 35 e il
+top e il fondo si incassano** in battuta, quindi fra la faccia sotto del top e la faccia sopra
+del fondo restano **25 mm liberi**, ed è quello il numero contro cui va confrontato tutto.
+
+Della costruzione a incasso c'è una conseguenza da decidere adesso: **si possono far sporgere
+le sponde di 2-3 mm sopra il top**, e diventano un bordo che protegge pannello e footswitch
+quando il pedale va in borsa a faccia in giù. Si paga millimetro per millimetro sull'altezza
+interna, e a 25 mm non ce n'è molto da regalare.
 
 **Gli ingombri in altezza che conosciamo ci stanno**: portacella con dentro il 18650 ~21 mm,
 modulo display col connettore sotto i 15, espansore coi pettini saldati ~13, TP4056 e XIAO
@@ -1376,12 +1382,14 @@ niente**: va messo dove non ci sono né footswitch né schede, e questo vincola 
 
 **Due cose invece si rompono, e vanno decise prima di tagliare:**
 
-- **il codino USB-C cambia modello.** Lo HENGBIRD vuole un **foro tondo da 22 mm**, e in una
-  sponda alta 25 ne restano 1,5 di legno sopra e sotto: non si fa. A 35 mm l'unico che entra è
-  il **BTFO a flangia rettangolare**, con le due viti e il foro a lima. Ne segue che **cade
-  l'idea di distinguere le due prese per forma** (un HENGBIRD e un BTFO): saranno uguali, e si
-  distingueranno per posizione — che resta meglio di un'etichetta, perché le etichette si
-  staccano;
+- **il codino USB-C a foro tondo ci sta, e resta quello.** Avevo scritto che non ci stava,
+  contando 25 mm di sponda utile perché davo per scontata una battuta scavata per tutta la
+  lunghezza: **la sponda è alta 35 e il foro è 22, quindi restano 13 mm, 6,5 per lato** — la
+  giunzione la decide chi costruisce, e l'ha decisa l'utente. Resta un solo dettaglio da
+  tenere d'occhio nel disegnarla: **il dado M21×1,5 vuole un appoggio piano di ~26-28 mm
+  all'interno**. Regge quindi anche l'idea delle due prese **fisicamente diverse** — uno
+  HENGBIRD tondo per la carica e un BTFO rettangolare per il firmware — che le fa distinguere
+  per forma invece che per etichetta;
 - **il footswitch è il vero collo di bottiglia, e la sua misura non ce l'abbiamo.** Il numero
   da prendere col calibro appena arriva è **quanto sporge sotto il pannello, fili compresi**:
   **≤ 20 mm** e i 35 si fanno con margine; **~25 mm** e ci si sta al pelo, coi fili da piegare

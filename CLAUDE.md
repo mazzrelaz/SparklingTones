@@ -59,6 +59,7 @@ tools/frames-pedale.html          genera preset_frames.h per il firmware
 tools/ponte-prova.html            sonda del ponte, sponda app
 tools/pedale-seriale.html         log del pedale via Web Serial (non resetta la scheda)
 tools/serve.ps1                   server statico su localhost, per provare la PWA
+tools/scatola-fusion.py           bozza della scatola del pedale, script per Fusion 360
 tools/snake-banco.html            fa girare il gioco da solo e dice cosa è successo
 tools/make-icons.ps1              rigenera icons/
 tools/leggi-btsnoop.ps1           legge uno snoop log HCI di Android
@@ -732,10 +733,10 @@ convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto B
 tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.
 
 **La scatola: ~295 × 145 mm**, scelta dall'utente — interassi **55 + 55 + 55 + 70**.
-**L'altezza è puntata a 35 mm ma non è confermata**: restano 25 mm dentro, e **non sappiamo
-quanto sporga il footswitch sotto il pannello** — sopra i ~25 mm non ci sta e servirebbero
-42-45 esterni. **Non si taglia il legno finché quel pezzo non è in mano.** A 35 mm cade anche
-lo HENGBIRD (foro da 22 in una sponda da 25) e restano i due BTFO a flangia rettangolare. **La
+**Altezza 35 mm**, sponde da 35 con top e fondo incassati: restano **25 mm liberi dentro**, e
+**non sappiamo quanto sporga il footswitch sotto il pannello** — sopra i ~25 mm non ci sta e
+servirebbero 42-45 esterni. **Non si taglia il legno finché quel pezzo non è in mano.** La
+bozza in Fusion la genera **`tools/scatola-fusion.py`**, misure in cima al file. **La
 misura la decide il piede, non i componenti**: l'elettronica occupa un quinto del pianale. Il
 minimo assoluto sarebbe 45 mm d'interasse (sotto, con una scarpa vera se ne premono due
 insieme), e **i 70 mm fra il quarto e il quinto sono un riferimento tattile**: quel pedale
