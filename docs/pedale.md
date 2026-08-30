@@ -1477,3 +1477,14 @@ Restano tre vie, in ordine di quanto convincono:
    distanziali. Dà anche un posto ordinato dove far arrivare i fili;
 3. **forarlo da sé**, 2 mm negli angoli. Si può, ma si va nel piano di massa e forse in una
    pista: è la via che rischia di più per il guadagno minore.
+
+**Verificato sulla foto del pezzo il 29 agosto 2026: sono `HW-373 V1.2.1`, e fori di montaggio
+non ne hanno.** Quindi vale la via delle guide scanalate. Due cose viste nella stessa foto:
+
+- **arrivano ancora in pannello**, uniti dalle linguette. Staccandoli restano i **dentini sui
+  bordi**, che per il montaggio a scanalatura vanno **limati a filo** — e va fatto *prima* di
+  fresare il legno, così si misura lo spessore vero. Si staccano piegando poco e tagliando: è
+  una scheda con un chip sopra, e le microfratture nel rame vicino al bordo non si vedono;
+- **la resistenza della corrente di carica si cerca per la marcatura `122`, non per la sigla**:
+  su queste schede la numerazione cambia da revisione a revisione (sul pannello si leggono R1,
+  R2, R3, R4, R8). Al suo posto una **`202`** e si è a ~600 mA.
