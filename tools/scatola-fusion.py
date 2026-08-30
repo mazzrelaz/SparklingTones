@@ -52,6 +52,15 @@ DISPLAY_W = 55.0      # area attiva del 2,42" 128x64
 DISPLAY_H = 27.5
 DISPLAY_Y = 65.0      # bordo davanti della finestra
 
+# Vetrino di protezione: policarbonato fume' da 2 mm, a filo del legno dentro
+# una battuta ricavata sulla faccia di sopra. Policarbonato e non plexiglass:
+# su questa luce il plexi si crepa a stella, il PC no. A filo e non incollato
+# sotto, perche' sotto lascerebbe un pozzo profondo 5 mm che sul palco
+# raccoglie di tutto. Va lasciato **1 mm d'aria** fra vetrino e vetro
+# dell'OLED: il modulo si fissa al pannello, non si spinge contro il vetrino.
+VETRINO_SP = 2.0
+VETRINO_BORDO = 3.0   # di quanto la battuta deborda dalla finestra, per lato
+
 # I due tasti a mano per i banchi stanno **ai fianchi del display**, non
 # dietro: il display e' largo 55 su un pannello largo 340, quindi ai suoi
 # lati ci sono oltre cento millimetri vuoti per parte. Metterli li' accorcia
@@ -219,6 +228,18 @@ def run(context):
         finestra = [(L / 2.0 - DISPLAY_W / 2.0, DISPLAY_Y,
                      L / 2.0 + DISPLAY_W / 2.0, DISPLAY_Y + DISPLAY_H)]
         fori_dall_alto(comp, cerchi, finestra, H - PAN, PAN, _corpi([top]))
+
+        # --- la battuta del vetrino, sulla faccia di sopra ----------------
+        b = VETRINO_BORDO
+        battuta = [(L / 2.0 - DISPLAY_W / 2.0 - b, DISPLAY_Y - b,
+                    L / 2.0 + DISPLAY_W / 2.0 + b, DISPLAY_Y + DISPLAY_H + b)]
+        fori_dall_alto(comp, [], battuta, H - VETRINO_SP, VETRINO_SP,
+                       _corpi([top]))
+
+        # --- il vetrino, appoggiato nella sua battuta ---------------------
+        scatola(comp, L / 2.0 - DISPLAY_W / 2.0 - b, DISPLAY_Y - b,
+                L / 2.0 + DISPLAY_W / 2.0 + b, DISPLAY_Y + DISPLAY_H + b,
+                H - VETRINO_SP, VETRINO_SP, 'vetrino policarbonato 2')
 
         # --- nervature, una fra ogni coppia di footswitch ----------------
         for i in range(len(fs_x) - 1):
