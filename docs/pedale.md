@@ -1428,3 +1428,28 @@ il liquido non arriva per gravità e la convezione lavora comunque.
 
 Quello che serve davvero, e non è ventilazione, è **il fondo smontabile con le viti**, già
 previsto: per un litio in una scatola conta più di dieci fori.
+
+**Un dissipatore sul TP4056 non serve** (chiesto dall'utente il 29 agosto 2026): il chip è un
+SOP-8 con la **piazzola termica sotto**, saldata al rame della scheda, quindi il calore esce
+dal fondo e non dal dorso di plastica. Un'alettina incollata sopra lavora sulla faccia
+sbagliata.
+
+**Se si vuole togliere il problema alla radice costa una resistenza**: la corrente di carica
+la decide `R3` sul modulo (di serie `122`, cioè 1,2 kΩ = 1 A). La dissipazione è
+(5 V − tensione della cella) × corrente, quindi **al peggio ~1,8 W a inizio carica**, che cala
+salendo la tensione della cella.
+
+| R3 | corrente | picco dissipato | carica di una 3300 |
+|---|---|---|---|
+| 1,2 kΩ (di serie) | 1 A | ~1,8 W | ~4 h |
+| **2 kΩ** | ~600 mA | ~1,1 W | **~6-7 h** |
+| 2,4 kΩ | ~500 mA | ~0,9 W | ~8 h |
+
+**La 2 kΩ è la scelta sensata**: sette ore sono una carica notturna, che è come il pedale verrà
+usato, e restano **quattordici volte i 50 mA della XIAO**, che è la ragione per cui il TP4056
+esiste in questo progetto. La cella ci guadagna pure.
+
+E comunque, anche a 1 A, **il TP4056 si autoregola** abbassando la corrente quando scalda: non
+esiste il caso in cui si rovina, esiste il caso in cui ci mette di più. **Quello che conta più
+di qualunque alettina è dove lo si monta**: su distanziali con aria attorno, non incollato
+contro il legno, che è un isolante.
