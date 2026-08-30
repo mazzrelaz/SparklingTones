@@ -737,8 +737,9 @@ tutto è **45 mm da centro a centro fra i footswitch** (50 comodi): sotto, con u
 se ne premono due insieme. Materiali scelti il 29 agosto 2026: **sponde in mogano da 10 mm,
 top e fondo in rovere da 5 mm**, con rinforzi interni. Due trappole che vengono da lì: **le
 prese USB-C accettano un pannello fino a 8 mm**, quindi nella sponda da 10 va svasato
-dall'interno; e **il rinforzo sotto i footswitch è limitato dal filetto** (~10 mm utili), che
-va misurato prima di incollare. Il resto in `docs/pedale.md`, «Quanto sarà grande».
+dall'interno; e **i rinforzi vanno fra un footswitch e l'altro** — così al foro restano 5 mm e
+il filetto non è un vincolo — **arrivando alle sponde**, con la fibra del rovere lungo la fila
+dei pedali. Il resto in `docs/pedale.md`, «Quanto sarà grande».
 
 **L'alimentazione è decisa e comprata** (27 agosto 2026). Le cinque cose che fanno danni se le
 dimentico; tutto il resto — cablaggio, saldature, indicatore di batteria, scelta dei pezzi —
