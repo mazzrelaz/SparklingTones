@@ -731,10 +731,11 @@ TP4056; e **il log seriale sull'USB potrebbe non convivere con la porta MIDI** �
 convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto BOOT e si
 tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.
 
-**La scatola: ~235 × 140 × 50 mm minimi, ~260 × 145 × 50 comodi**, e **la misura la decide il
-piede, non i componenti** — l'elettronica occupa un quarto del pianale. Il numero che governa
-tutto è **45 mm da centro a centro fra i footswitch** (50 comodi): sotto, con una scarpa vera
-se ne premono due insieme. Materiali scelti il 29 agosto 2026: **sponde in mogano da 10 mm,
+**La scatola: ~295 × 145 × 50 mm**, scelta dall'utente — interassi **55 + 55 + 55 + 70**. **La
+misura la decide il piede, non i componenti**: l'elettronica occupa un quinto del pianale. Il
+minimo assoluto sarebbe 45 mm d'interasse (sotto, con una scarpa vera se ne premono due
+insieme), e **i 70 mm fra il quarto e il quinto sono un riferimento tattile**: quel pedale
+cambia metà senza toccare il suono, e il vuoto lo fa trovare senza guardare. Materiali scelti il 29 agosto 2026: **sponde in mogano da 10 mm,
 top e fondo in rovere da 5 mm**, con rinforzi interni. Due trappole che vengono da lì: **le
 prese USB-C accettano un pannello fino a 8 mm**, quindi nella sponda da 10 va svasato
 dall'interno; e **i rinforzi vanno fra un footswitch e l'altro** — così al foro restano 5 mm e
