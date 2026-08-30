@@ -1282,3 +1282,65 @@ Cosa andrebbe rifatto passando alla S3, da mettere in conto:
 
 **Non deciso**: se comprare la S3. Sono pochi euro e non butta via la C6, che resta buona per
 il modo Spark puro.
+
+
+## Quanto sarà grande, e la scatola di legno — 29 agosto 2026
+
+Stima chiesta dall'utente. **La misura non la decidono i componenti: la decide il piede.**
+L'elettronica ci sta larga in qualunque scatola capace di reggere cinque footswitch.
+
+### Le due misure
+
+| | esterno, L × P × H |
+|---|---|
+| comoda, cinque pedali in fila a 50 mm | ~**260 × 145 × 50 mm** |
+| minima vera, in fila a 45 mm | ~**235 × 140 × 50 mm** |
+
+**Sotto i 45 mm da centro a centro non si scende**: con una scarpa vera se ne premono due
+insieme, che è il guasto peggiore possibile sul palco. 50 mm è comodo.
+
+Da dove vengono i numeri:
+
+- **larghezza** = quattro spazi fra i cinque pedali × 45÷50 mm, più ~28 mm di bordo per lato;
+- **profondità** ≈ 30 mm dal bordo al centro dei pedali + ~35 mm di pannello libero perché il
+  piede non arrivi allo schermo + 44 mm di modulo display + ~25 mm per i due tasti a mano
+  dietro + bordo;
+- **altezza**: la detta il footswitch, che sotto il pannello sporge ~30 mm. Servono ~40 mm
+  liberi dentro, e con top e fondo da 5 mm fanno 50 esterni.
+
+**L'elettronica non è un vincolo**, ed è il punto: sommati, i pezzi occupano poco più di
+**70 cm²** di pianale (display 71 × 43, portacella 78 × 21, espansore ~45 × 35, TP4056
+26 × 17, XIAO 21 × 17) contro i ~300 cm² del pianale interno della scatola minima. Quattro
+volte lo spazio che serve: i pezzi si dispongono come è comodo saldarli, non come costringe
+lo spazio.
+
+**Assunzioni da verificare col calibro quando arrivano i pezzi**: espansore KAmod ~45 × 35 mm
+e footswitch ø12 mm di filetto con ~30 mm di corpo. Sono le misure tipiche, non le schede.
+
+### I materiali, scelti dall'utente il 29 agosto 2026
+
+**Sponde in mogano da 10 mm, top e fondo in rovere da 5 mm**, con rinforzi interni contro le
+flessioni. Le misure qui sopra assumevano già pareti da 10 mm, quindi restano; il top e il
+fondo sottili fanno guadagnare in altezza.
+
+Tre cose che discendono da questi spessori, e vanno decise prima di tagliare:
+
+- **le prese USB-C non entrano in 10 mm.** Il filetto M21×1,5 accetta un pannello **fino a
+  8 mm** e la sponda è 10: serve una **svasatura dall'interno** (Forstner 24-25 mm per ~3 mm,
+  poi il passante da 22). Vale anche per l'interruttore generale se ha il filetto corto — da
+  misurare;
+- **il rinforzo sotto i footswitch ha per limite il filetto, non la robustezza.** Un
+  footswitch da pedale ha ~10 mm di filetto utile: rovere 5 + rinforzo 5 è già al limite e il
+  dado può non prendere. Quindi **si misura il filetto prima di incollare**, e se è corto il
+  rinforzo va svasato dove passa il dado. Il rinforzo giusto è **una striscia unica lungo
+  tutto il fronte**, non cinque tasselli: fa da piastra di montaggio per tutti e cinque e
+  scarica la pedata sulle sponde invece che sul rovere;
+- **la finestra del display è il punto debole del top**: un rettangolo da 55 × 27,5 mm in
+  mezzo a 5 mm di rovere, con le pedate che arrivano dal bordo davanti. Va incorniciata con un
+  telaietto incollato sotto, e vuole **almeno 15 mm di legno pieno** fra sé e qualunque altro
+  foro.
+
+Il rovere da 5 mm su una campata di 235 mm va appoggiato ogni **70-80 mm**: due traverse oltre
+alla striscia del fronte. Il mogano da 10 sulle sponde è abbondante — lì la sollecitazione è
+di taglio sugli angoli, quindi **tasselli d'angolo interni**, che servono comunque come punti
+di avvitamento del fondo.
