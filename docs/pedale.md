@@ -1363,3 +1363,34 @@ Il rovere da 5 mm su una campata di 235 mm va appoggiato ogni **70-80 mm**: due 
 alla striscia del fronte. Il mogano da 10 sulle sponde è abbondante — lì la sollecitazione è
 di taglio sugli angoli, quindi **tasselli d'angolo interni**, che servono comunque come punti
 di avvitamento del fondo.
+
+### L'altezza: 35 mm si può, ma dipende da una misura che non abbiamo
+
+L'utente punta a **35 mm esterni** (29 agosto 2026). Tolti i 5 mm di rovere sopra e i 5 sotto
+restano **25 mm liberi dentro**, ed è quello il numero contro cui va confrontato tutto.
+
+**Gli ingombri in altezza che conosciamo ci stanno**: portacella con dentro il 18650 ~21 mm,
+modulo display col connettore sotto i 15, espansore coi pettini saldati ~13, TP4056 e XIAO
+pochi millimetri. Ma **il portacella a 21 mm su 25 vuol dire che sopra di lui non passa più
+niente**: va messo dove non ci sono né footswitch né schede, e questo vincola il pianale.
+
+**Due cose invece si rompono, e vanno decise prima di tagliare:**
+
+- **il codino USB-C cambia modello.** Lo HENGBIRD vuole un **foro tondo da 22 mm**, e in una
+  sponda alta 25 ne restano 1,5 di legno sopra e sotto: non si fa. A 35 mm l'unico che entra è
+  il **BTFO a flangia rettangolare**, con le due viti e il foro a lima. Ne segue che **cade
+  l'idea di distinguere le due prese per forma** (un HENGBIRD e un BTFO): saranno uguali, e si
+  distingueranno per posizione — che resta meglio di un'etichetta, perché le etichette si
+  staccano;
+- **il footswitch è il vero collo di bottiglia, e la sua misura non ce l'abbiamo.** Il numero
+  da prendere col calibro appena arriva è **quanto sporge sotto il pannello, fili compresi**:
+  **≤ 20 mm** e i 35 si fanno con margine; **~25 mm** e ci si sta al pelo, coi fili da piegare
+  subito di lato; **28-30 mm**, che è il caso comune dei footswitch da pedale, e **non ci si
+  sta**: servirebbero ~42-45 mm esterni.
+
+**Quindi: disegnare a 35 mm sì, tagliare il legno no, finché il footswitch non è in mano.** È
+l'unico pezzo che può obbligare a rifare tutto.
+
+**E se fosse troppo alto ma i 35 mm stessero a cuore**, la via non è alzare la scatola: è
+**scavare una sede nel fondo sotto la sola fila dei pedali**. Nel legno è un lavoro normale, e
+lascia la scatola bassa dappertutto tranne dove serve.
