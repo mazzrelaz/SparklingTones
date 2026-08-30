@@ -17,7 +17,7 @@ e **va letto solo quando si rimette in discussione quella cosa lì**:
 
 | file | quando aprirlo |
 |---|---|
-| `docs/pedale.md` | si lavora sul pedale: forma, ferramenta, misure BLE, ponte, simulatore, modo MIDI |
+| `docs/pedale.md` | si lavora sul pedale: forma e misure, ferramenta, scatola, BLE, ponte, simulatore, modo MIDI |
 | `docs/protocollo-spark2.md` | si tocca il protocollo, l'encoder, la scrittura dei preset |
 | `docs/decisioni-ui.md` | si rimette in discussione una scelta grafica o di flusso |
 | `docs/dropbox.md` | il sync si rompe o si cambia trasporto |
@@ -730,6 +730,15 @@ fa a scatola chiusa e a tre-quattro metri**, che a mezzo metro funziona qualunqu
 TP4056; e **il log seriale sull'USB potrebbe non convivere con la porta MIDI** — se non
 convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto BOOT e si
 tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.
+
+**La scatola: ~235 × 140 × 50 mm minimi, ~260 × 145 × 50 comodi**, e **la misura la decide il
+piede, non i componenti** — l'elettronica occupa un quarto del pianale. Il numero che governa
+tutto è **45 mm da centro a centro fra i footswitch** (50 comodi): sotto, con una scarpa vera
+se ne premono due insieme. Materiali scelti il 29 agosto 2026: **sponde in mogano da 10 mm,
+top e fondo in rovere da 5 mm**, con rinforzi interni. Due trappole che vengono da lì: **le
+prese USB-C accettano un pannello fino a 8 mm**, quindi nella sponda da 10 va svasato
+dall'interno; e **il rinforzo sotto i footswitch è limitato dal filetto** (~10 mm utili), che
+va misurato prima di incollare. Il resto in `docs/pedale.md`, «Quanto sarà grande».
 
 **L'alimentazione è decisa e comprata** (27 agosto 2026). Le cinque cose che fanno danni se le
 dimentico; tutto il resto — cablaggio, saldature, indicatore di batteria, scelta dei pezzi —
