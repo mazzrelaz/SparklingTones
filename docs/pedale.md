@@ -1453,3 +1453,27 @@ E comunque, anche a 1 A, **il TP4056 si autoregola** abbassando la corrente quan
 esiste il caso in cui si rovina, esiste il caso in cui ci mette di più. **Quello che conta più
 di qualunque alettina è dove lo si monta**: su distanziali con aria attorno, non incollato
 contro il legno, che è un isolante.
+
+**Come si fissa il TP4056, che fori di montaggio probabilmente non ne ha** (chiesto
+dall'utente il 29 agosto 2026). Sui moduli di quel formato — il suo è 25 × 16,5 mm —
+**di solito i fori non ci sono**; ne ha sei, quindi la verifica è di due secondi.
+
+Due vincoli però cadono da soli, e insieme tolgono metà del problema:
+
+- **il modulo non regge nessuna forza.** Il cavo di carica non ci si infila: dalla presa del
+  pannello arrivano **due fili alle piazzole `+` e `−`**, che è la soluzione già decisa proprio
+  perché la spinta d'inserimento si scarichi sul pannello. Il fissaggio deve tenere il peso del
+  pezzo, nient'altro;
+- **se si mettono i due LED veri sul pannello** invece di guardare quelli a bordo — l'altra
+  strada già scritta qui sopra — il modulo si può mettere **dove si vuole**, senza allinearlo a
+  nessuna finestrella.
+
+Restano tre vie, in ordine di quanto convincono:
+
+1. **due guide scanalate di legno**, una fresatina da ~1,8 mm per parte e il modulo entra di
+   costa: niente fori nel rame, niente viti, **aria su tutte e due le facce**, e **in verticale
+   la convezione lavora meglio** che in piano. Per chi lavora il legno è la via più corta;
+2. **una basetta millefori come portapezzo**: il modulo saldato sopra, la basetta sui
+   distanziali. Dà anche un posto ordinato dove far arrivare i fili;
+3. **forarlo da sé**, 2 mm negli angoli. Si può, ma si va nel piano di massa e forse in una
+   pista: è la via che rischia di più per il guadagno minore.
