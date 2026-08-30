@@ -1293,7 +1293,7 @@ L'elettronica ci sta larga in qualunque scatola capace di reggere cinque footswi
 
 | | esterno, L × P × H |
 |---|---|
-| **scelta dall'utente il 29 agosto 2026** | ~**295 × 145 × 50 mm** |
+| **scelta dall'utente il 29 agosto 2026** | ~**295 × 125 × 35 mm** |
 | comoda, cinque pedali in fila a 50 mm | ~260 × 145 × 50 mm |
 | minima vera, in fila a 45 mm | ~235 × 140 × 50 mm |
 
@@ -1311,9 +1311,11 @@ per il rovere da 5.
 Da dove vengono i numeri:
 
 - **larghezza** = quattro spazi fra i cinque pedali × 45÷50 mm, più ~28 mm di bordo per lato;
-- **profondità** ≈ 30 mm dal bordo al centro dei pedali + ~35 mm di pannello libero perché il
-  piede non arrivi allo schermo + 44 mm di modulo display + ~25 mm per i due tasti a mano
-  dietro + bordo;
+- **profondità** ≈ 28 mm dal bordo al centro dei pedali + ~35 mm di pannello libero perché il
+  piede non arrivi allo schermo + 44 mm di modulo display + bordo. **Era 145 e adesso è 125**,
+  perché i **due tasti a mano vanno ai fianchi del display, non dietro**: il display è largo
+  55 su una scatola larga 295, e ai suoi lati ci sono un centinaio di millimetri vuoti per
+  parte. Trenta millimetri in meno, e in più si ha un tasto banco per mano;
 - **altezza**: la detta il footswitch, che sotto il pannello sporge ~30 mm. Servono ~40 mm
   liberi dentro, e con top e fondo da 5 mm fanno 50 esterni.
 
@@ -1402,3 +1404,27 @@ l'unico pezzo che può obbligare a rifare tutto.
 **E se fosse troppo alto ma i 35 mm stessero a cuore**, la via non è alzare la scatola: è
 **scavare una sede nel fondo sotto la sola fila dei pedali**. Nel legno è un lavoro normale, e
 lascia la scatola bassa dappertutto tranne dove serve.
+
+### Fori di areazione: non servono, tranne per una cosa — 29 agosto 2026
+
+Chiesto dall'utente. **Da acceso il pedale non scalda**: ~60 mA a 3,7 V sono **un quarto di
+watt** in tutta la scatola, e nessun foro cambia una temperatura che non sale.
+
+**L'unica cosa che scalda è il TP4056 mentre carica**, e non di poco: con la cella scarica
+dissipa fino a **2 W** in un chip minuscolo, dieci volte tutto il resto del pedale. Ma non è
+un problema, per tre ragioni: **il TP4056 si autoregola** e quando scalda abbassa la corrente
+da solo, quindi il caso peggiore è una carica più lenta, non un guasto; **si carica a
+interruttore spento**, quindi non ci si somma il consumo del pedale; e **una scatola di legno
+avvitata non è ermetica**, le connessioni e il fondo lasciano passare aria a sufficienza per
+due watt.
+
+**E i fori hanno un costo che qui pesa più del beneficio**: il pedale sta per terra, dove
+finiscono polvere, birra e la pioggia del carico e scarico. Un foro sul top è un imbuto
+puntato sull'elettronica.
+
+**Se si vogliono lo stesso** — fa caricare un filo più in fretta — la regola è **mai sul top e
+mai sul fondo**: qualche foro da 3 mm in basso sulla **sponda dietro**, vicino al TP4056. Lì
+il liquido non arriva per gravità e la convezione lavora comunque.
+
+Quello che serve davvero, e non è ventilazione, è **il fondo smontabile con le viti**, già
+previsto: per un litio in una scatola conta più di dieci fori.

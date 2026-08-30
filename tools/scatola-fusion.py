@@ -33,7 +33,7 @@ import traceback
 # ----------------------------------------------------------------- misure --
 
 L = 295.0      # larghezza esterna
-P = 145.0      # profondita' esterna
+P = 125.0      # profondita' esterna
 H = 35.0       # altezza esterna: la danno le sponde
 SP = 10.0      # spessore delle sponde (mogano)
 PAN = 5.0      # spessore di top e fondo (rovere)
@@ -42,21 +42,25 @@ PAN = 5.0      # spessore di top e fondo (rovere)
 # piu', e' il riferimento tattile del quinto pedale, quello che cambia meta'.
 FS_INTERASSI = [55.0, 55.0, 55.0, 70.0]
 FS_FORO = 12.0        # STIMA: filetto del footswitch, da misurare
-FS_Y = 30.0           # distanza del centro dal bordo davanti
+FS_Y = 28.0           # distanza del centro dal bordo davanti
 
 LED_FORO = 5.0        # RGB 5 mm, uno sopra ognuno dei primi quattro
-LED_Y = 52.0
+LED_Y = 48.0
 
 DISPLAY_W = 55.0      # area attiva del 2,42" 128x64
 DISPLAY_H = 27.5
-DISPLAY_Y = 75.0      # bordo davanti della finestra
+DISPLAY_Y = 68.0      # bordo davanti della finestra
 
-TASTO_FORO = 12.0     # i due tasti a mano per i banchi
-TASTO_Y = 122.0
-TASTO_DX = 30.0       # distanza dall'asse della scatola
+# I due tasti a mano per i banchi stanno **ai fianchi del display**, non
+# dietro: il display e' largo 55 su una scatola larga 295, quindi ai suoi
+# lati ci sono un centinaio di millimetri vuoti per parte. Metterli li'
+# accorcia la scatola di 30 mm e da' un tasto per mano.
+TASTO_FORO = 12.0
+TASTO_Y = 82.0        # alla stessa quota del centro del display
+TASTO_DX = 55.0       # distanza dall'asse della scatola
 
 NERV_SP = 10.0        # nervature fra un footswitch e l'altro
-NERV_FINO_A = 70.0    # da dietro la sponda davanti fino a questa quota
+NERV_FINO_A = 58.0    # da dietro la sponda davanti fino a questa quota
 
 # Prese USB-C sulla sponda dietro. Foro tondo da 22 (HENGBIRD, filetto
 # M21x1,5): su una sponda da 35 restano 6,5 mm di legno sopra e sotto.
@@ -67,11 +71,11 @@ USB_X = [90.0, 205.0]
 USB_Z = 17.5          # mezz'altezza della sponda
 
 INTER_FORO = 12.0     # interruttore generale, sulla sponda sinistra
-INTER_Y = 40.0
+INTER_Y = 35.0
 INTER_Z = 17.5
 
 LED_CARICA_FORO = 6.0   # finestrella sui due LED del TP4056
-LED_CARICA_Y = 70.0
+LED_CARICA_Y = 62.0
 LED_CARICA_Z = 17.5
 
 # --------------------------------------------------------------- aiutanti --

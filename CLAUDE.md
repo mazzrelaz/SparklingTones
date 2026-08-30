@@ -732,7 +732,9 @@ TP4056; e **il log seriale sull'USB potrebbe non convivere con la porta MIDI** �
 convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto BOOT e si
 tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.
 
-**La scatola: ~295 × 145 mm**, scelta dall'utente — interassi **55 + 55 + 55 + 70**.
+**La scatola: ~295 × 125 mm**, scelta dall'utente — interassi **55 + 55 + 55 + 70**. La
+profondità è scesa da 145 perché **i due tasti a mano vanno ai fianchi del display, non
+dietro**: il display è largo 55 su una scatola larga 295, e ai suoi lati lo spazio avanza.
 **Altezza 35 mm**, sponde da 35 con top e fondo incassati: restano **25 mm liberi dentro**, e
 **non sappiamo quanto sporga il footswitch sotto il pannello** — sopra i ~25 mm non ci sta e
 servirebbero 42-45 esterni. **Non si taglia il legno finché quel pezzo non è in mano.** La
