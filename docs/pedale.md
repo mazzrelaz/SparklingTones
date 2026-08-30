@@ -1329,12 +1329,22 @@ Tre cose che discendono da questi spessori, e vanno decise prima di tagliare:
   8 mm** e la sponda è 10: serve una **svasatura dall'interno** (Forstner 24-25 mm per ~3 mm,
   poi il passante da 22). Vale anche per l'interruttore generale se ha il filetto corto — da
   misurare;
-- **il rinforzo sotto i footswitch ha per limite il filetto, non la robustezza.** Un
-  footswitch da pedale ha ~10 mm di filetto utile: rovere 5 + rinforzo 5 è già al limite e il
-  dado può non prendere. Quindi **si misura il filetto prima di incollare**, e se è corto il
-  rinforzo va svasato dove passa il dado. Il rinforzo giusto è **una striscia unica lungo
-  tutto il fronte**, non cinque tasselli: fa da piastra di montaggio per tutti e cinque e
-  scarica la pedata sulle sponde invece che sul rovere;
+- **i rinforzi vanno fra un footswitch e l'altro, non sotto** (deciso dall'utente il 29 agosto
+  2026, ed è meglio della striscia continua che avevo proposto). Al foro restano 5 mm, quindi
+  **il filetto del footswitch non è più un vincolo** — con la striscia continua rovere 5 +
+  rinforzo 5 sarebbe stato al limite dei ~10 mm utili e il dado poteva non prendere. E le
+  nervature cadono **ogni ~50 mm** invece che ogni 70-80, quindi il top è più rigido. Tre
+  cose perché lavorino davvero:
+  - **devono arrivare alle sponde.** Se corrono avanti-indietro e vanno a battuta sulla sponda
+    davanti e su quella dietro, la pedata finisce nel mogano da 10; incollate solo sotto al
+    rovere irrigidiscono e basta;
+  - **fibra del rovere lungo la fila dei pedali**, cioè nel senso della larghezza. Cinque fori
+    da 12 mm in linea sono una linea debole, e le nervature che la attraversano sono
+    esattamente ciò che ferma una spaccatura. Con la fibra nell'altro senso una crepa che parte
+    da un foro corre dritta al bordo davanti;
+  - **spazio al corpo del footswitch**, largo ~15 mm sotto il pannello e coi terminali che
+    sporgono di lato: a 50 mm d'interasse restano ~17 mm per parte, a 45 va controllato col
+    pezzo in mano **prima** di incollare, che dopo le nervature non si spostano;
 - **la finestra del display è il punto debole del top**: un rettangolo da 55 × 27,5 mm in
   mezzo a 5 mm di rovere, con le pedate che arrivano dal bordo davanti. Va incorniciata con un
   telaietto incollato sotto, e vuole **almeno 15 mm di legno pieno** fra sé e qualunque altro
