@@ -1293,11 +1293,20 @@ L'elettronica ci sta larga in qualunque scatola capace di reggere cinque footswi
 
 | | esterno, L × P × H |
 |---|---|
-| comoda, cinque pedali in fila a 50 mm | ~**260 × 145 × 50 mm** |
-| minima vera, in fila a 45 mm | ~**235 × 140 × 50 mm** |
+| **scelta dall'utente il 29 agosto 2026** | ~**295 × 145 × 50 mm** |
+| comoda, cinque pedali in fila a 50 mm | ~260 × 145 × 50 mm |
+| minima vera, in fila a 45 mm | ~235 × 140 × 50 mm |
 
 **Sotto i 45 mm da centro a centro non si scende**: con una scarpa vera se ne premono due
 insieme, che è il guasto peggiore possibile sul palco. 50 mm è comodo.
+
+**La disposizione scelta è 55 + 55 + 55 + 70 mm**, cioè 235 mm fra il primo e l'ultimo centro,
+più ~30 mm di bordo per lato. **I 70 mm fra il quarto e il quinto non sono spazio in più: sono
+un riferimento tattile.** Il quinto pedale fa una cosa diversa dagli altri quattro — cambia
+metà senza toccare il suono — e con un vuoto più largo il piede lo trova senza guardare.
+Per riferimento, un Boss ES-5 ha cinque pedali in 300 × 130 mm: le proporzioni sono quelle
+normali del genere. La campata più larga fra due nervature resta quella da 70 mm, tranquilla
+per il rovere da 5.
 
 Da dove vengono i numeri:
 
