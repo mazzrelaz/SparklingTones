@@ -1491,3 +1491,39 @@ non ne hanno.** Quindi vale la via delle guide scanalate. Due cose viste nella s
 - **la resistenza della corrente di carica si cerca per la marcatura `122`, non per la sigla**:
   su queste schede la numerazione cambia da revisione a revisione (sul pannello si leggono R1,
   R2, R3, R4, R8). Al suo posto una **`202`** e si è a ~600 mA.
+
+### Proteggere il display — 29 agosto 2026
+
+Il rischio non è la pedata: il display sta dietro i footswitch. È **la borsa** — un cavo, una
+chiave, uno spigolo che ci finisce sopra in transito — più polvere e liquidi, che sul palco
+arrivano dall'alto.
+
+**Vetrino: policarbonato da 2 mm, fumé scuro.** Tre ragioni:
+
+- **policarbonato e non plexiglass**: su una luce di 55 × 27,5 il plexi si crepa a stella a un
+  colpo secco, il PC a quello spessore non si rompe;
+- **fumé e non trasparente**: su un OLED il nero dello schermo spento sparisce nel grigio del
+  filtro e le scritte sembrano galleggiare. È quello che fanno gli apparecchi seri e costa
+  uguale;
+- **2 mm e non 1**: sotto flette e arriva a toccare il vetro dell'OLED.
+
+**Montaggio: battuta sulla faccia di sopra, vetrino a filo del legno.** Finestra passante più
+una tasca di 2 mm profonda e ~3 mm più larga per lato. Si pulisce con uno straccio, non fa
+pozzetto, e se si riga si sostituisce. **L'alternativa — incollato sotto il pannello — protegge
+meglio i bordi ma lascia un pozzo profondo 5 mm** che sul palco raccoglie di tutto; con 2 mm
+di PC quella protezione in più non serve.
+
+Due dettagli che decidono la riuscita:
+
+- **un millimetro d'aria fra vetrino e vetro dell'OLED.** Il modulo si fissa al pannello con
+  distanziali o un telaietto, **non si spinge contro il vetrino**: il vetro dell'OLED è
+  sottile e non deve fare da appoggio a niente;
+- **smusso a 45° sul bordo di sopra della finestra.** Questo display si legge **in piedi, col
+  pedale per terra**, quindi di sbieco: 5 mm di legno più 2 di vetrino mangiano un pezzo del
+  bordo vicino, e lo smusso lo restituisce.
+
+E una **guarnizione di gommapiuma adesiva** attorno alla finestra, fra pannello e modulo:
+tiene fuori la polvere e fa da cuscino al modulo, che altrimenti appoggia rigido sul legno.
+
+**Nello script la battuta e il vetrino ci sono** (`VETRINO_SP`, `VETRINO_BORDO`); lo smusso no,
+che è un raccordo da fare a mano sul modello o con la fresa sul pezzo.
