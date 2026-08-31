@@ -55,6 +55,7 @@ pedale/prova-ble/                 firmware: si collega, cambia preset, riceve un
   banchi.h  preset_frames.h       formato del banco; frame preserializzati dall'app
 pedale/prova-usb/                 sketch vuoto, per isolare i guai di USB/alimentazione
 pedale/prova-display/             scanner I²C + display: il primo pezzo sul banco
+pedale/prova-espansore/           MCP23017: pulsanti e LED, con le caselle sullo schermo
 pedale/prova-midi/                la devkit si finge una pedaliera BLE-MIDI
 tools/pedale-sim.html             la faccia del pedale in una pagina, con la logica vera
 tools/frames-pedale.html          genera preset_frames.h per il firmware
@@ -180,6 +181,19 @@ il 14 agosto 2026 (su un C3; da riverificare sul C6):
 - **Da download mode non si esce via software**, nemmeno con `esptool --after hard-reset`:
   serve staccare e riattaccare il cavo. Distingue i due casi `boot:0x5 (DOWNLOAD)` contro
   `boot:0xd (SPI_FAST_FLASH_BOOT)`.
+
+**Sulla XIAO `Serial.print` si blocca se nessuno legge la porta.** La seriale passa dentro la
+USB e ogni stampa resta appesa fino a un timeout: un lampeggio da 1,4 s è diventato **cinque
+secondi** e i pulsanti rispondevano in ritardo (30 agosto 2026). Si risolve con
+**`Serial.setTxTimeoutMs(0)`** subito dopo `Serial.begin`, e **nel firmware del pedale non è
+un dettaglio: sul palco il PC non c'è.** Ne segue una regola di metodo più larga:
+**misurare un tempo mentre si è collegati alla seriale può nascondere il difetto che si
+manifesta da scollegati** — la mia misura tornava perfetta proprio perché la porta era aperta.
+
+**Le librerie Arduino non si installano in `Documenti`**: Defender ci blocca la scrittura
+(l'IDE è autorizzato, il mio `arduino-cli` no) e l'errore che dà è `mkdir … The system cannot
+find the file specified`, che sembra un'altra cosa. Si estraggono a mano in
+`%LOCALAPPDATA%\claude-arduino-libs` e si compila con `--libraries` che punta lì.
 
 **I messaggi di commit vanno passati per file, non per here-string.** `git commit -m @'…'@`
 in PowerShell 5.1 si rompe in silenzio con virgolette doppie o certe sequenze: il testo
@@ -896,11 +910,15 @@ Da fare:
 4. **«Importa un file» con un preset vero** dell'app ufficiale: le mie prove sono contro un
    preset ricostruito a mano. Se non entra, il posto da guardare è `trovaPresetUfficiali`, e
    la cosa da chiedere sono **i primi byte del file**, non l'estensione.
-5. **Il pedale, quando arrivano i pezzi**, in quest'ordine: display con quattro cavetti, e
-   vedere se scrive; poi l'espansore con **un pulsante solo**, per sapere se l'I²C legge; poi
-   il firmware, che è tutto software. Il porting da C3 a S3 dovrebbe essere di peso, ma
-   **tempi BLE e autonomia vanno rimisurati**. Il primo lavoro fisico che farà l'utente è
-   **il foro per i LED del TP4056**, e vuole il modulo in mano prima di disegnarlo.
+5. **Il pedale sul banco: display, bus ed espansore sono verificati** (30 agosto 2026, sulla
+   **C6** — l'S3 non è arrivata, il venditore ha mandato un'altra C6, e non blocca niente
+   tranne il MIDI). **Quello che resta aperto è che l'MCP23017 scalda a 60 °C**, il LED ha
+   smesso di accendersi e la XIAO ronza finché l'espansore è attaccato. **L'ipotesi da
+   verificare per prima è che `V+` non arrivi davvero e il chip si alimenti attraverso i
+   piedini del bus**: spiegherebbe insieme il calore, le uscite morte e il fatto che risponda
+   lo stesso allo scanner. Le quattro misure da fare stanno in `docs/pedale.md`, «Il banco,
+   prima serata». **Il LED resta scollegato finché non tornano.** Poi tocca al firmware, e
+   **tempi BLE e autonomia vanno rimisurati**.
 6. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due lati.
 7. **Il looper sul pedale, col conteggio fatto in casa.** Il protocollo è tutto lì e
