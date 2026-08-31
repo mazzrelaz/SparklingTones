@@ -1527,3 +1527,30 @@ tiene fuori la polvere e fa da cuscino al modulo, che altrimenti appoggia rigido
 
 **Nello script la battuta e il vetrino ci sono** (`VETRINO_SP`, `VETRINO_BORDO`); lo smusso no,
 che è un raccordo da fare a mano sul modello o con la fresa sul pezzo.
+
+### Il display è I²C a 4 pin, non SPI a 7 — 30 agosto 2026
+
+Sul banco è saltato fuori che il modulo arrivato ha **quattro pin: GND, VDD, SCL, SDA**. Il
+preventivo diceva «SSD1309 in SPI a 7 pin» e non era così. Il pezzo è
+**`2.42OLED-IIC VER:1.1`**, e la cosa è **in meglio**:
+
+- **libera cinque piedini** (SCK, MOSI, CS, DC, RST) rispetto alla versione SPI;
+- **sta sullo stesso bus dell'MCP23017**, indirizzi diversi, senza darsi fastidio;
+- l'indirizzo lo scelgono due ponticelli sul retro, `0X78` e `0X7A`: il modulo arriva chiuso
+  su **`0X78`**, cioè **`0x3c`** per lo scanner. Si lascia com'è.
+
+**La trappola, che sul retro è scritta in cinese**: *如需ACK应答，请短接D2* — «se serve la
+risposta ACK, cortocircuita D2». `D1` e `D2` non sono piazzole vuote, sono **due diodi**:
+«cortocircuitare» vuol dire scavalcarne uno con lo stagno, non toglierlo. E **non è
+opzionale come sembra**: il controller I²C dell'ESP32, se dopo l'indirizzo non riceve l'ACK,
+**interrompe la trasmissione** — senza quel ponte il display rischia di non scrivere affatto,
+non solo di non farsi trovare dallo scanner.
+
+**Sull'esemplare dell'utente D2 era già cortocircuitato di fabbrica** (misurato in modo diodo:
+1 mV nei due versi), quindi non c'è stato niente da saldare. Ma su un pezzo di ricambio va
+ricontrollato, perché il costruttore lo scrive apposta.
+
+Lo strumento è **`pedale/prova-display/`**: fa la scansione del bus *e* accende il display, e
+la scansione è la stessa che servirà per l'MCP23017. Se lo schermo resta nero ma la seriale
+conta, si cambia `CONTROLLORE` in cima allo sketch: i moduli in giro sono di tre tarature che
+si distinguono solo provando.
