@@ -1625,3 +1625,13 @@ Le quattro misure da fare quando si riprende, in quest'ordine:
    Molto meno, o un valore che balla, conferma l'alimentazione parassita.
 
 Il LED resta scollegato finché quelle quattro non tornano.
+
+**Come si riprende (deciso dall'utente il 30 agosto 2026): si aspetta l'S3 e si rifà tutto su
+millefori.** Il cablaggio volante su breadboard è diventato ingestibile, e per giunta **è il
+principale indiziato del guasto rimasto aperto**: un filo che balla su `V+` è esattamente
+l'ipotesi in piedi, e su millefori sparisce per costruzione.
+
+L'ordine di montaggio che evita di ripetere la serata: **prima le piste di 3V3 e GND, poi si
+dà corrente e si misurano i 3,3 V nei punti dove arriveranno espansore e display, e solo dopo
+si saldano i componenti.** Se il problema era l'alimentazione, così non si ripresenta; e se si
+ripresenta, allora non era quello e le quattro misure qui sopra tornano utili.
