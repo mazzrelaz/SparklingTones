@@ -54,6 +54,8 @@ src/snake-pedali.js               la goliardata: StompSnake, a 8 bit, in «Fai u
 pedale/prova-ble/                 firmware: si collega, cambia preset, riceve un banco
   banchi.h  preset_frames.h       formato del banco; frame preserializzati dall'app
 pedale/prova-usb/                 sketch vuoto, per isolare i guai di USB/alimentazione
+pedale/prova-display/             scanner I²C + display: il primo pezzo sul banco
+pedale/prova-midi/                la devkit si finge una pedaliera BLE-MIDI
 tools/pedale-sim.html             la faccia del pedale in una pagina, con la logica vera
 tools/frames-pedale.html          genera preset_frames.h per il firmware
 tools/ponte-prova.html            sonda del ponte, sponda app
@@ -713,12 +715,17 @@ questo file e in `docs/pedale.md` è storia**.
 
 | piedino | GPIO | a cosa serve |
 |---|---|---|
-| D4 / D5 | `5`, `6` | MCP23017 in I²C (SDA, SCL) |
-| D8 / D10 | `7`, `9` | display SPI: SCK, MOSI |
-| D3, D1, D9 | `4`, `2`, `8` | display: CS, DC, RST |
+| D4 / D5 | `5`, `6` | I²C: **display e MCP23017 insieme** (SDA, SCL) |
 | D0 (A0) | `1` | tensione di batteria — **il partitore va saldato** |
 | D6 / D7 | `43`, `44` | UART: il log seriale, **da tenere libero** |
-| D2 | `3` | libero — è l'unico strapping portato fuori, si usa per ultimo |
+| D1, D2, D3, D8, D9, D10 | `2,3,4,7,8,9` | liberi (D2 è l'unico strapping: si usa per ultimo) |
+
+**Il display è I²C a 4 pin, non SPI a 7** — scoperto sul banco il 30 agosto 2026, il
+preventivo diceva un'altra cosa. Libera cinque piedini e sta sullo stesso bus dell'espansore.
+La trappola è scritta in cinese sul retro: **`D2` va cortocircuitato o il display non manda
+l'ACK**, e senza ACK il controller I²C dell'ESP32 **interrompe la trasmissione** — cioè il
+display non scrive per niente. Sull'esemplare dell'utente era già chiuso di fabbrica; su un
+ricambio va rimisurato. Indirizzo `0x3c`. Dettagli in `docs/pedale.md`.
 
 Le tre differenze che fanno danni se le dimentico: **l'antenna non è a bordo** (solo u.FL, e
 senza antennina **non funziona il BLE** — non è l'antenna del Wi-Fi, che qui non serve: la
