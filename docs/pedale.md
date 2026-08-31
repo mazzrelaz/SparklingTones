@@ -1554,3 +1554,74 @@ Lo strumento è **`pedale/prova-display/`**: fa la scansione del bus *e* accende
 la scansione è la stessa che servirà per l'MCP23017. Se lo schermo resta nero ma la seriale
 conta, si cambia `CONTROLLORE` in cima allo sketch: i moduli in giro sono di tre tarature che
 si distinguono solo provando.
+
+## Il banco, prima serata — 30 agosto 2026
+
+Il pedale è passato dal disegno ai fili. Cosa è chiuso, cosa è aperto.
+
+### Chiuso: display, bus, espansore, lettura dei pulsanti
+
+`pedale/prova-display/` e `pedale/prova-espansore/` girano sulla **XIAO ESP32-C6** (l'S3 non
+è arrivata: il venditore ha spedito un'altra C6, e non blocca niente — solo la modalità MIDI
+vuole l'S3). Verificato sull'hardware:
+
+- il **display scrive**: tre schermate a rotazione, pagina finta del pedale, cornice 128×64 e
+  tutti i pixel accesi;
+- **display ed espansore convivono sul bus**: la scansione trova `0x3c` e `0x20`;
+- l'**MCP23017 legge un pulsante** coi pull-up interni, e le otto caselle sullo schermo
+  seguono gli otto ingressi;
+- l'**MCP23017 accende un LED** su `PB0` (lampeggio di prova all'avvio, cinque volte).
+
+**Gli sketch non dipendono dalla scheda**: i piedini si chiamano `D4` e `D5`, e il numero di
+GPIO lo mette la variante — 5 e 6 sull'S3, 22 e 23 sul C6. Passando all'S3 non si tocca niente.
+
+### La trappola che è costata la serata: `Serial.print` si blocca
+
+**Sulla XIAO la seriale passa dentro la USB, e se al PC nessuno sta leggendo la porta ogni
+`Serial.print` resta appesa fino a un timeout.** Con due stampe per ciclo, un lampeggio da
+1,4 s diventava **cinque secondi**, e i pulsanti rispondevano con ritardo. L'utente l'ha detto
+due volte e io l'ho scartato come impressione: era un dato.
+
+Il rimedio è una riga, **`Serial.setTxTimeoutMs(0)`**, e nel firmware vero non è un dettaglio:
+**sul palco il PC non c'è**, quindi senza quella riga il pedale striscerebbe proprio quando
+serve.
+
+**E la prova che era così ce l'avevo in mano senza vederla**: la mia misura dei tempi tornava
+perfetta — quindici rapporti da due secondi in trenta secondi veri — proprio perché la facevo
+**con la porta aperta**, cioè con qualcuno che leggeva. La lezione di metodo: **misurare un
+tempo mentre si è collegati può nascondere il difetto che si manifesta da scollegati.**
+
+### Il ritmo del giro, misurato
+
+| operazione | tempo |
+|---|---|
+| leggere gli otto ingressi (`GPIOA`) | **166 µs** |
+| scrivere i LED (`OLATB`) | trascurabile |
+| **ridisegnare tutto il display** | **35 ms** |
+
+Da cui la regola, che vale per il firmware vero: **gli ingressi si leggono spesso, il display
+si ridisegna solo quando qualcosa cambia**. Un fotogramma sono 1024 byte sullo stesso bus da
+cui si leggono i pulsanti: ridisegnando a ogni giro, il tasto si legge solo fra un disegno e
+l'altro. E **i LED si scrivono prima del disegno**, perché devono seguire il dito.
+
+### Aperto: l'espansore scalda, e il perché non è confermato
+
+Fine serata: **l'MCP23017 a 60 °C**, il LED che ha smesso di accendersi, e un ronzio dalla
+XIAO **che sparisce staccando l'espansore**. La XIAO da sola sta a 40 °C, che è normale.
+Nessun odore, e il modulo dell'espansore **non ha un corto**: 15 kΩ fra `V+` e `GND` scollegato.
+
+**L'ipotesi da verificare per prima**, che spiegherebbe tutto insieme: **`V+` non arriva
+davvero** — foro sbagliato, saldatura fredda, contatto che balla — e il chip si alimenta di
+straforo **attraverso le protezioni interne dei piedini `SD` e `SC`**. Un chip alimentato così
+**risponde sul bus** (per questo lo scanner lo trovava), **non pilota le uscite** (il LED che
+smette) e **scalda**.
+
+Le quattro misure da fare quando si riprende, in quest'ordine:
+
+1. continuità fra `V+` dell'espansore e `3V3` della XIAO — **deve suonare**;
+2. continuità fra `GND` dell'espansore e `GND` della XIAO — deve suonare;
+3. `V+` contro `GND` dell'espansore: **non** deve suonare (è la misura da 15 kΩ, già fatta);
+4. con la USB attaccata, **volt continui fra `GND` e `V+` dell'espansore: devono essere ~3,3 V**.
+   Molto meno, o un valore che balla, conferma l'alimentazione parassita.
+
+Il LED resta scollegato finché quelle quattro non tornano.

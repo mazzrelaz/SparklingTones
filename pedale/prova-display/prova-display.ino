@@ -13,14 +13,20 @@
  * volta. Se non scrive, il guasto sta in quattro fili e in nient'altro: e'
  * il motivo per cui si comincia da qui.
  *
- * Scheda: XIAO ESP32-S3.  Display: OLED 2,42" 128x64, quattro pin (I2C).
+ * Scheda: **qualunque XIAO ESP32** — S3, C6 o C3. I piedini si chiamano D4 e
+ * D5 su tutte, e il numero di GPIO che ci sta sotto lo mette la variante:
+ * 5 e 6 sull'S3, 22 e 23 sul C6. Non c'e' niente da cambiare passando
+ * dall'una all'altra, ed e' il motivo per cui il collegamento e' scritto
+ * per NOME del piedino e non per numero.
  *
- *   display   XIAO   GPIO
- *   ----------------------
- *   GND       GND     --
- *   VCC       3V3     --     <- 3,3 V, NON 5
- *   SCL       D5       6
- *   SDA       D4       5
+ * Display: OLED 2,42" 128x64, quattro pin (I2C).
+ *
+ *   display   XIAO
+ *   ---------------
+ *   GND       GND
+ *   VDD       3V3     <- 3,3 V, NON 5
+ *   SCL       D5
+ *   SDA       D4
  *
  * Sullo stesso bus andra' poi l'espansore MCP23017: indirizzi diversi, non
  * si danno fastidio. E il display in I2C **libera cinque piedini** rispetto
@@ -38,8 +44,10 @@
 // 0 = SSD1309 taratura 0   1 = SSD1309 taratura 2   2 = SSD1306
 #define CONTROLLORE 0
 
-static const uint8_t PIN_SDA = 5;    // D4
-static const uint8_t PIN_SCL = 6;    // D5
+/* I nomi D4/D5 li definisce la variante della scheda: cosi' lo stesso
+ * sketch gira su S3, C6 e C3 senza toccare un numero. */
+static const uint8_t PIN_SDA = D4;
+static const uint8_t PIN_SCL = D5;
 
 #if CONTROLLORE == 0
 U8G2_SSD1309_128X64_NONAME0_F_HW_I2C schermo(
@@ -121,6 +129,12 @@ void setup() {
   delay(400);
   Serial.println();
   Serial.println(F("=== prova-display: bus I2C e display ==="));
+  Serial.print(F("scheda: "));
+  Serial.print(ARDUINO_BOARD);
+  Serial.print(F("   SDA=GPIO"));
+  Serial.print(PIN_SDA);
+  Serial.print(F("  SCL=GPIO"));
+  Serial.println(PIN_SCL);
   Serial.print(F("controllore scelto: "));
   Serial.println(CONTROLLORE);
 
