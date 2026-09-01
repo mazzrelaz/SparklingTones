@@ -508,6 +508,15 @@ del microfono: `Preamp73`, `Comp76`, più i «vocal» che non avevamo. Erano tut
 uno inesistente lo mandava in palla). Restano nella `TABELLA` dei nomi, che è innocua e
 serve ancora a dare un nome alle manopole di un preset importato da altrove.
 
+**Il credito a Soundshed non si toglie, e la domanda è già stata fatta** (31 agosto 2026).
+La verifica contro l'app ufficiale ha corretto **`MODELLI`**, cioè quali modelli esistono;
+non ha toccato la **`TABELLA`**, che sono **90 voci di nomi di manopole con il loro ordine
+di indice** e sono ancora loro. Quell'ordine dalle foto non poteva venire — sullo schermo si
+legge Gain, Bass, Middle, Treble, Master e negli indici sta `Gain(0), Treble(1), Middle(2),
+Bass(3), Master(4)` — quindi il NOTICE dice il vero e la MIT lo richiede. L'unica strada per
+farlo cadere davvero è **sostituire la tabella battezzando le manopole a orecchio**, con la
+funzione che l'app ha già: quando i nomi dell'utente coprono tutto, il credito cade da sé.
+
 **Se si aggiunge un nome nuovo a `MODELLI`, va verificato allo stesso modo**, perché
 all'ampli non si può chiedere quali modelli conosce: l'unica prova è che compaia
 nell'elenco ufficiale o in un preset uscito dall'ampli. La tendina tiene in fondo un gruppo
@@ -880,6 +889,29 @@ quello. **Capitolo in stand by** per sua richiesta, il 27 agosto 2026.
 Non fatto perché è la facciata pubblica e la decide lui: il `README.md` dell'app punta
 ancora solo a `github.io`, senza il link al sito. La domanda gli è stata fatta e non ha
 risposto.
+
+**La trappola del `www`, pagata il 31 agosto 2026**: il record va in `CNAME` verso
+**`mazzrelaz.github.io`**, non verso la radice del dominio. Puntandolo alla radice il sito
+si raggiunge lo stesso — gli `A` sono quelli — ma **GitHub non emette il certificato per il
+`www`**, e siccome Chrome prova `https` per primo chi digita il www vede «la connessione non
+è privata». Si ripara cambiando il record e poi **togliendo e rimettendo il dominio** in
+Settings → Pages, che è quello che fa ripartire l'emissione. Da lì in poi GitHub scrive lui
+il file `CNAME` nel repo, quindi **la copia locale resta indietro: `git pull --rebase` prima
+di ogni push**.
+
+**C'è una `privacy.html`** (31 agosto 2026), nata da una mail commerciale di register («il
+tuo sito non è in regola col Garante»), che parte a tappeto a chi registra un dominio.
+Controllato e misurato: la pagina non ha **script, cookie, storage, analytics, moduli né
+una sola richiesta a domini di terzi** — i caratteri sono serviti da lì, ed è il motivo per
+cui erano stati copiati in casa. Quindi **nessun banner**: dove non c'è niente da
+consentire, un banner è peggio che non averlo. Resta vero solo che GitHub tiene i log
+tecnici con gli IP, e la pagina lo dice. **Se ritorna il discorso, la risposta è già
+scritta**: non serve rifare l'analisi.
+
+Il repo del sito ha la sua identità git (`massimo.togni@gmail.com`); **il primo commit porta
+per sbaglio `mazzbackup@gmail.com`** e GitHub potrebbe non attribuirlo. Correggerlo vorrebbe
+dire riscrivere la radice e forzare il push sopra i commit di GitHub: l'utente ha deciso di
+lasciar stare.
 
 ## Dove si riprende — 29 agosto 2026
 
