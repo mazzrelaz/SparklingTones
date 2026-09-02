@@ -377,11 +377,8 @@ record sono un'istantanea vera di quel suono. `inModifica.offline` governa la di
   **settantotto** i modelli cambiabili, perché il catalogo è verificato contro l'app
   ufficiale e la `TABELLA` dichiara le manopole di ognuno.
 
-  Che quel numero sia quello vero **è misurato**: nei ventiquattro blocchi dei preset usciti
-  dall'ampli in `captures/` — ventidue modelli diversi — i parametri sono sempre tanti
-  quanti i nomi. Le due eccezioni, noise gate e riverbero, ne hanno uno in più
-  (l'acceso/spento) e sono proprio i due blocchi con **un modello solo**, che non si cambiano
-  mai.
+  Che il numero sia quello vero **è misurato** sui ventiquattro blocchi dei preset in
+  `captures/`; il dettaglio in `docs/decisioni-ui.md`.
 
   Nel cambio, **prima si copia e poi si costruisce**: se quel modello sta già in un preset
   della libreria, `campioneModello(nome)` ne prende numero di parametri *e* valori — è un
