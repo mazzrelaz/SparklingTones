@@ -1,3 +1,4 @@
+| espansore, uscite | **3,278 V**, cioè tutta la tensione della pista senza cadute — e **un LED vero si accende** |
 # Il pedale ESP32 — ragionamento completo
 
 Estratto da `CLAUDE.md` il 26 agosto 2026 per non pesare a ogni sessione.
