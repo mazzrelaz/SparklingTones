@@ -998,17 +998,15 @@ Da fare:
 4. **«Importa un file» con un preset vero** dell'app ufficiale: le mie prove sono contro un
    preset ricostruito a mano. Se non entra, il posto da guardare è `trovaPresetUfficiali`, e
    la cosa da chiedere sono **i primi byte del file**, non l'estensione.
-5. **Il blocco elettronico del pedale è finito e parcheggiato** (2 settembre 2026, sulla
-   millefori definitiva e sulla S3 vera). Verificato: piste a **3,296 V**, bus con **`0x20` e
-   `0x3c`**, display che scrive, pulsante su `PA0` che segue il dito, uscite a **3,278 V** con
-   un LED vero che si accende. XIAO ed espansore **su zoccoli**, quindi sfilabili.
-   **Il capitolo dell'espansore che scaldava è chiuso: era il flussante** — nessuna delle
-   ipotesi in piedi era quella giusta, e il chip non era rotto.
-   **Quello che resta del montaggio** è meccanico: i **due pettini da 4 sui lati corti**
-   dell'espansore coi loro zoccoli, per rendere raggiungibili tutte e otto le uscite `PB`, e
-   poi i connettori verso il coperchio. **Quello che resta del progetto è software**: il
-   firmware BLE portato sulla S3, con **tempi BLE e autonomia da rimisurare** (le misure che
-   abbiamo sono su C3).
+5. **Il pedale fa il pedale** (2 settembre 2026, sulla millefori definitiva e sulla S3 vera):
+   **si preme il footswitch e l'ampli cambia preset, e il display dice quale.** Senza telefono
+   in mezzo. Verificato per intero: piste a **3,296 V**, bus con **`0x20` e `0x3c`**, ingressi
+   e uscite dell'espansore, BLE con l'intervallo corto concesso, footswitch letto dall'MCP e
+   display che segue. XIAO ed espansore **su zoccoli**, quindi sfilabili.
+   **Quello che resta è tutto in avanti, niente da rifare**: gli altri sei pulsanti e gli otto
+   LED (stesso lavoro ripetuto), le due metà del banco col quinto footswitch, il banco che non
+   si ricorda al riavvio (punto 6), il trasferimento di un banco dall'app da riprovare
+   sull'S3, e **l'autonomia, che è l'ultima misura mancante**.
 6. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due lati.
 7. **Il looper sul pedale, col conteggio fatto in casa.** Il protocollo è tutto lì e
