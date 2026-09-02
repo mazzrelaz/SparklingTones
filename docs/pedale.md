@@ -1682,3 +1682,29 @@ l'fqbn vecchio spegne la seriale su USB. Vedi `CLAUDE.md`, «Trappole dell'ambie
 a destra — montato così dall'utente il 2 settembre 2026, diverso da come l'avevo proposto io
 (che avevo messo GND per primo). È quello che conta quando si infila lo spinotto, quindi vale
 il montato e non il disegnato: aggiornato anche nella pagina della basetta.
+
+### Il ronzio è il display, e la leva del consumo non è il contrasto — 2 settembre 2026
+
+**Il rumore che si sentiva dalla prima serata è il modulo del display**, localizzato
+dall'utente. Un pannello OLED non funziona a 3,3 V: il modulo si fabbrica da sé la tensione
+alta che gli serve con un **convertitore a commutazione** — l'induttore `L2` che si vede sul
+retro — e quel componente vibra alla frequenza a cui commuta. I ceramici lì attorno fanno la
+loro parte, che sono piezoelettrici.
+
+**La conferma definitiva è che il suono cambia col contenuto dello schermo**: con tutti i
+pixel accesi il ronzio diventa un sibilo, perché il convertitore deve fornire più corrente e
+lavora diverso. Non è un guasto, non fa danni, e nella scatola di legno chiusa si sentirà
+molto meno.
+
+**Il contrasto non è una leva.** Provati `255`, `160`, `96`, `48` e `16`: su questo modulo
+**non si vede differenza**. Quindi non serve né a ridurre il ronzio né a risparmiare
+batteria, e nel firmware resta a 255.
+
+**La leva vera è quanti pixel sono accesi**, ed è la ragione per cui il sibilo cambia: su un
+OLED non c'è retroilluminazione, ogni pixel si accende per conto suo e **un pixel nero è un
+pixel spento che non consuma niente**. Da cui una regola di disegno per le schermate del
+pedale, che vale per la batteria *e* per il rumore:
+
+**schermate scure con scritte chiare, mai grandi zone piene.** Niente barre invertite, niente
+riquadri riempiti, niente banda bianca col titolo dentro. La pagina a quattro righe di testo
+su nero è già fatta giusta; la schermata «tutto acceso» esiste solo come prova.
