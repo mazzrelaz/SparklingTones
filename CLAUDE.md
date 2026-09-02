@@ -867,6 +867,15 @@ dropbox.com/developers e incollare l'app key nel pannello «Altro». Tutto il re
 trappole del rientro, il verifier che si riusa, i 34 test contro un fetch finto — è in
 `docs/dropbox.md`.
 
+**Positive Grid dismette il backup su Dropbox nel 2027** (annunciato a settembre 2026, i
+preset vanno sul cloud loro). **Non tocca il nostro sync**, che è una app registrata
+dall'utente sul suo Dropbox e non c'entra con l'app ufficiale; tocca solo **da dove si
+prende `preset_backup.zip`**, che `spark-backup.js` legge comunque da un file locale —
+quindi una copia salvata oggi vale per sempre, e il codice non cambia. Il trasporto vero
+dei suoni resta **l'ampli**: «Leggi dall'ampli» e «Importa preset attuale» non dipendono
+dal cloud di nessuno. Il ragionamento in `docs/dropbox.md`, «Il backup dell'app
+ufficiale».
+
 ## Il sito di presentazione — fuori da questo repo
 
 Dal **27 agosto 2026** c'è una vetrina su **`sparklingtones.com`**, e **non sta qui**:
@@ -963,6 +972,10 @@ Da fare:
 8. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` l'ha trovato
    l'utente; l'elenco viene da Soundshed e non è verificato. La tendina mette per primi i
    modelli visti sull'ampli, quindi il prossimo si trova più in fretta.
+9. **Mettere al sicuro il `preset_backup.zip` che sta su Dropbox adesso**, e importarlo:
+   Positive Grid dismette quel backup nel 2027. È l'unica strada che prende tutta la
+   libreria dell'app ufficiale in un colpo solo; dopo restano solo l'ampli e i preset
+   singoli. Non è urgente in giornata, ma è l'unica cosa che scade.
 
 **Discusso e non aperto: il pedale in modalità MIDI** (29 agosto 2026), per comandare
 AmpliTube sul PC con lo stesso pedale. Hardware invariato, cambia solo cosa parte alla

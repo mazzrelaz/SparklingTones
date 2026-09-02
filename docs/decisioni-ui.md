@@ -254,7 +254,8 @@ dell'interruttore, che continuava a dire «acceso», e la UI mentiva.
 
 ## Importazione dall'app ufficiale — il dettaglio
 
-L'app Spark salva su Dropbox `preset_backup.zip`:
+L'app Spark salva `preset_backup.zip` — su Dropbox fino al 2027, vedi
+`docs/dropbox.md`, «Il backup dell'app ufficiale»:
 
 ```
 preset_backup/Presets/<Categoria>/category.json
