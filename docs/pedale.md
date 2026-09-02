@@ -1708,3 +1708,34 @@ pedale, che vale per la batteria *e* per il rumore:
 **schermate scure con scritte chiare, mai grandi zone piene.** Niente barre invertite, niente
 riquadri riempiti, niente banda bianca col titolo dentro. La pagina a quattro righe di testo
 su nero è già fatta giusta; la schermata «tutto acceso» esiste solo come prova.
+
+### Il blocco I²C è chiuso — 2 settembre 2026
+
+Tutto verificato sulla basetta definitiva e sulla XIAO ESP32-S3:
+
+| cosa | esito |
+|---|---|
+| piste di alimentazione | **3,296 V** all'estremità lontana dalla XIAO |
+| bus condiviso | **`0x20` e `0x3c`** trovati insieme dalla scansione |
+| display | scrive |
+| espansore, ingressi | il pulsante su `PA0` segue il dito, coi pull-up interni |
+| espansore, uscite | **3,278 V**, cioè tutta la tensione della pista senza cadute |
+
+Della fila da 10 pin dell'espansore se ne usano **nove**: `PA0`…`PA6` per i sette pulsanti —
+cinque footswitch più i due tasti banco — e le due `G` come masse, una per estremità, così i
+ritorni di massa non attraversano tutti da una parte sola. Resta libero `PA7`, che è la
+riserva per un ottavo comando (tap tempo, interruttore d'espressione).
+
+**Le uscite `PB0`…`PB7` stanno sui due lati corti del modulo** e per usarle servono altri due
+pettini da 4 con i rispettivi zoccoli: lavoro per il montaggio vero, non per le prove. Fino
+ad allora `prova-espansore` fa battere **tutte e otto insieme**, dieci secondi alte e dieci
+basse, così si misurano col tester senza premere niente e senza indovinare quale sia `PB0`.
+
+**Due trappole della misura**, pagate entrambe:
+
+- il puntale va appoggiato **sulla mezzaluna dorata del modulo**, non in un foro della
+  basetta lì accanto: quel foro non è collegato a niente e legge **mezzo volt**, che sembra
+  un'uscita rotta e non lo è;
+- **un puntale che scivola su due pad adiacenti** mette in corto un'uscita alta contro una
+  bassa. È probabilmente ciò che ha fatto scaldare il chip la terza volta, insieme al
+  flussante delle saldature nuove.

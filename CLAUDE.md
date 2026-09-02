@@ -197,7 +197,12 @@ un dettaglio: sul palco il PC non c'è.** Ne segue una regola di metodo più lar
 **misurare un tempo mentre si è collegati alla seriale può nascondere il difetto che si
 manifesta da scollegati** — la mia misura tornava perfetta proprio perché la porta era aperta.
 
-**Il flussante residuo fa scaldare i chip, e lo abbiamo pagato due sere** (2 settembre 2026).
+**Il flussante residuo fa scaldare i chip, e lo abbiamo pagato tre volte** (2 settembre 2026).
+**Si pulisce dopo OGNI sessione di saldatura, prima di ridare corrente** — non una volta e
+via: la terza volta è tornato a scaldare per le saldature *nuove* dello zoccolo da 10 pin,
+fatte dopo la pulizia precedente. Stessa categoria: **un puntale che scivola su due pad di
+uscita adiacenti** mette in corto un'uscita alta contro una bassa, e scalda in un attimo —
+si tocca un pad alla volta.
 Non è isolante: fa un percorso da qualche kΩ fra saldature vicine, e su una fila a 2,54 mm
 basta a portare un ingresso CMOS fuori dai suoi limiti e mandare il chip in **latch-up** —
 tira corrente a vuoto, scalda, e **si spegne da solo togliendo l'alimentazione**, quindi non

@@ -64,11 +64,34 @@ static uint8_t ingressiPrec = 0xff;
 static uint32_t pressioni[8] = {0};
 static uint32_t inizioPressione[8] = {0};
 
+/* PB0 batte in continuo, un secondo acceso e uno spento, finche' la scheda
+ * e' accesa. Serve a misurare l'uscita col tester **senza premere niente e
+ * senza staccare il cavo**: si appoggiano i puntali e si guarda il numero
+ * saltare fra 0 e 3,3 V. I pulsantini di reset sulla XIAO sono SMD da 2 mm,
+ * e tenere due puntali fermi mentre si preme uno spillo non e' una prova,
+ * e' un esercizio di equilibrio. Le altre tre uscite basse — PB1, PB2, PB3 —
+ * seguono i primi tre ingressi. */
+static bool battito = false;
+static uint32_t ultimoBattito = 0;
+
 static bool scrivi(uint8_t reg, uint8_t val) {
   Wire.beginTransmission(indirizzo);
   Wire.write(reg);
   Wire.write(val);
   return Wire.endTransmission() == 0;
+}
+
+/** L'unico posto che scrive OLATB: PB0 e' il battito, PB1..PB3 specchiano i
+ *  primi tre ingressi. Tenerlo in una funzione sola evita che i due usi si
+ *  sovrascrivano a vicenda. */
+static void aggiornaUscite(uint8_t ingressi) {
+  (void)ingressi;
+  /* Finche' non ci sono i LED, il battito muove **tutte e otto** le uscite
+   * insieme: cosi' qualunque delle otto mezzelune `PB` si tocchi col tester,
+   * sui due lati corti del modulo, legge la stessa cosa e non serve
+   * indovinare quale sia PB0. Quando i LED ci saranno, qui torna lo
+   * specchio degli ingressi. */
+  scrivi(OLATB, battito ? 0xff : 0x00);
 }
 
 static bool leggi(uint8_t reg, uint8_t &val) {
@@ -218,7 +241,7 @@ void loop() {
       cambiato = true;
       // i LED per primi: sono due byte sul bus e devono seguire il dito
       t0 = micros();
-      scrivi(OLATB, (uint8_t)(~ingressi) & 0x0f);
+      aggiornaUscite(ingressi);
       const uint32_t dtScrittura = micros() - t0;
       if (dtScrittura > maxScrittura) maxScrittura = dtScrittura;
       for (uint8_t i = 0; i < 8; i++) {
@@ -242,6 +265,15 @@ void loop() {
       }
       ingressiPrec = ingressi;
     }
+  }
+
+  // il battito di PB0, che non dipende da nessuna pressione
+  // dieci secondi per lato: un tester economico aggiorna piano, e deve avere
+  // tutto il tempo di fermarsi sul valore invece di inseguirlo
+  if (indirizzo != 0 && (millis() - ultimoBattito) > 10000) {
+    ultimoBattito = millis();
+    battito = !battito;
+    aggiornaUscite(ingressiPrec);
   }
 
   if (cambiato || (millis() - ultimoDisegno) > 500) {
