@@ -995,21 +995,36 @@ Da fare:
    display che segue. XIAO ed espansore **su zoccoli**, quindi sfilabili.
    **Quello che resta è tutto in avanti, niente da rifare**: gli altri sei pulsanti e gli otto
    LED (stesso lavoro ripetuto), le due metà del banco col quinto footswitch, il banco che non
-   si ricorda al riavvio (punto 6), il trasferimento di un banco dall'app da riprovare
+   si ricorda al riavvio (punto 7), il trasferimento di un banco dall'app da riprovare
    sull'S3, e **l'autonomia, che è l'ultima misura mancante**.
-6. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
+6. **La scheda stampata, in `pcb/`** (2 settembre 2026). Schema e **disposizione** ci sono —
+   contorno, fori, piazzole con la rete assegnata, serigrafia — nati da
+   `tools/genera-schema-kicad.py` e `tools/genera-pcb-kicad.py`, che **da qui in poi non si
+   rigenerano**: si modifica in KiCad, o si perde quello che l'utente aggiusta a mano. Si
+   controlla **senza aprire KiCad**: `kicad-cli` (10.0.6, in `C:\Program Files\KiCad\10.0\bin`)
+   esporta in SVG — da lì un'immagine con Edge headless — **e fa girare il DRC**. Due cose,
+   in quest'ordine:
+   - **stringere il contorno**: 95 × 60 in un vano di 100 × 64 lascia due millimetri e mezzo
+     per lato, che su una scatola fatta a mano è troppo poco, e c'è spazio vuoto in avanzo;
+   - **misurare col calibro gli interassi dei moduli, prima di tirare le piste.** Nel file i
+     quattro connettori del KAmod (J3, J4, J5, J6) stanno a distanze **inventate**: se il
+     modulo si innesta sulla scheda, le piazzole devono cadere dove cadono i suoi pettini, e
+     le misure in `docs/pedale.md` sono ancora dichiarate come stime («~45 × 35»). La XIAO
+     invece è giusta per costruzione: **15,24 mm** fra le due file. **Le piste si tirano
+     dopo**, o spostare un connettore vuol dire rifarle.
+7. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due lati.
-7. **Il looper sul pedale, col conteggio fatto in casa.** Il protocollo è tutto lì e
+8. **Il looper sul pedale, col conteggio fatto in casa.** Il protocollo è tutto lì e
    verificato; manca il firmware. Il conteggio col click **non si comanda** (vedi
    «Protocollo»), quindi lo produce il pedale: legge il bpm, conta quattro tempi lampeggiando
    un LED — o con un buzzer — e **40 ms prima dell'uno** manda `0x0175` con `04`, che registra
    all'istante. Quei 40 ms sono il tempo di volo misurato. Il tempo si può anche **scrivere**
    (`0x0176`), quindi il pedale può avere il suo tap tempo. In Signal Detection Mode (click
    spento) il conteggio non serve: parte al primo suono di chitarra.
-8. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` l'ha trovato
+9. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` l'ha trovato
    l'utente; l'elenco viene da Soundshed e non è verificato. La tendina mette per primi i
    modelli visti sull'ampli, quindi il prossimo si trova più in fretta.
-9. **Mettere al sicuro il `preset_backup.zip` che sta su Dropbox adesso**, e importarlo:
+10. **Mettere al sicuro il `preset_backup.zip` che sta su Dropbox adesso**, e importarlo:
    Positive Grid dismette quel backup nel 2027. È l'unica strada che prende tutta la
    libreria dell'app ufficiale in un colpo solo; dopo restano solo l'ampli e i preset
    singoli. Non è urgente in giornata, ma è l'unica cosa che scade.
