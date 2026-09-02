@@ -1850,3 +1850,290 @@ Quindi si compra **una lastra da 10 × 10 di `pleksa przydymiona grafit` da 3 mm
 si tagliano col laser — e da una lastra ne escono diversi, ricambi compresi. Se poi montato
 risultasse troppo scuro da leggere in piedi, si torna al trasparente e si accetta il taglio
 fatto fare.
+
+## Estratti da CLAUDE.md, 2 settembre 2026 — versione lunga
+
+Spostati qui per alleggerire la memoria di lavoro, dove ne resta la forma corta.
+
+## Trappole dell'ambiente
+
+**Mai riscrivere un file di questo progetto con `Get-Content`/`Set-Content` di PowerShell
+5.1.** Senza BOM, `Get-Content` decodifica l'UTF-8 come ANSI e `Set-Content -Encoding UTF8`
+lo riscrive doppiamente codificato: ogni accento e ogni «—» diventano `Ã ` e `â€"`, in
+tutto il file, in silenzio. Basta un `-replace` di una riga sola — ci sono ricascato il 13
+agosto 2026 su `index.html`/`live.html`/`pwa.js` e il 14 su `sw.js`. Rimedio: `git checkout
+-- <file>` se è committato, e rifare con gli strumenti di edit (o in .NET con l'encoding
+esplicito). Se il file non è committato: rileggerlo come UTF-8, togliere l'eventuale `﻿`
+iniziale e riscrivere i byte convertendo la stringa in **CP1252**, che è l'inverso.
+
+**Dopo ogni modifica a `src/`, apri le pagine in `test/` e verifica che il riepilogo sia
+verde.** Girano contro catture reali dell'ampli, quindi intercettano una regressione nella
+codifica senza avere l'hardware a portata.
+
+**Le suite girano anche senza browser**, con Edge headless:
+
+```
+& 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --headless=new --disable-gpu `
+  --no-first-run --user-data-dir="$env:TEMP\claude\edge-prof" --virtual-time-budget=20000 `
+  --dump-dom 'file:///C:/Users/massi/spark/test/protocol-test.html'
+```
+
+Poi si cerca `id="summary"`. Funziona per protocol e transport. **Su `store-test.html` e
+`backup-test.html` no**: col tempo virtuale il browser manda avanti i timer ma non aspetta
+il lavoro asincrono vero — IndexedDB e le fetch dei fixture non fanno in tempo — e la
+pagina resta a «esecuzione…». Non è un test rotto, è l'ambiente.
+
+**Per quelle, e per provare l'app che gira, si passa da `localhost`**: `tools/serve.ps1` in
+background, poi una scheda del browser del riquadro su
+`http://localhost:8099/test/store-test.html`, e il riepilogo si legge con una riga di
+JavaScript. Lì IndexedDB e la rete si comportano da veri. **Aprire un `file://` nel riquadro
+invece non serve a niente**: lo carica come `data:`, i `<script src="../src/…">` non partono
+e si vede solo il guscio. In quel browser il service worker non si registra: **non è
+verificato** se sia un limite suo o un difetto nostro.
+
+**In una scheda in secondo piano i timer vengono strozzati**, e una suite da un secondo
+sembra piantata per minuti. Basta portarla in primo piano.
+
+**Nel browser del riquadro `requestAnimationFrame` non gira**, e in Edge headless nemmeno:
+misurato il 27 agosto 2026 con una sonda che contava i fotogrammi — **uno solo**, in tutti
+e due. La pagina non compone, quindi rAF non scatta mai (e per lo stesso motivo lì lo
+screenshot del riquadro fallisce: «not compositing frames»). Conseguenza pratica: **niente
+che si muova da sé si può provare con rAF**, e infatti il ciclo del gioco è un
+`setInterval`. Le catture di una pagina che *gira* si fanno con `--screenshot` e
+`--virtual-time-budget`.
+
+**Il service worker serve a Edge headless i file della corsa precedente.** Il profilo resta
+sul disco, l'app ci registra `sw.js`, e da lì in poi ogni `--screenshot` guarda una copia
+vecchia: si perde mezz'ora a chiedersi perché una modifica non si vede. Tre rimedi, in
+ordine di comodità: una **query in coda** all'url (la chiave di cache comprende la query),
+un profilo nuovo, oppure disiscrivere il service worker dalla pagina. Attenzione che il
+profilo nuovo ne porta un'altra: **da freddo IndexedDB non fa in tempo a rispondere** col
+tempo virtuale, quindi l'app resta a metà avvio.
+
+**L'avvio dell'app chiude i pannelli.** `applicaVista()` chiama `chiudiPannelli()` quando il
+database ha risposto: una prova automatica che apre un pannello troppo presto se lo vede
+chiudere in faccia, e sembra un difetto del pannello.
+
+**Lo stdout di Edge headless non torna alla shell**: `$out = & msedge …` dà **stringa
+vuota** anche su una pagina che funziona. Va redirezionato su file con
+`Start-Process … -RedirectStandardOutput $file -NoNewWindow -Wait`, poi
+`[IO.File]::ReadAllText($file)`. Vale per `--dump-dom` e per `--screenshot` — ed è con
+`--screenshot` che si guarda una pagina che *gira*, leggendola poi come immagine.
+
+**L'ESP32 si programma e si legge dalla mia shell**, senza l'IDE: `arduino-cli` sta in
+`%LOCALAPPDATA%\Programs\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe`,
+e la seriale si legge con `System.IO.Ports.SerialPort` da PowerShell. Tre trappole pagate
+il 14 agosto 2026 (su un C3; da riverificare sul C6):
+
+- **`CDCOnBoot=default` vuol dire *Disabled*, ed è il valore di fabbrica.** Con quella la
+  `Serial` esce dai pin 20/21 e il monitor sull'USB resta muto: sembra che lo sketch non
+  parta. Va compilato con `CDCOnBoot=cdc` nell'fqbn. Il segno che l'impostazione **non** è
+  cambiata è `No changed sectors found` nel log di caricamento.
+- **Ma sulla XIAO ESP32-S3 i due valori sono ROVESCIATI** (2 settembre 2026): in
+  `boards.txt` `CDCOnBoot.default=Enabled` e `CDCOnBoot.cdc=Disabled`. Quindi sull'S3
+  l'fqbn giusto è **`XIAO_ESP32S3:CDCOnBoot=default`**, e copiare l'fqbn del C3/C6 spegne
+  la seriale invece di accenderla. È saltato fuori solo perché `Serial.setTxTimeoutMs()`
+  non compila su `HardwareSerial`: senza quella riga avremmo avuto il monitor muto e dato
+  la colpa a tutt'altro. **Sulla S3 `Serial` è `HWCDC` solo con CDC acceso**, altrimenti è
+  la UART.
+- **Aprire la porta seriale resetta il chip**: sull'USB nativo DTR/RTS pilotano reset e
+  boot. `DtrEnable=$false, RtsEnable=$false` per leggere senza toccare niente; con
+  `RTS=$true` il chip riparte **in download mode** e non esegue lo sketch.
+- **Da download mode non si esce via software**, nemmeno con `esptool --after hard-reset`:
+  serve staccare e riattaccare il cavo. Distingue i due casi `boot:0x5 (DOWNLOAD)` contro
+  `boot:0xd (SPI_FAST_FLASH_BOOT)`.
+
+**Sulla XIAO `Serial.print` si blocca se nessuno legge la porta.** La seriale passa dentro la
+USB e ogni stampa resta appesa fino a un timeout: un lampeggio da 1,4 s è diventato **cinque
+secondi** e i pulsanti rispondevano in ritardo (30 agosto 2026). Si risolve con
+**`Serial.setTxTimeoutMs(0)`** subito dopo `Serial.begin`, e **nel firmware del pedale non è
+un dettaglio: sul palco il PC non c'è.** Ne segue una regola di metodo più larga:
+**misurare un tempo mentre si è collegati alla seriale può nascondere il difetto che si
+manifesta da scollegati** — la mia misura tornava perfetta proprio perché la porta era aperta.
+
+**Il flussante residuo fa scaldare i chip, e lo abbiamo pagato tre volte** (2 settembre 2026).
+**Si pulisce dopo OGNI sessione di saldatura, prima di ridare corrente** — non una volta e
+via: la terza volta è tornato a scaldare per le saldature *nuove* dello zoccolo da 10 pin,
+fatte dopo la pulizia precedente. Stessa categoria: **un puntale che scivola su due pad di
+uscita adiacenti** mette in corto un'uscita alta contro una bassa, e scalda in un attimo —
+si tocca un pad alla volta.
+Non è isolante: fa un percorso da qualche kΩ fra saldature vicine, e su una fila a 2,54 mm
+basta a portare un ingresso CMOS fuori dai suoi limiti e mandare il chip in **latch-up** —
+tira corrente a vuoto, scalda, e **si spegne da solo togliendo l'alimentazione**, quindi non
+lascia prove. L'MCP23017 è arrivato a 80 °C; **pulito con alcol isopropilico è sceso a 23**.
+**Si pulisce sempre e subito.** E la lezione di metodo: **quando un componente scalda, prima
+di condannarlo si guarda *intorno* al componente** — il conto sui watt era giusto e la
+conclusione («il chip è andato») sbagliata, perché la corrente non passava dove pensavo.
+Nota: **l'ohmmetro su un chip non alimentato non dice niente di utile**, la tensione di prova
+è troppo bassa perché conducano le protezioni interne.
+
+**Le librerie Arduino non si installano in `Documenti`**: Defender ci blocca la scrittura
+(l'IDE è autorizzato, il mio `arduino-cli` no) e l'errore che dà è `mkdir … The system cannot
+find the file specified`, che sembra un'altra cosa. Si estraggono a mano in
+`%LOCALAPPDATA%\claude-arduino-libs` e si compila con `--libraries` che punta lì.
+
+**Mai usare `|` come delimitatore di `s///` in perl su testo che contiene tabelle
+markdown.** Il primo `|` del contenuto chiude il pattern e la sostituzione va a finire dove
+capita — di solito **in cima al file**, che sembra tutt'altro guasto. Successo due volte il
+2 settembre 2026, su uno sketch e su `docs/pedale.md`. Per modifiche mirate su questi file si
+usa lo strumento di edit, non `perl -0pi`.
+
+**I messaggi di commit vanno passati per file, non per here-string.** `git commit -m @'…'@`
+in PowerShell 5.1 si rompe in silenzio con virgolette doppie o certe sequenze: il testo
+viene spezzato in parole e git risponde `pathspec '…' did not match any file(s)`. E il
+sandbox rifiuta la riga se ci trova un `e:` o simili, leggendolo come percorso. Si scrive
+il messaggio con Write nello scratchpad e poi
+`git -c i18n.commitEncoding=UTF-8 commit -F <file>` — così **si possono anche usare gli
+accenti**.
+
+Il push non parte dalla mia shell, che è non interattiva: Git Credential Manager non
+riesce a chiedere le credenziali e git muore con *terminal prompts disabled*. Funziona con
+`GIT_TERMINAL_PROMPT=1`, `GCM_INTERACTIVE=true` e `GCM_GUI_PROMPT=true`, che gli fanno
+aprire la finestra grafica sul desktop dell'utente.
+
+## Il pedale ESP32
+
+Il ragionamento completo — la forma e perché, tutta la ferramenta pezzo per pezzo, le
+misure BLE, il ponte, il simulatore, la ricognizione — sta in **`docs/pedale.md`**, che va
+aperto quando ci si lavora. Qui il minimo per non fare danni.
+
+**Cos'è**: la vista live del web, staccata dal telefono. Prende i preset dall'app, poi è
+autonomo con lo Spark. Nessuna regolazione, solo preset. Sta in questo repo perché
+l'interfaccia app↔pedale è un contratto fra le due sponde e un commit solo deve poter
+cambiare tutte e due.
+
+**Comandi**: quattro footswitch = i quattro suoni della metà corrente; un quinto **cambia
+metà senza toccare il suono che sta suonando** (provato col piede nel simulatore e voluto
+così dall'utente: sul palco la sorpresa è il difetto peggiore); due tasti a mano per i
+banchi. Il banco resta da otto, diviso in due metà da quattro, come i banchi dell'app e
+come i quattro LED bicolore dell'ampli — rosso A, verde B, e **cambiano tutti e quattro
+insieme**. Quando la metà mostrata non è quella che suona nessun LED è acceso, ed è giusto:
+per questo l'OLED tiene in fondo una riga **♪** con quello che sta suonando davvero.
+
+**Le regole che non si toccano:**
+
+- **Il pedale non tocca mai gli slot hardware.** Ogni cambio preset è `0x0101` sul buffer
+  `0x7f` + `0x0138` con `0x7f`, ~200–400 ms. Ne segue che servono **solo due comandi**:
+  niente `0x0104`, `0x0115`, `0x0106`, niente parser dei preset. E il pedale non può
+  rovinare quello che c'è sull'ampli, per costruzione. Conseguenza: **il LED del pannello
+  dell'ampli lampeggia in permanenza**, non è un difetto.
+- **L'app preserializza, il firmware non serializza niente.** Riceve frame già pronti e
+  **patcha un byte solo**, il seq all'indice 2 — il checksum è un XOR dei soli byte
+  impacchettati e non lo copre. Verificato sull'hardware. L'encoder resta uno solo, in JS,
+  coperto dai test. `tools/frames-pedale.html` → `preset_frames.h`.
+- **Un padrone alla volta**: mentre l'ampli è connesso al pedale **smette di annunciarsi**,
+  quindi via Web Bluetooth il browser non lo trova più. Il pedale si annuncia sempre come
+  `SparkPedale`; quando l'app si collega **molla l'ampli**, quando l'app se ne va se lo
+  riprende (~0,5 s). **Se il footswitch non fa niente, il primo sospetto è l'app ancora
+  collegata** — è lo scambio più facile da fare, ed è già costato tre giri di diagnosi.
+- **Mai fare operazioni BLE dentro un callback BLE**: `disconnect()` in `onConnect` o
+  `startAdvertising()` in `onDisconnect` bloccano NimBLE per decine di secondi. I callback
+  alzano una bandiera, il lavoro lo fa il `loop()`.
+- **Niente attese bloccanti che non guardino gli ingressi.** Durante un trasferimento il
+  tasto va letto lo stesso: la pressione si accoda e **vince l'ultima**.
+- **L'antirimbalzo aspetta che il segnale stia fermo**, non che sia passato del tempo
+  dall'ultimo cambio accettato. Con la forma sbagliata un contatto sporco può tenere la
+  porta chiusa a tempo indeterminato.
+- **Web Bluetooth ammette una sola operazione GATT alla volta per dispositivo.** Ci si casca
+  appena si risponde a una notifica con un comando. Serve una coda; il trasferimento di un
+  banco ci entra **come blocco solo**.
+- **Il formato del banco sta in due file che vanno cambiati insieme**: `src/pedale-ponte.js`
+  lo costruisce, `pedale/prova-ble/banchi.h` lo legge. `banchi.h` è **l'unico punto del
+  progetto dove entrano byte non nostri**: offset e lunghezze vanno verificati, o un blocco
+  malformato scrive oltre il buffer.
+
+**Stato**: verificato sull'hardware (C3) — connessione, cambio preset in ~200–400 ms
+(contro ~1,2 s del telefono, perché `updateConnParams` a 7,5 ms secchi accorcia i sedici
+round-trip), trasferimento di un banco dall'app, salvataggio in LittleFS e ricarica dopo un
+riavvio, footswitch. Il pannello «Pedale» nell'app compone il riordino offline e lo applica
+in una volta.
+
+**Ferramenta comprata** (25 agosto 2026, scelte e perché in `docs/pedale.md`): **XIAO
+ESP32-S3** (era la C6 fino al 29 agosto 2026, vedi sotto), OLED **2,42" 128×64 SSD1309 in SPI a 7 pin**, espansore **KAmod I2C-IOexp16**
+(MCP23017), cella **XTAR 18650-330PCM protetta** in portacella. **I LED non si comprano**:
+sono i RGB 5 mm **a catodo comune** che l'utente ha già in casa a mucchi, quelli del suo
+progetto `Timer` — resistenze già tarate a 3,3 V, **verde 100 Ω e rosso 220 Ω**, e il blu
+non si usa perché quattro LED per due colori sono già le otto uscite libere
+dell'espansore. Attenzione: **l'MCP23017 non ha PWM**, quindi acceso/spento e basta. Mancano footswitch e pulsantini dalla Cina, ma **per il firmware
+bastano i pulsanti da arcade che l'utente ha in casa** (COM e NO del microswitch: sono la
+stessa cosa elettrica).
+
+**Il 29 agosto 2026 la scheda è passata dalla C6 alla XIAO ESP32-S3**, comprata dall'utente:
+**solo l'S3 ha l'USB-OTG vero**, quindi è l'unica che può fare la modalità MIDI da sola, senza
+programmi ponte (vedi «Discusso e non aperto: il pedale in modalità MIDI»). Tutta la
+ferramenta comprata resta buona; cambia la mappa dei pin, e **quella della C6 nel resto di
+questo file e in `docs/pedale.md` è storia**.
+
+| piedino | GPIO | a cosa serve |
+|---|---|---|
+| D4 / D5 | `5`, `6` | I²C: **display e MCP23017 insieme** (SDA, SCL) |
+| D0 (A0) | `1` | tensione di batteria — **il partitore va saldato** |
+| D6 / D7 | `43`, `44` | UART: il log seriale, **da tenere libero** |
+| D1, D2, D3, D8, D9, D10 | `2,3,4,7,8,9` | liberi (D2 è l'unico strapping: si usa per ultimo) |
+
+**Il display è I²C a 4 pin, non SPI a 7** — scoperto sul banco il 30 agosto 2026, il
+preventivo diceva un'altra cosa. Libera cinque piedini e sta sullo stesso bus dell'espansore.
+La trappola è scritta in cinese sul retro: **`D2` va cortocircuitato o il display non manda
+l'ACK**, e senza ACK il controller I²C dell'ESP32 **interrompe la trasmissione** — cioè il
+display non scrive per niente. Sull'esemplare dell'utente era già chiuso di fabbrica; su un
+ricambio va rimisurato. Indirizzo `0x3c`. Dettagli in `docs/pedale.md`.
+
+**L'antenna non è a bordo, e senza non funziona il BLE** — non è l'antenna del Wi-Fi: la
+radio a 2,4 GHz è una sola e la condividono. **Misurato**: senza, lo Spark si vede a
+**−92 dBm**; col foglietto u.FL a **−63**. Se un giorno «ogni tanto non si collega», il primo
+sospetto è quel connettore. Si usa il foglietto di serie dentro la scatola (di **legno**, che
+ai 2,4 GHz è trasparente), **lontano dal metallo interno**. Altre due: **carica a 50 mA**
+invece di 100, ininfluente perché si carica col TP4056; e **il log seriale sull'USB potrebbe
+non convivere con la porta MIDI**, e allora passa dalla UART.
+
+**La scatola, chiusa e senza più incognite: esterno 360 × 120 × 35 mm, pannello utile
+340 × 100, interassi 70 + 70 + 70 + 90.** Sponde in **mogano da 10**, top e fondo in **rovere
+da 5** incassati, rinforzi **fra un footswitch e l'altro** che arrivano alle sponde, fibra del
+rovere lungo la fila dei pedali. Dentro restano **25 mm** e il footswitch ne occupa **20**.
+Tre numeri che fanno danni se li dimentico: **le prese USB-C accettano un pannello fino a
+8 mm**, quindi nella sponda da 10 va svasato dall'interno; **il vetrino del display è pleksa
+fumé grafite da 3 mm** e la sua battuta lascia solo 2 mm di rovere, quindi **il telaietto
+incollato sotto la finestra è obbligatorio**; e **i 90 mm fra il quarto e il quinto footswitch
+sono un riferimento tattile**, non spazio in più. La bozza la genera
+**`tools/scatola-fusion.py`**, installata in Fusion come **ScatolaPedale**. Tutto il perché in
+`docs/pedale.md`.
+
+**La lezione che vale oltre questo pedale: la spaziatura dei footswitch si misura col proprio
+piede.** La mia stima («45 il minimo, 50 comodo») sbagliava del cinquanta per cento — a 60 mm
+l'utente ne premeva ancora due insieme.
+
+**L'alimentazione è decisa e comprata** (27 agosto 2026). Le cinque cose che fanno danni se le
+dimentico; tutto il resto — cablaggio, saldature, indicatore di batteria, scelta dei pezzi —
+sta in `docs/pedale.md`:
+
+- **la XIAO carica pianissimo** — 100 mA la C6, **50 mA l'S3** che l'ha sostituita, e non i
+  380 del C3: decine di ore su una 3300, quindi **la sua USB non è una via di ricarica**. Si
+  carica con un **modulo TC4056 dedicato** e la sua presa; la cella si può anche estrarre e
+  caricare fuori;
+- **il TP4056 non fa load sharing**: per fidarsi del verde `FULL` si carica a **interruttore
+  generale spento**. Usarlo mentre carica funziona lo stesso, non è un divieto;
+- **interruttore generale fisico**, sul positivo **fra la cella e la XIAO**, col modulo
+  attaccato alla cella *prima*. Il deep sleep non lo sostituisce: in borsa un footswitch si
+  preme da solo. **Niente auto-spegnimento per inattività**, che sul palco è la sorpresa che
+  non si vuole;
+- **due prese sul pannello, da etichettare**: una carica, l'altra fa firmware, log seriale
+  **e, con l'S3, il MIDI verso il computer**. Sono identiche, e il caricatore nella sbagliata
+  non carica senza dirlo;
+- **il partitore di A0 va saldato** (non è a bordo né sulla C6 né sull'S3), e **l'indicatore di batteria è
+  firmware da scrivere**: quattro tacche a soglie, **mai percentuali** — la tensione di un
+  litio è piatta nel mezzo — e sotto **3,50 V** un avviso impossibile da non vedere, che la
+  protezione della cella taglia a 2,5 V e il pedale muore a metà canzone.
+
+Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
+sul port B.
+
+**Tempi BLE rimisurati sull'S3** (2 settembre 2026): **26,5 ms** a giro con l'intervallo a
+7,5 ms — cioè **~424 ms** per un preset intero — contro **82 ms** e **~1312 ms** con quello
+lento. Quindi **lo Spark l'intervallo corto lo concede davvero**. E i 1312 ms del lento **sono
+il tempo del telefono**: era un'inferenza, ora è misurato — il telefono è lento per
+l'intervallo di connessione, non per la banda.
+
+**Resta non verificato sull'S3**: l'autonomia, e se il modulo espansore abbia i pull-up
+sull'I²C — se il bus non parte, quello è il primo sospetto, e si risolve con due resistenze
+da 4,7 kΩ.
+
