@@ -1768,3 +1768,31 @@ non lo ignora, e il guadagno è **tre volte**.
 mette il telefono con l'app: finora «il telefono è lento per l'intervallo di connessione, non
 per la banda» era un'inferenza dalla teoria. Adesso è una misura diretta — **rallentando il
 pedale allo stesso intervallo, ci mette lo stesso tempo.**
+
+### Il pedale fa il pedale — 2 settembre 2026
+
+`prova-ble` adesso è il firmware di un pedale vero, non più una sonda: **si preme il
+footswitch e l'ampli cambia preset, e il display dice quale**. Tutto sull'hardware
+definitivo, senza telefono in mezzo.
+
+**Il footswitch viene dall'MCP23017**, non più dal tasto BOOT della scheda. Il cambio è stato
+chirurgico: **la logica dell'antirimbalzo non è stata toccata di una riga**, è cambiata solo
+la sorgente del livello (`livelloTasto()`). Funziona perché il verso è lo stesso nei due casi
+— alto = rilasciato — dato che sia il pin BOOT sia il port A hanno il pull-up e il pulsante
+tira a massa. **Se l'espansore non c'è sul bus, si ripiega sul tasto BOOT**, così lo sketch
+gira ancora su una devkit nuda.
+
+Dall'espansore si legge **al massimo una volta al millisecondo**: un footswitch non ha bisogno
+di più, e il bus resta libero per il display.
+
+**Il display mostra tre cose**: lo stato della radio, il nome del preset che sta suonando, e a
+che punto del banco si è. Due regole, e vengono dalle misure:
+
+- **si ridisegna solo quando qualcosa è cambiato**, mai a ogni giro. Un fotogramma costa
+  **32 ms** contro i **0,18 ms** di una lettura del port A: ridisegnando sempre, il tasto
+  verrebbe letto solo negli intervalli fra un disegno e l'altro;
+- **mai durante un trasferimento**. Quei 32 ms non toccano il BLE, ma sono 32 ms in cui il
+  loop non guarda il tasto — e la regola del pedale è che una pressione non si perde mai.
+
+Il disegno è **scritte chiare su nero, senza zone piene**, che su un OLED è anche il modo di
+consumare meno.

@@ -35,6 +35,8 @@
  *   ?      questo elenco
  */
 
+#include <Wire.h>
+#include <U8g2lib.h>
 #include <BLEDevice.h>
 #include "preset_frames.h"
 #include "banchi.h"
@@ -111,28 +113,105 @@ static uint32_t ultimoRx  = 0;      // millis dell'ultimo messaggio: serve a mis
 static uint8_t  buffer[512];
 static size_t   dentro = 0;
 
-/* --- il footswitch: per ora il tasto BOOT che c'e' gia' sulla scheda ------
+/* --- il footswitch di ripiego: il tasto BOOT della scheda -----------------
  *
- * GPIO9 e' il tasto BOOT, quindi zero saldature. Ma e' anche un pin di
- * strapping: **tenuto premuto mentre la scheda si accende, il C3 parte in
- * modalita' programmazione e non esegue lo sketch**. Va benissimo per provare,
- * e nel pedale vero il footswitch non ci va mai sopra.
- *
- * ATTENZIONE portando questo sketch sulla XIAO ESP32-S3 (la scheda decisa il
- * 29 agosto 2026): li' il tasto BOOT e' **GPIO0**, non GPIO9. Sull'S3 il 9 e'
- * D10/MOSI, che resta flottante: il tasto sembrerebbe semplicemente non
- * funzionare, o peggio rimbalzare da solo. Cambiare la costante qui sotto e'
- * l'unica riga chip-dipendente di tutto il firmware.
+ * Serve solo quando non c'e' l'espansore, cioe' su una devkit nuda. Il suo
+ * numero cambia da un chip all'altro — GPIO9 sul C3, GPIO0 sull'S3 e sul C6 —
+ * e **non e' un dettaglio estetico**: sull'S3 il 9 e' D10/MOSI, che senza
+ * niente attaccato resta flottante e produce pressioni fantasma, cioe' cambi
+ * preset a caso. Sul C3 e' anche un pin di strapping: tenuto premuto
+ * all'accensione la scheda parte in modalita' programmazione.
  */
-/* Il tasto BOOT della scheda, che cambia numero da un chip all'altro: sul C3
- * e' GPIO9, sull'S3 e sul C6 e' GPIO0. **Non e' un dettaglio estetico**: sull'S3
- * il 9 e' D10/MOSI, che senza niente attaccato resta flottante e produce
- * pressioni fantasma — cioe' cambi preset a caso. */
 #if CONFIG_IDF_TARGET_ESP32C3
 static const uint8_t PIN_TASTO = 9;
 #else
 static const uint8_t PIN_TASTO = 0;
 #endif
+
+/* --- il footswitch vero, letto dall'MCP23017 --------------------------
+ *
+ * Se sul bus I2C c'e' l'espansore, il tasto e' quello **vero** collegato a
+ * GPA0; se non c'e', si ripiega sul tasto BOOT della scheda, cosi' lo
+ * sketch gira anche su una devkit nuda.
+ *
+ * La logica dell'antirimbalzo non cambia di una riga: cambia solo da dove
+ * arriva il livello. E il livello ha lo stesso verso in tutti e due i casi
+ * — **alto = rilasciato** — perche' sia il pin BOOT sia il port A hanno il
+ * pull-up e il pulsante tira a massa.
+ */
+/* --- il display -------------------------------------------------------
+ *
+ * Sta sullo stesso bus dell'espansore, a 0x3c. Due regole che vengono da
+ * quello che si e' misurato sul banco:
+ *
+ *  - **un fotogramma intero costa 32 ms** contro i 0,18 ms di una lettura
+ *    del port A. Quindi il display si ridisegna **solo quando qualcosa e'
+ *    cambiato**, mai a ogni giro, o il tasto verrebbe letto solo negli
+ *    intervalli fra un disegno e l'altro;
+ *  - **mai durante un trasferimento**: quei 32 ms sul bus I2C non toccano il
+ *    BLE, ma sono 32 ms in cui il loop non guarda il tasto, e la regola del
+ *    pedale e' che una pressione non si perde mai.
+ *
+ * E il disegno e' **scuro con scritte chiare, senza zone piene**: su un OLED
+ * un pixel nero e' spento e non consuma. Vedi docs/pedale.md.
+ */
+U8G2_SSD1309_128X64_NONAME0_F_HW_I2C schermo(U8G2_R0, U8X8_PIN_NONE, D5, D4);
+static bool schermoPresente = false;
+static bool schermoSporco   = true;    // c'e' qualcosa da ridisegnare
+
+static const uint8_t MCP_IODIRA = 0x00;
+static const uint8_t MCP_GPPUA = 0x0c;
+static const uint8_t MCP_GPIOA = 0x12;
+static uint8_t mcp = 0;                  // 0 = nessun espansore sul bus
+
+static bool mcpScrivi(uint8_t reg, uint8_t val) {
+  Wire.beginTransmission(mcp);
+  Wire.write(reg);
+  Wire.write(val);
+  return Wire.endTransmission() == 0;
+}
+
+static bool mcpLeggi(uint8_t reg, uint8_t &val) {
+  Wire.beginTransmission(mcp);
+  Wire.write(reg);
+  if (Wire.endTransmission(false) != 0) return false;
+  if (Wire.requestFrom((int)mcp, 1) != 1) return false;
+  val = Wire.read();
+  return true;
+}
+
+static void avviaEspansore() {
+  Wire.begin(D4, D5);
+  Wire.setClock(400000);
+  for (uint8_t a = 0x20; a <= 0x27; a++) {
+    Wire.beginTransmission(a);
+    if (Wire.endTransmission() == 0) { mcp = a; break; }
+  }
+  if (mcp == 0) {
+    Serial.println(F("espansore non trovato: uso il tasto BOOT della scheda"));
+    return;
+  }
+  mcpScrivi(MCP_IODIRA, 0xff);           // port A tutto in ingresso
+  mcpScrivi(MCP_GPPUA, 0xff);            // coi pull-up interni
+  Serial.printf("espansore a 0x%02X: il footswitch e' GPA0\n", mcp);
+}
+
+/** Il livello del tasto, alto = rilasciato. Dall'espansore si legge al
+ *  massimo una volta al millisecondo: un footswitch non ha bisogno di piu',
+ *  e il bus resta libero per il display. */
+static bool livelloTasto() {
+  if (mcp == 0) return digitalRead(PIN_TASTO) == HIGH;
+
+  static uint32_t ultimaLettura = 0;
+  static bool memoria = true;
+  const uint32_t ora = millis();
+  if (ora != ultimaLettura) {
+    ultimaLettura = ora;
+    uint8_t v;
+    if (mcpLeggi(MCP_GPIOA, v)) memoria = (v & 0x01) != 0;
+  }
+  return memoria;
+}
 static const uint32_t ANTIRIMBALZO = 25;   // ms
 
 /* Antirimbalzo «aspetta che stia fermo», non «ignora i cambi ravvicinati».
@@ -146,6 +225,30 @@ static bool     livelloGrezzo = true;      // true = rilasciato (pull-up)
 static bool     livelloFermo  = true;
 static uint32_t ultimoFronte  = 0;
 static uint8_t  corrente      = 0;         // quale preset del banco sta suonando
+
+/** Quello che il pedale mostra: lo stato della radio, il preset che sta
+ *  suonando e a che punto del banco si e'. Scuro con scritte chiare, niente
+ *  zone piene: su un OLED un pixel nero e' spento e non consuma. */
+static void disegnaSchermo() {
+  if (!schermoPresente) return;
+  schermo.clearBuffer();
+
+  schermo.setFont(u8g2_font_6x12_tf);
+  schermo.drawStr(0, 10, chScrittura ? "Spark: connesso" : "Spark: cerco...");
+  schermo.drawHLine(0, 14, 128);
+
+  schermo.setFont(u8g2_font_9x15B_tf);
+  char nome[15];
+  snprintf(nome, sizeof(nome), "%s", nomePosto(corrente));
+  schermo.drawStr(0, 38, nome);
+
+  schermo.setFont(u8g2_font_6x12_tf);
+  char piede[24];
+  snprintf(piede, sizeof(piede), "%u di %u", corrente + 1, quantiPosti());
+  schermo.drawStr(0, 60, piede);
+
+  schermo.sendBuffer();
+}
 
 /* Strumentazione: senza questa non si distingue «il fronte non arriva» da
  * «arriva e lo scarto io», e sono due cause opposte. */
@@ -319,6 +422,7 @@ static bool collega() {
   momentoConnesso = millis();
   ripetizioniIntervallo = 0;
   Serial.printf("connesso, MTU %d, chiesto intervallo 7,5 ms\n", client->getMTU());
+  schermoSporco = true;
   Serial.println(F("pronto. '?' per l'elenco dei comandi."));
   return true;
 }
@@ -387,6 +491,7 @@ static void mandaPreset(uint8_t n) {
                 n + 1, nomePosto(n), tTotale, ack, quanti,
                 persi ? "  (ATTENZIONE: qualche chunk non confermato)" : "");
   corrente = n;
+  schermoSporco = true;
 }
 
 /** Chiede un preset. Non lo manda qui: lo raccoglie il loop, cosi' una
@@ -402,7 +507,7 @@ static void richiedi(uint8_t n) {
 
 /** Si agisce alla pressione, non al rilascio. */
 static void leggiTasto() {
-  const bool livello = (digitalRead(PIN_TASTO) == HIGH);   // true = rilasciato
+  const bool livello = livelloTasto();                     // true = rilasciato
 
   if (livello != livelloGrezzo) {          // fronte grezzo, rimbalzi compresi
     livelloGrezzo = livello;
@@ -786,6 +891,15 @@ void setup() {
   Serial.println(F("\nprova-ble — pedale Spark 2"));
   Serial.printf("banco di %u preset nel firmware. Premi BOOT per il prossimo.\n\n", BANCO_QUANTI);
   pinMode(PIN_TASTO, INPUT_PULLUP);
+  avviaEspansore();
+  schermoPresente = schermo.begin();
+  if (schermoPresente) {
+    schermo.setContrast(255);
+    Wire.setClock(400000);   // u8g2 dopo begin() si rimette la sua velocita'
+    Serial.println(F("display a 0x3c: pronto"));
+  } else {
+    Serial.println(F("display assente: si va avanti senza"));
+  }
   banchiAvvia();
   // Se in memoria c'e' gia' un banco, il pedale riparte con quello: e' la
   // prova che e' autonomo, cioe' che sopravvive allo spegnimento.
@@ -801,11 +915,19 @@ void setup() {
 }
 
 void loop() {
+  /* Il display per ultimo e solo se serve: costa 32 ms, contro i 0,18 di una
+   * lettura del tasto. Mai durante un trasferimento. */
+  if (schermoPresente && schermoSporco && !inTrasferimento) {
+    schermoSporco = false;
+    disegnaSchermo();
+  }
+
   sbrigaPonte();
   sbrigaComandoPonte();
 
   if (client && !client->isConnected() && chScrittura) {
     Serial.println(F("connessione persa"));
+    schermoSporco = true;
     chScrittura = chNotifiche = nullptr;
     dentro = 0;
   }
