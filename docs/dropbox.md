@@ -83,3 +83,31 @@ API su un file dentro la cartella Dropbox locale — zero OAuth, ma **su Android
 esiste**, quindi risolverebbe solo la metà che serve meno, visto che il telefono è
 l'apparecchio che va all'ampli.
 
+
+## Il backup dell'app ufficiale — Dropbox dismesso nel 2027
+
+Positive Grid ha annunciato (settembre 2026) che i preset dell'app ufficiale vanno sul
+**cloud loro** e che il backup su Dropbox verrà **dismesso nel 2027**. La cosa da non
+confondere, perché in questo progetto Dropbox compare in due posti che non c'entrano
+niente fra loro:
+
+- **`src/dropbox-sync.js` non è toccato.** È il *nostro* sync, con una app registrata
+  dall'utente sul suo account Dropbox e la nostra `App folder`. Non passa dall'app
+  ufficiale né da Positive Grid: continua a funzionare come prima.
+- **`src/spark-backup.js` è toccato solo su *dove si prende il file*.** Legge
+  `preset_backup.zip` da un `<input type=file>`, in locale, senza rete: **una copia
+  salvata oggi si importerà per sempre**, e il codice non va cambiato.
+
+Quello che si perde davvero è **la strada comoda per portare via tutta la libreria
+dell'app ufficiale in un colpo solo**. Restano aperte, e non dipendono dal cloud di
+nessuno:
+
+- **«Leggi dall'ampli»**, che prende gli otto slot dalla radio;
+- **«Importa preset attuale»**, che prende il suono che l'ampli sta suonando — quindi
+  *qualunque* tono che l'app ufficiale riesca a far suonare, uno per volta. **È il punto
+  che rende l'annuncio poco pericoloso: il trasporto è l'ampli, non il cloud.**
+- **«Importa un file»** con un preset singolo, se l'app ufficiale continua a esportarli.
+
+**L'azione da fare finché c'è tempo: mettere da parte una copia del
+`preset_backup.zip` che sta su Dropbox adesso**, e importarla. Da lì in poi la libreria è
+nostra — IndexedDB più il nostro export JSON — e Positive Grid non ci entra più.

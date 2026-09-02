@@ -1,11 +1,18 @@
 /**
  * spark-backup.js — legge il backup dei preset dell'app ufficiale Positive Grid.
  *
- * L'app Spark salva su Dropbox un file `preset_backup.zip` così strutturato:
+ * L'app Spark salva un file `preset_backup.zip` così strutturato:
  *
  *   preset_backup/Presets/<Categoria>/category.json
  *   preset_backup/Presets/<Categoria>/<UUID>/preset.json
  *   preset_backup/Presets/<Categoria>/<UUID>/icon.png
+ *
+ * **Fino al 2027 lo scrive su Dropbox, poi non più**: Positive Grid ha
+ * annunciato (settembre 2026) che i preset vanno sul cloud loro e che il
+ * backup su Dropbox viene dismesso. Non tocca questo file — qui lo zip
+ * arriva da un `<input type=file>` e si legge in locale, quindi una copia
+ * salvata oggi si importerà sempre — ma cambia da dove l'utente lo prende.
+ * Il resto è in `docs/dropbox.md`, «Il backup dell'app ufficiale».
  *
  * Le cartelle di categoria diventano tag nella nostra libreria. Le icone si
  * ignorano: sono immagini generiche da mezzo mega l'una.
