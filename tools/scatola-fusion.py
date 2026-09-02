@@ -52,13 +52,19 @@ DISPLAY_W = 55.0      # area attiva del 2,42" 128x64
 DISPLAY_H = 27.5
 DISPLAY_Y = 65.0      # bordo davanti della finestra
 
-# Vetrino di protezione: policarbonato fume' da 2 mm, a filo del legno dentro
-# una battuta ricavata sulla faccia di sopra. Policarbonato e non plexiglass:
-# su questa luce il plexi si crepa a stella, il PC no. A filo e non incollato
-# sotto, perche' sotto lascerebbe un pozzo profondo 5 mm che sul palco
-# raccoglie di tutto. Va lasciato **1 mm d'aria** fra vetrino e vetro
-# dell'OLED: il modulo si fissa al pannello, non si spinge contro il vetrino.
-VETRINO_SP = 2.0
+# Vetrino di protezione: **pleksa lana przydymiona grafit da 3 mm**, tagliata
+# su misura dal venditore, a filo del legno dentro una battuta ricavata sulla
+# faccia di sopra. Acrilico e non policarbonato: il PC resiste di piu' agli
+# urti ma al laser brucia e ingiallisce, e qui il taglio lo fa una macchina.
+# Tre millimetri e non due perche' in quella tinta il 2 non si trova: la
+# battuta diventa profonda 3 su un top da 5, quindi restano 2 mm di legno
+# attorno alla finestra e **il telaietto incollato sotto diventa necessario**,
+# non piu' solo consigliato.
+# A filo e non incollato sotto: sotto lascerebbe un pozzo di 8 mm fra legno e
+# vetrino, e questo schermo si legge in piedi, cioe' di sbieco.
+# Va lasciato **1 mm d'aria** fra vetrino e vetro dell'OLED: il modulo si fissa
+# al pannello per i suoi fori, non si spinge contro il vetrino.
+VETRINO_SP = 3.0
 VETRINO_BORDO = 3.0   # di quanto la battuta deborda dalla finestra, per lato
 
 # I due tasti a mano per i banchi stanno **ai fianchi del display**, non
@@ -239,7 +245,7 @@ def run(context):
         # --- il vetrino, appoggiato nella sua battuta ---------------------
         scatola(comp, L / 2.0 - DISPLAY_W / 2.0 - b, DISPLAY_Y - b,
                 L / 2.0 + DISPLAY_W / 2.0 + b, DISPLAY_Y + DISPLAY_H + b,
-                H - VETRINO_SP, VETRINO_SP, 'vetrino policarbonato 2')
+                H - VETRINO_SP, VETRINO_SP, 'vetrino pleksa grafit 3')
 
         # --- nervature, una fra ogni coppia di footswitch ----------------
         for i in range(len(fs_x) - 1):
