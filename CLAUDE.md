@@ -834,9 +834,27 @@ sta in `docs/pedale.md`:
   protezione della cella taglia a 2,5 V e il pedale muore a metà canzone.
 
 Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
-sul port B. **Non verificato sull'S3**: i tempi BLE (misurati su C3, libreria identica),
-l'autonomia, e se il modulo espansore abbia i pull-up sull'I²C — se il bus non parte, quello
-è il primo sospetto, e si risolve con due resistenze da 4,7 kΩ.
+sul port B.
+
+**I tempi BLE sono stati rimisurati sull'S3 il 2 settembre 2026, e l'intervallo corto lo
+Spark lo concede davvero:**
+
+| intervallo | giro | preset intero (16 giri) |
+|---|---|---|
+| lento, 30 ms | 82,0 ms | ~1312 ms |
+| **veloce, 7,5 ms** | **26,5 ms** | **~424 ms** |
+
+**E i 1312 ms del lento sono il tempo del telefono**: finora era un'inferenza, adesso è
+misurato — il telefono è lento per l'intervallo di connessione, non per mancanza di banda.
+
+**L'antenna non è opzionale, ed è misurato**: senza il foglietto attaccato all'u.FL la
+scansione trovava lo Spark a **−92 dBm**, al limite del funzionamento; con l'antenna
+**−63 dBm**, cioè quasi ottocento volte la potenza. Se un giorno il pedale «ogni tanto non
+si collega», il primo sospetto è quel connettore.
+
+**Resta non verificato sull'S3**: l'autonomia, e se il modulo espansore abbia i pull-up
+sull'I²C — se il bus non parte, quello è il primo sospetto, e si risolve con due resistenze
+da 4,7 kΩ.
 
 ## La goliardata: StompSnake
 
