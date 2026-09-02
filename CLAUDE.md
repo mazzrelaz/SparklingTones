@@ -980,12 +980,17 @@ Da fare:
 4. **«Importa un file» con un preset vero** dell'app ufficiale: le mie prove sono contro un
    preset ricostruito a mano. Se non entra, il posto da guardare è `trovaPresetUfficiali`, e
    la cosa da chiedere sono **i primi byte del file**, non l'estensione.
-5. **Il pedale sul banco, sulla millefori definitiva e sulla S3 vera** (2 settembre 2026).
-   Fatto e verificato: le due piste danno **3,296 V** all'estremità lontana, la XIAO è su
-   zoccoli, l'espansore pure. **Il capitolo dell'espansore che scaldava è chiuso: era il
-   flussante residuo** — pulito con alcol, da 80 °C a 23. Il chip non era rotto, e nessuna
-   delle ipotesi in piedi era quella giusta. Da lì: bus, display, un pulsante e un LED, poi
-   il firmware, e **tempi BLE e autonomia vanno rimisurati**.
+5. **Il blocco elettronico del pedale è finito e parcheggiato** (2 settembre 2026, sulla
+   millefori definitiva e sulla S3 vera). Verificato: piste a **3,296 V**, bus con **`0x20` e
+   `0x3c`**, display che scrive, pulsante su `PA0` che segue il dito, uscite a **3,278 V** con
+   un LED vero che si accende. XIAO ed espansore **su zoccoli**, quindi sfilabili.
+   **Il capitolo dell'espansore che scaldava è chiuso: era il flussante** — nessuna delle
+   ipotesi in piedi era quella giusta, e il chip non era rotto.
+   **Quello che resta del montaggio** è meccanico: i **due pettini da 4 sui lati corti**
+   dell'espansore coi loro zoccoli, per rendere raggiungibili tutte e otto le uscite `PB`, e
+   poi i connettori verso il coperchio. **Quello che resta del progetto è software**: il
+   firmware BLE portato sulla S3, con **tempi BLE e autonomia da rimisurare** (le misure che
+   abbiamo sono su C3).
 6. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due lati.
 7. **Il looper sul pedale, col conteggio fatto in casa.** Il protocollo è tutto lì e
