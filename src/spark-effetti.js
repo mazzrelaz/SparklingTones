@@ -69,6 +69,27 @@ window.SparkEffetti = (function () {
     'Compressor': { nome: 'Red Comp', manopole: ['Output', 'Sensitivity'] },
     'BassComp': { nome: 'Bass Comp', manopole: ['Comp', 'Gain'] },
     'BBEOpticalComp': { nome: 'Optical Comp', manopole: ['Volume', 'Comp', 'Pad'] },
+    // **Un identificativo solo, due voci nell'elenco ufficiale** (2 settembre
+    // 2026). Positive Grid ha aggiunto un «Auto Wah» libero per tutti, con una
+    // sola regolazione (Sensitivity), accanto al wah del pacchetto Hendrix che
+    // c'era già: nell'app sono due voci distinte, ma **i preset che le usano
+    // escono dallo Spark tutti e due come `JH.Vox846`**, con sei parametri.
+    // Misurato con due catture apposta, `prova auto wah` e `prova wah jh`: il
+    // blocco si chiama uguale in tutte e due.
+    //
+    // Quindi qui non si aggiunge niente, il modello lo conoscevamo già. Ma cade
+    // l'assunto che un identificativo valga una voce di elenco, e ne segue una
+    // cosa vera per la UI: **scegliendo questo modello dalla tendina non si
+    // decide quale dei due si prende** — `campioneModello` copia il primo
+    // blocco che trova in libreria, e la differenza fra i due sta nei valori,
+    // non nel nome. Il conteggio del 26 agosto resta **sei identificativi**
+    // anche se l'app adesso di voci ne mostra sette: non è un modello mancante
+    // da cercare.
+    //
+    // Il nome resta quello del pacchetto e il prefisso `JH.` resta com'è (vedi
+    // `eHendrix`), **di proposito**: la variante Hendrix di questo blocco vuole
+    // ancora lo sblocco, quindi l'avviso ogni tanto parla a vuoto ma non tace
+    // mai quando servirebbe. Fra i due errori possibili, quello giusto è questo.
     'JH.Vox846': { nome: 'J.H. Legendary Wah', manopole: ['P1', 'Mode', 'P3', 'P4', 'P5'] },
 
     /* ---- Drive ---- */
@@ -389,6 +410,8 @@ window.SparkEffetti = (function () {
     ['bias.noisegate'],
     // Sei, contati sull'app ufficiale. `Comp76` esiste, ma **solo su Spark
     // LIVE ed EDGE**, sul canale del microfono: sullo Spark 2 non c'è.
+    // Restano sei anche dopo l'«Auto Wah» che Positive Grid ha aggiunto il
+    // 2 settembre 2026: è `JH.Vox846` un'altra volta, vedi la nota in TABELLA.
     ['LA2AComp', 'BlueComp', 'Compressor', 'BassComp', 'BBEOpticalComp', 'JH.Vox846'],
     [
       // Quattordici, contati sull'app ufficiale. `MetalZoneMT2` non c'è —

@@ -527,6 +527,17 @@ ha fotografato l'elenco intero sul suo Spark 2 e il confronto voce per voce ha t
 screenshot: **noise gate 1, comp/wah 6, drive 14, ampli 39, modulazione 13, delay 6,
 riverbero 1 con 9 tipi**.
 
+**Una voce nuova nell'elenco ufficiale non è per forza un modello nuovo** (2 settembre
+2026). Positive Grid ha aggiunto un **«Auto Wah»**, libero per tutti, con la sola
+Sensitivity, accanto al wah del pacchetto Hendrix che c'era già. Nell'app sono due voci; per
+lo Spark sono **lo stesso `JH.Vox846` con sei parametri**, e la differenza sta nei valori.
+Misurato con due catture apposta. Quindi **il conteggio di comp/wah resta 6** — sono
+identificativi, non voci di menu — e in `MODELLI` non è stato aggiunto niente. Ne segue una
+cosa vera per la UI: **scegliendo quel modello dalla tendina non si decide quale dei due si
+prende**, perché `campioneModello` copia il primo blocco che trova in libreria. E il
+prefisso `JH.` su quel codice **resta di proposito**: la variante Hendrix vuole ancora lo
+sblocco, quindi l'avviso ogni tanto parla a vuoto ma non tace mai quando servirebbe.
+
 I dodici: `JCM800`, `MatchlessDC30`, `DrZ`, `Hiwatt103`, `B15`, `Acoustic360`, `GK700RBII`,
 `MetalZoneMT2`, `MuTron` — e tre che **esistono ma solo su Spark LIVE ed EDGE**, sul canale
 del microfono: `Preamp73`, `Comp76`, più i «vocal» che non avevamo. Erano tutti
