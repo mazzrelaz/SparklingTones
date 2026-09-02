@@ -124,7 +124,15 @@ static size_t   dentro = 0;
  * funzionare, o peggio rimbalzare da solo. Cambiare la costante qui sotto e'
  * l'unica riga chip-dipendente di tutto il firmware.
  */
-static const uint8_t PIN_TASTO = 9;   // C3: BOOT. Sull'S3 diventa 0.
+/* Il tasto BOOT della scheda, che cambia numero da un chip all'altro: sul C3
+ * e' GPIO9, sull'S3 e sul C6 e' GPIO0. **Non e' un dettaglio estetico**: sull'S3
+ * il 9 e' D10/MOSI, che senza niente attaccato resta flottante e produce
+ * pressioni fantasma — cioe' cambi preset a caso. */
+#if CONFIG_IDF_TARGET_ESP32C3
+static const uint8_t PIN_TASTO = 9;
+#else
+static const uint8_t PIN_TASTO = 0;
+#endif
 static const uint32_t ANTIRIMBALZO = 25;   // ms
 
 /* Antirimbalzo «aspetta che stia fermo», non «ignora i cambi ravvicinati».
@@ -770,6 +778,10 @@ static void avviaPonte() {
 
 void setup() {
   Serial.begin(115200);
+  /* Senza questa, se al PC nessuno legge la porta ogni stampa resta appesa
+   * fino a un timeout e il firmware striscia — e nel pedale vero, sul palco,
+   * il PC non c'e'. Vedi CLAUDE.md, «Trappole dell'ambiente». */
+  Serial.setTxTimeoutMs(0);
   delay(600);
   Serial.println(F("\nprova-ble — pedale Spark 2"));
   Serial.printf("banco di %u preset nel firmware. Premi BOOT per il prossimo.\n\n", BANCO_QUANTI);

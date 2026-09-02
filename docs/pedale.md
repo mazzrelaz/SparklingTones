@@ -1739,3 +1739,32 @@ basse, così si misurano col tester senza premere niente e senza indovinare qual
 - **un puntale che scivola su due pad adiacenti** mette in corto un'uscita alta contro una
   bassa. È probabilmente ciò che ha fatto scaldare il chip la terza volta, insieme al
   flussante delle saldature nuove.
+
+### Il BLE sulla S3: misurato, e l'antenna non è opzionale — 2 settembre 2026
+
+Il firmware `pedale/prova-ble/` portato sulla XIAO ESP32-S3 si collega allo Spark 2 e cambia
+preset. Il porting è stato di due righe: **`Serial.setTxTimeoutMs(0)`** e il numero del tasto
+BOOT, che sul C3 è GPIO9 e sull'S3 è GPIO0 — e non è estetica, perché **sull'S3 il 9 è
+D10/MOSI**, che lasciato flottante produce pressioni fantasma, cioè cambi preset a caso.
+
+**L'antenna, misurata.** Alla prima accensione la scansione trovava lo Spark a **−92 dBm**,
+che è al limite del funzionamento. Il foglietto u.FL non era montato — la S3 non ha antenna a
+bordo. Attaccandolo: **−63 dBm**, cioè **29 dB**, quasi ottocento volte la potenza ricevuta.
+Da cui la regola: se un giorno il pedale «ogni tanto non si collega», **il primo sospetto è
+quel connettore**, non il firmware.
+
+**I tempi, rimisurati sull'hardware nuovo** (dieci cambi preset di fila, alternando due
+slot):
+
+| intervallo di connessione | giro medio | min–max | preset intero, 16 giri |
+|---|---|---|---|
+| lento, 30 ms | 82,0 ms | 80–100 | ~1312 ms |
+| **veloce, 7,5 ms** | **26,5 ms** | 15–37 | **~424 ms** |
+
+**Quindi `updateConnParams` funziona anche sull'S3**: lo Spark l'intervallo corto lo concede,
+non lo ignora, e il guadagno è **tre volte**.
+
+**E il numero del lento chiude una domanda vecchia.** I ~1300 ms sono esattamente quanto ci
+mette il telefono con l'app: finora «il telefono è lento per l'intervallo di connessione, non
+per la banda» era un'inferenza dalla teoria. Adesso è una misura diretta — **rallentando il
+pedale allo stesso intervallo, ci mette lo stesso tempo.**
