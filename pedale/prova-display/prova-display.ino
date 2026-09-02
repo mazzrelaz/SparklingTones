@@ -62,6 +62,12 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C schermo(
 
 static uint32_t giro = 0;
 
+/* Il contrasto resta al massimo, e non e. una svista: su questo modulo
+ * **non fa differenza visibile** — provati 255, 160, 96, 48 e 16 il 2
+ * settembre 2026 e lo schermo sembra uguale. Quindi non e. una leva ne. sul
+ * consumo ne. sul ronzio del convertitore. **La leva vera e. quanti pixel
+ * sono accesi**: su un OLED un pixel nero e. spento e non consuma niente. */
+
 /** Chi risponde sul bus. Un display OLED sta di solito a 0x3c o 0x3d,
  *  l'MCP23017 fra 0x20 e 0x27. Zero dispositivi = fili, alimentazione o
  *  pull-up: in quell'ordine. */
