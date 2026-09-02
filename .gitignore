@@ -11,3 +11,4 @@ pcb/.history/
 pcb/*-backups/
 pcb/*.kicad_prl
 pcb/fp-info-cache
+pcb/~*.lck
