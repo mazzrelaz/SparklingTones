@@ -519,3 +519,18 @@ larghezza da computer e da telefono. Ha preso la terza, con modifiche sue.
 - **misurare invece di guardare.** Le posizioni degli elementi della barra lette con
   `getBoundingClientRect` da `localhost` hanno mostrato in un colpo solo cosa andava a
   capo e dove; a occhio, su uno screenshot, si vedeva solo che «era disordinato».
+
+## Perché tutti i settantotto modelli si possono cambiare, anche senza ampli
+
+Spostato da `CLAUDE.md` il 2 settembre 2026 per non pesarci a ogni sessione: è un argomento
+chiuso, e in `CLAUDE.md` ne resta la conclusione.
+
+La regola è sempre stata **«solo i modelli di cui sappiamo com'è fatto il blocco»**, e dal
+26 agosto 2026 lo sappiamo per tutti, perché il catalogo è verificato contro l'app ufficiale
+e la `TABELLA` dichiara le manopole di ognuno.
+
+**Che il conto torni è misurato, non supposto**: nei **ventiquattro blocchi** dei preset
+usciti dall'ampli in `captures/` — **ventidue modelli diversi** — i parametri sono sempre
+tanti quanti i nomi. Le due eccezioni sono **noise gate e riverbero**, che ne hanno uno in
+più (l'acceso/spento), e sono proprio i due blocchi con **un modello solo**: quelli non si
+cambiano mai, quindi l'eccezione non tocca il cambio di modello.
