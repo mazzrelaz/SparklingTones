@@ -357,3 +357,139 @@ Confronto con `reference/paulhamsh/SparkESP32_SparkIO.ino`:
   (`Spark.ino:319, 333`). Passare il preset corrente rilevato rompe il comando.
 - `oc_seq` parte da `0x01` ed è un contatore indipendente, non sincronizzato col seq
   dell'ampli
+
+## Estratto da CLAUDE.md, 2 settembre 2026 — protocollo, versione lunga
+
+## Protocollo — quello che non va dimenticato mai
+
+Dettaglio, derivazioni e misure: `docs/protocollo-spark2.md`.
+
+GATT: service `0xFFC0`, write `0xFFC1` (**writeWithoutResponse only**), notify `0xFFC2`.
+Notifiche frammentate: riassemblare cercando `F0` … `F7`.
+Chunk: `F0 01 <seq> <checksum> <cmd> <sub> <dati impacchettati> F7`.
+
+Stato: **completo e verificato sull'ampli**. `0x0201` lettura, `0x0138` cambio preset,
+`0x0115` effetto on/off, `0x0104` cambio parametro, `0x0101` invio di un preset intero.
+
+**Le trappole, tutte verificate sull'hardware:**
+
+- **`0x0115`, `0x0104` e `0x0106` vogliono un byte `0x00` in coda al payload logico.**
+  Senza, ack regolare e comando non applicato. `0x0138`, `0x0175` e `0x0176` no — e su
+  `0x0176` il byte di troppo **non è innocuo**: il bpm non cambia e **il delay parte in
+  ripetizione infinita** (28 agosto 2026), perché l'ampli legge i campi spostati. Si
+  recupera premendo un tasto preset sul pannello. Quindi **un payload malformato può
+  muovere qualcosa che non c'entra**, non solo essere ignorato.
+- **Il bpm si scrive con `0x0176`, e gli effetti a tempo seguono da soli** (verificato il
+  28 agosto 2026). Il payload si costruisce **dall'ultimo `0x0376` ricevuto** cambiando il
+  solo bpm, mai da una costante: l'ultimo campo cambia forma fra sessioni (`3c` contro
+  `cd ea 60`). Il TAP dell'ampli manda insieme `0x0363`, `0x0376` e `0x0337` sul parametro
+  4 di `DelayRe201`: l'accoppiamento tempo→effetti è dentro l'ampli, non tocca a noi.
+  Dettaglio in `docs/protocollo-spark2.md`.
+- **L'ack conferma la ricezione, non l'esecuzione.** E `writeWithoutResponse` fa sembrare
+  riuscita ogni scrittura lato browser. **L'assenza di errori non è una verifica**: vale
+  solo l'effetto sull'ampli o una risposta in RX.
+- **Chunk da 25 byte di payload, non 128.** Con 128 lo Spark 2 **si disconnette**. Il
+  massimo verificato in scrittura è 44.
+- **Tutti i chunk di un preset vanno con lo stesso sequence number.**
+- **`0x0127` non salva sullo Spark 2**, in tutte e quattro le forme provate. Tolto.
+- **Le write BLE lunghe vanno spezzate**: l'app ufficiale manda ogni messaggio in write ATT
+  da 20 byte e l'ampli riassembla da sé. `transport.sendSpezzato(comando, 20)`. Sopra i ~44
+  byte una write singola sparisce **in silenzio**, senza nemmeno l'ack.
+- **Cambiare un parametro di un effetto spento non produce nessun suono.** Verifica prima
+  che l'effetto sia attivo.
+- **`0x0106` vuole il nome del modello che c'è *adesso***, riletto dall'ampli, non quello
+  che ha sullo schermo. Se sbagliato, l'ampli ignora tutto senza fiatare — e da lì in poi
+  ogni cambio fallisce per sempre.
+- **L'ampli si può piantare davvero**, e allora serve staccare la corrente. `rxTotali`
+  distingue i due casi: 0 messaggi = ampli muto o connessione morta; più di 0 = parla e
+  siamo noi a scartare. Senza quel numero i due casi si vedono uguali — è costato una
+  serata.
+- **Gli effetti Hendrix (`JH.*`) non suonano finché l'app ufficiale non li sblocca**, e
+  non c'è niente che possiamo farci. Osservato dall'utente il 26 agosto 2026: i `JH.*`
+  mandati dalla nostra app restano muti — «Hey Jimi Solo» suona senza fuzz e con l'ampli
+  sbagliato, anche scritto in uno slot — e **nemmeno il pannello dell'ampli li sblocca**
+  (ci ha creduto per un momento e si è ricreduto). Basta invece **connettere l'app
+  ufficiale**: da lì in poi funziona tutto, e **lo sblocco resta nell'ampli anche dopo
+  che l'app ufficiale si è disconnessa**. Il pacchetto lui ce l'ha comprato.
+  È l'unico contenuto a pagamento dello Spark 2, e chi lo abilita è la **license key
+  `0x0170`** che l'app ufficiale manda appena connessa. **Non è forgiabile**: spacchettata
+  dalle due catture in `captures/2026-08-14-app-ufficiale-looper.txt` sono **64 byte tondi,
+  completamente diversi fra le due sessioni**, cioè una firma con dentro un nonce — e
+  rigiocata l'ampli la rifiuta (`0x0470` con `fe` invece di `00 00`, vedi `docs/looper.md`).
+  Cavare la chiave dall'app ufficiale è protezione di contenuto a pagamento e non si fa.
+  Sull'app ufficiale i suoni Hendrix si vedono **solo dopo il login**, ma **fare il login
+  dalla nostra app non servirebbe a niente, ed è misurato**: nella cattura l'app manda la
+  chiave **14 ms dopo** la risposta dell'ampli a `0x022f` — due volte, a 0,060s e a
+  589,246s — e in 14 ms non ci sta un giro in rete. E se fosse un gettone preso dal server
+  al login le due connessioni manderebbero lo stesso; invece sono diversi. **L'app la firma
+  in locale, con una chiave che si porta dentro.** Ne segue che **l'ampli non verifica
+  l'acquisto: verifica una firma** — non ha account e non parla con internet. Il login
+  serve all'app ufficiale per *mostrare* i suoni, non all'ampli per abilitarli.
+  **La cosa da ricordare è che non è un difetto nostro**, così non ci si torna sopra.
+  E ne resta una lezione che vale oltre gli Hendrix: **la catena riletta conferma il nome
+  del modello, non che quel blocco suoni** — è quello che aveva «verificato» il cambio a
+  `JH.SupaFuzz` il 13 agosto, mentre il fuzz era muto.
+
+**Le due strade per scrivere un preset sono diverse**, e questo è costato mezza giornata:
+
+```
+far suonare un preset   -> 0x0101 su [0x00, 0x7f], poi 0x0138 con 0x7f
+salvarlo in uno slot n  -> 0x0101 su [0x00, n], poi 0x0138 su un altro slot e 0x0138 su n
+```
+
+Il giro via e ritorno non è decorazione: senza, lo slot riporta il contenuto vecchio.
+`loadPreset` non sovrascrive nessuno slot: è il modo sicuro di provare un preset.
+**Mentre l'ampli suona il preset software il LED lampeggia** e non indica nessuno slot — non
+è un malfunzionamento.
+
+**Lo Spark 2 ha 8 slot, 0–7** (il 0–3 della documentazione vale per lo Spark 40), ma il
+pannello ha **4 LED bicolore**: rosso banco A (0–3), verde banco B (4–7).
+`Spark.slotLabel(n)` fa la conversione e la UI mostra A1…B4.
+
+**Nessuna autenticazione è richiesta, e dal 28 agosto 2026 è misurato e non supposto**: la
+license key `0x0170` **abilita il contenuto a pagamento, non i comandi**. Con l'ampli
+sbloccato davvero — l'app ufficiale connessa prima, senza staccare la corrente — il
+conteggio del looper resta ignorato identico a quando la chiave non c'era. Gli Hendrix la
+vogliono, il protocollo no. Vedi `docs/looper.md`.
+
+**Looper**, in due righe: si comanda con `0x0175` e un byte (`04` rec, `05` stop rec, `08`
+play, `09` stop, `0b` dub, `0c` stop dub, `0a` delete); si legge posizione (`0x0377`), bpm
+(`0x0363`) e impostazioni (`0x0376`). **La battuta di conteggio col click non si comanda, e
+non è più un'ipotesi aperta**: `02` riceve l'ack e viene buttato via, e il 28 agosto 2026 è
+caduta anche l'ultima spiegazione rimasta sui byte (la chiave). **Ma non è chiuso**, e la
+ragione è quella che ha detto l'utente: se l'app lo fa partire, un modo c'è. Quello che è
+finito è l'elenco delle ipotesi sui *byte*; **il canale non era mai stato guardato** —
+`leggi-btsnoop.ps1` concatenava tutte le write buttando via **handle e opcode ATT**, quindi
+«byte identici a quelli dell'app» era verificato e «sullo stesso canale» no. Metà è già
+chiuso: **`0xFFC1` dichiara solo `writeWithoutResponse`**, e la **mappa GATT presa con nRF
+Connect** dice che è **l'unica cosa scrivibile dell'intero dispositivo** (28 agosto 2026,
+tutta in `docs/looper.md`). L'app non aveva un'altra strada: stesso canale, stesso opcode,
+stessi byte. E **il paradosso è reale**, misurato il 28 agosto 2026: REC premuto nell'app
+ufficiale, mani lontane dal pannello, **conta** — quindi non era un dito sull'ampli.
+**Allora la differenza è in chi manda, non in cosa manda.** Il **bonding** è escluso per
+costruzione: la sonda fatta girare **sullo stesso telefono** che con l'app ufficiale fa
+contare l'ampli fallisce lo stesso. Resta **la sessione autorizzata**, ed è la conclusione:
+lo sblocco dei suoni resta nell'ampli, ma un flag «questo client ha mandato una chiave
+valida» è per connessione, e in nessuna prova ne abbiamo mai avuta una. **Quindi il modo
+c'è ed è la chiave `0x0170`, e non è una porta che apriamo** — sarebbe estrarre una chiave
+di firma dall'app ufficiale. La tabella di tutto ciò che è stato eliminato sta in
+`docs/looper.md`, «Come si conclude». **Non aggiungere sonde sui byte.** L'unica cosa che
+resterebbe da fare è **chiedere a Ignitron**, che manda COUNTIN senza nessuna chiave: se a
+loro funziona, la conclusione cade.
+
+### Regole di metodo, che valgono oltre il looper
+
+- **Una cattura d'ascolto dice cosa l'ampli racconta, non cosa accetta.** I nomi degli enum
+  di terzi descrivono lo *stato in cui l'ampli è entrato*, non un tasto da premere: che il
+  pannello notifichi `02` non vuol dire che `02` si possa mandare. Le due direzioni vanno
+  misurate separatamente.
+- **Si registra prima e si interpreta dopo, mai il contrario.** Una sonda che chiede di
+  dichiarare in anticipo cosa si sta per fare produce log che mentono appena l'ampli fa
+  altro.
+- **I dati finti non devono finire in una cattura.** Sono marcati `demo`, non contano negli
+  RX totali e l'esportazione li scarta.
+- Ogni prova va verificata **rileggendo dall'ampli**, una variante alla volta.
+- **Strumentare prima di ipotizzare.** I contatori — fronti grezzi contro pressioni
+  accettate — hanno chiuso in una sessione un problema su cui si era tirato a indovinare per
+  due.
+

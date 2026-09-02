@@ -534,3 +534,318 @@ usciti dall'ampli in `captures/` — **ventidue modelli diversi** — i parametr
 tanti quanti i nomi. Le due eccezioni sono **noise gate e riverbero**, che ne hanno uno in
 più (l'acceso/spento), e sono proprio i due blocchi con **un modello solo**: quelli non si
 cambiano mai, quindi l'eccezione non tocca il cambio di modello.
+
+## Le regole dell app, versione lunga — archiviata da CLAUDE.md il 2 settembre 2026
+
+In memoria di lavoro restano le regole nude; qui il testo per intero, col perche.
+
+### Sezione Preset
+
+**Gli otto preset caricati sull'ampli stanno per conto loro**, sopra, con l'etichetta
+A1…B4 e i colori dei LED (rosso il banco A, verde il B). Tutti gli altri stanno sotto. Un
+preset non compare mai in tutti e due i posti. **Niente striscia della famiglia sulle otto
+caselle** (tolta il 26 agosto 2026): resta sulle righe di libreria e sul LED dei
+pulsantoni live.
+
+**Sovrascrivere uno slot non perde il preset che c'era**, e la domanda è venuta
+(26 agosto 2026): `assignSlots` → `_sistemaSlot` gli toglie lo slot, quindi da lì in poi
+cade in `altri` e **ricompare da solo nella lista sotto**, con tag, note e famiglia. Il
+record non si cancella mai, cambia solo `slots`. L'utente ha deciso di lasciarla così:
+niente duplicazione fra i due posti.
+
+**Il bollo «JH» marca i preset che hanno un effetto Hendrix in catena**, sulle schede degli
+slot e sulle righe di libreria (`bolloHendrix`, e `SparkEffetti.hendrixNellaCatena` che è
+solo il prefisso `JH.`). Serve perché quei preset **non suonano come dicono** finché l'app
+ufficiale non ha sbloccato il pacchetto — vedi la trappola in «Protocollo» — e va saputo
+prima di sceglierne uno, non dopo averlo sentito muto.
+
+**In tutto, gli Hendrix si dicono in quattro posti, e quattro devono restare**: le schede
+della vista preset, la tendina dei modelli, il blocco a fuoco dell'editor (questi due in
+«Editor della catena effetti») e **una riga nel log quando il preset parte per l'ampli**,
+in `mandaPreset`, che è il momento in cui il suono esce sbagliato. Quest'ultima si dice
+**prima dell'invio** e non nella verifica, così è una sola invece che in ognuno dei rami.
+**È un avviso al buio**: all'ampli non si può chiedere se il pacchetto sia sbloccato,
+quindi parla anche quando va tutto bene — ed è la ragione per cui i posti sono quattro e
+non dieci. Restano scoperti **la vista live** (decisione dell'utente, non presa: i
+pulsantoni li ha disegnati lui e il LED porta già la famiglia) e **il pedale**, che un
+banco con dentro un Hendrix lo suonerebbe muto senza nessuna app che lo spieghi.
+
+**Alla connessione la lettura degli otto slot parte da sola** (`leggiDallAmpli`, dopo
+`identify`). Durante la lettura i pulsantoni della vista live restano spenti: l'ampli sta
+rispondendo a otto richieste in fila e premerne uno infilerebbe un comando dentro una
+conversazione già aperta.
+
+`store.hardware()` restituisce sempre otto posti, con `null` dove non sappiamo ancora cosa
+ci sia. Nel disegnare «In libreria» il confronto va fatto **per id**, non per oggetto:
+`hardware()` rilegge dal database e restituisce copie diverse dagli stessi record.
+
+**`slots` è una lista, non un numero.** Lo stesso preset può stare in più slot, e capita
+davvero. `normalizzaSlots` tiene una sola verità: costruisce `record.slots` ordinato e
+**cancella il vecchio `slot`**. `_sistemaSlot(visti)` è il cuore, condiviso fra
+`importFromAmp` e `assignSlots`: **si toccano solo gli slot osservati**, perché
+`readLibrary` salta quelli che non rispondono e cancellare uno slot mai visto farebbe
+sparire un preset per un timeout. Nella UI un preset in due slot compare due volte, e la
+chiave di apertura del dettaglio è `id:slot` e non `id`.
+
+**«Elimina tutti i preset» (pannello «Altro») risparmia gli otto dell'ampli**, e non per
+prudenza: quelli l'ampli li suona, quindi la prima lettura li rimetterebbe dentro comunque
+— ma spogliati di tag, note e famiglia, e *quello* sarebbe lavoro perso davvero.
+`svuotaTranneAmpli` passa da `remove`, quindi lascia le lapidi: senza, il primo «Prendi da
+Dropbox» rimetterebbe dentro tutto. Due conferme, e la seconda dice che la cosa viaggia.
+
+**Un preset nuovo si fa in tre modi, e nessuno parte dal nulla**: «Duplica» nel dettaglio
+(`store.duplicate`, che cambia **UUID, slot e nome** — l'UUID perché altrimenti la lettura
+dall'ampli scambierebbe la copia per l'originale), «Importa preset attuale» nel menu «⋯»,
+che offre di salvare quello che l'ampli sta suonando — se quell'UUID c'è già aggiorna solo
+la parte sonora, che è la regola di `importFromAmp` — e **«Importa un file»**, che dal
+28 agosto 2026 prende anche **un preset singolo** dell'app ufficiale e non solo il backup
+intero (vedi «Importare un preset solo» qui sotto). **Dal nulla non si fa, ed è
+deliberato**: un preset inventato dovrebbe dichiarare sette blocchi con modelli che l'ampli
+ha davvero, e un modello inesistente è quello che l'ha già piantato una volta (vedi
+`TrebleBooster`). Se un giorno servisse, lo scheletro va preso da un preset **uscito
+dall'ampli**, non dal catalogo.
+
+**Importare un preset solo** (28 agosto 2026). «Importa un file» accetta tre cose e le
+distingue **dal contenuto, non dall'estensione**: uno zip lo dicono i suoi primi due byte
+(`PK`), il nostro backup lo dice il campo `presets`, e tutto il resto lo guarda
+`SparkBackup.trovaPresetUfficiali`, che scende nel JSON in cerca di **un oggetto con
+`sigpath`** invece di indovinare il nome dell'incarto — di un tono esportato o condiviso
+dall'app ufficiale **non abbiamo un esemplare**, quindi la forma dell'involucro non la
+sappiamo, ma la catena sì. Per questo l'`<input type=file>` **non ha `accept`**: con un
+filtro, un'estensione che non conosciamo non si riuscirebbe nemmeno a scegliere.
+Da lì in poi è la strada del backup — stesso `convertiPreset`, stessa `importFromBackup` —
+quindi valgono le regole della libreria. Senza `meta.id` **l'UUID glielo diamo noi** e lo
+si dice nel log: reimportando lo stesso file si fa un doppione invece di aggiornare.
+**Il file non è l'unica via, e spesso non è la più comoda**: un tono che l'app ufficiale
+sta già facendo suonare si prende con «Importa preset attuale», senza esportare niente.
+
+### Editor della catena effetti
+
+Com'è fatto e perché — la catena al neon, i pomelli, la piramide, la tendina dei modelli —
+sta in `docs/decisioni-ui.md`. Qui restano le regole che fanno danni se le dimentico.
+
+**Le manopole agiscono sul suono che sta suonando**, non su una copia: è la scelta che
+governa tutto il resto. Per questo «Regola», **quando l'ampli c'è**, prima manda il preset
+con `loadPreset` e solo dopo apre il pannello. Lo stato di partenza si rilegge
+**dall'ampli** (`readLiveState`), non dalla libreria: se l'utente ha girato una manopola
+vera o ha usato l'app ufficiale, la verità è lì. Se la rilettura fallisce l'editor non si
+apre — meglio niente che manopole che partono da valori inventati. Niente viene salvato
+finché non si preme **Salva in libreria**.
+
+**Senza ampli l'editor si apre lo stesso, sulla copia in libreria** (chiesto dall'utente il
+24 agosto 2026: è il caso del divano). Non tradisce la regola di sopra, perché i valori del
+record sono un'istantanea vera di quel suono. `inModifica.offline` governa la differenza:
+
+- **niente parte sulla radio**: `mandaParametro` non accoda nemmeno, o un arretrato
+  partirebbe tutto insieme se l'ampli si connettesse a metà;
+- **il modello si cambia, qualunque, anche senza ampli** (dal 26 agosto 2026, chiesto
+  dall'utente in tre passi: prima la tendina era spenta, poi si aprivano i soli modelli
+  visti, ora tutti). Non è un cedimento sulla sicurezza: la regola è sempre stata **«solo
+  quelli di cui sappiamo com'è fatto il blocco»**, e adesso lo sappiamo per tutti e
+  **settantotto** i modelli cambiabili, perché il catalogo è verificato contro l'app
+  ufficiale e la `TABELLA` dichiara le manopole di ognuno.
+
+  Che il numero sia quello vero **è misurato** sui ventiquattro blocchi dei preset in
+  `captures/`; il dettaglio in `docs/decisioni-ui.md`.
+
+  Nel cambio, **prima si copia e poi si costruisce**: se quel modello sta già in un preset
+  della libreria, `campioneModello(nome)` ne prende numero di parametri *e* valori — è un
+  blocco che l'ampli ha davvero prodotto. Solo se non c'è si costruisce dalla tabella, con i
+  valori a metà corsa. Il blocco resta acceso o spento com'era, che è una scelta dell'utente
+  e non una proprietà del modello;
+- **la modalità si decide all'apertura e non cambia più**, anche se l'ampli si connette
+  dopo: rileggere la catena a metà lavoro sostituirebbe di soppiatto quello che si sta
+  modificando con quello che l'ampli sta suonando, che è un altro suono.
+
+Il titolo dice «— senza ampli» e la riga di stato lo ripete.
+
+**Le sette posizioni sono etichettate per categoria** (`Spark.CATENA`): noise gate,
+compressore, drive, ampli, modulazione, delay, riverbero.
+
+**Il tempo sta qui, e solo qui** (28 agosto 2026, chiesto dall'utente e poi ristretto da
+lui: «non nella vista live, non serve»). La ragione è che **il bpm è un campo del preset**
+— `preset.bpm`, che `serializePreset` scrive dentro `0x0101` — quindi viaggia col preset e
+torna quando lo si rimanda all'ampli: è una cosa che si sceglie mentre si costruisce il
+suono, come una manopola, non mentre si suona. Si batte col **tap** (due tocchi bastano,
+media delle ultime cinque battute, una pausa oltre 2,5 s ricomincia) o si aggiusta di un
+bpm coi due tasti. Il riscontro del tap è **il lampeggio del tasto** e non un messaggio,
+che in questo pannello non ne devono comparire.
+
+Con l'ampli attaccato il cambio parte subito con `0x0176` (`spark.setBpm`), **e gli effetti
+a tempo lo seguono da soli**: l'accoppiamento è dentro l'ampli. Senza ampli **non parte
+niente sulla radio**, come per le manopole. All'apertura il valore si prende dalla lettura
+dell'ampli quando c'è, dal record quando non c'è, e 120 per i record vecchi che il campo
+non ce l'hanno. `salvaModifiche` lo scrive nel record.
+
+**Il cursore va strozzato, e lo strozzamento dev'essere autocadenzato.** Un trascinamento
+genera decine di eventi al secondo e ogni comando è una scrittura BLE.
+**`writeWithoutResponse` non ha controllo di flusso**: la promessa si risolve quando il
+sistema ha preso in carico la scrittura, non quando l'ampli l'ha ricevuta, quindi l'app può
+correre più della radio. **È la causa più probabile dell'ampli che si pianta girando le
+manopole**, segnalato dall'utente il 16 agosto 2026.
+
+Quindi il prossimo invio parte **quando il precedente è finito**, più `PAUSA_PARAMETRO`
+(90 ms), e non su un timer: così la coda non può crescere qualunque cosa faccia il dito. La
+versione a timer da 60 ms poteva **sovrapporsi a sé stessa** — `svuotaCoda` azzerava
+`timerInvio` prima di aspettare gli invii — e accumulava arretrato. Si tiene solo l'ultimo
+valore per manopola, e l'ultimo parte sempre. **Non è verificato che risolva**: il blocco
+non si riproduce a comando. Se ricapita, la manopola da girare è `PAUSA_PARAMETRO`, poi
+`SEND_GAP_MS` in `spark-transport.js` (30 ms, più svelto di un intervallo di connessione).
+
+**L'editor sa se c'è del lavoro non salvato, e non lo lascia buttare via per sbaglio.**
+`inModifica.toccato` è il dato, e nasce in `segnaModificato()`: lo alzano `mandaParametro`
+(dove passano **tutte e cinque** le manopole — pomello, cursore, tendina, i due
+trascinamenti — subito **prima** del ritorno che scarta l'invio offline), l'interruttore
+acceso/spento, e ogni ramo di `cambiaModello`. Da lì:
+
+- **«Fatto» e il logo chiedono**, con `chiediPrimaDiUscire()`. **Tre vie, non due**: con un
+  `confirm()` di sistema l'alternativa a «salva» è «butta via», e un dito che sbaglia
+  bottone perde il lavoro proprio mentre glielo si chiedeva. La terza — «Torna all'editor»
+  — è anche quella di Esc e del tocco fuori. Il logo passa un seguito, che parte **solo se
+  si esce davvero**: chiude l'editor *e* torna ai preset.
+- **Se il salvataggio fallisce non si chiude niente**, e per questo `salvaModifiche()`
+  torna `true`/`false`: chiudere dopo un salvataggio fallito è il modo esatto di perdere
+  il lavoro che si stava salvando.
+- **Il segno che ha salvato lo dà il tasto**, non un messaggio — in questo pannello non ne
+  deve comparire nessuno, ed è per quello che l'utente non aveva «la certezza di nulla».
+  Pallino rosso e bordo acceso quando c'è del lavoro in sospeso, `✓ Salvato` verde per 2,6
+  secondi dopo, poi normale. **Non si disabilita mai quando niente è toccato**: con l'ampli
+  la catena viene da una lettura vera e può già essere diversa da quella in libreria —
+  salvare in quel momento è proprio come si porta in libreria quello che l'ampli suona.
+
+**Gli Hendrix si dicono in due momenti, e sui tasselli non si dicono affatto.** Quei
+modelli si chiamano già «J.H. Fuzz Zone»: il nome li identifica da solo, e un bollo in più
+su una casella da 106 px sarebbe rumore. Quello che manca è **cosa comporta**, e va nei due
+momenti in cui conta: una `.elenco-nota` sotto l'intestazione «Jimi Hendrix Pack» della
+tendina — **una sola, non su ogni voce** — e una `.nota-jh` sotto il nome del modello nel
+blocco a fuoco, che resta lì finché quel modello è quello. La seconda **è uno stato, non un
+messaggio**, che in questo pannello non ne devono comparire: sta al nome del blocco come
+«offline» sta al nome del preset.
+
+**Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**, e `logLine`/
+`logProgress` ci scrivono l'ultimo messaggio: un pannello a tutto schermo copre il log, e
+senza quello un comando fallito è indistinguibile da un comando che non fa niente.
+**`pulisciStatoPannelli()` nasconde ogni `.stato-pannello`**, e chi ci scrive deve
+rimostrarlo (`riga.hidden = false`) — è quello che fa `statoDelPannello`. Senza, il log
+viene scritto sempre e non si vede mai: due giri di diagnostica finiti in un elemento
+invisibile.
+
+### Finestre e tendine: nell'app non c'è più niente del sistema
+
+**Mai più `confirm()`, `alert()`, `prompt()` o `<select>`** (26 agosto 2026, chiesto
+dall'utente: «sulla prima pagina sono ancora i menu di sistema»). Aprono la roba del
+sistema operativo — carattere suo, fondo chiaro in un'app tutta nera, e sul telefono il
+menu di Android manda a capo le voci lunghe — e soprattutto **un `confirm()` ha due vie
+sole**, che è il problema che aveva già fatto nascere la domanda dell'editor.
+
+Al loro posto, tutte costruite sulla stessa scatola `.elenco-scelta`:
+
+| invece di | si usa | torna |
+|---|---|---|
+| `<select>` | `tendinaFinta(titolo, voci, valore, quando)` | il valore sta in `.valore` (non `.value`), `aggiorna(v)` lo cambia da fuori |
+| `confirm()` | `await conferma(titolo, testo, {ok, pericolo})` | `true`/`false` |
+| `alert()` | `await avvisa(titolo, testo)` | — |
+| `prompt()` | `await chiediTesto(titolo, testo, valore, {ok, invito})` | il testo, o `null` |
+| tre o più vie | `await finestra({titolo, testo, campo, azioni})` | il `valore` dell'azione, `null` se si esce |
+
+Tutte sono **asincrone**, quindi il gestore che le chiama va `async`. `testo` è **HTML** —
+il grassetto va sulla parte che conta — e un nome che viene dai dati ci entra solo passando
+da **`testoConNome()`**, che lo scappa. Esc e il tocco fuori tornano sempre `null`, che è la
+via che non fa niente.
+
+**Le scorciatoie «campo vuoto = elimina» sono sparite**, ed erano due: il nome del banco e
+il nome di una manopola. Erano una regola scritta fra parentesi che nessuno legge, e chi
+svuotava il campo per riscriverlo si trovava a rispondere di un'eliminazione mai chiesta.
+Adesso sono bottoni che dicono quello che fanno.
+
+**Nella tendina «⋯» nessuna voce si spegne**, e il motivo è misurato: **un pulsante
+`disabled` non riceve il clic**, quindi non scatta nemmeno il gestore che chiude la
+tendina — la tendina resta aperta, non compare niente da nessuna parte, e si vede
+un'app rotta. È quello che è successo il 28 agosto 2026 con «Importa preset attuale»
+(«non succede nulla»). Quindi «Leggi dall'ampli» e «Importa preset attuale» restano
+sempre premibili e, senza ampli, **rispondono**: `senzaAmpli(cosa)` compone la riga di
+log, una sola, che dice cosa manca e cosa fare. La stessa trappola vale per qualunque
+voce si aggiunga lì dentro.
+
+### I nomi degli effetti e delle manopole (`src/spark-effetti.js`)
+
+Vengono dal catalogo di **Soundshed** (MIT), non da Positive Grid, quindi restano
+**proposte**: si vedono *in corsivo*, un nome scritto a mano vince sempre, e `manopola()`
+**scarta l'intera riga** se dichiara più manopole di quante l'ampli ne manda per
+quell'effetto.
+
+**L'ordine sullo schermo non è l'ordine degli indici, ed è il punto di tutto.** Su un ampli
+le manopole si leggono Gain, Bass, Middle, Treble, Master, ma negli indici stanno
+`Gain(0), Treble(1), Middle(2), Bass(3), Master(4)`. Trascrivendo dall'interfaccia si
+sbagliava in silenzio. Due test fissano questo caso e quello di LA Comp.
+
+Il campo `quante` dice **quante manopole ha davvero l'effetto**: può essere più dei nomi che
+sappiamo e meno dei parametri che arrivano. I parametri in eccesso sono
+**l'acceso/spento del blocco** (misurato, vedi `docs/protocollo-spark2.md`).
+
+**I nomi dei parametri li dà l'utente**, girando e ascoltando: l'ampli manda solo indici e
+non esiste nessuna tabella da cui dedurli. Sono salvati **per modello di effetto**
+(`settings.nomiParametri`), non per preset. `exportAll` li porta con sé e `importBackup` li
+**aggiunge** invece di sovrascrivere: reimportare un backup vecchio non deve cancellare i
+battesimi fatti da allora.
+
+**`MODELLI` adesso è verificato tutto, contro l'app ufficiale** (26 agosto 2026): l'utente
+ha fotografato l'elenco intero sul suo Spark 2 e il confronto voce per voce ha tolto
+**dodici** nomi che il catalogo di Soundshed aveva e l'ampli no. I conti tornano con i suoi
+screenshot: **noise gate 1, comp/wah 6, drive 14, ampli 39, modulazione 13, delay 6,
+riverbero 1 con 9 tipi**.
+
+**Una voce nuova nell'elenco ufficiale non è per forza un modello nuovo** (2 settembre
+2026). Positive Grid ha aggiunto un **«Auto Wah»**, libero per tutti, con la sola
+Sensitivity, accanto al wah del pacchetto Hendrix che c'era già. Nell'app sono due voci; per
+lo Spark sono **lo stesso `JH.Vox846` con sei parametri**, e la differenza sta nei valori.
+Misurato con due catture apposta. Quindi **il conteggio di comp/wah resta 6** — sono
+identificativi, non voci di menu — e in `MODELLI` non è stato aggiunto niente. Ne segue una
+cosa vera per la UI: **scegliendo quel modello dalla tendina non si decide quale dei due si
+prende**, perché `campioneModello` copia il primo blocco che trova in libreria. E il
+prefisso `JH.` su quel codice **resta di proposito**: la variante Hendrix vuole ancora lo
+sblocco, quindi l'avviso ogni tanto parla a vuoto ma non tace mai quando servirebbe.
+
+I dodici: `JCM800`, `MatchlessDC30`, `DrZ`, `Hiwatt103`, `B15`, `Acoustic360`, `GK700RBII`,
+`MetalZoneMT2`, `MuTron` — e tre che **esistono ma solo su Spark LIVE ed EDGE**, sul canale
+del microfono: `Preamp73`, `Comp76`, più i «vocal» che non avevamo. Erano tutti
+`TrebleBooster` in attesa (18 agosto 2026: sullo Spark 2 c'è solo `Booster`, e chiederne
+uno inesistente lo mandava in palla). Restano nella `TABELLA` dei nomi, che è innocua e
+serve ancora a dare un nome alle manopole di un preset importato da altrove.
+
+**Il credito a Soundshed non si toglie, e la domanda è già stata fatta** (31 agosto 2026).
+La verifica contro l'app ufficiale ha corretto **`MODELLI`**, cioè quali modelli esistono;
+non ha toccato la **`TABELLA`**, che sono **90 voci di nomi di manopole con il loro ordine
+di indice** e sono ancora loro. Quell'ordine dalle foto non poteva venire — sullo schermo si
+legge Gain, Bass, Middle, Treble, Master e negli indici sta `Gain(0), Treble(1), Middle(2),
+Bass(3), Master(4)` — quindi il NOTICE dice il vero e la MIT lo richiede. L'unica strada per
+farlo cadere davvero è **sostituire la tabella battezzando le manopole a orecchio**, con la
+funzione che l'app ha già: quando i nomi dell'utente coprono tutto, il credito cade da sé.
+
+**Se si aggiunge un nome nuovo a `MODELLI`, va verificato allo stesso modo**, perché
+all'ampli non si può chiedere quali modelli conosce: l'unica prova è che compaia
+nell'elenco ufficiale o in un preset uscito dall'ampli. La tendina tiene in fondo un gruppo
+«fuori dall'elenco Positive Grid» — oggi vuoto — che li raccoglierebbe.
+
+**Gli effetti Hendrix stanno in fondo a ogni tendina, sotto «Jimi Hendrix Pack»**
+(`SparkEffetti.GRUPPO_HENDRIX`, una stringa sola per tutti e quattro i blocchi che ne
+hanno). Chiesto dall'utente il 26 agosto 2026, e non è solo ordine: sono l'unico contenuto
+a pagamento e l'unico che può entrare in catena e restare muto, quindi sparsi in mezzo agli
+altri sembravano effetti come tutti gli altri. Per gli ampli è una famiglia di
+`GRUPPI_AMPLI` come le altre, ed è l'ultima; per gli altri blocchi, che famiglie non hanno,
+l'elenco si costruisce in due passate.
+
+
+### La decisione sull inglese — spostata da CLAUDE.md il 2 settembre 2026
+
+- Italiano nei commenti e nella UI. **L'inglese ci sarà, ma non adesso** — deciso il 26
+  agosto 2026 dopo aver misurato: sono **~270 stringhe** (169 nel JS, 87 nel corpo HTML,
+  12 fra `title` e `placeholder`), e **93 sono messaggi di log**, cioè prosa che spiega il
+  comportamento e che quindi si riscrive ogni volta che il comportamento cambia.
+  Tradurre adesso vuol dire tradurre due volte e rendere doppia ogni modifica alla UI;
+  aspettare non accumula debito, perché i messaggi sono già frasi intere con i valori
+  dentro e non pezzi cuciti insieme. Il momento è **quando Preset, Live ed editor smettono
+  di cambiare forma** — non «a progetto finito», che il pedale può andare avanti senza
+  toccare una riga di testo dell'app. Allora: `src/lingua.js` con due dizionari e una
+  `t()`, `data-t` sugli elementi statici, nessuna libreria e nessun build step. L'utente ha
+  detto «non c'è fretta»: è per sé, non per pubblicarla ad altri.

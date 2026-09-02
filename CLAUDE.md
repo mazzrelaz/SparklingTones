@@ -25,13 +25,19 @@ e **va letto solo quando si rimette in discussione quella cosa lì**:
 | `docs/snake.md` | si riapre StompSnake: disegno, wah, accordo, neon, manopole |
 | `docs/HANDOFF-2026-08-10.md` | ricerca originale: comandi, tipi dati, catture |
 | `docs/diario.md` | com'è andata una sessione passata, e perché una cosa è come è |
+| `docs/sito.md` | si tocca `sparklingtones.com`: DNS, `www`, privacy, video |
 
-Snellito quattro volte: il 14 agosto 2026 (era 27.700 token), il 26 agosto (~27.000, metà
-erano il pedale), il 27 agosto (~17.700 in un giorno solo: StompSnake pesava quanto il
-protocollo dell'ampli), e il **29 agosto**, da ~23.300, spostando il racconto delle sessioni
-in `docs/diario.md`. **Ogni volta non si butta via niente: si sposta in `docs/`.** La regola
+Snellito cinque volte: il 14 agosto 2026 (era 27.700 token), il 26 agosto (~27.000), il 27
+agosto (~17.700 in un giorno solo), il 29 agosto (da ~23.300), e il **2 settembre, da 73.137
+byte a 42.154** — cioè da ~25.000 token a ~14.000, **11.000 risparmiati a ogni singola
+sessione**. Quella volta hanno lasciato la memoria di lavoro: il racconto delle regole
+dell'app e la decisione sull'inglese (`docs/decisioni-ui.md`), le trappole dell'ESP32 e la
+sezione lunga del pedale (`docs/pedale.md`), gli Hendrix e il looper
+(`docs/protocollo-spark2.md`), il sito (`docs/sito.md`), i punti di ripresa vecchi
+(`docs/diario.md`). **Ogni volta non si butta via niente: si sposta in `docs/`.** La regola
 che decide è sempre la stessa: qui resta ciò che mi impedisce di fare danni, il resto è un
-rimando.
+rimando. **Si rigonfia in due settimane, quindi si rimisura spesso**, con
+`wc -c CLAUDE.md`.
 
 ## Struttura
 
@@ -50,73 +56,61 @@ src/spark-backup.js               legge preset_backup.zip dell'app ufficiale, se
 src/dropbox-sync.js               sync della libreria: OAuth PKCE, niente server
 src/pedale-ponte.js               sponda app del ponte BLE verso il pedale
 src/pwa.js                        service worker, «installa», «versione nuova»
-src/snake-pedali.js               la goliardata: StompSnake, a 8 bit, in «Fai una pausa»
-pedale/prova-ble/                 firmware: si collega, cambia preset, riceve un banco
-  banchi.h  preset_frames.h       formato del banco; frame preserializzati dall'app
-pedale/prova-usb/                 sketch vuoto, per isolare i guai di USB/alimentazione
-pedale/prova-display/             scanner I²C + display: il primo pezzo sul banco
-pedale/prova-espansore/           MCP23017: pulsanti e LED, con le caselle sullo schermo
-pedale/prova-midi/                la devkit si finge una pedaliera BLE-MIDI
-tools/pedale-sim.html             la faccia del pedale in una pagina, con la logica vera
-tools/frames-pedale.html          genera preset_frames.h per il firmware
-tools/ponte-prova.html            sonda del ponte, sponda app
-tools/pedale-seriale.html         log del pedale via Web Serial (non resetta la scheda)
-tools/serve.ps1                   server statico su localhost, per provare la PWA
-tools/scatola-fusion.py           bozza della scatola del pedale, script per Fusion 360
-tools/snake-banco.html            fa girare il gioco da solo e dice cosa è successo
-tools/make-icons.ps1              rigenera icons/
-tools/leggi-btsnoop.ps1           legge uno snoop log HCI di Android
-tools/reader.html                 legge la libreria dall'ampli, esporta in JSON
-tools/write-probe.html            varianti di 0x0101, con rilettura di verifica
-tools/model-probe.html            idem per 0x0106
-tools/looper-probe.html           ascolta l'ampli mentre si usa il looper
-tools/explorer.html               diagnostico single-file per Android, CONGELATO
-tools/explorer-v1.html            la sua versione vecchia, non aperta da nessuno: si può togliere
-tools/banco-di-prova.js           otto preset veri per frames-pedale.html (da captures/)
+src/snake-pedali.js               la goliardata: StompSnake, in «Fai una pausa»
+pedale/prova-ble/                 firmware del pedale; banchi.h e preset_frames.h sono il
+                                  formato del banco e i frame preserializzati dall'app
+pedale/prova-usb|display|espansore|midi/   sketch di prova, uno per pezzo
+pcb/                              la scheda portante in KiCad: schema e disposizione
+tools/                            simulatore del pedale, generatori, sonde dell'ampli, server
+                                  locale (serve.ps1), script della scatola; `ls tools/` li
+                                  elenca e il nome dice cosa fanno
 test/*.html                       protocol 139, transport 60, store 136, backup 41, dropbox 34
-test/fixtures/preset0.js          catture condivise fra le suite
-design/proposte-*.html            le proposte grafiche a confronto, non è l'app
 captures/                         log grezzi dall'ampli
 reference/paulhamsh/              sorgenti di riferimento (ESP32 + Python), BLE funzionante
-docs/                             vedi tabella qui sopra
+design/                           le proposte grafiche a confronto, non è l'app
+docs/                             vedi la tabella qui sopra
 ```
 
-**`index.html` è 186 KB: leggerlo intero costa ~55.000 token, più di due volte questo
-file.** Non va mai letto tutto. È già navigabile: `grep -n '^/\* ==='` dà l'indice del
-JavaScript e poi si legge la sola sezione con `sed -n 'a,bp'`. Le sezioni, in ordine:
-`<style>` (15–691, senza marcatori), corpo HTML (fino a ~1000), poi lo script — Stato in
-memoria, Le due viste, Log, Pannelli, Vista preset, Vista live, Invio di un preset
-all'ampli, Editor della catena effetti, Il disegno dell'editor, Categorie, Azioni comuni,
-Dropbox, Il pedale ESP32. I numeri di riga invecchiano a ogni modifica; i titoli no.
+**`tools/explorer.html` è CONGELATO**: ha una copia propria del codice di protocollo perché
+deve restare single-file per il telefono, e le modifiche vanno in `src/`.
 
-Niente build step, niente server: tutto si apre da `file://`. Per questo i moduli sono
-classic script che espongono `window.Spark` e `window.SparkTransport` invece di ES module,
-che su `file://` sono bloccati dal CORS.
+**`index.html` è 186 KB: leggerlo intero costa ~55.000 token**, più di due volte questo file.
+Non va mai letto tutto. `grep -n '^/\* ==='` dà l'indice del JavaScript e poi si legge la sola
+sezione con `sed -n 'a,bp'`. Le sezioni, in ordine: `<style>` (senza marcatori), corpo HTML,
+poi lo script — Stato in memoria, Le due viste, Log, Pannelli, Vista preset, Vista live, Invio
+di un preset all'ampli, Editor della catena effetti, Il disegno dell'editor, Categorie, Azioni
+comuni, Dropbox, Il pedale ESP32. I numeri di riga invecchiano a ogni modifica; i titoli no.
 
-IndexedDB funziona da `file://` su Chrome desktop (verificato). Ma su `file://` tutte le
-pagine condividono la stessa origine opaca, quindi niente isolamento fra i database e il
-browser li ripulisce più facilmente. **Passando da `file://` a https la libreria non viene
-dietro**: altra origine, altro IndexedDB. Va esportata in JSON e reimportata.
-
-`tools/explorer.html` ha una copia propria del codice di protocollo, perché deve restare
-single-file per il telefono. È **congelato**: le modifiche vanno in `src/`.
+Niente build step, niente server: tutto si apre da `file://`. Per questo i moduli sono classic
+script che espongono `window.Spark` e `window.SparkTransport` invece di ES module, che su
+`file://` sono bloccati dal CORS. **IndexedDB funziona da `file://`** su Chrome desktop, ma lì
+tutte le pagine condividono la stessa origine opaca: **passando da `file://` a https la
+libreria non viene dietro**, e va esportata in JSON e reimportata.
 
 ## Trappole dell'ambiente
 
 **Mai riscrivere un file di questo progetto con `Get-Content`/`Set-Content` di PowerShell
-5.1.** Senza BOM, `Get-Content` decodifica l'UTF-8 come ANSI e `Set-Content -Encoding UTF8`
-lo riscrive doppiamente codificato: ogni accento e ogni «—» diventano `Ã ` e `â€"`, in
-tutto il file, in silenzio. Basta un `-replace` di una riga sola — ci sono ricascato il 13
-agosto 2026 su `index.html`/`live.html`/`pwa.js` e il 14 su `sw.js`. Rimedio: `git checkout
--- <file>` se è committato, e rifare con gli strumenti di edit (o in .NET con l'encoding
-esplicito). Se il file non è committato: rileggerlo come UTF-8, togliere l'eventuale `﻿`
-iniziale e riscrivere i byte convertendo la stringa in **CP1252**, che è l'inverso.
+5.1.** Senza BOM, `Get-Content` decodifica l'UTF-8 come ANSI e `Set-Content -Encoding UTF8` lo
+riscrive doppiamente codificato: ogni accento diventa `Ã ` in tutto il file, in silenzio.
+Basta un `-replace` di una riga. Rimedio: `git checkout -- <file>` se è committato, e rifare
+con gli strumenti di edit; se non è committato, rileggerlo come UTF-8, togliere il `﻿` iniziale
+e riscrivere i byte convertendo in **CP1252**, che è l'inverso.
 
-**Dopo ogni modifica a `src/`, apri le pagine in `test/` e verifica che il riepilogo sia
-verde.** Girano contro catture reali dell'ampli, quindi intercettano una regressione nella
-codifica senza avere l'hardware a portata.
+**Mai usare `|` come delimitatore di `s///` in perl su testo con tabelle markdown**: il primo
+`|` del contenuto chiude il pattern e la sostituzione finisce **in cima al file**, che sembra
+tutt'altro guasto. Su questi file si usa lo strumento di edit, non `perl -0pi`.
 
-**Le suite girano anche senza browser**, con Edge headless:
+**Gli heredoc lunghi in bash si rompono**: per scrivere testo lungo si usa Write in un file
+dello scratchpad e poi lo si concatena. Stessa famiglia: **i messaggi di commit vanno passati
+per file** — `git -c i18n.commitEncoding=UTF-8 commit -F <file>` — perché `-m @'…'@` in
+PowerShell 5.1 si spezza in silenzio. Così si possono anche usare gli accenti.
+
+**Il push non parte dalla mia shell**, che è non interattiva: serve `GIT_TERMINAL_PROMPT=1`,
+`GCM_INTERACTIVE=true` e `GCM_GUI_PROMPT=true`, che fanno aprire la finestra sul desktop.
+
+**Dopo ogni modifica a `src/`, le pagine in `test/` devono restare verdi.** Girano contro
+catture reali dell'ampli, quindi prendono una regressione della codifica senza hardware.
+Girano anche senza browser, con Edge headless:
 
 ```
 & 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --headless=new --disable-gpu `
@@ -124,118 +118,40 @@ codifica senza avere l'hardware a portata.
   --dump-dom 'file:///C:/Users/massi/spark/test/protocol-test.html'
 ```
 
-Poi si cerca `id="summary"`. Funziona per protocol e transport. **Su `store-test.html` e
-`backup-test.html` no**: col tempo virtuale il browser manda avanti i timer ma non aspetta
-il lavoro asincrono vero — IndexedDB e le fetch dei fixture non fanno in tempo — e la
-pagina resta a «esecuzione…». Non è un test rotto, è l'ambiente.
+Poi si cerca `id="summary"`. **Su `store-test.html` e `backup-test.html` no**: col tempo
+virtuale IndexedDB e le fetch dei fixture non fanno in tempo e la pagina resta a «esecuzione…».
+Per quelle, e per provare l'app che gira, si passa da **`localhost`** (`tools/serve.ps1`).
+**Aprire un `file://` nel browser del riquadro non serve a niente**: lo carica come `data:` e i
+`<script src="../src/…">` non partono.
 
-**Per quelle, e per provare l'app che gira, si passa da `localhost`**: `tools/serve.ps1` in
-background, poi una scheda del browser del riquadro su
-`http://localhost:8099/test/store-test.html`, e il riepilogo si legge con una riga di
-JavaScript. Lì IndexedDB e la rete si comportano da veri. **Aprire un `file://` nel riquadro
-invece non serve a niente**: lo carica come `data:`, i `<script src="../src/…">` non partono
-e si vede solo il guscio. In quel browser il service worker non si registra: **non è
-verificato** se sia un limite suo o un difetto nostro.
+Cinque cose misurate su quell'ambiente, che fanno perdere ore se le dimentico:
 
-**In una scheda in secondo piano i timer vengono strozzati**, e una suite da un secondo
-sembra piantata per minuti. Basta portarla in primo piano.
+- **lo stdout di Edge headless non torna alla shell** (`$out = & msedge …` dà stringa vuota):
+  va redirezionato con `Start-Process … -RedirectStandardOutput`, sia per `--dump-dom` sia per
+  `--screenshot`, ed è con `--screenshot` che si guarda una pagina che *gira*;
+- **`requestAnimationFrame` non gira** né nel riquadro né in headless — un fotogramma solo, e
+  per lo stesso motivo lì lo screenshot del riquadro fallisce. Niente che si muova da sé si può
+  provare con rAF: il ciclo del gioco è un `setInterval`;
+- **il service worker serve a Edge headless i file della corsa precedente**, e una modifica non
+  si vede: si aggiunge una **query in coda** all'url, o si usa un profilo nuovo — che però da
+  freddo non dà tempo a IndexedDB di rispondere;
+- **in una scheda in secondo piano i timer sono strozzati**, e una suite da un secondo sembra
+  piantata per minuti;
+- **l'avvio dell'app chiude i pannelli** (`applicaVista()` → `chiudiPannelli()` quando il
+  database risponde): una prova che apre un pannello troppo presto sembra un difetto del
+  pannello.
 
-**Nel browser del riquadro `requestAnimationFrame` non gira**, e in Edge headless nemmeno:
-misurato il 27 agosto 2026 con una sonda che contava i fotogrammi — **uno solo**, in tutti
-e due. La pagina non compone, quindi rAF non scatta mai (e per lo stesso motivo lì lo
-screenshot del riquadro fallisce: «not compositing frames»). Conseguenza pratica: **niente
-che si muova da sé si può provare con rAF**, e infatti il ciclo del gioco è un
-`setInterval`. Le catture di una pagina che *gira* si fanno con `--screenshot` e
-`--virtual-time-budget`.
-
-**Il service worker serve a Edge headless i file della corsa precedente.** Il profilo resta
-sul disco, l'app ci registra `sw.js`, e da lì in poi ogni `--screenshot` guarda una copia
-vecchia: si perde mezz'ora a chiedersi perché una modifica non si vede. Tre rimedi, in
-ordine di comodità: una **query in coda** all'url (la chiave di cache comprende la query),
-un profilo nuovo, oppure disiscrivere il service worker dalla pagina. Attenzione che il
-profilo nuovo ne porta un'altra: **da freddo IndexedDB non fa in tempo a rispondere** col
-tempo virtuale, quindi l'app resta a metà avvio.
-
-**L'avvio dell'app chiude i pannelli.** `applicaVista()` chiama `chiudiPannelli()` quando il
-database ha risposto: una prova automatica che apre un pannello troppo presto se lo vede
-chiudere in faccia, e sembra un difetto del pannello.
-
-**Lo stdout di Edge headless non torna alla shell**: `$out = & msedge …` dà **stringa
-vuota** anche su una pagina che funziona. Va redirezionato su file con
-`Start-Process … -RedirectStandardOutput $file -NoNewWindow -Wait`, poi
-`[IO.File]::ReadAllText($file)`. Vale per `--dump-dom` e per `--screenshot` — ed è con
-`--screenshot` che si guarda una pagina che *gira*, leggendola poi come immagine.
-
-**L'ESP32 si programma e si legge dalla mia shell**, senza l'IDE: `arduino-cli` sta in
-`%LOCALAPPDATA%\Programs\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe`,
-e la seriale si legge con `System.IO.Ports.SerialPort` da PowerShell. Tre trappole pagate
-il 14 agosto 2026 (su un C3; da riverificare sul C6):
-
-- **`CDCOnBoot=default` vuol dire *Disabled*, ed è il valore di fabbrica.** Con quella la
-  `Serial` esce dai pin 20/21 e il monitor sull'USB resta muto: sembra che lo sketch non
-  parta. Va compilato con `CDCOnBoot=cdc` nell'fqbn. Il segno che l'impostazione **non** è
-  cambiata è `No changed sectors found` nel log di caricamento.
-- **Ma sulla XIAO ESP32-S3 i due valori sono ROVESCIATI** (2 settembre 2026): in
-  `boards.txt` `CDCOnBoot.default=Enabled` e `CDCOnBoot.cdc=Disabled`. Quindi sull'S3
-  l'fqbn giusto è **`XIAO_ESP32S3:CDCOnBoot=default`**, e copiare l'fqbn del C3/C6 spegne
-  la seriale invece di accenderla. È saltato fuori solo perché `Serial.setTxTimeoutMs()`
-  non compila su `HardwareSerial`: senza quella riga avremmo avuto il monitor muto e dato
-  la colpa a tutt'altro. **Sulla S3 `Serial` è `HWCDC` solo con CDC acceso**, altrimenti è
-  la UART.
-- **Aprire la porta seriale resetta il chip**: sull'USB nativo DTR/RTS pilotano reset e
-  boot. `DtrEnable=$false, RtsEnable=$false` per leggere senza toccare niente; con
-  `RTS=$true` il chip riparte **in download mode** e non esegue lo sketch.
-- **Da download mode non si esce via software**, nemmeno con `esptool --after hard-reset`:
-  serve staccare e riattaccare il cavo. Distingue i due casi `boot:0x5 (DOWNLOAD)` contro
-  `boot:0xd (SPI_FAST_FLASH_BOOT)`.
-
-**Sulla XIAO `Serial.print` si blocca se nessuno legge la porta.** La seriale passa dentro la
-USB e ogni stampa resta appesa fino a un timeout: un lampeggio da 1,4 s è diventato **cinque
-secondi** e i pulsanti rispondevano in ritardo (30 agosto 2026). Si risolve con
-**`Serial.setTxTimeoutMs(0)`** subito dopo `Serial.begin`, e **nel firmware del pedale non è
-un dettaglio: sul palco il PC non c'è.** Ne segue una regola di metodo più larga:
-**misurare un tempo mentre si è collegati alla seriale può nascondere il difetto che si
-manifesta da scollegati** — la mia misura tornava perfetta proprio perché la porta era aperta.
-
-**Il flussante residuo fa scaldare i chip, e lo abbiamo pagato tre volte** (2 settembre 2026).
-**Si pulisce dopo OGNI sessione di saldatura, prima di ridare corrente** — non una volta e
-via: la terza volta è tornato a scaldare per le saldature *nuove* dello zoccolo da 10 pin,
-fatte dopo la pulizia precedente. Stessa categoria: **un puntale che scivola su due pad di
-uscita adiacenti** mette in corto un'uscita alta contro una bassa, e scalda in un attimo —
-si tocca un pad alla volta.
-Non è isolante: fa un percorso da qualche kΩ fra saldature vicine, e su una fila a 2,54 mm
-basta a portare un ingresso CMOS fuori dai suoi limiti e mandare il chip in **latch-up** —
-tira corrente a vuoto, scalda, e **si spegne da solo togliendo l'alimentazione**, quindi non
-lascia prove. L'MCP23017 è arrivato a 80 °C; **pulito con alcol isopropilico è sceso a 23**.
-**Si pulisce sempre e subito.** E la lezione di metodo: **quando un componente scalda, prima
-di condannarlo si guarda *intorno* al componente** — il conto sui watt era giusto e la
-conclusione («il chip è andato») sbagliata, perché la corrente non passava dove pensavo.
-Nota: **l'ohmmetro su un chip non alimentato non dice niente di utile**, la tensione di prova
-è troppo bassa perché conducano le protezioni interne.
-
-**Le librerie Arduino non si installano in `Documenti`**: Defender ci blocca la scrittura
-(l'IDE è autorizzato, il mio `arduino-cli` no) e l'errore che dà è `mkdir … The system cannot
-find the file specified`, che sembra un'altra cosa. Si estraggono a mano in
-`%LOCALAPPDATA%\claude-arduino-libs` e si compila con `--libraries` che punta lì.
-
-**Mai usare `|` come delimitatore di `s///` in perl su testo che contiene tabelle
-markdown.** Il primo `|` del contenuto chiude il pattern e la sostituzione va a finire dove
-capita — di solito **in cima al file**, che sembra tutt'altro guasto. Successo due volte il
-2 settembre 2026, su uno sketch e su `docs/pedale.md`. Per modifiche mirate su questi file si
-usa lo strumento di edit, non `perl -0pi`.
-
-**I messaggi di commit vanno passati per file, non per here-string.** `git commit -m @'…'@`
-in PowerShell 5.1 si rompe in silenzio con virgolette doppie o certe sequenze: il testo
-viene spezzato in parole e git risponde `pathspec '…' did not match any file(s)`. E il
-sandbox rifiuta la riga se ci trova un `e:` o simili, leggendolo come percorso. Si scrive
-il messaggio con Write nello scratchpad e poi
-`git -c i18n.commitEncoding=UTF-8 commit -F <file>` — così **si possono anche usare gli
-accenti**.
-
-Il push non parte dalla mia shell, che è non interattiva: Git Credential Manager non
-riesce a chiedere le credenziali e git muore con *terminal prompts disabled*. Funziona con
-`GIT_TERMINAL_PROMPT=1`, `GCM_INTERACTIVE=true` e `GCM_GUI_PROMPT=true`, che gli fanno
-aprire la finestra grafica sul desktop dell'utente.
+**Le trappole dell'ESP32 — seriale, CDC, download mode, flussante, librerie Arduino — stanno in
+`docs/pedale.md`.** In una riga l'una, per sapere che esistono: sulla **XIAO S3 i valori di
+`CDCOnBoot` sono rovesciati** rispetto al C3/C6 (l'fqbn giusto è `CDCOnBoot=default`);
+**aprire la porta seriale resetta il chip** e con RTS lo manda in download mode, da cui **si
+esce solo staccando il cavo**; **`Serial.print` si blocca se nessuno legge la porta**, e si
+risolve con `Serial.setTxTimeoutMs(0)` — ne segue che **misurare un tempo mentre si è collegati
+alla seriale può nascondere il difetto che si manifesta da scollegati**; **il flussante residuo
+fa scaldare i chip** e si pulisce dopo ogni sessione di saldatura, prima di ridare corrente —
+e quando un componente scalda **si guarda intorno al componente** prima di condannarlo; **le
+librerie Arduino non si installano in `Documenti`**, che Defender blocca con un errore che
+sembra un'altra cosa.
 
 ## Le regole che governano l'app
 
@@ -257,83 +173,49 @@ le variabili di colore — la vista live è più scura — e la media query del 
 
 ### Sezione Preset
 
-**Gli otto preset caricati sull'ampli stanno per conto loro**, sopra, con l'etichetta
-A1…B4 e i colori dei LED (rosso il banco A, verde il B). Tutti gli altri stanno sotto. Un
-preset non compare mai in tutti e due i posti. **Niente striscia della famiglia sulle otto
-caselle** (tolta il 26 agosto 2026): resta sulle righe di libreria e sul LED dei
-pulsantoni live.
+Il perché di ognuna di queste è in `docs/decisioni-ui.md`.
 
-**Sovrascrivere uno slot non perde il preset che c'era**, e la domanda è venuta
-(26 agosto 2026): `assignSlots` → `_sistemaSlot` gli toglie lo slot, quindi da lì in poi
-cade in `altri` e **ricompare da solo nella lista sotto**, con tag, note e famiglia. Il
-record non si cancella mai, cambia solo `slots`. L'utente ha deciso di lasciarla così:
-niente duplicazione fra i due posti.
+**Gli otto preset caricati sull'ampli stanno per conto loro**, sopra, etichettati A1…B4 coi
+colori dei LED (rosso banco A, verde B); tutti gli altri stanno sotto, e **un preset non
+compare mai in tutti e due i posti**. Niente striscia della famiglia sulle otto caselle.
+**Sovrascrivere uno slot non perde il preset che c'era**: `assignSlots` → `_sistemaSlot` gli
+toglie lo slot e quello ricompare da solo nella lista sotto, con tag, note e famiglia. Il
+record non si cancella mai, cambia solo `slots`.
 
-**Il bollo «JH» marca i preset che hanno un effetto Hendrix in catena**, sulle schede degli
-slot e sulle righe di libreria (`bolloHendrix`, e `SparkEffetti.hendrixNellaCatena` che è
-solo il prefisso `JH.`). Serve perché quei preset **non suonano come dicono** finché l'app
-ufficiale non ha sbloccato il pacchetto — vedi la trappola in «Protocollo» — e va saputo
-prima di sceglierne uno, non dopo averlo sentito muto.
-
-**In tutto, gli Hendrix si dicono in quattro posti, e quattro devono restare**: le schede
-della vista preset, la tendina dei modelli, il blocco a fuoco dell'editor (questi due in
-«Editor della catena effetti») e **una riga nel log quando il preset parte per l'ampli**,
-in `mandaPreset`, che è il momento in cui il suono esce sbagliato. Quest'ultima si dice
-**prima dell'invio** e non nella verifica, così è una sola invece che in ognuno dei rami.
-**È un avviso al buio**: all'ampli non si può chiedere se il pacchetto sia sbloccato,
-quindi parla anche quando va tutto bene — ed è la ragione per cui i posti sono quattro e
-non dieci. Restano scoperti **la vista live** (decisione dell'utente, non presa: i
-pulsantoni li ha disegnati lui e il LED porta già la famiglia) e **il pedale**, che un
-banco con dentro un Hendrix lo suonerebbe muto senza nessuna app che lo spieghi.
+**`slots` è una lista, non un numero** — lo stesso preset può stare in più slot, e capita.
+`normalizzaSlots` tiene una sola verità e cancella il vecchio `slot`. `_sistemaSlot(visti)`
+**tocca solo gli slot osservati**: `readLibrary` salta quelli che non rispondono, e cancellare
+uno slot mai visto farebbe sparire un preset per un timeout. Nella UI la chiave del dettaglio
+è `id:slot`, non `id`. `store.hardware()` dà sempre otto posti, `null` dove non sappiamo, e il
+confronto va fatto **per id**, non per oggetto: rilegge dal database e torna copie diverse.
 
 **Alla connessione la lettura degli otto slot parte da sola** (`leggiDallAmpli`, dopo
-`identify`). Durante la lettura i pulsantoni della vista live restano spenti: l'ampli sta
-rispondendo a otto richieste in fila e premerne uno infilerebbe un comando dentro una
-conversazione già aperta.
+`identify`), e durante la lettura i pulsantoni live restano spenti: l'ampli sta rispondendo a
+otto richieste in fila.
 
-`store.hardware()` restituisce sempre otto posti, con `null` dove non sappiamo ancora cosa
-ci sia. Nel disegnare «In libreria» il confronto va fatto **per id**, non per oggetto:
-`hardware()` rilegge dal database e restituisce copie diverse dagli stessi record.
+**«Elimina tutti i preset» risparmia gli otto dell'ampli** — la prima lettura li rimetterebbe
+comunque, ma spogliati di tag e note, e *quello* sarebbe lavoro perso. `svuotaTranneAmpli`
+passa da `remove`, quindi lascia le lapidi: senza, il primo «Prendi da Dropbox» rimetterebbe
+dentro tutto.
 
-**`slots` è una lista, non un numero.** Lo stesso preset può stare in più slot, e capita
-davvero. `normalizzaSlots` tiene una sola verità: costruisce `record.slots` ordinato e
-**cancella il vecchio `slot`**. `_sistemaSlot(visti)` è il cuore, condiviso fra
-`importFromAmp` e `assignSlots`: **si toccano solo gli slot osservati**, perché
-`readLibrary` salta quelli che non rispondono e cancellare uno slot mai visto farebbe
-sparire un preset per un timeout. Nella UI un preset in due slot compare due volte, e la
-chiave di apertura del dettaglio è `id:slot` e non `id`.
+**Un preset nuovo si fa in tre modi, e nessuno parte dal nulla**: «Duplica» (`store.duplicate`,
+che cambia **UUID**, slot e nome), «Importa preset attuale», «Importa un file». **Dal nulla non
+si fa, ed è deliberato**: un modello inesistente è quello che ha già piantato l'ampli una volta
+(`TrebleBooster`). Se servisse, lo scheletro va preso da un preset **uscito dall'ampli**.
 
-**«Elimina tutti i preset» (pannello «Altro») risparmia gli otto dell'ampli**, e non per
-prudenza: quelli l'ampli li suona, quindi la prima lettura li rimetterebbe dentro comunque
-— ma spogliati di tag, note e famiglia, e *quello* sarebbe lavoro perso davvero.
-`svuotaTranneAmpli` passa da `remove`, quindi lascia le lapidi: senza, il primo «Prendi da
-Dropbox» rimetterebbe dentro tutto. Due conferme, e la seconda dice che la cosa viaggia.
+**«Importa un file» distingue le tre cose dal contenuto, non dall'estensione** — `PK` per lo
+zip, il campo `presets` per il nostro backup, un oggetto con `sigpath` per un preset singolo
+dell'app ufficiale (`SparkBackup.trovaPresetUfficiali`). Per questo l'`<input type=file>`
+**non ha `accept`**. Senza `meta.id` **l'UUID glielo diamo noi**, e reimportando lo stesso file
+si fa un doppione invece di aggiornare.
 
-**Un preset nuovo si fa in tre modi, e nessuno parte dal nulla**: «Duplica» nel dettaglio
-(`store.duplicate`, che cambia **UUID, slot e nome** — l'UUID perché altrimenti la lettura
-dall'ampli scambierebbe la copia per l'originale), «Importa preset attuale» nel menu «⋯»,
-che offre di salvare quello che l'ampli sta suonando — se quell'UUID c'è già aggiorna solo
-la parte sonora, che è la regola di `importFromAmp` — e **«Importa un file»**, che dal
-28 agosto 2026 prende anche **un preset singolo** dell'app ufficiale e non solo il backup
-intero (vedi «Importare un preset solo» qui sotto). **Dal nulla non si fa, ed è
-deliberato**: un preset inventato dovrebbe dichiarare sette blocchi con modelli che l'ampli
-ha davvero, e un modello inesistente è quello che l'ha già piantato una volta (vedi
-`TrebleBooster`). Se un giorno servisse, lo scheletro va preso da un preset **uscito
-dall'ampli**, non dal catalogo.
-
-**Importare un preset solo** (28 agosto 2026). «Importa un file» accetta tre cose e le
-distingue **dal contenuto, non dall'estensione**: uno zip lo dicono i suoi primi due byte
-(`PK`), il nostro backup lo dice il campo `presets`, e tutto il resto lo guarda
-`SparkBackup.trovaPresetUfficiali`, che scende nel JSON in cerca di **un oggetto con
-`sigpath`** invece di indovinare il nome dell'incarto — di un tono esportato o condiviso
-dall'app ufficiale **non abbiamo un esemplare**, quindi la forma dell'involucro non la
-sappiamo, ma la catena sì. Per questo l'`<input type=file>` **non ha `accept`**: con un
-filtro, un'estensione che non conosciamo non si riuscirebbe nemmeno a scegliere.
-Da lì in poi è la strada del backup — stesso `convertiPreset`, stessa `importFromBackup` —
-quindi valgono le regole della libreria. Senza `meta.id` **l'UUID glielo diamo noi** e lo
-si dice nel log: reimportando lo stesso file si fa un doppione invece di aggiornare.
-**Il file non è l'unica via, e spesso non è la più comoda**: un tono che l'app ufficiale
-sta già facendo suonare si prende con «Importa preset attuale», senza esportare niente.
+**Il bollo «JH» marca i preset con un effetto Hendrix in catena**, perché quei preset **non
+suonano come dicono** finché l'app ufficiale non ha sbloccato il pacchetto (vedi «Protocollo»).
+**Si dice in quattro posti, e quattro devono restare**: le schede della vista preset, la
+tendina dei modelli, il blocco a fuoco dell'editor, e **una riga di log in `mandaPreset`**,
+prima dell'invio. È **un avviso al buio** — all'ampli non si può chiedere se sia sbloccato —
+ed è la ragione per cui i posti sono quattro e non dieci. Restano scoperti la vista live
+(decisione dell'utente) e il pedale.
 
 ### Sezione Live
 
@@ -353,124 +235,60 @@ zigzag). Ogni pulsantone ha un LED verde, anche i posti vuoti.
 
 ### Editor della catena effetti
 
-Com'è fatto e perché — la catena al neon, i pomelli, la piramide, la tendina dei modelli —
-sta in `docs/decisioni-ui.md`. Qui restano le regole che fanno danni se le dimentico.
+Com'è fatto e perché — la catena al neon, i pomelli, la piramide, la tendina — sta in
+`docs/decisioni-ui.md`, insieme al racconto di ognuna di queste regole. Qui le regole nude.
 
-**Le manopole agiscono sul suono che sta suonando**, non su una copia: è la scelta che
-governa tutto il resto. Per questo «Regola», **quando l'ampli c'è**, prima manda il preset
-con `loadPreset` e solo dopo apre il pannello. Lo stato di partenza si rilegge
-**dall'ampli** (`readLiveState`), non dalla libreria: se l'utente ha girato una manopola
-vera o ha usato l'app ufficiale, la verità è lì. Se la rilettura fallisce l'editor non si
-apre — meglio niente che manopole che partono da valori inventati. Niente viene salvato
-finché non si preme **Salva in libreria**.
+**Le manopole agiscono sul suono che sta suonando**, non su una copia: è la scelta che governa
+tutto il resto. Per questo «Regola», **quando l'ampli c'è**, prima manda il preset con
+`loadPreset` e poi apre il pannello, e lo stato di partenza si rilegge **dall'ampli**
+(`readLiveState`), non dalla libreria. **Se la rilettura fallisce l'editor non si apre.**
+Niente è salvato finché non si preme «Salva in libreria».
 
-**Senza ampli l'editor si apre lo stesso, sulla copia in libreria** (chiesto dall'utente il
-24 agosto 2026: è il caso del divano). Non tradisce la regola di sopra, perché i valori del
-record sono un'istantanea vera di quel suono. `inModifica.offline` governa la differenza:
+**Senza ampli l'editor si apre lo stesso, sulla copia in libreria**, e `inModifica.offline`
+governa tre differenze: **niente parte sulla radio** (`mandaParametro` non accoda nemmeno, o un
+arretrato partirebbe tutto insieme a una connessione a metà); **il modello si cambia lo
+stesso, qualunque**, perché il catalogo è verificato e sappiamo com'è fatto il blocco per tutti
+e settantotto; **la modalità si decide all'apertura e non cambia più**, anche se l'ampli si
+connette dopo — rileggere a metà lavoro sostituirebbe di soppiatto un suono con un altro.
 
-- **niente parte sulla radio**: `mandaParametro` non accoda nemmeno, o un arretrato
-  partirebbe tutto insieme se l'ampli si connettesse a metà;
-- **il modello si cambia, qualunque, anche senza ampli** (dal 26 agosto 2026, chiesto
-  dall'utente in tre passi: prima la tendina era spenta, poi si aprivano i soli modelli
-  visti, ora tutti). Non è un cedimento sulla sicurezza: la regola è sempre stata **«solo
-  quelli di cui sappiamo com'è fatto il blocco»**, e adesso lo sappiamo per tutti e
-  **settantotto** i modelli cambiabili, perché il catalogo è verificato contro l'app
-  ufficiale e la `TABELLA` dichiara le manopole di ognuno.
+Nel cambio di modello, **prima si copia e poi si costruisce**: `campioneModello(nome)` prende
+numero di parametri *e* valori da un blocco che l'ampli ha davvero prodotto; solo se non c'è si
+costruisce dalla tabella, a metà corsa. Il blocco resta acceso o spento com'era.
 
-  Che il numero sia quello vero **è misurato** sui ventiquattro blocchi dei preset in
-  `captures/`; il dettaglio in `docs/decisioni-ui.md`.
+**Il tempo sta qui, e solo qui** — non nella vista live: **il bpm è un campo del preset**
+(`preset.bpm`, dentro `0x0101`), quindi si sceglie mentre si costruisce il suono. Col tap, o di
+un bpm coi tasti; con l'ampli parte subito `0x0176` **e gli effetti a tempo seguono da soli**;
+senza ampli non parte niente. Il riscontro del tap è **il lampeggio del tasto**, non un
+messaggio.
 
-  Nel cambio, **prima si copia e poi si costruisce**: se quel modello sta già in un preset
-  della libreria, `campioneModello(nome)` ne prende numero di parametri *e* valori — è un
-  blocco che l'ampli ha davvero prodotto. Solo se non c'è si costruisce dalla tabella, con i
-  valori a metà corsa. Il blocco resta acceso o spento com'era, che è una scelta dell'utente
-  e non una proprietà del modello;
-- **la modalità si decide all'apertura e non cambia più**, anche se l'ampli si connette
-  dopo: rileggere la catena a metà lavoro sostituirebbe di soppiatto quello che si sta
-  modificando con quello che l'ampli sta suonando, che è un altro suono.
+**L'invio dei parametri è autocadenzato, non a timer**: il prossimo parte quando il precedente
+è finito, più `PAUSA_PARAMETRO` (90 ms), così la coda non cresce qualunque cosa faccia il dito.
+`writeWithoutResponse` non ha controllo di flusso, e questa è **la causa più probabile
+dell'ampli che si pianta girando le manopole** — ma **la correzione non è verificata**. Se
+ricapita: prima `PAUSA_PARAMETRO`, poi `SEND_GAP_MS`.
 
-Il titolo dice «— senza ampli» e la riga di stato lo ripete.
+**L'editor sa se c'è del lavoro non salvato**, e non lo lascia buttare via: `inModifica.toccato`
+nasce in `segnaModificato()`, e «Fatto» e il logo chiedono con `chiediPrimaDiUscire()` —
+**tre vie, non due**, perché con due un dito che sbaglia bottone perde il lavoro. **Se il
+salvataggio fallisce non si chiude niente** (`salvaModifiche()` torna `true`/`false`). **Il
+segno che ha salvato lo dà il tasto**, non un messaggio: in questo pannello non ne deve
+comparire nessuno. Non si disabilita mai quando niente è toccato.
 
-**Le sette posizioni sono etichettate per categoria** (`Spark.CATENA`): noise gate,
-compressore, drive, ampli, modulazione, delay, riverbero.
+Per lo stesso motivo la nota sugli Hendrix **è uno stato e non un messaggio**: una
+`.elenco-nota` sotto l'intestazione «Jimi Hendrix Pack» della tendina — una sola — e una
+`.nota-jh` sotto il nome del modello nel blocco a fuoco. Sui tasselli non si dice niente: si
+chiamano già «J.H. Fuzz Zone».
 
-**Il tempo sta qui, e solo qui** (28 agosto 2026, chiesto dall'utente e poi ristretto da
-lui: «non nella vista live, non serve»). La ragione è che **il bpm è un campo del preset**
-— `preset.bpm`, che `serializePreset` scrive dentro `0x0101` — quindi viaggia col preset e
-torna quando lo si rimanda all'ampli: è una cosa che si sceglie mentre si costruisce il
-suono, come una manopola, non mentre si suona. Si batte col **tap** (due tocchi bastano,
-media delle ultime cinque battute, una pausa oltre 2,5 s ricomincia) o si aggiusta di un
-bpm coi due tasti. Il riscontro del tap è **il lampeggio del tasto** e non un messaggio,
-che in questo pannello non ne devono comparire.
-
-Con l'ampli attaccato il cambio parte subito con `0x0176` (`spark.setBpm`), **e gli effetti
-a tempo lo seguono da soli**: l'accoppiamento è dentro l'ampli. Senza ampli **non parte
-niente sulla radio**, come per le manopole. All'apertura il valore si prende dalla lettura
-dell'ampli quando c'è, dal record quando non c'è, e 120 per i record vecchi che il campo
-non ce l'hanno. `salvaModifiche` lo scrive nel record.
-
-**Il cursore va strozzato, e lo strozzamento dev'essere autocadenzato.** Un trascinamento
-genera decine di eventi al secondo e ogni comando è una scrittura BLE.
-**`writeWithoutResponse` non ha controllo di flusso**: la promessa si risolve quando il
-sistema ha preso in carico la scrittura, non quando l'ampli l'ha ricevuta, quindi l'app può
-correre più della radio. **È la causa più probabile dell'ampli che si pianta girando le
-manopole**, segnalato dall'utente il 16 agosto 2026.
-
-Quindi il prossimo invio parte **quando il precedente è finito**, più `PAUSA_PARAMETRO`
-(90 ms), e non su un timer: così la coda non può crescere qualunque cosa faccia il dito. La
-versione a timer da 60 ms poteva **sovrapporsi a sé stessa** — `svuotaCoda` azzerava
-`timerInvio` prima di aspettare gli invii — e accumulava arretrato. Si tiene solo l'ultimo
-valore per manopola, e l'ultimo parte sempre. **Non è verificato che risolva**: il blocco
-non si riproduce a comando. Se ricapita, la manopola da girare è `PAUSA_PARAMETRO`, poi
-`SEND_GAP_MS` in `spark-transport.js` (30 ms, più svelto di un intervallo di connessione).
-
-**L'editor sa se c'è del lavoro non salvato, e non lo lascia buttare via per sbaglio.**
-`inModifica.toccato` è il dato, e nasce in `segnaModificato()`: lo alzano `mandaParametro`
-(dove passano **tutte e cinque** le manopole — pomello, cursore, tendina, i due
-trascinamenti — subito **prima** del ritorno che scarta l'invio offline), l'interruttore
-acceso/spento, e ogni ramo di `cambiaModello`. Da lì:
-
-- **«Fatto» e il logo chiedono**, con `chiediPrimaDiUscire()`. **Tre vie, non due**: con un
-  `confirm()` di sistema l'alternativa a «salva» è «butta via», e un dito che sbaglia
-  bottone perde il lavoro proprio mentre glielo si chiedeva. La terza — «Torna all'editor»
-  — è anche quella di Esc e del tocco fuori. Il logo passa un seguito, che parte **solo se
-  si esce davvero**: chiude l'editor *e* torna ai preset.
-- **Se il salvataggio fallisce non si chiude niente**, e per questo `salvaModifiche()`
-  torna `true`/`false`: chiudere dopo un salvataggio fallito è il modo esatto di perdere
-  il lavoro che si stava salvando.
-- **Il segno che ha salvato lo dà il tasto**, non un messaggio — in questo pannello non ne
-  deve comparire nessuno, ed è per quello che l'utente non aveva «la certezza di nulla».
-  Pallino rosso e bordo acceso quando c'è del lavoro in sospeso, `✓ Salvato` verde per 2,6
-  secondi dopo, poi normale. **Non si disabilita mai quando niente è toccato**: con l'ampli
-  la catena viene da una lettura vera e può già essere diversa da quella in libreria —
-  salvare in quel momento è proprio come si porta in libreria quello che l'ampli suona.
-
-**Gli Hendrix si dicono in due momenti, e sui tasselli non si dicono affatto.** Quei
-modelli si chiamano già «J.H. Fuzz Zone»: il nome li identifica da solo, e un bollo in più
-su una casella da 106 px sarebbe rumore. Quello che manca è **cosa comporta**, e va nei due
-momenti in cui conta: una `.elenco-nota` sotto l'intestazione «Jimi Hendrix Pack» della
-tendina — **una sola, non su ogni voce** — e una `.nota-jh` sotto il nome del modello nel
-blocco a fuoco, che resta lì finché quel modello è quello. La seconda **è uno stato, non un
-messaggio**, che in questo pannello non ne devono comparire: sta al nome del blocco come
-«offline» sta al nome del preset.
-
-**Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**, e `logLine`/
-`logProgress` ci scrivono l'ultimo messaggio: un pannello a tutto schermo copre il log, e
-senza quello un comando fallito è indistinguibile da un comando che non fa niente.
-**`pulisciStatoPannelli()` nasconde ogni `.stato-pannello`**, e chi ci scrive deve
-rimostrarlo (`riga.hidden = false`) — è quello che fa `statoDelPannello`. Senza, il log
-viene scritto sempre e non si vede mai: due giri di diagnostica finiti in un elemento
-invisibile.
+**Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**, dove scrivono `logLine` e
+`logProgress`: un pannello a tutto schermo copre il log. **`pulisciStatoPannelli()` le nasconde
+tutte**, e chi ci scrive deve rimostrarla (`riga.hidden = false`, che è quello che fa
+`statoDelPannello`) — senza, il log si scrive sempre e non si vede mai.
 
 ### Finestre e tendine: nell'app non c'è più niente del sistema
 
-**Mai più `confirm()`, `alert()`, `prompt()` o `<select>`** (26 agosto 2026, chiesto
-dall'utente: «sulla prima pagina sono ancora i menu di sistema»). Aprono la roba del
-sistema operativo — carattere suo, fondo chiaro in un'app tutta nera, e sul telefono il
-menu di Android manda a capo le voci lunghe — e soprattutto **un `confirm()` ha due vie
-sole**, che è il problema che aveva già fatto nascere la domanda dell'editor.
-
-Al loro posto, tutte costruite sulla stessa scatola `.elenco-scelta`:
+**Mai più `confirm()`, `alert()`, `prompt()` o `<select>`**: aprono la roba del sistema
+operativo in un'app tutta nera, e soprattutto **un `confirm()` ha due vie sole**. Al loro
+posto, tutte costruite sulla stessa scatola `.elenco-scelta`:
 
 | invece di | si usa | torna |
 |---|---|---|
@@ -480,92 +298,44 @@ Al loro posto, tutte costruite sulla stessa scatola `.elenco-scelta`:
 | `prompt()` | `await chiediTesto(titolo, testo, valore, {ok, invito})` | il testo, o `null` |
 | tre o più vie | `await finestra({titolo, testo, campo, azioni})` | il `valore` dell'azione, `null` se si esce |
 
-Tutte sono **asincrone**, quindi il gestore che le chiama va `async`. `testo` è **HTML** —
-il grassetto va sulla parte che conta — e un nome che viene dai dati ci entra solo passando
-da **`testoConNome()`**, che lo scappa. Esc e il tocco fuori tornano sempre `null`, che è la
-via che non fa niente.
+Tutte **asincrone**, quindi il gestore va `async`. `testo` è **HTML**, e un nome che viene dai
+dati ci entra solo passando da **`testoConNome()`**, che lo scappa. Esc e il tocco fuori tornano
+sempre `null`, che è la via che non fa niente.
 
-**Le scorciatoie «campo vuoto = elimina» sono sparite**, ed erano due: il nome del banco e
-il nome di una manopola. Erano una regola scritta fra parentesi che nessuno legge, e chi
-svuotava il campo per riscriverlo si trovava a rispondere di un'eliminazione mai chiesta.
-Adesso sono bottoni che dicono quello che fanno.
-
-**Nella tendina «⋯» nessuna voce si spegne**, e il motivo è misurato: **un pulsante
-`disabled` non riceve il clic**, quindi non scatta nemmeno il gestore che chiude la
-tendina — la tendina resta aperta, non compare niente da nessuna parte, e si vede
-un'app rotta. È quello che è successo il 28 agosto 2026 con «Importa preset attuale»
-(«non succede nulla»). Quindi «Leggi dall'ampli» e «Importa preset attuale» restano
-sempre premibili e, senza ampli, **rispondono**: `senzaAmpli(cosa)` compone la riga di
-log, una sola, che dice cosa manca e cosa fare. La stessa trappola vale per qualunque
-voce si aggiunga lì dentro.
+**Nella tendina «⋯» nessuna voce si spegne**, ed è misurato: **un pulsante `disabled` non
+riceve il clic**, quindi non scatta nemmeno il gestore che chiude la tendina — e si vede
+un'app rotta. Senza ampli le voci **rispondono** con `senzaAmpli(cosa)`, una riga di log che
+dice cosa manca. Vale per qualunque voce si aggiunga lì dentro.
 
 ### I nomi degli effetti e delle manopole (`src/spark-effetti.js`)
 
-Vengono dal catalogo di **Soundshed** (MIT), non da Positive Grid, quindi restano
-**proposte**: si vedono *in corsivo*, un nome scritto a mano vince sempre, e `manopola()`
-**scarta l'intera riga** se dichiara più manopole di quante l'ampli ne manda per
-quell'effetto.
+Vengono dal catalogo di **Soundshed** (MIT), quindi restano **proposte**: si vedono *in
+corsivo*, un nome scritto a mano vince sempre, e `manopola()` **scarta l'intera riga** se
+dichiara più manopole di quante l'ampli ne manda. **Il credito a Soundshed non si toglie**, e
+la domanda è già stata fatta e chiusa (31 agosto 2026, il perché in `docs/decisioni-ui.md`).
 
-**L'ordine sullo schermo non è l'ordine degli indici, ed è il punto di tutto.** Su un ampli
-le manopole si leggono Gain, Bass, Middle, Treble, Master, ma negli indici stanno
-`Gain(0), Treble(1), Middle(2), Bass(3), Master(4)`. Trascrivendo dall'interfaccia si
-sbagliava in silenzio. Due test fissano questo caso e quello di LA Comp.
+**L'ordine sullo schermo non è l'ordine degli indici, ed è il punto di tutto**: si legge Gain,
+Bass, Middle, Treble, Master, ma negli indici sta `Gain(0), Treble(1), Middle(2), Bass(3),
+Master(4)`. Trascrivendo dall'interfaccia si sbagliava in silenzio; due test fissano il caso.
+Il campo `quante` dice **quante manopole ha davvero l'effetto**: i parametri in eccesso sono
+**l'acceso/spento del blocco**, misurato.
 
-Il campo `quante` dice **quante manopole ha davvero l'effetto**: può essere più dei nomi che
-sappiamo e meno dei parametri che arrivano. I parametri in eccesso sono
-**l'acceso/spento del blocco** (misurato, vedi `docs/protocollo-spark2.md`).
+**I nomi dei parametri li dà l'utente**, girando e ascoltando — l'ampli manda solo indici.
+Stanno **per modello** (`settings.nomiParametri`), e `importBackup` li **aggiunge** invece di
+sovrascrivere: un backup vecchio non deve cancellare i battesimi fatti da allora.
 
-**I nomi dei parametri li dà l'utente**, girando e ascoltando: l'ampli manda solo indici e
-non esiste nessuna tabella da cui dedurli. Sono salvati **per modello di effetto**
-(`settings.nomiParametri`), non per preset. `exportAll` li porta con sé e `importBackup` li
-**aggiunge** invece di sovrascrivere: reimportare un backup vecchio non deve cancellare i
-battesimi fatti da allora.
-
-**`MODELLI` adesso è verificato tutto, contro l'app ufficiale** (26 agosto 2026): l'utente
-ha fotografato l'elenco intero sul suo Spark 2 e il confronto voce per voce ha tolto
-**dodici** nomi che il catalogo di Soundshed aveva e l'ampli no. I conti tornano con i suoi
-screenshot: **noise gate 1, comp/wah 6, drive 14, ampli 39, modulazione 13, delay 6,
-riverbero 1 con 9 tipi**.
-
-**Una voce nuova nell'elenco ufficiale non è per forza un modello nuovo** (2 settembre
-2026). Positive Grid ha aggiunto un **«Auto Wah»**, libero per tutti, con la sola
-Sensitivity, accanto al wah del pacchetto Hendrix che c'era già. Nell'app sono due voci; per
-lo Spark sono **lo stesso `JH.Vox846` con sei parametri**, e la differenza sta nei valori.
-Misurato con due catture apposta. Quindi **il conteggio di comp/wah resta 6** — sono
-identificativi, non voci di menu — e in `MODELLI` non è stato aggiunto niente. Ne segue una
-cosa vera per la UI: **scegliendo quel modello dalla tendina non si decide quale dei due si
-prende**, perché `campioneModello` copia il primo blocco che trova in libreria. E il
-prefisso `JH.` su quel codice **resta di proposito**: la variante Hendrix vuole ancora lo
-sblocco, quindi l'avviso ogni tanto parla a vuoto ma non tace mai quando servirebbe.
-
-I dodici: `JCM800`, `MatchlessDC30`, `DrZ`, `Hiwatt103`, `B15`, `Acoustic360`, `GK700RBII`,
-`MetalZoneMT2`, `MuTron` — e tre che **esistono ma solo su Spark LIVE ed EDGE**, sul canale
-del microfono: `Preamp73`, `Comp76`, più i «vocal» che non avevamo. Erano tutti
-`TrebleBooster` in attesa (18 agosto 2026: sullo Spark 2 c'è solo `Booster`, e chiederne
-uno inesistente lo mandava in palla). Restano nella `TABELLA` dei nomi, che è innocua e
-serve ancora a dare un nome alle manopole di un preset importato da altrove.
-
-**Il credito a Soundshed non si toglie, e la domanda è già stata fatta** (31 agosto 2026).
-La verifica contro l'app ufficiale ha corretto **`MODELLI`**, cioè quali modelli esistono;
-non ha toccato la **`TABELLA`**, che sono **90 voci di nomi di manopole con il loro ordine
-di indice** e sono ancora loro. Quell'ordine dalle foto non poteva venire — sullo schermo si
-legge Gain, Bass, Middle, Treble, Master e negli indici sta `Gain(0), Treble(1), Middle(2),
-Bass(3), Master(4)` — quindi il NOTICE dice il vero e la MIT lo richiede. L'unica strada per
-farlo cadere davvero è **sostituire la tabella battezzando le manopole a orecchio**, con la
-funzione che l'app ha già: quando i nomi dell'utente coprono tutto, il credito cade da sé.
-
-**Se si aggiunge un nome nuovo a `MODELLI`, va verificato allo stesso modo**, perché
-all'ampli non si può chiedere quali modelli conosce: l'unica prova è che compaia
-nell'elenco ufficiale o in un preset uscito dall'ampli. La tendina tiene in fondo un gruppo
-«fuori dall'elenco Positive Grid» — oggi vuoto — che li raccoglierebbe.
+**`MODELLI` è verificato tutto contro l'app ufficiale** (26 agosto 2026, dalle foto
+dell'utente): noise gate 1, comp/wah 6, drive 14, ampli 39, modulazione 13, delay 6, riverbero
+1 con 9 tipi. Dodici nomi del catalogo Soundshed sono stati tolti perché l'ampli non li ha.
+**Se si aggiunge un nome nuovo va verificato allo stesso modo**, perché all'ampli non si può
+chiedere quali modelli conosce: l'unica prova è l'elenco ufficiale o un preset uscito
+dall'ampli. E **una voce nuova nell'elenco ufficiale non è per forza un modello nuovo**:
+l'«Auto Wah» del 2026 è lo stesso `JH.Vox846` con altri valori, quindi in `MODELLI` non è
+entrato niente.
 
 **Gli effetti Hendrix stanno in fondo a ogni tendina, sotto «Jimi Hendrix Pack»**
-(`SparkEffetti.GRUPPO_HENDRIX`, una stringa sola per tutti e quattro i blocchi che ne
-hanno). Chiesto dall'utente il 26 agosto 2026, e non è solo ordine: sono l'unico contenuto
-a pagamento e l'unico che può entrare in catena e restare muto, quindi sparsi in mezzo agli
-altri sembravano effetti come tutti gli altri. Per gli ampli è una famiglia di
-`GRUPPI_AMPLI` come le altre, ed è l'ultima; per gli altri blocchi, che famiglie non hanno,
-l'elenco si costruisce in due passate.
+(`SparkEffetti.GRUPPO_HENDRIX`): sono l'unico contenuto a pagamento e l'unico che può entrare
+in catena e restare muto.
 
 ## Protocollo — quello che non va dimenticato mai
 
@@ -575,67 +345,58 @@ GATT: service `0xFFC0`, write `0xFFC1` (**writeWithoutResponse only**), notify `
 Notifiche frammentate: riassemblare cercando `F0` … `F7`.
 Chunk: `F0 01 <seq> <checksum> <cmd> <sub> <dati impacchettati> F7`.
 
-Stato: **completo e verificato sull'ampli**. `0x0201` lettura, `0x0138` cambio preset,
-`0x0115` effetto on/off, `0x0104` cambio parametro, `0x0101` invio di un preset intero.
+Stato: **completo e verificato sull'ampli**. `0x0201` lettura, `0x0138` cambio preset, `0x0115`
+effetto on/off, `0x0104` cambio parametro, `0x0101` invio di un preset intero, `0x0176` bpm,
+`0x0175` looper.
 
 **Le trappole, tutte verificate sull'hardware:**
 
-- **`0x0115`, `0x0104` e `0x0106` vogliono un byte `0x00` in coda al payload logico.**
-  Senza, ack regolare e comando non applicato. `0x0138`, `0x0175` e `0x0176` no — e su
-  `0x0176` il byte di troppo **non è innocuo**: il bpm non cambia e **il delay parte in
-  ripetizione infinita** (28 agosto 2026), perché l'ampli legge i campi spostati. Si
-  recupera premendo un tasto preset sul pannello. Quindi **un payload malformato può
-  muovere qualcosa che non c'entra**, non solo essere ignorato.
-- **Il bpm si scrive con `0x0176`, e gli effetti a tempo seguono da soli** (verificato il
-  28 agosto 2026). Il payload si costruisce **dall'ultimo `0x0376` ricevuto** cambiando il
-  solo bpm, mai da una costante: l'ultimo campo cambia forma fra sessioni (`3c` contro
-  `cd ea 60`). Il TAP dell'ampli manda insieme `0x0363`, `0x0376` e `0x0337` sul parametro
-  4 di `DelayRe201`: l'accoppiamento tempo→effetti è dentro l'ampli, non tocca a noi.
-  Dettaglio in `docs/protocollo-spark2.md`.
-- **L'ack conferma la ricezione, non l'esecuzione.** E `writeWithoutResponse` fa sembrare
-  riuscita ogni scrittura lato browser. **L'assenza di errori non è una verifica**: vale
-  solo l'effetto sull'ampli o una risposta in RX.
-- **Chunk da 25 byte di payload, non 128.** Con 128 lo Spark 2 **si disconnette**. Il
-  massimo verificato in scrittura è 44.
-- **Tutti i chunk di un preset vanno con lo stesso sequence number.**
+- **`0x0115`, `0x0104` e `0x0106` vogliono un byte `0x00` in coda al payload logico.** Senza,
+  ack regolare e comando non applicato. `0x0138`, `0x0175` e `0x0176` no — e su `0x0176` il
+  byte di troppo **non è innocuo**: il bpm non cambia e **il delay parte in ripetizione
+  infinita**, perché l'ampli legge i campi spostati (si recupera premendo un tasto preset).
+  Quindi **un payload malformato può muovere qualcosa che non c'entra**.
+- **Il payload del bpm si costruisce dall'ultimo `0x0376` ricevuto**, cambiando il solo bpm, mai
+  da una costante: l'ultimo campo cambia forma fra sessioni. Gli effetti a tempo seguono da
+  soli: l'accoppiamento è dentro l'ampli.
+- **L'ack conferma la ricezione, non l'esecuzione**, e `writeWithoutResponse` fa sembrare
+  riuscita ogni scrittura lato browser. **L'assenza di errori non è una verifica**: vale solo
+  l'effetto sull'ampli o una risposta in RX. E **la catena riletta conferma il nome del
+  modello, non che quel blocco suoni**.
+- **Chunk da 25 byte di payload, non 128** (con 128 lo Spark 2 si disconnette; il massimo
+  verificato in scrittura è 44), e **tutti i chunk di un preset con lo stesso sequence number**.
+- **Le write BLE lunghe vanno spezzate** in write ATT da 20 byte (`transport.sendSpezzato`):
+  sopra i ~44 byte una write singola sparisce **in silenzio**, senza nemmeno l'ack.
 - **`0x0127` non salva sullo Spark 2**, in tutte e quattro le forme provate. Tolto.
-- **Le write BLE lunghe vanno spezzate**: l'app ufficiale manda ogni messaggio in write ATT
-  da 20 byte e l'ampli riassembla da sé. `transport.sendSpezzato(comando, 20)`. Sopra i ~44
-  byte una write singola sparisce **in silenzio**, senza nemmeno l'ack.
-- **Cambiare un parametro di un effetto spento non produce nessun suono.** Verifica prima
-  che l'effetto sia attivo.
-- **`0x0106` vuole il nome del modello che c'è *adesso***, riletto dall'ampli, non quello
-  che ha sullo schermo. Se sbagliato, l'ampli ignora tutto senza fiatare — e da lì in poi
-  ogni cambio fallisce per sempre.
-- **L'ampli si può piantare davvero**, e allora serve staccare la corrente. `rxTotali`
-  distingue i due casi: 0 messaggi = ampli muto o connessione morta; più di 0 = parla e
-  siamo noi a scartare. Senza quel numero i due casi si vedono uguali — è costato una
-  serata.
-- **Gli effetti Hendrix (`JH.*`) non suonano finché l'app ufficiale non li sblocca**, e
-  non c'è niente che possiamo farci. Osservato dall'utente il 26 agosto 2026: i `JH.*`
-  mandati dalla nostra app restano muti — «Hey Jimi Solo» suona senza fuzz e con l'ampli
-  sbagliato, anche scritto in uno slot — e **nemmeno il pannello dell'ampli li sblocca**
-  (ci ha creduto per un momento e si è ricreduto). Basta invece **connettere l'app
-  ufficiale**: da lì in poi funziona tutto, e **lo sblocco resta nell'ampli anche dopo
-  che l'app ufficiale si è disconnessa**. Il pacchetto lui ce l'ha comprato.
-  È l'unico contenuto a pagamento dello Spark 2, e chi lo abilita è la **license key
-  `0x0170`** che l'app ufficiale manda appena connessa. **Non è forgiabile**: spacchettata
-  dalle due catture in `captures/2026-08-14-app-ufficiale-looper.txt` sono **64 byte tondi,
-  completamente diversi fra le due sessioni**, cioè una firma con dentro un nonce — e
-  rigiocata l'ampli la rifiuta (`0x0470` con `fe` invece di `00 00`, vedi `docs/looper.md`).
-  Cavare la chiave dall'app ufficiale è protezione di contenuto a pagamento e non si fa.
-  Sull'app ufficiale i suoni Hendrix si vedono **solo dopo il login**, ma **fare il login
-  dalla nostra app non servirebbe a niente, ed è misurato**: nella cattura l'app manda la
-  chiave **14 ms dopo** la risposta dell'ampli a `0x022f` — due volte, a 0,060s e a
-  589,246s — e in 14 ms non ci sta un giro in rete. E se fosse un gettone preso dal server
-  al login le due connessioni manderebbero lo stesso; invece sono diversi. **L'app la firma
-  in locale, con una chiave che si porta dentro.** Ne segue che **l'ampli non verifica
-  l'acquisto: verifica una firma** — non ha account e non parla con internet. Il login
-  serve all'app ufficiale per *mostrare* i suoni, non all'ampli per abilitarli.
-  **La cosa da ricordare è che non è un difetto nostro**, così non ci si torna sopra.
-  E ne resta una lezione che vale oltre gli Hendrix: **la catena riletta conferma il nome
-  del modello, non che quel blocco suoni** — è quello che aveva «verificato» il cambio a
-  `JH.SupaFuzz` il 13 agosto, mentre il fuzz era muto.
+- **Cambiare un parametro di un effetto spento non produce nessun suono.**
+- **`0x0106` vuole il nome del modello che c'è *adesso***, riletto dall'ampli. Se sbagliato
+  l'ampli ignora tutto senza fiatare, e da lì in poi ogni cambio fallisce per sempre.
+- **L'ampli si può piantare davvero**, e allora serve staccare la corrente. `rxTotali` distingue
+  i due casi: 0 messaggi = ampli muto o connessione morta; più di 0 = parla e siamo noi a
+  scartare. Senza quel numero i due casi si vedono uguali.
+
+**Gli effetti Hendrix (`JH.*`) non suonano finché l'app ufficiale non li sblocca**, e non c'è
+niente che possiamo farci: li abilita la **license key `0x0170`**, che l'app ufficiale firma in
+locale ed è **non forgiabile** (64 byte diversi a ogni sessione, cioè una firma con un nonce; e
+rigiocata l'ampli la rifiuta). Basta connettere l'app ufficiale una volta e **lo sblocco resta
+nell'ampli** anche dopo che si è disconnessa. **L'ampli non verifica l'acquisto, verifica una
+firma**: non ha account e non parla con internet, quindi fare il login dalla nostra app non
+servirebbe a niente — ed è misurato. Cavare la chiave dall'app ufficiale è protezione di
+contenuto a pagamento e **non si fa**. La cosa da ricordare è che **non è un difetto nostro**.
+Il ragionamento intero in `docs/protocollo-spark2.md` e `docs/looper.md`.
+
+**Nessuna autenticazione è richiesta per i comandi, ed è misurato**: con l'ampli sbloccato
+davvero, il conteggio del looper resta ignorato identico a quando la chiave non c'era. Gli
+Hendrix la vogliono, il protocollo no.
+
+**Looper**: si comanda con `0x0175` e un byte (`04` rec, `05` stop rec, `08` play, `09` stop,
+`0b` dub, `0c` stop dub, `0a` delete); si legge posizione (`0x0377`), bpm (`0x0363`) e
+impostazioni (`0x0376`). **La battuta di conteggio col click non si comanda**: `02` riceve l'ack
+e viene buttato via. Tutto ciò che è stato eliminato — canale, opcode, bonding, byte — sta in
+`docs/looper.md`, «Come si conclude»; la conclusione è che **il modo c'è ed è la chiave
+`0x0170`, e non è una porta che apriamo**. **Non aggiungere sonde sui byte.** L'unica cosa che
+resterebbe è **chiedere a Ignitron**, che manda COUNTIN senza nessuna chiave: se a loro
+funziona, la conclusione cade.
 
 **Le due strade per scrivere un preset sono diverse**, e questo è costato mezza giornata:
 
@@ -645,133 +406,76 @@ salvarlo in uno slot n  -> 0x0101 su [0x00, n], poi 0x0138 su un altro slot e 0x
 ```
 
 Il giro via e ritorno non è decorazione: senza, lo slot riporta il contenuto vecchio.
-`loadPreset` non sovrascrive nessuno slot: è il modo sicuro di provare un preset.
-**Mentre l'ampli suona il preset software il LED lampeggia** e non indica nessuno slot — non
-è un malfunzionamento.
+`loadPreset` non sovrascrive nessuno slot: è il modo sicuro di provare un preset. **Mentre
+l'ampli suona il preset software il LED lampeggia** e non indica nessuno slot.
 
-**Lo Spark 2 ha 8 slot, 0–7** (il 0–3 della documentazione vale per lo Spark 40), ma il
-pannello ha **4 LED bicolore**: rosso banco A (0–3), verde banco B (4–7).
-`Spark.slotLabel(n)` fa la conversione e la UI mostra A1…B4.
-
-**Nessuna autenticazione è richiesta, e dal 28 agosto 2026 è misurato e non supposto**: la
-license key `0x0170` **abilita il contenuto a pagamento, non i comandi**. Con l'ampli
-sbloccato davvero — l'app ufficiale connessa prima, senza staccare la corrente — il
-conteggio del looper resta ignorato identico a quando la chiave non c'era. Gli Hendrix la
-vogliono, il protocollo no. Vedi `docs/looper.md`.
-
-**Looper**, in due righe: si comanda con `0x0175` e un byte (`04` rec, `05` stop rec, `08`
-play, `09` stop, `0b` dub, `0c` stop dub, `0a` delete); si legge posizione (`0x0377`), bpm
-(`0x0363`) e impostazioni (`0x0376`). **La battuta di conteggio col click non si comanda, e
-non è più un'ipotesi aperta**: `02` riceve l'ack e viene buttato via, e il 28 agosto 2026 è
-caduta anche l'ultima spiegazione rimasta sui byte (la chiave). **Ma non è chiuso**, e la
-ragione è quella che ha detto l'utente: se l'app lo fa partire, un modo c'è. Quello che è
-finito è l'elenco delle ipotesi sui *byte*; **il canale non era mai stato guardato** —
-`leggi-btsnoop.ps1` concatenava tutte le write buttando via **handle e opcode ATT**, quindi
-«byte identici a quelli dell'app» era verificato e «sullo stesso canale» no. Metà è già
-chiuso: **`0xFFC1` dichiara solo `writeWithoutResponse`**, e la **mappa GATT presa con nRF
-Connect** dice che è **l'unica cosa scrivibile dell'intero dispositivo** (28 agosto 2026,
-tutta in `docs/looper.md`). L'app non aveva un'altra strada: stesso canale, stesso opcode,
-stessi byte. E **il paradosso è reale**, misurato il 28 agosto 2026: REC premuto nell'app
-ufficiale, mani lontane dal pannello, **conta** — quindi non era un dito sull'ampli.
-**Allora la differenza è in chi manda, non in cosa manda.** Il **bonding** è escluso per
-costruzione: la sonda fatta girare **sullo stesso telefono** che con l'app ufficiale fa
-contare l'ampli fallisce lo stesso. Resta **la sessione autorizzata**, ed è la conclusione:
-lo sblocco dei suoni resta nell'ampli, ma un flag «questo client ha mandato una chiave
-valida» è per connessione, e in nessuna prova ne abbiamo mai avuta una. **Quindi il modo
-c'è ed è la chiave `0x0170`, e non è una porta che apriamo** — sarebbe estrarre una chiave
-di firma dall'app ufficiale. La tabella di tutto ciò che è stato eliminato sta in
-`docs/looper.md`, «Come si conclude». **Non aggiungere sonde sui byte.** L'unica cosa che
-resterebbe da fare è **chiedere a Ignitron**, che manda COUNTIN senza nessuna chiave: se a
-loro funziona, la conclusione cade.
+**Lo Spark 2 ha 8 slot, 0–7** (lo 0–3 della documentazione vale per lo Spark 40), ma il pannello
+ha **4 LED bicolore**: rosso banco A (0–3), verde banco B (4–7). `Spark.slotLabel(n)` converte e
+la UI mostra A1…B4.
 
 ### Regole di metodo, che valgono oltre il looper
 
-- **Una cattura d'ascolto dice cosa l'ampli racconta, non cosa accetta.** I nomi degli enum
-  di terzi descrivono lo *stato in cui l'ampli è entrato*, non un tasto da premere: che il
-  pannello notifichi `02` non vuol dire che `02` si possa mandare. Le due direzioni vanno
-  misurate separatamente.
-- **Si registra prima e si interpreta dopo, mai il contrario.** Una sonda che chiede di
-  dichiarare in anticipo cosa si sta per fare produce log che mentono appena l'ampli fa
-  altro.
-- **I dati finti non devono finire in una cattura.** Sono marcati `demo`, non contano negli
-  RX totali e l'esportazione li scarta.
+- **Una cattura d'ascolto dice cosa l'ampli racconta, non cosa accetta.** I nomi degli enum di
+  terzi descrivono lo *stato in cui l'ampli è entrato*, non un tasto da premere: le due
+  direzioni vanno misurate separatamente.
+- **Si registra prima e si interpreta dopo, mai il contrario.**
+- **I dati finti non devono finire in una cattura**: sono marcati `demo`, non contano negli RX
+  totali e l'esportazione li scarta.
 - Ogni prova va verificata **rileggendo dall'ampli**, una variante alla volta.
-- **Strumentare prima di ipotizzare.** I contatori — fronti grezzi contro pressioni
-  accettate — hanno chiuso in una sessione un problema su cui si era tirato a indovinare per
-  due.
+- **Strumentare prima di ipotizzare.** I contatori hanno chiuso in una sessione un problema su
+  cui si era tirato a indovinare per due.
 
 ## Il pedale ESP32
 
-Il ragionamento completo — la forma e perché, tutta la ferramenta pezzo per pezzo, le
-misure BLE, il ponte, il simulatore, la ricognizione — sta in **`docs/pedale.md`**, che va
-aperto quando ci si lavora. Qui il minimo per non fare danni.
+Il ragionamento completo — la forma e perché, la ferramenta pezzo per pezzo, le misure BLE, il
+ponte, il simulatore, la scatola, l'alimentazione, la modalità MIDI — sta in **`docs/pedale.md`**,
+che va aperto quando ci si lavora. Qui il minimo per non fare danni.
 
 **Cos'è**: la vista live del web, staccata dal telefono. Prende i preset dall'app, poi è
-autonomo con lo Spark. Nessuna regolazione, solo preset. Sta in questo repo perché
-l'interfaccia app↔pedale è un contratto fra le due sponde e un commit solo deve poter
-cambiare tutte e due.
+autonomo con lo Spark. Nessuna regolazione, solo preset. Sta in questo repo perché l'interfaccia
+app↔pedale è un contratto fra le due sponde, e un commit solo deve poter cambiare tutte e due.
 
-**Comandi**: quattro footswitch = i quattro suoni della metà corrente; un quinto **cambia
-metà senza toccare il suono che sta suonando** (provato col piede nel simulatore e voluto
-così dall'utente: sul palco la sorpresa è il difetto peggiore); due tasti a mano per i
-banchi. Il banco resta da otto, diviso in due metà da quattro, come i banchi dell'app e
-come i quattro LED bicolore dell'ampli — rosso A, verde B, e **cambiano tutti e quattro
-insieme**. Quando la metà mostrata non è quella che suona nessun LED è acceso, ed è giusto:
-per questo l'OLED tiene in fondo una riga **♪** con quello che sta suonando davvero.
+**Comandi**: quattro footswitch = i quattro suoni della metà corrente; un quinto **cambia metà
+senza toccare il suono che sta suonando** (sul palco la sorpresa è il difetto peggiore); due
+tasti a mano per i banchi. Il banco è da otto, in due metà da quattro, coi quattro LED bicolore
+che **cambiano tutti insieme** — rosso A, verde B. Quando la metà mostrata non è quella che
+suona nessun LED è acceso, e per questo l'OLED tiene in fondo una riga **♪** con quello che sta
+suonando davvero.
 
 **Le regole che non si toccano:**
 
-- **Il pedale non tocca mai gli slot hardware.** Ogni cambio preset è `0x0101` sul buffer
-  `0x7f` + `0x0138` con `0x7f`, ~200–400 ms. Ne segue che servono **solo due comandi**:
-  niente `0x0104`, `0x0115`, `0x0106`, niente parser dei preset. E il pedale non può
-  rovinare quello che c'è sull'ampli, per costruzione. Conseguenza: **il LED del pannello
-  dell'ampli lampeggia in permanenza**, non è un difetto.
-- **L'app preserializza, il firmware non serializza niente.** Riceve frame già pronti e
-  **patcha un byte solo**, il seq all'indice 2 — il checksum è un XOR dei soli byte
-  impacchettati e non lo copre. Verificato sull'hardware. L'encoder resta uno solo, in JS,
-  coperto dai test. `tools/frames-pedale.html` → `preset_frames.h`.
-- **Un padrone alla volta**: mentre l'ampli è connesso al pedale **smette di annunciarsi**,
-  quindi via Web Bluetooth il browser non lo trova più. Il pedale si annuncia sempre come
-  `SparkPedale`; quando l'app si collega **molla l'ampli**, quando l'app se ne va se lo
-  riprende (~0,5 s). **Se il footswitch non fa niente, il primo sospetto è l'app ancora
-  collegata** — è lo scambio più facile da fare, ed è già costato tre giri di diagnosi.
+- **Il pedale non tocca mai gli slot hardware.** Ogni cambio preset è `0x0101` sul buffer `0x7f`
+  + `0x0138` con `0x7f`. Ne segue che servono **solo due comandi** — niente `0x0104`, `0x0115`,
+  `0x0106`, niente parser dei preset — e che il pedale **non può rovinare quello che c'è
+  sull'ampli, per costruzione**. Conseguenza: il LED del pannello dell'ampli lampeggia in
+  permanenza, e non è un difetto.
+- **L'app preserializza, il firmware non serializza niente.** Riceve frame già pronti e **patcha
+  un byte solo**, il seq all'indice 2 — il checksum è un XOR dei soli byte impacchettati e non
+  lo copre. Verificato sull'hardware. L'encoder resta uno solo, in JS, coperto dai test.
+- **Un padrone alla volta**: mentre l'ampli è connesso al pedale **smette di annunciarsi**, e via
+  Web Bluetooth il browser non lo trova più. Quando l'app si collega al pedale, lui molla
+  l'ampli; quando se ne va se lo riprende (~0,5 s). **Se il footswitch non fa niente, il primo
+  sospetto è l'app ancora collegata** — è già costato tre giri di diagnosi.
 - **Mai fare operazioni BLE dentro un callback BLE**: `disconnect()` in `onConnect` o
   `startAdvertising()` in `onDisconnect` bloccano NimBLE per decine di secondi. I callback
   alzano una bandiera, il lavoro lo fa il `loop()`.
-- **Niente attese bloccanti che non guardino gli ingressi.** Durante un trasferimento il
-  tasto va letto lo stesso: la pressione si accoda e **vince l'ultima**.
-- **L'antirimbalzo aspetta che il segnale stia fermo**, non che sia passato del tempo
-  dall'ultimo cambio accettato. Con la forma sbagliata un contatto sporco può tenere la
-  porta chiusa a tempo indeterminato.
-- **Web Bluetooth ammette una sola operazione GATT alla volta per dispositivo.** Ci si casca
-  appena si risponde a una notifica con un comando. Serve una coda; il trasferimento di un
-  banco ci entra **come blocco solo**.
-- **Il formato del banco sta in due file che vanno cambiati insieme**: `src/pedale-ponte.js`
-  lo costruisce, `pedale/prova-ble/banchi.h` lo legge. `banchi.h` è **l'unico punto del
-  progetto dove entrano byte non nostri**: offset e lunghezze vanno verificati, o un blocco
-  malformato scrive oltre il buffer.
+- **Niente attese bloccanti che non guardino gli ingressi**: durante un trasferimento il tasto va
+  letto lo stesso, la pressione si accoda e **vince l'ultima**. E **l'antirimbalzo aspetta che il
+  segnale stia fermo**, non che sia passato del tempo dall'ultimo cambio accettato.
+- **Web Bluetooth ammette una sola operazione GATT alla volta per dispositivo**: serve una coda,
+  e il trasferimento di un banco ci entra come blocco solo.
+- **Il formato del banco sta in due file che vanno cambiati insieme**: `src/pedale-ponte.js` lo
+  costruisce, `pedale/prova-ble/banchi.h` lo legge. `banchi.h` è **l'unico punto del progetto
+  dove entrano byte non nostri**: offset e lunghezze vanno verificati, o un blocco malformato
+  scrive oltre il buffer.
 
-**Stato**: verificato sull'hardware (C3) — connessione, cambio preset in ~200–400 ms
-(contro ~1,2 s del telefono, perché `updateConnParams` a 7,5 ms secchi accorcia i sedici
-round-trip), trasferimento di un banco dall'app, salvataggio in LittleFS e ricarica dopo un
-riavvio, footswitch. Il pannello «Pedale» nell'app compone il riordino offline e lo applica
-in una volta.
-
-**Ferramenta comprata** (25 agosto 2026, scelte e perché in `docs/pedale.md`): **XIAO
-ESP32-S3** (era la C6 fino al 29 agosto 2026, vedi sotto), OLED **2,42" 128×64 SSD1309 in SPI a 7 pin**, espansore **KAmod I2C-IOexp16**
-(MCP23017), cella **XTAR 18650-330PCM protetta** in portacella. **I LED non si comprano**:
-sono i RGB 5 mm **a catodo comune** che l'utente ha già in casa a mucchi, quelli del suo
-progetto `Timer` — resistenze già tarate a 3,3 V, **verde 100 Ω e rosso 220 Ω**, e il blu
-non si usa perché quattro LED per due colori sono già le otto uscite libere
-dell'espansore. Attenzione: **l'MCP23017 non ha PWM**, quindi acceso/spento e basta. Mancano footswitch e pulsantini dalla Cina, ma **per il firmware
-bastano i pulsanti da arcade che l'utente ha in casa** (COM e NO del microswitch: sono la
-stessa cosa elettrica).
-
-**Il 29 agosto 2026 la scheda è passata dalla C6 alla XIAO ESP32-S3**, comprata dall'utente:
-**solo l'S3 ha l'USB-OTG vero**, quindi è l'unica che può fare la modalità MIDI da sola, senza
-programmi ponte (vedi «Discusso e non aperto: il pedale in modalità MIDI»). Tutta la
-ferramenta comprata resta buona; cambia la mappa dei pin, e **quella della C6 nel resto di
-questo file e in `docs/pedale.md` è storia**.
+**La ferramenta è comprata** (`docs/pedale.md` per la scelta di ognuno): **XIAO ESP32-S3** —
+dal 29 agosto 2026 al posto della C6, perché **solo l'S3 ha l'USB-OTG vero** e quindi può fare
+la modalità MIDI da sola — OLED **2,42" 128×64 I²C**, espansore **KAmod I2C-IOexp16**
+(MCP23017), cella **XTAR 18650-330PCM protetta**. I LED sono quelli che l'utente ha in casa,
+RGB 5 mm **a catodo comune**, verde 100 Ω e rosso 220 Ω; **l'MCP23017 non ha PWM**, quindi
+acceso/spento e basta. **Interruttori sul port A** (è quello che fa scattare l'interrupt), **LED
+sul port B**.
 
 | piedino | GPIO | a cosa serve |
 |---|---|---|
@@ -780,71 +484,40 @@ questo file e in `docs/pedale.md` è storia**.
 | D6 / D7 | `43`, `44` | UART: il log seriale, **da tenere libero** |
 | D1, D2, D3, D8, D9, D10 | `2,3,4,7,8,9` | liberi (D2 è l'unico strapping: si usa per ultimo) |
 
-**Il display è I²C a 4 pin, non SPI a 7** — scoperto sul banco il 30 agosto 2026, il
-preventivo diceva un'altra cosa. Libera cinque piedini e sta sullo stesso bus dell'espansore.
-La trappola è scritta in cinese sul retro: **`D2` va cortocircuitato o il display non manda
-l'ACK**, e senza ACK il controller I²C dell'ESP32 **interrompe la trasmissione** — cioè il
-display non scrive per niente. Sull'esemplare dell'utente era già chiuso di fabbrica; su un
-ricambio va rimisurato. Indirizzo `0x3c`. Dettagli in `docs/pedale.md`.
+Quattro cose dell'hardware che fanno danni se le dimentico:
 
-**L'antenna non è a bordo, e senza non funziona il BLE** — non è l'antenna del Wi-Fi: la
-radio a 2,4 GHz è una sola e la condividono. **Misurato**: senza, lo Spark si vede a
-**−92 dBm**; col foglietto u.FL a **−63**. Se un giorno «ogni tanto non si collega», il primo
-sospetto è quel connettore. Si usa il foglietto di serie dentro la scatola (di **legno**, che
-ai 2,4 GHz è trasparente), **lontano dal metallo interno**. Altre due: **carica a 50 mA**
-invece di 100, ininfluente perché si carica col TP4056; e **il log seriale sull'USB potrebbe
-non convivere con la porta MIDI**, e allora passa dalla UART.
-
-**La scatola, chiusa e senza più incognite: esterno 360 × 120 × 35 mm, pannello utile
-340 × 100, interassi 70 + 70 + 70 + 90.** Sponde in **mogano da 10**, top e fondo in **rovere
-da 5** incassati, rinforzi **fra un footswitch e l'altro** che arrivano alle sponde, fibra del
-rovere lungo la fila dei pedali. Dentro restano **25 mm** e il footswitch ne occupa **20**.
-Tre numeri che fanno danni se li dimentico: **le prese USB-C accettano un pannello fino a
-8 mm**, quindi nella sponda da 10 va svasato dall'interno; **il vetrino del display è pleksa
-fumé grafite da 3 mm** e la sua battuta lascia solo 2 mm di rovere, quindi **il telaietto
-incollato sotto la finestra è obbligatorio**; e **i 90 mm fra il quarto e il quinto footswitch
-sono un riferimento tattile**, non spazio in più. La bozza la genera
-**`tools/scatola-fusion.py`**, installata in Fusion come **ScatolaPedale**. Tutto il perché in
-`docs/pedale.md`.
-
-**La lezione che vale oltre questo pedale: la spaziatura dei footswitch si misura col proprio
-piede.** La mia stima («45 il minimo, 50 comodo») sbagliava del cinquanta per cento — a 60 mm
-l'utente ne premeva ancora due insieme.
-
-**L'alimentazione è decisa e comprata** (27 agosto 2026). Le cinque cose che fanno danni se le
-dimentico; tutto il resto — cablaggio, saldature, indicatore di batteria, scelta dei pezzi —
-sta in `docs/pedale.md`:
-
-- **la XIAO carica pianissimo** — 100 mA la C6, **50 mA l'S3** che l'ha sostituita, e non i
-  380 del C3: decine di ore su una 3300, quindi **la sua USB non è una via di ricarica**. Si
-  carica con un **modulo TC4056 dedicato** e la sua presa; la cella si può anche estrarre e
-  caricare fuori;
-- **il TP4056 non fa load sharing**: per fidarsi del verde `FULL` si carica a **interruttore
-  generale spento**. Usarlo mentre carica funziona lo stesso, non è un divieto;
-- **interruttore generale fisico**, sul positivo **fra la cella e la XIAO**, col modulo
-  attaccato alla cella *prima*. Il deep sleep non lo sostituisce: in borsa un footswitch si
-  preme da solo. **Niente auto-spegnimento per inattività**, che sul palco è la sorpresa che
-  non si vuole;
-- **due prese sul pannello, da etichettare**: una carica, l'altra fa firmware, log seriale
-  **e, con l'S3, il MIDI verso il computer**. Sono identiche, e il caricatore nella sbagliata
+- **il display è I²C a 4 pin** (non SPI a 7, come diceva il preventivo), indirizzo `0x3c`, e
+  sul retro ha una trappola scritta in cinese: **`D2` va cortocircuitato o il display non manda
+  l'ACK**, e senza ACK il controller I²C **interrompe la trasmissione**. Sull'esemplare
+  dell'utente era già chiuso di fabbrica; su un ricambio va rimisurato;
+- **l'antenna non è a bordo, e senza non funziona il BLE**: misurato, lo Spark passa da −92 dBm
+  a −63 col foglietto u.FL. Se un giorno «ogni tanto non si collega», il primo sospetto è quel
+  connettore;
+- **la XIAO carica a 50 mA**, quindi **la sua USB non è una via di ricarica**: si carica con un
+  **TP4056 dedicato**, a **interruttore generale spento** (non fa load sharing). L'interruttore è
+  fisico, sul positivo fra cella e XIAO: **niente auto-spegnimento per inattività**. Le **due
+  prese sul pannello vanno etichettate**, che sono identiche e il caricatore in quella sbagliata
   non carica senza dirlo;
-- **il partitore di A0 va saldato** (non è a bordo né sulla C6 né sull'S3), e **l'indicatore di batteria è
-  firmware da scrivere**: quattro tacche a soglie, **mai percentuali** — la tensione di un
-  litio è piatta nel mezzo — e sotto **3,50 V** un avviso impossibile da non vedere, che la
-  protezione della cella taglia a 2,5 V e il pedale muore a metà canzone.
+- **l'indicatore di batteria è firmware da scrivere**: quattro tacche a soglie, **mai
+  percentuali** — la tensione di un litio è piatta nel mezzo — e sotto **3,50 V** un avviso
+  impossibile da non vedere.
 
-Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
-sul port B.
+**La scatola è chiusa e senza incognite: 360 × 120 × 35 mm esterni, pannello utile 340 × 100,
+interassi 70 + 70 + 70 + 90**, mogano da 10 e rovere da 5, bozza in `tools/scatola-fusion.py`.
+I tre numeri che fanno danni: le **prese USB-C accettano un pannello fino a 8 mm** (la sponda è
+10, va svasata dall'interno); il vetrino è **pleksa fumé grafite da 3 mm** e lascia 2 mm di
+rovere attorno alla finestra, quindi **il telaietto incollato sotto è obbligatorio**; i **90 mm
+fra il quarto e il quinto footswitch sono un riferimento tattile**, non spazio in più. E la
+lezione che vale oltre questo pedale: **la spaziatura dei footswitch si misura col proprio
+piede** — la mia stima sbagliava del cinquanta per cento.
 
-**Tempi BLE rimisurati sull'S3** (2 settembre 2026): **26,5 ms** a giro con l'intervallo a
-7,5 ms — cioè **~424 ms** per un preset intero — contro **82 ms** e **~1312 ms** con quello
-lento. Quindi **lo Spark l'intervallo corto lo concede davvero**. E i 1312 ms del lento **sono
-il tempo del telefono**: era un'inferenza, ora è misurato — il telefono è lento per
-l'intervallo di connessione, non per la banda.
-
-**Resta non verificato sull'S3**: l'autonomia, e se il modulo espansore abbia i pull-up
-sull'I²C — se il bus non parte, quello è il primo sospetto, e si risolve con due resistenze
-da 4,7 kΩ.
+**Stato**: verificato sull'hardware definitivo (2 settembre 2026) — footswitch premuto, ampli
+che cambia preset, display che lo dice, senza telefono in mezzo. BLE sull'S3 **26,5 ms a giro**
+con l'intervallo a 7,5 ms, cioè **~424 ms** per un preset intero, contro 82 ms e ~1312 ms con
+quello lento: **lo Spark l'intervallo corto lo concede davvero**, e i 1312 ms del telefono sono
+il suo intervallo di connessione, non la banda. **Resta non verificato**: l'autonomia, e se il
+modulo espansore abbia i pull-up sull'I²C — se il bus non parte, quello è il primo sospetto, e
+si risolve con due resistenze da 4,7 kΩ.
 
 ## La goliardata: StompSnake
 
@@ -878,17 +551,10 @@ sta in `docs/snake.md`.**
   fare danni o di ripercorrere una strada chiusa**. Il racconto di *come* ci si è arrivati
   va in `docs/`, sempre.
 - Segnare sempre cosa è verificato sull'hardware e cosa no.
-- Italiano nei commenti e nella UI. **L'inglese ci sarà, ma non adesso** — deciso il 26
-  agosto 2026 dopo aver misurato: sono **~270 stringhe** (169 nel JS, 87 nel corpo HTML,
-  12 fra `title` e `placeholder`), e **93 sono messaggi di log**, cioè prosa che spiega il
-  comportamento e che quindi si riscrive ogni volta che il comportamento cambia.
-  Tradurre adesso vuol dire tradurre due volte e rendere doppia ogni modifica alla UI;
-  aspettare non accumula debito, perché i messaggi sono già frasi intere con i valori
-  dentro e non pezzi cuciti insieme. Il momento è **quando Preset, Live ed editor smettono
-  di cambiare forma** — non «a progetto finito», che il pedale può andare avanti senza
-  toccare una riga di testo dell'app. Allora: `src/lingua.js` con due dizionari e una
-  `t()`, `data-t` sugli elementi statici, nessuna libreria e nessun build step. L'utente ha
-  detto «non c'è fretta»: è per sé, non per pubblicarla ad altri.
+- Italiano nei commenti e nella UI. **L'inglese ci sarà, ma non adesso**: sono ~270 stringhe,
+  93 delle quali messaggi di log, cioè prosa che si riscrive ogni volta che il comportamento
+  cambia. Il momento è **quando Preset, Live ed editor smettono di cambiare forma**, e il piano
+  (`src/lingua.js`, `data-t`, nessuna libreria) è in `docs/decisioni-ui.md`.
 - I byte nei log e nella documentazione si scrivono in hex minuscolo separato da spazi.
 
 ## Il sync con Dropbox — in tre righe
@@ -915,139 +581,56 @@ ufficiale».
 
 ## Il sito di presentazione — fuori da questo repo
 
-Dal **27 agosto 2026** c'è una vetrina su **`sparklingtones.com`**, e **non sta qui**:
-`C:\Users\massi\sparklingtones-sito`, repo `mazzrelaz/sparklingtones-sito`. Un solo
-`index.html`, font e logo copiati dall'app, nessuna dipendenza.
+`sparklingtones.com` sta in `C:\Users\massi\sparklingtones-sito`, repo
+`mazzrelaz/sparklingtones-sito`: un solo `index.html`, nessuna dipendenza. **L'app non si
+sposta lì**, e la ragione è la trappola: un dominio custom su GitHub Pages vale per **l'intero
+repo**, quindi porterebbe via anche la PWA installata sul telefono e l'IndexedDB della
+libreria. **Prima di ogni push lì, `git pull --rebase`**: il file `CNAME` lo riscrive GitHub.
+DNS, la trappola del `www`, la `privacy.html` (già analizzata: niente script, niente banner) e
+i video ancora da girare stanno in **`docs/sito.md`**.
 
-**L'app non si è spostata**, e la ragione è la trappola da ricordare: **un dominio custom
-su GitHub Pages vale per l'intero repo**. Messo su `SparklingTones` avrebbe portato via
-anche l'app, e con lei la PWA installata sul telefono e l'IndexedDB della libreria — altra
-origine, altro database. Quindi repo separato, e il sito ci manda con dei link.
+## Dove si riprende — 2 settembre 2026
 
-DNS su register.it: quattro record `A` agli IP di GitHub (`185.199.108-111.153`) più il
-`CNAME` del `www`; il dominio lo dichiara il file `CNAME` dentro il repo del sito. Attivo e
-verificato, https compreso.
+Guscio `v73` (in `sw.js`; non fidarsi di questa riga se non torna). Suite verdi: protocol 139,
+transport 60, store 136, backup 41, dropbox 34. **`index.html` non è coperto da nessuna
+suite**: si verifica solo aprendo l'app, e le mie prove sono contro un ampli finto. Il racconto
+delle sessioni sta in `docs/diario.md`.
 
-**I video non ci sono ancora**: i blocchi `<video>` sono in `index.html` **commentati**, e
-`media/LEGGIMI.md` dice quali servono e come registrarli. Se l'utente dice «il video», è
-quello. **Capitolo in stand by** per sua richiesta, il 27 agosto 2026.
+Sull'app:
 
-Non fatto perché è la facciata pubblica e la decide lui: il `README.md` dell'app punta
-ancora solo a `github.io`, senza il link al sito. La domanda gli è stata fatta e non ha
-risposto.
+1. **Il tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, **non dall'app**.
+   Aprire l'editor, battere, e sentire se il delay ci va dentro.
+2. **Editor e vestito con l'ampli acceso, e sul telefono**: girare un pomello, cambiare un
+   modello, salvare e riscrivere. Le mie prove sono su schermo largo e su un ampli finto.
+3. **Che l'ampli non si pianti più girando le manopole**: la correzione **non è verificata**.
+   Se ricapita, la manopola è `PAUSA_PARAMETRO`, poi `SEND_GAP_MS`.
+4. **«Importa un file» con un preset vero** dell'app ufficiale. Se non entra si guarda
+   `trovaPresetUfficiali`, e la cosa da chiedere sono **i primi byte del file**, non
+   l'estensione.
+5. **Togliere dal catalogo altri modelli che l'ampli non ha**, come fu `TrebleBooster`.
+6. **Mettere al sicuro il `preset_backup.zip` che sta su Dropbox**, e importarlo: Positive Grid
+   lo dismette nel 2027, ed è **l'unica cosa che scade**.
 
-**La trappola del `www`, pagata il 31 agosto 2026**: il record va in `CNAME` verso
-**`mazzrelaz.github.io`**, non verso la radice del dominio. Puntandolo alla radice il sito
-si raggiunge lo stesso — gli `A` sono quelli — ma **GitHub non emette il certificato per il
-`www`**, e siccome Chrome prova `https` per primo chi digita il www vede «la connessione non
-è privata». Si ripara cambiando il record e poi **togliendo e rimettendo il dominio** in
-Settings → Pages, che è quello che fa ripartire l'emissione. Da lì in poi GitHub scrive lui
-il file `CNAME` nel repo, quindi **la copia locale resta indietro: `git pull --rebase` prima
-di ogni push**.
+Sul pedale — il resto in `docs/pedale.md`:
 
-**C'è una `privacy.html`** (31 agosto 2026), nata da una mail commerciale di register («il
-tuo sito non è in regola col Garante»), che parte a tappeto a chi registra un dominio.
-Controllato e misurato: la pagina non ha **script, cookie, storage, analytics, moduli né
-una sola richiesta a domini di terzi** — i caratteri sono serviti da lì, ed è il motivo per
-cui erano stati copiati in casa. Quindi **nessun banner**: dove non c'è niente da
-consentire, un banner è peggio che non averlo. Resta vero solo che GitHub tiene i log
-tecnici con gli IP, e la pagina lo dice. **Se ritorna il discorso, la risposta è già
-scritta**: non serve rifare l'analisi.
+7. **Il pedale fa il pedale** (2 settembre 2026, millefori definitiva e S3 vera): footswitch
+   premuto, ampli che cambia preset, display che lo dice, senza telefono in mezzo. **Niente da
+   rifare**; restano gli altri sei pulsanti e gli otto LED, le due metà col quinto footswitch,
+   il banco che non si ricorda al riavvio (va fatto coi tasti banco veri), il trasferimento di
+   un banco da riprovare sull'S3, e **l'autonomia, l'ultima misura mancante**.
+8. **La scheda in `pcb/`**: schema e disposizione ci sono. Due cose, in quest'ordine —
+   **stringere il contorno** (95 × 60 in un vano di 100 × 64 lascia 2,5 mm per lato) e
+   **misurare col calibro gli interassi dei connettori del KAmod (J3, J4, J5, J6), che nel file
+   sono inventati**, prima di tirare le piste, o le piste si rifanno. La XIAO invece è giusta
+   per costruzione: 15,24 mm fra le due file. `kicad-cli` esporta in SVG e **fa girare il DRC**
+   senza aprire KiCad. Gli script `tools/genera-*-kicad.py` **non si rigenerano più**: da qui
+   in poi si modifica in KiCad, o si perde quello che l'utente aggiusta a mano.
+9. **Il looper sul pedale, col conteggio fatto in casa**: il protocollo c'è tutto, manca il
+   firmware. Il conteggio col click **non si comanda**, quindi lo produce il pedale — legge il
+   bpm, conta quattro tempi e **40 ms prima dell'uno** manda `0x0175` con `04`.
 
-Il repo del sito ha la sua identità git (`massimo.togni@gmail.com`); **il primo commit porta
-per sbaglio `mazzbackup@gmail.com`** e GitHub potrebbe non attribuirlo. Correggerlo vorrebbe
-dire riscrivere la radice e forzare il push sopra i commit di GitHub: l'utente ha deciso di
-lasciar stare.
-
-## Dove si riprende — 29 agosto 2026
-
-Guscio `v73` (sta in `sw.js`; non fidarsi di questa riga se non torna). Suite verdi:
-protocol 139, transport 60, store 136, backup 41, dropbox 34. **`index.html` non è coperto
-da nessuna suite**: si verifica solo aprendo l'app, e le mie prove sono contro un ampli finto.
-
-**Il racconto delle sessioni sta in `docs/diario.md`** — cosa è successo il 26, 27 e 28
-agosto e perché. Qui resta solo quello che è ancora da fare.
-
-**Il 29 agosto non ha toccato l'app**: è andato tutto sul pedale. La scheda passa dalla C6
-alla **XIAO ESP32-S3**, che l'utente ha ordinato, perché è l'unica che può fare la modalità
-MIDI; la **scatola sarà di legno**; l'antenna è il **foglietto di serie, dentro**. Dettagli
-nella sezione «Il pedale ESP32» e in `docs/pedale.md`.
-
-Da fare:
-
-1. **Il tap tempo con l'ampli acceso.** `0x0176` è verificato dalla sonda ma **non
-   dall'app**: aprire l'editor, battere il tap, e sentire se il tempo cambia *e* se il delay
-   ci va dentro. `tools/looper-probe.html`, sezione «5 — Il tempo», fa lo stesso a mano.
-2. **Provare editor e vestito con l'ampli acceso, e sul telefono.** Girare un pomello e
-   sentire se il suono segue, cambiare un modello, salvare e riscrivere. Se qualcosa non
-   torna il primo sospetto sono i comandi, non il disegno. Sul telefono contano le tendine
-   nostre e i LED delle famiglie sui pulsantoni live: le mie prove sono su schermo largo.
-3. **Provare che l'ampli non si pianta più girando le manopole.** L'invio dei parametri è
-   autocadenzato ma **la correzione non è verificata**. Se ricapita: prima `PAUSA_PARAMETRO`,
-   poi `SEND_GAP_MS`.
-4. **«Importa un file» con un preset vero** dell'app ufficiale: le mie prove sono contro un
-   preset ricostruito a mano. Se non entra, il posto da guardare è `trovaPresetUfficiali`, e
-   la cosa da chiedere sono **i primi byte del file**, non l'estensione.
-5. **Il pedale fa il pedale** (2 settembre 2026, sulla millefori definitiva e sulla S3 vera):
-   **si preme il footswitch e l'ampli cambia preset, e il display dice quale.** Senza telefono
-   in mezzo. Verificato per intero: piste a **3,296 V**, bus con **`0x20` e `0x3c`**, ingressi
-   e uscite dell'espansore, BLE con l'intervallo corto concesso, footswitch letto dall'MCP e
-   display che segue. XIAO ed espansore **su zoccoli**, quindi sfilabili.
-   **Quello che resta è tutto in avanti, niente da rifare**: gli altri sei pulsanti e gli otto
-   LED (stesso lavoro ripetuto), le due metà del banco col quinto footswitch, il banco che non
-   si ricorda al riavvio (punto 7), il trasferimento di un banco dall'app da riprovare
-   sull'S3, e **l'autonomia, che è l'ultima misura mancante**.
-6. **La scheda stampata, in `pcb/`** (2 settembre 2026). Schema e **disposizione** ci sono —
-   contorno, fori, piazzole con la rete assegnata, serigrafia — nati da
-   `tools/genera-schema-kicad.py` e `tools/genera-pcb-kicad.py`, che **da qui in poi non si
-   rigenerano**: si modifica in KiCad, o si perde quello che l'utente aggiusta a mano. Si
-   controlla **senza aprire KiCad**: `kicad-cli` (10.0.6, in `C:\Program Files\KiCad\10.0\bin`)
-   esporta in SVG — da lì un'immagine con Edge headless — **e fa girare il DRC**. Due cose,
-   in quest'ordine:
-   - **stringere il contorno**: 95 × 60 in un vano di 100 × 64 lascia due millimetri e mezzo
-     per lato, che su una scatola fatta a mano è troppo poco, e c'è spazio vuoto in avanzo;
-   - **misurare col calibro gli interassi dei moduli, prima di tirare le piste.** Nel file i
-     quattro connettori del KAmod (J3, J4, J5, J6) stanno a distanze **inventate**: se il
-     modulo si innesta sulla scheda, le piazzole devono cadere dove cadono i suoi pettini, e
-     le misure in `docs/pedale.md` sono ancora dichiarate come stime («~45 × 35»). La XIAO
-     invece è giusta per costruzione: **15,24 mm** fra le due file. **Le piste si tirano
-     dopo**, o spostare un connettore vuol dire rifarle.
-7. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
-   trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due lati.
-8. **Il looper sul pedale, col conteggio fatto in casa.** Il protocollo è tutto lì e
-   verificato; manca il firmware. Il conteggio col click **non si comanda** (vedi
-   «Protocollo»), quindi lo produce il pedale: legge il bpm, conta quattro tempi lampeggiando
-   un LED — o con un buzzer — e **40 ms prima dell'uno** manda `0x0175` con `04`, che registra
-   all'istante. Quei 40 ms sono il tempo di volo misurato. Il tempo si può anche **scrivere**
-   (`0x0176`), quindi il pedale può avere il suo tap tempo. In Signal Detection Mode (click
-   spento) il conteggio non serve: parte al primo suono di chitarra.
-9. **Togliere dal catalogo altri modelli che l'ampli non ha.** `TrebleBooster` l'ha trovato
-   l'utente; l'elenco viene da Soundshed e non è verificato. La tendina mette per primi i
-   modelli visti sull'ampli, quindi il prossimo si trova più in fretta.
-10. **Mettere al sicuro il `preset_backup.zip` che sta su Dropbox adesso**, e importarlo:
-   Positive Grid dismette quel backup nel 2027. È l'unica strada che prende tutta la
-   libreria dell'app ufficiale in un colpo solo; dopo restano solo l'ampli e i preset
-   singoli. Non è urgente in giornata, ma è l'unica cosa che scade.
-
-**Discusso e non aperto: il pedale in modalità MIDI** (29 agosto 2026), per comandare
-AmpliTube sul PC con lo stesso pedale. Hardware invariato, cambia solo cosa parte alla
-pressione; si commuta col **primo e l'ultimo footswitch insieme**. Tre cose misurate quel
-giorno, da non ripercorrere: **Windows non sa fare BLE-MIDI** (nemmeno col nuovo Windows MIDI
-Services, dov'è in backlog) e vuole per forza un programma ponte di terzi — ma la scheda
-funziona, Windows ci si collega e le legge dentro il servizio MIDI; **la C6 non può fare
-USB-MIDI** e **l'S3 sì**, ed è per questo che si cambia scheda; lo strumento della prova è
-**`pedale/prova-midi/`**. Due trappole d'ambiente valide sempre: **PowerShell 5.1 non può
-sottoscrivere eventi WinRT** (le `…Async` invece si aspettano con `AsTask`) e
-**`Pairing.CanPair` da `FindAllAsync` è `False` per tutti**, quindi non dice niente. Il resto
-in `docs/pedale.md`, «Modalità MIDI».
-
-**Discusso e non aperto: creare un preset con l'AI** («voglio il suono dell'assolo di Gilmour
-in Mother»). L'utente ha chiesto solo di ragionarci. Il punto: il vocabolario dei modelli non
-lo può scegliere l'AI — un nome che l'ampli non ha è il comando che lo pianta — quindi glielo
-si dà ristretto a `modelliVisti()`, lo scheletro si prende da un preset uscito dall'ampli, e
-il risultato si prova **solo sul buffer `0x7f`**, mai in uno slot. Serve una API key
-dell'utente, e sarebbe la prima funzione dell'app che non funziona offline. L'AI non sente:
-dà un punto di partenza, non un suono finito.
-
-**Non aperto, e va bene così:** il trasferimento di un banco al pedale che costa ~6 s —
-funziona, si può accorciare, ma è ottimizzazione.
+**Discussi e non aperti**, col ragionamento già scritto e da non rifare: il pedale in
+**modalità MIDI** (`docs/pedale.md` — e lì stanno le due trappole d'ambiente: Windows non sa
+fare BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT); **creare un preset con l'AI**
+(`docs/diario.md`); e il trasferimento di un banco che costa ~6 s, che funziona ed è solo
+ottimizzazione.
