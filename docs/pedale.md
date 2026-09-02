@@ -1796,3 +1796,18 @@ che punto del banco si è. Due regole, e vengono dalle misure:
 
 Il disegno è **scritte chiare su nero, senza zone piene**, che su un OLED è anche il modo di
 consumare meno.
+
+**L'altezza è confermata e la scatola si può tagliare — 2 settembre 2026.** Era rimasta
+l'ultima incognita: quanto sporgesse il footswitch sotto il pannello, che sopra i ~25 mm
+avrebbe obbligato a una scatola da 42-45 invece che da 35. **Misurato dall'utente: 20 mm**,
+dentro i 25 liberi, con 5 mm per i fili — che bastano **a patto di piegarli subito di lato**,
+perché un filo lasciato scendere dritto tocca il fondo.
+
+E c'è un margine di regolazione che toglie ogni ansia: **il collo del footswitch è lungo**,
+quindi quanto scende dentro lo decide quanto lo si lascia sporgere fuori. Due cose da tenere
+a mente scegliendo: più esterno vuol dire **pulsante più alto sopra il pannello** — per un
+footswitch non è un difetto, si trova meglio col piede — e **al dado deve restare filetto su
+cui prendere**.
+
+Quindi: **360 × 120 × 35 mm esterni, pannello utile 340 × 100, interassi 70 + 70 + 70 + 90.**
+Niente resta da decidere.

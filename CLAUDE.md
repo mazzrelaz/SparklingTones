@@ -797,9 +797,10 @@ ne premeva ancora due insieme, e la mia stima («45 il minimo, 50 comodo») sbag
 cinquanta per cento. La lezione vale oltre questo pedale: **la spaziatura dei footswitch si
 misura col proprio piede.** La profondità è 100 perché **i due tasti a mano vanno ai fianchi
 del display, non dietro**: il display è largo 55 su un pannello largo 340.
-**Altezza 35 mm**, sponde da 35 con top e fondo incassati: restano **25 mm liberi dentro**, e
-**non sappiamo quanto sporga il footswitch sotto il pannello** — sopra i ~25 mm non ci sta e
-servirebbero 42-45 esterni. **Non si taglia il legno finché quel pezzo non è in mano.** La
+**Altezza 35 mm, e adesso è confermata** (2 settembre 2026): sponde da 35 con top e fondo
+incassati lasciano **25 mm liberi dentro**, e **il footswitch ne occupa 20**, misurato
+dall'utente — con 5 mm per i fili, che bastano se si piegano subito di lato. In più **il collo
+del footswitch è lungo**, quindi quanto scende dentro si regola lasciandolo più esterno. La
 bozza in Fusion la genera **`tools/scatola-fusion.py`**, misure in cima al file, ed è
 installata anche fra gli script di Fusion come **ScatolaPedale**. **La misura la decide il
 piede, non i componenti**: l'elettronica occupa un ventesimo del pianale. **I 90 mm fra il
