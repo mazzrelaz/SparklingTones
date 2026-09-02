@@ -1,4 +1,3 @@
-| espansore, uscite | **3,278 V**, cioè tutta la tensione della pista senza cadute — e **un LED vero si accende** |
 # Il pedale ESP32 — ragionamento completo
 
 Estratto da `CLAUDE.md` il 26 agosto 2026 per non pesare a ogni sessione.
@@ -1720,7 +1719,7 @@ Tutto verificato sulla basetta definitiva e sulla XIAO ESP32-S3:
 | bus condiviso | **`0x20` e `0x3c`** trovati insieme dalla scansione |
 | display | scrive |
 | espansore, ingressi | il pulsante su `PA0` segue il dito, coi pull-up interni |
-| espansore, uscite | **3,278 V**, cioè tutta la tensione della pista senza cadute |
+| espansore, uscite | **3,278 V**, senza cadute — e **un LED vero si accende** |
 
 Della fila da 10 pin dell'espansore se ne usano **nove**: `PA0`…`PA6` per i sette pulsanti —
 cinque footswitch più i due tasti banco — e le due `G` come masse, una per estremità, così i

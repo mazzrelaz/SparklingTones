@@ -218,6 +218,12 @@ Nota: **l'ohmmetro su un chip non alimentato non dice niente di utile**, la tens
 find the file specified`, che sembra un'altra cosa. Si estraggono a mano in
 `%LOCALAPPDATA%\claude-arduino-libs` e si compila con `--libraries` che punta lì.
 
+**Mai usare `|` come delimitatore di `s///` in perl su testo che contiene tabelle
+markdown.** Il primo `|` del contenuto chiude il pattern e la sostituzione va a finire dove
+capita — di solito **in cima al file**, che sembra tutt'altro guasto. Successo due volte il
+2 settembre 2026, su uno sketch e su `docs/pedale.md`. Per modifiche mirate su questi file si
+usa lo strumento di edit, non `perl -0pi`.
+
 **I messaggi di commit vanno passati per file, non per here-string.** `git commit -m @'…'@`
 in PowerShell 5.1 si rompe in silenzio con virgolette doppie o certe sequenze: il testo
 viene spezzato in parole e git risponde `pathspec '…' did not match any file(s)`. E il
