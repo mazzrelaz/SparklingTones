@@ -1635,3 +1635,35 @@ L'ordine di montaggio che evita di ripetere la serata: **prima le piste di 3V3 e
 dà corrente e si misurano i 3,3 V nei punti dove arriveranno espansore e display, e solo dopo
 si saldano i componenti.** Se il problema era l'alimentazione, così non si ripresenta; e se si
 ripresenta, allora non era quello e le quattro misure qui sopra tornano utili.
+
+### Chiuso: l'espansore che scaldava era il flussante — 2 settembre 2026
+
+Il capitolo aperto della prima serata (MCP23017 a 60 °C) si è chiuso al secondo montaggio,
+e **la causa non era nessuna delle ipotesi in piedi**: non il cablaggio volante, non `V+`
+che non arrivava, non il chip bruciato.
+
+Rifatto tutto su millefori, con i quattro fili verificati uno per uno in continuità, il chip
+è arrivato a **80 °C**. **L'ha trovata l'utente: era il flussante residuo.** Pulito con
+alcol isopropilico, l'espansore è sceso a **23 °C**, cioè temperatura ambiente.
+
+**Il meccanismo, che spiega tutto il quadro**: il flussante residuo non è isolante e fa un
+percorso da qualche kΩ fra saldature vicine — su una fila a 2,54 mm ce n'è d'avanzo. Basta
+che porti un ingresso fuori dai suoi limiti e un CMOS entra in **latch-up**: dentro il chip
+si innesca un percorso parassita che tira corrente a vuoto e scalda, **e si spegne da solo
+togliendo l'alimentazione**. Da cui il quadro esatto che avevamo: scalda tantissimo, non
+lascia danni permanenti, sparisce quando la causa se ne va.
+
+**La regola che ne resta, e vale per tutto il montaggio: il flussante si pulisce sempre e
+subito**, alcol isopropilico e spazzolino. Non è ordine, è elettricità: su un chip che
+assorbe microampere anche una perdita minima si vede.
+
+**E una lezione di metodo, pagata due volte.** Avevo concluso «il chip è andato» da un
+ragionamento sui watt — 80 °C senza carico ⇒ centinaia di milliampere ⇒ cinque ordini di
+grandezza fuori. Il conto era giusto e la conclusione sbagliata, perché **la corrente non
+passava dove pensavo**. Quando un componente scalda, prima di condannarlo va guardato
+**intorno** al componente: il chip era l'ultimo anello, non la causa.
+
+Nota a margine, sempre di quella sera: **l'ohmmetro su un chip non alimentato non dice
+niente di utile.** La tensione di prova del tester è troppo bassa per far condurre le
+protezioni interne, quindi «15 kΩ» e «infinito» sono la stessa risposta. Ci mi ero
+appoggiato per decidere se il chip fosse vivo, e non poteva rispondere.

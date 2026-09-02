@@ -197,6 +197,17 @@ un dettaglio: sul palco il PC non c'è.** Ne segue una regola di metodo più lar
 **misurare un tempo mentre si è collegati alla seriale può nascondere il difetto che si
 manifesta da scollegati** — la mia misura tornava perfetta proprio perché la porta era aperta.
 
+**Il flussante residuo fa scaldare i chip, e lo abbiamo pagato due sere** (2 settembre 2026).
+Non è isolante: fa un percorso da qualche kΩ fra saldature vicine, e su una fila a 2,54 mm
+basta a portare un ingresso CMOS fuori dai suoi limiti e mandare il chip in **latch-up** —
+tira corrente a vuoto, scalda, e **si spegne da solo togliendo l'alimentazione**, quindi non
+lascia prove. L'MCP23017 è arrivato a 80 °C; **pulito con alcol isopropilico è sceso a 23**.
+**Si pulisce sempre e subito.** E la lezione di metodo: **quando un componente scalda, prima
+di condannarlo si guarda *intorno* al componente** — il conto sui watt era giusto e la
+conclusione («il chip è andato») sbagliata, perché la corrente non passava dove pensavo.
+Nota: **l'ohmmetro su un chip non alimentato non dice niente di utile**, la tensione di prova
+è troppo bassa perché conducano le protezioni interne.
+
 **Le librerie Arduino non si installano in `Documenti`**: Defender ci blocca la scrittura
 (l'IDE è autorizzato, il mio `arduino-cli` no) e l'errore che dà è `mkdir … The system cannot
 find the file specified`, che sembra un'altra cosa. Si estraggono a mano in
@@ -958,15 +969,12 @@ Da fare:
 4. **«Importa un file» con un preset vero** dell'app ufficiale: le mie prove sono contro un
    preset ricostruito a mano. Se non entra, il posto da guardare è `trovaPresetUfficiali`, e
    la cosa da chiedere sono **i primi byte del file**, non l'estensione.
-5. **Il pedale sul banco: display, bus ed espansore sono verificati** (30 agosto 2026, sulla
-   **C6** — l'S3 non è arrivata, il venditore ha mandato un'altra C6, e non blocca niente
-   tranne il MIDI). **Quello che resta aperto è che l'MCP23017 scalda a 60 °C**, il LED ha
-   smesso di accendersi e la XIAO ronza finché l'espansore è attaccato. **L'ipotesi da
-   verificare per prima è che `V+` non arrivi davvero e il chip si alimenti attraverso i
-   piedini del bus**: spiegherebbe insieme il calore, le uscite morte e il fatto che risponda
-   lo stesso allo scanner. Le quattro misure da fare stanno in `docs/pedale.md`, «Il banco,
-   prima serata». **Il LED resta scollegato finché non tornano.** Poi tocca al firmware, e
-   **tempi BLE e autonomia vanno rimisurati**.
+5. **Il pedale sul banco, sulla millefori definitiva e sulla S3 vera** (2 settembre 2026).
+   Fatto e verificato: le due piste danno **3,296 V** all'estremità lontana, la XIAO è su
+   zoccoli, l'espansore pure. **Il capitolo dell'espansore che scaldava è chiuso: era il
+   flussante residuo** — pulito con alcol, da 80 °C a 23. Il chip non era rotto, e nessuna
+   delle ipotesi in piedi era quella giusta. Da lì: bus, display, un pulsante e un LED, poi
+   il firmware, e **tempi BLE e autonomia vanno rimisurati**.
 6. **Il pedale non ricorda quale banco stava suonando**: al riavvio carica il primo che
    trova. Va fatto insieme ai tasti banco veri, che sono la stessa funzione vista da due lati.
 7. **Il looper sul pedale, col conteggio fatto in casa.** Il protocollo è tutto lì e
