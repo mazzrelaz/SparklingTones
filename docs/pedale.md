@@ -1677,3 +1677,8 @@ ingressi **181 µs**, fotogramma intero del display **32,7 ms** — quindi la re
 **L'fqbn per l'S3 è `esp32:esp32:XIAO_ESP32S3:CDCOnBoot=default`**, e non è un dettaglio:
 su quella scheda `CDCOnBoot` ha i valori rovesciati rispetto al C3 e al C6, quindi copiare
 l'fqbn vecchio spegne la seriale su USB. Vedi `CLAUDE.md`, «Trappole dell'ambiente».
+
+**L'ordine del connettore del display sulla basetta è `VDD · GND · SCL · SDA`**, da sinistra
+a destra — montato così dall'utente il 2 settembre 2026, diverso da come l'avevo proposto io
+(che avevo messo GND per primo). È quello che conta quando si infila lo spinotto, quindi vale
+il montato e non il disegnato: aggiornato anche nella pagina della basetta.
