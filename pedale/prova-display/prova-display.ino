@@ -126,6 +126,10 @@ static void tuttoAcceso() {
 
 void setup() {
   Serial.begin(115200);
+  /* Senza questa riga, se al PC nessuno sta leggendo la porta ogni
+   * Serial.print resta appesa fino a un timeout e il firmware striscia.
+   * Vedi CLAUDE.md, «Trappole dell'ambiente». */
+  Serial.setTxTimeoutMs(0);
   delay(400);
   Serial.println();
   Serial.println(F("=== prova-display: bus I2C e display ==="));

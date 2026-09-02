@@ -175,6 +175,13 @@ il 14 agosto 2026 (su un C3; da riverificare sul C6):
   `Serial` esce dai pin 20/21 e il monitor sull'USB resta muto: sembra che lo sketch non
   parta. Va compilato con `CDCOnBoot=cdc` nell'fqbn. Il segno che l'impostazione **non** è
   cambiata è `No changed sectors found` nel log di caricamento.
+- **Ma sulla XIAO ESP32-S3 i due valori sono ROVESCIATI** (2 settembre 2026): in
+  `boards.txt` `CDCOnBoot.default=Enabled` e `CDCOnBoot.cdc=Disabled`. Quindi sull'S3
+  l'fqbn giusto è **`XIAO_ESP32S3:CDCOnBoot=default`**, e copiare l'fqbn del C3/C6 spegne
+  la seriale invece di accenderla. È saltato fuori solo perché `Serial.setTxTimeoutMs()`
+  non compila su `HardwareSerial`: senza quella riga avremmo avuto il monitor muto e dato
+  la colpa a tutt'altro. **Sulla S3 `Serial` è `HWCDC` solo con CDC acceso**, altrimenti è
+  la UART.
 - **Aprire la porta seriale resetta il chip**: sull'USB nativo DTR/RTS pilotano reset e
   boot. `DtrEnable=$false, RtsEnable=$false` per leggere senza toccare niente; con
   `RTS=$true` il chip riparte **in download mode** e non esegue lo sketch.
