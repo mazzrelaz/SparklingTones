@@ -1811,3 +1811,27 @@ cui prendere**.
 
 Quindi: **360 × 120 × 35 mm esterni, pannello utile 340 × 100, interassi 70 + 70 + 70 + 90.**
 Niente resta da decidere.
+
+**Il vetrino, deciso davvero — 2 settembre 2026.** La scelta di prima (policarbonato 2 mm)
+è caduta su un vincolo pratico: **l'utente il policarbonato non lo può tagliare**, e a mano
+non vuole farlo perché sta costruendo tutto con precisione da macchina. Da lì la catena:
+
+- **il laser a diodo non taglia il plexi trasparente** (che a quella lunghezza d'onda è
+  trasparente anche per il laser) né il policarbonato, che brucia e ingiallisce. **Il fumé
+  scuro invece lo assorbe e si taglia bene** — cioè la scelta estetica coincide con l'unica
+  lavorabile;
+- ma il taglio non lo fa lui: **lo fa il venditore su misura**, che toglie il problema alla
+  radice. In polacco il materiale è **`pleksa przydymiona grafit`** — grafite e non `brąz`,
+  che virerebbe le scritte sull'ambra — e **`lana`/`GS`** (colata) e non `ekstrudowana`/`XT`;
+- **spessore 3 mm e non 2**, perché in quella tinta il 2 non si trova.
+
+**Quindi: `pleksa lana przydymiona grafit`, 3 mm, tagliata su misura 61 × 34 mm, due pezzi.**
+Il 61 × 34 è la finestra (55 × 27,5) più i 3 mm di battuta per lato; la battuta nel legno si
+fa 0,2 mm più larga perché entri senza forzare.
+
+**La conseguenza dei 3 mm**: la battuta è profonda 3 su un top da 5, quindi **restano 2 mm di
+legno attorno alla finestra**. Il telaietto incollato sotto — che era già previsto — da
+consigliato diventa **necessario**, ed è lui a restituire la rigidezza. L'alternativa di
+incollare il vetrino sotto il pannello invece che nella battuta è stata scartata: verrebbe
+più semplice, ma il display finirebbe in fondo a un pozzo di 8 mm, **e questo schermo si legge
+in piedi, cioè di sbieco**.
