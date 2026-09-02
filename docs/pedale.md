@@ -1835,3 +1835,18 @@ consigliato diventa **necessario**, ed è lui a restituire la rigidezza. L'alter
 incollare il vetrino sotto il pannello invece che nella battuta è stata scartata: verrebbe
 più semplice, ma il display finirebbe in fondo a un pozzo di 8 mm, **e questo schermo si legge
 in piedi, cioè di sbieco**.
+
+**Il fumé vince per una ragione che non è estetica — 2 settembre 2026.** Provato il grigio
+scuro tenendo davanti al display un paio di occhiali da sole: **si legge male**. La prova è
+però più severa del vero — gli occhiali stanno al 10-18% di luce passante, una pleksa
+`przydymiona` al 30-50 — e la scelta l'ha decisa un vincolo pratico:
+
+- **i servizi di taglio hanno un minimo di 10 × 10 cm**, quindi non si ordina un 61 × 34: si
+  compra una lastra e ci si ricava il pezzo;
+- **il trasparente l'utente non lo può tagliare** (il laser a diodo lo attraversa senza
+  inciderlo), **il fumé sì**.
+
+Quindi si compra **una lastra da 10 × 10 di `pleksa przydymiona grafit` da 3 mm** e i vetrini
+si tagliano col laser — e da una lastra ne escono diversi, ricambi compresi. Se poi montato
+risultasse troppo scuro da leggere in piedi, si torna al trasparente e si accetta il taglio
+fatto fare.

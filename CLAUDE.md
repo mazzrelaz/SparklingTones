@@ -779,38 +779,29 @@ l'ACK**, e senza ACK il controller I²C dell'ESP32 **interrompe la trasmissione*
 display non scrive per niente. Sull'esemplare dell'utente era già chiuso di fabbrica; su un
 ricambio va rimisurato. Indirizzo `0x3c`. Dettagli in `docs/pedale.md`.
 
-Le tre differenze che fanno danni se le dimentico: **l'antenna non è a bordo** (solo u.FL, e
-senza antennina **non funziona il BLE** — non è l'antenna del Wi-Fi, che qui non serve: la
-radio a 2,4 GHz è una sola e la condividono). **Non si compra niente**: si usa il **foglietto**
-di serie, dentro la scatola, perché l'antenna l'utente non la vuole vedere — e **la scatola
-sarà di legno**, che ai 2,4 GHz è trasparente, quindi la gabbia di Faraday dell'alluminio non
-è un problema nostro. L'unica accortezza è **lontano dal metallo interno** (cella 18650,
-cornice del display). Una stilo su bulkhead ce l'ha in casa e resta la riserva. **La prova si
-fa a scatola chiusa e a tre-quattro metri**, che a mezzo metro funziona qualunque cosa; **carica a 50 mA** invece di 100, il che non cambia niente perché si carica col
-TP4056; e **il log seriale sull'USB potrebbe non convivere con la porta MIDI** — se non
-convive, il log passa dalla UART e per ricaricare il firmware si tiene premuto BOOT e si
-tocca RESET. Da rimisurare: i tempi BLE e **l'autonomia**, perché l'S3 consuma più della C6.
+**L'antenna non è a bordo, e senza non funziona il BLE** — non è l'antenna del Wi-Fi: la
+radio a 2,4 GHz è una sola e la condividono. **Misurato**: senza, lo Spark si vede a
+**−92 dBm**; col foglietto u.FL a **−63**. Se un giorno «ogni tanto non si collega», il primo
+sospetto è quel connettore. Si usa il foglietto di serie dentro la scatola (di **legno**, che
+ai 2,4 GHz è trasparente), **lontano dal metallo interno**. Altre due: **carica a 50 mA**
+invece di 100, ininfluente perché si carica col TP4056; e **il log seriale sull'USB potrebbe
+non convivere con la porta MIDI**, e allora passa dalla UART.
 
-**La scatola: pannello utile 340 × 100, esterno 360 × 120 × 35 mm**, interassi
-**70 + 70 + 70 + 90**. **Il numero l'ha deciso il piede dell'utente, non un calcolo**: a 60 mm
-ne premeva ancora due insieme, e la mia stima («45 il minimo, 50 comodo») sbagliava del
-cinquanta per cento. La lezione vale oltre questo pedale: **la spaziatura dei footswitch si
-misura col proprio piede.** La profondità è 100 perché **i due tasti a mano vanno ai fianchi
-del display, non dietro**: il display è largo 55 su un pannello largo 340.
-**Altezza 35 mm, e adesso è confermata** (2 settembre 2026): sponde da 35 con top e fondo
-incassati lasciano **25 mm liberi dentro**, e **il footswitch ne occupa 20**, misurato
-dall'utente — con 5 mm per i fili, che bastano se si piegano subito di lato. In più **il collo
-del footswitch è lungo**, quindi quanto scende dentro si regola lasciandolo più esterno. La
-bozza in Fusion la genera **`tools/scatola-fusion.py`**, misure in cima al file, ed è
-installata anche fra gli script di Fusion come **ScatolaPedale**. **La misura la decide il
-piede, non i componenti**: l'elettronica occupa un ventesimo del pianale. **I 90 mm fra il
-quarto e il quinto sono un riferimento tattile**: quel pedale cambia metà senza toccare il
-suono, e il vuoto lo fa trovare senza guardare. Materiali scelti il 29 agosto 2026: **sponde in mogano da 10 mm,
-top e fondo in rovere da 5 mm**, con rinforzi interni. Due trappole che vengono da lì: **le
-prese USB-C accettano un pannello fino a 8 mm**, quindi nella sponda da 10 va svasato
-dall'interno; e **i rinforzi vanno fra un footswitch e l'altro** — così al foro restano 5 mm e
-il filetto non è un vincolo — **arrivando alle sponde**, con la fibra del rovere lungo la fila
-dei pedali. Il resto in `docs/pedale.md`, «Quanto sarà grande».
+**La scatola, chiusa e senza più incognite: esterno 360 × 120 × 35 mm, pannello utile
+340 × 100, interassi 70 + 70 + 70 + 90.** Sponde in **mogano da 10**, top e fondo in **rovere
+da 5** incassati, rinforzi **fra un footswitch e l'altro** che arrivano alle sponde, fibra del
+rovere lungo la fila dei pedali. Dentro restano **25 mm** e il footswitch ne occupa **20**.
+Tre numeri che fanno danni se li dimentico: **le prese USB-C accettano un pannello fino a
+8 mm**, quindi nella sponda da 10 va svasato dall'interno; **il vetrino del display è pleksa
+fumé grafite da 3 mm** e la sua battuta lascia solo 2 mm di rovere, quindi **il telaietto
+incollato sotto la finestra è obbligatorio**; e **i 90 mm fra il quarto e il quinto footswitch
+sono un riferimento tattile**, non spazio in più. La bozza la genera
+**`tools/scatola-fusion.py`**, installata in Fusion come **ScatolaPedale**. Tutto il perché in
+`docs/pedale.md`.
+
+**La lezione che vale oltre questo pedale: la spaziatura dei footswitch si misura col proprio
+piede.** La mia stima («45 il minimo, 50 comodo») sbagliava del cinquanta per cento — a 60 mm
+l'utente ne premeva ancora due insieme.
 
 **L'alimentazione è decisa e comprata** (27 agosto 2026). Le cinque cose che fanno danni se le
 dimentico; tutto il resto — cablaggio, saldature, indicatore di batteria, scelta dei pezzi —
@@ -837,21 +828,11 @@ sta in `docs/pedale.md`:
 Interruttori sul **port A** dell'espansore (è quello che può far scattare l'interrupt), LED
 sul port B.
 
-**I tempi BLE sono stati rimisurati sull'S3 il 2 settembre 2026, e l'intervallo corto lo
-Spark lo concede davvero:**
-
-| intervallo | giro | preset intero (16 giri) |
-|---|---|---|
-| lento, 30 ms | 82,0 ms | ~1312 ms |
-| **veloce, 7,5 ms** | **26,5 ms** | **~424 ms** |
-
-**E i 1312 ms del lento sono il tempo del telefono**: finora era un'inferenza, adesso è
-misurato — il telefono è lento per l'intervallo di connessione, non per mancanza di banda.
-
-**L'antenna non è opzionale, ed è misurato**: senza il foglietto attaccato all'u.FL la
-scansione trovava lo Spark a **−92 dBm**, al limite del funzionamento; con l'antenna
-**−63 dBm**, cioè quasi ottocento volte la potenza. Se un giorno il pedale «ogni tanto non
-si collega», il primo sospetto è quel connettore.
+**Tempi BLE rimisurati sull'S3** (2 settembre 2026): **26,5 ms** a giro con l'intervallo a
+7,5 ms — cioè **~424 ms** per un preset intero — contro **82 ms** e **~1312 ms** con quello
+lento. Quindi **lo Spark l'intervallo corto lo concede davvero**. E i 1312 ms del lento **sono
+il tempo del telefono**: era un'inferenza, ora è misurato — il telefono è lento per
+l'intervallo di connessione, non per la banda.
 
 **Resta non verificato sull'S3**: l'autonomia, e se il modulo espansore abbia i pull-up
 sull'I²C — se il bus non parte, quello è il primo sospetto, e si risolve con due resistenze
