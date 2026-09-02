@@ -1667,3 +1667,13 @@ Nota a margine, sempre di quella sera: **l'ohmmetro su un chip non alimentato no
 niente di utile.** La tensione di prova del tester è troppo bassa per far condurre le
 protezioni interne, quindi «15 kΩ» e «infinito» sono la stessa risposta. Ci mi ero
 appoggiato per decidere se il chip fosse vivo, e non poteva rispondere.
+
+**Verificato sulla basetta definitiva e sulla S3 vera, il 2 settembre 2026**: scheda
+`XIAO_ESP32S3`, scansione del bus che trova **`0x20` e `0x3c`**, configurazione
+dell'espansore riuscita. I tempi sono gli stessi misurati sul C6 — lettura degli otto
+ingressi **181 µs**, fotogramma intero del display **32,7 ms** — quindi la regola del giro
+(ingressi spesso, display solo quando cambia) vale identica sull'S3.
+
+**L'fqbn per l'S3 è `esp32:esp32:XIAO_ESP32S3:CDCOnBoot=default`**, e non è un dettaglio:
+su quella scheda `CDCOnBoot` ha i valori rovesciati rispetto al C3 e al C6, quindi copiare
+l'fqbn vecchio spegne la seriale su USB. Vedi `CLAUDE.md`, «Trappole dell'ambiente».
