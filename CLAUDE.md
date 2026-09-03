@@ -477,6 +477,36 @@ RGB 5 mm **a catodo comune**, verde 100 Ω e rosso 220 Ω; **l'MCP23017 non ha P
 acceso/spento e basta. **Interruttori sul port A** (è quello che fa scattare l'interrupt), **LED
 sul port B**.
 
+**I nomi dei pezzi sono fissi, e cambiarli fa danni** (3 settembre 2026, chiesto dall'utente
+dopo che in una sola risposta avevo chiamato la stessa cosa basetta, scheda e millefori, e il
+pannello «coperchio»): **basetta** (la millefori 7 × 9), **XIAO**, **espansore** (il KAmod),
+**pista** GND e 3V3 (le linee di stagno), **pettine** (il connettore di pin sulla basetta),
+**linea** (`PA0`…`PB7`), **pannello** (la faccia superiore della scatola), **scatola**,
+**cavo** (basetta → pannello), **footswitch** (i 5 a piede), **tasti banco** (i 2 a mano),
+**pulsanti** (tutti e 7). Vietati: coperchio, top, rotaia, striscia, modulo. «Bus» solo per
+l'I²C. La legenda sta anche in cima alla pagina delle istruzioni, che è
+`https://claude.ai/code/artifact/b1b451ca-2804-41a6-810f-b2b4a92d7acd` (sorgente nello
+scratchpad, ma **si aggiorna passando quell'url**, o se ne crea una seconda).
+
+**Com'è fatta la basetta** (3 settembre 2026, dalla foto dell'utente — e sono cose che ho
+già dovuto richiedere una volta): basetta **7 × 9 cm**, i due moduli su una metà sola e
+**l'altra metà libera**, che è dove va tutto quello che manca. **Le due strisce di stagno sono
+le rotaie di alimentazione, 3V3 e GND**, saldate per prime: è l'ordine di montaggio deciso il
+30 agosto (`docs/pedale.md`), piste prima, misura dei 3,3 V poi, componenti per ultimi. **Il
+port A è già portato fuori** su un pettine femmina a 10 vie — `G, PA0…PA7, G` — quindi per i
+sette pulsanti **non c'è niente da saldare sulla basetta**: si infilano lì. I fili colorati che
+escono sono **del display**. Resta da fare **solo il port B**: le resistenze e il connettore
+dei LED.
+
+**Le resistenze dei LED stanno sulla basetta, non sui piedini del LED** (3 settembre 2026), e
+sono **una per colore, otto in tutto**, in serie con PB0…PB7. Una sola sul catodo comune non
+va: con rosso e verde accesi insieme la corrente si dividerebbe, e i due valori sono diversi.
+Il motivo per cui stanno sulla basetta non è l'ordine ma la sicurezza — **così il filo che
+esce verso il pannello ha già la corrente limitata**, e se tocca massa mentre si chiude la
+scatola non porta via il pin dell'espansore; in più la giunzione volante sui piedini di un LED
+montato è quella che si spezza dopo qualche apertura, di solito dentro il termorestringente,
+dove non si vede.
+
 | piedino | GPIO | a cosa serve |
 |---|---|---|
 | D4 / D5 | `5`, `6` | I²C: **display e MCP23017 insieme** (SDA, SCL) |
@@ -618,13 +648,14 @@ Sul pedale — il resto in `docs/pedale.md`:
    rifare**; restano gli altri sei pulsanti e gli otto LED, le due metà col quinto footswitch,
    il banco che non si ricorda al riavvio (va fatto coi tasti banco veri), il trasferimento di
    un banco da riprovare sull'S3, e **l'autonomia, l'ultima misura mancante**.
-8. **La scheda in `pcb/`**: schema e disposizione ci sono. Due cose, in quest'ordine —
-   **stringere il contorno** (95 × 60 in un vano di 100 × 64 lascia 2,5 mm per lato) e
-   **misurare col calibro gli interassi dei connettori del KAmod (J3, J4, J5, J6), che nel file
-   sono inventati**, prima di tirare le piste, o le piste si rifanno. La XIAO invece è giusta
-   per costruzione: 15,24 mm fra le due file. `kicad-cli` esporta in SVG e **fa girare il DRC**
-   senza aprire KiCad. Gli script `tools/genera-*-kicad.py` **non si rigenerano più**: da qui
-   in poi si modifica in KiCad, o si perde quello che l'utente aggiusta a mano.
+8. **La scheda stampata in `pcb/` è accantonata**, deciso dall'utente il 3 settembre 2026: il
+   pedale si finisce **sulla millefori**, che è quella che deve funzionare. Quanto c'è nel repo
+   — schema e disposizione — resta lì e **non si tocca**: non è materiale di lavoro, e non va
+   proposto. Quando si riaprirà, le due cose da fare in quest'ordine sono **stringere il
+   contorno** (95 × 60 in un vano di 100 × 64 lascia 2,5 mm per lato) e **misurare col calibro
+   gli interassi dei connettori del KAmod (J3, J4, J5, J6), che nel file sono inventati**,
+   prima di tirare le piste. `kicad-cli` esporta in SVG e fa girare il DRC senza aprire KiCad;
+   gli script `tools/genera-*-kicad.py` non si rigenerano più.
 9. **Il looper sul pedale, col conteggio fatto in casa**: il protocollo c'è tutto, manca il
    firmware. Il conteggio col click **non si comanda**, quindi lo produce il pedale — legge il
    bpm, conta quattro tempi e **40 ms prima dell'uno** manda `0x0175` con `04`.
