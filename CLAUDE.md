@@ -474,14 +474,14 @@ dal 29 agosto 2026 al posto della C6, perché **solo l'S3 ha l'USB-OTG vero** e 
 la modalità MIDI da sola — OLED **2,42" 128×64 I²C**, espansore **KAmod I2C-IOexp16**
 (MCP23017), cella **XTAR 18650-330PCM protetta**. I LED sono quelli che l'utente ha in casa,
 RGB 5 mm **a catodo comune**; **l'MCP23017 non ha PWM**, quindi acceso/spento e basta — **la
-luminosità la fissa la resistenza, una volta per tutte**. I valori di partenza non sono più
-100/220: **470 Ω sul rosso e 1 kΩ sul verde**, in prova dal 3 settembre 2026. Vengono da una
-misura dell'utente sul suo progetto timer, **anche lui a 3,3 V**: con 220 e 100 Ω i LED sono
-*troppo* luminosi, e lì li tiene al 25-60% di PWM. E il verde sta **più alto** del rosso, che
-sembra un errore e non lo è: a parità di corrente l'occhio vede il verde ~3× più luminoso, e
-qui i due colori dicono la stessa cosa (banco A o B), quindi devono pesare uguale. Ne segue
-**12 mA con quattro LED accesi invece di 48**, che sull'autonomia è la leva più grossa che
-abbiamo. Il gradino sopra, se al buio fossero deboli, è 330 e 680. **Interruttori sul port A** (è quello che fa scattare l'interrupt), **LED
+luminosità la fissa la resistenza, una volta per tutte**. **Valori scelti dall'utente col LED
+in mano, 3 settembre 2026: 330 Ω sul rosso e 560 Ω sul verde** — 4,2 e 2,1 mA a 3,3 V, cioè
+**17 mA con quattro LED accesi invece dei 48** del piano iniziale, che sull'autonomia è la
+leva più grossa che abbiamo. I 100/220 di prima erano una stima e sono caduti su una misura:
+sul progetto timer dell'utente, **anche lui a 3,3 V**, quei valori danno LED *troppo*
+luminosi, tenuti al 25-60% di PWM. E il verde sta **più alto** del rosso, che sembra un errore
+e non lo è: a parità di corrente l'occhio vede il verde ~3× più luminoso, e qui i due colori
+dicono la stessa cosa (banco A o B), quindi devono pesare uguale. **Interruttori sul port A** (è quello che fa scattare l'interrupt), **LED
 sul port B**.
 
 **I nomi dei pezzi sono fissi, e cambiarli fa danni** (3 settembre 2026, chiesto dall'utente
