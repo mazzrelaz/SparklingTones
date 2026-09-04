@@ -506,6 +506,14 @@ sette pulsanti **non c'è niente da saldare sulla basetta**: si infilano lì. I 
 escono sono **del display**. Resta da fare **solo il port B**: le resistenze e il connettore
 dei LED.
 
+**Il laser a diodo dell'utente non taglia il plexi, nemmeno il fumé scuro** — provato da lui il
+4 settembre 2026: **fonde e basta**. Avevo scritto il contrario (che il fumé assorbe il blu del
+diodo) e **non era una misura**: su quella frase si reggeva la scelta del vetrino, che infatti
+cade. **Il vincolo «lavorabile col laser» non esiste più per nessun materiale**, quindi il
+vetrino si sceglie solo su come si legge — e il trasparente si legge meglio, come l'utente
+aveva già provato. I rettangoli nel plexi si fanno **rigando e spezzando**, a mano, e allora
+**non c'è kerf da compensare**: 61 × 34 netti. Il ragionamento in `docs/pedale.md`.
+
 **Nei DXF dell'utente le quote dei fori sono nominali: il kerf del laser le allarga di ~3
 decimi**, quindi un foro disegnato da 0,5 mm taglia a 0,8 ed è lì che entrano i piedini dei
 LED — verificato da lui sul pezzo, dopo che io avevo dichiarato il disegno sbagliato leggendo
@@ -550,7 +558,7 @@ Quattro cose dell'hardware che fanno danni se le dimentico:
 **La scatola è chiusa e senza incognite: 360 × 120 × 35 mm esterni, pannello utile 340 × 100,
 interassi 70 + 70 + 70 + 90**, mogano da 10 e rovere da 5, bozza in `tools/scatola-fusion.py`.
 I tre numeri che fanno danni: le **prese USB-C accettano un pannello fino a 8 mm** (la sponda è
-10, va svasata dall'interno); il vetrino è **pleksa fumé grafite da 3 mm** e lascia 2 mm di
+10, va svasata dall'interno); il vetrino è **plexi da 3 mm** e lascia 2 mm di
 rovere attorno alla finestra, quindi **il telaietto incollato sotto è obbligatorio**; i **90 mm
 fra il quarto e il quinto footswitch sono un riferimento tattile**, non spazio in più. E la
 lezione che vale oltre questo pedale: **la spaziatura dei footswitch si misura col proprio
