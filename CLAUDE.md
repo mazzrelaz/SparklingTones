@@ -506,14 +506,21 @@ sette pulsanti **non c'è niente da saldare sulla basetta**: si infilano lì. I 
 escono sono **del display**. Resta da fare **solo il port B**: le resistenze e il connettore
 dei LED.
 
-**Le resistenze dei LED stanno sulla basetta, non sui piedini del LED** (3 settembre 2026), e
-sono **una per colore, otto in tutto**, in serie con PB0…PB7. Una sola sul catodo comune non
-va: con rosso e verde accesi insieme la corrente si dividerebbe, e i due valori sono diversi.
-Il motivo per cui stanno sulla basetta non è l'ordine ma la sicurezza — **così il filo che
-esce verso il pannello ha già la corrente limitata**, e se tocca massa mentre si chiude la
-scatola non porta via il pin dell'espansore; in più la giunzione volante sui piedini di un LED
-montato è quella che si spezza dopo qualche apertura, di solito dentro il termorestringente,
-dove non si vede.
+**Nei DXF dell'utente le quote dei fori sono nominali: il kerf del laser le allarga di ~3
+decimi**, quindi un foro disegnato da 0,5 mm taglia a 0,8 ed è lì che entrano i piedini dei
+LED — verificato da lui sul pezzo, dopo che io avevo dichiarato il disegno sbagliato leggendo
+il file. **Non concludere mai che un suo foro è troppo stretto guardando il DXF.** Le quote
+della **piastrina LED** (18 × 26, passo 1,5 e 4, due file a 11) stanno in `docs/pedale.md`.
+
+**Le resistenze dei LED sono una per colore, otto in tutto**, in serie con `PB0`…`PB7`. Una
+sola sul catodo comune **non va**: con rosso e verde accesi insieme la corrente si
+dividerebbe, e i due valori sono diversi. **Stanno sulla piastrina LED** — deciso il 3
+settembre 2026 perché sulla basetta non c'è più spazio, e non sui piedini volanti del LED, che
+è la giunzione che si spezza dopo qualche apertura, dentro il termorestringente dove non si
+vede. Il rovescio, da tenere a mente: **il filo dal pettine alla piastrina non ha la corrente
+limitata**, quindi un contatto a massa lì mette la linea `PB` a massa senza niente in mezzo.
+Nella scatola di legno il rischio è basso — l'unico metallo sono i corpi dei footswitch, da
+cui i cavi dei LED vanno tenuti lontani.
 
 | piedino | GPIO | a cosa serve |
 |---|---|---|

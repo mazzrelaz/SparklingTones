@@ -2137,3 +2137,46 @@ l'intervallo di connessione, non per la banda.
 sull'I²C — se il bus non parte, quello è il primo sospetto, e si risolve con due resistenze
 da 4,7 kΩ.
 
+
+### La piastrina LED — quote dal DXF dell'utente, 3 settembre 2026
+
+Il pezzo che porta **un** LED con le sue due resistenze e si monta dietro il pannello. Ne
+servono quattro, e conviene farne cinque: il ricambio con le stesse quote costa qualche
+minuto adesso e non si rifà più.
+
+Dal file `piastrina led.dxf` (tagliata al laser, legno):
+
+| quota | valore |
+|---|---|
+| esterno | **18 × 26 mm**, angoli raccordati ~2,5 mm |
+| fori delle gambe del LED | **4 a passo 1,5 mm**, centrati in larghezza, a **2,33 mm dal bordo alto** |
+| posizioni delle resistenze | **4**, a passo **4 mm**, su due file distanti **11 mm** |
+| diametro dei fori | **0,5 mm nel disegno** |
+
+**I diametri del disegno sono nominali: il kerf del laser li porta a ~0,8 mm**, ed è a 0,8 che
+i piedini del LED e i reofori delle resistenze entrano — **verificato dall'utente sul pezzo
+tagliato**. Vale per tutti i suoi DXF: leggere le quote dei fori come nominali, e non
+concludere che un foro è troppo stretto guardando il file. Stessa cosa per il contorno, che
+il kerf stringe di mezzo taglio per lato.
+
+Ne segue anche che fra un foro del LED e l'altro restano **0,7 mm di legno**, che a una punta
+da trapano si sbriciolerebbero e al laser no. **Se un giorno questo pezzo si facesse col
+trapano, i quattro fori vanno sostituiti da un'asola unica** (~5,5 × 1 mm).
+
+**Quattro posizioni per due resistenze**: sono standard, così la stessa piastrina serve un
+domani per un RGB a tre colori. Le due libere non sono sprecate — **una fa da passafilo per il
+catodo comune**, che è l'unico dei tre fili a non passare da una resistenza e quindi l'unico
+la cui saldatura lavora a trazione.
+
+**Le due regole che valgono perché il pezzo è standard e ce ne sono quattro uguali**: la
+posizione del rosso e quella del verde devono essere **le stesse su tutte**, o una piastrina
+di ricambio mostra il banco sbagliato; e il **verso del LED va segnato sul pezzo** — una
+tacca, un angolo smussato — perché il catodo è la gamba più lunga e dopo averla tagliata e
+annegata nella colla a caldo non lo sa più nessuno.
+
+**Come si fissa, e perché non ha fori**: non si fissa. Il LED è stretto al pannello dal suo
+supporto (il portaled), e la piastrina resta appesa dietro alle gambe del LED — leggera com'è,
+regge senza altro. Ne segue che **il corpo del LED sborda di ~0,2 mm dal bordo alto ed è
+voluto**: deve arrivare dentro al supporto. E ne segue anche che **la colla a caldo sui fili in
+uscita non è opzionale**, perché è l'unica cosa che impedisce alla piastrina di dondolare
+appesa a tre saldature.
