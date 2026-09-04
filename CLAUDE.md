@@ -489,7 +489,8 @@ dopo che in una sola risposta avevo chiamato la stessa cosa basetta, scheda e mi
 pannello «coperchio»): **basetta** (la millefori 7 × 9), **XIAO**, **espansore** (il KAmod),
 **pista** GND e 3V3 (le linee di stagno), **pettine** (il connettore di pin sulla basetta),
 **linea** (`PA0`…`PB7`), **pannello** (la faccia superiore della scatola), **scatola**,
-**cavo** (basetta → pannello), **footswitch** (i 5 a piede), **tasti banco** (i 2 a mano),
+**cavo** (basetta → pannello), **piastrina LED** (il pezzo che porta i LED con le loro
+resistenze, dietro il pannello), **footswitch** (i 5 a piede), **tasti banco** (i 2 a mano),
 **pulsanti** (tutti e 7). Vietati: coperchio, top, rotaia, striscia, modulo. «Bus» solo per
 l'I²C. La legenda sta anche in cima alla pagina delle istruzioni, che è
 `https://claude.ai/code/artifact/b1b451ca-2804-41a6-810f-b2b4a92d7acd` (sorgente nello
