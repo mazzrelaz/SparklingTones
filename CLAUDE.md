@@ -558,8 +558,11 @@ Quattro cose dell'hardware che fanno danni se le dimentico:
 **La scatola è chiusa e senza incognite: 360 × 120 × 35 mm esterni, pannello utile 340 × 100,
 interassi 70 + 70 + 70 + 90**, mogano da 10 e rovere da 5, bozza in `tools/scatola-fusion.py`.
 I tre numeri che fanno danni: le **prese USB-C accettano un pannello fino a 8 mm** (la sponda è
-10, va svasata dall'interno); il vetrino è **plexi da 3 mm** e lascia 2 mm di
-rovere attorno alla finestra, quindi **il telaietto incollato sotto è obbligatorio**; i **90 mm
+10, va svasata dall'interno); il vetrino è **plexi da 3 mm incollato SOTTO il pannello**, con
+la finestra **smussata a 45°** — deciso il 4 settembre 2026, ribalta la battuta dall'alto:
+così il taglio a mano del plexi resta nascosto e **la sua misura non è più critica** (conviene
+abbondante, ~65 × 38), lo smusso toglie il pozzo che rendeva illeggibile lo schermo di sbieco,
+e **il telaietto sotto non serve più**. Mai cianoacrilica sul plexi: vela la finestra; i **90 mm
 fra il quarto e il quinto footswitch sono un riferimento tattile**, non spazio in più. E la
 lezione che vale oltre questo pedale: **la spaziatura dei footswitch si misura col proprio
 piede** — la mia stima sbagliava del cinquanta per cento.
