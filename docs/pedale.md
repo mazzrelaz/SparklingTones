@@ -2180,3 +2180,32 @@ regge senza altro. Ne segue che **il corpo del LED sborda di ~0,2 mm dal bordo a
 voluto**: deve arrivare dentro al supporto. E ne segue anche che **la colla a caldo sui fili in
 uscita non è opzionale**, perché è l'unica cosa che impedisce alla piastrina di dondolare
 appesa a tre saldature.
+
+### Il laser a diodo non taglia nemmeno il fumé — 4 settembre 2026
+
+**Smentita da una prova diretta dell'utente**, e va letta prima di tutto quello che sta scritto
+sopra sul vetrino: **la pleksa fumé grafite da 3 mm il suo SculpFun SF-A9 non la taglia**. Non
+è che taglia male: **fonde e basta**, il solco si richiude dietro al fascio.
+
+Era una mia affermazione, non una misura: avevo scritto che il fumé assorbe il blu del diodo e
+quindi si taglia bene, e ci si era costruita sopra tutta la catena della scelta — il fumé
+sceglto perché *unico lavorabile in casa*, e la lastra 10 × 10 comprata per ricavarne i
+vetrini col laser. **Quella catena non regge più.**
+
+Ne segue, e sono le cose che contano adesso:
+
+- **il vincolo «lavorabile col laser» è caduto per tutti i materiali**, non solo per il
+  trasparente. Quindi la scelta del vetrino torna a essere solo **come si legge**, che è il
+  criterio che l'utente aveva già provato: il grigio scuro si legge peggio, e il trasparente
+  era meglio;
+- **i rettangoli nel plexi si fanno rigando e spezzando**, senza macchine: raschietto a uncino,
+  riga di metallo a morsetto, sei-otto passate fino a un terzo dello spessore, poi si spezza
+  sul bordo del tavolo e si rifinisce con carta 240 e 400 bagnata. Funziona identico sul
+  trasparente e sul fumé, e il bordo finisce **in battuta**, dove non si vede;
+- **tagliando a mano non c'è kerf da compensare**: il vetrino si disegna a 61 × 34 netti. La
+  compensazione di ~3 decimi serviva solo al laser.
+
+L'unica variabile che potrebbe ancora cambiare il risultato del laser è **l'air assist**: sul
+PMMA è l'aria che caccia via il fuso prima che si risaldi, e senza un getto forte anche 40 W
+ottici fondono soltanto. Ma con la macchina com'è oggi, il taglio del vetrino **non passa dal
+laser**.
