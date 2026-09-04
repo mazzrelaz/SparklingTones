@@ -2226,3 +2226,32 @@ Togliere è facile, aggiungere no — e un vetrino corto balla nella battuta e s
 **E la scelta del materiale non è più definitiva**: tagliare a mano un secondo vetrino è mezz'ora,
 non un ordine da rifare. Si monta il fumé già comprato; se acceso e guardato in piedi non
 convince, se ne taglia uno trasparente con lo stesso metodo e si scambia.
+
+### Il vetrino va INCOLLATO SOTTO, con la finestra smussata a 45° — 4 settembre 2026
+
+**Ribalta la decisione precedente** (battuta dall'alto), e va letto al posto di quella. Deciso
+dall'utente, che ha rifatto il progetto: **il vetrino si incolla sotto il pannello** e la
+finestra nel rovere ha uno **smusso a 45°** tutto attorno.
+
+**Il perché è di lavorazione, ed è giusto: la parte che si vede la fa il legno, dove lui è
+preciso; il taglio a mano del plexi, che preciso non sarà mai, finisce nascosto sotto.** Con la
+battuta a vista ogni decimo del bordo del vetrino sarebbe stato in mostra.
+
+**Lo smusso risolve l'obiezione per cui questa strada era stata scartata** — il display in
+fondo a un pozzo, illeggibile di sbieco. Il conto: guardando in piedi la linea di vista sta a
+**~24° dalla verticale** (occhi a 1,6 m, pedale ~0,7 m avanti). A pareti dritte, gli 8 mm fra
+superficie e display coprivano **3,6 mm** del lato corto, cioè oltre un decimo dei 27,5 mm
+utili. **Con lo smusso a 45° l'ostruzione sparisce fino a 45° di inclinazione**, molto oltre
+qualunque posizione d'uso.
+
+Le tre conseguenze, tutte a favore:
+
+- **la misura del vetrino non è più critica**: deve solo coprire la finestra con margine da
+  incollare. **Conviene abbondare** — con apertura inferiore 55 × 27,5, un vetrino da
+  **65 × 38** dà 5 mm di incollaggio per lato, e a mano tagliare abbondante è più facile che
+  tagliare preciso. Le vecchie quote 61 × 34 e la battuta 61,2 × 34,2 **non valgono più**;
+- **il telaietto sotto la finestra non è più obbligatorio**: serviva perché la battuta da 3 mm
+  lasciava 2 mm di rovere: adesso il legno attorno resta pieno da 5;
+- **mai cianoacrilica**: i suoi vapori lasciano un velo bianco sul plexi, proprio nell'area
+  della finestra. Si incolla con **biadesivo sottile tipo VHB** — che dà anche il gioco per non
+  premere sul display — o **silicone neutro**, mai acetico.
