@@ -2209,3 +2209,20 @@ L'unica variabile che potrebbe ancora cambiare il risultato del laser è **l'air
 PMMA è l'aria che caccia via il fuso prima che si risaldi, e senza un getto forte anche 40 W
 ottici fondono soltanto. Ma con la macchina com'è oggi, il taglio del vetrino **non passa dal
 laser**.
+
+**Deciso il 4 settembre 2026: taglio a mano, vetrino incassato nella battuta.** Le quote che
+valgono da qui in avanti:
+
+- **vetrino 61 × 34 netti**, senza compensazione del kerf;
+- **battuta 61,2 × 34,2, profonda 3 mm** — due decimi di gioco per lato;
+- il **telaietto incollato sotto la finestra resta obbligatorio**: la battuta da 3 su un top da
+  5 lascia 2 mm di rovere.
+
+**L'ordine delle lavorazioni conta, perché a mano la tolleranza è peggiore del laser**: si
+taglia il vetrino mezzo millimetro abbondante e lo si porta a misura **sulla battuta già
+fatta**, con carta 240 poi 400 su un piano rigido, bagnata, provando l'incastro a secco.
+Togliere è facile, aggiungere no — e un vetrino corto balla nella battuta e si vede.
+
+**E la scelta del materiale non è più definitiva**: tagliare a mano un secondo vetrino è mezz'ora,
+non un ordine da rifare. Si monta il fumé già comprato; se acceso e guardato in piedi non
+convince, se ne taglia uno trasparente con lo stesso metodo e si scambia.
