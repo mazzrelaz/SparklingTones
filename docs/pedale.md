@@ -2255,3 +2255,29 @@ Le tre conseguenze, tutte a favore:
 - **mai cianoacrilica**: i suoi vapori lasciano un velo bianco sul plexi, proprio nell'area
   della finestra. Si incolla con **biadesivo sottile tipo VHB** — che dà anche il gioco per non
   premere sul display — o **silicone neutro**, mai acetico.
+
+### Le due prese USB stanno sul pannello, non sui moduli — 7 settembre 2026
+
+**Il montaggio diretto è escluso dall'utente**: niente asola nella sponda davanti alla presa
+del TP4056 o della XIAO, si passa sempre da una presa da pannello con cavo. Da qui in avanti
+non va riproposto.
+
+Ne segue che le due prese hanno bisogni diversi e **non si comprano uguali**:
+
+- **carica**: bastano alimentazione e massa, quindi va bene una USB-C **a 4 fili** (24 AWG,
+  3 A, cavetto morbido — quella che l'utente ha trovato). **Ma va verificato che dichiari le
+  due resistenze da 5,1 kΩ sui pin CC**: con quattro fili i CC non sono portati fuori, quindi
+  **non si possono aggiungere dopo**, e senza quelle nessun caricatore USB-C moderno eroga
+  corrente. Funzionerebbe solo con alimentatore USB-A e cavo A→C, dove è il cavo a portarsi
+  dietro la resistenza;
+- **XIAO**: servono **i dati** — firmware, log e soprattutto il MIDI, che è il motivo per cui
+  si è passati all'S3. Quindi resta il codino femmina→maschio, e **il criterio d'acquisto è il
+  cavo, non il connettore**: sottile e flessibile, perché elettricamente sono tutti uguali.
+
+**Il problema del codino rigido è meccanico e ha tre rimedi**, tutti da applicare: uscita
+**dritta** dal connettore per un paio di centimetri e poi **ansa larga** lungo la scatola (un
+cavo rigido non spinge se il raggio è grande, è la curva stretta a fare leva); **fascetta su un
+tassello incollato al fondo a 2-3 cm dal connettore**, così ogni strattone finisce sul legno e
+non sulla presa saldata del modulo; e **un fermo sopra la XIAO** che le impedisca di sollevarsi
+dagli zoccoli — è l'unico danno silenzioso possibile, la scheda che lavora in verticale finché
+un contatto comincia a fare falso.
