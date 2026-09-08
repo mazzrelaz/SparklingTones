@@ -645,7 +645,15 @@ libreria. **Prima di ogni push lì, `git pull --rebase`**: il file `CNAME` lo ri
 DNS, la trappola del `www`, la `privacy.html` (già analizzata: niente script, niente banner) e
 i video ancora da girare stanno in **`docs/sito.md`**.
 
-## Dove si riprende — 2 settembre 2026
+## Dove si riprende — 8 settembre 2026
+
+**Sulla XIAO c'è caricato `prova-espansore`, non il firmware del pedale.** Deciso dall'utente
+l'8 settembre per montare i tasti banco e i LED con le caselle sullo schermo davanti. Quindi
+**se il pedale non parla con l'ampli, non è un guasto: è lo sketch sbagliato**, e si rimette
+`prova-ble` quando i test finiscono. Il prossimo lavoro concordato, quando i LED saranno
+montati: **estendere `prova-espansore` da un LED a tutti e otto**, in sequenza, così si vede
+subito se uno è invertito o su una linea sbagliata.
+
 
 Guscio `v73` (in `sw.js`; non fidarsi di questa riga se non torna). Suite verdi: protocol 139,
 transport 60, store 136, backup 41, dropbox 34. **`index.html` non è coperto da nessuna
