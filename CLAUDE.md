@@ -670,8 +670,11 @@ Sull'app:
 Sul pedale — il resto in `docs/pedale.md`:
 
 7. **Il pedale fa il pedale** (2 settembre 2026, millefori definitiva e S3 vera): footswitch
-   premuto, ampli che cambia preset, display che lo dice, senza telefono in mezzo. **Niente da
-   rifare**; restano gli altri sei pulsanti e gli otto LED, le due metà col quinto footswitch,
+   premuto, ampli che cambia preset, display che lo dice, senza telefono in mezzo. **Tutti e
+   cinque i footswitch sono cablati e verificati** (8 settembre 2026, con `prova-espansore`:
+   `GPA0`…`GPA4`, nessuno scambiato, nessuno che resta chiuso; e il log riconferma lettura del
+   port A **183 µs** contro **32,8 ms** di un fotogramma). **Niente da
+   rifare**; restano i due tasti banco su `GPA5`/`GPA6` e gli otto LED, le due metà col quinto footswitch,
    il banco che non si ricorda al riavvio (va fatto coi tasti banco veri), il trasferimento di
    un banco da riprovare sull'S3, e **l'autonomia, l'ultima misura mancante**.
 8. **La scheda stampata in `pcb/` è accantonata**, deciso dall'utente il 3 settembre 2026: il
