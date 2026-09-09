@@ -42,9 +42,10 @@
  * si accendono i due banchi interi, tutti rossi e tutti verdi, che e' come il
  * pedale vero li usa. La sequenza gira finche' non si preme un pulsante.
  *
- * Poi si passa alla PROVA A MANO: i primi quattro footswitch accendono il
- * loro LED, il quinto cambia colore (rosso <-> verde, cioe' banco A <-> B),
- * i due tasti banco lo forzano (GPA5 rosso, GPA6 verde). Tenendo premuto il
+ * Poi si passa alla PROVA A MANO: i quattro LED stanno accesi nel colore del
+ * banco, tenendo premuto uno dei primi quattro footswitch resta acceso solo
+ * il suo, il quinto cambia colore (rosso <-> verde, cioe' banco A <-> B) e i
+ * due tasti banco lo forzano (GPA5 rosso, GPA6 verde). Tenendo premuto il
  * quinto footswitch per piu' di un secondo riparte la sequenza.
  */
 
@@ -147,14 +148,19 @@ static void accendi(uint8_t maschera) {
   scrivi(OLATB, maschera);
 }
 
-/** Nella prova a mano ogni footswitch accende il suo LED, nel colore corrente. */
+/** Nella prova a mano i quattro LED stanno **accesi** nel colore del banco, e
+ *  tenendo premuto un footswitch resta acceso solo il suo. Cosi' ogni tasto
+ *  risponde con qualcosa che si vede: prima i tasti banco cambiavano il solo
+ *  colore, e il colore si vedeva solo tenendo premuto un footswitch — cioe'
+ *  da soli non accendevano niente e sembravano scollegati. E' anche il
+ *  comportamento del pedale vero: i quattro LED dicono sempre il banco. */
 static void aggiornaUscite(uint8_t ingressi) {
-  uint8_t m = 0;
+  int8_t solo = -1;
   for (uint8_t i = 0; i < 4; i++) {
-    const bool premuto = !(ingressi & (1 << i));   // pull-up: premuto = zero
-    if (premuto) m |= verde ? bitVerde(i) : bitRosso(i);
+    if (!(ingressi & (1 << i))) solo = (int8_t)i;   // pull-up: premuto = zero
   }
-  accendi(m);
+  if (solo >= 0) accendi(verde ? bitVerde((uint8_t)solo) : bitRosso((uint8_t)solo));
+  else accendi(mascheraColore(verde ? LINEA_VERDE : LINEA_ROSSO));
 }
 
 /** Chi risponde sul bus, e intanto trova l'espansore. */
@@ -283,7 +289,9 @@ static void sequenza() {
     }
   }
 
-  accendi(0x00);
+  /* Non si spegne tutto: si entra nella prova a mano gia' col banco acceso,
+   * o dopo la sequenza lo schermo direbbe ROSSO con i LED spenti. */
+  aggiornaUscite(0xff);
   ingressiPrec = 0xff;
   Serial.println(F("-- prova a mano: footswitch = LED, il quinto cambia colore --"));
   Serial.println(F("   (tieni premuto il quinto per un secondo e la sequenza riparte)"));
