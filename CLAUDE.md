@@ -153,6 +153,21 @@ e quando un componente scalda **si guarda intorno al componente** prima di conda
 librerie Arduino non si installano in `Documenti`**, che Defender blocca con un errore che
 sembra un'altra cosa.
 
+**Il firmware lo compilo e lo carico io, senza chiederlo all'utente** (9 settembre 2026, dopo
+che gli avevo dato istruzioni per farlo a mano e me l'ha fatto notare). L'`arduino-cli` c'è, in
+pancia all'IDE, e U8g2 sta fuori dallo sketchbook, quindi il percorso delle librerie va passato
+a mano — e `upload` non accetta `--libraries`, si usa `compile -u`:
+
+```
+CLI='C:\Users\massi\AppData\Local\Programs\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe'
+& $CLI compile -u -p COM13 --fqbn "esp32:esp32:XIAO_ESP32S3:CDCOnBoot=default" `
+    --libraries C:\Users\massi\AppData\Local\claude-arduino-libs pedale\prova-espansore
+```
+
+`board list` dà la porta (COM13 il 9 settembre, ma cambia). Se il caricamento fallisce con la
+porta occupata, il primo sospetto è **il monitor seriale dell'IDE aperto**. All'utente resta
+solo di guardare il pedale.
+
 ## Le regole che governano l'app
 
 **La libreria non perde mai il lavoro dell'utente**: `importFromAmp` riconosce i preset per
