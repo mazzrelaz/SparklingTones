@@ -668,14 +668,15 @@ libreria. **Prima di ogni push lì, `git pull --rebase`**: il file `CNAME` lo ri
 DNS, la trappola del `www`, la `privacy.html` (già analizzata: niente script, niente banner) e
 i video ancora da girare stanno in **`docs/sito.md`**.
 
-## Dove si riprende — 8 settembre 2026
+## Dove si riprende — 9 settembre 2026
 
-**Sulla XIAO c'è caricato `prova-espansore`, non il firmware del pedale.** Deciso dall'utente
-l'8 settembre per montare i tasti banco e i LED con le caselle sullo schermo davanti. Quindi
-**se il pedale non parla con l'ampli, non è un guasto: è lo sketch sbagliato**, e si rimette
-`prova-ble` quando i test finiscono. Il prossimo lavoro concordato, quando i LED saranno
-montati: **estendere `prova-espansore` da un LED a tutti e otto**, in sequenza, così si vede
-subito se uno è invertito o su una linea sbagliata.
+**Sulla XIAO c'è caricato `prova-espansore`, non il firmware del pedale.** Quindi **se il
+pedale non parla con l'ampli, non è un guasto: è lo sketch sbagliato**, e si rimette
+`prova-ble`. **L'espansore non ha più niente da provare**: sette pulsanti e otto LED sono
+cablati e verificati il 9 settembre 2026, e con loro finisce il montaggio elettrico. Il
+prossimo lavoro è **portare LED e tasti banco dentro `prova-ble`**, cioè nel firmware vero: i
+quattro LED che dicono il banco, i due tasti che lo cambiano, e il quinto footswitch che
+cambia metà senza toccare il suono. La mappa delle linee è più su, e va copiata di lì.
 
 
 Guscio `v73` (in `sw.js`; non fidarsi di questa riga se non torna). Suite verdi: protocol 139,
@@ -708,10 +709,11 @@ Sul pedale — il resto in `docs/pedale.md`:
    verificati** (9 settembre 2026, sempre con `prova-espansore`, che ora li accende in
    sequenza: in ordine di LED da sinistra a destra, prima rosso e poi verde, tre secondi per
    passo con una barra che dice quanto manca — e chiude ogni giro coi due banchi interi.
-   Premendo un pulsante si passa alla prova a mano). **Niente da
-   rifare**; restano i due tasti banco su `GPA5`/`GPA6`, le due metà col quinto footswitch,
-   il banco che non si ricorda al riavvio (va fatto coi tasti banco veri), il trasferimento di
-   un banco da riprovare sull'S3, e **l'autonomia, l'ultima misura mancante**.
+   Premendo un pulsante si passa alla prova a mano). **Anche i due tasti banco su
+   `GPA5`/`GPA6` rispondono** (9 settembre 2026), e con questo **il montaggio elettrico è
+   finito e non c'è niente da rifare**. Restano cose di firmware: LED e tasti banco dentro
+   `prova-ble`, le due metà col quinto footswitch, il banco che non si ricorda al riavvio, il
+   trasferimento di un banco da riprovare sull'S3, e **l'autonomia, l'ultima misura mancante**.
 8. **La scheda stampata in `pcb/` è accantonata**, deciso dall'utente il 3 settembre 2026: il
    pedale si finisce **sulla millefori**, che è quella che deve funzionare. Quanto c'è nel repo
    — schema e disposizione — resta lì e **non si tocca**: non è materiale di lavoro, e non va
