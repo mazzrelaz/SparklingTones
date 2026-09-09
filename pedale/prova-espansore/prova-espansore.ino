@@ -81,13 +81,17 @@ static const uint8_t OLATB = 0x15;
  *
  *      LED 1   rosso PB7   verde PB6
  *      LED 2   rosso PB5   verde PB4
- *      LED 3   rosso PB0   verde PB1
- *      LED 4   rosso PB2   verde PB3
+ *      LED 3   rosso PB2   verde PB3
+ *      LED 4   rosso PB0   verde PB1
+ *
+ * Le prime due coppie scendono, le ultime due risalgono: il terzo e il quarto
+ * LED sono l'uno sulle linee dell'altro. Verificato sull'hardware guardando la
+ * sequenza (9 settembre 2026), non dedotto.
  *
  * Tutto il resto del programma passa da qui: se un filo si sposta, si cambiano
  * solo queste due righe. Il LED n e' il footswitch n, da sinistra. */
-static const uint8_t LINEA_ROSSO[4] = {7, 5, 0, 2};
-static const uint8_t LINEA_VERDE[4] = {6, 4, 1, 3};
+static const uint8_t LINEA_ROSSO[4] = {7, 5, 2, 0};
+static const uint8_t LINEA_VERDE[4] = {6, 4, 3, 1};
 
 static uint8_t mascheraColore(const uint8_t linee[4]) {
   uint8_t m = 0;
