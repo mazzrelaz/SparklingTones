@@ -34,12 +34,13 @@
  *
  * Come si prova
  * -------------
- * All'accensione parte la SEQUENZA: le otto linee una alla volta, PB0 -> PB7,
- * col numero e il colore scritti sullo schermo. Basta guardare: se si accende
- * il LED sbagliato, o il colore sbagliato, si vede subito e si sa **quale**
- * linea e' scambiata. Fra un giro e l'altro si accendono i due banchi interi,
- * tutti rossi e tutti verdi, che e' come il pedale vero li usa.
- * La sequenza gira finche' non si preme un pulsante.
+ * All'accensione parte la SEQUENZA: gli otto mezzi LED uno alla volta, in
+ * ordine da sinistra a destra e per ogni LED prima il rosso e poi il verde,
+ * con scritto sullo schermo quale LED dovrebbe accendersi e su che linea sta.
+ * Cosi' basta guardare la fila: se l'ordine salta, o il colore e' l'altro, il
+ * filo scambiato e' quello che lo schermo sta nominando. Fra un giro e l'altro
+ * si accendono i due banchi interi, tutti rossi e tutti verdi, che e' come il
+ * pedale vero li usa. La sequenza gira finche' non si preme un pulsante.
  *
  * Poi si passa alla PROVA A MANO: i primi quattro footswitch accendono il
  * loro LED, il quinto cambia colore (rosso <-> verde, cioe' banco A <-> B),
@@ -74,16 +75,43 @@ static const uint8_t GPPUA = 0x0C;
 static const uint8_t GPIOA = 0x12;
 static const uint8_t OLATB = 0x15;
 
-/* --- Come sono cablati i LED (9 settembre 2026) ---------------------------
- * Quattro LED bicolore a catodo comune, due linee per LED: il ROSSO sulle
- * linee PARI (PB0 PB2 PB4 PB6), il VERDE sulle DISPARI (PB1 PB3 PB5 PB7).
- * Quindi il LED n (0..3, cioe' il footswitch n) ha il rosso su PB(2n) e il
- * verde su PB(2n+1): le due meta' di uno stesso LED stanno affiancate.
- * Se un giorno il cablaggio cambia, si cambiano solo queste quattro righe. */
-static const uint8_t MASCHERA_ROSSO = 0x55;   // PB0 PB2 PB4 PB6
-static const uint8_t MASCHERA_VERDE = 0xaa;   // PB1 PB3 PB5 PB7
-static inline uint8_t bitRosso(uint8_t led) { return (uint8_t)(1 << (led * 2)); }
-static inline uint8_t bitVerde(uint8_t led) { return (uint8_t)(1 << (led * 2 + 1)); }
+/* --- Come sono cablati i LED (9 settembre 2026, dall'utente) ---------------
+ * Quattro LED bicolore a catodo comune, due linee per LED. Le linee NON sono
+ * in ordine, e non c'e' nessuna regola da indovinare: sono queste.
+ *
+ *      LED 1   rosso PB7   verde PB6
+ *      LED 2   rosso PB5   verde PB4
+ *      LED 3   rosso PB0   verde PB1
+ *      LED 4   rosso PB2   verde PB3
+ *
+ * Tutto il resto del programma passa da qui: se un filo si sposta, si cambiano
+ * solo queste due righe. Il LED n e' il footswitch n, da sinistra. */
+static const uint8_t LINEA_ROSSO[4] = {7, 5, 0, 2};
+static const uint8_t LINEA_VERDE[4] = {6, 4, 1, 3};
+
+static uint8_t mascheraColore(const uint8_t linee[4]) {
+  uint8_t m = 0;
+  for (uint8_t n = 0; n < 4; n++) m |= (uint8_t)(1 << linee[n]);
+  return m;
+}
+
+/* Quanto sta accesa ogni linea, in millisecondi. Non e' un dettaglio: questa
+ * sequenza si guarda, e con meno di un paio di secondi non si fa in tempo a
+ * leggere lo schermo e poi spostare gli occhi sul LED. Provato: 900 ms erano
+ * troppo pochi. I due banchi interi stanno un secondo in piu'. */
+static const uint16_t PASSO_MS = 3000;
+static inline uint8_t bitRosso(uint8_t led) { return (uint8_t)(1 << LINEA_ROSSO[led]); }
+static inline uint8_t bitVerde(uint8_t led) { return (uint8_t)(1 << LINEA_VERDE[led]); }
+
+/** Che LED e che colore stanno su una linea. Serve al disegno, che parla di
+ *  linee (PB4) e di LED (il secondo da sinistra) nella stessa schermata. */
+static int8_t ledDiLinea(uint8_t b, bool &inVerde) {
+  for (uint8_t n = 0; n < 4; n++) {
+    if (LINEA_ROSSO[n] == b) { inVerde = false; return (int8_t)n; }
+    if (LINEA_VERDE[n] == b) { inVerde = true;  return (int8_t)n; }
+  }
+  return -1;
+}
 
 static uint8_t indirizzo = 0;      // 0 = non trovato
 static uint8_t ingressiPrec = 0xff;
@@ -150,30 +178,37 @@ static void scansione() {
 
 /* ---------------------------- la sequenza ---------------------------- */
 
-static void disegnaLinea(uint8_t b) {
+/* Che cosa e' acceso adesso: 0..7 la linea accesa, -1 il banco A, -2 il B. */
+static int8_t passo = 0;
+
+/** La schermata della sequenza, con in fondo la barra che si svuota: senza,
+ *  il cambio arriva addosso e non si fa in tempo a guardare il LED prima che
+ *  cambi. La barra dice **quanto manca**, ed e' l'unica ragione per cui il
+ *  disegno si rinfresca durante l'attesa. */
+static void disegnaPasso(uint16_t trascorsi, uint16_t totale) {
   char riga[24];
   schermo.clearBuffer();
   schermo.setFont(u8g2_font_6x12_tf);
   schermo.drawStr(0, 10, "sequenza LED");
   schermo.setFont(u8g2_font_10x20_tf);
-  snprintf(riga, sizeof(riga), "PB%u  %s", (unsigned)b, (b & 1) ? "VERDE" : "ROSSO");
-  schermo.drawStr(0, 34, riga);
-  schermo.setFont(u8g2_font_6x12_tf);
-  snprintf(riga, sizeof(riga), "e' il LED %u", (unsigned)(b / 2) + 1);
-  schermo.drawStr(0, 48, riga);
-  schermo.drawStr(0, 62, "premi per fermare");
-  schermo.sendBuffer();
-}
-
-static void disegnaBanco(bool inVerde) {
-  schermo.clearBuffer();
-  schermo.setFont(u8g2_font_6x12_tf);
-  schermo.drawStr(0, 10, "sequenza LED");
-  schermo.setFont(u8g2_font_10x20_tf);
-  schermo.drawStr(0, 34, inVerde ? "BANCO B" : "BANCO A");
-  schermo.setFont(u8g2_font_6x12_tf);
-  schermo.drawStr(0, 48, inVerde ? "tutti e 4 verdi" : "tutti e 4 rossi");
-  schermo.drawStr(0, 62, "premi per fermare");
+  if (passo >= 0) {
+    bool inVerde = false;
+    const int8_t led = ledDiLinea((uint8_t)passo, inVerde);
+    snprintf(riga, sizeof(riga), "LED %d %s", (int)led + 1, inVerde ? "VERDE" : "ROSSO");
+    schermo.drawStr(0, 34, riga);
+    schermo.setFont(u8g2_font_6x12_tf);
+    snprintf(riga, sizeof(riga), "sulla linea PB%d", (int)passo);
+    schermo.drawStr(0, 48, riga);
+  } else {
+    schermo.drawStr(0, 34, passo == -1 ? "BANCO A" : "BANCO B");
+    schermo.setFont(u8g2_font_6x12_tf);
+    schermo.drawStr(0, 48, passo == -1 ? "tutti e 4 rossi" : "tutti e 4 verdi");
+  }
+  if (totale > 0 && trascorsi < totale) {
+    const int larghezza = (int)(128L * (totale - trascorsi) / totale);
+    schermo.drawBox(0, 50, larghezza, 3);
+  }
+  schermo.drawStr(0, 63, "premi per fermare");
   schermo.sendBuffer();
 }
 
@@ -182,12 +217,18 @@ static void disegnaBanco(bool inVerde) {
  *  giro. E' la stessa regola del firmware vero: nessuna attesa cieca. */
 static bool attendi(uint16_t ms) {
   const uint32_t inizio = millis();
-  while (millis() - inizio < ms) {
+  uint32_t ultimaBarra = 0;
+  for (;;) {
+    const uint32_t trascorsi = millis() - inizio;
+    if (trascorsi >= ms) return false;
     uint8_t v;
     if (leggi(GPIOA, v) && v != 0xff) return true;
+    if (trascorsi - ultimaBarra >= 150) {
+      ultimaBarra = trascorsi;
+      disegnaPasso((uint16_t)trascorsi, ms);
+    }
     delay(2);
   }
-  return false;
 }
 
 static void attendiRilascio() {
@@ -206,26 +247,35 @@ static void sequenza() {
 
   bool fermato = false;
   while (!fermato) {
-    for (uint8_t b = 0; b < 8 && !fermato; b++) {
-      accendi((uint8_t)(1 << b));
-      Serial.print(F("   PB"));
-      Serial.print(b);
-      Serial.print((b & 1) ? F("  verde   LED ") : F("  rosso   LED "));
-      Serial.println((b / 2) + 1);
-      disegnaLinea(b);
-      fermato = attendi(900);
+    /* In ordine di LED, non di linea: cosi' devono accendersi da sinistra a
+     * destra, prima rosso e poi verde, e un filo scambiato si vede come un
+     * salto nell'ordine invece che come un numero da controllare a mente. */
+    for (uint8_t n = 0; n < 4 && !fermato; n++) {
+      for (uint8_t c = 0; c < 2 && !fermato; c++) {
+        const uint8_t linea = c ? LINEA_VERDE[n] : LINEA_ROSSO[n];
+        accendi((uint8_t)(1 << linea));
+        Serial.print(F("   LED "));
+        Serial.print(n + 1);
+        Serial.print(c ? F(" verde   sulla linea PB") : F(" rosso   sulla linea PB"));
+        Serial.println(linea);
+        passo = (int8_t)linea;
+        disegnaPasso(0, PASSO_MS);
+        fermato = attendi(PASSO_MS);
+      }
     }
     if (!fermato) {
-      accendi(MASCHERA_ROSSO);
+      accendi(mascheraColore(LINEA_ROSSO));
       Serial.println(F("   banco A: tutti e quattro rossi"));
-      disegnaBanco(false);
-      fermato = attendi(1400);
+      passo = -1;
+      disegnaPasso(0, PASSO_MS + 1000);
+      fermato = attendi(PASSO_MS + 1000);
     }
     if (!fermato) {
-      accendi(MASCHERA_VERDE);
+      accendi(mascheraColore(LINEA_VERDE));
       Serial.println(F("   banco B: tutti e quattro verdi"));
-      disegnaBanco(true);
-      fermato = attendi(1400);
+      passo = -2;
+      disegnaPasso(0, PASSO_MS + 1000);
+      fermato = attendi(PASSO_MS + 1000);
     }
   }
 
@@ -269,8 +319,11 @@ static void disegna(uint8_t ingressi) {
     const bool acceso = (uscite & (1 << i)) != 0;
     if (acceso) schermo.drawBox(x, 40, 14, 12);
     else schermo.drawFrame(x, 40, 14, 12);
-    char c[2] = {(char)((i & 1) ? 'V' : 'R'), 0};
-    schermo.drawStr(x + 4, 63, c);
+    // sotto ogni uscita, che cosa c'e' attaccato davvero: "1R", "3V"...
+    bool inVerde = false;
+    const int8_t led = ledDiLinea(i, inVerde);
+    char c[3] = {(char)('1' + led), (char)(inVerde ? 'V' : 'R'), 0};
+    schermo.drawStr(x + 1, 63, c);
   }
   schermo.sendBuffer();
 }
