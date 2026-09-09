@@ -499,6 +499,14 @@ e non lo è: a parità di corrente l'occhio vede il verde ~3× più luminoso, e 
 dicono la stessa cosa (banco A o B), quindi devono pesare uguale. **Interruttori sul port A** (è quello che fa scattare l'interrupt), **LED
 sul port B**.
 
+**Su quale linea sta ogni LED, verificato sull'hardware il 9 settembre 2026** — e **non c'è
+nessuna regola da dedurre**, va letta la tabella: **LED 1 = `PB7` rosso / `PB6` verde, LED 2 =
+`PB5`/`PB4`, LED 3 = `PB2`/`PB3`, LED 4 = `PB0`/`PB1`**. Le prime due coppie scendono, le
+ultime due risalgono. Nel codice sta in due sole righe, `LINEA_ROSSO = {7,5,2,0}` e
+`LINEA_VERDE = {6,4,3,1}` di `pedale/prova-espansore`, e il firmware vero deve prenderle da
+lì: **inventarsele in ordine crescente accende il LED sbagliato**, che è esattamente lo
+sbaglio già fatto una volta.
+
 **I nomi dei pezzi sono fissi, e cambiarli fa danni** (3 settembre 2026, chiesto dall'utente
 dopo che in una sola risposta avevo chiamato la stessa cosa basetta, scheda e millefori, e il
 pannello «coperchio»): **basetta** (la millefori 7 × 9), **XIAO**, **espansore** (il KAmod),
@@ -696,8 +704,12 @@ Sul pedale — il resto in `docs/pedale.md`:
    premuto, ampli che cambia preset, display che lo dice, senza telefono in mezzo. **Tutti e
    cinque i footswitch sono cablati e verificati** (8 settembre 2026, con `prova-espansore`:
    `GPA0`…`GPA4`, nessuno scambiato, nessuno che resta chiuso; e il log riconferma lettura del
-   port A **183 µs** contro **32,8 ms** di un fotogramma). **Niente da
-   rifare**; restano i due tasti banco su `GPA5`/`GPA6` e gli otto LED, le due metà col quinto footswitch,
+   port A **183 µs** contro **32,8 ms** di un fotogramma). **Anche gli otto LED sono cablati e
+   verificati** (9 settembre 2026, sempre con `prova-espansore`, che ora li accende in
+   sequenza: in ordine di LED da sinistra a destra, prima rosso e poi verde, tre secondi per
+   passo con una barra che dice quanto manca — e chiude ogni giro coi due banchi interi.
+   Premendo un pulsante si passa alla prova a mano). **Niente da
+   rifare**; restano i due tasti banco su `GPA5`/`GPA6`, le due metà col quinto footswitch,
    il banco che non si ricorda al riavvio (va fatto coi tasti banco veri), il trasferimento di
    un banco da riprovare sull'S3, e **l'autonomia, l'ultima misura mancante**.
 8. **La scheda stampata in `pcb/` è accantonata**, deciso dall'utente il 3 settembre 2026: il
