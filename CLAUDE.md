@@ -499,13 +499,15 @@ e non lo è: a parità di corrente l'occhio vede il verde ~3× più luminoso, e 
 dicono la stessa cosa (banco A o B), quindi devono pesare uguale. **Interruttori sul port A** (è quello che fa scattare l'interrupt), **LED
 sul port B**.
 
-**Su quale linea sta ogni LED, verificato sull'hardware il 9 settembre 2026** — e **non c'è
-nessuna regola da dedurre**, va letta la tabella: **LED 1 = `PB7` rosso / `PB6` verde, LED 2 =
-`PB5`/`PB4`, LED 3 = `PB2`/`PB3`, LED 4 = `PB0`/`PB1`**. Le prime due coppie scendono, le
-ultime due risalgono. Nel codice sta in due sole righe, `LINEA_ROSSO = {7,5,2,0}` e
-`LINEA_VERDE = {6,4,3,1}` di `pedale/prova-espansore`, e il firmware vero deve prenderle da
-lì: **inventarsele in ordine crescente accende il LED sbagliato**, che è esattamente lo
-sbaglio già fatto una volta.
+**Su quale linea sta ogni LED, verificato sull'hardware il 13 settembre 2026** — e **non c'è
+nessuna regola da dedurre**, va letta la tabella: **LED 1 = `PB5` rosso / `PB4` verde, LED 2 =
+`PB7`/`PB6`, LED 3 = `PB2`/`PB3`, LED 4 = `PB0`/`PB1`**. Nel codice sta in due sole righe,
+`LINEA_ROSSO = {5,7,2,0}` e `LINEA_VERDE = {4,6,3,1}` di `pedale/prova-espansore`, e il
+firmware vero deve prenderle da lì: **inventarsele in ordine crescente accende il LED
+sbagliato**. **Questa tabella è già cambiata due volte** (il 9 settembre era `{7,5,2,0}`, poi
+l'utente ha rifatto il cablaggio), quindi **non si ricostruisce a mente e non si dà per
+buona**: si fa girare la sequenza di `prova-espansore`, si guarda in che ordine si accendono, e
+si scrive quello che fa.
 
 **I nomi dei pezzi sono fissi, e cambiarli fa danni** (3 settembre 2026, chiesto dall'utente
 dopo che in una sola risposta avevo chiamato la stessa cosa basetta, scheda e millefori, e il
