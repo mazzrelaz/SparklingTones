@@ -76,23 +76,24 @@ static const uint8_t GPPUA = 0x0C;
 static const uint8_t GPIOA = 0x12;
 static const uint8_t OLATB = 0x15;
 
-/* --- Come sono cablati i LED (9 settembre 2026, dall'utente) ---------------
+/* --- Come sono cablati i LED (13 settembre 2026, cablaggio rifatto) --------
  * Quattro LED bicolore a catodo comune, due linee per LED. Le linee NON sono
  * in ordine, e non c'e' nessuna regola da indovinare: sono queste.
  *
- *      LED 1   rosso PB7   verde PB6
- *      LED 2   rosso PB5   verde PB4
+ *      LED 1   rosso PB5   verde PB4
+ *      LED 2   rosso PB7   verde PB6
  *      LED 3   rosso PB2   verde PB3
  *      LED 4   rosso PB0   verde PB1
  *
- * Le prime due coppie scendono, le ultime due risalgono: il terzo e il quarto
- * LED sono l'uno sulle linee dell'altro. Verificato sull'hardware guardando la
- * sequenza (9 settembre 2026), non dedotto.
+ * Verificato sull'hardware guardando la sequenza, non dedotto: prima si
+ * accendevano nell'ordine 2-1-3-4, cioe' i primi due erano l'uno sulle linee
+ * dell'altro. E' la seconda volta che questa tabella cambia, quindi non la si
+ * ricostruisce a mente: si guarda la sequenza e si scrive quello che fa.
  *
  * Tutto il resto del programma passa da qui: se un filo si sposta, si cambiano
  * solo queste due righe. Il LED n e' il footswitch n, da sinistra. */
-static const uint8_t LINEA_ROSSO[4] = {7, 5, 2, 0};
-static const uint8_t LINEA_VERDE[4] = {6, 4, 3, 1};
+static const uint8_t LINEA_ROSSO[4] = {5, 7, 2, 0};
+static const uint8_t LINEA_VERDE[4] = {4, 6, 3, 1};
 
 static uint8_t mascheraColore(const uint8_t linee[4]) {
   uint8_t m = 0;
