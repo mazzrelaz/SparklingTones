@@ -2,14 +2,9 @@
  * prova-espansore — il secondo pezzo sul banco
  * ============================================
  *
- * Aggiunge l'MCP23017 al display, sullo stesso bus I2C. Risponde a tre
- * domande, e le mostra sullo schermo cosi' si prova col pedale in mano
- * senza guardare il monitor seriale:
- *
- *   1. i due dispositivi convivono sul bus?
- *   2. l'espansore legge i pulsanti?
- *   3. l'espansore accende gli otto LED, tutti, quello giusto e del colore
- *      giusto?
+ * Aggiunge l'MCP23017 al display, sullo stesso bus I2C, e serve a sapere
+ * **quale pulsante e quale LED stanno su quale linea**, col pedale in mano e
+ * senza guardare il monitor seriale.
  *
  * Nessuna libreria per l'MCP23017: sono quattro registri, e scriverli a
  * mano vale meno di una dipendenza in piu'.
@@ -25,7 +20,7 @@
  *   A0 A1 A2    GND        <- indirizzo 0x20
  *   RESET       3V3        <- attivo basso: per aria il chip resta in reset
  *
- *   pulsanti    fra GPA0..GPA6 e GND   (arcade: COM a GND, NO sulla linea)
+ *   pulsanti    fra GPA0..GPA7 e GND   (COM a GND, NO sulla linea)
  *   LED         fra PB0..PB7 e GND, ognuno con la sua resistenza
  *
  * Port A in ingresso coi pull-up interni, port B in uscita: e' la divisione
@@ -34,19 +29,24 @@
  *
  * Come si prova
  * -------------
- * All'accensione parte la SEQUENZA: gli otto mezzi LED uno alla volta, in
- * ordine da sinistra a destra e per ogni LED prima il rosso e poi il verde,
- * con scritto sullo schermo quale LED dovrebbe accendersi e su che linea sta.
- * Cosi' basta guardare la fila: se l'ordine salta, o il colore e' l'altro, il
- * filo scambiato e' quello che lo schermo sta nominando. Fra un giro e l'altro
- * si accendono i due banchi interi, tutti rossi e tutti verdi, che e' come il
- * pedale vero li usa. La sequenza gira finche' non si preme un pulsante.
+ * 1. MAPPATURA, all'accensione. Lo schermo chiede di premere i sette
+ *    pulsanti uno alla volta, nell'ordine (footswitch 1..5 da sinistra, poi
+ *    tasto banco sinistro e destro), e si segna su che linea arriva ognuno.
+ *    Poi accende le otto linee dei LED una alla volta e chiede cosa si vede:
+ *    si risponde col footswitch del LED che si e' acceso (il quinto se non si
+ *    accende niente) e poi col colore (tasto banco sinistro rosso, destro
+ *    verde). Alla fine mostra le due tabelle, e le scrive sulla seriale.
+ *    **Una linea a cui si risponde "niente" e' un LED guasto o un filo
+ *    staccato**: e' la diagnosi, non un errore della procedura.
+ * 2. PROVA A MANO, subito dopo e **con la mappa appena trovata**: i quattro
+ *    LED accesi nel colore del banco, il footswitch premuto lascia acceso
+ *    solo il suo, il quinto cambia colore, i tasti banco lo forzano. Se qui
+ *    tutto torna, la mappa e' giusta.
+ * 3. Tenendo premuto il quinto footswitch per piu' di un secondo parte la
+ *    SEQUENZA dei LED, in ordine da sinistra a destra.
  *
- * Poi si passa alla PROVA A MANO: i quattro LED stanno accesi nel colore del
- * banco, tenendo premuto uno dei primi quattro footswitch resta acceso solo
- * il suo, il quinto cambia colore (rosso <-> verde, cioe' banco A <-> B) e i
- * due tasti banco lo forzano (GPA5 rosso, GPA6 verde). Tenendo premuto il
- * quinto footswitch per piu' di un secondo riparte la sequenza.
+ * Se un pulsante non risponde, dopo 30 secondi la mappatura va avanti da
+ * sola e lo segna come assente.
  */
 
 #include <Arduino.h>
@@ -76,41 +76,50 @@ static const uint8_t GPPUA = 0x0C;
 static const uint8_t GPIOA = 0x12;
 static const uint8_t OLATB = 0x15;
 
-/* --- Come sono cablati i LED (13 settembre 2026, cablaggio rifatto) --------
- * Quattro LED bicolore a catodo comune, due linee per LED. Le linee NON sono
- * in ordine, e non c'e' nessuna regola da indovinare: sono queste.
+static const uint8_t ASSENTE = 255;   // una linea che non si e' trovata
+
+/* --- La mappa dei pulsanti e dei LED ---------------------------------------
+ * **Non si scrive a mano: la trova la mappatura all'accensione.** I valori
+ * qui sotto sono solo il punto di partenza, e sono quelli dell'ultima volta
+ * che l'hardware e' stato verificato. Il cablaggio e' gia' stato rifatto due
+ * volte, e ogni volta la tabella ricostruita a mente era sbagliata.
  *
- *      LED 1   rosso PB5   verde PB4
- *      LED 2   rosso PB7   verde PB6
- *      LED 3   rosso PB2   verde PB3
- *      LED 4   rosso PB0   verde PB1
- *
- * Verificato sull'hardware guardando la sequenza, non dedotto: prima si
- * accendevano nell'ordine 2-1-3-4, cioe' i primi due erano l'uno sulle linee
- * dell'altro. E' la seconda volta che questa tabella cambia, quindi non la si
- * ricostruisce a mente: si guarda la sequenza e si scrive quello che fa.
- *
- * Tutto il resto del programma passa da qui: se un filo si sposta, si cambiano
- * solo queste due righe. Il LED n e' il footswitch n, da sinistra. */
-static const uint8_t LINEA_ROSSO[4] = {5, 7, 2, 0};
-static const uint8_t LINEA_VERDE[4] = {4, 6, 3, 1};
+ * Pulsanti, nell'ordine: footswitch 1..5 da sinistra, tasto banco sinistro,
+ * tasto banco destro. Il valore e' la linea GPA.
+ * LED: per ogni LED da sinistra, la linea PB del rosso e quella del verde. */
+static const uint8_t N_PULSANTI = 7;
+static const uint8_t FS5 = 4, BANCO_SX = 5, BANCO_DX = 6;
+static uint8_t LINEA_PULSANTE[N_PULSANTI] = {0, 1, 2, 3, 4, 5, 6};
+static uint8_t LINEA_ROSSO[4] = {5, 7, 2, 0};
+static uint8_t LINEA_VERDE[4] = {4, 6, 3, 1};
+
+static const char *const NOME_PULSANTE[N_PULSANTI] = {
+  "FOOTSWITCH 1", "FOOTSWITCH 2", "FOOTSWITCH 3", "FOOTSWITCH 4",
+  "FOOTSWITCH 5", "BANCO SX", "BANCO DX"};
+
+/* Quanto sta accesa ogni linea nella sequenza, in millisecondi. Con meno di
+ * un paio di secondi non si fa in tempo a leggere lo schermo e poi guardare
+ * il LED: 900 ms erano troppo pochi. I due banchi interi, un secondo in piu'. */
+static const uint16_t PASSO_MS = 3000;
+/* Quanto aspetta la mappatura prima di dare per assente un pulsante. */
+static const uint16_t ATTESA_MAPPA_MS = 30000;
 
 static uint8_t mascheraColore(const uint8_t linee[4]) {
   uint8_t m = 0;
-  for (uint8_t n = 0; n < 4; n++) m |= (uint8_t)(1 << linee[n]);
+  for (uint8_t n = 0; n < 4; n++) {
+    if (linee[n] != ASSENTE) m |= (uint8_t)(1 << linee[n]);
+  }
   return m;
 }
 
-/* Quanto sta accesa ogni linea, in millisecondi. Non e' un dettaglio: questa
- * sequenza si guarda, e con meno di un paio di secondi non si fa in tempo a
- * leggere lo schermo e poi spostare gli occhi sul LED. Provato: 900 ms erano
- * troppo pochi. I due banchi interi stanno un secondo in piu'. */
-static const uint16_t PASSO_MS = 3000;
-static inline uint8_t bitRosso(uint8_t led) { return (uint8_t)(1 << LINEA_ROSSO[led]); }
-static inline uint8_t bitVerde(uint8_t led) { return (uint8_t)(1 << LINEA_VERDE[led]); }
+static inline uint8_t bitRosso(uint8_t led) {
+  return LINEA_ROSSO[led] == ASSENTE ? 0 : (uint8_t)(1 << LINEA_ROSSO[led]);
+}
+static inline uint8_t bitVerde(uint8_t led) {
+  return LINEA_VERDE[led] == ASSENTE ? 0 : (uint8_t)(1 << LINEA_VERDE[led]);
+}
 
-/** Che LED e che colore stanno su una linea. Serve al disegno, che parla di
- *  linee (PB4) e di LED (il secondo da sinistra) nella stessa schermata. */
+/** Che LED e che colore stanno su una linea; -1 se nessuno. */
 static int8_t ledDiLinea(uint8_t b, bool &inVerde) {
   for (uint8_t n = 0; n < 4; n++) {
     if (LINEA_ROSSO[n] == b) { inVerde = false; return (int8_t)n; }
@@ -119,12 +128,18 @@ static int8_t ledDiLinea(uint8_t b, bool &inVerde) {
   return -1;
 }
 
+/** Il pulsante k e' premuto, secondo la mappa? Pull-up: premuto = bit a zero. */
+static bool premuto(uint8_t ingressi, uint8_t k) {
+  const uint8_t l = LINEA_PULSANTE[k];
+  return l != ASSENTE && !(ingressi & (1 << l));
+}
+
 static uint8_t indirizzo = 0;      // 0 = non trovato
 static uint8_t ingressiPrec = 0xff;
 static uint8_t uscite = 0;         // l'ultima cosa scritta su OLATB
 static bool verde = false;         // il colore della prova a mano: banco A/B
-static uint32_t pressioni[8] = {0};
-static uint32_t inizioPressione[8] = {0};
+static uint32_t pressioni[N_PULSANTI] = {0};
+static uint32_t inizioPressione[N_PULSANTI] = {0};
 
 static bool scrivi(uint8_t reg, uint8_t val) {
   Wire.beginTransmission(indirizzo);
@@ -142,8 +157,8 @@ static bool leggi(uint8_t reg, uint8_t &val) {
   return true;
 }
 
-/** L'unico posto che scrive le uscite: cosi' i due usi — la sequenza e la
- *  prova a mano — non si sovrascrivono a vicenda. */
+/** L'unico posto che scrive le uscite: cosi' la mappatura, la sequenza e la
+ *  prova a mano non si sovrascrivono a vicenda. */
 static void accendi(uint8_t maschera) {
   uscite = maschera;
   scrivi(OLATB, maschera);
@@ -151,14 +166,12 @@ static void accendi(uint8_t maschera) {
 
 /** Nella prova a mano i quattro LED stanno **accesi** nel colore del banco, e
  *  tenendo premuto un footswitch resta acceso solo il suo. Cosi' ogni tasto
- *  risponde con qualcosa che si vede: prima i tasti banco cambiavano il solo
- *  colore, e il colore si vedeva solo tenendo premuto un footswitch — cioe'
- *  da soli non accendevano niente e sembravano scollegati. E' anche il
- *  comportamento del pedale vero: i quattro LED dicono sempre il banco. */
+ *  risponde con qualcosa che si vede — prima i tasti banco cambiavano il solo
+ *  colore e sembravano scollegati. E' anche il comportamento del pedale vero. */
 static void aggiornaUscite(uint8_t ingressi) {
   int8_t solo = -1;
-  for (uint8_t i = 0; i < 4; i++) {
-    if (!(ingressi & (1 << i))) solo = (int8_t)i;   // pull-up: premuto = zero
+  for (uint8_t k = 0; k < 4; k++) {
+    if (premuto(ingressi, k)) solo = (int8_t)k;
   }
   if (solo >= 0) accendi(verde ? bitVerde((uint8_t)solo) : bitRosso((uint8_t)solo));
   else accendi(mascheraColore(verde ? LINEA_VERDE : LINEA_ROSSO));
@@ -187,15 +200,238 @@ static void scansione() {
   }
 }
 
+/* ----------------------- attese che guardano i tasti ----------------------- */
+
+/* Che cosa sta dicendo lo schermo mentre si aspetta: le attese lo ridisegnano
+ * per far scendere la barra, quindi devono sapere cosa c'e' scritto. */
+static const char *domandaSopra = "";
+static const char *domandaGrande = "";
+static const char *domandaSotto1 = "";
+static const char *domandaSotto2 = "";
+
+/** Quattro righe e, in mezzo, la barra che si svuota: senza, non si sa
+ *  quanto manca e il cambio arriva addosso. */
+static void disegnaDomanda(uint32_t trascorsi, uint32_t totale) {
+  schermo.clearBuffer();
+  schermo.setFont(u8g2_font_6x12_tf);
+  schermo.drawStr(0, 10, domandaSopra);
+  schermo.setFont(u8g2_font_10x20_tf);
+  schermo.drawStr(0, 32, domandaGrande);
+  if (totale > 0 && trascorsi < totale) {
+    const int larghezza = (int)(128L * (long)(totale - trascorsi) / (long)totale);
+    schermo.drawBox(0, 36, larghezza, 2);
+  }
+  schermo.setFont(u8g2_font_6x12_tf);
+  schermo.drawStr(0, 50, domandaSotto1);
+  schermo.drawStr(0, 63, domandaSotto2);
+  schermo.sendBuffer();
+}
+
+static void attendiRilascio() {
+  uint8_t v;
+  uint32_t fermoDa = millis();
+  // antirimbalzo: tutto rilasciato **e fermo** per 40 ms, non solo passato
+  while (millis() - fermoDa < 40) {
+    if (!leggi(GPIOA, v) || v != 0xff) fermoDa = millis();
+    delay(3);
+  }
+}
+
+/** Aspetta che una linea GPA vada a massa, ignorando quelle in `escluse`, e
+ *  torna il suo numero; -1 se scade il tempo. Una pressione conta solo se
+ *  resta giu' per 25 ms, e si torna solo a tasto rilasciato: cosi' la domanda
+ *  dopo non si prende il rimbalzo di quella prima. */
+static int8_t attendiLinea(uint32_t ms, uint8_t escluse) {
+  const uint32_t inizio = millis();
+  uint32_t ultimoDisegno = 0;
+  disegnaDomanda(0, ms);
+  for (;;) {
+    const uint32_t trascorsi = millis() - inizio;
+    if (trascorsi >= ms) return -1;
+    uint8_t v;
+    if (leggi(GPIOA, v)) {
+      const uint8_t giu = (uint8_t)(~v & ~escluse);
+      if (giu) {
+        delay(25);
+        uint8_t w;
+        if (leggi(GPIOA, w) && (uint8_t)(~w & ~escluse & giu)) {
+          const uint8_t conferma = (uint8_t)(~w & ~escluse & giu);
+          int8_t linea = 0;
+          while (!(conferma & (1 << linea))) linea++;
+          attendiRilascio();
+          return linea;
+        }
+      }
+    }
+    if (trascorsi - ultimoDisegno >= 250) {
+      ultimoDisegno = trascorsi;
+      disegnaDomanda(trascorsi, ms);
+    }
+    delay(3);
+  }
+}
+
+/** Come attendiLinea, ma risponde con il pulsante (0..6) secondo la mappa,
+ *  accettando solo quelli nella maschera `ammessi`. */
+static int8_t attendiPulsante(uint32_t ms, uint8_t ammessi) {
+  uint8_t escluse = 0xff;
+  for (uint8_t k = 0; k < N_PULSANTI; k++) {
+    if ((ammessi & (1 << k)) && LINEA_PULSANTE[k] != ASSENTE) {
+      escluse &= (uint8_t) ~(1 << LINEA_PULSANTE[k]);
+    }
+  }
+  const int8_t linea = attendiLinea(ms, escluse);
+  if (linea < 0) return -1;
+  for (uint8_t k = 0; k < N_PULSANTI; k++) {
+    if (LINEA_PULSANTE[k] == (uint8_t)linea) return (int8_t)k;
+  }
+  return -1;
+}
+
+static void stampaLinea(uint8_t l) {
+  if (l == ASSENTE) Serial.print(F("--"));
+  else Serial.print(l);
+}
+
+/* ------------------------------- la mappatura ------------------------------ */
+
+/** La schermata finale: le due tabelle intere, in piccolo. Si fotografa. */
+static void disegnaRiepilogo() {
+  char riga[32];
+  schermo.clearBuffer();
+  schermo.setFont(u8g2_font_5x8_tf);
+
+  auto cella = [](char *s, uint8_t l) {
+    if (l == ASSENTE) { s[0] = '-'; s[1] = 0; }
+    else { s[0] = (char)('0' + l); s[1] = 0; }
+  };
+
+  schermo.drawStr(0, 7, "PULSANTI -> GPA");
+  char f[5][2];
+  for (uint8_t k = 0; k < 5; k++) cella(f[k], LINEA_PULSANTE[k]);
+  snprintf(riga, sizeof(riga), "FS 1:%s 2:%s 3:%s 4:%s 5:%s",
+           f[0], f[1], f[2], f[3], f[4]);
+  schermo.drawStr(0, 16, riga);
+  char sx[2], dx[2];
+  cella(sx, LINEA_PULSANTE[BANCO_SX]);
+  cella(dx, LINEA_PULSANTE[BANCO_DX]);
+  snprintf(riga, sizeof(riga), "banco sx:%s  dx:%s", sx, dx);
+  schermo.drawStr(0, 25, riga);
+
+  schermo.drawStr(0, 35, "LED -> PB   rosso verde");
+  for (uint8_t n = 0; n < 4; n++) {
+    char r[2], v[2];
+    cella(r, LINEA_ROSSO[n]);
+    cella(v, LINEA_VERDE[n]);
+    snprintf(riga, sizeof(riga), "LED %u        %s     %s", (unsigned)n + 1, r, v);
+    schermo.drawStr(0, 42 + n * 7, riga);
+  }
+  schermo.sendBuffer();
+}
+
+static void stampaRiepilogo() {
+  Serial.println(F("== mappa trovata =="));
+  Serial.print(F("LINEA_PULSANTE = {"));
+  for (uint8_t k = 0; k < N_PULSANTI; k++) {
+    if (k) Serial.print(F(", "));
+    stampaLinea(LINEA_PULSANTE[k]);
+  }
+  Serial.println(F("}   // FS1..FS5, banco sx, banco dx"));
+  Serial.print(F("LINEA_ROSSO = {"));
+  for (uint8_t n = 0; n < 4; n++) { if (n) Serial.print(F(", ")); stampaLinea(LINEA_ROSSO[n]); }
+  Serial.println(F("}"));
+  Serial.print(F("LINEA_VERDE = {"));
+  for (uint8_t n = 0; n < 4; n++) { if (n) Serial.print(F(", ")); stampaLinea(LINEA_VERDE[n]); }
+  Serial.println(F("}"));
+}
+
+static void mappatura() {
+  if (indirizzo == 0) return;
+  accendi(0x00);
+  attendiRilascio();
+  Serial.println(F("-- mappatura dei pulsanti --"));
+
+  /* Prima i pulsanti: servono a rispondere alle domande sui LED. Una linea
+   * gia' presa non vale una seconda volta, cosi' ripremere per sbaglio il
+   * tasto di prima non sposta niente. */
+  uint8_t prese = 0;
+  for (uint8_t k = 0; k < N_PULSANTI; k++) {
+    domandaSopra = "MAPPATURA  pulsanti";
+    domandaGrande = NOME_PULSANTE[k];
+    domandaSotto1 = "premilo una volta";
+    domandaSotto2 = (k < 5) ? "(footswitch da sinistra)" : "(ai lati del display)";
+    const int8_t l = attendiLinea(ATTESA_MAPPA_MS, prese);
+    LINEA_PULSANTE[k] = (l < 0) ? ASSENTE : (uint8_t)l;
+    if (l >= 0) prese |= (uint8_t)(1 << l);
+    Serial.print(F("   "));
+    Serial.print(NOME_PULSANTE[k]);
+    Serial.print(F(" -> GPA"));
+    stampaLinea(LINEA_PULSANTE[k]);
+    Serial.println();
+  }
+
+  /* Poi i LED: una linea alla volta, e si chiede cosa si vede. Le risposte
+   * si danno coi pulsanti appena mappati: il footswitch del LED acceso (il
+   * quinto per "niente"), poi il colore coi tasti banco. Se un tasto banco
+   * manca, al suo posto fanno il footswitch 1 (rosso) e 2 (verde). */
+  Serial.println(F("-- mappatura dei LED --"));
+  const bool conBanchi =
+      LINEA_PULSANTE[BANCO_SX] != ASSENTE && LINEA_PULSANTE[BANCO_DX] != ASSENTE;
+  const uint8_t tastoRosso = conBanchi ? BANCO_SX : 0;
+  const uint8_t tastoVerde = conBanchi ? BANCO_DX : 1;
+
+  for (uint8_t n = 0; n < 4; n++) { LINEA_ROSSO[n] = ASSENTE; LINEA_VERDE[n] = ASSENTE; }
+  static char grande[16];
+
+  for (uint8_t b = 0; b < 8; b++) {
+    accendi((uint8_t)(1 << b));
+    snprintf(grande, sizeof(grande), "PB%u acceso", (unsigned)b);
+    domandaSopra = "MAPPATURA  LED";
+    domandaGrande = grande;
+    domandaSotto1 = "premi il footswitch";
+    domandaSotto2 = "del LED  (5 = niente)";
+    const int8_t led = attendiPulsante(ATTESA_MAPPA_MS, 0x1f);   // FS1..FS5
+
+    Serial.print(F("   PB"));
+    Serial.print(b);
+    if (led < 0 || led == FS5) {
+      Serial.println(F(" -> NIENTE acceso"));
+      continue;
+    }
+
+    domandaSotto1 = conBanchi ? "rosso: banco SX" : "rosso: footswitch 1";
+    domandaSotto2 = conBanchi ? "verde: banco DX" : "verde: footswitch 2";
+    snprintf(grande, sizeof(grande), "LED %d: colore?", led + 1);
+    const int8_t col = attendiPulsante(ATTESA_MAPPA_MS,
+                                       (uint8_t)((1 << tastoRosso) | (1 << tastoVerde)));
+    const bool inVerde = (col == (int8_t)tastoVerde);
+    if (inVerde) LINEA_VERDE[led] = b;
+    else LINEA_ROSSO[led] = b;
+    Serial.print(F(" -> LED "));
+    Serial.print(led + 1);
+    Serial.println(inVerde ? F(" verde") : F(" rosso"));
+  }
+
+  accendi(0x00);
+  stampaRiepilogo();
+  disegnaRiepilogo();
+
+  /* Il riepilogo resta finche' non si preme qualcosa: e' la schermata da
+   * fotografare, e non deve sparire mentre si prende il telefono. */
+  uint8_t v;
+  do { delay(20); } while (!leggi(GPIOA, v) || v == 0xff);
+  attendiRilascio();
+
+  aggiornaUscite(0xff);
+  ingressiPrec = 0xff;
+  Serial.println(F("-- prova a mano, con la mappa appena trovata --"));
+}
+
 /* ---------------------------- la sequenza ---------------------------- */
 
 /* Che cosa e' acceso adesso: 0..7 la linea accesa, -1 il banco A, -2 il B. */
 static int8_t passo = 0;
 
-/** La schermata della sequenza, con in fondo la barra che si svuota: senza,
- *  il cambio arriva addosso e non si fa in tempo a guardare il LED prima che
- *  cambi. La barra dice **quanto manca**, ed e' l'unica ragione per cui il
- *  disegno si rinfresca durante l'attesa. */
 static void disegnaPasso(uint16_t trascorsi, uint16_t totale) {
   char riga[24];
   schermo.clearBuffer();
@@ -224,8 +460,7 @@ static void disegnaPasso(uint16_t trascorsi, uint16_t totale) {
 }
 
 /** Aspetta, ma **guardando gli ingressi**: torna true appena un pulsante e'
- *  premuto, cosi' la sequenza si ferma sotto il dito invece di finire il suo
- *  giro. E' la stessa regola del firmware vero: nessuna attesa cieca. */
+ *  premuto, cosi' la sequenza si ferma sotto il dito. */
 static bool attendi(uint16_t ms) {
   const uint32_t inizio = millis();
   uint32_t ultimaBarra = 0;
@@ -242,33 +477,20 @@ static bool attendi(uint16_t ms) {
   }
 }
 
-static void attendiRilascio() {
-  uint8_t v;
-  while (leggi(GPIOA, v) && v != 0xff) delay(5);
-  delay(30);   // antirimbalzo: il segnale deve stare fermo, non solo passare
-}
-
-/** Le otto linee una alla volta, poi i due banchi interi. Gira finche' non si
- *  preme qualcosa. Un LED che non si accende, che si accende insieme a un
- *  altro o del colore sbagliato si vede qui, con scritto **quale linea e'**. */
+/** I LED in ordine da sinistra a destra, prima rosso e poi verde, poi i due
+ *  banchi interi. Gira finche' non si preme qualcosa. */
 static void sequenza() {
   if (indirizzo == 0) return;
-  Serial.println(F("-- sequenza: le otto linee, una alla volta --"));
+  Serial.println(F("-- sequenza dei LED --"));
   attendiRilascio();
 
   bool fermato = false;
   while (!fermato) {
-    /* In ordine di LED, non di linea: cosi' devono accendersi da sinistra a
-     * destra, prima rosso e poi verde, e un filo scambiato si vede come un
-     * salto nell'ordine invece che come un numero da controllare a mente. */
     for (uint8_t n = 0; n < 4 && !fermato; n++) {
       for (uint8_t c = 0; c < 2 && !fermato; c++) {
         const uint8_t linea = c ? LINEA_VERDE[n] : LINEA_ROSSO[n];
+        if (linea == ASSENTE) continue;
         accendi((uint8_t)(1 << linea));
-        Serial.print(F("   LED "));
-        Serial.print(n + 1);
-        Serial.print(c ? F(" verde   sulla linea PB") : F(" rosso   sulla linea PB"));
-        Serial.println(linea);
         passo = (int8_t)linea;
         disegnaPasso(0, PASSO_MS);
         fermato = attendi(PASSO_MS);
@@ -276,31 +498,26 @@ static void sequenza() {
     }
     if (!fermato) {
       accendi(mascheraColore(LINEA_ROSSO));
-      Serial.println(F("   banco A: tutti e quattro rossi"));
       passo = -1;
       disegnaPasso(0, PASSO_MS + 1000);
       fermato = attendi(PASSO_MS + 1000);
     }
     if (!fermato) {
       accendi(mascheraColore(LINEA_VERDE));
-      Serial.println(F("   banco B: tutti e quattro verdi"));
       passo = -2;
       disegnaPasso(0, PASSO_MS + 1000);
       fermato = attendi(PASSO_MS + 1000);
     }
   }
 
-  /* Non si spegne tutto: si entra nella prova a mano gia' col banco acceso,
-   * o dopo la sequenza lo schermo direbbe ROSSO con i LED spenti. */
+  attendiRilascio();
   aggiornaUscite(0xff);
   ingressiPrec = 0xff;
-  Serial.println(F("-- prova a mano: footswitch = LED, il quinto cambia colore --"));
-  Serial.println(F("   (tieni premuto il quinto per un secondo e la sequenza riparte)"));
 }
 
 /* -------------------------- la prova a mano -------------------------- */
 
-/** Sopra gli otto ingressi, sotto le otto uscite: piena = attiva. */
+/** Sopra le otto linee GPA grezze, sotto le otto uscite con cosa c'e' sopra. */
 static void disegna(uint8_t ingressi) {
   schermo.clearBuffer();
   schermo.setFont(u8g2_font_6x12_tf);
@@ -314,7 +531,7 @@ static void disegna(uint8_t ingressi) {
   }
 
   uint32_t totale = 0;
-  for (uint8_t i = 0; i < 8; i++) totale += pressioni[i];
+  for (uint8_t k = 0; k < N_PULSANTI; k++) totale += pressioni[k];
   char testa[26];
   snprintf(testa, sizeof(testa), "0x%02X %s   %lu",
            indirizzo, verde ? "VERDE" : "ROSSO", (unsigned long)totale);
@@ -322,9 +539,8 @@ static void disegna(uint8_t ingressi) {
 
   for (uint8_t i = 0; i < 8; i++) {
     const int x = i * 16;
-    // il pull-up tiene alto a riposo: premuto = bit a zero
-    const bool premuto = !(ingressi & (1 << i));
-    if (premuto) schermo.drawBox(x, 13, 14, 12);
+    const bool giu = !(ingressi & (1 << i));
+    if (giu) schermo.drawBox(x, 13, 14, 12);
     else schermo.drawFrame(x, 13, 14, 12);
     char n[2] = {(char)('0' + i), 0};
     schermo.drawStr(x + 4, 36, n);
@@ -332,10 +548,10 @@ static void disegna(uint8_t ingressi) {
     const bool acceso = (uscite & (1 << i)) != 0;
     if (acceso) schermo.drawBox(x, 40, 14, 12);
     else schermo.drawFrame(x, 40, 14, 12);
-    // sotto ogni uscita, che cosa c'e' attaccato davvero: "1R", "3V"...
     bool inVerde = false;
     const int8_t led = ledDiLinea(i, inVerde);
-    char c[3] = {(char)('1' + led), (char)(inVerde ? 'V' : 'R'), 0};
+    char c[3] = {'-', '-', 0};
+    if (led >= 0) { c[0] = (char)('1' + led); c[1] = inVerde ? 'V' : 'R'; }
     schermo.drawStr(x + 1, 63, c);
   }
   schermo.sendBuffer();
@@ -345,15 +561,12 @@ void setup() {
   Serial.begin(115200);
   /* LA TRAPPOLA CHE E' COSTATA UNA SERATA: sulla XIAO la seriale passa
    * dentro la USB, e **se al PC nessuno sta leggendo la porta, ogni
-   * Serial.print resta appesa fino allo scadere di un timeout**. Con due
-   * stampe per ciclo un lampeggio da 1,4 s diventava di cinque secondi, e i
-   * pulsanti rispondevano in ritardo. Con zero non aspetta piu' nessuno: se
-   * non c'e' un ascoltatore, la riga si butta via e il firmware tira dritto.
-   * Nel pedale vero questo non e' un dettaglio: sul palco il PC non c'e'. */
+   * Serial.print resta appesa fino allo scadere di un timeout**. Con zero non
+   * aspetta piu' nessuno. Nel pedale vero sul palco il PC non c'e'. */
   Serial.setTxTimeoutMs(0);
   delay(400);
   Serial.println();
-  Serial.println(F("=== prova-espansore: pulsanti e LED ==="));
+  Serial.println(F("=== prova-espansore: mappatura di pulsanti e LED ==="));
   Serial.print(F("scheda: "));
   Serial.println(ARDUINO_BOARD);
 
@@ -372,18 +585,13 @@ void setup() {
     const bool d = scrivi(OLATB, 0x00);    // LED spenti
     Serial.print(F("configurazione: "));
     Serial.println((a && b && c && d) ? F("ok") : F("FALLITA"));
-    sequenza();
+    mappatura();
   }
 }
 
-/* Il giro e' costruito attorno a una regola che vale anche per il firmware
- * vero: **gli ingressi si leggono spesso, il display si ridisegna di rado**.
- * Un fotogramma intero sono 1024 byte sullo stesso bus da cui si leggono i
- * pulsanti: ridisegnando a ogni giro il tasto si legge solo fra un disegno e
- * l'altro, e la pressione arriva in ritardo. Quindi il display si tocca solo
- * quando qualcosa e' cambiato, e i LED partono **prima** del disegno. */
-/* Quanto ci mette ogni operazione sul bus, in microsecondi. Serve a sapere
- * *dove* se ne vanno i secondi invece di tirare a indovinare. */
+/* Gli ingressi si leggono spesso, il display si ridisegna di rado: un
+ * fotogramma sono 1024 byte sullo stesso bus dei pulsanti. I LED partono
+ * **prima** del disegno. */
 static uint32_t maxLettura = 0, maxScrittura = 0, maxDisegno = 0;
 static uint32_t ultimoRapporto = 0;
 
@@ -400,40 +608,32 @@ void loop() {
 
   if (letto && ingressi != ingressiPrec) {
     cambiato = true;
-    for (uint8_t i = 0; i < 8; i++) {
-      const bool prima = !(ingressiPrec & (1 << i));
-      const bool adesso = !(ingressi & (1 << i));
+    for (uint8_t k = 0; k < N_PULSANTI; k++) {
+      const bool prima = premuto(ingressiPrec, k);
+      const bool adesso = premuto(ingressi, k);
       if (adesso && !prima) {
-        pressioni[i]++;
-        inizioPressione[i] = millis();
+        pressioni[k]++;
+        inizioPressione[k] = millis();
         // il quinto footswitch cambia meta', i due tasti banco la forzano
-        if (i == 4) verde = !verde;
-        else if (i == 5) verde = false;
-        else if (i == 6) verde = true;
-        Serial.print(F("GPA"));
-        Serial.print(i);
-        Serial.print(F(" PREMUTO    ("));
-        Serial.print(pressioni[i]);
+        if (k == FS5) verde = !verde;
+        else if (k == BANCO_SX) verde = false;
+        else if (k == BANCO_DX) verde = true;
+        Serial.print(NOME_PULSANTE[k]);
+        Serial.print(F(" premuto ("));
+        Serial.print(pressioni[k]);
         Serial.println(F(" volte)"));
-      } else if (!adesso && prima) {
-        Serial.print(F("GPA"));
-        Serial.print(i);
-        Serial.print(F(" rilasciato dopo "));
-        Serial.print(millis() - inizioPressione[i]);
-        Serial.println(F(" ms"));
       }
     }
     ingressiPrec = ingressi;
-    // i LED per primi: sono due byte sul bus e devono seguire il dito
     t0 = micros();
     aggiornaUscite(ingressi);
     const uint32_t dtScrittura = micros() - t0;
     if (dtScrittura > maxScrittura) maxScrittura = dtScrittura;
   }
 
-  // quinto footswitch tenuto premuto: la sequenza riparte
-  if (indirizzo != 0 && !(ingressiPrec & (1 << 4)) &&
-      (millis() - inizioPressione[4]) > 1200) {
+  // quinto footswitch tenuto premuto: parte la sequenza
+  if (indirizzo != 0 && premuto(ingressiPrec, FS5) &&
+      (millis() - inizioPressione[FS5]) > 1200) {
     sequenza();
     return;
   }
