@@ -544,6 +544,15 @@ sette pulsanti **non c'è niente da saldare sulla basetta**: si infilano lì. I 
 escono sono **del display**. Resta da fare **solo il port B**: le resistenze e il connettore
 dei LED.
 
+**I Dupont vanno via, al loro posto JST-XH crimpati** (deciso dall'utente il 15 settembre
+2026): i Dupont femmina sul pettine si allentano, e sono loro la causa della massa del LED 2
+staccata e del verde muto. **XH e non PH**, perché il passo 2,50 entra nei fori della millefori
+e il 2,0 no. **I 10 poli non si trovano**, quindi ogni cavo è diviso per posizione fisica:
+footswitch **6 poli** (`G` + FS1…FS5), tasti banco **3** (`G` + SX, DX), LED **due da 5**
+(`G` + i quattro fili dei LED 1-2, e lo stesso per i 3-4). **Ogni connettore ha la sua `G`**, e
+i due da 5 dei LED sono identici e vanno segnati. A cablaggio finito le tabelle cambiano e **si
+rifanno con la mappatura**, non a mente.
+
 **Il laser a diodo dell'utente non taglia il plexi, nemmeno il fumé scuro** — provato da lui il
 4 settembre 2026: **fonde e basta**. Avevo scritto il contrario (che il fumé assorbe il blu del
 diodo) e **non era una misura**: su quella frase si reggeva la scelta del vetrino, che infatti
