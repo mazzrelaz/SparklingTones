@@ -499,15 +499,27 @@ e non lo è: a parità di corrente l'occhio vede il verde ~3× più luminoso, e 
 dicono la stessa cosa (banco A o B), quindi devono pesare uguale. **Interruttori sul port A** (è quello che fa scattare l'interrupt), **LED
 sul port B**.
 
-**Su quale linea sta ogni LED, verificato sull'hardware il 13 settembre 2026** — e **non c'è
-nessuna regola da dedurre**, va letta la tabella: **LED 1 = `PB5` rosso / `PB4` verde, LED 2 =
-`PB7`/`PB6`, LED 3 = `PB2`/`PB3`, LED 4 = `PB0`/`PB1`**. Nel codice sta in due sole righe,
-`LINEA_ROSSO = {5,7,2,0}` e `LINEA_VERDE = {4,6,3,1}` di `pedale/prova-espansore`, e il
-firmware vero deve prenderle da lì: **inventarsele in ordine crescente accende il LED
-sbagliato**. **Questa tabella è già cambiata due volte** (il 9 settembre era `{7,5,2,0}`, poi
-l'utente ha rifatto il cablaggio), quindi **non si ricostruisce a mente e non si dà per
-buona**: si fa girare la sequenza di `prova-espansore`, si guarda in che ordine si accendono, e
-si scrive quello che fa.
+**Su quale linea sta ogni pulsante e ogni LED — trovato con la mappatura il 15 settembre
+2026**, e **non c'è nessuna regola da dedurre**:
+
+| pulsante | FS1 | FS2 | FS3 | FS4 | FS5 | banco SX | banco DX |
+|---|---|---|---|---|---|---|---|
+| linea | `GPA4` | `GPA5` | `GPA6` | `GPA3` | `GPA7` | `GPA0` | `GPA1` |
+
+**LED 1 = `PB5` rosso / `PB4` verde, LED 2 = `PB7`/`PB6`, LED 3 = `PB2`/`PB3`, LED 4 =
+`PB0`/`PB1`**. `GPA2` è libero. **Il verde del LED 2 non si accende** (15 settembre, ramo
+interrotto — prima si era staccata la massa del LED, già risaldata): `PB6` è scritto per
+esclusione e **non è verificato** finché la mappatura non lo ritrova. Nel codice stanno in
+`LINEA_PULSANTE = {4,5,6,3,7,0,1}`, `LINEA_ROSSO = {5,7,2,0}`, `LINEA_VERDE = {4,6,3,1}` di
+`pedale/prova-espansore`, e il firmware vero deve prenderle da lì. **Queste tabelle sono
+cambiate tre volte in una settimana**, perché l'utente rifà i cablaggi, quindi **non si
+ricostruiscono a mente e non si danno per buone**: **all'accensione `prova-espansore` fa una
+mappatura guidata** — chiede di premere i sette pulsanti in ordine, poi accende le otto linee
+`PB` una alla volta e si risponde col footswitch del LED acceso (il quinto per «niente») e coi
+tasti banco per il colore — e alla fine mostra le tabelle **su una schermata che resta ferma
+finché non si preme qualcosa: si chiede la foto**. Dalla seriale non si leggono: aprire la
+porta riavvia la XIAO e la mappa, che sta solo in RAM, si perde. **Una linea a cui si risponde
+«niente» è un filo staccato**: la mappatura fa anche da diagnosi.
 
 **I nomi dei pezzi sono fissi, e cambiarli fa danni** (3 settembre 2026, chiesto dall'utente
 dopo che in una sola risposta avevo chiamato la stessa cosa basetta, scheda e millefori, e il
@@ -670,15 +682,16 @@ libreria. **Prima di ogni push lì, `git pull --rebase`**: il file `CNAME` lo ri
 DNS, la trappola del `www`, la `privacy.html` (già analizzata: niente script, niente banner) e
 i video ancora da girare stanno in **`docs/sito.md`**.
 
-## Dove si riprende — 9 settembre 2026
+## Dove si riprende — 15 settembre 2026
 
 **Sulla XIAO c'è caricato `prova-espansore`, non il firmware del pedale.** Quindi **se il
 pedale non parla con l'ampli, non è un guasto: è lo sketch sbagliato**, e si rimette
-`prova-ble`. **L'espansore non ha più niente da provare**: sette pulsanti e otto LED sono
-cablati e verificati il 9 settembre 2026, e con loro finisce il montaggio elettrico. Il
-prossimo lavoro è **portare LED e tasti banco dentro `prova-ble`**, cioè nel firmware vero: i
-quattro LED che dicono il banco, i due tasti che lo cambiano, e il quinto footswitch che
-cambia metà senza toccare il suono. La mappa delle linee è più su, e va copiata di lì.
+`prova-ble`. **Il cablaggio è stato rifatto**, e la mappatura del 15 settembre ha trovato tutti
+e sette i pulsanti e sette LED su otto: **manca il verde del LED 2**, che è da riparare (la
+resistenza da 560 Ω sulla piastrina LED, il filo da `PB6`, il piedino del LED). Riparato
+quello, si rifà la mappatura, e poi il lavoro è **portare LED e tasti banco dentro
+`prova-ble`**: i quattro LED che dicono il banco, i due tasti che lo cambiano, il quinto
+footswitch che cambia metà senza toccare il suono. Le mappe sono più su, e vanno copiate di lì.
 
 
 Guscio `v73` (in `sw.js`; non fidarsi di questa riga se non torna). Suite verdi: protocol 139,
@@ -704,16 +717,11 @@ Sull'app:
 Sul pedale — il resto in `docs/pedale.md`:
 
 7. **Il pedale fa il pedale** (2 settembre 2026, millefori definitiva e S3 vera): footswitch
-   premuto, ampli che cambia preset, display che lo dice, senza telefono in mezzo. **Tutti e
-   cinque i footswitch sono cablati e verificati** (8 settembre 2026, con `prova-espansore`:
-   `GPA0`…`GPA4`, nessuno scambiato, nessuno che resta chiuso; e il log riconferma lettura del
-   port A **183 µs** contro **32,8 ms** di un fotogramma). **Anche gli otto LED sono cablati e
-   verificati** (9 settembre 2026, sempre con `prova-espansore`, che ora li accende in
-   sequenza: in ordine di LED da sinistra a destra, prima rosso e poi verde, tre secondi per
-   passo con una barra che dice quanto manca — e chiude ogni giro coi due banchi interi.
-   Premendo un pulsante si passa alla prova a mano). **Anche i due tasti banco su
-   `GPA5`/`GPA6` rispondono** (9 settembre 2026), e con questo **il montaggio elettrico è
-   finito e non c'è niente da rifare**. Restano cose di firmware: LED e tasti banco dentro
+   premuto, ampli che cambia preset, display che lo dice, senza telefono in mezzo. **Pulsanti e
+   LED sono cablati**, verificati una prima volta l'8-9 settembre e di nuovo, **dopo il
+   cablaggio rifatto, il 15 settembre con la mappatura guidata** (le linee sono nella tabella
+   più su; lettura del port A **183 µs** contro **32,8 ms** di un fotogramma). **Manca solo il
+   verde del LED 2**, da riparare. Poi restano cose di firmware: LED e tasti banco dentro
    `prova-ble`, le due metà col quinto footswitch, il banco che non si ricorda al riavvio, il
    trasferimento di un banco da riprovare sull'S3, e **l'autonomia, l'ultima misura mancante**.
 8. **La scheda stampata in `pcb/` è accantonata**, deciso dall'utente il 3 settembre 2026: il
