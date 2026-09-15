@@ -513,8 +513,9 @@ esclusione e **non è verificato** finché la mappatura non lo ritrova. Nel codi
 `LINEA_PULSANTE = {4,5,6,3,7,0,1}`, `LINEA_ROSSO = {5,7,2,0}`, `LINEA_VERDE = {4,6,3,1}` di
 `pedale/prova-espansore`, e il firmware vero deve prenderle da lì. **Queste tabelle sono
 cambiate tre volte in una settimana**, perché l'utente rifà i cablaggi, quindi **non si
-ricostruiscono a mente e non si danno per buone**: **all'accensione `prova-espansore` fa una
-mappatura guidata** — chiede di premere i sette pulsanti in ordine, poi accende le otto linee
+ricostruiscono a mente e non si danno per buone**: **`prova-espansore` fa una mappatura guidata,
+tenendo premuto il tasto banco SX per 1,5 s** (non più all'accensione: un riavvio buttava via
+la prova a mano) — chiede di premere i sette pulsanti in ordine, poi accende le otto linee
 `PB` una alla volta e si risponde col footswitch del LED acceso (il quinto per «niente») e coi
 tasti banco per il colore — e alla fine mostra le tabelle **su una schermata che resta ferma
 finché non si preme qualcosa: si chiede la foto**. Dalla seriale non si leggono: aprire la
