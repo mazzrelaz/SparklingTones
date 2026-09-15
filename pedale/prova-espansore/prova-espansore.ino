@@ -29,7 +29,13 @@
  *
  * Come si prova
  * -------------
- * 1. MAPPATURA, all'accensione. Lo schermo chiede di premere i sette
+ * All'accensione si entra direttamente nella PROVA A MANO, con la mappa
+ * scritta qui sotto. La mappatura non parte piu' da sola: finche' partiva a
+ * ogni avvio, un riavvio qualunque — anche un puntale del tester che scivola
+ * — buttava via la prova a mano e costringeva a rifare quindici risposte.
+ *
+ * 1. MAPPATURA, tenendo premuto il tasto banco sinistro per piu' di un
+ *    secondo e mezzo. Lo schermo chiede di premere i sette
  *    pulsanti uno alla volta, nell'ordine (footswitch 1..5 da sinistra, poi
  *    tasto banco sinistro e destro), e si segna su che linea arriva ognuno.
  *    Poi accende le otto linee dei LED una alla volta e chiede cosa si vede:
@@ -591,7 +597,8 @@ void setup() {
     const bool d = scrivi(OLATB, 0x00);    // LED spenti
     Serial.print(F("configurazione: "));
     Serial.println((a && b && c && d) ? F("ok") : F("FALLITA"));
-    mappatura();
+    aggiornaUscite(0xff);   // si parte gia' col banco acceso
+    Serial.println(F("prova a mano. Banco SX tenuto premuto: mappatura."));
   }
 }
 
@@ -641,6 +648,13 @@ void loop() {
   if (indirizzo != 0 && premuto(ingressiPrec, FS5) &&
       (millis() - inizioPressione[FS5]) > 1200) {
     sequenza();
+    return;
+  }
+
+  // tasto banco sinistro tenuto premuto: parte la mappatura
+  if (indirizzo != 0 && premuto(ingressiPrec, BANCO_SX) &&
+      (millis() - inizioPressione[BANCO_SX]) > 1500) {
+    mappatura();
     return;
   }
 
