@@ -101,3 +101,19 @@ cadenza, `ACCORDO_OGNI` e la tabella `ACCORDI`.
 **Due cose non le ho viste io e le sa solo l'utente**: come suona davvero l'accordo — volume,
 cattiveria della distorsione, filtro — e **il wah in una partita vera**, perché per arrivarci
 servono dieci batterie giocate a mano.
+
+## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
+
+Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.
+
+## La goliardata: StompSnake
+
+Un Snake a 8 bit in «Fai una pausa» (menu «⋯»), chiesto dall'utente il 27 agosto 2026.
+**Non tocca niente**: non parla con l'ampli, non legge la libreria, non ha stato in comune con
+l'app — l'unico contatto è `SnakePedali.apri()`, e record e «muto» stanno in `localStorage`,
+non in `settings`, perché non devono finire in un backup né su Dropbox. **Vive in
+`src/snake-pedali.js` e non in `index.html`**, che costa già ~55.000 token a lettura. Il ciclo
+è un `setInterval` e non `requestAnimationFrame`, che nei miei due browser non gira (vedi
+«Trappole dell'ambiente»). `tools/snake-banco.html` lo fa girare da solo e dice cosa è
+successo. **Tutto il resto — il disegno, il wah, l'accordo, il neon, il logo, le manopole —
+sta in `docs/snake.md`.**

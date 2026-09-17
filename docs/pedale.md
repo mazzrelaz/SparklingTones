@@ -2286,3 +2286,323 @@ tassello incollato al fondo a 2-3 cm dal connettore**, così ogni strattone fini
 non sulla presa saldata del modulo; e **un fermo sopra la XIAO** che le impedisca di sollevarsi
 dagli zoccoli — è l'unico danno silenzioso possibile, la scheda che lavora in verticale finché
 un contatto comincia a fare falso.
+
+## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
+
+Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.
+
+## Il pedale ESP32
+
+Il ragionamento completo — la forma e perché, la ferramenta pezzo per pezzo, le misure BLE, il
+ponte, il simulatore, la scatola, l'alimentazione, la modalità MIDI — sta in **`docs/pedale.md`**,
+che va aperto quando ci si lavora. Qui il minimo per non fare danni.
+
+**Cos'è**: la vista live del web, staccata dal telefono. Prende i preset dall'app, poi è
+autonomo con lo Spark. Nessuna regolazione, solo preset. Sta in questo repo perché l'interfaccia
+app↔pedale è un contratto fra le due sponde, e un commit solo deve poter cambiare tutte e due.
+
+**Comandi**: quattro footswitch = i quattro suoni della metà corrente; un quinto **cambia metà
+senza toccare il suono che sta suonando** (sul palco la sorpresa è il difetto peggiore); due
+tasti a mano per i banchi. Il banco è da otto, in due metà da quattro, coi quattro LED bicolore
+che **cambiano tutti insieme** — rosso A, verde B. Quando la metà mostrata non è quella che
+suona nessun LED è acceso, e per questo l'OLED tiene in fondo una riga **♪** con quello che sta
+suonando davvero.
+
+**Le regole che non si toccano:**
+
+- **Il pedale non tocca mai gli slot hardware.** Ogni cambio preset è `0x0101` sul buffer `0x7f`
+  + `0x0138` con `0x7f`. Ne segue che servono **solo due comandi** — niente `0x0104`, `0x0115`,
+  `0x0106`, niente parser dei preset — e che il pedale **non può rovinare quello che c'è
+  sull'ampli, per costruzione**. Conseguenza: il LED del pannello dell'ampli lampeggia in
+  permanenza, e non è un difetto.
+- **L'app preserializza, il firmware non serializza niente.** Riceve frame già pronti e **patcha
+  un byte solo**, il seq all'indice 2 — il checksum è un XOR dei soli byte impacchettati e non
+  lo copre. Verificato sull'hardware. L'encoder resta uno solo, in JS, coperto dai test.
+- **Un padrone alla volta**: mentre l'ampli è connesso al pedale **smette di annunciarsi**, e via
+  Web Bluetooth il browser non lo trova più. Quando l'app si collega al pedale, lui molla
+  l'ampli; quando se ne va se lo riprende (~0,5 s). **Se il footswitch non fa niente, il primo
+  sospetto è l'app ancora collegata** — è già costato tre giri di diagnosi.
+- **Mai fare operazioni BLE dentro un callback BLE**: `disconnect()` in `onConnect` o
+  `startAdvertising()` in `onDisconnect` bloccano NimBLE per decine di secondi. I callback
+  alzano una bandiera, il lavoro lo fa il `loop()`.
+- **Niente attese bloccanti che non guardino gli ingressi**: durante un trasferimento il tasto va
+  letto lo stesso, la pressione si accoda e **vince l'ultima**. E **l'antirimbalzo aspetta che il
+  segnale stia fermo**, non che sia passato del tempo dall'ultimo cambio accettato.
+- **Web Bluetooth ammette una sola operazione GATT alla volta per dispositivo**: serve una coda,
+  e il trasferimento di un banco ci entra come blocco solo.
+- **Il formato del banco sta in due file che vanno cambiati insieme**: `src/pedale-ponte.js` lo
+  costruisce, `pedale/prova-ble/banchi.h` lo legge. `banchi.h` è **l'unico punto del progetto
+  dove entrano byte non nostri**: offset e lunghezze vanno verificati, o un blocco malformato
+  scrive oltre il buffer.
+
+**La ferramenta è comprata** (`docs/pedale.md` per la scelta di ognuno): **XIAO ESP32-S3** —
+dal 29 agosto 2026 al posto della C6, perché **solo l'S3 ha l'USB-OTG vero** e quindi può fare
+la modalità MIDI da sola — OLED **2,42" 128×64 I²C**, espansore **KAmod I2C-IOexp16**
+(MCP23017), cella **XTAR 18650-330PCM protetta**. I LED sono quelli che l'utente ha in casa,
+RGB 5 mm **a catodo comune**; **l'MCP23017 non ha PWM**, quindi acceso/spento e basta — **la
+luminosità la fissa la resistenza, una volta per tutte**. **Valori scelti dall'utente col LED
+in mano, 3 settembre 2026: 330 Ω sul rosso e 560 Ω sul verde** — 4,2 e 2,1 mA a 3,3 V, cioè
+**17 mA con quattro LED accesi invece dei 48** del piano iniziale, che sull'autonomia è la
+leva più grossa che abbiamo. I 100/220 di prima erano una stima e sono caduti su una misura:
+sul progetto timer dell'utente, **anche lui a 3,3 V**, quei valori danno LED *troppo*
+luminosi, tenuti al 25-60% di PWM. E il verde sta **più alto** del rosso, che sembra un errore
+e non lo è: a parità di corrente l'occhio vede il verde ~3× più luminoso, e qui i due colori
+dicono la stessa cosa (banco A o B), quindi devono pesare uguale. **Interruttori sul port A** (è quello che fa scattare l'interrupt), **LED
+sul port B**.
+
+**Su quale linea sta ogni pulsante e ogni LED — trovato con la mappatura il 15 settembre
+2026**, e **non c'è nessuna regola da dedurre**:
+
+| pulsante | FS1 | FS2 | FS3 | FS4 | FS5 | banco SX | banco DX |
+|---|---|---|---|---|---|---|---|
+| linea | `GPA4` | `GPA5` | `GPA6` | `GPA3` | `GPA7` | `GPA0` | `GPA1` |
+
+**LED 1 = `PB5` rosso / `PB4` verde, LED 2 = `PB7`/`PB6`, LED 3 = `PB2`/`PB3`, LED 4 =
+`PB0`/`PB1`**. `GPA2` è libero. **Il verde del LED 2 non si accende** (15 settembre, ramo
+interrotto — prima si era staccata la massa del LED, già risaldata): `PB6` è scritto per
+esclusione e **non è verificato** finché la mappatura non lo ritrova. Nel codice stanno in
+`LINEA_PULSANTE = {4,5,6,3,7,0,1}`, `LINEA_ROSSO = {5,7,2,0}`, `LINEA_VERDE = {4,6,3,1}` di
+`pedale/prova-espansore`, e il firmware vero deve prenderle da lì. **Queste tabelle sono
+cambiate tre volte in una settimana**, perché l'utente rifà i cablaggi, quindi **non si
+ricostruiscono a mente e non si danno per buone**: **`prova-espansore` fa una mappatura guidata,
+tenendo premuti due pulsanti qualsiasi insieme per 1,5 s** (non all'accensione, perché un riavvio
+buttava via la prova a mano; e non col solo banco SX, che dopo un ricablaggio può non stare più
+dove lo si cerca) — chiede di premere i sette pulsanti in ordine, poi accende le otto linee
+`PB` una alla volta e si risponde col footswitch del LED acceso (il quinto per «niente») e coi
+tasti banco per il colore — e alla fine mostra le tabelle **su una schermata che resta ferma
+finché non si preme qualcosa: si chiede la foto**. Dalla seriale non si leggono: aprire la
+porta riavvia la XIAO e la mappa, che sta solo in RAM, si perde. **Una linea a cui si risponde
+«niente» è un filo staccato**: la mappatura fa anche da diagnosi.
+
+**I nomi dei pezzi sono fissi, e cambiarli fa danni** (3 settembre 2026, chiesto dall'utente
+dopo che in una sola risposta avevo chiamato la stessa cosa basetta, scheda e millefori, e il
+pannello «coperchio»): **basetta** (la millefori 7 × 9), **XIAO**, **espansore** (il KAmod),
+**pista** GND e 3V3 (le linee di stagno), **pettine** (il connettore di pin sulla basetta),
+**linea** (`PA0`…`PB7`), **pannello** (la faccia superiore della scatola), **scatola**,
+**cavo** (basetta → pannello), **piastrina LED** (il pezzo che porta i LED con le loro
+resistenze, dietro il pannello), **footswitch** (i 5 a piede), **tasti banco** (i 2 a mano),
+**pulsanti** (tutti e 7). Vietati: coperchio, top, rotaia, striscia, modulo. «Bus» solo per
+l'I²C. La legenda sta anche in cima alla pagina delle istruzioni, che è
+`https://claude.ai/code/artifact/b1b451ca-2804-41a6-810f-b2b4a92d7acd` (sorgente nello
+scratchpad, ma **si aggiorna passando quell'url**, o se ne crea una seconda).
+
+**Com'è fatta la basetta — rifatta dall'utente il 17 settembre 2026** (dalle sue due foto):
+millefori, XIAO in alto a sinistra con l'USB verso il bordo, espansore in alto a destra con
+un **condensatore** sull'alimentazione, le due **piste** nude in alto e in basso, i
+collegamenti sotto con ponticelli nudi e fili guainati. **Connettori JST-XH a 4 e 5 poli**
+già saldati al posto del vecchio pettine femmina (uno a 4 poli verticale dove arriva il
+**display**), e un **morsetto a vite verde per la cella**: rosso `+` e marrone `−`, che vanno
+alle piazzole `BAT` sotto la XIAO — polarità **misurata** (~4 V dal caricabatterie della
+XIAO anche senza cella). Prima accensione riuscita: XIAO sulla porta, display ed espansore
+rispondono (`0x20`). **Mancano i cavi crimpati di pulsanti e LED.**
+
+**I Dupont vanno via, al loro posto JST-XH crimpati** (deciso dall'utente il 15 settembre
+2026): i Dupont femmina sul pettine si allentano, e sono loro la causa della massa del LED 2
+staccata e del verde muto. **XH e non PH**, perché il passo 2,50 entra nei fori della millefori
+e il 2,0 no. **I 10 poli non si trovano, e il kit comprato (DxCRIMP «XH + Dupont»)
+arriva a 5**, quindi quattro connettori: footswitch **5 poli** (`G` + FS1…FS4), **4 poli** per
+`G` + FS5 + banco SX + banco DX, LED **due da 5** (`G` + i quattro fili dei LED 1-2, e lo
+stesso per i 3-4). Del kit si usano i gusci `XH-…Y`, i maschi da saldare `XH-…A` e i contatti
+femmina XH; gli `XH-…M` e i contatti maschi sono filo-filo e non servono. **Ogni connettore ha
+la sua `G`**, e i tre da 5 sono identici e vanno segnati. A cablaggio finito le tabelle cambiano e **si
+rifanno con la mappatura**, non a mente.
+
+**Il laser a diodo dell'utente non taglia il plexi, nemmeno il fumé scuro** — provato da lui il
+4 settembre 2026: **fonde e basta**. Avevo scritto il contrario (che il fumé assorbe il blu del
+diodo) e **non era una misura**: su quella frase si reggeva la scelta del vetrino, che infatti
+cade. **Il vincolo «lavorabile col laser» non esiste più per nessun materiale**, quindi il
+vetrino si sceglie solo su come si legge — e il trasparente si legge meglio, come l'utente
+aveva già provato. I rettangoli nel plexi si fanno **rigando e spezzando**, a mano, e allora
+**non c'è kerf da compensare**: 61 × 34 netti. Il ragionamento in `docs/pedale.md`.
+
+**Nei DXF dell'utente le quote dei fori sono nominali: il kerf del laser le allarga di ~3
+decimi**, quindi un foro disegnato da 0,5 mm taglia a 0,8 ed è lì che entrano i piedini dei
+LED — verificato da lui sul pezzo, dopo che io avevo dichiarato il disegno sbagliato leggendo
+il file. **Non concludere mai che un suo foro è troppo stretto guardando il DXF.** Le quote
+della **piastrina LED** (18 × 26, passo 1,5 e 4, due file a 11) stanno in `docs/pedale.md`.
+
+**Le resistenze dei LED sono una per colore, otto in tutto**, in serie con `PB0`…`PB7`. Una
+sola sul catodo comune **non va**: con rosso e verde accesi insieme la corrente si
+dividerebbe, e i due valori sono diversi. **Stanno sulla piastrina LED** — deciso il 3
+settembre 2026 perché sulla basetta non c'è più spazio, e non sui piedini volanti del LED, che
+è la giunzione che si spezza dopo qualche apertura, dentro il termorestringente dove non si
+vede. Il rovescio, da tenere a mente: **il filo dal pettine alla piastrina non ha la corrente
+limitata**, quindi un contatto a massa lì mette la linea `PB` a massa senza niente in mezzo.
+Nella scatola di legno il rischio è basso — l'unico metallo sono i corpi dei footswitch, da
+cui i cavi dei LED vanno tenuti lontani.
+
+| piedino | GPIO | a cosa serve |
+|---|---|---|
+| D4 / D5 | `5`, `6` | I²C: **display e MCP23017 insieme** (SDA, SCL) |
+| D0 (A0) | `1` | tensione di batteria — **il partitore va saldato** |
+| D6 / D7 | `43`, `44` | UART: il log seriale, **da tenere libero** |
+| D1, D2, D3, D8, D9, D10 | `2,3,4,7,8,9` | liberi (D2 è l'unico strapping: si usa per ultimo) |
+
+Quattro cose dell'hardware che fanno danni se le dimentico:
+
+- **il display è I²C a 4 pin** (non SPI a 7, come diceva il preventivo), indirizzo `0x3c`, e
+  sul retro ha una trappola scritta in cinese: **`D2` va cortocircuitato o il display non manda
+  l'ACK**, e senza ACK il controller I²C **interrompe la trasmissione**. Sull'esemplare
+  dell'utente era già chiuso di fabbrica; su un ricambio va rimisurato;
+- **l'antenna non è a bordo, e senza non funziona il BLE**: misurato, lo Spark passa da −92 dBm
+  a −63 col foglietto u.FL. Se un giorno «ogni tanto non si collega», il primo sospetto è quel
+  connettore;
+- **la XIAO carica a 50 mA**, quindi **la sua USB non è una via di ricarica**: si carica con un
+  **TP4056 dedicato**, a **interruttore generale spento** (non fa load sharing). L'interruttore è
+  fisico, sul positivo fra cella e XIAO: **niente auto-spegnimento per inattività**. Le **due
+  prese sul pannello vanno etichettate**, che sono identiche e il caricatore in quella sbagliata
+  non carica senza dirlo;
+- **l'indicatore di batteria è firmware da scrivere**: quattro tacche a soglie, **mai
+  percentuali** — la tensione di un litio è piatta nel mezzo — e sotto **3,50 V** un avviso
+  impossibile da non vedere.
+
+**La scatola è chiusa e senza incognite: 360 × 120 × 35 mm esterni, pannello utile 340 × 100,
+interassi 70 + 70 + 70 + 90**, mogano da 10 e rovere da 5, bozza in `tools/scatola-fusion.py`.
+I tre numeri che fanno danni: le **prese USB-C accettano un pannello fino a 8 mm** (la sponda è
+10, va svasata dall'interno); il vetrino è **plexi da 3 mm incollato SOTTO il pannello**, con
+la finestra **smussata a 45°** — deciso il 4 settembre 2026, ribalta la battuta dall'alto:
+così il taglio a mano del plexi resta nascosto e **la sua misura non è più critica** (conviene
+abbondante, ~65 × 38), lo smusso toglie il pozzo che rendeva illeggibile lo schermo di sbieco,
+e **il telaietto sotto non serve più**. Mai cianoacrilica sul plexi: vela la finestra; i **90 mm
+fra il quarto e il quinto footswitch sono un riferimento tattile**, non spazio in più. E la
+lezione che vale oltre questo pedale: **la spaziatura dei footswitch si misura col proprio
+piede** — la mia stima sbagliava del cinquanta per cento.
+
+**Stato**: verificato sull'hardware definitivo (2 settembre 2026) — footswitch premuto, ampli
+che cambia preset, display che lo dice, senza telefono in mezzo. BLE sull'S3 **26,5 ms a giro**
+con l'intervallo a 7,5 ms, cioè **~424 ms** per un preset intero, contro 82 ms e ~1312 ms con
+quello lento: **lo Spark l'intervallo corto lo concede davvero**, e i 1312 ms del telefono sono
+il suo intervallo di connessione, non la banda. **Resta non verificato**: l'autonomia, e se il
+modulo espansore abbia i pull-up sull'I²C — se il bus non parte, quello è il primo sospetto, e
+si risolve con due resistenze da 4,7 kΩ.
+
+### I punti di ripresa del pedale, com'erano
+
+## Dove si riprende — 17 settembre 2026
+
+**Sulla XIAO c'è caricato `prova-espansore`, non il firmware del pedale.** Quindi **se il
+pedale non parla con l'ampli, non è un guasto: è lo sketch sbagliato**, e si rimette
+`prova-ble`. **La basetta è stata rifatta coi JST** (vedi «Com'è fatta la basetta») e la
+prima accensione è andata; **l'utente crimpa i cavi di pulsanti e LED il 18 settembre**. Poi,
+in quest'ordine:
+
+1. la cella nel morsetto, a interruttore spento, e il dito sulla XIAO alla prima accensione;
+2. **la mappatura** — due pulsanti qualsiasi insieme per 1,5 s — e **la foto delle
+   tabelle**, da cui si riscrivono `LINEA_PULSANTE`, `LINEA_ROSSO`, `LINEA_VERDE` e la
+   tabella più su: **quelle scritte adesso sono del cablaggio vecchio**. Il verde del LED 2,
+   muto il 15 settembre, si riguarda lì: se ancora «niente», il guasto è sulla piastrina LED;
+3. **portare LED e tasti banco dentro `prova-ble`**: i quattro LED che dicono il banco, i due
+   tasti che lo cambiano, il quinto footswitch che cambia metà senza toccare il suono.
+
+Sul pedale — il resto in `docs/pedale.md`:
+
+7. **Il pedale fa il pedale** (2 settembre 2026, millefori definitiva e S3 vera): footswitch
+   premuto, ampli che cambia preset, display che lo dice, senza telefono in mezzo. **Pulsanti e
+   LED sono cablati**, verificati una prima volta l'8-9 settembre e di nuovo, **dopo il
+   cablaggio rifatto, il 15 settembre con la mappatura guidata** (le linee sono nella tabella
+   più su; lettura del port A **183 µs** contro **32,8 ms** di un fotogramma). **Manca solo il
+   verde del LED 2**, da riparare. Poi restano cose di firmware: LED e tasti banco dentro
+   `prova-ble`, le due metà col quinto footswitch, il banco che non si ricorda al riavvio, il
+   trasferimento di un banco da riprovare sull'S3, e **l'autonomia, l'ultima misura mancante**.
+8. **La scheda stampata in `pcb/` è accantonata**, deciso dall'utente il 3 settembre 2026: il
+   pedale si finisce **sulla millefori**, che è quella che deve funzionare. Quanto c'è nel repo
+   — schema e disposizione — resta lì e **non si tocca**: non è materiale di lavoro, e non va
+   proposto. Quando si riaprirà, le due cose da fare in quest'ordine sono **stringere il
+   contorno** (95 × 60 in un vano di 100 × 64 lascia 2,5 mm per lato) e **misurare col calibro
+   gli interassi dei connettori del KAmod (J3, J4, J5, J6), che nel file sono inventati**,
+   prima di tirare le piste. `kicad-cli` esporta in SVG e fa girare il DRC senza aprire KiCad;
+   gli script `tools/genera-*-kicad.py` non si rigenerano più.
+9. **Il looper sul pedale, col conteggio fatto in casa**: il protocollo c'è tutto, manca il
+   firmware. Il conteggio col click **non si comanda**, quindi lo produce il pedale — legge il
+   bpm, conta quattro tempi e **40 ms prima dell'uno** manda `0x0175` con `04`.
+
+**Discussi e non aperti**, col ragionamento già scritto e da non rifare: il pedale in
+**modalità MIDI** (`docs/pedale.md` — e lì stanno le due trappole d'ambiente: Windows non sa
+fare BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT); **creare un preset con l'AI**
+(`docs/diario.md`); e il trasferimento di un banco che costa ~6 s, che funziona ed è solo
+ottimizzazione.
+
+## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
+
+Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.
+
+## Trappole dell'ambiente
+
+**Mai riscrivere un file di questo progetto con `Get-Content`/`Set-Content` di PowerShell
+5.1.** Senza BOM, `Get-Content` decodifica l'UTF-8 come ANSI e `Set-Content -Encoding UTF8` lo
+riscrive doppiamente codificato: ogni accento diventa `Ã ` in tutto il file, in silenzio.
+Basta un `-replace` di una riga. Rimedio: `git checkout -- <file>` se è committato, e rifare
+con gli strumenti di edit; se non è committato, rileggerlo come UTF-8, togliere il `﻿` iniziale
+e riscrivere i byte convertendo in **CP1252**, che è l'inverso.
+
+**Mai usare `|` come delimitatore di `s///` in perl su testo con tabelle markdown**: il primo
+`|` del contenuto chiude il pattern e la sostituzione finisce **in cima al file**, che sembra
+tutt'altro guasto. Su questi file si usa lo strumento di edit, non `perl -0pi`.
+
+**Gli heredoc lunghi in bash si rompono**: per scrivere testo lungo si usa Write in un file
+dello scratchpad e poi lo si concatena. Stessa famiglia: **i messaggi di commit vanno passati
+per file** — `git -c i18n.commitEncoding=UTF-8 commit -F <file>` — perché `-m @'…'@` in
+PowerShell 5.1 si spezza in silenzio. Così si possono anche usare gli accenti.
+
+**Il push non parte dalla mia shell**, che è non interattiva: serve `GIT_TERMINAL_PROMPT=1`,
+`GCM_INTERACTIVE=true` e `GCM_GUI_PROMPT=true`, che fanno aprire la finestra sul desktop.
+
+**Dopo ogni modifica a `src/`, le pagine in `test/` devono restare verdi.** Girano contro
+catture reali dell'ampli, quindi prendono una regressione della codifica senza hardware.
+Girano anche senza browser, con Edge headless:
+
+```
+& 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --headless=new --disable-gpu `
+  --no-first-run --user-data-dir="$env:TEMP\claude\edge-prof" --virtual-time-budget=20000 `
+  --dump-dom 'file:///C:/Users/massi/spark/test/protocol-test.html'
+```
+
+Poi si cerca `id="summary"`. **Su `store-test.html` e `backup-test.html` no**: col tempo
+virtuale IndexedDB e le fetch dei fixture non fanno in tempo e la pagina resta a «esecuzione…».
+Per quelle, e per provare l'app che gira, si passa da **`localhost`** (`tools/serve.ps1`).
+**Aprire un `file://` nel browser del riquadro non serve a niente**: lo carica come `data:` e i
+`<script src="../src/…">` non partono.
+
+Cinque cose misurate su quell'ambiente, che fanno perdere ore se le dimentico:
+
+- **lo stdout di Edge headless non torna alla shell** (`$out = & msedge …` dà stringa vuota):
+  va redirezionato con `Start-Process … -RedirectStandardOutput`, sia per `--dump-dom` sia per
+  `--screenshot`, ed è con `--screenshot` che si guarda una pagina che *gira*;
+- **`requestAnimationFrame` non gira** né nel riquadro né in headless — un fotogramma solo, e
+  per lo stesso motivo lì lo screenshot del riquadro fallisce. Niente che si muova da sé si può
+  provare con rAF: il ciclo del gioco è un `setInterval`;
+- **il service worker serve a Edge headless i file della corsa precedente**, e una modifica non
+  si vede: si aggiunge una **query in coda** all'url, o si usa un profilo nuovo — che però da
+  freddo non dà tempo a IndexedDB di rispondere;
+- **in una scheda in secondo piano i timer sono strozzati**, e una suite da un secondo sembra
+  piantata per minuti;
+- **l'avvio dell'app chiude i pannelli** (`applicaVista()` → `chiudiPannelli()` quando il
+  database risponde): una prova che apre un pannello troppo presto sembra un difetto del
+  pannello.
+
+**Le trappole dell'ESP32 — seriale, CDC, download mode, flussante, librerie Arduino — stanno in
+`docs/pedale.md`.** In una riga l'una, per sapere che esistono: sulla **XIAO S3 i valori di
+`CDCOnBoot` sono rovesciati** rispetto al C3/C6 (l'fqbn giusto è `CDCOnBoot=default`);
+**aprire la porta seriale resetta il chip** e con RTS lo manda in download mode, da cui **si
+esce solo staccando il cavo**; **`Serial.print` si blocca se nessuno legge la porta**, e si
+risolve con `Serial.setTxTimeoutMs(0)` — ne segue che **misurare un tempo mentre si è collegati
+alla seriale può nascondere il difetto che si manifesta da scollegati**; **il flussante residuo
+fa scaldare i chip** e si pulisce dopo ogni sessione di saldatura, prima di ridare corrente —
+e quando un componente scalda **si guarda intorno al componente** prima di condannarlo; **le
+librerie Arduino non si installano in `Documenti`**, che Defender blocca con un errore che
+sembra un'altra cosa.
+
+**Il firmware lo compilo e lo carico io, senza chiederlo all'utente** (9 settembre 2026, dopo
+che gli avevo dato istruzioni per farlo a mano e me l'ha fatto notare). L'`arduino-cli` c'è, in
+pancia all'IDE, e U8g2 sta fuori dallo sketchbook, quindi il percorso delle librerie va passato
+a mano — e `upload` non accetta `--libraries`, si usa `compile -u`:
+
+```
+CLI='C:\Users\massi\AppData\Local\Programs\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe'
+& $CLI compile -u -p COM13 --fqbn "esp32:esp32:XIAO_ESP32S3:CDCOnBoot=default" `
+    --libraries C:\Users\massi\AppData\Local\claude-arduino-libs pedale\prova-espansore
+```
+
+`board list` dà la porta (COM13 il 9 settembre, ma cambia). Se il caricamento fallisce con la
+porta occupata, il primo sospetto è **il monitor seriale dell'IDE aperto**. All'utente resta
+solo di guardare il pedale.

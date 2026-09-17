@@ -111,3 +111,29 @@ nessuno:
 **L'azione da fare finché c'è tempo: mettere da parte una copia del
 `preset_backup.zip` che sta su Dropbox adesso**, e importarla. Da lì in poi la libreria è
 nostra — IndexedDB più il nostro export JSON — e Positive Grid non ci entra più.
+
+## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
+
+Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.
+
+## Il sync con Dropbox — in tre righe
+
+Funziona e l'ha verificato l'utente il 24 agosto 2026. Serve perché `file://` e `https://`
+sono due origini con due IndexedDB diversi. **Niente server**: OAuth **PKCE senza redirect**,
+col codice da incollare a mano — accettato da Dropbox, verificato. Backup alla **versione 2**:
+porta anche i banchi (per UUID, che si ritraducono all'arrivo) e le **lapidi** delle
+cancellazioni, che però **non vincono sempre** — un preset toccato dopo la data resta dov'è,
+perché fra perdere lavoro e tenersi un preset di troppo la regola della libreria è chiara.
+Il primo passo è dell'utente e va fatto una volta per apparecchio: registrare l'app su
+dropbox.com/developers e incollare l'app key nel pannello «Altro». Tutto il resto — le
+trappole del rientro, il verifier che si riusa, i 34 test contro un fetch finto — è in
+`docs/dropbox.md`.
+
+**Positive Grid dismette il backup su Dropbox nel 2027** (annunciato a settembre 2026, i
+preset vanno sul cloud loro). **Non tocca il nostro sync**, che è una app registrata
+dall'utente sul suo Dropbox e non c'entra con l'app ufficiale; tocca solo **da dove si
+prende `preset_backup.zip`**, che `spark-backup.js` legge comunque da un file locale —
+quindi una copia salvata oggi vale per sempre, e il codice non cambia. Il trasporto vero
+dei suoni resta **l'ampli**: «Leggi dall'ampli» e «Importa preset attuale» non dipendono
+dal cloud di nessuno. Il ragionamento in `docs/dropbox.md`, «Il backup dell'app
+ufficiale».

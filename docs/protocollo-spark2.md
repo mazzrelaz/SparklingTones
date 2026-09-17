@@ -493,3 +493,30 @@ loro funziona, la conclusione cade.
   accettate — hanno chiuso in una sessione un problema su cui si era tirato a indovinare per
   due.
 
+
+## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
+
+Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.
+
+**Gli effetti Hendrix (`JH.*`) non suonano finché l'app ufficiale non li sblocca**, e non c'è
+niente che possiamo farci: li abilita la **license key `0x0170`**, che l'app ufficiale firma in
+locale ed è **non forgiabile** (64 byte diversi a ogni sessione, cioè una firma con un nonce; e
+rigiocata l'ampli la rifiuta). Basta connettere l'app ufficiale una volta e **lo sblocco resta
+nell'ampli** anche dopo che si è disconnessa. **L'ampli non verifica l'acquisto, verifica una
+firma**: non ha account e non parla con internet, quindi fare il login dalla nostra app non
+servirebbe a niente — ed è misurato. Cavare la chiave dall'app ufficiale è protezione di
+contenuto a pagamento e **non si fa**. La cosa da ricordare è che **non è un difetto nostro**.
+Il ragionamento intero in `docs/protocollo-spark2.md` e `docs/looper.md`.
+
+**Nessuna autenticazione è richiesta per i comandi, ed è misurato**: con l'ampli sbloccato
+davvero, il conteggio del looper resta ignorato identico a quando la chiave non c'era. Gli
+Hendrix la vogliono, il protocollo no.
+
+**Looper**: si comanda con `0x0175` e un byte (`04` rec, `05` stop rec, `08` play, `09` stop,
+`0b` dub, `0c` stop dub, `0a` delete); si legge posizione (`0x0377`), bpm (`0x0363`) e
+impostazioni (`0x0376`). **La battuta di conteggio col click non si comanda**: `02` riceve l'ack
+e viene buttato via. Tutto ciò che è stato eliminato — canale, opcode, bonding, byte — sta in
+`docs/looper.md`, «Come si conclude»; la conclusione è che **il modo c'è ed è la chiave
+`0x0170`, e non è una porta che apriamo**. **Non aggiungere sonde sui byte.** L'unica cosa che
+resterebbe è **chiedere a Ignitron**, che manda COUNTIN senza nessuna chiave: se a loro
+funziona, la conclusione cade.

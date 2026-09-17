@@ -48,3 +48,17 @@ per sbaglio `mazzbackup@gmail.com`** e GitHub potrebbe non attribuirlo. Corregge
 dire riscrivere la radice e forzare il push sopra i commit di GitHub: l'utente ha deciso di
 lasciar stare.
 
+
+## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
+
+Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.
+
+## Il sito di presentazione — fuori da questo repo
+
+`sparklingtones.com` sta in `C:\Users\massi\sparklingtones-sito`, repo
+`mazzrelaz/sparklingtones-sito`: un solo `index.html`, nessuna dipendenza. **L'app non si
+sposta lì**, e la ragione è la trappola: un dominio custom su GitHub Pages vale per **l'intero
+repo**, quindi porterebbe via anche la PWA installata sul telefono e l'IndexedDB della
+libreria. **Prima di ogni push lì, `git pull --rebase`**: il file `CNAME` lo riscrive GitHub.
+DNS, la trappola del `www`, la `privacy.html` (già analizzata: niente script, niente banner) e
+i video ancora da girare stanno in **`docs/sito.md`**.
