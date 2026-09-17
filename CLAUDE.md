@@ -535,15 +535,15 @@ l'I²C. La legenda sta anche in cima alla pagina delle istruzioni, che è
 `https://claude.ai/code/artifact/b1b451ca-2804-41a6-810f-b2b4a92d7acd` (sorgente nello
 scratchpad, ma **si aggiorna passando quell'url**, o se ne crea una seconda).
 
-**Com'è fatta la basetta** (3 settembre 2026, dalla foto dell'utente — e sono cose che ho
-già dovuto richiedere una volta): basetta **7 × 9 cm**, i due moduli su una metà sola e
-**l'altra metà libera**, che è dove va tutto quello che manca. **Le due strisce di stagno sono
-le rotaie di alimentazione, 3V3 e GND**, saldate per prime: è l'ordine di montaggio deciso il
-30 agosto (`docs/pedale.md`), piste prima, misura dei 3,3 V poi, componenti per ultimi. **Il
-port A è già portato fuori** su un pettine femmina a 10 vie — `G, PA0…PA7, G` — quindi per i
-sette pulsanti **non c'è niente da saldare sulla basetta**: si infilano lì. I fili colorati che
-escono sono **del display**. Resta da fare **solo il port B**: le resistenze e il connettore
-dei LED.
+**Com'è fatta la basetta — rifatta dall'utente il 17 settembre 2026** (dalle sue due foto):
+millefori, XIAO in alto a sinistra con l'USB verso il bordo, espansore in alto a destra con
+un **condensatore** sull'alimentazione, le due **piste** nude in alto e in basso, i
+collegamenti sotto con ponticelli nudi e fili guainati. **Connettori JST-XH a 4 e 5 poli**
+già saldati al posto del vecchio pettine femmina (uno a 4 poli verticale dove arriva il
+**display**), e un **morsetto a vite verde per la cella**: rosso `+` e marrone `−`, che vanno
+alle piazzole `BAT` sotto la XIAO — polarità **misurata** (~4 V dal caricabatterie della
+XIAO anche senza cella). Prima accensione riuscita: XIAO sulla porta, display ed espansore
+rispondono (`0x20`). **Mancano i cavi crimpati di pulsanti e LED.**
 
 **I Dupont vanno via, al loro posto JST-XH crimpati** (deciso dall'utente il 15 settembre
 2026): i Dupont femmina sul pettine si allentano, e sono loro la causa della massa del LED 2
@@ -695,16 +695,21 @@ libreria. **Prima di ogni push lì, `git pull --rebase`**: il file `CNAME` lo ri
 DNS, la trappola del `www`, la `privacy.html` (già analizzata: niente script, niente banner) e
 i video ancora da girare stanno in **`docs/sito.md`**.
 
-## Dove si riprende — 15 settembre 2026
+## Dove si riprende — 17 settembre 2026
 
 **Sulla XIAO c'è caricato `prova-espansore`, non il firmware del pedale.** Quindi **se il
 pedale non parla con l'ampli, non è un guasto: è lo sketch sbagliato**, e si rimette
-`prova-ble`. **Il cablaggio è stato rifatto**, e la mappatura del 15 settembre ha trovato tutti
-e sette i pulsanti e sette LED su otto: **manca il verde del LED 2**, che è da riparare (la
-resistenza da 560 Ω sulla piastrina LED, il filo da `PB6`, il piedino del LED). Riparato
-quello, si rifà la mappatura, e poi il lavoro è **portare LED e tasti banco dentro
-`prova-ble`**: i quattro LED che dicono il banco, i due tasti che lo cambiano, il quinto
-footswitch che cambia metà senza toccare il suono. Le mappe sono più su, e vanno copiate di lì.
+`prova-ble`. **La basetta è stata rifatta coi JST** (vedi «Com'è fatta la basetta») e la
+prima accensione è andata; **l'utente crimpa i cavi di pulsanti e LED il 18 settembre**. Poi,
+in quest'ordine:
+
+1. la cella nel morsetto, a interruttore spento, e il dito sulla XIAO alla prima accensione;
+2. **la mappatura** — due pulsanti qualsiasi insieme per 1,5 s — e **la foto delle
+   tabelle**, da cui si riscrivono `LINEA_PULSANTE`, `LINEA_ROSSO`, `LINEA_VERDE` e la
+   tabella più su: **quelle scritte adesso sono del cablaggio vecchio**. Il verde del LED 2,
+   muto il 15 settembre, si riguarda lì: se ancora «niente», il guasto è sulla piastrina LED;
+3. **portare LED e tasti banco dentro `prova-ble`**: i quattro LED che dicono il banco, i due
+   tasti che lo cambiano, il quinto footswitch che cambia metà senza toccare il suono.
 
 
 Guscio `v73` (in `sw.js`; non fidarsi di questa riga se non torna). Suite verdi: protocol 139,
