@@ -513,6 +513,11 @@ Quello che fa la differenza col saldatore in mano:
   base della saldatura dopo un po' di pedalate;
 - **i due fili `BAT` si saldano alla XIAO prima di montarla** nella scatola: dopo quelle
   piazzole sono irraggiungibili.
+- **la polarità delle piazzole `BAT` si verifica senza cella e senza vederle** (misurato
+  sulla S3 il 17 settembre 2026): con l'USB attaccato **il caricabatterie della XIAO mette
+  ~4 V sulle piazzole anche a cella assente**, quindi basta il tester in volt fra il filo che
+  deve essere il `+` e la pista GND — positivo è giusto, negativo è invertito. Sulla basetta
+  rifatta i due fili arrivano a un **morsetto a vite verde**, rosso `+` e marrone `−`.
 
 #### Come si capisce che la ricarica è finita
 
