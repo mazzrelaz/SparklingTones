@@ -10,6 +10,18 @@ firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 
 **Corretto il 17 settembre 2026.** Tolta dal probe e dalle tre catture, e dalla cronologia di git riscritta.
 
+Come si è fatto: `git filter-branch --index-filter` su tutti i 311 commit di `main`,
+sostituendo i blob delle 7 versioni del probe che contenevano la chiave e delle tre catture
+con le loro versioni pulite; verificato che nessun commit contenga più i byte, che l'albero
+finale sia identico a prima, e poi push forzato (`6ef64ed` → `87de95e`). **Tutti i codici dei
+commit sono cambiati**: quelli citati in `docs/` prima del 17 settembre non esistono più.
+
+**Resta una cosa che solo GitHub può fare**: i commit vecchi non sono più raggiungibili da
+nessun ramo, ma **si aprono ancora conoscendone il codice** (`/commit/6ef64ed…` risponde
+200). Per toglierli serve una richiesta al supporto di GitHub («remove cached views» /
+garbage collection del repository). La copia completa di prima della riscrittura sta in un
+`.bundle` nello scratchpad della sessione, e contiene ancora la chiave.
+
 La chiave `0x0170` catturata dall'app ufficiale il 14 agosto sta in tre file pubblici:
 
 - `tools/looper-probe.html`: la costante `LICENSE_KEY` e i pulsanti ②, ③ e ④ che la

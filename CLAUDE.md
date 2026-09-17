@@ -420,6 +420,11 @@ ampli finto):
 10. **Togliere dal catalogo altri modelli che l'ampli non ha.**
 11. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
 
+**La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
+i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
+GitHub di togliere i commit vecchi dalla cache (`docs/sicurezza.md`, punto 1). **Mai più
+catture o strumenti con la chiave `0x0170` nel repository.**
+
 **Discussi e non aperti, da non rifare**: modalità MIDI (`docs/pedale.md`: Windows non sa fare
 BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT); preset creati con l'AI
 (`docs/diario.md`); il banco che si trasferisce in ~6 s (solo ottimizzazione); la scheda in
