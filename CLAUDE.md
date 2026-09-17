@@ -514,8 +514,9 @@ esclusione e **non è verificato** finché la mappatura non lo ritrova. Nel codi
 `pedale/prova-espansore`, e il firmware vero deve prenderle da lì. **Queste tabelle sono
 cambiate tre volte in una settimana**, perché l'utente rifà i cablaggi, quindi **non si
 ricostruiscono a mente e non si danno per buone**: **`prova-espansore` fa una mappatura guidata,
-tenendo premuto il tasto banco SX per 1,5 s** (non più all'accensione: un riavvio buttava via
-la prova a mano) — chiede di premere i sette pulsanti in ordine, poi accende le otto linee
+tenendo premuti due pulsanti qualsiasi insieme per 1,5 s** (non all'accensione, perché un riavvio
+buttava via la prova a mano; e non col solo banco SX, che dopo un ricablaggio può non stare più
+dove lo si cerca) — chiede di premere i sette pulsanti in ordine, poi accende le otto linee
 `PB` una alla volta e si risponde col footswitch del LED acceso (il quinto per «niente») e coi
 tasti banco per il colore — e alla fine mostra le tabelle **su una schermata che resta ferma
 finché non si preme qualcosa: si chiede la foto**. Dalla seriale non si leggono: aprire la

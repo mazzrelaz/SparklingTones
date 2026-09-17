@@ -34,7 +34,7 @@
  * ogni avvio, un riavvio qualunque — anche un puntale del tester che scivola
  * — buttava via la prova a mano e costringeva a rifare quindici risposte.
  *
- * 1. MAPPATURA, tenendo premuto il tasto banco sinistro per piu' di un
+ * 1. MAPPATURA, tenendo premuti DUE PULSANTI QUALSIASI insieme per un
  *    secondo e mezzo. Lo schermo chiede di premere i sette
  *    pulsanti uno alla volta, nell'ordine (footswitch 1..5 da sinistra, poi
  *    tasto banco sinistro e destro), e si segna su che linea arriva ognuno.
@@ -598,7 +598,7 @@ void setup() {
     Serial.print(F("configurazione: "));
     Serial.println((a && b && c && d) ? F("ok") : F("FALLITA"));
     aggiornaUscite(0xff);   // si parte gia' col banco acceso
-    Serial.println(F("prova a mano. Banco SX tenuto premuto: mappatura."));
+    Serial.println(F("prova a mano. Due pulsanti insieme per 1,5 s: mappatura."));
   }
 }
 
@@ -644,17 +644,28 @@ void loop() {
     if (dtScrittura > maxScrittura) maxScrittura = dtScrittura;
   }
 
-  // quinto footswitch tenuto premuto: parte la sequenza
-  if (indirizzo != 0 && premuto(ingressiPrec, FS5) &&
-      (millis() - inizioPressione[FS5]) > 1200) {
-    sequenza();
-    return;
+  /* Due pulsanti qualsiasi tenuti insieme: parte la mappatura. Si guardano le
+   * linee grezze e non la mappa, perche' la mappatura serve proprio quando la
+   * mappa e' sbagliata: col tasto banco SX, dopo un cablaggio rifatto, il
+   * tasto poteva non stare piu' sulla linea dove lo si cercava, e la
+   * mappatura non partiva mai. */
+  static uint32_t dueInsiemeDa = 0;
+  const int giu = __builtin_popcount((uint8_t)~ingressiPrec);
+  if (indirizzo != 0 && giu >= 2) {
+    if (dueInsiemeDa == 0) dueInsiemeDa = millis() | 1;
+    else if (millis() - dueInsiemeDa > 1500) {
+      dueInsiemeDa = 0;
+      mappatura();
+      return;
+    }
+  } else {
+    dueInsiemeDa = 0;
   }
 
-  // tasto banco sinistro tenuto premuto: parte la mappatura
-  if (indirizzo != 0 && premuto(ingressiPrec, BANCO_SX) &&
-      (millis() - inizioPressione[BANCO_SX]) > 1500) {
-    mappatura();
+  // il solo quinto footswitch tenuto premuto: parte la sequenza
+  if (indirizzo != 0 && giu == 1 && premuto(ingressiPrec, FS5) &&
+      (millis() - inizioPressione[FS5]) > 1200) {
+    sequenza();
     return;
   }
 
