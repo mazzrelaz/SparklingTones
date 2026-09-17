@@ -4,9 +4,11 @@ Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync D
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
 
-## Da correggere
+## Da correggere — restano il 2 e il 3
 
 ### 1. La license key dell'app ufficiale è pubblicata — medio, legale
+
+**Corretto il 17 settembre 2026.** Tolta dal probe e dalle tre catture, e dalla cronologia di git riscritta.
 
 La chiave `0x0170` catturata dall'app ufficiale il 14 agosto sta in tre file pubblici:
 
@@ -50,6 +52,8 @@ per quelli malformati.
 
 ### 4. Un backup importato da file può cancellare preset — basso-medio, lavoro perso
 
+**Corretto il 17 settembre 2026.** `importBackup(backup, { lapidi: false })` ignora le cancellazioni del file, e «Importa un file» chiede conferma prima; tre test in `store-test`.
+
 «Importa un file» con un nostro backup chiama `importBackup` **senza chiedere conferma**, e
 applica le **lapidi** del file. I preset di fabbrica hanno lo stesso UUID per tutti: il
 backup di un amico che ne ha cancellato uno **cancella anche il tuo**, se non l'hai toccato
@@ -61,6 +65,8 @@ come c'è già per i preset dell'app ufficiale.
 
 ### 5. Un preset con un modello inesistente passa il controllo — basso, ampli
 
+**Corretto il 17 settembre 2026.** `controllaPreset(preset, { modelli })` dà errore sui nomi fuori elenco, e `mandaPreset` gli passa `SparkEffetti.MODELLI`; quattro test in `protocol-test`.
+
 `Spark.controllaPreset` verifica tipi e intervalli, ma non che i modelli esistano. Un file
 importato con un nome che l'ampli non conosce parte, e **può piantare l'ampli**: è già
 successo con `TrebleBooster`, e si recupera solo staccando la corrente.
@@ -69,6 +75,8 @@ successo con `TrebleBooster`, e si recupera solo staccando la corrente.
 verificato tutto, quindi non blocca preset veri.
 
 ### 6. «Scollega Dropbox» non revoca il token — basso
+
+**Corretto il 17 settembre 2026.** `scollega()` chiama `auth/token/revoke` e torna se la revoca è arrivata; il log lo dice. Quattro test in `dropbox-test`.
 
 `scollega()` dimentica il refresh token in locale, ma lassù resta valido. Se l'apparecchio
 fosse compromesso prima dello scollegamento, il token continuerebbe a funzionare finché non

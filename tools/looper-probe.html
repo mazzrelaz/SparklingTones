@@ -417,12 +417,10 @@ function scriviBpm(bpm) {
    10, che stanno subito oltre la fine dell'elenco. */
 const NON_ELENCATI = [0x01, 0x03, 0x0f, 0x10];
 
-/* La license key `0x0170` catturata dallo snoop log dell'app ufficiale il 14 agosto
-   2026: 64 byte veri, scritti come 64 interi msgpack (da cui i prefissi `cc` sopra
-   il 127), per 89 byte di payload. **Il payload cambia da sessione a sessione**, quindi
-   rigiocarlo tale e quale può benissimo non bastare — ma costa un pulsante scoprirlo. */
-const LICENSE_KEY = [
-];
+/* La license key `0x0170` dell'app ufficiale è stata tolta dal repository il 17
+   settembre 2026, anche dalla cronologia: è materiale della protezione di un prodotto a
+   pagamento, e rigiocata l'ampli la rifiuta comunque (`0x0470` con `fe`). Le prove che
+   la mandavano non ci sono più; il loro esito sta in `docs/looper.md`. */
 
 /* Le tre interrogazioni che l'app fa **subito prima** del conteggio, nell'ordine e con
    le distanze che ha nel log: 0x0278, poi 0x0275 e 0x0276 quasi insieme, e 2,3 s dopo
@@ -441,7 +439,6 @@ function interrogaLooper(poi) {
    pezzo del contesto manchi, si rigioca tutto e poi si toglie finché non si rompe. */
 const AVVIO_APP = [
   { t:     0, cmd:0x02, sub:0x2f, d:[] },
-  { t:    60, cmd:0x01, sub:0x70, d:LICENSE_KEY },
   { t:   221, cmd:0x02, sub:0x2f, d:[] },
   { t:   310, cmd:0x02, sub:0x23, d:[] },
   { t:   405, cmd:0x02, sub:0x11, d:[] },
@@ -466,9 +463,9 @@ const AVVIO_APP = [
   { t: 11749, cmd:0x01, sub:0x75, d:[0x02] },
 ];
 
-function rigiocaAvvio(conChiave) {
-  const passi = AVVIO_APP.filter(p => conChiave || p.sub !== 0x70);
-  riga('mk', `———— rigioco l'avvio dell'app${conChiave ? '' : ' (senza license key)'}: ` +
+function rigiocaAvvio() {
+  const passi = AVVIO_APP;
+  riga('mk', `———— rigioco l'avvio dell'app (senza license key): ` +
              `${passi.length} messaggi in ${(AVVIO_APP[AVVIO_APP.length-1].t/1000).toFixed(1)}s ————`);
   for (const p of passi) {
     setTimeout(() => {
@@ -543,18 +540,10 @@ const PROVE = [
     f: () => inviaComeLApp(0x01, 0x75, [0x02], 'COUNTIN') },
   { n: '⑦ REC come lo manda l\'app', d: 'idem con 04, per confronto',
     f: () => inviaComeLApp(0x01, 0x75, [0x04], 'REC') },
-  { n: '④ rigioca l\'avvio dell\'app', d: 'tutti i 24 messaggi, con la chiave — 12 s',
-    f: () => rigiocaAvvio(true) },
-  { n: '⑤ rigioca l\'avvio senza la chiave', d: 'uguale ma senza 0x0170, che tanto e\' rifiutata',
-    f: () => rigiocaAvvio(false) },
+  { n: '⑤ rigioca l\'avvio senza la chiave', d: 'i messaggi dell\'avvio dell\'app, senza 0x0170',
+    f: () => rigiocaAvvio() },
   { n: '① interroga ▸ poi COUNTIN', d: '0x0278 0x0275 0x0276, poi 0x0175 02',
     f: () => interrogaLooper(() => invia(0x01, 0x75, [0x02], 'COUNTIN')) },
-  { n: '② license key ▸ interroga ▸ COUNTIN', d: '0x0170 spezzata in write da 20, poi come sopra',
-    f: () => { inviaSpezzato(0x01, 0x70, LICENSE_KEY, 'license key');
-               setTimeout(() => interrogaLooper(
-                 () => invia(0x01, 0x75, [0x02], 'COUNTIN')), 1200); } },
-  { n: '③ solo la license key', d: '0x0170 da sola — risponde 0x0470?',
-    f: () => inviaSpezzato(0x01, 0x70, LICENSE_KEY, 'license key') },
   ...NON_ELENCATI.map(v => ({
     n: `valore ${hex(v)}`, d: 'non è nell\'elenco di Ignitron',
     f: () => invia(0x01, 0x75, [v], `sconosciuto ${hex(v)}`),

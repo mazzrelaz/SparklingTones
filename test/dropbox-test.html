@@ -255,11 +255,28 @@ const corpoDi = chiamata => {
   /* ------------------------------------------------------------------ */
   group('scollegarsi');
 
-  const via = clientCon([]);
-  await via.client.scollega();
-  check('scollegarsi dimentica tutto, senza chiamare nessuno',
-        [via.client.autorizzato(), via.client.refresh, via.finto.chiamate.length],
-        [false, null, 0]);
+  const via = clientCon([RINNOVO, { stato: 200, corpo: 'null' }]);
+  const revocato = await via.client.scollega();
+  check('scollegarsi revoca l\'autorizzazione su Dropbox',
+        [revocato, via.finto.chiamate[1].url],
+        [true, 'https://api.dropboxapi.com/2/auth/token/revoke']);
+  check('col token di accesso, non col refresh token in chiaro',
+        via.finto.chiamate[1].opzioni.headers.Authorization, 'Bearer tok-1');
+  check('e poi dimentica tutto',
+        [via.client.autorizzato(), via.client.refresh, via.client.token],
+        [false, null, null]);
+
+  const senzaRete = new DropboxSync.Client({
+    appKey: 'chiave123', refreshToken: 'refresh-abc',
+    fetch: async () => { throw new TypeError('Failed to fetch'); },
+  });
+  check('senza rete si scollega lo stesso, e dice che la revoca non è arrivata',
+        [await senzaRete.scollega(), senzaRete.autorizzato()], [false, false]);
+
+  const finto = fetchFinto([]);
+  const scollegato = new DropboxSync.Client({ appKey: 'chiave123', fetch: finto });
+  await scollegato.scollega();
+  check('se non era collegato non chiama nessuno', finto.chiamate.length, 0);
 
   /* ------------------------------------------------------------------ */
   const s = document.getElementById('summary');

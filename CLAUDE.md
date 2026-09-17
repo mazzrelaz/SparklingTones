@@ -22,7 +22,7 @@ danni o di ripercorrere una strada chiusa**, più il lavoro in corso. Il ragiona
 | `docs/HANDOFF-2026-08-10.md` | ricerca originale: comandi, tipi dati, catture |
 | `docs/diario.md` | com'è andata una sessione passata; le versioni lunghe di questo file |
 | `docs/sito.md` | si tocca `sparklingtones.com` |
-| `docs/sicurezza.md` | audit del 17 settembre 2026: sei punti da correggere, e cosa è già a posto |
+| `docs/sicurezza.md` | audit del 17 settembre 2026: restano i punti 2 e 3, sul pedale |
 
 **Si sposta, non si butta**: ogni sfoltita copia parola per parola in `docs/` ciò che accorcia
 (l'ultima il 17 settembre 2026, da 52 a 25 KB). **Si rigonfia in due settimane**: si rimisura
@@ -47,7 +47,7 @@ pedale/prova-espansore/           pulsanti e LED: mappatura guidata e prova a ma
 pedale/prova-usb|display|midi/    altri sketch di prova
 pcb/                              scheda in KiCad, ACCANTONATA: non si tocca e non si propone
 tools/                            simulatore, generatori, sonde, serve.ps1, script scatola
-test/*.html                       protocol 139, transport 60, store 136, backup 41, dropbox 34
+test/*.html                       protocol 143, transport 60, store 139, backup 41, dropbox 38
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
 ```
 
@@ -73,7 +73,12 @@ libreria non passa dall'una all'altra, si esporta in JSON.
   il percorso intero dello scratchpad.
 - **Il push dalla mia shell** vuole `GIT_TERMINAL_PROMPT=1 GCM_INTERACTIVE=true
   GCM_GUI_PROMPT=true`, che aprono la finestra sul desktop.
-- **Python non c'è** (l'alias apre lo Store).
+- **Python non c'è** (l'alias apre lo Store); **Node sì** (v24): per le modifiche
+  ripetitive si scrive uno script nello scratchpad, che deve **conservare le CRLF** dei file.
+- **`sed -i` di Git Bash converte le CRLF in LF**: con `core.autocrlf=true` il diff resta
+  pulito, ma lo si controlla.
+- **Per le suite su `localhost`** c'è `spark-locale` in `.claude/launch.json` (il riquadro
+  del browser); il risultato si legge da `#summary` e dai `.fail`.
 
 **Dopo ogni modifica a `src/`, le suite in `test/` devono restare verdi.** Girano con Edge
 headless (poi si cerca `id="summary"`):
@@ -141,6 +146,8 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
   le lapidi.
 - **Un preset nuovo non parte mai dal nulla** (Duplica — che cambia UUID —, Importa attuale,
   Importa file): un modello inesistente ha già piantato l'ampli (`TrebleBooster`).
+- **Un backup importato da file non applica le lapidi** (`importBackup(…, { lapidi: false })`)
+  e chiede conferma: le lapidi valgono solo per il sync Dropbox.
 - **«Importa un file» riconosce dal contenuto** (`PK`, campo `presets`, oggetto con `sigpath`):
   l'`<input>` non ha `accept`. Senza `meta.id` l'UUID lo diamo noi.
 - **Il bollo «JH»** (effetto Hendrix in catena) sta in **quattro posti, e quattro restano**:
@@ -231,6 +238,8 @@ intero, `0x0176` bpm, `0x0175` looper.
 - **`0x0127` non salva sullo Spark 2.** Un parametro di un effetto spento non suona.
 - **`0x0106` vuole il nome del modello di adesso**, riletto: se sbagliato, ogni cambio
   successivo fallisce per sempre.
+- **Un modello che l'ampli non ha lo pianta**: `mandaPreset` chiama `controllaPreset` con
+  `{ modelli: SparkEffetti.MODELLI.flat() }`, e un nome fuori elenco non parte.
 - **L'ampli si può piantare** (si stacca la corrente). `rxTotali` = 0 → ampli muto o
   connessione morta; > 0 → siamo noi a scartare.
 
@@ -401,7 +410,7 @@ Sul pedale, in quest'ordine:
    **l'autonomia**, e il **looper col conteggio fatto in casa** (il pedale conta quattro tempi
    e 40 ms prima dell'uno manda `0x0175` `04`).
 
-Sull'app (guscio `v73` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v74` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 6. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
@@ -410,8 +419,6 @@ ampli finto):
 9. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
 10. **Togliere dal catalogo altri modelli che l'ampli non ha.**
 11. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
-12. **I punti 1, 4, 5 e 6 di `docs/sicurezza.md`**: la license key pubblicata, le lapidi
-    dei backup importati da file, i modelli inesistenti, la revoca del token Dropbox.
 
 **Discussi e non aperti, da non rifare**: modalità MIDI (`docs/pedale.md`: Windows non sa fare
 BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT); preset creati con l'AI

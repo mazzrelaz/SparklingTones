@@ -589,6 +589,23 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('e se il preset torna, la lapide sparisce',
         Object.keys(await qua.getSetting('cancellati', {})), ['uuid-s2']);
 
+  // Un file importato a mano non è un altro apparecchio dello stesso utente:
+  // i preset di fabbrica hanno lo stesso UUID per tutti, e il backup di un
+  // amico non deve cancellare i tuoi.
+  // Un preset tutto suo, senza storia di lapidi, e un backup che lo dà per
+  // cancellato dopo l'ultima modifica.
+  await la.add(makePreset('uuid-s3', 'Terzo', ['Twin']));
+  const altrui = { format: 'spark-controller-library', version: 2, presets: [],
+                   cancellati: { 'uuid-s3': Date.now() + 60000 } };
+  await la.importBackup(altrui, { lapidi: false });
+  check('un backup importato da file non cancella niente con le sue lapidi',
+        (await la.all()).map(r => r.name).includes('Terzo'), true);
+  check('e le sue lapidi non entrano fra quelle di qui',
+        'uuid-s3' in (await la.getSetting('cancellati', {})), false);
+  await la.importBackup(altrui);
+  check('mentre col sync la stessa lapide cancella',
+        (await la.all()).map(r => r.name).includes('Terzo'), false);
+
   qua.close(); la.close();
   await PresetStore.deleteDatabase(DB_QUA);
   await PresetStore.deleteDatabase(DB_LA);

@@ -2734,7 +2734,8 @@ async function mandaPreset(record, slot) {
   // Prima di mandare: l'ampli conferma i chunk anche quando il payload è
   // malformato, e poi lo ignora. Meglio accorgersene qui, dove si può dire
   // cosa non va, che sull'ampli dove il sintomo è solo silenzio.
-  const controllo = Spark.controllaPreset(record);
+  // Con l'elenco dei modelli: un nome che l'ampli non ha lo pianta davvero.
+  const controllo = Spark.controllaPreset(record, { modelli: SparkEffetti.MODELLI.flat() });
   if (controllo.errori.length) {
     logLine(`«${record.name}» non è mandabile così com'è — ` +
             controllo.errori.slice(0, 3).join('; ') +
@@ -4904,7 +4905,15 @@ async function importaJson(file, bytes) {
   }
 
   if (json && Array.isArray(json.presets)) {
-    const quanti = await store.importBackup(json);
+    // Un file non è un altro apparecchio: le sue cancellazioni non valgono
+    // (lapidi: false), e prima di toccare la libreria si chiede.
+    const n = json.presets.length;
+    if (!await conferma('importare un backup',
+      `Mettere in libreria <strong>${n} preset</strong> da ` +
+      `<strong>${testoConNome(file.name)}</strong>? I preset che hai già prendono il ` +
+      'suono <strong>e anche tag, note e ordine</strong> del file. Non viene cancellato niente.',
+      { ok: n === 1 ? 'Importa il preset' : `Importa ${n} preset` })) return;
+    const quanti = await store.importBackup(json, { lapidi: false });
     logLine(`importati ${quanti} preset da ${file.name}`);
     return;
   }
@@ -5136,9 +5145,12 @@ $('btnDropboxVia').addEventListener('click', async () => {
   if (!await conferma('scollegare Dropbox',
     'Scollegare Dropbox? La libreria qui e quella lassù restano dove sono: ' +
     'smettono solo di parlarsi.', { ok: 'Scollega' })) return;
-  await dropbox.scollega();
+  const revocato = await dropbox.scollega();
   disegnaDropbox();
-  logLine('Dropbox scollegato');
+  logLine(revocato
+    ? 'Dropbox scollegato, e l\'autorizzazione è revocata anche lassù'
+    : 'Dropbox scollegato qui, ma lassù non ho potuto revocare l\'autorizzazione: ' +
+      'se vuoi, toglila da dropbox.com, nelle app collegate');
 });
 
 /**

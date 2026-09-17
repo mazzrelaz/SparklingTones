@@ -602,9 +602,18 @@ window.Spark = (function () {
    * Gli `errori` impediscono la codifica o producono byte senza senso; gli
    * `avvisi` sono cose strane ma che l'ampli potrebbe digerire.
    *
+   * `opzioni.modelli`, se c'è, è l'elenco dei modelli che l'ampli conosce: un
+   * effetto con un nome fuori elenco è un **errore**, perché chiedere all'ampli
+   * un modello che non ha è l'unica cosa nota che lo pianta davvero
+   * (`TrebleBooster`, e si recupera solo staccando la corrente). Un file
+   * importato da altrove può portarne uno. Il modulo resta puro: l'elenco lo
+   * passa chi chiama, da `SparkEffetti.MODELLI`.
+   *
+   * @param {{modelli?: Iterable<string>}} [opzioni]
    * @returns {{errori: string[], avvisi: string[]}}
    */
-  function controllaPreset(preset) {
+  function controllaPreset(preset, opzioni) {
+    const noti = opzioni && opzioni.modelli ? new Set(opzioni.modelli) : null;
     const errori = [], avvisi = [];
     const numero = v => typeof v === 'number' && Number.isFinite(v);
 
@@ -631,6 +640,9 @@ window.Spark = (function () {
       const dove = `effetto ${i + 1}`;
       if (!effetto || typeof effetto !== 'object') { errori.push(`${dove}: non è un effetto`); return; }
       if (typeof effetto.name !== 'string' || !effetto.name) errori.push(`${dove}: manca il nome`);
+      else if (noti && !noti.has(effetto.name)) {
+        errori.push(`${dove}: il modello «${effetto.name}» non è fra quelli che l'ampli conosce`);
+      }
       if (!Array.isArray(effetto.params)) { errori.push(`${dove}: mancano i parametri`); return; }
       if (effetto.params.length > 15) {
         errori.push(`${dove}: ${effetto.params.length} parametri, oltre i 15 di un fixarray`);

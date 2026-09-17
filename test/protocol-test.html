@@ -305,6 +305,19 @@ check('un valore fuori da 0..1 è solo un avviso: l\'ampli potrebbe digerirlo',
       [Spark.controllaPreset(fuoriScala).errori.length,
        Spark.controllaPreset(fuoriScala).avvisi.length], [0, 1]);
 
+const noti = preset.effects.map(e => e.name);
+check('con l\'elenco dei modelli, un preset vero passa lo stesso',
+      Spark.controllaPreset(preset, { modelli: noti }).errori, []);
+
+const inventato = copia(preset);
+inventato.effects[2].name = 'TrebleBooster';
+check('un modello che l\'ampli non conosce è un errore: è quello che lo pianta',
+      Spark.controllaPreset(inventato, { modelli: noti }).errori.length, 1);
+check('e l\'errore dice il nome del modello',
+      Spark.controllaPreset(inventato, { modelli: noti }).errori[0].includes('TrebleBooster'), true);
+check('senza elenco il nome non si controlla: il modulo resta puro',
+      Spark.controllaPreset(inventato).errori, []);
+
 const troppiEffetti = copia(preset);
 troppiEffetti.effects = new Array(16).fill(0).map(() => copia(preset.effects[0]));
 check('oltre i 15 effetti il fixarray sconfina in un altro tipo',

@@ -163,12 +163,33 @@ window.DropboxSync = (function () {
       return this.refresh;
     },
 
-    /** Dimentica l'autorizzazione, senza toccare niente su Dropbox. */
+    /**
+     * Revoca l'autorizzazione su Dropbox, poi la dimentica qui.
+     *
+     * Dimenticarla soltanto non basta: il refresh token lassù resterebbe
+     * valido, e chi l'avesse copiato continuerebbe a entrare finché l'utente
+     * non lo revoca a mano da dropbox.com. `auth/token/revoke` spegne il token
+     * di accesso **e il refresh token da cui viene**.
+     *
+     * Se Dropbox non si raggiunge — senza rete, o token già revocato — lo
+     * scollegamento avviene lo stesso: non deve mai restare a metà. Torna
+     * `true` se la revoca è arrivata, `false` se è stata solo dimenticata.
+     */
     async scollega() {
+      let revocato = false;
+      if (this.refresh) {
+        try {
+          await this._chiama(RPC + 'auth/token/revoke', {});
+          revocato = true;
+        } catch (err) {
+          revocato = false;
+        }
+      }
       this.refresh = null;
       this.token   = null;
       this.scadeA  = 0;
       await this.salvaRefresh(null);
+      return revocato;
     },
 
     /** Manda su l'istantanea della libreria. Sovrascrive quella di prima. */

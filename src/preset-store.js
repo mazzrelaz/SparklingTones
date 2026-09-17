@@ -924,9 +924,16 @@ window.PresetStore = (function () {
      * riletto dall'ampli, che ai fini della data è lo stesso — resta dov'è:
      * fra perdere lavoro e tenersi un preset di troppo, la regola della
      * libreria è chiara.
+     *
+     * Con `lapidi: false` le cancellazioni del backup **non valgono affatto**:
+     * è il caso di un file importato a mano, che non è un altro apparecchio
+     * dello stesso utente. I preset di fabbrica hanno lo stesso UUID per tutti,
+     * e il backup di un amico che ne ha cancellato uno non deve cancellare il
+     * tuo. Le lapidi servono solo al sync fra i propri apparecchi.
      */
     async importBackup(backup, options) {
       const opts = options || {};
+      const conLapidi = opts.lapidi !== false;
       if (!backup || backup.format !== 'spark-controller-library') {
         throw new Error('il file non è un backup della libreria');
       }
@@ -958,7 +965,7 @@ window.PresetStore = (function () {
       // Fondendole, la cancellazione continua a viaggiare verso un terzo
       // dispositivo che non l'ha ancora vista.
       const tombe  = opts.replace ? {} : await this.getSetting('cancellati', {});
-      const arrivo = (backup.cancellati && typeof backup.cancellati === 'object')
+      const arrivo = (conLapidi && backup.cancellati && typeof backup.cancellati === 'object')
         ? backup.cancellati : {};
       for (const [uuid, quando] of Object.entries(arrivo)) {
         if (tombe[uuid] === undefined || quando < tombe[uuid]) tombe[uuid] = quando;
@@ -967,7 +974,7 @@ window.PresetStore = (function () {
       // Si cancella prima di importare: se lo stesso backup porta la lapide e
       // un preset più recente, deve vincere il preset, e lo fa perché il
       // ciclo qui sotto lo riaggiunge.
-      if (!opts.replace) {
+      if (!opts.replace && conLapidi) {
         for (const [uuid, quando] of Object.entries(tombe)) {
           const locale = await this.byUuid(uuid);
           if (locale && !((locale.updatedAt || 0) > quando)) {
@@ -984,7 +991,7 @@ window.PresetStore = (function () {
         // Un preset cancellato altrove non risuscita, a meno che la copia che
         // arriva sia più recente della cancellazione.
         const cancellato = copy.uuid ? tombe[copy.uuid] : undefined;
-        if (!opts.replace && cancellato !== undefined &&
+        if (!opts.replace && conLapidi && cancellato !== undefined &&
             !((copy.updatedAt || 0) > cancellato)) continue;
         if (copy.uuid) delete tombe[copy.uuid];   // è tornato: la lapide non serve più
 
