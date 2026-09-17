@@ -22,6 +22,7 @@ danni o di ripercorrere una strada chiusa**, più il lavoro in corso. Il ragiona
 | `docs/HANDOFF-2026-08-10.md` | ricerca originale: comandi, tipi dati, catture |
 | `docs/diario.md` | com'è andata una sessione passata; le versioni lunghe di questo file |
 | `docs/sito.md` | si tocca `sparklingtones.com` |
+| `docs/sicurezza.md` | audit del 17 settembre 2026: sei punti da correggere, e cosa è già a posto |
 
 **Si sposta, non si butta**: ogni sfoltita copia parola per parola in `docs/` ciò che accorcia
 (l'ultima il 17 settembre 2026, da 52 a 25 KB). **Si rigonfia in due settimane**: si rimisura
@@ -270,7 +271,9 @@ suona.
 **Le regole che non si toccano:**
 
 - **Mai gli slot hardware**: ogni cambio è `0x0101` su `0x7f` + `0x0138` con `0x7f`. Due soli
-  comandi, nessun parser; il LED dell'ampli lampeggia sempre, ed è giusto.
+  comandi, nessun parser; il LED dell'ampli lampeggia sempre, ed è giusto. **Ma oggi è vero
+  solo se i frame li ha fatti l'app**: il firmware li spedisce come arrivano, e il ponte BLE
+  accetta chiunque (`docs/sicurezza.md`, punti 2 e 3).
 - **L'app preserializza**: il firmware patcha solo il seq (indice 2; il checksum non lo copre).
 - **Un padrone alla volta**: con l'ampli connesso al pedale il browser non lo trova. **Se un
   footswitch non fa niente, primo sospetto: l'app ancora collegata al pedale.**
@@ -391,7 +394,9 @@ Sul pedale, in quest'ordine:
 2. **La cella nel morsetto**, a interruttore spento, dito sulla XIAO alla prima accensione.
 3. **La mappatura** e la foto delle tabelle → si riscrivono le tre tabelle. Lì si riguarda il
    **verde del LED 2**, muto il 15 settembre: se ancora «niente», il guasto è sulla piastrina.
-4. **LED e tasti banco dentro `prova-ble`**, con la metà sul quinto footswitch.
+4. **LED e tasti banco dentro `prova-ble`**, con la metà sul quinto footswitch — e insieme
+   i punti 2 e 3 di `docs/sicurezza.md`: accoppiamento con consenso, e solo frame `0x0101`
+   verso `0x7f`.
 5. Poi: il banco che non si ricorda al riavvio, il trasferimento di un banco sull'S3,
    **l'autonomia**, e il **looper col conteggio fatto in casa** (il pedale conta quattro tempi
    e 40 ms prima dell'uno manda `0x0175` `04`).
@@ -405,6 +410,8 @@ ampli finto):
 9. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
 10. **Togliere dal catalogo altri modelli che l'ampli non ha.**
 11. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
+12. **I punti 1, 4, 5 e 6 di `docs/sicurezza.md`**: la license key pubblicata, le lapidi
+    dei backup importati da file, i modelli inesistenti, la revoca del token Dropbox.
 
 **Discussi e non aperti, da non rifare**: modalità MIDI (`docs/pedale.md`: Windows non sa fare
 BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT); preset creati con l'AI
