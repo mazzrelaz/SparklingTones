@@ -94,16 +94,14 @@ static const uint8_t ASSENTE = 255;   // una linea che non si e' trovata
  * tasto banco destro. Il valore e' la linea GPA.
  * LED: per ogni LED da sinistra, la linea PB del rosso e quella del verde.
  *
- * Trovati con la mappatura il 15 settembre 2026, dopo il cablaggio rifatto.
- * Unica eccezione: il verde del LED 2 non si e' acceso, perche' quel ramo e'
- * interrotto. PB6 e' l'unica linea rimasta libera e ci stava fino al 13
- * settembre, quindi e' scritto 6 — ma **non e' verificato** finche' il ramo
- * non e' riparato e la mappatura non lo trova. GPA2 resta libero. */
+ * Trovati con la mappatura il 18 settembre 2026, sulla basetta rifatta coi
+ * connettori JST: tutti e sette i pulsanti e tutti e otto i LED, verde del
+ * LED 2 compreso. GPA2 resta libero. */
 static const uint8_t N_PULSANTI = 7;
 static const uint8_t FS5 = 4, BANCO_SX = 5, BANCO_DX = 6;
-static uint8_t LINEA_PULSANTE[N_PULSANTI] = {4, 5, 6, 3, 7, 0, 1};
-static uint8_t LINEA_ROSSO[4] = {5, 7, 2, 0};
-static uint8_t LINEA_VERDE[4] = {4, 6, 3, 1};
+static uint8_t LINEA_PULSANTE[N_PULSANTI] = {4, 5, 6, 3, 7, 1, 0};
+static uint8_t LINEA_ROSSO[4] = {5, 7, 1, 3};
+static uint8_t LINEA_VERDE[4] = {4, 6, 0, 2};
 
 static const char *const NOME_PULSANTE[N_PULSANTI] = {
   "FOOTSWITCH 1", "FOOTSWITCH 2", "FOOTSWITCH 3", "FOOTSWITCH 4",

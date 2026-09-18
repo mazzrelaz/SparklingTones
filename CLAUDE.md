@@ -316,8 +316,14 @@ linea `PB` con la risposta col footswitch del LED acceso, il quinto per «niente
 coi tasti banco); **la schermata finale resta ferma: si chiede la foto**. Dalla seriale no: la
 mappa sta in RAM e aprire la porta riavvia. **«Niente» su una linea = filo staccato.** Le
 tabelle vanno in `LINEA_PULSANTE`, `LINEA_ROSSO`, `LINEA_VERDE` di `prova-espansore`, e il
-firmware vero le prende da lì. **Quelle scritte adesso sono del cablaggio del 15 settembre,
-che non c'è più.**
+firmware vero le prende da lì. **Mappa del 18 settembre 2026** (basetta coi JST, tutto verificato):
+
+| pulsante | FS1 | FS2 | FS3 | FS4 | FS5 | banco SX | banco DX |
+|---|---|---|---|---|---|---|---|
+| linea | `GPA4` | `GPA5` | `GPA6` | `GPA3` | `GPA7` | `GPA1` | `GPA0` |
+
+**LED 1 = `PB5` rosso / `PB4` verde, LED 2 = `PB7`/`PB6`, LED 3 = `PB1`/`PB0`, LED 4 =
+`PB3`/`PB2`.** `GPA2` libero.
 
 **La basetta** (rifatta dall'utente il 17 settembre 2026): millefori, XIAO in alto a sinistra,
 espansore in alto a destra con un condensatore, piste nude in alto e in basso. **Connettori
@@ -392,18 +398,17 @@ il suo backup su Dropbox nel 2027**: non tocca il nostro sync, solo da dove si p
 l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pull --rebase`**
 (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 17 settembre 2026
+## Dove si riprende — 18 settembre 2026
 
 **Sulla XIAO c'è `prova-espansore`, non il firmware del pedale**: se il pedale non parla con
 l'ampli è lo sketch, e si rimette `prova-ble`.
 
 Sul pedale, in quest'ordine:
 
-1. **L'utente crimpa i cavi JST di pulsanti e LED** (18 settembre).
-2. **La cella nel morsetto**, a interruttore spento, dito sulla XIAO alla prima accensione.
-3. **La mappatura** e la foto delle tabelle → si riscrivono le tre tabelle. Lì si riguarda il
-   **verde del LED 2**, muto il 15 settembre: se ancora «niente», il guasto è sulla piastrina.
-4. **LED e tasti banco dentro `prova-ble`**, con la metà sul quinto footswitch — e insieme
+1. **Cablaggio JST fatto e mappato il 18 settembre**: sette pulsanti e otto LED, verde del
+   LED 2 compreso (il guasto era nel cablaggio vecchio). Resta **la cella nel morsetto**, a
+   interruttore spento, dito sulla XIAO alla prima accensione.
+2. **LED e tasti banco dentro `prova-ble`**, con la metà sul quinto footswitch — e insieme
    i punti 2 e 3 di `docs/sicurezza.md`: accoppiamento con consenso, e solo frame `0x0101`
    verso `0x7f`.
 5. Poi: il banco che non si ricorda al riavvio, il trasferimento di un banco sull'S3,
@@ -413,12 +418,12 @@ Sul pedale, in quest'ordine:
 Sull'app (guscio `v74` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
 ampli finto):
 
-6. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
-7. **Editor con l'ampli acceso e sul telefono**.
-8. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
-9. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
-10. **Togliere dal catalogo altri modelli che l'ampli non ha.**
-11. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
+3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
+4. **Editor con l'ampli acceso e sul telefono**.
+5. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
+6. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
+7. **Togliere dal catalogo altri modelli che l'ampli non ha.**
+8. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
 
 **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
 i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
