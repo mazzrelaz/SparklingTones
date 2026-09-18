@@ -411,19 +411,19 @@ Sul pedale, in quest'ordine:
 2. **LED e tasti banco dentro `prova-ble`**, con la metà sul quinto footswitch — e insieme
    i punti 2 e 3 di `docs/sicurezza.md`: accoppiamento con consenso, e solo frame `0x0101`
    verso `0x7f`.
-5. Poi: il banco che non si ricorda al riavvio, il trasferimento di un banco sull'S3,
+3. Poi: il banco che non si ricorda al riavvio, il trasferimento di un banco sull'S3,
    **l'autonomia**, e il **looper col conteggio fatto in casa** (il pedale conta quattro tempi
    e 40 ms prima dell'uno manda `0x0175` `04`).
 
 Sull'app (guscio `v74` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
 ampli finto):
 
-3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
-4. **Editor con l'ampli acceso e sul telefono**.
-5. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
-6. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
-7. **Togliere dal catalogo altri modelli che l'ampli non ha.**
-8. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
+4. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
+5. **Editor con l'ampli acceso e sul telefono**.
+6. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
+7. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
+8. **Togliere dal catalogo altri modelli che l'ampli non ha.**
+9. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
 
 **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
 i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
