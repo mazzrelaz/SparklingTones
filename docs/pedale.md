@@ -2287,6 +2287,14 @@ non sulla presa saldata del modulo; e **un fermo sopra la XIAO** che le impedisc
 dagli zoccoli — è l'unico danno silenzioso possibile, la scheda che lavora in verticale finché
 un contatto comincia a fare falso.
 
+**Aggiornamento del 18 settembre 2026**: le prese comprate erano troppo rigide e lunghe per la
+scatola. **La XIAO tiene la sua** (l'utente riesce a farla stare). **Il TP4056 cambia
+strada**: niente spina nel modulo, ma una piastrina **eleUniverse YG003** (amazon.pl
+`B0GS5WZR74`), scelta perché **dichiara le 5,1 kΩ sui CC** — le prese a 2 fili con ghiera non
+lo dicono, e senza caricano solo da USB-A. `VBUS` → piazzola **`+`** del TP4056 (in basso a
+destra, vicino a `R8`), `GND` → **`−`** (in alto a destra); il modulo è un **HW-373 V1.2.1**,
+con la protezione (DW01) a bordo. La piastrina si fissa dietro un'asola nella sponda.
+
 ## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
 
 Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.
