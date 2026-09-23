@@ -201,6 +201,13 @@ static bool cacciaApp = false;                 // e' entrato qualcuno a ponte ch
 
 static bool ponteAperto() { return pontefino != 0; }
 
+/* Un messaggio che campeggia per due secondi al posto del nome del banco.
+ * Serve ai casi in cui **un tasto non fa niente e deve dire perche'**: coi
+ * tasti banco e un solo banco in memoria la spiegazione finiva sulla
+ * seriale, che sul palco non c'e', e da fuori il tasto sembrava rotto. */
+static char    avvisoTesto[26] = "";
+static uint32_t avvisoFino = 0;
+
 static uint8_t metaMostrata = 0;         // 0 = A (posti 1-4), 1 = B (5-8)
 static uint8_t metaSuona    = 0;
 static char    nomeSuona[40] = "";       // vuoto = non e' ancora partito niente
@@ -305,7 +312,9 @@ static void disegnaSchermo() {
 
   // Il nome del banco, che coi tasti banco cambia sotto i piedi.
   char banco[26];
-  if (pontefino) {
+  if (avvisoTesto[0] && (int32_t)(avvisoFino - millis()) > 0) {
+    snprintf(banco, sizeof(banco), "%s", avvisoTesto);
+  } else if (pontefino) {
     // Il ponte aperto e' uno stato che va visto: finche' e' aperto qualcuno
     // puo' collegarsi, e il conto alla rovescia dice quanto manca.
     const uint32_t restano = (int32_t)(pontefino - millis()) > 0
@@ -616,6 +625,43 @@ static void mandaPreset(uint8_t n) {
   schermoSporco = true;
 }
 
+/* --- Il banco si ricorda allo spegnimento --------------------------------
+ *
+ * Senza, il pedale ripartiva sempre dal primo slot che trovava: chi aveva
+ * scelto il banco del secondo set se lo ritrovava cambiato alla riaccensione,
+ * e sul palco e' la stessa sorpresa che il quinto footswitch evita.
+ *
+ * Basta un byte in LittleFS, che c'e' gia' per i banchi. Se il file manca, o
+ * dice uno slot vuoto, si ricade sul primo che c'e': un pedale che non parte
+ * perche' manca un file sarebbe molto peggio. */
+static const char* VIA_ULTIMO = "/ultimo.txt";
+
+static const uint8_t FIRMWARE = 0xff;     // il banco del firmware, che non ha slot
+
+static void ricordaBanco(int8_t slot) {
+  File f = LittleFS.open(VIA_ULTIMO, "w");
+  if (!f) { Serial.println(F("non riesco a ricordare il banco")); return; }
+  f.write(slot < 0 ? FIRMWARE : (uint8_t)slot);
+  f.close();
+}
+
+/** Lo slot ricordato, -1 per il banco del firmware, -100 se non c'e' niente. */
+static int16_t bancoRicordato() {
+  if (!LittleFS.exists(VIA_ULTIMO)) return -100;
+  File f = LittleFS.open(VIA_ULTIMO, "r");
+  if (!f) return -100;
+  const int v = f.read();
+  f.close();
+  if (v == FIRMWARE) return -1;
+  return (v >= 0 && v < BANCHI_MAX) ? (int16_t)v : -100;
+}
+
+static void avvisa(const char* testo) {
+  snprintf(avvisoTesto, sizeof(avvisoTesto), "%s", testo);
+  avvisoFino = millis() + 2000;
+  schermoSporco = true;
+}
+
 /** Il quinto footswitch: cambia la meta' mostrata **senza toccare il suono**.
  *  Provato col piede nel simulatore il 16 agosto 2026: premere questo tasto
  *  non deve cambiare quello che stai suonando, perche' sul palco la sorpresa
@@ -629,16 +675,19 @@ static void cambiaMeta() {
   schermoSporco = true;
 }
 
-/** Il primo slot di memoria che contiene un banco, girando in tondo. */
-static int8_t slotBancoVicino(int8_t da, int8_t passo) {
-  for (uint8_t giro = 1; giro <= BANCHI_MAX; giro++) {
-    const int8_t s = (int8_t)(((int)da + (int)passo * (int)giro +
-                               (int)BANCHI_MAX * 8) % (int)BANCHI_MAX);
+/** L'elenco dei banchi a disposizione: **quello del firmware c'e' sempre**
+ *  (slot -1), e dietro vengono gli slot occupati in memoria. Il banco del
+ *  firmware non e' un ripiego da nascondere: e' quello che il pedale suona
+ *  appena uscito dalla scatola, e va raggiungibile coi tasti come gli altri. */
+static uint8_t elencoBanchi(int8_t* fuori) {
+  uint8_t quanti = 0;
+  fuori[quanti++] = -1;
+  for (uint8_t s = 0; s < BANCHI_MAX; s++) {
     char percorso[16];
-    nomeFile((uint8_t)s, percorso, sizeof(percorso));
-    if (LittleFS.exists(percorso)) return s;
+    nomeFile(s, percorso, sizeof(percorso));
+    if (LittleFS.exists(percorso)) fuori[quanti++] = (int8_t)s;
   }
-  return -1;
+  return quanti;
 }
 
 /** I due tasti a mano: il banco precedente e il successivo. **Anche questi non
@@ -646,18 +695,33 @@ static int8_t slotBancoVicino(int8_t da, int8_t passo) {
  *  quello che i quattro tasti vogliono dire. Finche' non se ne preme uno, i
  *  LED restano spenti, perche' il suono che si sente viene da un altro banco. */
 static void cambiaBanco(int8_t passo) {
-  const int8_t s = slotBancoVicino(slotBanco < 0 ? 0 : slotBanco, passo);
-  if (s < 0) { Serial.println(F("in memoria non c'e' nessun banco")); return; }
-  if (s == slotBanco) { Serial.println(F("c'e' un solo banco in memoria")); return; }
-
-  BancoCaricato nuovo = {};
-  if (!bancoCarica((uint8_t)s, nuovo)) {
-    Serial.printf("il banco nello slot %d non si legge\n", s);
+  int8_t elenco[BANCHI_MAX + 1];
+  const uint8_t quanti = elencoBanchi(elenco);
+  if (quanti < 2) {
+    Serial.println(F("c'e' solo il banco del firmware"));
+    avvisa("un solo banco");
     return;
   }
-  bancoLibera(bancoAttivo);
-  bancoAttivo = nuovo;
+
+  uint8_t dove = 0;
+  while (dove < quanti && elenco[dove] != slotBanco) dove++;
+  if (dove >= quanti) dove = 0;
+  const int8_t s = elenco[(dove + quanti + (passo > 0 ? 1 : quanti - 1)) % quanti];
+
+  if (s < 0) {
+    bancoLibera(bancoAttivo);            // torna quello del firmware
+  } else {
+    BancoCaricato nuovo = {};
+    if (!bancoCarica((uint8_t)s, nuovo)) {
+      Serial.printf("il banco nello slot %d non si legge\n", s);
+      avvisa("banco illeggibile");
+      return;
+    }
+    bancoLibera(bancoAttivo);
+    bancoAttivo = nuovo;
+  }
   slotBanco = s;
+  ricordaBanco(s);
   metaMostrata = 0;                      // un banco nuovo si presenta dalla meta' A
   bersaglio = 0;
   Serial.printf("banco \"%s\" (slot %d); suona ancora %s\n",
@@ -942,6 +1006,18 @@ static void eseguiComandoPesante(const uint8_t* d, size_t n) {
         if (!buono) { ricAnnulla(); rispondi(RSP_ERRORE, "blocco non interpretabile"); break; }
 
         const bool salvato = bancoSalva(ricSlot, ricDati, ricAttesi);
+        // Un banco appena mandato e' quello che si vuole usare: se il pedale
+        // non ne aveva nessuno, diventa il suo, e si riaccendera' con quello.
+        if (salvato && slotBanco < 0) {
+          if (bancoCarica(ricSlot, bancoAttivo)) {
+            slotBanco = (int8_t)ricSlot;
+            ricordaBanco((int8_t)ricSlot);
+            metaMostrata = 0;
+            bersaglio = 0;
+            aggiornaLed();
+            schermoSporco = true;
+          }
+        }
         char msg[80];
         snprintf(msg, sizeof(msg), salvato ? "banco \"%s\" salvato nello slot %u"
                                            : "scrittura fallita per \"%s\" (slot %u)",
@@ -1156,7 +1232,18 @@ void setup() {
   banchiAvvia();
   // Se in memoria c'e' gia' un banco, il pedale riparte con quello: e' la
   // prova che e' autonomo, cioe' che sopravvive allo spegnimento.
-  for (uint8_t s = 0; s < BANCHI_MAX; s++) {
+  const int16_t ricordato = bancoRicordato();
+  bool scelto = false;
+  if (ricordato == -1) {
+    scelto = true;                       // era il banco del firmware, e resta quello
+    Serial.println(F("riparto dal banco del firmware, quello di prima dello spegnimento"));
+  } else if (ricordato >= 0 && bancoCarica((uint8_t)ricordato, bancoAttivo)) {
+    slotBanco = (int8_t)ricordato;
+    scelto = true;
+    Serial.printf("banco \"%s\" dallo slot %d, quello di prima dello spegnimento\n",
+                  bancoAttivo.nome, ricordato);
+  }
+  for (uint8_t s = 0; !scelto && slotBanco < 0 && s < BANCHI_MAX; s++) {
     if (bancoCarica(s, bancoAttivo)) {
       slotBanco = (int8_t)s;
       Serial.printf("banco \"%s\" dallo slot %u\n", bancoAttivo.nome, s);
@@ -1172,6 +1259,11 @@ void setup() {
 void loop() {
   /* Il display per ultimo e solo se serve: costa 32 ms, contro i 0,18 di una
    * lettura del tasto. Mai durante un trasferimento. */
+  // L'avviso dura due secondi, poi il display torna a dire quello di prima.
+  if (avvisoTesto[0] && (int32_t)(avvisoFino - millis()) <= 0) {
+    avvisoTesto[0] = 0;
+    schermoSporco = true;
+  }
   // Col ponte aperto il display rinfresca il conto alla rovescia una volta al
   // secondo; per il resto si ridisegna solo quando qualcosa cambia.
   if (pontefino && !inTrasferimento) {
