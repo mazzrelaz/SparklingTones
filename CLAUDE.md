@@ -422,7 +422,10 @@ l'aggancio lo fa il `loop()`.
 Sul pedale resta, e **non è poco** (detto dall'utente il 24 settembre, dopo che avevo
 scritto «finito»):
 
-1. **I menu, tutti**, da sistemare — il capitolo che apre la prossima sessione.
+1. **I menu del display del pedale**, tutti, da sistemare — il capitolo che apre la
+   prossima sessione. In particolare **l'utente vuole i preset mostrati in un altro modo**:
+   com'è adesso (metà in alto a destra, nome del banco, il suono in grande, la riga con la
+   posizione) **non gli va bene, e come li vuole va chiesto a lui prima di scrivere**.
 2. **La modalità pedale MIDI**: il ragionamento è già in `docs/pedale.md` e non va rifatto,
    il firmware sì.
 3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
