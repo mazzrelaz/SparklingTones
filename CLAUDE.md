@@ -2,7 +2,7 @@
 
 App personale per controllare e organizzare i preset di un Positive Grid Spark 2: web app /
 PWA, HTML+JS vanilla, zero dipendenze, Web Bluetooth. Più un pedale ESP32 in `pedale/`.
-L'app è pubblicata e funziona; il pedale funziona e si sta finendo di cablare. `README.md`
+L'app è pubblicata e funziona; il pedale è cablato, suona e si sta finendo il firmware. `README.md`
 racconta il progetto a chi arriva da fuori. **Dove si riprende** è in fondo.
 
 ## Questa memoria
@@ -406,7 +406,7 @@ l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pu
 
 ## Dove si riprende — 24 settembre 2026
 
-**Sulla XIAO c'è `prova-ble`, il firmware vero, e il pedale è finito.** Fa i quattro suoni
+**Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni
 della metà mostrata, il quinto footswitch cambia metà senza toccare il suono, i tasti banco
 girano fra il banco del firmware e quelli in memoria, i LED dicono cosa suona, il banco si
 ricorda allo spegnimento, il ponte si apre coi due tasti banco e il trasferimento di un banco
@@ -419,13 +419,17 @@ si rispegne; e **la scansione dell'ampli era bloccante**, otto secondi in cui i 
 venivano letti, quindi a ampli spento il pedale sembrava morto: adesso è asincrona e
 l'aggancio lo fa il `loop()`.
 
-Sul pedale resta:
+Sul pedale resta, e **non è poco** (detto dall'utente il 24 settembre, dopo che avevo
+scritto «finito»):
 
-1. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
+1. **I menu, tutti**, da sistemare — il capitolo che apre la prossima sessione.
+2. **La modalità pedale MIDI**: il ragionamento è già in `docs/pedale.md` e non va rifatto,
+   il firmware sì.
+3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
    (mA) invece di aspettare che si scarichi; la via lunga è lasciarlo acceso e guardare
    l'orologio. **Il partitore su `D0` non è saldato**, quindi l'indicatore di batteria non si
    può ancora scrivere.
-2. Il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
+4. Il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
    dell'uno manda `0x0175` `04`).
 
 **Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare
@@ -446,7 +450,8 @@ i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al
 GitHub di togliere i commit vecchi dalla cache (`docs/sicurezza.md`, punto 1). **Mai più
 catture o strumenti con la chiave `0x0170` nel repository.**
 
-**Discussi e non aperti, da non rifare**: modalità MIDI (`docs/pedale.md`: Windows non sa fare
-BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT); preset creati con l'AI
+**Discussi e non aperti, da non rifare** (la modalità MIDI non è più qui: è lavoro in
+programma, vedi sopra — resta valido il ragionamento in `docs/pedale.md`, e le due trappole:
+Windows non sa fare BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT): preset creati con l'AI
 (`docs/diario.md`); il banco che si trasferisce in ~6 s (solo ottimizzazione); la scheda in
 `pcb/` (se si riapre: prima stringere il contorno, poi misurare gli interassi veri del KAmod).
