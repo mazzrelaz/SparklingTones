@@ -403,16 +403,16 @@ il suo backup su Dropbox nel 2027**: non tocca il nostro sync, solo da dove si p
 l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pull --rebase`**
 (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 18 settembre 2026
+## Dove si riprende — 23 settembre 2026
 
 **Sulla XIAO c'è `prova-espansore`, non il firmware del pedale**: se il pedale non parla con
 l'ampli è lo sketch, e si rimette `prova-ble`.
 
 Sul pedale, in quest'ordine:
 
-1. **Cablaggio JST fatto e mappato il 18 settembre**: sette pulsanti e otto LED, verde del
-   LED 2 compreso (il guasto era nel cablaggio vecchio). Resta **la cella nel morsetto**, a
-   interruttore spento, dito sulla XIAO alla prima accensione.
+1. **La ferramenta è finita** (23 settembre 2026): basetta coi JST, sette pulsanti e otto
+   LED mappati il 18 settembre, display, cella col suo interruttore, TP4056 montato diretto,
+   tutto dentro la scatola. Il pedale va a batteria. **Non resta niente da saldare.**
 2. **LED e tasti banco dentro `prova-ble`**, con la metà sul quinto footswitch — e insieme
    i punti 2 e 3 di `docs/sicurezza.md`: accoppiamento con consenso, e solo frame `0x0101`
    verso `0x7f`.
