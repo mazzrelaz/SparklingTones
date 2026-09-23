@@ -426,7 +426,9 @@ scritto «finito»):
    alto il nome del banco (Helvetica grassetto 8) (il banco del firmware si chiama «Amp Preset») e a
    destra un quadratino pieno con la S in negativo se lo Spark è connesso, vuoto se no; sotto i quattro preset della metà mostrata, etichetta
    `A1` in 6x13 grassetto e nome in 6x13 normale (il grassetto era troppo pieno), quello che
-   suona in negativo. Avvisi e ponte aperto prendono per un attimo il posto del nome del
+   suona in negativo. **Senza Spark** i preset lasciano il posto a «Accendi lo Spark /
+   lo sto cercando» coi puntini che si muovono (fermo, sembrava piantato), e il suono si
+   azzera: riacceso, lo Spark suona il suo. Avvisi e ponte aperto prendono per un attimo il posto del nome del
    banco. **Visto in foto e approvato nei caratteri il 24 settembre; il quadratino in negativo
    va ancora guardato.**
 2. **La modalità pedale MIDI**: il ragionamento è già in `docs/pedale.md` e non va rifatto,

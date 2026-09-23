@@ -338,6 +338,26 @@ static void disegnaSchermo() {
   }
   schermo.drawHLine(0, 12, 128);         // tre pixel d'aria sotto il nome del banco
 
+  /* Senza lo Spark, al posto dei preset si dice cosa manca. Coi preset al loro
+   * posto e l'ultimo ancora in negativo il pedale sembrava piantato (foto del
+   * 24 settembre): i puntini che si muovono dicono che sta cercando. */
+  if (!chScrittura) {
+    schermo.setFont(u8g2_font_6x13B_tf);
+    const char* riga1 = sganciato ? "Spark all'app" : "Accendi lo Spark";
+    schermo.drawStr((128 - schermo.getStrWidth(riga1)) / 2, 33, riga1);
+    if (!sganciato) {
+      schermo.setFont(u8g2_font_6x13_tf);
+      const char* riga2 = "lo sto cercando";
+      const int largo = schermo.getStrWidth(riga2) + 18;   // i puntini hanno il loro posto fisso
+      const int x = (128 - largo) / 2;
+      schermo.drawStr(x, 52, riga2);
+      const uint8_t quanti = (uint8_t)((millis() / 400) % 4);
+      for (uint8_t k = 0; k < quanti; k++) schermo.drawBox(x + largo - 16 + k * 6, 50, 2, 2);
+    }
+    schermo.sendBuffer();
+    return;
+  }
+
   // I quattro preset: righe da 12 pixel, lettere alte nove (~3,9 mm sul
   // vetro), diciotto caratteri dopo l'etichetta. Grassetto solo l'etichetta:
   // i nomi in grassetto erano troppo pieni (foto del 24 settembre).
@@ -1283,6 +1303,11 @@ void loop() {
     static uint32_t ultimoSecondo = 0;
     if (millis() - ultimoSecondo > 1000) { ultimoSecondo = millis(); schermoSporco = true; }
   }
+  // Senza lo Spark i puntini di «lo sto cercando» si muovono.
+  if (!chScrittura && !sganciato && !inTrasferimento) {
+    static uint32_t ultimoPasso = 0;
+    if (millis() - ultimoPasso > 400) { ultimoPasso = millis(); schermoSporco = true; }
+  }
   if (schermoPresente && schermoSporco && !inTrasferimento) {
     schermoSporco = false;
     disegnaSchermo();
@@ -1293,6 +1318,9 @@ void loop() {
 
   if (client && !client->isConnected() && chScrittura) {
     Serial.println(F("connessione persa"));
+    // Quello che suonava non c'e' piu': riacceso, lo Spark suona il suo.
+    nomeSuona[0] = 0;
+    aggiornaLed();
     schermoSporco = true;
     chScrittura = chNotifiche = nullptr;
     dentro = 0;
