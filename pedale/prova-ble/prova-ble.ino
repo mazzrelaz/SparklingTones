@@ -40,6 +40,11 @@
 #include <BLEDevice.h>
 #include "preset_frames.h"
 #include "banchi.h"
+#include "logo.h"
+
+/* La versione del firmware, sulla schermata di avvio: si alza a ogni
+ * caricamento che cambia qualcosa di visibile sul pedale. */
+static const char* VERSIONE = "1.0";
 
 /* Il banco che il pedale sta suonando. Se ne ha uno ricevuto dall'app usa
  * quello; altrimenti ripiega su preset_frames.h, che resta utile per provare
@@ -294,6 +299,29 @@ static void aggiornaLed() {
     maschera = (uint8_t)(1 << (metaMostrata ? LINEA_VERDE[led] : LINEA_ROSSO[led]));
   }
   mcpScrivi(MCP_OLATB, maschera);
+}
+
+/* La schermata di avvio, chiesta dall'utente il 24 settembre 2026: il logo
+ * dell'app, sotto l'autore e la versione. Resta due secondi e mezzo, ma **non
+ * ferma niente**: intanto il pedale cerca lo Spark e legge i pulsanti, e il
+ * loop semplicemente non ridisegna finche' non e' passata. */
+static const uint32_t AVVIO_MS = 2500;
+static uint32_t avvioFino = 0;
+
+static void disegnaAvvio() {
+  if (!schermoPresente) return;
+  schermo.clearBuffer();
+  schermo.setDrawColor(1);
+  schermo.drawXBMP(0, 4, LOGO_LARGO, LOGO_ALTO, LOGO_BITS);
+  schermo.setFont(u8g2_font_6x13_tf);
+  const char* autore = "By Massimo Togni";
+  schermo.drawStr((128 - schermo.getStrWidth(autore)) / 2, 44, autore);
+  char versione[16];
+  snprintf(versione, sizeof(versione), "v%s", VERSIONE);
+  schermo.setFont(u8g2_font_6x10_tf);
+  schermo.drawStr((128 - schermo.getStrWidth(versione)) / 2, 60, versione);
+  schermo.sendBuffer();
+  avvioFino = millis() + AVVIO_MS;
 }
 
 /** Quello che il pedale mostra, deciso dall'utente il 24 settembre 2026:
@@ -1259,6 +1287,7 @@ void setup() {
     schermo.setContrast(255);
     Wire.setClock(400000);   // u8g2 dopo begin() si rimette la sua velocita'
     Serial.println(F("display a 0x3c: pronto"));
+    disegnaAvvio();
   } else {
     Serial.println(F("display assente: si va avanti senza"));
   }
@@ -1308,7 +1337,8 @@ void loop() {
     static uint32_t ultimoPasso = 0;
     if (millis() - ultimoPasso > 400) { ultimoPasso = millis(); schermoSporco = true; }
   }
-  if (schermoPresente && schermoSporco && !inTrasferimento) {
+  if (schermoPresente && schermoSporco && !inTrasferimento
+      && (int32_t)(millis() - avvioFino) >= 0) {
     schermoSporco = false;
     disegnaSchermo();
   }
