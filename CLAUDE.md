@@ -406,30 +406,37 @@ l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pu
 
 ## Dove si riprende — 23 settembre 2026
 
-**Sulla XIAO c'è `prova-espansore`, non il firmware del pedale**: se il pedale non parla con
-l'ampli è lo sketch, e si rimette `prova-ble`.
+**Sulla XIAO c'è `prova-ble`, il firmware vero.** Il pedale è finito come ferramenta e fa il
+pedale: quattro suoni della metà mostrata, il quinto footswitch che cambia metà senza toccare
+il suono, i tasti banco, i LED (solo quello del suono attivo, rosso A / verde B) e l'OLED che
+dice metà, banco e cosa suona. **Verificato col piede il 23 settembre.**
 
 Sul pedale, in quest'ordine:
 
-1. **La ferramenta è finita** (23 settembre 2026): basetta coi JST, sette pulsanti e otto
-   LED mappati il 18 settembre, display, cella col suo interruttore, TP4056 montato diretto,
-   tutto dentro la scatola. Il pedale va a batteria. **Non resta niente da saldare.**
-2. **LED e tasti banco dentro `prova-ble`**, con la metà sul quinto footswitch — e insieme
-   i punti 2 e 3 di `docs/sicurezza.md`: accoppiamento con consenso, e solo frame `0x0101`
-   verso `0x7f`.
-3. Poi: il banco che non si ricorda al riavvio, il trasferimento di un banco sull'S3,
-   **l'autonomia**, e il **looper col conteggio fatto in casa** (il pedale conta quattro tempi
-   e 40 ms prima dell'uno manda `0x0175` `04`).
+1. **Da provare, mai fatto**: il ponte che parte chiuso e si apre coi **due tasti banco
+   insieme** per 1,5 s (l'elenco del Bluetooth dev'essere vuoto prima, e `SparkPedale` dopo),
+   il **trasferimento di un banco** con la nuova verifica dei frame, e i **tasti banco** con
+   più di un banco in memoria.
+2. **Il banco non si ricorda al riavvio**: riparte sempre dal primo slot che trova.
+3. **L'autonomia**, l'ultima misura mancante, ora che il firmware vero è quello giusto per
+   misurarla.
+4. Poi il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
+   dell'uno manda `0x0175` `04`).
+
+**Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare
+il firmware il cavo va infilato **dentro**, direttamente nella XIAO. Se un giorno serve la
+modalità MIDI, o aggiornare il firmware a scatola chiusa, va comprato un codino **USB 2.0 con
+i dati**.
 
 Sull'app (guscio `v75` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
 ampli finto):
 
-4. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
-5. **Editor con l'ampli acceso e sul telefono**.
-6. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
-7. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
-8. **Togliere dal catalogo altri modelli che l'ampli non ha.**
-9. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
+5. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
+6. **Editor con l'ampli acceso e sul telefono**.
+7. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
+8. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
+9. **Togliere dal catalogo altri modelli che l'ampli non ha.**
+10. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
 
 **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
 i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
