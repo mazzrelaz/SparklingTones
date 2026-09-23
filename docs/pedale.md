@@ -2295,6 +2295,14 @@ lo dicono, e senza caricano solo da USB-A. `VBUS` → piazzola **`+`** del TP405
 destra, vicino a `R8`), `GND` → **`−`** (in alto a destra); il modulo è un **HW-373 V1.2.1**,
 con la protezione (DW01) a bordo. La piastrina si fissa dietro un'asola nella sponda.
 
+**Deciso dall'utente il 23 settembre 2026, e ribalta tutto il capitolo**: niente presa da
+pannello e niente piastrina, **il TP4056 va montato diretto**, con la sua presa affacciata a
+un'apertura nella sponda. Le prese comprate non ci stavano e non si compra altro. Due
+conseguenze: la ricarica resta **solo da caricatore USB-A con cavo A→C** (vedi qui sotto), e
+va scritto sull'etichetta; e **il modulo va bloccato dietro il pannello**, perché adesso gli
+strattoni del cavo finiscono sulle saldature della sua presa. Quanto sopra sulle prese da
+pannello e sulla piastrina YG003 resta come ragionamento, ma non è più la strada.
+
 **Misurato il 23 settembre 2026, e chiude la questione**: quel TP4056 (HW-373 V1.2.1)
 **non ha le resistenze da 5,1 kΩ sui CC**. Con caricatore USB-A e cavo A→C carica (la
 resistenza sta nel cavo); con un caricatore USB-C e cavo C→C **non si accende nemmeno la
