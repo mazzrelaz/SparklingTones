@@ -2295,6 +2295,12 @@ lo dicono, e senza caricano solo da USB-A. `VBUS` → piazzola **`+`** del TP405
 destra, vicino a `R8`), `GND` → **`−`** (in alto a destra); il modulo è un **HW-373 V1.2.1**,
 con la protezione (DW01) a bordo. La piastrina si fissa dietro un'asola nella sponda.
 
+**Misurato il 23 settembre 2026, e chiude la questione**: quel TP4056 (HW-373 V1.2.1)
+**non ha le resistenze da 5,1 kΩ sui CC**. Con caricatore USB-A e cavo A→C carica (la
+resistenza sta nel cavo); con un caricatore USB-C e cavo C→C **non si accende nemmeno la
+spia**, perché al modulo non arriva corrente. Non è un guasto, ed è la ragione per cui la
+presa di carica deve portarsele lei.
+
 ## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
 
 Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.

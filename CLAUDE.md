@@ -348,7 +348,9 @@ XIAO anche senza cella).
   quel connettore.
 - **La XIAO carica a 50 mA**: si ricarica col **TP4056**, a **interruttore spento** (niente load
   sharing). L'interruttore è fisico, sul positivo fra cella e XIAO. **Le due prese USB sul
-  pannello vanno etichettate.**
+  pannello vanno etichettate.** **Il TP4056 comprato (HW-373) non ha le 5,1 kΩ sui CC**:
+  da un caricatore USB-C con cavo C→C non carica e non accende nemmeno la spia (misurato);
+  le resistenze le porta la presa di carica sul pannello.
 - **Indicatore di batteria da scrivere**: quattro tacche, **mai percentuali**, avviso sotto
   **3,50 V**.
 - **Pull-up I²C dell'espansore non verificati**: se il bus non parte, due 4,7 kΩ.
