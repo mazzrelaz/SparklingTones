@@ -60,6 +60,31 @@ static void bancoLibera(BancoCaricato& b) {
   b.quanti = 0;
 }
 
+/** Un frame del banco e' accettabile solo se e' **un preset verso il buffer
+ *  software**, e niente altro.
+ *
+ *  Il firmware spedisce all'ampli i frame come arrivano, cambiando solo il
+ *  seq: senza questo controllo «il pedale non tocca mai gli slot dell'ampli»
+ *  varrebbe soltanto finche' i frame li fa la nostra app. Un banco scritto da
+ *  qualcun altro potrebbe sovrascrivere un preset salvato sull'ampli, o
+ *  mandare un comando che lo pianta.
+ *
+ *  Si controlla quello che si vede senza spacchettare niente: l'involucro
+ *  (`f0 01 … f7`), il comando (`0x0101` e nient'altro) e, nel primo chunk,
+ *  la destinazione — banco `0x00`, posto `0x7f`, cioe' il buffer software.
+ *  Quei byte stanno in chiaro nel frame perche' sono tutti sotto 0x80, e i
+ *  bit di maschera che li riguardano devono essere a zero. */
+static bool frameAccettabile(const uint8_t* f, uint8_t n, bool primo) {
+  if (n < 8) return false;
+  if (f[0] != 0xf0 || f[1] != 0x01 || f[n - 1] != 0xf7) return false;
+  if (f[4] != 0x01 || f[5] != 0x01) return false;        // solo 0x0101
+  if (!primo) return true;
+  if (n < 12) return false;
+  if ((f[6] & 0x1f) != 0) return false;                  // maschera 7/8: byte espliciti
+  if (f[8] != 0x00) return false;                        // e' davvero il chunk 0
+  return f[10] == 0x00 && f[11] == 0x7f;                 // banco 0, buffer software
+}
+
 /** Legge una stringa con lunghezza davanti. Torna false se sfora. */
 static bool leggiTesto(const uint8_t* d, size_t n, size_t& i, char* fuori, size_t max) {
   if (i >= n) return false;
@@ -114,6 +139,10 @@ static bool bancoInterpreta(BancoCaricato& b) {
       posto.inizio[c] = (uint16_t)i;
       posto.lung[c]   = len;
       i += len;
+    }
+    // Prima di dire che il posto e' buono: i suoi frame devono essere nostri.
+    for (uint8_t c = 0; c < quantiChunk; c++) {
+      if (!frameAccettabile(d + posto.inizio[c], posto.lung[c], c == 0)) return false;
     }
     posto.quanti   = quantiChunk;
     posto.presente = true;

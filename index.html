@@ -1414,6 +1414,10 @@
   <div class="stato-pannello" id="statoPannelloPedale"></div>
 
   <div class="sezione-pannello">
+    <p class="spiega"><strong>Prima apri il ponte sul pedale</strong>: tieni premuti insieme
+      i due tasti banco per un secondo e mezzo. Resta aperto due minuti, e il display lo dice.
+      Finché è chiuso il pedale non si annuncia, e qui non compare: serve a non far collegare
+      chiunque passi, che gli farebbe mollare l'ampli.</p>
     <p class="spiega">Mentre sei collegato al pedale, <em>il pedale ha mollato l'ampli</em>
       e non suona: è così per scelta, un padrone alla volta. Appena stacchi se lo riprende
       da solo. I banchi restano nel pedale anche a corrente staccata.</p>
@@ -5537,7 +5541,12 @@ async function collegaPedale() {
     await comandoPedale(PedalePonte.CMD.ELENCA);
   } catch (err) {
     statoPedale(false, 'non collegato');
-    logPedale('connessione fallita: ' + err.message);
+    // Il caso più probabile non è un guasto: il ponte del pedale è chiuso, e
+    // un pedale che non si annuncia non compare nell'elenco del browser.
+    const scelto = /cancell|chosen|user/i.test(err.message || '');
+    logPedale('connessione fallita: ' + err.message +
+              (scelto ? ' — se nell\'elenco non c\'era nessun pedale, apri il ponte: ' +
+                        'due tasti banco insieme per un secondo e mezzo' : ''));
   }
 }
 
@@ -5603,7 +5612,8 @@ $('btnPedale').addEventListener('click', () => {
   aggiornaInvioPedale();
   disegnaSlotsPedale();
   if (!$('statoPannelloPedale').textContent)
-    logPedale('il pedale si annuncia come «SparkPedale» anche mentre suona');
+    logPedale('prima apri il ponte sul pedale: tieni premuti insieme i due tasti banco ' +
+              'per un secondo e mezzo. Resta aperto due minuti, e il display lo dice');
   apriPannello('pannelloPedale');
 });
 $('btnPedaleConnetti').addEventListener('click', collegaPedale);

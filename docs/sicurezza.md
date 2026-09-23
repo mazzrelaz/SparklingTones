@@ -4,7 +4,7 @@ Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync D
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
 
-## Da correggere — restano il 2 e il 3
+## Da correggere — nessuno: tutti e sei corretti
 
 ### 1. La license key dell'app ufficiale è pubblicata — medio, legale
 
@@ -40,6 +40,8 @@ e fare un push forzato, e la decisione è dell'utente.
 
 ### 2. Il pedale accetta chiunque via Bluetooth — medio, sul palco
 
+**Corretto il 23 settembre 2026.** Il ponte parte **chiuso**: il pedale non si annuncia, e chi si collega lo stesso viene scollegato dal `loop()` senza che l'ampli venga mollato. Si apre tenendo premuti **i due tasti banco insieme** per 1,5 s, e resta aperto due minuti — che non scadono finche' l'app e' collegata, per non tagliare un banco a meta'. Il display mostra il conto alla rovescia, e il pannello «Pedale» dell'app lo spiega.
+
 Il servizio del ponte non chiede accoppiamento. Chiunque sia a portata, con un'app BLE
 generica, può collegarsi al pedale. E siccome **c'è un padrone alla volta**, il pedale
 **molla l'ampli**: a metà concerto i footswitch smettono di funzionare. Chi si collega può
@@ -51,6 +53,8 @@ dispositivi accoppiati. In alternativa, il ponte resta spento e si accende solo 
 «modalità ponte» scelta coi tasti.
 
 ### 3. Il firmware manda all'ampli qualsiasi frame — medio, conseguenza del 2
+
+**Corretto il 23 settembre 2026.** `frameAccettabile()` in `banchi.h`: un banco entra in memoria solo se **ogni** frame e' `f0 01 … f7` con comando `0x0101`, e se il primo chunk e' diretto al buffer software (banco `0x00`, posto `0x7f`). I byte si leggono in chiaro perche' stanno tutti sotto 0x80; si controlla anche che i bit di maschera della codifica 7/8 siano a zero.
 
 `mandaPreset` spedisce i frame del banco così come sono arrivati, cambiando solo il seq. La
 regola «il pedale non può toccare gli slot dell'ampli, per costruzione» vale quindi **solo se

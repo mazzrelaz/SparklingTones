@@ -22,7 +22,7 @@ danni o di ripercorrere una strada chiusa**, più il lavoro in corso. Il ragiona
 | `docs/HANDOFF-2026-08-10.md` | ricerca originale: comandi, tipi dati, catture |
 | `docs/diario.md` | com'è andata una sessione passata; le versioni lunghe di questo file |
 | `docs/sito.md` | si tocca `sparklingtones.com` |
-| `docs/sicurezza.md` | audit del 17 settembre 2026: restano i punti 2 e 3, sul pedale |
+| `docs/sicurezza.md` | audit del 17 settembre 2026, tutti e sei i punti corretti |
 
 **Si sposta, non si butta**: ogni sfoltita copia parola per parola in `docs/` ciò che accorcia
 (l'ultima il 17 settembre 2026, da 52 a 25 KB). **Si rigonfia in due settimane**: si rimisura
@@ -280,9 +280,10 @@ suona.
 **Le regole che non si toccano:**
 
 - **Mai gli slot hardware**: ogni cambio è `0x0101` su `0x7f` + `0x0138` con `0x7f`. Due soli
-  comandi, nessun parser; il LED dell'ampli lampeggia sempre, ed è giusto. **Ma oggi è vero
-  solo se i frame li ha fatti l'app**: il firmware li spedisce come arrivano, e il ponte BLE
-  accetta chiunque (`docs/sicurezza.md`, punti 2 e 3).
+  comandi, nessun parser; il LED dell'ampli lampeggia sempre, ed è giusto. **E adesso è vero
+  anche coi banchi che arrivano da fuori**: `frameAccettabile()` in `banchi.h` accetta solo
+  frame `0x0101` verso `0x7f`, e **il ponte BLE parte chiuso** — si apre coi due tasti banco
+  insieme per 1,5 s, due minuti alla volta (`docs/sicurezza.md`).
 - **L'app preserializza**: il firmware patcha solo il seq (indice 2; il checksum non lo copre).
 - **Un padrone alla volta**: con l'ampli connesso al pedale il browser non lo trova. **Se un
   footswitch non fa niente, primo sospetto: l'app ancora collegata al pedale.**
@@ -420,7 +421,7 @@ Sul pedale, in quest'ordine:
    **l'autonomia**, e il **looper col conteggio fatto in casa** (il pedale conta quattro tempi
    e 40 ms prima dell'uno manda `0x0175` `04`).
 
-Sull'app (guscio `v74` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v75` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 4. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.

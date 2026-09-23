@@ -193,6 +193,14 @@ static const uint8_t LINEA_VERDE[4] = {4, 6, 0, 2};
  * `slotSuona` serve al caso meno ovvio: cambiato banco, il suono continua ma
  * non appartiene piu' a quello che i tasti mostrano, quindi i LED si spengono
  * come per la meta' sbagliata. */
+static const uint32_t PONTE_APERTO_MS = 120000;
+static uint32_t pontefino = 0;                 // millis fino a cui il ponte e' aperto
+static BLEServer* serverPonte = nullptr;
+static volatile uint16_t connApp = 0;
+static bool cacciaApp = false;                 // e' entrato qualcuno a ponte chiuso
+
+static bool ponteAperto() { return pontefino != 0; }
+
 static uint8_t metaMostrata = 0;         // 0 = A (posti 1-4), 1 = B (5-8)
 static uint8_t metaSuona    = 0;
 static char    nomeSuona[40] = "";       // vuoto = non e' ancora partito niente
@@ -296,8 +304,17 @@ static void disegnaSchermo() {
   schermo.drawHLine(0, 14, 128);
 
   // Il nome del banco, che coi tasti banco cambia sotto i piedi.
-  char banco[22];
-  snprintf(banco, sizeof(banco), "%s", bancoAttivo.valido ? bancoAttivo.nome : "(firmware)");
+  char banco[26];
+  if (pontefino) {
+    // Il ponte aperto e' uno stato che va visto: finche' e' aperto qualcuno
+    // puo' collegarsi, e il conto alla rovescia dice quanto manca.
+    const uint32_t restano = (int32_t)(pontefino - millis()) > 0
+                             ? (pontefino - millis()) / 1000 : 0;
+    snprintf(banco, sizeof(banco), "ponte aperto %lu:%02lu",
+             (unsigned long)(restano / 60), (unsigned long)(restano % 60));
+  } else {
+    snprintf(banco, sizeof(banco), "%s", bancoAttivo.valido ? bancoAttivo.nome : "(firmware)");
+  }
   schermo.drawStr(0, 26, banco);
 
   // I quattro nomi della meta' mostrata non ci stanno: ci sta il grande, ed
@@ -666,8 +683,14 @@ static void leggiTasto() {
     pressioniViste++;
 
     if (k == FS5)       { cambiaMeta();  continue; }
-    if (k == BANCO_SX)  { cambiaBanco(-1); continue; }
-    if (k == BANCO_DX)  { cambiaBanco(+1); continue; }
+    // I due tasti banco insieme sono la combinazione che apre il ponte:
+    // mentre l'altro e' premuto, questo non cambia banco.
+    if (k == BANCO_SX || k == BANCO_DX) {
+      const uint8_t altro = (k == BANCO_SX) ? BANCO_DX : BANCO_SX;
+      if (!(ingressi & (uint8_t)(1 << LINEA_PULSANTE[altro]))) continue;
+      cambiaBanco(k == BANCO_DX ? +1 : -1);
+      continue;
+    }
 
     // I quattro sotto il piede: il posto dipende dalla meta' mostrata.
     const uint8_t posto = (uint8_t)(metaMostrata * 4 + k);
@@ -985,13 +1008,59 @@ static void sbrigaComandoPonte() {
  * solo una bandiera; il lavoro lo fa il loop. */
 static volatile bool appEntrata = false, appUscita = false;
 
+/* --- Il ponte si apre solo quando lo dici tu ------------------------------
+ *
+ * Finche' il pedale si annunciava sempre, **chiunque a portata poteva
+ * collegarsi** con una app BLE qualunque. E siccome c'e' un padrone alla
+ * volta, quel collegamento fa mollare l'ampli: in mezzo a un concerto i
+ * footswitch smettono di funzionare, e da fuori sembra un guasto.
+ *
+ * Quindi il ponte sta chiuso — niente annuncio, e chi arriva lo stesso viene
+ * scollegato — e si apre **tenendo premuti i due tasti banco insieme**, per
+ * due minuti. Il tempo di far partire un trasferimento dall'app; finche'
+ * l'app resta collegata la finestra non scade, cosi' non si taglia un banco a
+ * meta'. */
 class Collegamenti : public BLEServerCallbacks {
-  void onConnect(BLEServer*)    override { appCollegata = true;  appEntrata = true; }
-  void onDisconnect(BLEServer*) override { appCollegata = false; appUscita  = true; }
+  void onConnect(BLEServer* s) override {
+    connApp = s->getConnId();
+    // A ponte chiuso non si molla l'ampli: si alza solo la bandiera, e il
+    // loop lo scollega. Mai operazioni BLE dentro un callback BLE.
+    if (pontefino == 0) { cacciaApp = true; return; }
+    appCollegata = true;
+    appEntrata   = true;
+  }
+  void onDisconnect(BLEServer*) override { appCollegata = false; appUscita = true; }
 };
+
+static void apriPonte() {
+  pontefino = millis() + PONTE_APERTO_MS;
+  BLEDevice::startAdvertising();
+  Serial.println(F("ponte aperto per due minuti: l'app puo' collegarsi"));
+  schermoSporco = true;
+}
+
+static void chiudiPonte(const char* perche) {
+  if (!pontefino && !appCollegata) return;
+  pontefino = 0;
+  BLEDevice::stopAdvertising();
+  if (appCollegata && serverPonte) serverPonte->disconnect(connApp);
+  Serial.printf("ponte chiuso (%s)\n", perche);
+  schermoSporco = true;
+}
 
 /** Le conseguenze dei collegamenti, eseguite fuori dal task BLE. */
 static void sbrigaPonte() {
+  if (cacciaApp) {
+    cacciaApp = false;
+    if (serverPonte) serverPonte->disconnect(connApp);
+    Serial.println(F("ponte chiuso: collegamento rifiutato (due tasti banco per aprirlo)"));
+  }
+  // Mentre l'app e' collegata la finestra non scade: un banco non si taglia a
+  // meta'. Scade dopo, appena se n'e' andata.
+  if (ponteAperto() && appCollegata) pontefino = millis() + PONTE_APERTO_MS;
+  if (ponteAperto() && !appCollegata && (int32_t)(millis() - pontefino) > 0) {
+    chiudiPonte("tempo scaduto");
+  }
   if (appEntrata) {
     appEntrata = false;
     Serial.println(F("ponte: l'app si e' collegata, mollo l'ampli"));
@@ -1023,11 +1092,12 @@ static void avviaPonte() {
     UUID_STATO, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
 
   servizio->start();
+  serverPonte = server;
   BLEAdvertising* adv = BLEDevice::getAdvertising();
   adv->addServiceUUID(UUID_PONTE);
   adv->setScanResponse(true);
-  BLEDevice::startAdvertising();
-  Serial.println(F("ponte avviato: il pedale si annuncia come \"SparkPedale\""));
+  // **Non si annuncia**: il ponte parte chiuso, si apre coi due tasti banco.
+  Serial.println(F("ponte pronto ma chiuso: due tasti banco insieme per aprirlo"));
 }
 
 void setup() {
@@ -1068,6 +1138,12 @@ void setup() {
 void loop() {
   /* Il display per ultimo e solo se serve: costa 32 ms, contro i 0,18 di una
    * lettura del tasto. Mai durante un trasferimento. */
+  // Col ponte aperto il display rinfresca il conto alla rovescia una volta al
+  // secondo; per il resto si ridisegna solo quando qualcosa cambia.
+  if (pontefino && !inTrasferimento) {
+    static uint32_t ultimoSecondo = 0;
+    if (millis() - ultimoSecondo > 1000) { ultimoSecondo = millis(); schermoSporco = true; }
+  }
   if (schermoPresente && schermoSporco && !inTrasferimento) {
     schermoSporco = false;
     disegnaSchermo();
@@ -1105,6 +1181,21 @@ void loop() {
   }
 
   leggiTasto();
+  /* I due tasti banco tenuti insieme per un secondo e mezzo aprono il ponte.
+   * Si guarda il livello gia' filtrato, non i fronti: una combinazione si
+   * tiene premuta, non si preme. */
+  {
+    static uint32_t insiemeDa = 0;
+    const uint8_t sx = (uint8_t)(1 << LINEA_PULSANTE[BANCO_SX]);
+    const uint8_t dx = (uint8_t)(1 << LINEA_PULSANTE[BANCO_DX]);
+    const bool tuttiEDue = !(ingressiFermi & sx) && !(ingressiFermi & dx);
+    if (tuttiEDue) {
+      if (insiemeDa == 0) insiemeDa = millis() | 1;
+      else if (millis() - insiemeDa > 1500 && !ponteAperto()) { insiemeDa = 0; apriPonte(); }
+    } else {
+      insiemeDa = 0;
+    }
+  }
   // La richiesta resta in coda **finche' non c'e' l'ampli**, invece di essere
   // buttata via. Mentre il pedale si sta riagganciando una pressione andava
   // persa e da fuori sembrava che il pedale ignorasse il piede: cosi' invece
