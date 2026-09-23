@@ -423,12 +423,12 @@ Sul pedale resta, e **non è poco** (detto dall'utente il 24 settembre, dopo che
 scritto «finito»):
 
 1. **Il display del pedale, deciso dall'utente il 24 settembre** (niente striscia ♪): in
-   alto il nome del banco (Helvetica grassetto 8) e a destra un quadratino con la S se lo
-   Spark è connesso, vuoto se no; sotto i quattro preset della metà mostrata, etichetta
+   alto il nome del banco (Helvetica grassetto 8) (il banco del firmware si chiama «Amp Preset») e a
+   destra un quadratino pieno con la S in negativo se lo Spark è connesso, vuoto se no; sotto i quattro preset della metà mostrata, etichetta
    `A1` in 6x13 grassetto e nome in 6x13 normale (il grassetto era troppo pieno), quello che
    suona in negativo. Avvisi e ponte aperto prendono per un attimo il posto del nome del
-   banco. **Prima versione vista in foto; l'ultima (caratteri e spazio sotto la linea) va
-   ancora guardata.**
+   banco. **Visto in foto e approvato nei caratteri il 24 settembre; il quadratino in negativo
+   va ancora guardato.**
 2. **La modalità pedale MIDI**: il ragionamento è già in `docs/pedale.md` e non va rifatto,
    il firmware sì.
 3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella

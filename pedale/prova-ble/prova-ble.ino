@@ -297,8 +297,8 @@ static void aggiornaLed() {
 }
 
 /** Quello che il pedale mostra, deciso dall'utente il 24 settembre 2026:
- *  - in alto il **nome del banco**, piccolo, e a destra un **quadratino con la
- *    S** se lo Spark e' connesso, vuoto se no;
+ *  - in alto il **nome del banco**, piccolo, e a destra un **quadratino pieno
+ *    con la S** se lo Spark e' connesso, vuoto se no;
  *  - sotto, **i quattro preset della meta' mostrata**, uno per riga;
  *  - quello che suona **in negativo**, con la stessa regola dei LED: solo se
  *    sta nella meta' mostrata e nel banco caricato.
@@ -321,15 +321,20 @@ static void disegnaSchermo() {
     snprintf(testa, sizeof(testa), "ponte %lu:%02lu",
              (unsigned long)(restano / 60), (unsigned long)(restano % 60));
   } else {
-    snprintf(testa, sizeof(testa), "%s", bancoAttivo.valido ? bancoAttivo.nome : "banco del firmware");
+    snprintf(testa, sizeof(testa), "%s", bancoAttivo.valido ? bancoAttivo.nome : "Amp Preset");
   }
   schermo.setFont(u8g2_font_helvB08_tf);
   schermo.drawStr(0, 8, testa);
 
-  schermo.drawFrame(118, 0, 10, 10);
+  // Connesso: quadratino pieno con la S in negativo. Non connesso: vuoto.
   if (chScrittura) {
+    schermo.drawBox(118, 0, 10, 10);
+    schermo.setDrawColor(0);
     schermo.setFont(u8g2_font_5x7_tf);
     schermo.drawStr(121, 8, "S");
+    schermo.setDrawColor(1);
+  } else {
+    schermo.drawFrame(118, 0, 10, 10);
   }
   schermo.drawHLine(0, 12, 128);         // tre pixel d'aria sotto il nome del banco
 
@@ -729,7 +734,7 @@ static void cambiaBanco(int8_t passo) {
   slotBanco = s;
   ricordaBanco(s);
   metaMostrata = 0;                      // un banco nuovo si presenta dalla meta' A
-  avvisa(bancoAttivo.valido ? bancoAttivo.nome : "banco del firmware");
+  avvisa(bancoAttivo.valido ? bancoAttivo.nome : "Amp Preset");
   bersaglio = 0;
   Serial.printf("banco \"%s\" (slot %d); suona ancora %s\n",
                 bancoAttivo.nome, s, nomeSuona[0] ? nomeSuona : "(niente)");
