@@ -473,18 +473,40 @@ class Scansione : public BLEAdvertisedDeviceCallbacks {
   }
 };
 
-static bool collega() {
+/* **La scansione non blocca piu' il ciclo.** Prima era `scan->start(8, false)`:
+ * otto secondi dentro i quali il pedale non leggeva i pulsanti, ripetuti ogni
+ * pochi secondi finche' l'ampli non c'era. Col risultato che **a ampli spento
+ * il pedale sembrava morto** — nemmeno la combinazione dei due tasti banco
+ * apriva il ponte, ed e' il difetto trovato il 24 settembre 2026 mentre si
+ * provava il ponte. E' la stessa regola di sempre: nessuna attesa che non
+ * guardi gli ingressi.
+ *
+ * Adesso la scansione parte e torna subito; quando l'ampli si fa vedere,
+ * `Scansione` alza `trovato` e l'aggancio lo fa il loop. */
+static bool scansioneInCorso = false;
+
+static void fineScansione(BLEScanResults) {
+  scansioneInCorso = false;
+}
+
+static void avviaScansione() {
+  if (scansioneInCorso) return;
   Serial.println(F("scansione..."));
   BLEScan* scan = BLEDevice::getScan();
   scan->setAdvertisedDeviceCallbacks(new Scansione());
   scan->setActiveScan(true);
   scan->setInterval(100);
   scan->setWindow(99);
-  trovato = nullptr;
-  scan->start(8, false);
-  scan->clearResults();
+  if (trovato) { delete trovato; trovato = nullptr; }
+  scansioneInCorso = true;
+  if (!scan->start(8, fineScansione, false)) scansioneInCorso = false;
+}
 
-  if (!trovato) { Serial.println(F("nessuno Spark: riprovo fra cinque secondi.")); return false; }
+/** L'aggancio vero e proprio, con l'ampli gia' trovato. */
+static bool agganciaAmpli() {
+  BLEScan* scan = BLEDevice::getScan();
+  scan->clearResults();
+  if (!trovato) return false;
 
   // Un client solo, riusato. Crearne uno nuovo a ogni tentativo li accumula
   // e NimBLE ne ammette pochi: dopo qualche passaggio di consegne il pedale
@@ -1096,8 +1118,20 @@ static void avviaPonte() {
   BLEAdvertising* adv = BLEDevice::getAdvertising();
   adv->addServiceUUID(UUID_PONTE);
   adv->setScanResponse(true);
-  // **Non si annuncia**: il ponte parte chiuso, si apre coi due tasti banco.
+  /* **L'annuncio si accende un attimo e si spegne subito.** Sembra inutile e
+   * invece e' la riga che fa funzionare tutto: su NimBLE i servizi GATT si
+   * registrano davvero alla prima accensione dell'annuncio, e **se quel
+   * momento arriva quando il pedale e' gia' collegato all'ampli la
+   * registrazione non riesce**. Il sintomo era esattamente quello visto il 24
+   * settembre 2026: l'app trovava il pedale, si collegava, e poi il browser
+   * diceva «No Services matching UUID». Facendolo qui, prima di collegarsi
+   * all'ampli, i servizi ci sono per sempre, e da li' in avanti accendere e
+   * spegnere l'annuncio e' innocuo. */
+  BLEDevice::startAdvertising();
+  delay(50);
+  BLEDevice::stopAdvertising();
   Serial.println(F("ponte pronto ma chiuso: due tasti banco insieme per aprirlo"));
+
 }
 
 void setup() {
@@ -1132,7 +1166,7 @@ void setup() {
   aggiornaLed();   // spenti: finche' non si preme un tasto non suona niente di nostro
   BLEDevice::init("SparkPedale");
   avviaPonte();          // prima il server: cosi' l'app lo trova sempre
-  collega();
+  avviaScansione();
 }
 
 void loop() {
@@ -1162,16 +1196,19 @@ void loop() {
   // rimettersi ad annunciarsi, quindi il primo tentativo va spesso a vuoto:
   // per mezzo minuto si riprova fitto, poi si rallenta per non stare a
   // scansionare in eterno.
-  if (!chScrittura && !sganciato) {
+  if (!chScrittura && !sganciato && !scansioneInCorso && !trovato) {
     const uint32_t attesa = (millis() - momentoSgancio < 30000) ? 2000 : 5000;
     if (millis() - ultimoTentativo > attesa) {
       ultimoTentativo = millis();
-      collega();
+      avviaScansione();
     }
   }
+  // L'ampli si e' fatto vedere: ci si attacca **qui**, fuori dal callback
+  // della scansione, che e' la regola di sempre per le operazioni BLE.
+  if (trovato && !scansioneInCorso && !chScrittura && !sganciato) agganciaAmpli();
 
   // La richiesta dell'intervallo, ripetuta a connessione matura: e' quella che
-  // fa la differenza fra un secondo e mezzo e quattro decimi (vedi collega()).
+  // fa la differenza fra un secondo e mezzo e quattro decimi (vedi agganciaAmpli()).
   if (chScrittura && client && ripetizioniIntervallo < 2) {
     const uint32_t quando = ripetizioniIntervallo == 0 ? 600 : 2500;
     if (millis() - momentoConnesso > quando) {
@@ -1244,7 +1281,7 @@ void loop() {
       // Se e' gia' collegato, scansionare non serve e anzi confonde: l'ampli
       // connesso non si annuncia, quindi si leggerebbe «nessuno Spark».
       if (chScrittura) Serial.println(F("gia' collegato all'ampli"));
-      else { momentoSgancio = millis(); collega(); }
+      else { momentoSgancio = millis(); ultimoTentativo = 0; avviaScansione(); }
     }
     else if (c == 'x') {
       sganciato = true;
