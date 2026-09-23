@@ -422,14 +422,13 @@ l'aggancio lo fa il `loop()`.
 Sul pedale resta, e **non è poco** (detto dall'utente il 24 settembre, dopo che avevo
 scritto «finito»):
 
-1. **Il display del pedale, da rifare come era stato disegnato** — il capitolo che apre la
-   prossima sessione. **La disposizione giusta c'è già** ed è quella su cui è stato scelto il
-   display (`docs/pedale.md`, «Il display è il 2,42" 128×64»): **l'elenco a quattro righe**,
-   i quattro preset della metà mostrata uno per riga, ~21 caratteri a testa perché i nomi ci
-   stiano interi, più la **striscia in fondo `♪ A1 Clean Twin`** con quello che suona davvero.
-   Quella a **quattro colonne**, che ricalcava i pedali in fila, era stata **scartata**: torna
-   a sei caratteri per riga. Il firmware oggi fa un'altra cosa ancora (il suono attivo in
-   grande), ed è quello che non va.
+1. **Il display del pedale: scritto e caricato il 23 settembre, NON ancora visto acceso.**
+   `disegnaSchermo()` in `prova-ble` fa ora l'elenco a quattro righe (`A1 nome`, 6x13B,
+   18 caratteri, la riga che suona in negativo con la stessa regola dei LED) e la striscia
+   ♪ in fondo (nota disegnata a mano: il glifo non c'è nei font). La striscia la scavalcano
+   avviso (anche il nome del banco appena scelto, che in alto non sta più), ponte aperto e
+   «cerco lo Spark...». **Si riprende chiedendo la foto**: controllare i discendenti (g, p, y)
+   sopra la riga in negativo e che la ♪ si riconosca.
 2. **La modalità pedale MIDI**: il ragionamento è già in `docs/pedale.md` e non va rifatto,
    il firmware sì.
 3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella

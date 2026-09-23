@@ -296,58 +296,76 @@ static void aggiornaLed() {
   mcpScrivi(MCP_OLATB, maschera);
 }
 
-/** Quello che il pedale mostra: lo stato della radio, il preset che sta
- *  suonando e a che punto del banco si e'. Scuro con scritte chiare, niente
- *  zone piene: su un OLED un pixel nero e' spento e non consuma. */
+/** Una nota da otto pixel: ♪ non c'e' nei font di U8g2 che usiamo. */
+static void disegnaNota(int x, int y) {       // y = linea di base
+  schermo.drawDisc(x + 2, y - 2, 2);
+  schermo.drawVLine(x + 4, y - 9, 8);
+  schermo.drawLine(x + 4, y - 9, x + 7, y - 6);
+}
+
+/** Quello che il pedale mostra, come era stato disegnato (docs/pedale.md, «Il
+ *  display e' il 2,42" 128x64»): **i quattro preset della meta' mostrata, uno
+ *  per riga**, coi nomi interi, e in fondo la **striscia ♪** con quello che
+ *  suona davvero. La riga del suono che si sente e' in negativo, con la stessa
+ *  regola dei LED: solo se sta nella meta' mostrata e nel banco caricato.
+ *
+ *  6x13 grassetto: lettere alte nove pixel, ~3,9 mm sul vetro, sopra i 2,2 mm
+ *  che si leggono da in piedi. Diciotto caratteri dopo l'etichetta. */
 static void disegnaSchermo() {
   if (!schermoPresente) return;
   schermo.clearBuffer();
+  schermo.setFont(u8g2_font_6x13B_tf);
+  schermo.setFontMode(1);                      // trasparente: serve al testo in negativo
 
-  schermo.setFont(u8g2_font_6x12_tf);
-  schermo.drawStr(0, 10, chScrittura ? "Spark: connesso" : "Spark: cerco...");
-  // La meta' mostrata sta in alto a destra: e' lo stato che decide cosa
-  // vogliono dire i quattro tasti sotto il piede.
-  schermo.drawStr(110, 10, metaMostrata ? "B" : "A");
-  schermo.drawHLine(0, 14, 128);
+  const bool suonaQui = nomeSuona[0] && slotSuona == slotBanco && metaSuona == metaMostrata;
+  for (uint8_t i = 0; i < 4; i++) {
+    const uint8_t posto = (uint8_t)(metaMostrata * 4 + i);
+    const int y = i * 12;
+    const bool acceso = suonaQui && corrente == posto;
+    if (acceso) { schermo.setDrawColor(1); schermo.drawBox(0, y, 128, 12); }
+    schermo.setDrawColor(acceso ? 0 : 1);
 
-  // Il nome del banco, che coi tasti banco cambia sotto i piedi.
-  char banco[26];
+    char etichetta[3] = { metaMostrata ? 'B' : 'A', (char)('1' + i), 0 };
+    schermo.drawStr(1, y + 10, etichetta);
+    char nome[19];
+    snprintf(nome, sizeof(nome), "%s",
+             posto < quantiPosti() && postoPieno(posto) ? nomePosto(posto) : "-");
+    schermo.drawStr(17, y + 10, nome);
+  }
+  schermo.setDrawColor(1);
+  schermo.drawHLine(0, 49, 128);
+
+  /* La striscia in fondo. Di norma ♪ e il suono che si sente: quando la meta'
+   * mostrata non e' quella che suona i LED sono tutti spenti, e senza questa
+   * riga **si perderebbe l'unica informazione che conta**. Per questo c'e'
+   * sempre. La scavalcano solo le cose che vanno viste subito: un avviso
+   * (anche il nome del banco appena scelto), il ponte aperto col suo conto
+   * alla rovescia, l'ampli che non c'e'. */
+  char piede[26];
+  bool nota = false;
   if (avvisoTesto[0] && (int32_t)(avvisoFino - millis()) > 0) {
-    snprintf(banco, sizeof(banco), "%s", avvisoTesto);
+    snprintf(piede, sizeof(piede), "%s", avvisoTesto);
   } else if (pontefino) {
-    // Il ponte aperto e' uno stato che va visto: finche' e' aperto qualcuno
-    // puo' collegarsi, e il conto alla rovescia dice quanto manca.
     const uint32_t restano = (int32_t)(pontefino - millis()) > 0
                              ? (pontefino - millis()) / 1000 : 0;
-    snprintf(banco, sizeof(banco), "ponte aperto %lu:%02lu",
+    snprintf(piede, sizeof(piede), "ponte aperto %lu:%02lu",
              (unsigned long)(restano / 60), (unsigned long)(restano % 60));
+  } else if (!chScrittura) {
+    snprintf(piede, sizeof(piede), "cerco lo Spark...");
+  } else if (nomeSuona[0]) {
+    nota = true;
+    // L'etichetta solo se il suono viene da questo banco: da un altro, «A1»
+    // indicherebbe un tasto che adesso vuol dire un'altra cosa.
+    if (slotSuona == slotBanco)
+      snprintf(piede, sizeof(piede), "%c%u %s", metaSuona ? 'B' : 'A', (corrente % 4) + 1, nomeSuona);
+    else
+      snprintf(piede, sizeof(piede), "%s", nomeSuona);
   } else {
-    snprintf(banco, sizeof(banco), "%s", bancoAttivo.valido ? bancoAttivo.nome : "(firmware)");
+    snprintf(piede, sizeof(piede), "%s", bancoAttivo.valido ? bancoAttivo.nome : "banco del firmware");
   }
-  schermo.drawStr(0, 26, banco);
-
-  // I quattro nomi della meta' mostrata non ci stanno: ci sta il grande, ed
-  // e' quello che si guarda da in piedi.
-  schermo.setFont(u8g2_font_9x15B_tf);
-  char nome[15];
-  snprintf(nome, sizeof(nome), "%s", nomeSuona[0] ? nomeSuona : "-");
-  schermo.drawStr(0, 46, nome);
-
-  /* La riga ♪: quando la meta' mostrata non e' quella che suona i LED sono
-   * tutti spenti, e senza questa riga **si perderebbe l'unica informazione
-   * che conta**, cioe' cosa si sta sentendo. Per questo c'e' sempre, non solo
-   * in quel caso: una riga che compare e sparisce si legge peggio. */
-  schermo.setFont(u8g2_font_6x12_tf);
-  char piede[24];
-  if (nomeSuona[0]) {
-    snprintf(piede, sizeof(piede), "%c %c%u%s",
-             (metaSuona == metaMostrata && slotSuona == slotBanco) ? '>' : '~',
-             metaSuona ? 'B' : 'A', (corrente % 4) + 1,
-             slotSuona == slotBanco ? "" : "  (altro banco)");
-  } else {
-    snprintf(piede, sizeof(piede), "premi un footswitch");
-  }
-  schermo.drawStr(0, 62, piede);
+  if (nota) disegnaNota(1, 62);
+  piede[nota ? 18 : 21] = 0;                   // quel che ci sta in 128 pixel
+  schermo.drawStr(nota ? 12 : 1, 62, piede);
 
   schermo.sendBuffer();
 }
@@ -723,6 +741,7 @@ static void cambiaBanco(int8_t passo) {
   slotBanco = s;
   ricordaBanco(s);
   metaMostrata = 0;                      // un banco nuovo si presenta dalla meta' A
+  avvisa(bancoAttivo.valido ? bancoAttivo.nome : "banco del firmware");
   bersaglio = 0;
   Serial.printf("banco \"%s\" (slot %d); suona ancora %s\n",
                 bancoAttivo.nome, s, nomeSuona[0] ? nomeSuona : "(niente)");
