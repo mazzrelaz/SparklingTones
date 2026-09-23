@@ -428,8 +428,8 @@ scritto «finito»):
    `A1` in 6x13 grassetto e nome in 6x13 normale (il grassetto era troppo pieno), quello che
    suona in negativo. **Senza Spark** i preset lasciano il posto a «Accendi lo Spark /
    lo sto cercando» coi puntini che si muovono (fermo, sembrava piantato), e il suono si
-   azzera: riacceso, lo Spark suona il suo. All'accensione, 2,5 s di **schermata di avvio** (logo da , «By Massimo
-   Togni», , da alzare a ogni cambio visibile), che non ferma niente. Avvisi e ponte aperto prendono per un attimo il posto del nome del
+   azzera: riacceso, lo Spark suona il suo. All'accensione, 2,5 s di **schermata di avvio** (logo da `logo.h`, «By Massimo
+   Togni», `VERSIONE`, da alzare a ogni cambio visibile), che non ferma niente. Avvisi e ponte aperto prendono per un attimo il posto del nome del
    banco. **Visto in foto e approvato nei caratteri il 24 settembre; il quadratino in negativo
    va ancora guardato.**
 2. **La modalità pedale MIDI**: il ragionamento è già in `docs/pedale.md` e non va rifatto,
