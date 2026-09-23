@@ -422,13 +422,13 @@ l'aggancio lo fa il `loop()`.
 Sul pedale resta, e **non è poco** (detto dall'utente il 24 settembre, dopo che avevo
 scritto «finito»):
 
-1. **Il display del pedale: scritto e caricato il 23 settembre, NON ancora visto acceso.**
-   `disegnaSchermo()` in `prova-ble` fa ora l'elenco a quattro righe (`A1 nome`, 6x13B,
-   18 caratteri, la riga che suona in negativo con la stessa regola dei LED) e la striscia
-   ♪ in fondo (nota disegnata a mano: il glifo non c'è nei font). La striscia la scavalcano
-   avviso (anche il nome del banco appena scelto, che in alto non sta più), ponte aperto e
-   «cerco lo Spark...». **Si riprende chiedendo la foto**: controllare i discendenti (g, p, y)
-   sopra la riga in negativo e che la ♪ si riconosca.
+1. **Il display del pedale, deciso dall'utente il 24 settembre** (niente striscia ♪): in
+   alto il nome del banco (Helvetica grassetto 8) e a destra un quadratino con la S se lo
+   Spark è connesso, vuoto se no; sotto i quattro preset della metà mostrata, etichetta
+   `A1` in 6x13 grassetto e nome in 6x13 normale (il grassetto era troppo pieno), quello che
+   suona in negativo. Avvisi e ponte aperto prendono per un attimo il posto del nome del
+   banco. **Prima versione vista in foto; l'ultima (caratteri e spazio sotto la linea) va
+   ancora guardata.**
 2. **La modalità pedale MIDI**: il ragionamento è già in `docs/pedale.md` e non va rifatto,
    il firmware sì.
 3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
