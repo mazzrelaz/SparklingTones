@@ -404,39 +404,42 @@ il suo backup su Dropbox nel 2027**: non tocca il nostro sync, solo da dove si p
 l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pull --rebase`**
 (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 23 settembre 2026
+## Dove si riprende — 24 settembre 2026
 
-**Sulla XIAO c'è `prova-ble`, il firmware vero.** Il pedale è finito come ferramenta e fa il
-pedale: quattro suoni della metà mostrata, il quinto footswitch che cambia metà senza toccare
-il suono, i tasti banco, i LED (solo quello del suono attivo, rosso A / verde B) e l'OLED che
-dice metà, banco e cosa suona. **Verificato col piede il 23 settembre.**
+**Sulla XIAO c'è `prova-ble`, il firmware vero, e il pedale è finito.** Fa i quattro suoni
+della metà mostrata, il quinto footswitch cambia metà senza toccare il suono, i tasti banco
+girano fra il banco del firmware e quelli in memoria, i LED dicono cosa suona, il banco si
+ricorda allo spegnimento, il ponte si apre coi due tasti banco e il trasferimento di un banco
+dall'app funziona (4 KB in 1,5 s). **Tutto verificato sul pedale il 24 settembre.**
 
-Sul pedale, in quest'ordine:
+Due difetti di quel giorno, da non riscoprire: **su NimBLE i servizi GATT si registrano alla
+prima accensione dell'annuncio**, e farlo con l'ampli già collegato non riesce (il browser
+diceva «No Services matching UUID») — per questo l'annuncio si accende un attimo all'avvio e
+si rispegne; e **la scansione dell'ampli era bloccante**, otto secondi in cui i pulsanti non
+venivano letti, quindi a ampli spento il pedale sembrava morto: adesso è asincrona e
+l'aggancio lo fa il `loop()`.
 
-1. **Da provare, mai fatto**: il ponte che parte chiuso e si apre coi **due tasti banco
-   insieme** per 1,5 s (l'elenco del Bluetooth dev'essere vuoto prima, e `SparkPedale` dopo),
-   il **trasferimento di un banco** con la nuova verifica dei frame, e i **tasti banco** con
-   più di un banco in memoria.
-2. **Il banco non si ricorda al riavvio**: riparte sempre dal primo slot che trova.
-3. **L'autonomia**, l'ultima misura mancante, ora che il firmware vero è quello giusto per
-   misurarla.
-4. Poi il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
+Sul pedale resta:
+
+1. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
+   (mA) invece di aspettare che si scarichi; la via lunga è lasciarlo acceso e guardare
+   l'orologio. **Il partitore su `D0` non è saldato**, quindi l'indicatore di batteria non si
+   può ancora scrivere.
+2. Il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
    dell'uno manda `0x0175` `04`).
 
 **Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare
-il firmware il cavo va infilato **dentro**, direttamente nella XIAO. Se un giorno serve la
-modalità MIDI, o aggiornare il firmware a scatola chiusa, va comprato un codino **USB 2.0 con
-i dati**.
+il firmware il cavo va infilato **dentro**, direttamente nella XIAO.
 
 Sull'app (guscio `v75` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
 ampli finto):
 
-5. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
-6. **Editor con l'ampli acceso e sul telefono**.
-7. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
-8. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
-9. **Togliere dal catalogo altri modelli che l'ampli non ha.**
-10. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
+3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
+4. **Editor con l'ampli acceso e sul telefono**.
+5. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
+6. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
+7. **Togliere dal catalogo altri modelli che l'ampli non ha.**
+8. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
 
 **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
 i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
