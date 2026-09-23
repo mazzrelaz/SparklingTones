@@ -160,9 +160,44 @@ static bool schermoPresente = false;
 static bool schermoSporco   = true;    // c'e' qualcosa da ridisegnare
 
 static const uint8_t MCP_IODIRA = 0x00;
+static const uint8_t MCP_IODIRB = 0x01;
 static const uint8_t MCP_GPPUA = 0x0c;
 static const uint8_t MCP_GPIOA = 0x12;
+static const uint8_t MCP_OLATB = 0x15;
 static uint8_t mcp = 0;                  // 0 = nessun espansore sul bus
+
+/* --- La mappa di pulsanti e LED ------------------------------------------
+ *
+ * **Copiata da `prova-espansore` e non ricostruita a mente**: e' cambiata
+ * quattro volte, perche' il cablaggio e' stato rifatto altrettante. Questa e'
+ * quella trovata con la mappatura guidata il 18 settembre 2026, sulla basetta
+ * coi connettori JST. Se un cavo si sposta, si rifa' la mappatura (due
+ * pulsanti insieme per un secondo e mezzo) e si riportano qui i tre elenchi.
+ *
+ * Pulsanti: footswitch 1..5 da sinistra, poi tasto banco sinistro e destro.
+ * LED: per ognuno dei quattro, la linea del rosso e quella del verde. */
+static const uint8_t N_PULSANTI = 7;
+static const uint8_t FS5 = 4, BANCO_SX = 5, BANCO_DX = 6;
+static const uint8_t LINEA_PULSANTE[N_PULSANTI] = {4, 5, 6, 3, 7, 1, 0};
+static const uint8_t LINEA_ROSSO[4] = {5, 7, 1, 3};
+static const uint8_t LINEA_VERDE[4] = {4, 6, 0, 2};
+
+/* --- Le due meta' e il banco ---------------------------------------------
+ *
+ * Il banco e' da otto, in due meta' da quattro: i quattro footswitch sono la
+ * meta' **mostrata**, il quinto cambia meta' **senza toccare il suono**. Da
+ * qui segue tutto il comportamento dei LED: se la meta' mostrata non e' quella
+ * che sta suonando, nessuno di quei quattro tasti e' il suono che senti, e
+ * quindi **nessun LED e' acceso**. Quello che suona davvero lo dice l'OLED.
+ *
+ * `slotSuona` serve al caso meno ovvio: cambiato banco, il suono continua ma
+ * non appartiene piu' a quello che i tasti mostrano, quindi i LED si spengono
+ * come per la meta' sbagliata. */
+static uint8_t metaMostrata = 0;         // 0 = A (posti 1-4), 1 = B (5-8)
+static uint8_t metaSuona    = 0;
+static char    nomeSuona[40] = "";       // vuoto = non e' ancora partito niente
+static int8_t  slotBanco    = -1;        // slot di memoria caricato, -1 = quello del firmware
+static int8_t  slotSuona    = -2;        // da quale banco viene il suono che si sente
 
 static bool mcpScrivi(uint8_t reg, uint8_t val) {
   Wire.beginTransmission(mcp);
@@ -191,27 +226,33 @@ static void avviaEspansore() {
     Serial.println(F("espansore non trovato: uso il tasto BOOT della scheda"));
     return;
   }
-  mcpScrivi(MCP_IODIRA, 0xff);           // port A tutto in ingresso
+  mcpScrivi(MCP_IODIRA, 0xff);           // port A tutto in ingresso: i pulsanti
   mcpScrivi(MCP_GPPUA, 0xff);            // coi pull-up interni
-  Serial.printf("espansore a 0x%02X: il footswitch e' GPA0\n", mcp);
+  mcpScrivi(MCP_IODIRB, 0x00);           // port B tutto in uscita: i LED
+  mcpScrivi(MCP_OLATB, 0x00);            // spenti finche' non suona qualcosa
+  Serial.printf("espansore a 0x%02X: 7 pulsanti sul port A, 8 LED sul port B\n", mcp);
 }
 
-/** Il livello del tasto, alto = rilasciato. Dall'espansore si legge al
- *  massimo una volta al millisecondo: un footswitch non ha bisogno di piu',
- *  e il bus resta libero per il display. */
-static bool livelloTasto() {
-  if (mcp == 0) return digitalRead(PIN_TASTO) == HIGH;
-
+/** Il port A intero, un bit per linea, alto = rilasciato. Si legge al massimo
+ *  una volta al millisecondo: sette footswitch non hanno bisogno di piu', e il
+ *  bus resta libero per il display. Senza espansore si ripiega sul tasto BOOT,
+ *  che fa da footswitch 1, cosi' lo sketch gira anche su una devkit nuda. */
+static uint8_t leggiPortA() {
+  if (mcp == 0) {
+    const bool giu = digitalRead(PIN_TASTO) == LOW;
+    return giu ? (uint8_t)~(1 << LINEA_PULSANTE[0]) : 0xff;
+  }
   static uint32_t ultimaLettura = 0;
-  static bool memoria = true;
+  static uint8_t memoria = 0xff;
   const uint32_t ora = millis();
   if (ora != ultimaLettura) {
     ultimaLettura = ora;
     uint8_t v;
-    if (mcpLeggi(MCP_GPIOA, v)) memoria = (v & 0x01) != 0;
+    if (mcpLeggi(MCP_GPIOA, v)) memoria = v;
   }
   return memoria;
 }
+
 static const uint32_t ANTIRIMBALZO = 25;   // ms
 
 /* Antirimbalzo «aspetta che stia fermo», non «ignora i cambi ravvicinati».
@@ -221,10 +262,24 @@ static const uint32_t ANTIRIMBALZO = 25;   // ms
  * fronte grezzo e si accetta il livello solo quando e' rimasto immobile per
  * ANTIRIMBALZO: i rimbalzi allungano l'attesa di qualche ms, non annullano
  * la pressione. */
-static bool     livelloGrezzo = true;      // true = rilasciato (pull-up)
-static bool     livelloFermo  = true;
-static uint32_t ultimoFronte  = 0;
-static uint8_t  corrente      = 0;         // quale preset del banco sta suonando
+static uint8_t  ingressiGrezzi = 0xff;     // l'ultimo livello letto, rimbalzi compresi
+static uint8_t  ingressiFermi  = 0xff;     // quello accettato
+static uint32_t ultimoFronte   = 0;
+static uint8_t  corrente       = 0;        // quale preset del banco sta suonando
+
+/** I LED: **solo quello del suono che sta suonando**, nel colore della meta'
+ *  mostrata — rosso la A, verde la B, come i LED del pannello dell'ampli. Se
+ *  la meta' mostrata non e' quella che suona, o se il banco e' cambiato dopo,
+ *  sono tutti spenti: nessuno di quei quattro tasti e' il suono che senti. */
+static void aggiornaLed() {
+  if (mcp == 0) return;
+  uint8_t maschera = 0;
+  if (nomeSuona[0] && slotSuona == slotBanco && metaSuona == metaMostrata) {
+    const uint8_t led = corrente % 4;
+    maschera = (uint8_t)(1 << (metaMostrata ? LINEA_VERDE[led] : LINEA_ROSSO[led]));
+  }
+  mcpScrivi(MCP_OLATB, maschera);
+}
 
 /** Quello che il pedale mostra: lo stato della radio, il preset che sta
  *  suonando e a che punto del banco si e'. Scuro con scritte chiare, niente
@@ -235,17 +290,38 @@ static void disegnaSchermo() {
 
   schermo.setFont(u8g2_font_6x12_tf);
   schermo.drawStr(0, 10, chScrittura ? "Spark: connesso" : "Spark: cerco...");
+  // La meta' mostrata sta in alto a destra: e' lo stato che decide cosa
+  // vogliono dire i quattro tasti sotto il piede.
+  schermo.drawStr(110, 10, metaMostrata ? "B" : "A");
   schermo.drawHLine(0, 14, 128);
 
+  // Il nome del banco, che coi tasti banco cambia sotto i piedi.
+  char banco[22];
+  snprintf(banco, sizeof(banco), "%s", bancoAttivo.valido ? bancoAttivo.nome : "(firmware)");
+  schermo.drawStr(0, 26, banco);
+
+  // I quattro nomi della meta' mostrata non ci stanno: ci sta il grande, ed
+  // e' quello che si guarda da in piedi.
   schermo.setFont(u8g2_font_9x15B_tf);
   char nome[15];
-  snprintf(nome, sizeof(nome), "%s", nomePosto(corrente));
-  schermo.drawStr(0, 38, nome);
+  snprintf(nome, sizeof(nome), "%s", nomeSuona[0] ? nomeSuona : "-");
+  schermo.drawStr(0, 46, nome);
 
+  /* La riga ♪: quando la meta' mostrata non e' quella che suona i LED sono
+   * tutti spenti, e senza questa riga **si perderebbe l'unica informazione
+   * che conta**, cioe' cosa si sta sentendo. Per questo c'e' sempre, non solo
+   * in quel caso: una riga che compare e sparisce si legge peggio. */
   schermo.setFont(u8g2_font_6x12_tf);
   char piede[24];
-  snprintf(piede, sizeof(piede), "%u di %u", corrente + 1, quantiPosti());
-  schermo.drawStr(0, 60, piede);
+  if (nomeSuona[0]) {
+    snprintf(piede, sizeof(piede), "%c %c%u%s",
+             (metaSuona == metaMostrata && slotSuona == slotBanco) ? '>' : '~',
+             metaSuona ? 'B' : 'A', (corrente % 4) + 1,
+             slotSuona == slotBanco ? "" : "  (altro banco)");
+  } else {
+    snprintf(piede, sizeof(piede), "premi un footswitch");
+  }
+  schermo.drawStr(0, 62, piede);
 
   schermo.sendBuffer();
 }
@@ -491,6 +567,63 @@ static void mandaPreset(uint8_t n) {
                 n + 1, nomePosto(n), tTotale, ack, quanti,
                 persi ? "  (ATTENZIONE: qualche chunk non confermato)" : "");
   corrente = n;
+  // Da qui dipendono i LED: il suono che si sente, da che meta' e da che banco
+  // viene. Il nome si **copia**, perche' cambiando banco quello di prima non
+  // esiste piu' e la riga ♪ resterebbe senza niente da dire.
+  metaSuona = (uint8_t)(n / 4);
+  slotSuona = slotBanco;
+  snprintf(nomeSuona, sizeof(nomeSuona), "%s", nomePosto(n));
+  aggiornaLed();
+  schermoSporco = true;
+}
+
+/** Il quinto footswitch: cambia la meta' mostrata **senza toccare il suono**.
+ *  Provato col piede nel simulatore il 16 agosto 2026: premere questo tasto
+ *  non deve cambiare quello che stai suonando, perche' sul palco la sorpresa
+ *  e' il difetto peggiore. Costa una pedalata in piu' per la coppia
+ *  strofa/ritornello, e va bene cosi'. */
+static void cambiaMeta() {
+  metaMostrata = metaMostrata ? 0 : 1;
+  Serial.printf("meta' %c mostrata; suona ancora %s\n",
+                metaMostrata ? 'B' : 'A', nomeSuona[0] ? nomeSuona : "(niente)");
+  aggiornaLed();
+  schermoSporco = true;
+}
+
+/** Il primo slot di memoria che contiene un banco, girando in tondo. */
+static int8_t slotBancoVicino(int8_t da, int8_t passo) {
+  for (uint8_t giro = 1; giro <= BANCHI_MAX; giro++) {
+    const int8_t s = (int8_t)(((int)da + (int)passo * (int)giro +
+                               (int)BANCHI_MAX * 8) % (int)BANCHI_MAX);
+    char percorso[16];
+    nomeFile((uint8_t)s, percorso, sizeof(percorso));
+    if (LittleFS.exists(percorso)) return s;
+  }
+  return -1;
+}
+
+/** I due tasti a mano: il banco precedente e il successivo. **Anche questi non
+ *  toccano il suono**, per la stessa ragione del cambio meta': cambia solo
+ *  quello che i quattro tasti vogliono dire. Finche' non se ne preme uno, i
+ *  LED restano spenti, perche' il suono che si sente viene da un altro banco. */
+static void cambiaBanco(int8_t passo) {
+  const int8_t s = slotBancoVicino(slotBanco < 0 ? 0 : slotBanco, passo);
+  if (s < 0) { Serial.println(F("in memoria non c'e' nessun banco")); return; }
+  if (s == slotBanco) { Serial.println(F("c'e' un solo banco in memoria")); return; }
+
+  BancoCaricato nuovo = {};
+  if (!bancoCarica((uint8_t)s, nuovo)) {
+    Serial.printf("il banco nello slot %d non si legge\n", s);
+    return;
+  }
+  bancoLibera(bancoAttivo);
+  bancoAttivo = nuovo;
+  slotBanco = s;
+  metaMostrata = 0;                      // un banco nuovo si presenta dalla meta' A
+  bersaglio = 0;
+  Serial.printf("banco \"%s\" (slot %d); suona ancora %s\n",
+                bancoAttivo.nome, s, nomeSuona[0] ? nomeSuona : "(niente)");
+  aggiornaLed();
   schermoSporco = true;
 }
 
@@ -505,29 +638,45 @@ static void richiedi(uint8_t n) {
                   inTrasferimento ? "  (in coda, trasferimento in corso)" : "");
 }
 
-/** Si agisce alla pressione, non al rilascio. */
+/** Si agisce alla pressione, non al rilascio. L'antirimbalzo guarda il port A
+ *  **intero**: un rimbalzo su una linea qualunque allunga l'attesa di qualche
+ *  millisecondo per tutte, che e' irrilevante sotto un piede e tiene il codice
+ *  in un posto solo. */
 static void leggiTasto() {
-  const bool livello = livelloTasto();                     // true = rilasciato
+  const uint8_t ingressi = leggiPortA();                   // bit alto = rilasciato
 
-  if (livello != livelloGrezzo) {          // fronte grezzo, rimbalzi compresi
-    livelloGrezzo = livello;
-    ultimoFronte  = millis();
+  if (ingressi != ingressiGrezzi) {        // fronte grezzo, rimbalzi compresi
+    ingressiGrezzi = ingressi;
+    ultimoFronte   = millis();
     frontiVisti++;
-    if (diagnostica)
-      Serial.printf("  ~ fronte %s  t=%lu\n", livello ? "su" : "GIU", millis());
+    if (diagnostica) Serial.printf("  ~ fronte  %02x  t=%lu\n", ingressi, millis());
     return;
   }
-  if (livello == livelloFermo) return;                     // gia' registrato
+  if (ingressi == ingressiFermi) return;                   // gia' registrato
   if (millis() - ultimoFronte < ANTIRIMBALZO) return;      // non ancora fermo
 
-  livelloFermo = livello;
-  if (livelloFermo) return;                                // rilascio: niente
-  pressioniViste++;
-  if (!bancoHaQualcosa()) {
-    Serial.println(F("il banco caricato non ha nemmeno un preset: non c'e' niente da suonare"));
-    return;
+  const uint8_t prima = ingressiFermi;
+  ingressiFermi = ingressi;
+
+  for (uint8_t k = 0; k < N_PULSANTI; k++) {
+    const uint8_t bit = (uint8_t)(1 << LINEA_PULSANTE[k]);
+    const bool giuPrima = !(prima & bit);
+    const bool giuOra   = !(ingressi & bit);
+    if (!giuOra || giuPrima) continue;                     // solo le pressioni
+    pressioniViste++;
+
+    if (k == FS5)       { cambiaMeta();  continue; }
+    if (k == BANCO_SX)  { cambiaBanco(-1); continue; }
+    if (k == BANCO_DX)  { cambiaBanco(+1); continue; }
+
+    // I quattro sotto il piede: il posto dipende dalla meta' mostrata.
+    const uint8_t posto = (uint8_t)(metaMostrata * 4 + k);
+    if (posto >= quantiPosti() || !postoPieno(posto)) {
+      Serial.printf("posto %c%u vuoto\n", metaMostrata ? 'B' : 'A', k + 1);
+      continue;
+    }
+    richiedi(posto);
   }
-  richiedi(prossimoPieno(bersaglio));
 }
 
 /* ======================================================================
@@ -905,10 +1054,12 @@ void setup() {
   // prova che e' autonomo, cioe' che sopravvive allo spegnimento.
   for (uint8_t s = 0; s < BANCHI_MAX; s++) {
     if (bancoCarica(s, bancoAttivo)) {
+      slotBanco = (int8_t)s;
       Serial.printf("banco \"%s\" dallo slot %u\n", bancoAttivo.nome, s);
       break;
     }
   }
+  aggiornaLed();   // spenti: finche' non si preme un tasto non suona niente di nostro
   BLEDevice::init("SparkPedale");
   avviaPonte();          // prima il server: cosi' l'app lo trova sempre
   collega();
