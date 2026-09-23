@@ -302,10 +302,10 @@ static void aggiornaLed() {
 }
 
 /* La schermata di avvio, chiesta dall'utente il 24 settembre 2026: il logo
- * dell'app, sotto l'autore e la versione. Resta due secondi e mezzo, ma **non
+ * dell'app, sotto l'autore e la versione. Resta quattro secondi, ma **non
  * ferma niente**: intanto il pedale cerca lo Spark e legge i pulsanti, e il
  * loop semplicemente non ridisegna finche' non e' passata. */
-static const uint32_t AVVIO_MS = 2500;
+static const uint32_t AVVIO_MS = 4000;
 static uint32_t avvioFino = 0;
 
 static void disegnaAvvio() {
