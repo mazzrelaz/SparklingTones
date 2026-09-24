@@ -43,6 +43,16 @@ consentire, un banner è peggio che non averlo. Resta vero solo che GitHub tiene
 tecnici con gli IP, e la pagina lo dice. **Se ritorna il discorso, la risposta è già
 scritta**: non serve rifare l'analisi.
 
+**Il sito è anche in inglese** (24 settembre 2026): `en/index.html` ed `en/privacy.html` sono
+copie tradotte, con lo stesso stile incollato dentro (i caratteri da `../fonts/`). Ogni pagina
+porta all'altra lingua con un link — «EN»/«IT» in alto accanto al pulsante, e in fondo — e
+hreflang le accoppia (`x-default` va all'inglese, per chi non è né l'uno né l'altro). **Niente
+script e niente reindirizzamenti**: la privacy promette che il sito non ne ha. I link all'app
+passano `?lang=it` o `?lang=en`, così l'app si apre nella lingua della pagina. **L'inglese è
+secondario**: le pagine `en/` non si leggono e non si toccano finché l'utente non chiede di
+aggiornarle; allora si rifanno dalla versione italiana. La sezione del pedale, in tutte e due,
+racconta ancora il pedale a metà (schedina nuda).
+
 Il repo del sito ha la sua identità git (`massimo.togni@gmail.com`); **il primo commit porta
 per sbaglio `mazzbackup@gmail.com`** e GitHub potrebbe non attribuirlo. Correggerlo vorrebbe
 dire riscrivere la radice e forzare il push sopra i commit di GitHub: l'utente ha deciso di

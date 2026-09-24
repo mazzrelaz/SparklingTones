@@ -42,6 +42,8 @@ src/spark-backup.js               legge preset_backup.zip dell'app ufficiale
 src/dropbox-sync.js               sync della libreria: OAuth PKCE, niente server
 src/pedale-ponte.js               sponda app del ponte BLE verso il pedale
 src/pwa.js / src/snake-pedali.js  service worker; StompSnake
+src/lingua.js                     le lingue: tr() e la traduzione dell'HTML all'avvio
+src/lingua-en.js                  l'inglese — NON si legge (vedi «L'inglese»)
 pedale/prova-ble/                 firmware del pedale (banchi.h, preset_frames.h)
 pedale/prova-espansore/           pulsanti e LED: mappatura guidata e prova a mano
 pedale/prova-usb|display|midi/    altri sketch di prova
@@ -54,7 +56,7 @@ captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte g
 **`tools/explorer.html` è CONGELATO** (copia propria del protocollo, single-file per il
 telefono): le modifiche vanno in `src/`.
 
-**`index.html` è 186 KB, ~55.000 token: mai leggerlo intero.** `grep -n '^/\* ==='` dà
+**`index.html` è 265 KB, ~75.000 token: mai leggerlo intero.** `grep -n '^/\* ==='` dà
 l'indice del JavaScript, poi `sed -n 'a,bp'` sulla sola sezione.
 
 Niente build, tutto da `file://`: i moduli sono classic script (`window.Spark`, …), perché gli
@@ -208,6 +210,35 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
 `testo` è HTML: un nome dai dati passa da **`testoConNome()`**. Esc e tocco fuori → `null`.
 **Nella tendina «⋯» nessuna voce si spegne** (un `disabled` non riceve il clic e la tendina non
 si chiude): senza ampli rispondono con `senzaAmpli(cosa)`.
+
+### L'inglese — lingua secondaria (dal 24 settembre 2026)
+
+**Regola dell'utente: app e sito si cambiano solo in italiano, e la parte inglese non si
+legge né si tocca finché non è lui a dire di aggiornare anche l'inglese.** Quindi mai aprire
+`src/lingua-en.js` né `sparklingtones-sito/en/`, e nelle ricerche escluderli
+(`--glob '!src/lingua-en.js'`, `--glob '!en/**'`). Il perché del disegno è in
+`docs/decisioni-ui.md`, «La decisione sull'inglese».
+
+- **Ogni testo nuovo dell'app, scritto in italiano, passa da `tr`** (`src/lingua.js`):
+  `tr('…')`, `` tr`…${x}…` ``, o `tr('… {0} …' + '…', x)` per le frasi lunghe. I moduli di
+  `src/` hanno già il ripiego (senza `lingua.js` resta l'italiano: test e strumenti non
+  cambiano). **Il testo scritto nell'HTML non vuole niente**: lo traduce
+  `Lingua.traduciPagina()` all'avvio, anche un paragrafo con grassetti e link, intero.
+- **La chiave è la frase italiana**: una frase nuova o cambiata, finché non ha traduzione,
+  esce in italiano anche in inglese. È il patto, non un difetto.
+- **Frasi intere, mai pezzi cuciti**: i valori nei segnaposto, così l'inglese li sposta. Un
+  nome mostrato che nasce in una costante (`Spark.CATENA`, `GRUPPI_AMPLI`, `NOME_EXTRA`)
+  passa da `tr` dove nasce o dove si mostra.
+- **Quando l'utente dice di aggiornare l'inglese**: `tools/lingua.html` (Edge headless con
+  `--allow-file-access-from-files`, poi `#riassunto` e `#mancanti`) dà le frasi mancanti,
+  quelle non più usate e quelle con segnaposto o tag diversi; si completa `lingua-en.js`, e
+  le pagine `en/` del sito si rifanno dalla versione italiana.
+- La lingua sta in `localStorage` (`lingua`), altrimenti è quella del browser (non italiano
+  → inglese); `?lang=en|it` la sceglie da fuori, e i link del sito la passano. Si cambia in
+  cima al pannello «Altro» e **ricarica la pagina** (con l'ampli collegato chiede prima).
+- Il sito ha `en/index.html` ed `en/privacy.html`, copie tradotte **senza script** (la
+  privacy lo promette): la lingua si cambia con un link, hreflang le accoppia.
+- Non tradotti: il firmware del pedale, `README.md`, `docs/`, il manifest, `live.html`.
 
 ### Nomi di effetti e manopole (`src/spark-effetti.js`)
 
@@ -396,8 +427,8 @@ Snake in «Fai una pausa». **Non tocca niente dell'app** (solo `SnakePedali.apr
   `store.importFromAmp([...])`.
 - **Questa memoria la aggiorno io**, sempre a fine sessione; si registrano anche le ipotesi
   escluse da misure. Si segna sempre cosa è verificato sull'hardware.
-- Italiano in commenti e UI. **L'inglese ci sarà, non adesso** (piano in
-  `docs/decisioni-ui.md`). Byte in hex minuscolo separato da spazi.
+- Italiano in commenti e UI; la UI ha anche l'inglese, secondario (vedi «L'inglese»). Byte
+  in hex minuscolo separato da spazi.
 
 ## Dropbox e sito
 
@@ -414,10 +445,9 @@ l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pu
 
 ## Dove si riprende — 24 settembre 2026
 
-**La prossima sessione apre l'inglese** (chiesto dall'utente il 24 settembre): traduzione di
-**tutto, app e sito** (`sparklingtones.com`, repo a parte), con **l'opzione per scegliere
-la lingua**. Il piano già scritto è in `docs/decisioni-ui.md`, «La decisione sull'inglese»:
-leggerlo prima di cominciare. «Italiano nella UI» nelle Convenzioni va aggiornato allora.
+**L'inglese è fatto** (24 settembre 2026): app e sito, con la scelta della lingua, pubblicati.
+Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta indietro
+finché l'utente non dice di aggiornarlo.
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni
 della metà mostrata, il quinto footswitch cambia metà senza toccare il suono, i tasti banco
@@ -477,7 +507,7 @@ scritto «finito»):
 **Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare
 il firmware il cavo va infilato **dentro**, direttamente nella XIAO.
 
-Sull'app (guscio `v75` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v76` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.

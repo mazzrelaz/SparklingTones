@@ -849,3 +849,64 @@ l'elenco si costruisce in due passate.
   toccare una riga di testo dell'app. Allora: `src/lingua.js` con due dizionari e una
   `t()`, `data-t` sugli elementi statici, nessuna libreria e nessun build step. L'utente ha
   detto «non c'è fretta»: è per sé, non per pubblicarla ad altri.
+
+### Com'è stato fatto — 24 settembre 2026
+
+Chiesto dall'utente il 24 settembre, **app e sito**, con la scelta della lingua, e con una
+condizione che ha deciso il disegno: **l'inglese resta la lingua secondaria**. Le modifiche
+future si fanno in italiano, e la parte inglese non la si legge finché lui non dice di
+aggiornarla. Quindi l'inglese doveva poter restare indietro senza rompere niente.
+
+- **La chiave di ogni traduzione è la frase italiana stessa**, non un identificativo
+  (`msg.salvato`): il codice resta leggibile in italiano, una frase nuova non richiede di
+  inventarle un nome, e **una frase senza traduzione esce in italiano** anche in inglese. È
+  quello che rende sopportabile un inglese in ritardo: mai una chiave a vista, mai un buco.
+  Il prezzo è che correggere una virgola nell'italiano «stacca» la sua traduzione — che
+  torna fuori in `tools/lingua.html` come mancante e come non più usata.
+- **Tutto l'inglese in un file** (`src/lingua-en.js`, ~500 voci, 56 KB), caricato sempre:
+  caricarlo solo in inglese voleva dire `document.write` o un avvio asincrono, per
+  risparmiare un file che il service worker tiene comunque in cache.
+- **Il testo dell'HTML si traduce da solo** all'avvio, girando l'albero: niente `data-t` da
+  ricordarsi su ogni elemento nuovo. Un elemento che mescola testo e tag in linea
+  (`<strong>`, `<em>`, `<a>`…) si traduce **intero, col suo HTML**, perché una frase
+  spezzata nei suoi pezzi non si traduce (l'ordine delle parole cambia). La raccolta delle
+  chiavi in `tools/lingua.html` usa la **stessa funzione** (`Lingua.raccogli`), così le due
+  cose non possono andare in disaccordo sulla normalizzazione degli spazi o dell'HTML.
+- **Il testo del JavaScript passa da `tr`**, con due forme: il template con tag
+  (`` tr`«${nome}» eliminato` `` → chiave `«{0}» eliminato`) e la concatenazione di
+  letterali con i valori in coda (`tr('… {0} …' + '…', x)`), per le frasi su più righe. I
+  segnaposto sono numerati perché in inglese l'ordine cambia. Si chiama `tr` e non `t`
+  perché di `t` locali ce n'erano una dozzina.
+- **I moduli di `src/` hanno un ripiego** (`const tr = window.tr || …`): i test e gli
+  strumenti che li caricano senza `lingua.js` restano in italiano e non si sono accorti di
+  niente. Per questo `lingua.js` deve caricarsi **prima** dei moduli, e lo
+  `<script src="src/dropbox-sync.js">` che stava per sbaglio in mezzo al pannello del pedale
+  è stato spostato con gli altri.
+- **Cambiare lingua ricarica la pagina**, e con l'ampli collegato prima chiede: tradurre dal
+  vivo voleva dire ridisegnare ogni pannello già costruito, per un gesto che si fa una volta.
+- **Senza una scelta vale il browser**: italiano se è italiano, altrimenti inglese. Si
+  ricorda in `localStorage` e non in `settings`, perché serve prima di qualunque lettura
+  asincrona. `?lang=` nell'indirizzo la sceglie da fuori: ci passano i link del sito.
+- **Il sito ha due pagine per lingua** (`en/`), non una pagina che si traduce: il sito non ha
+  script e la privacy lo promette, e due copie statiche sono anche quello che i motori di
+  ricerca capiscono meglio (hreflang). Niente reindirizzamento automatico per la stessa
+  ragione.
+- **Misurato sul telefono**: «Duplicate» non ci stava nella riga delle quattro azioni
+  (usciva «Duplica…»), quindi in inglese è «Copy».
+
+Verificato nel browser in tutte e due le lingue, anche a 375 px; le suite sono rimaste
+verdi senza toccarle.
+
+### Estratto da CLAUDE.md, 24 settembre 2026 — copiato parola per parola
+
+Dalle Convenzioni:
+
+- Italiano in commenti e UI. **L'inglese ci sarà, non adesso** (piano in
+  `docs/decisioni-ui.md`). Byte in hex minuscolo separato da spazi.
+
+Da «Dove si riprende — 24 settembre 2026»:
+
+**La prossima sessione apre l'inglese** (chiesto dall'utente il 24 settembre): traduzione di
+**tutto, app e sito** (`sparklingtones.com`, repo a parte), con **l'opzione per scegliere
+la lingua**. Il piano già scritto è in `docs/decisioni-ui.md`, «La decisione sull'inglese»:
+leggerlo prima di cominciare. «Italiano nella UI» nelle Convenzioni va aggiornato allora.
