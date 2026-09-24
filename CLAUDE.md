@@ -414,6 +414,11 @@ l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pu
 
 ## Dove si riprende — 24 settembre 2026
 
+**La prossima sessione apre l'inglese** (chiesto dall'utente il 24 settembre): traduzione di
+**tutto, app e sito** (`sparklingtones.com`, repo a parte), con **l'opzione per scegliere
+la lingua**. Il piano già scritto è in `docs/decisioni-ui.md`, «La decisione sull'inglese»:
+leggerlo prima di cominciare. «Italiano nella UI» nelle Convenzioni va aggiornato allora.
+
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni
 della metà mostrata, il quinto footswitch cambia metà senza toccare il suono, i tasti banco
 girano fra il banco del firmware e quelli in memoria, i LED dicono cosa suona, il banco si
@@ -456,8 +461,14 @@ scritto «finito»):
    insieme). A ponte chiuso in MIDI chi si collega è `midiCentrale` e non può scrivere
    banchi. Ogni comando parte da USB e BLE (`mandaMidi`). Senza cifratura, e iOS lo accetta.
    Su Windows il BLE-MIDI non arriva ai programmi (29 agosto): lì resta l'USB.
-3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
-   (mA) invece di aspettare che si scarichi; la via lunga è lasciarlo acceso e guardare
+3. **L'autonomia**, l'ultima misura mai fatta, **rimandata dall'utente il 24 settembre**. Il
+   piano deciso: **tester sui due contatti dell'interruttore lasciato spento** (è sul
+   positivo fra cella e XIAO, quindi il tester fa da interruttore e misura), USB staccato;
+   tre letture (collegato allo Spark e fermo, picco a un footswitch, modalità MIDI);
+   3300 mAh diviso i mA. **Prima si chiedono le foto** del tester (rotella e prese: presa
+   sbagliata = fusibile bruciato) e dell'interruttore coi suoi fili. Se il pedale si
+   riavvia all'accensione, è la caduta di tensione del tester: portata più alta. Poi
+   il partitore su `D0`. Altrimenti la via lunga: la via lunga è lasciarlo acceso e guardare
    l'orologio. **Il partitore su `D0` non è saldato**, quindi l'indicatore di batteria non si
    può ancora scrivere.
 4. Il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
