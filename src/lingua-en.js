@@ -1013,4 +1013,6 @@ window.LINGUA_EN = {
     "PAUSE",
   "il wah se n'è andato":
     "the wah is gone",
+  "Tipo":
+    "Type",
 };

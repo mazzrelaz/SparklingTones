@@ -897,6 +897,19 @@ aggiornarla. Quindi l'inglese doveva poter restare indietro senza rompere niente
 Verificato nel browser in tutte e due le lingue, anche a 375 px; le suite sono rimaste
 verdi senza toccarle.
 
+**Audit dello stesso giorno, chiesto dall'utente.** Una sola cosa sfuggita: `'Tipo'`, il nome
+proposto della settima manopola del riverbero in `spark-effetti.js`, che non passava da `tr`
+(il controllo delle frasi lasciate fuori saltava le parole singole minuscole, scambiandole
+per identificatori). Corretta, guscio `v77`, 502 frasi. Il resto misurato: ogni frase italiana
+ritrovata identica nei letterali del codice di prima (`ad9eef2`); nessuna variabile locale
+`tr`; nessun confronto logico su un testo che ora si traduce; gli otto strumenti di `tools/`
+che caricano i moduli senza `lingua.js` partono senza errori e restano in italiano; l'app
+girata in tutte e due le lingue (dettaglio, editor senza ampli e cambi di modello, banchi,
+categorie, pedale, Dropbox, import di file sbagliati, preset non mandabile, StompSnake) senza
+errori in console e con `Lingua.mancanti` vuoto; sito con le quattro pagine online, nessun
+link locale rotto, nessuno script, hreflang a coppie; i link dei `README` e del protocollo
+nelle due lingue tutti validi.
+
 ### Estratto da CLAUDE.md, 24 settembre 2026 — copiato parola per parola
 
 Dalle Convenzioni:

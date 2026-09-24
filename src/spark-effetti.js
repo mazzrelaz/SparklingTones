@@ -276,7 +276,7 @@ window.SparkEffetti = (function () {
       scelte: { 6: ['Room Studio A', 'Chamber', 'Hall Natural', 'Plate Short',
                     'Hall Ambient', 'Plate Rich', 'Hall Medium', 'Plate Long',
                     'Room Studio B'] },
-      manopole: ['Level', 'Damping', 'Low Cut', 'High Cut', 'Dwell', 'Time', 'Tipo'] },
+      manopole: ['Level', 'Damping', 'Low Cut', 'High Cut', 'Dwell', 'Time', tr('Tipo')] },
   };
 
   /**

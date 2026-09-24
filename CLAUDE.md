@@ -510,7 +510,7 @@ scritto «finito»):
 **Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare
 il firmware il cavo va infilato **dentro**, direttamente nella XIAO.
 
-Sull'app (guscio `v76` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v77` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
