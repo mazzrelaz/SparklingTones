@@ -13,6 +13,9 @@
  */
 window.PresetStore = (function () {
   'use strict';
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
   const DB_VERSION = 2;
   const STORE      = 'presets';
@@ -106,7 +109,7 @@ window.PresetStore = (function () {
     },
 
     _tx(mode, which) {
-      if (!this.db) throw new Error('store non aperto: chiama open() prima');
+      if (!this.db) throw new Error(tr('store non aperto: chiama open() prima'));
       const name = which || STORE;
       return this.db.transaction(name, mode).objectStore(name);
     },
@@ -196,7 +199,7 @@ window.PresetStore = (function () {
       const banchi = await this.getSetting('banchi', []);
       const id = banchi.reduce((max, b) => Math.max(max, b.id), 0) + 1;
       const banco = { id, uuid: nuovoUuid(),
-                      nome: String(nome || '').trim() || `Banco ${banchi.length + 1}`,
+                      nome: String(nome || '').trim() || tr`Banco ${banchi.length + 1}`,
                       posti: this._ottoPosti([]) };
       banchi.push(banco);
       await this.setBanks(banchi);
@@ -245,7 +248,7 @@ window.PresetStore = (function () {
           mio.posti = posti;
         } else {
           nostri.push({ id: prossimo++, uuid: arrivo.uuid || nuovoUuid(),
-                        nome: String(arrivo.nome || '').trim() || `Banco ${nostri.length + 1}`,
+                        nome: String(arrivo.nome || '').trim() || tr`Banco ${nostri.length + 1}`,
                         posti });
         }
       }
@@ -255,7 +258,7 @@ window.PresetStore = (function () {
     async renameBank(id, nome) {
       const banchi = await this.getSetting('banchi', []);
       const banco  = banchi.find(b => b.id === id);
-      if (!banco) throw new Error(`banco ${id} inesistente`);
+      if (!banco) throw new Error(tr`banco ${id} inesistente`);
       banco.nome = String(nome || '').trim() || banco.nome;
       await this.setBanks(banchi);
       return banco;
@@ -270,11 +273,11 @@ window.PresetStore = (function () {
     /** Mette un preset in un posto del banco, o lo svuota con null. */
     async setBankSlot(id, posto, presetId) {
       if (posto < 0 || posto >= POSTI_PER_BANCO) {
-        throw new Error(`posto ${posto} fuori dal banco: ce ne sono ${POSTI_PER_BANCO}`);
+        throw new Error(tr`posto ${posto} fuori dal banco: ce ne sono ${POSTI_PER_BANCO}`);
       }
       const banchi = await this.getSetting('banchi', []);
       const banco  = banchi.find(b => b.id === id);
-      if (!banco) throw new Error(`banco ${id} inesistente`);
+      if (!banco) throw new Error(tr`banco ${id} inesistente`);
       banco.posti = this._ottoPosti(banco.posti);
       banco.posti[posto] = presetId === undefined ? null : presetId;
       await this.setBanks(banchi);
@@ -420,7 +423,7 @@ window.PresetStore = (function () {
      */
     async duplicate(id, nome) {
       const originale = await this.get(id);
-      if (!originale) throw new Error(`preset ${id} inesistente`);
+      if (!originale) throw new Error(tr`preset ${id} inesistente`);
 
       const copia = Object.assign({}, originale, {
         uuid:  nuovoUuid(),
@@ -439,9 +442,9 @@ window.PresetStore = (function () {
     async _nomeLibero(nome) {
       const presi = new Set((await this.all())
         .map(r => String(r.name || '').trim().toLowerCase()));
-      const base = String(nome || 'Senza nome').trim();
-      let proposto = `${base} (copia)`;
-      for (let n = 2; presi.has(proposto.toLowerCase()); n++) proposto = `${base} (copia ${n})`;
+      const base = String(nome || tr('Senza nome')).trim();
+      let proposto = tr`${base} (copia)`;
+      for (let n = 2; presi.has(proposto.toLowerCase()); n++) proposto = tr`${base} (copia ${n})`;
       return proposto;
     },
 
@@ -584,7 +587,7 @@ window.PresetStore = (function () {
 
     async _update(id, change) {
       const record = await this.get(id);
-      if (!record) throw new Error(`preset ${id} inesistente`);
+      if (!record) throw new Error(tr`preset ${id} inesistente`);
       change(record);
       await this.put(record);
       return record;
@@ -616,7 +619,7 @@ window.PresetStore = (function () {
     setFamiglia(id, famiglia) {
       const valore = famiglia ? String(famiglia).trim().toLowerCase() : null;
       if (valore && !FAMIGLIE.some(f => f.id === valore)) {
-        throw new Error(`famiglia sconosciuta: ${famiglia}`);
+        throw new Error(tr`famiglia sconosciuta: ${famiglia}`);
       }
       return this._update(id, r => {
         if (valore) r.famiglia = valore;
@@ -639,7 +642,7 @@ window.PresetStore = (function () {
     async setColoreFamiglia(id, colore) {
       const chiave = String(id).trim().toLowerCase();
       if (!FAMIGLIE.some(f => f.id === chiave)) {
-        throw new Error(`famiglia sconosciuta: ${id}`);
+        throw new Error(tr`famiglia sconosciuta: ${id}`);
       }
       const scelti = Object.assign({}, await this.getSetting('coloriFamiglia', {}));
       if (colore) scelti[chiave] = String(colore);
@@ -670,7 +673,7 @@ window.PresetStore = (function () {
     async move(id, newIndex) {
       const records = await this.all();
       const from = records.findIndex(r => r.id === id);
-      if (from === -1) throw new Error(`preset ${id} inesistente`);
+      if (from === -1) throw new Error(tr`preset ${id} inesistente`);
 
       const target = Math.max(0, Math.min(records.length - 1, newIndex));
       records.splice(target, 0, records.splice(from, 1)[0]);
@@ -797,7 +800,7 @@ window.PresetStore = (function () {
     /** Crea una categoria vuota. Ripetere il nome non fa danni. */
     async addCategory(nome) {
       const pulito = String(nome || '').trim();
-      if (!pulito) throw new Error('la categoria vuole un nome');
+      if (!pulito) throw new Error(tr('la categoria vuole un nome'));
       const elenco = await this.getSetting('categorie', []);
       if (!elenco.some(n => n.toLowerCase() === pulito.toLowerCase())) {
         elenco.push(pulito);
@@ -810,7 +813,7 @@ window.PresetStore = (function () {
     async renameCategory(vecchio, nuovo) {
       const da = String(vecchio || '').trim().toLowerCase();
       const a  = String(nuovo   || '').trim();
-      if (!da || !a) throw new Error('serve sia il vecchio nome sia il nuovo');
+      if (!da || !a) throw new Error(tr('serve sia il vecchio nome sia il nuovo'));
 
       const elenco = (await this.getSetting('categorie', []))
         .map(n => (n.toLowerCase() === da ? a : n));
@@ -861,7 +864,7 @@ window.PresetStore = (function () {
     async moveCategory(nome, nuovoIndice) {
       const elenco = (await this.allCategories()).map(c => c.nome);
       const da = elenco.findIndex(n => n.toLowerCase() === String(nome).trim().toLowerCase());
-      if (da === -1) throw new Error(`categoria «${nome}» inesistente`);
+      if (da === -1) throw new Error(tr`categoria «${nome}» inesistente`);
       const a = Math.max(0, Math.min(elenco.length - 1, nuovoIndice));
       elenco.splice(a, 0, elenco.splice(da, 1)[0]);
       await this.setSetting('categorie', elenco);
@@ -935,7 +938,7 @@ window.PresetStore = (function () {
       const opts = options || {};
       const conLapidi = opts.lapidi !== false;
       if (!backup || backup.format !== 'spark-controller-library') {
-        throw new Error('il file non è un backup della libreria');
+        throw new Error(tr('il file non è un backup della libreria'));
       }
       if (opts.replace) await this.clear();
 

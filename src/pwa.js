@@ -13,6 +13,9 @@
 'use strict';
 
 (function () {
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
   const SUPPORTATO = 'serviceWorker' in navigator && location.protocol !== 'file:';
 
   /** Striscia in basso: un messaggio, un pulsante, e via. */
@@ -22,7 +25,7 @@
     barra.innerHTML =
       '<span></span>' +
       '<button type="button" class="pwa-si"></button>' +
-      '<button type="button" class="pwa-no" title="chiudi">✕</button>';
+      '<button type="button" class="pwa-no" title="' + tr('chiudi') + '">✕</button>';
     barra.querySelector('span').textContent = testo;
     barra.querySelector('.pwa-si').textContent = etichetta;
     barra.querySelector('.pwa-si').addEventListener('click', () => {
@@ -62,8 +65,8 @@
     event.preventDefault();
     invito = event;
     if (localStorage.getItem('pwa-installa-no') === '1') return;
-    const barra = striscia('Installa l\'app sul telefono, per averla a portata dall\'ampli.',
-      'Installa', async () => {
+    const barra = striscia(tr('Installa l\'app sul telefono, per averla a portata dall\'ampli.'),
+      tr('Installa'), async () => {
         invito.prompt();
         await invito.userChoice;
         invito = null;
@@ -120,7 +123,7 @@
   });
 
   function proponiAggiornamento(worker) {
-    striscia('C\'è una versione nuova dell\'app.', 'Aggiorna',
+    striscia(tr('C\'è una versione nuova dell\'app.'), tr('Aggiorna'),
       () => worker.postMessage('aggiorna'));
   }
 })();

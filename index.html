@@ -1154,6 +1154,15 @@
     <span style="flex:1"></span>
     <button class="primary" data-chiudi="pannelloAltro">Fatto</button>
   </div>
+  <!-- La lingua: scritta nelle due lingue, perché la trovi anche chi l'altra
+       non la legge. Cambiarla ricarica la pagina. -->
+  <div class="sezione-pannello" translate="no">
+    <h3>Lingua · Language</h3>
+    <div class="azioni" id="sceltaLingua">
+      <button data-lingua="it">Italiano</button>
+      <button data-lingua="en">English</button>
+    </div>
+  </div>
   <p class="spiega">La libreria vive in questo browser: l'esportazione è l'unico modo di
     portarla su un altro apparecchio o di metterla al sicuro.</p>
   <div class="azioni">
@@ -1400,7 +1409,6 @@
   </div>
 
   <div class="barra-alta">
-<script src="src/dropbox-sync.js"></script>
     <button id="btnPedaleConnetti" class="primary">Cerca il pedale</button>
     <span id="statoPedale" class="status off">non collegato</span>
     <span style="flex:1"></span>
@@ -1444,6 +1452,9 @@
   </div>
 </div>
 
+<script src="src/lingua.js"></script>
+<script src="src/lingua-en.js"></script>
+<script src="src/dropbox-sync.js"></script>
 <script src="src/spark-protocol.js"></script>
 <script src="src/spark-effetti.js"></script>
 <script src="src/spark-transport.js"></script>
@@ -1454,6 +1465,9 @@
 <script src="src/snake-pedali.js"></script>
 <script>
 'use strict';
+
+// Prima di tutto il resto: il JS che segue trova l'HTML già nella lingua scelta.
+Lingua.traduciPagina();
 
 /*
  * Due sezioni, Preset e Live, nello stesso documento.
@@ -1475,9 +1489,9 @@ const spark = new SparkTransport({
     // Da connesso il pulsante dice «CONNESSO» e non il nome dell'ampli: il nome
     // è lungo, cambia la larghezza della barra, e a chi suona non dice niente
     // che non sappia già. Resta nel titolo, per chi ha due amplificatori.
-    el.textContent = acceso ? 'CONNESSO' : state === 'connecting' ? label : 'CONNETTI';
-    el.title = acceso ? (spark.state.name || 'connesso')
-                      : 'collega l\'amplificatore via Bluetooth';
+    el.textContent = acceso ? tr('CONNESSO') : state === 'connecting' ? label : tr('CONNETTI');
+    el.title = acceso ? (spark.state.name || tr('connesso'))
+                      : tr('collega l\'amplificatore via Bluetooth');
     el.disabled = acceso || state === 'connecting';
     // «Leggi dall'ampli» e «Importa preset attuale» **non si spengono qui**:
     // stanno nella tendina «⋯», e un pulsante spento non riceve il clic —
@@ -1576,7 +1590,7 @@ function campioneModello(nome) {
     for (const e of (record.effects || [])) {
       if (e.name === nome && (e.params || []).length) {
         return { params: e.params.map(p => ({ index: p.index, value: p.value })),
-                 da: record.name || '(senza nome)' };
+                 da: record.name || tr('(senza nome)') };
       }
     }
   }
@@ -1623,6 +1637,8 @@ const slotsDi   = record => (record && record.slots) || [];
 const residente = record => slotsDi(record).length > 0;
 const etichetteSlot = record =>
   slotsDi(record).map(s => Spark.slotLabel(s).label).join(' ');
+/** Il colore di un LED dell'ampli, da mostrare: `Spark.slotLabel` lo dà in italiano. */
+const nomeColore = colore => colore === 'rosso' ? tr('rosso') : tr('verde');
 
 /* ====================================================================
    Le due viste
@@ -1636,7 +1652,7 @@ const inLive = () => location.hash === '#live';
 async function applicaVista() {
   const live_ = inLive();
   document.body.classList.toggle('vista-live', live_);
-  $('btnVista').textContent = live_ ? '← Preset' : 'Live →';
+  $('btnVista').textContent = live_ ? tr('← Preset') : tr('Live →');
   if (!live_) chiudiPannelli();
 
   await ricarica();
@@ -1828,7 +1844,7 @@ function disegnaPreset() {
 
     const eti = document.createElement('div');
     eti.className = 'banco-eti ' + (banco === 0 ? 'a' : 'b');
-    eti.textContent = 'banco ' + (banco === 0 ? 'A' : 'B');
+    eti.textContent = tr('banco {0}', banco === 0 ? 'A' : 'B');
     colonna.appendChild(eti);
 
     for (let posto = 0; posto < 4; posto++) {
@@ -1862,16 +1878,16 @@ function disegnaPreset() {
   visibili.forEach(record => libreria.appendChild(rigaPreset(record, null)));
 
   $('quantiLibreria').textContent = filtroAttivo()
-    ? `${visibili.length} di ${altri.length}`
+    ? tr`${visibili.length} di ${altri.length}`
     : `${altri.length}`;
 
   if (visibili.length === 0) {
     const vuoto = document.createElement('div');
     vuoto.className = 'vuoto-sezione';
     vuoto.textContent = altri.length === 0
-      ? 'Nessun preset oltre a quelli sull\'ampli. Connetti e premi «Leggi dall\'ampli», ' +
-        'oppure importa un backup da «Altro».'
-      : 'Nessun preset corrisponde alla ricerca.';
+      ? tr('Nessun preset oltre a quelli sull\'ampli. Connetti e premi «Leggi dall\'ampli», ' +
+        'oppure importa un backup da «Altro».')
+      : tr('Nessun preset corrisponde alla ricerca.');
     libreria.appendChild(vuoto);
   }
 }
@@ -1887,7 +1903,7 @@ function disegnaFiltriCategoria() {
 
   const tutte = document.createElement('span');
   tutte.className = 'pastiglia' + (vista.categoria ? '' : ' attiva');
-  tutte.textContent = 'tutte';
+  tutte.textContent = tr('tutte');
   tutte.addEventListener('click', () => { vista.categoria = ''; disegnaPreset(); });
   barra.appendChild(tutte);
 
@@ -1931,7 +1947,7 @@ function schedaSlot(record, slot) {
   const sigla = document.createElement('span');
   sigla.className = 'sigla';
   sigla.textContent = posizione.label;
-  sigla.title = `slot ${slot} — LED ${posizione.color} numero ${posizione.position}`;
+  sigla.title = tr`slot ${slot} — LED ${nomeColore(posizione.color)} numero ${posizione.position}`;
   alto.append(led, sigla);
   // Il bollo va **in cima e a destra**: la riga della sigla è l'unica che ha
   // spazio, e il nome sotto sta su due righe e non ne ha da cedere.
@@ -1948,7 +1964,7 @@ function schedaSlot(record, slot) {
   basso.className = 'basso';
   const nome = document.createElement('div');
   nome.className = 'nome-slot';
-  nome.textContent = record ? (record.name || '(senza nome)') : 'non ancora letto';
+  nome.textContent = record ? (record.name || tr('(senza nome)')) : tr('non ancora letto');
   if (record) nome.title = record.name || '';   // per intero, se è troncato
   basso.appendChild(nome);
   card.appendChild(basso);
@@ -2033,7 +2049,7 @@ function etichettaSlot(slot) {
   const el = document.createElement('span');
   el.className = 'slot ' + (posizione.color === 'rosso' ? 'a' : 'b');
   el.textContent = posizione.label;
-  el.title = `slot ${slot} — LED ${posizione.color} numero ${posizione.position}`;
+  el.title = tr`slot ${slot} — LED ${nomeColore(posizione.color)} numero ${posizione.position}`;
   return el;
 }
 
@@ -2059,10 +2075,9 @@ function bolloHendrix(record) {
   const pallino = document.createElement('span');
   pallino.className = 'pallino';
   bollo.append(pallino, 'JH');
-  bollo.title = dentro.map(n => SparkEffetti.nome(n)).join(' · ') +
-    ' — pacchetto Jimi Hendrix. Suonano solo dopo che l\'app ufficiale si è ' +
+  bollo.title = tr('{0} — pacchetto Jimi Hendrix. Suonano solo dopo che l\'app ufficiale si è ' +
     'connessa all\'ampli almeno una volta da quando è acceso: prima restano ' +
-    'muti, senza dare nessun errore.';
+    'muti, senza dare nessun errore.', dentro.map(n => SparkEffetti.nome(n)).join(' · '));
   return bollo;
 }
 
@@ -2080,7 +2095,7 @@ function rigaPreset(record, slot) {
   naming.className = 'naming';
   const nome = document.createElement('div');
   nome.className = 'name';
-  nome.textContent = record.name || '(senza nome)';
+  nome.textContent = record.name || tr('(senza nome)');
   naming.appendChild(nome);
 
   head.appendChild(naming);
@@ -2093,7 +2108,7 @@ function rigaPreset(record, slot) {
   const prova = document.createElement('button');
   prova.className = 'via' + (spark.connected ? ' pronto' : '');
   prova.textContent = '▶';
-  prova.title = 'manda il preset all\'ampli senza sovrascrivere nessuno slot';
+  prova.title = tr('manda il preset all\'ampli senza sovrascrivere nessuno slot');
   prova.disabled = !spark.connected;
   prova.addEventListener('click', event => {
     event.stopPropagation();
@@ -2120,7 +2135,7 @@ function dettaglio(record, slot) {
 
   /* nome ---------------------------------------------------------- */
   const boxNome = document.createElement('div');
-  boxNome.innerHTML = '<label>nome</label>';
+  boxNome.innerHTML = '<label>' + tr('nome') + '</label>';
   const campoNome = document.createElement('input');
   campoNome.type = 'text';
   campoNome.value = record.name || '';
@@ -2128,8 +2143,8 @@ function dettaglio(record, slot) {
     const nuovo = campoNome.value.trim();
     if (!nuovo || nuovo === record.name) { campoNome.value = record.name; return; }
     await store.setName(record.id, nuovo);
-    logLine(`rinominato in «${nuovo}». Sull'ampli il nome resta quello vecchio ` +
-            'finché non lo riscrivi in uno slot.');
+    logLine(tr('rinominato in «{0}». Sull\'ampli il nome resta quello vecchio ' +
+            'finché non lo riscrivi in uno slot.', nuovo));
     await ricarica();
     disegnaPreset();
   });
@@ -2145,7 +2160,7 @@ function dettaglio(record, slot) {
   // (Pink Floyd, jazz, il pezzo), questa è *che tipo di suono è*. Una sola,
   // scelta a mano, e si può togliere — chi non ce l'ha resta senza colore.
   const boxFam = document.createElement('div');
-  boxFam.innerHTML = '<label>famiglia di suono</label>';
+  boxFam.innerHTML = '<label>' + tr('famiglia di suono') + '</label>';
   const scelteFam = document.createElement('div');
   scelteFam.className = 'scelte';
 
@@ -2166,13 +2181,13 @@ function dettaglio(record, slot) {
   if (!record.famiglia) {
     const nota = document.createElement('div');
     nota.className = 'nota-famiglia';
-    nota.textContent = 'senza famiglia: resta senza colore.';
+    nota.textContent = tr('senza famiglia: resta senza colore.');
     boxFam.appendChild(nota);
   }
 
   /* categorie ----------------------------------------------------- */
   const boxCat = document.createElement('div');
-  boxCat.innerHTML = '<label>categorie</label>';
+  boxCat.innerHTML = '<label>' + tr('categorie') + '</label>';
   const scelte = document.createElement('div');
   scelte.className = 'scelte';
   const sue = new Set((record.tags || []).map(t => t.toLowerCase()));
@@ -2192,11 +2207,11 @@ function dettaglio(record, slot) {
 
   const nuova = document.createElement('span');
   nuova.className = 'scelta';
-  nuova.textContent = '＋ nuova…';
+  nuova.textContent = tr('＋ nuova…');
   nuova.addEventListener('click', async () => {
-    const nome = await chiediTesto('nuova categoria',
-      'Come si chiama? La userai per filtrare la libreria dalle pastiglie in alto.',
-      '', { ok: 'Crea e assegna', invito: 'blues, prove, casa…' });
+    const nome = await chiediTesto(tr('nuova categoria'),
+      tr('Come si chiama? La userai per filtrare la libreria dalle pastiglie in alto.'),
+      '', { ok: tr('Crea e assegna'), invito: tr('blues, prove, casa…') });
     if (!nome) return;
     await store.addCategory(nome);
     await store.addTag(record.id, nome.trim());
@@ -2208,10 +2223,10 @@ function dettaglio(record, slot) {
 
   /* note ---------------------------------------------------------- */
   const boxNote = document.createElement('div');
-  boxNote.innerHTML = '<label>note</label>';
+  boxNote.innerHTML = '<label>' + tr('note') + '</label>';
   const note = document.createElement('textarea');
   note.value = record.notes || '';
-  note.placeholder = 'come suona, quando usarlo, cosa cambiare…';
+  note.placeholder = tr('come suona, quando usarlo, cosa cambiare…');
   note.addEventListener('change', async () => {
     await store.setNotes(record.id, note.value);
     await ricarica();
@@ -2244,20 +2259,20 @@ function dettaglio(record, slot) {
     if (altri.length) {
       avvisoAltriSlot = document.createElement('div');
       avvisoAltriSlot.style.cssText = 'color:var(--dim);font-size:0.76rem';
-      avvisoAltriSlot.textContent = 'Lo stesso preset sta anche in ' +
-        altri.map(s => Spark.slotLabel(s).label).join(', ') + '.';
+      avvisoAltriSlot.textContent = tr('Lo stesso preset sta anche in {0}.',
+        altri.map(s => Spark.slotLabel(s).label).join(', '));
     }
 
     // Sta in una riga sua, sopra le quattro: non è un'azione sul preset ma
     // sull'ampli — gli dice quale slot mettere davanti — e compare solo
     // aprendo uno degli otto posti hardware.
     const attiva = document.createElement('button');
-    attiva.textContent = 'Seleziona ' + Spark.slotLabel(slot).label;
-    attiva.title = 'seleziona lo slot sull\'ampli, senza scrivere nulla';
+    attiva.textContent = tr('Seleziona {0}', Spark.slotLabel(slot).label);
+    attiva.title = tr('seleziona lo slot sull\'ampli, senza scrivere nulla');
     attiva.disabled = !spark.connected;
     attiva.addEventListener('click', async () => {
       await spark.send(Spark.commands.changePreset(slot));
-      logLine(`selezionato ${nomeSlot(slot)}`);
+      logLine(tr`selezionato ${nomeSlot(slot)}`);
     });
     azioni.insertBefore(riga('sola'), rigaSuono).appendChild(attiva);
   }
@@ -2266,19 +2281,19 @@ function dettaglio(record, slot) {
   // sicuro di provare un preset che sull'ampli non c'è.
   const prova = document.createElement('button');
   prova.className = 'primary';
-  prova.textContent = 'Attiva';
-  prova.title = 'manda il preset all\'ampli senza sovrascrivere nessuno slot';
+  prova.textContent = tr('Attiva');
+  prova.title = tr('manda il preset all\'ampli senza sovrascrivere nessuno slot');
   prova.disabled = !spark.connected;
   prova.addEventListener('click', () => mandaPreset(record, null));
   rigaSuono.appendChild(prova);
 
   const regola = document.createElement('button');
-  regola.textContent = 'Regola';
+  regola.textContent = tr('Regola');
   // Senza ampli si apre lo stesso, sulla copia in libreria: non si sente
   // niente, ma si guarda la catena e si salva. È il caso del divano.
   regola.title = spark.connected
-    ? 'manda il preset all\'ampli e apri le manopole'
-    : 'apri le manopole sulla copia in libreria: senza ampli non si sente, ma si salva';
+    ? tr('manda il preset all\'ampli e apri le manopole')
+    : tr('apri le manopole sulla copia in libreria: senza ampli non si sente, ma si salva');
   regola.addEventListener('click', () => apriEditor(record));
   rigaSuono.appendChild(regola);
 
@@ -2288,27 +2303,27 @@ function dettaglio(record, slot) {
   for (let i = 0; i < 8; i++) {
     const posizione = Spark.slotLabel(i);
     posti.push({ valore: i,
-                 testo: `${posizione.label} — LED ${posizione.color} ${posizione.position}` });
+                 testo: tr`${posizione.label} — LED ${nomeColore(posizione.color)} ${posizione.position}` });
   }
-  const scelta = tendinaFinta('dove scriverlo sull\'ampli', posti,
+  const scelta = tendinaFinta(tr('dove scriverlo sull\'ampli'), posti,
                               slot !== null ? slot : 0);
 
   const scrivi = document.createElement('button');
   scrivi.className = 'neon oro';
-  scrivi.textContent = 'Invia a preset HW';
-  scrivi.title = 'sovrascrive il preset presente in quello slot';
+  scrivi.textContent = tr('Invia a preset HW');
+  scrivi.title = tr('sovrascrive il preset presente in quello slot');
   scrivi.disabled = !spark.connected;
   scrivi.addEventListener('click', async () => {
     const dove = scelta.valore;
     const chiCera = suAmpli[dove];
     const avviso =
-      `Scrivere <strong>${testoConNome(record.name)}</strong> in ${nomeSlot(dove)} ` +
-      'sull\'ampli? ' +
+      tr('Scrivere <strong>{0}</strong> in {1} sull\'ampli?', testoConNome(record.name), nomeSlot(dove)) +
+      ' ' +
       (chiCera && chiCera.id !== record.id
-        ? `Sovrascrive «${testoConNome(chiCera.name)}», che è già lì — ma la sua copia ` +
-          'in libreria resta al sicuro, e ricompare nella lista qui sotto.'
-        : 'La copia in libreria resta comunque al sicuro.');
-    if (!await conferma('scrivere sull\'ampli', avviso, { ok: 'Scrivi ' + nomeSlot(dove) })) return;
+        ? tr('Sovrascrive «{0}», che è già lì — ma la sua copia ' +
+          'in libreria resta al sicuro, e ricompare nella lista qui sotto.', testoConNome(chiCera.name))
+        : tr('La copia in libreria resta comunque al sicuro.'));
+    if (!await conferma(tr('scrivere sull\'ampli'), avviso, { ok: tr('Scrivi {0}', nomeSlot(dove)) })) return;
     mandaPreset(record, dove);
   });
   const rigaSlot = riga('coppia');
@@ -2324,14 +2339,14 @@ function dettaglio(record, slot) {
     const quali = banchi.map(b => {
       const liberi = b.posti.filter(p => p === null).length;
       return { valore: b.id,
-               testo: b.nome + (liberi ? ` — ${liberi} posti liberi` : ' — pieno') };
+               testo: b.nome + (liberi ? tr` — ${liberi} posti liberi` : tr(' — pieno')) };
     });
-    const banco = tendinaFinta('in quale banco live', quali, banchi[0].id);
+    const banco = tendinaFinta(tr('in quale banco live'), quali, banchi[0].id);
 
     const metti = document.createElement('button');
     metti.className = 'neon blu';
-    metti.textContent = 'Metti nel banco';
-    metti.title = 'aggiunge il preset al banco live, senza toccare l\'ampli';
+    metti.textContent = tr('Metti nel banco');
+    metti.title = tr('aggiunge il preset al banco live, senza toccare l\'ampli');
     metti.addEventListener('click', async () => {
       const id = banco.valore;
       const scelto = banchi.find(b => b.id === id);
@@ -2339,18 +2354,18 @@ function dettaglio(record, slot) {
 
       const giaLi = scelto.posti.indexOf(record.id);
       if (giaLi !== -1) {
-        logLine(`«${record.name}» era già in «${scelto.nome}», al posto ${giaLi + 1}`);
+        logLine(tr`«${record.name}» era già in «${scelto.nome}», al posto ${giaLi + 1}`);
         return;
       }
       const libero = scelto.posti.indexOf(null);
       if (libero === -1) {
-        await avvisa('banco pieno',
-          `<strong>${testoConNome(scelto.nome)}</strong> ha tutti e otto i posti ` +
-          'occupati. Liberane uno dalla vista Live, oppure scegli un altro banco.');
+        await avvisa(tr('banco pieno'),
+          tr('<strong>{0}</strong> ha tutti e otto i posti ' +
+          'occupati. Liberane uno dalla vista Live, oppure scegli un altro banco.', testoConNome(scelto.nome)));
         return;
       }
       await store.setBankSlot(id, libero, record.id);
-      logLine(`«${record.name}» → «${scelto.nome}», posto ${libero + 1}`);
+      logLine(tr`«${record.name}» → «${scelto.nome}», posto ${libero + 1}`);
       await ricarica();
       disegnaPreset();
       disegnaLive();
@@ -2361,13 +2376,13 @@ function dettaglio(record, slot) {
   // Duplicare è il modo vero di fare un preset nuovo: si parte da un suono
   // che funziona. Non serve l'ampli, quindi il pulsante c'è sempre.
   const duplica = document.createElement('button');
-  duplica.textContent = 'Duplica';
-  duplica.title = 'ne fa una copia in libreria, da storcere a piacere';
+  duplica.textContent = tr('Duplica');
+  duplica.title = tr('ne fa una copia in libreria, da storcere a piacere');
   duplica.addEventListener('click', async () => {
     const copiaId = await store.duplicate(record.id);
     const copia = await store.get(copiaId);
     vista.aperto = `${copiaId}:null`;   // si apre la copia, che è quella su cui si lavora
-    logLine(`«${copia.name}» creato copiando «${record.name}»`);
+    logLine(tr`«${copia.name}» creato copiando «${record.name}»`);
     await ricarica();
     disegnaPreset();
     disegnaLive();
@@ -2376,15 +2391,15 @@ function dettaglio(record, slot) {
 
   const elimina = document.createElement('button');
   elimina.className = 'pericolo';
-  elimina.textContent = 'Elimina';
+  elimina.textContent = tr('Elimina');
   elimina.addEventListener('click', async () => {
-    if (!await conferma('eliminare dalla libreria',
-      `Eliminare <strong>${testoConNome(record.name)}</strong> dalla libreria? ` +
-      'L\'ampli non viene toccato: se è caricato in uno slot continua a suonare.',
-      { ok: 'Elimina', pericolo: true })) return;
+    if (!await conferma(tr('eliminare dalla libreria'),
+      tr('Eliminare <strong>{0}</strong> dalla libreria? ' +
+      'L\'ampli non viene toccato: se è caricato in uno slot continua a suonare.', testoConNome(record.name)),
+      { ok: tr('Elimina'), pericolo: true })) return;
     await store.remove(record.id);
     vista.aperto = null;
-    logLine(`«${record.name}» eliminato dalla libreria`);
+    logLine(tr`«${record.name}» eliminato dalla libreria`);
     await ricarica();
     disegnaPreset();
     disegnaLive();
@@ -2435,9 +2450,9 @@ async function scambiaNelBanco(banco, da, a) {
   live.sposta = null;
   await ricarica();
   disegnaLive();
-  const nome = r => (r ? `«${r.name}»` : 'il posto vuoto');
-  logLine(`${nome(perId(idDa))} ora è al posto ${a + 1}` +
-          (idA === null ? '' : `, ${nome(perId(idA))} al ${da + 1}`));
+  const nome = r => (r ? `«${r.name}»` : tr('il posto vuoto'));
+  logLine(tr`${nome(perId(idDa))} ora è al posto ${a + 1}` +
+          (idA === null ? '' : tr`, ${nome(perId(idA))} al ${da + 1}`));
 }
 
 function disegnaLive() {
@@ -2469,7 +2484,7 @@ function disegnaLive() {
 
     const nome = document.createElement('span');
     nome.textContent = vuoto
-      ? (banco ? (live.modifica ? 'tocca per scegliere' : 'vuoto') : 'non letto')
+      ? (banco ? (live.modifica ? tr('tocca per scegliere') : tr('vuoto')) : tr('non letto'))
       : record.name;
 
     // Niente «● istantaneo» / «● da caricare»: tolti su richiesta il 14 agosto
@@ -2504,8 +2519,8 @@ function disegnaLive() {
         presa.className = 'presa' + (live.sposta === posto ? ' viva' : '');
         presa.textContent = '⇅';
         presa.title = live.sposta === posto
-          ? 'tocca un altro posto per scambiare, o qui per lasciar perdere'
-          : 'sposta questo preset in un altro posto';
+          ? tr('tocca un altro posto per scambiare, o qui per lasciar perdere')
+          : tr('sposta questo preset in un altro posto');
         presa.addEventListener('click', event => {
           event.stopPropagation();
           live.sposta = live.sposta === posto ? null : posto;
@@ -2520,7 +2535,7 @@ function disegnaLive() {
     griglia.appendChild(pad);
   });
 
-  $('btnModifica').textContent = live.modifica ? 'Fatto' : 'Modifica';
+  $('btnModifica').textContent = live.modifica ? tr('Fatto') : tr('Modifica');
   $('btnModifica').className = 'solo-live' + (live.modifica ? ' primary' : '');
 }
 
@@ -2530,8 +2545,8 @@ function disegnaBanchi() {
 
   const ampli = document.createElement('span');
   ampli.className = 'banco' + (live.banco === BANCO_AMPLI ? ' attivo' : '');
-  ampli.textContent = 'Ampli';
-  ampli.title = 'gli otto preset caricati sull\'ampli: sempre istantanei';
+  ampli.textContent = tr('Ampli');
+  ampli.title = tr('gli otto preset caricati sull\'ampli: sempre istantanei');
   ampli.addEventListener('click', () => {
     live.banco = BANCO_AMPLI;
     live.modifica = false;
@@ -2553,11 +2568,11 @@ function disegnaBanchi() {
 
   const piu = document.createElement('span');
   piu.className = 'banco aggiungi';
-  piu.textContent = '＋ banco';
+  piu.textContent = tr('＋ banco');
   piu.addEventListener('click', async () => {
-    const nome = await chiediTesto('nuovo banco',
-      'Otto posti, quattro per piede. I banchi inventati non scrivono mai sull\'ampli.',
-      `Banco ${banchi.length + 1}`, { ok: 'Crea il banco' });
+    const nome = await chiediTesto(tr('nuovo banco'),
+      tr('Otto posti, quattro per piede. I banchi inventati non scrivono mai sull\'ampli.'),
+      tr`Banco ${banchi.length + 1}`, { ok: tr('Crea il banco') });
     if (nome === null) return;
     const banco = await store.addBank(nome);
     await ricarica();
@@ -2581,14 +2596,14 @@ const ELIMINA_BANCO = {};   // un valore che non è nessun nome possibile
 
 async function rinominaOElimina(banco) {
   const scelto = await finestra({
-    titolo: 'banco live',
-    testo: 'Cambiagli nome, oppure eliminalo: <strong>i preset restano in ' +
-           'libreria</strong>, sparisce solo l\'ordine in cui li avevi messi.',
+    titolo: tr('banco live'),
+    testo: tr('Cambiagli nome, oppure eliminalo: <strong>i preset restano in ' +
+           'libreria</strong>, sparisce solo l\'ordine in cui li avevi messi.'),
     campo: { valore: banco.nome },
     azioni: [
-      { testo: 'Salva il nome', classe: 'primary', vuoleTesto: true },
-      { testo: 'Elimina il banco', classe: 'pericolo', valore: ELIMINA_BANCO },
-      { testo: 'Annulla', valore: null },
+      { testo: tr('Salva il nome'), classe: 'primary', vuoleTesto: true },
+      { testo: tr('Elimina il banco'), classe: 'pericolo', valore: ELIMINA_BANCO },
+      { testo: tr('Annulla'), valore: null },
     ],
   });
   if (scelto === null) return;
@@ -2618,10 +2633,10 @@ async function attiva(record, barra) {
       await spark.loadPreset(record, (i, total) => {
         barra.style.width = Math.round(((i + 1) / total) * 100) + '%';
       });
-      logLine(`${record.name} — caricato nel preset software`);
+      logLine(tr`${record.name} — caricato nel preset software`);
     }
   } catch (err) {
-    logLine('errore: ' + err.message);
+    logLine(tr('errore: {0}', err.message));
     live.attivo = null;
   }
   live.occupato = false;
@@ -2634,7 +2649,7 @@ let sceltaInCorso = null;   // {bancoId, posto}
 
 function scegliPer(banco, posto) {
   sceltaInCorso = { bancoId: banco.id, posto };
-  $('titoloScegli').textContent = `${banco.nome} — posto ${posto + 1}`;
+  $('titoloScegli').textContent = tr`${banco.nome} — posto ${posto + 1}`;
   $('cercaScegli').value = '';
   disegnaElencoScelta();
   apriPannello('pannelloScegli');
@@ -2647,7 +2662,7 @@ function disegnaElencoScelta() {
   const candidati = tutti.filter(r => !termine || (r.name || '').toLowerCase().includes(termine));
 
   if (candidati.length === 0) {
-    elenco.innerHTML = '<div class="vuoto-sezione">Nessun preset.</div>';
+    elenco.innerHTML = '<div class="vuoto-sezione">' + tr('Nessun preset.') + '</div>';
     return;
   }
 
@@ -2689,8 +2704,8 @@ $('btnSvuotaPosto').addEventListener('click', async () => {
 
 $('btnModifica').addEventListener('click', () => {
   if (live.banco === BANCO_AMPLI) {
-    logLine('Il banco «Ampli» rispecchia gli otto slot dell\'ampli: per cambiarlo ' +
-            'scrivi un preset in uno slot dalla sezione Preset.');
+    logLine(tr('Il banco «Ampli» rispecchia gli otto slot dell\'ampli: per cambiarlo ' +
+            'scrivi un preset in uno slot dalla sezione Preset.'));
     return;
   }
   live.modifica = !live.modifica;
@@ -2733,7 +2748,7 @@ function scaricaDiagnostica() {
  */
 async function mandaPreset(record, slot) {
   const soloProva = slot === null;
-  const dove = soloProva ? 'suono corrente' : nomeSlot(slot);
+  const dove = soloProva ? tr('suono corrente') : nomeSlot(slot);
 
   // Prima di mandare: l'ampli conferma i chunk anche quando il payload è
   // malformato, e poi lo ignora. Meglio accorgersene qui, dove si può dire
@@ -2741,15 +2756,15 @@ async function mandaPreset(record, slot) {
   // Con l'elenco dei modelli: un nome che l'ampli non ha lo pianta davvero.
   const controllo = Spark.controllaPreset(record, { modelli: SparkEffetti.MODELLI.flat() });
   if (controllo.errori.length) {
-    logLine(`«${record.name}» non è mandabile così com'è — ` +
-            controllo.errori.slice(0, 3).join('; ') +
-            (controllo.errori.length > 3 ? ` (e altri ${controllo.errori.length - 3})` : '') +
-            '. Non l\'ho inviato: l\'ampli avrebbe confermato i chunk e ignorato tutto. ' +
+    logLine(tr('«{0}» non è mandabile così com\'è — {1}{2}. ' +
+            'Non l\'ho inviato: l\'ampli avrebbe confermato i chunk e ignorato tutto. ' +
             'Se viene dal backup dell\'app ufficiale, reimportalo: la conversione è ' +
-            'stata corretta.');
+            'stata corretta.', record.name,
+            controllo.errori.slice(0, 3).join('; '),
+            controllo.errori.length > 3 ? tr` (e altri ${controllo.errori.length - 3})` : ''));
     return;
   }
-  if (controllo.avvisi.length) logLine(`nota su «${record.name}»: ${controllo.avvisi.join('; ')}`);
+  if (controllo.avvisi.length) logLine(tr`nota su «${record.name}»: ${controllo.avvisi.join('; ')}`);
 
   // **L'unico posto dove il sintomo arrivava senza spiegazione.** Il preset
   // parte, l'ampli conferma tutto, la rilettura dice che è quello giusto — e il
@@ -2763,30 +2778,30 @@ async function mandaPreset(record, slot) {
   // grida al lupo ogni volta smette di essere letta.
   const hendrix = SparkEffetti.hendrixNellaCatena(record.effects);
   if (hendrix.length) {
-    logLine(`«${record.name}» ha ${hendrix.length === 1 ? 'un effetto' : 'effetti'} ` +
-            `del pacchetto Jimi Hendrix (${hendrix.map(n => SparkEffetti.nome(n)).join(', ')}). ` +
+    logLine(tr('«{0}» ha {1} del pacchetto Jimi Hendrix ({2}). ' +
             'Se non li senti, collega una volta l\'app ufficiale all\'ampli e riprova: ' +
-            'lo sblocco resta finché non lo spegni.');
+            'lo sblocco resta finché non lo spegni.', record.name,
+            hendrix.length === 1 ? tr('un effetto') : tr('effetti'), hendrix.map(n => SparkEffetti.nome(n)).join(', ')));
   }
 
   try {
     const avanzamento = (i, total) =>
-      logProgress(`invio «${record.name}» → ${dove}: chunk ${i + 1} di ${total}…`);
+      logProgress(tr`invio «${record.name}» → ${dove}: chunk ${i + 1} di ${total}…`);
     const esito = soloProva
       ? await spark.loadPreset(record, avanzamento)
       : await spark.storePreset(record, slot, avanzamento);
     if (!esito.ok) {
-      logLine(`invio interrotto: ${esito.error}. ` +
-              'L\'ampli potrebbe essere rimasto a metà: rileggi per controllare.');
+      logLine(tr('invio interrotto: {0}. ' +
+              'L\'ampli potrebbe essere rimasto a metà: rileggi per controllare.', esito.error));
       return;
     }
 
-    const inviato = `inviato al ${dove} (${esito.acks}/${esito.total} confermati)`;
-    logLine(inviato + ', verifico…');
+    const inviato = tr`inviato al ${dove} (${esito.acks}/${esito.total} confermati)`;
+    logLine(inviato + tr(', verifico…'));
     await new Promise(r => setTimeout(r, 400));
 
     if (!spark.connected) {
-      logLine(`${inviato}, ma l'ampli si è disconnesso durante l'invio.`);
+      logLine(tr`${inviato}, ma l'ampli si è disconnesso durante l'invio.`);
       return;
     }
 
@@ -2795,8 +2810,8 @@ async function mandaPreset(record, slot) {
     const vivo = await spark.request(Spark.commands.getCurrentPreset(),
       m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x10, 1500);
     if (!vivo) {
-      logLine(`${inviato}, ma ora l'ampli non risponde più nemmeno a una ` +
-              'domanda semplice: l\'invio l\'ha bloccato.');
+      logLine(tr('{0}, ma ora l\'ampli non risponde più nemmeno a una ' +
+              'domanda semplice: l\'invio l\'ha bloccato.', inviato));
       return;
     }
 
@@ -2804,18 +2819,18 @@ async function mandaPreset(record, slot) {
 
     if (!letto && spark.lastFailedPayload) {
       scaricaDiagnostica();
-      logLine(`${inviato}, ma non so leggere quello che l'ampli risponde: ` +
-              'ho scaricato il payload grezzo nei Download.');
+      logLine(tr('{0}, ma non so leggere quello che l\'ampli risponde: ' +
+              'ho scaricato il payload grezzo nei Download.', inviato));
     } else if (!letto && soloProva) {
-      logLine(`${inviato}, ma non riesco a rileggere il suono corrente per verificare. ` +
-              'Ascolta: il suono è cambiato?');
+      logLine(tr('{0}, ma non riesco a rileggere il suono corrente per verificare. ' +
+              'Ascolta: il suono è cambiato?', inviato));
     } else if (!letto) {
-      logLine(`${inviato}. L'ampli risponde alle domande semplici ma non rilegge ` +
-              `${nomeSlot(slot)}.`);
+      logLine(tr('{0}. L\'ampli risponde alle domande semplici ma non rilegge ' +
+              '{1}.', inviato, nomeSlot(slot)));
     } else if (letto.uuid === record.uuid) {
-      logLine(`«${record.name}» è ora sul ${dove}. Verificato rileggendolo.` +
-              (soloProva ? ' Il LED lampeggia perché l\'ampli sta suonando il preset ' +
-                           'software, che non è nessuno degli otto slot.' : ''));
+      logLine(tr`«${record.name}» è ora sul ${dove}. Verificato rileggendolo.` +
+              (soloProva ? tr(' Il LED lampeggia perché l\'ampli sta suonando il preset ' +
+                           'software, che non è nessuno degli otto slot.') : ''));
       if (!soloProva) {
         await store.assignSlots({ [record.id]: slot });
         await ricarica();
@@ -2823,12 +2838,12 @@ async function mandaPreset(record, slot) {
         disegnaLive();
       }
     } else {
-      logLine(`${inviato}, ma ${dove} riporta ancora «${letto.name}»: ` +
+      logLine(tr('{0}, ma {1} riporta ancora «{2}»: ' +
               'il preset non è stato applicato. L\'ampli ha confermato i chunk ' +
-              'senza usarli.');
+              'senza usarli.', inviato, dove, letto.name));
     }
   } catch (err) {
-    logLine('invio fallito: ' + err.message);
+    logLine(tr('invio fallito: {0}', err.message));
   }
 }
 
@@ -2879,20 +2894,20 @@ async function apriEditor(record) {
     disegnaCatena();
     apriPannello('pannelloEditor');
     aggiornaTastoSalva();   // editor appena aperto: niente in sospeso
-    logLine(`«${record.name}»: regolazioni senza ampli, sulla copia in libreria.`);
+    logLine(tr`«${record.name}»: regolazioni senza ampli, sulla copia in libreria.`);
     return;
   }
 
-  logLine(`mando «${record.name}» all'ampli per regolarlo…`);
+  logLine(tr`mando «${record.name}» all'ampli per regolarlo…`);
   const esito = await spark.loadPreset(record, (i, total) =>
-    logProgress(`invio «${record.name}»: chunk ${i + 1} di ${total}…`));
-  if (!esito.ok) { logLine(`invio interrotto: ${esito.error}`); return; }
+    logProgress(tr`invio «${record.name}»: chunk ${i + 1} di ${total}…`));
+  if (!esito.ok) { logLine(tr`invio interrotto: ${esito.error}`); return; }
 
   await new Promise(r => setTimeout(r, 400));
   const attuale = await spark.readLiveState();
   if (!attuale) {
-    logLine('non riesco a rileggere il suono corrente: senza quello l\'editor ' +
-            'partirebbe da valori che potrebbero non essere quelli veri.');
+    logLine(tr('non riesco a rileggere il suono corrente: senza quello l\'editor ' +
+            'partirebbe da valori che potrebbero non essere quelli veri.'));
     return;
   }
 
@@ -2917,7 +2932,7 @@ async function apriEditor(record) {
   aggiornaTastoSalva();   // editor appena aperto: niente in sospeso
   // Non finisce nella riga di stato del pannello: nessuno l'ha chiesto, e lì
   // ci vanno solo le risposte a un gesto. Nel log resta.
-  logLine(`«${record.name}» è sull'ampli: gira pure.`);
+  logLine(tr`«${record.name}» è sull'ampli: gira pure.`);
 }
 
 /* --------------------------------------------------------------------
@@ -3110,7 +3125,7 @@ function tassello(effetto, posizione) {
 
   const cat = document.createElement('div');
   cat.className = 'cat';
-  cat.textContent = Spark.CATENA[posizione] || `posizione ${posizione + 1}`;
+  cat.textContent = Spark.CATENA[posizione] || tr`posizione ${posizione + 1}`;
 
   const modello = document.createElement('div');
   modello.className = 'modello';
@@ -3192,10 +3207,10 @@ function barraPosizione(posizione) {
 
   const dove = document.createElement('div');
   dove.className = 'dove';
-  dove.textContent = Spark.CATENA[posizione] || `posizione ${posizione + 1}`;
+  dove.textContent = Spark.CATENA[posizione] || tr`posizione ${posizione + 1}`;
 
-  barra.append(vaiA(posizione - 1, '‹', 'il blocco prima'), dove,
-               vaiA(posizione + 1, '›', 'il blocco dopo'));
+  barra.append(vaiA(posizione - 1, '‹', tr('il blocco prima')), dove,
+               vaiA(posizione + 1, '›', tr('il blocco dopo')));
   return barra;
 }
 
@@ -3217,6 +3232,10 @@ function barraPosizione(posizione) {
  * fa da intestazione quando cambia, e le voci spente si leggono ma non si
  * prendono.
  */
+/** Il nome di un gruppo da mostrare: due di `GRUPPI_AMPLI` sono parole italiane. */
+const nomeGruppo = gruppo =>
+  ({ Acustico: tr('Acustico'), Basso: tr('Basso') })[gruppo] || gruppo;
+
 function apriElenco(titolo, voci, scelto, quando) {
   const velo = document.createElement('div');
   velo.className = 'velo-elenco';
@@ -3235,7 +3254,7 @@ function apriElenco(titolo, voci, scelto, quando) {
       gruppoOra = voce.gruppo;
       const g = document.createElement('div');
       g.className = 'elenco-gruppo';
-      g.textContent = voce.gruppo;
+      g.textContent = nomeGruppo(voce.gruppo);
       lista.appendChild(g);
 
       // **Il momento della scelta è questo**, e non dopo aver sentito il
@@ -3246,9 +3265,9 @@ function apriElenco(titolo, voci, scelto, quando) {
       if (voce.gruppo === SparkEffetti.GRUPPO_HENDRIX) {
         const nota = document.createElement('div');
         nota.className = 'elenco-nota';
-        nota.textContent = 'Suonano solo se l\'app ufficiale si è collegata ' +
+        nota.textContent = tr('Suonano solo se l\'app ufficiale si è collegata ' +
           'all\'ampli almeno una volta da quando è acceso. Altrimenti li vedi ' +
-          'in catena ma non li senti.';
+          'in catena ma non li senti.');
         lista.appendChild(nota);
       }
     }
@@ -3428,12 +3447,12 @@ function testoConNome(nome) {
 }
 
 /** Sì o no. Il no è sempre l'ultima riga, ed è anche Esc e il tocco fuori. */
-function conferma(titolo, testo, { ok = 'Procedi', pericolo = false } = {}) {
+function conferma(titolo, testo, { ok = tr('Procedi'), pericolo = false } = {}) {
   return finestra({
     titolo, testo,
     azioni: [
       { testo: ok, valore: true, classe: pericolo ? 'pericolo' : 'primary' },
-      { testo: 'Annulla', valore: false },
+      { testo: tr('Annulla'), valore: false },
     ],
   }).then(scelto => scelto === true);
 }
@@ -3441,17 +3460,17 @@ function conferma(titolo, testo, { ok = 'Procedi', pericolo = false } = {}) {
 /** Una cosa da sapere e basta: un bottone solo, che non decide niente. */
 function avvisa(titolo, testo) {
   return finestra({ titolo, testo,
-                    azioni: [{ testo: 'Ho capito', valore: true, classe: 'primary' }] });
+                    azioni: [{ testo: tr('Ho capito'), valore: true, classe: 'primary' }] });
 }
 
 /** Qualcosa da scrivere. Torna il testo, o `null` se non se n'è fatto niente. */
-function chiediTesto(titolo, testo, valore = '', { ok = 'Salva', invito } = {}) {
+function chiediTesto(titolo, testo, valore = '', { ok = tr('Salva'), invito } = {}) {
   return finestra({
     titolo, testo,
     campo: { valore, invito },
     azioni: [
       { testo: ok, classe: 'primary', vuoleTesto: true },
-      { testo: 'Annulla', valore: null },
+      { testo: tr('Annulla'), valore: null },
     ],
   });
 }
@@ -3518,7 +3537,7 @@ function intestazioneBlocco(effetto, posizione) {
   const scelta = document.createElement('button');
   scelta.type = 'button';
   scelta.className = 'nome-effetto';
-  scelta.title = 'tocca per mettere un altro modello in questa posizione';
+  scelta.title = tr('tocca per mettere un altro modello in questa posizione');
   const voci = [];
 
   // I modelli **usciti da questo ampli** vengono per primi: esistono di sicuro.
@@ -3539,8 +3558,8 @@ function intestazioneBlocco(effetto, posizione) {
       gruppo: gruppo || null,
       spento: spento(modello),
       title: spento(modello)
-        ? modello + ' — serve l\'ampli: la tua libreria non l\'ha mai visto, ' +
-          'quindi non sappiamo quante manopole abbia'
+        ? tr('{0} — serve l\'ampli: la tua libreria non l\'ha mai visto, ' +
+          'quindi non sappiamo quante manopole abbia', modello)
         : modello,
     });
   };
@@ -3561,7 +3580,7 @@ function intestazioneBlocco(effetto, posizione) {
     // l'elenco vero e gli otto di troppo sono stati tolti — ma il codice resta
     // per il giorno che al catalogo si aggiunge un nome nuovo.
     candidati.filter(m => !SparkEffetti.ampliGruppo(m))
-             .forEach(m => metti(m, 'fuori dall\'elenco Positive Grid'));
+             .forEach(m => metti(m, tr('fuori dall\'elenco Positive Grid')));
   } else {
     // **L'ordine è quello dell'app ufficiale**, com'è scritto in `MODELLI`, con
     // una sola eccezione: **gli Hendrix vanno in fondo**, sotto la loro
@@ -3594,8 +3613,8 @@ function intestazioneBlocco(effetto, posizione) {
   // un blocco vero**, preso da un preset della libreria che quel modello ce
   // l'ha già. Per questo qui offline restano solo i modelli visti.
   if (inModifica.offline) {
-    scelta.title = 'senza ampli si può mettere solo un modello che la libreria ' +
-                   'ha già visto: di quello sappiamo quante manopole ha';
+    scelta.title = tr('senza ampli si può mettere solo un modello che la libreria ' +
+                   'ha già visto: di quello sappiamo quante manopole ha');
   }
 
   scelta.addEventListener('click', () => {
@@ -3619,7 +3638,7 @@ function intestazioneBlocco(effetto, posizione) {
     pallino.className = 'pallino';
     bollo.append(pallino, 'JH');
     const testo = document.createElement('span');
-    testo.textContent = 'non si sente finché l\'app ufficiale non lo sblocca';
+    testo.textContent = tr('non si sente finché l\'app ufficiale non lo sblocca');
     nota.append(bollo, testo);
     riga.appendChild(nota);
   }
@@ -3633,7 +3652,7 @@ function interruttoreDi(effetto) {
   const interruttore = document.createElement('button');
   interruttore.type = 'button';
   interruttore.className = 'interruttore' + (effetto.enabled ? ' acceso' : '');
-  interruttore.textContent = effetto.enabled ? 'acceso' : 'spento';
+  interruttore.textContent = effetto.enabled ? tr('acceso') : tr('spento');
   interruttore.addEventListener('click', async () => {
     effetto.enabled = !effetto.enabled;
     segnaModificato();
@@ -3641,7 +3660,7 @@ function interruttoreDi(effetto) {
       try {
         await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
       } catch (err) {
-        logLine('errore: ' + err.message, true);
+        logLine(tr('errore: {0}', err.message), true);
       }
     }
     // L'ampli scrive lui l'acceso/spento anche nel parametro che lo rispecchia
@@ -3686,21 +3705,21 @@ function intestazioneScelta(effetto, param) {
   const menu = document.createElement('button');
   menu.type = 'button';
   menu.className = 'nome-effetto';
-  menu.title = 'tocca per cambiare tipo';
+  menu.title = tr('tocca per cambiare tipo');
 
   const quante = SparkEffetti.posizioni(effetto.name, param.index);
   const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
   const voci = [];
   for (let n = 0; n < quante; n++) {
     voci.push({ valore: String(SparkEffetti.valorePosizione(n)),
-                testo: nomi ? nomi[n] : 'posizione ' + (n + 1) });
+                testo: nomi ? nomi[n] : tr('posizione {0}', n + 1) });
   }
   const dove = SparkEffetti.posizioneDi(param.value, quante);
   // L'ampli riporta un valore che non è nessuna delle posizioni note: si
   // aggiunge invece di spostarlo di nascosto su quella più vicina.
   if (dove === -1) {
     voci.push({ valore: String(param.value),
-                testo: 'valore dell\'ampli (' + mostraValore(param.value) + ')' });
+                testo: tr('valore dell\'ampli ({0})', mostraValore(param.value)) });
   }
   const ora = String(dove === -1 ? param.value : SparkEffetti.valorePosizione(dove));
   menu.textContent = (voci.find(v => v.valore === ora) || {}).testo ||
@@ -3810,24 +3829,24 @@ function etichettaDi(effetto, param, quante) {
   nome.className = 'nome' + (dato ? '' : proposto ? ' daTabella' : ' senzaNome');
   nome.textContent = dato || proposto || (param.index + 1);
   nome.title = dato
-    ? `«${dato}», nome tuo — tocca per cambiarlo`
+    ? tr`«${dato}», nome tuo — tocca per cambiarlo`
     : proposto
-      ? `«${proposto}» arriva dalla tabella: gira e senti se torna. Tocca per correggerlo.`
-      : 'tocca per dargli un nome: varrà per ogni preset che usa ' + effetto.name;
+      ? tr`«${proposto}» arriva dalla tabella: gira e senti se torna. Tocca per correggerlo.`
+      : tr('tocca per dargli un nome: varrà per ogni preset che usa {0}', effetto.name);
   nome.addEventListener('click', async evento => {
     evento.stopPropagation();
     // Anche qui la scorciatoia «campo vuoto = rimetti quello di prima» era
     // una regola scritta fra parentesi che nessuno legge: adesso è un bottone.
-    const azioni = [{ testo: 'Salva il nome', classe: 'primary', vuoleTesto: true }];
-    if (dato) azioni.push({ testo: 'Rimetti quello di partenza', valore: '' });
-    azioni.push({ testo: 'Annulla', valore: null });
+    const azioni = [{ testo: tr('Salva il nome'), classe: 'primary', vuoleTesto: true }];
+    if (dato) azioni.push({ testo: tr('Rimetti quello di partenza'), valore: '' });
+    azioni.push({ testo: tr('Annulla'), valore: null });
 
     const scelto = await finestra({
-      titolo: `manopola ${param.index + 1} di ${SparkEffetti.nome(effetto.name)}`,
-      testo: 'Il nome vale per <strong>ogni preset che usa ' +
-             testoConNome(SparkEffetti.nome(effetto.name)) + '</strong>, non solo ' +
+      titolo: tr`manopola ${param.index + 1} di ${SparkEffetti.nome(effetto.name)}`,
+      testo: tr('Il nome vale per <strong>ogni preset che usa {0}</strong>, non solo ' +
              'per questo. Gira e senti cosa fa, poi chiamala come la chiami tu.',
-      campo: { valore: dato || proposto || '', invito: 'tono, mix, tempo…' },
+             testoConNome(SparkEffetti.nome(effetto.name))),
+      campo: { valore: dato || proposto || '', invito: tr('tono, mix, tempo…') },
       azioni,
     });
     if (scelto === null) return;
@@ -3985,15 +4004,15 @@ function vociScelta(effetto, param) {
   const voci = [];
   for (let n = 0; n < quante; n++) {
     voci.push({ valore: SparkEffetti.valorePosizione(n),
-                testo: nomi ? nomi[n] : 'posizione ' + (n + 1),
-                title: `posizione ${n + 1}` });
+                testo: nomi ? nomi[n] : tr('posizione {0}', n + 1),
+                title: tr`posizione ${n + 1}` });
   }
   const dove = SparkEffetti.posizioneDi(param.value, quante);
   if (dove === -1) {
     // L'ampli riporta un valore che non è nessuna delle posizioni note: si
     // aggiunge invece di spostarlo di nascosto su quella più vicina.
     voci.push({ valore: param.value,
-                testo: 'valore dell\'ampli (' + mostraValore(param.value) + ')' });
+                testo: tr('valore dell\'ampli ({0})', mostraValore(param.value)) });
     return { voci, valore: param.value };
   }
   return { voci, valore: SparkEffetti.valorePosizione(dove) };
@@ -4052,15 +4071,15 @@ function cassettoExtra(effetto) {
   const titolo = document.createElement('summary');
   const cosaSia = SparkEffetti.nomeExtra(effetto.name);
   titolo.textContent = fuori.length === 1
-    ? (cosaSia ? `1 parametro che non è una manopola: ${cosaSia.toLowerCase()}`
-               : '1 parametro che non è una manopola')
-    : `${fuori.length} parametri che non sono manopole`;
+    ? (cosaSia ? tr('1 parametro che non è una manopola: {0}', cosaSia.toLowerCase())
+               : tr('1 parametro che non è una manopola'))
+    : tr`${fuori.length} parametri che non sono manopole`;
   const quante = SparkEffetti.TABELLA[effetto.name] &&
                  SparkEffetti.TABELLA[effetto.name].quante;
   if (quante) {
-    titolo.title = `${SparkEffetti.nome(effetto.name)} ha ${quante} manopole, ma su ` +
+    titolo.title = tr('{0} ha {1} manopole, ma su ' +
       'certi preset l\'ampli manda qualche parametro in più. Restano qui, e si ' +
-      'possono muovere.';
+      'possono muovere.', SparkEffetti.nome(effetto.name), quante);
   }
   cassetto.appendChild(titolo);
   fuori.forEach(param => cassetto.appendChild(rigaExtra(effetto, param)));
@@ -4093,14 +4112,15 @@ function rigaExtra(effetto, param) {
   if (nomeExtra) {
     nome.classList.add('daTabella');
     nome.textContent = nomeExtra;
-    nome.title = `«${nomeExtra}», misurato sull'ampli: sotto la metà il blocco è ` +
+    nome.title = tr('«{0}», misurato sull\'ampli: sotto la metà il blocco è ' +
                  'spento, sopra è acceso. È l\'interruttore qui sopra, visto da ' +
-                 'un\'altra parte.';
+                 'un\'altra parte.', nomeExtra);
     const spiega = document.createElement('div');
     spiega.className = 'spiega-extra';
     spiega.textContent = param.value >= 0.5
-      ? 'acceso — si cambia dall\'interruttore in cima al blocco'
-      : 'spento — si cambia dall\'interruttore in cima al blocco';
+      ? tr('acceso — si cambia dall\'interruttore in cima al blocco')
+      : tr('spento — si cambia dall\'interruttore in cima al blocco');
+
     riga.appendChild(spiega);
     return riga;
   }
@@ -4149,7 +4169,7 @@ async function cambiaModello(posizione, nuovo) {
   // «Non dovrebbe mai capitare», e proprio per questo se capita va detto:
   // tornare indietro in silenzio lascia la tendina sul nome nuovo mentre
   // l'ampli ha ancora il vecchio, che è la bugia peggiore di tutte.
-  if (!inModifica) { logLine('l\'editor non è più aperto: riapri «Regola».'); return; }
+  if (!inModifica) { logLine(tr('l\'editor non è più aperto: riapri «Regola».')); return; }
 
   // L'editor aperto senza ampli resta senza ampli anche se nel frattempo la
   // connessione arriva: quello che l'ampli suona adesso è un altro suono, e
@@ -4162,8 +4182,8 @@ async function cambiaModello(posizione, nuovo) {
   // scelta dell'utente, non una proprietà del modello.
   if (inModifica.offline) {
     const blocco = inModifica.effetti[posizione];
-    if (!blocco) { logLine('quel blocco non esiste nella catena.', true); return; }
-    if (nuovo === blocco.name) { logLine(`${nuovo} c'era già.`); return; }
+    if (!blocco) { logLine(tr('quel blocco non esiste nella catena.'), true); return; }
+    if (nuovo === blocco.name) { logLine(tr`${nuovo} c'era già.`); return; }
 
     // Un ampli si mette anche se la libreria non l'ha mai visto: hanno tutti e
     // trentanove le stesse cinque manopole (misurato, vedi `intestazioneBlocco`),
@@ -4174,9 +4194,9 @@ async function cambiaModello(posizione, nuovo) {
       blocco.name = nuovo;
       segnaModificato();
       disegnaCatena();
-      logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
+      logLine(tr('{0} → {1}, con le ' +
               'stesse manopole. Senza ampli non si sente: si salva in libreria ' +
-              'e si prova alla prossima connessione.');
+              'e si prova alla prossima connessione.', SparkEffetti.nome(vecchio), SparkEffetti.nome(nuovo)));
       return;
     }
 
@@ -4194,16 +4214,16 @@ async function cambiaModello(posizione, nuovo) {
       segnaModificato();
       blocco.params = campione.params;
       disegnaCatena();
-      logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
-              `manopole che aveva in «${campione.da}». Senza ampli non si sente: ` +
-              'si salva in libreria e si prova alla prossima connessione.');
+      logLine(tr('{0} → {1}, con le ' +
+              'manopole che aveva in «{2}». Senza ampli non si sente: ' +
+              'si salva in libreria e si prova alla prossima connessione.', SparkEffetti.nome(vecchio), SparkEffetti.nome(nuovo), campione.da));
       return;
     }
 
     const quante = SparkEffetti.quanteManopole(nuovo);
     if (!quante) {
-      logLine(`senza ampli non posso mettere ${SparkEffetti.nome(nuovo)}: non so ` +
-              'quante manopole abbia. Connetti l\'ampli e riapri «Regola».', true);
+      logLine(tr('senza ampli non posso mettere {0}: non so ' +
+              'quante manopole abbia. Connetti l\'ampli e riapri «Regola».', SparkEffetti.nome(nuovo)), true);
       disegnaCatena();                  // la tendina torna a dire la verità
       return;
     }
@@ -4212,15 +4232,15 @@ async function cambiaModello(posizione, nuovo) {
     blocco.params = Array.from({ length: quante },
                                (_, i) => ({ index: i, value: 0.5 }));
     disegnaCatena();
-    logLine(`${SparkEffetti.nome(vecchio)} → ${SparkEffetti.nome(nuovo)}, con le ` +
-            `${quante} manopole a metà corsa: la tua libreria non ha nessun preset ` +
+    logLine(tr('{0} → {1}, con le ' +
+            '{2} manopole a metà corsa: la tua libreria non ha nessun preset ' +
             'con quel modello da cui copiarle. Senza ampli non si sente: si salva ' +
-            'in libreria e si prova alla prossima connessione.');
+            'in libreria e si prova alla prossima connessione.', SparkEffetti.nome(vecchio), SparkEffetti.nome(nuovo), quante));
     return;
   }
 
   if (!spark.connected) {
-    logLine('ampli non connesso: il cambio non è partito.', true);
+    logLine(tr('ampli non connesso: il cambio non è partito.'), true);
     disegnaCatena();                    // la tendina torna a dire la verità
     return;
   }
@@ -4233,26 +4253,26 @@ async function cambiaModello(posizione, nuovo) {
     // agosto 2026, e c'è voluto staccare la corrente.
     let prima = inModifica.effetti;
     if (!inModifica.attendibile) {
-      logProgress('guardo cosa c\'è adesso in quel blocco…');
+      logProgress(tr('guardo cosa c\'è adesso in quel blocco…'));
       prima = await aggiornaCatenaDallAmpli();
     }
     if (!prima) {
-      logLine('non riesco a leggere la catena dall\'ampli: senza sapere cosa ' +
+      logLine(tr('non riesco a leggere la catena dall\'ampli: senza sapere cosa ' +
               'c\'è adesso, il cambio partirebbe alla cieca. Se si ripete, ' +
-              'chiudi l\'editor e riconnetti l\'ampli.', true);
+              'chiudi l\'editor e riconnetti l\'ampli.'), true);
       disegnaCatena();
       return;
     }
 
     const vecchio = prima[posizione] && prima[posizione].name;
     if (!vecchio) {
-      logLine('quel blocco non esiste nella catena letta.', true);
+      logLine(tr('quel blocco non esiste nella catena letta.'), true);
       disegnaCatena();
       return;
     }
-    if (nuovo === vecchio) { logLine(`${nuovo} c'era già.`); return; }
+    if (nuovo === vecchio) { logLine(tr`${nuovo} c'era già.`); return; }
 
-    logProgress(`sostituisco ${vecchio} con ${nuovo}…`);
+    logProgress(tr`sostituisco ${vecchio} con ${nuovo}…`);
     await spark.send(Spark.commands.changeEffectModel(vecchio, nuovo));
     segnaModificato();
     // Cambiare modello vuol dire ricostruire un blocco DSP: è il comando più
@@ -4262,20 +4282,20 @@ async function cambiaModello(posizione, nuovo) {
 
     const dopo = await aggiornaCatenaDallAmpli();
     if (!dopo) {
-      logLine('comando mandato, ma non riesco a rileggere la catena: ' +
-              'riapri «Regola» per vedere com\'è rimasta.', true);
+      logLine(tr('comando mandato, ma non riesco a rileggere la catena: ' +
+              'riapri «Regola» per vedere com\'è rimasta.'), true);
       return;
     }
 
     if (dopo[posizione] && dopo[posizione].name === nuovo) {
-      logLine(`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`);
+      logLine(tr`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`);
     } else {
-      logLine(`il comando è partito ma quel blocco riporta ancora ` +
-              `${dopo[posizione] ? dopo[posizione].name : '?'}: il modello ` +
-              'potrebbe non esistere con questo nome.', true);
+      logLine(tr('il comando è partito ma quel blocco riporta ancora ' +
+              '{0}: il modello ' +
+              'potrebbe non esistere con questo nome.', dopo[posizione] ? dopo[posizione].name : '?'), true);
     }
   } catch (err) {
-    logLine('cambio modello fallito: ' + err.message, true);
+    logLine(tr('cambio modello fallito: {0}', err.message), true);
   }
 }
 
@@ -4356,7 +4376,7 @@ async function svuotaCoda() {
       await spark.send(Spark.commands.changeParam(nomeEffetto, indice, valore));
     }
   } catch (err) {
-    logLine('errore: ' + err.message, true);
+    logLine(tr('errore: {0}', err.message), true);
     inAttesa.clear();          // non si insiste su una connessione che non va
   }
   invioInCorso = false;
@@ -4373,19 +4393,19 @@ async function svuotaCoda() {
 $('btnRileggi').addEventListener('click', async () => {
   if (!inModifica) return;
   if (inModifica.offline) {
-    logLine('stai regolando la copia in libreria: non c\'è nessun ampli da rileggere.', true);
+    logLine(tr('stai regolando la copia in libreria: non c\'è nessun ampli da rileggere.'), true);
     return;
   }
   if (!spark.connected) {
-    logLine('ampli non connesso: non c\'è niente da rileggere.', true);
+    logLine(tr('ampli non connesso: non c\'è niente da rileggere.'), true);
     return;
   }
-  logProgress('rileggo la catena dall\'ampli…');
+  logProgress(tr('rileggo la catena dall\'ampli…'));
   const catena = await aggiornaCatenaDallAmpli();
   // La riuscita finisce solo nel log: nel pannello ci va quello che non va.
   logLine(catena
-    ? 'catena riletta: adesso sullo schermo c\'è quello che ha l\'ampli.'
-    : 'non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.',
+    ? tr('catena riletta: adesso sullo schermo c\'è quello che ha l\'ampli.')
+    : tr('non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.'),
     !catena);
 });
 
@@ -4427,7 +4447,7 @@ function aggiornaTastoSalva(appenaSalvato) {
   tasto.classList.remove('da-salvare', 'salvato');
 
   if (appenaSalvato) {
-    tasto.textContent = '✓ Salvato';
+    tasto.textContent = tr('✓ Salvato');
     tasto.classList.add('salvato');
     // Poi torna com'era: una spunta che resta per sempre finirebbe per dire
     // «salvato» anche dopo la prossima manopola girata.
@@ -4437,10 +4457,10 @@ function aggiornaTastoSalva(appenaSalvato) {
 
   // Il testo lungo sparisce sul telefono: quelle due parole in più sono la
   // differenza fra una riga sola e una barra che va a capo.
-  tasto.textContent = 'Salva';
+  tasto.textContent = tr('Salva');
   const lungo = document.createElement('span');
   lungo.className = 'solo-largo';
-  lungo.textContent = ' in libreria';
+  lungo.textContent = tr(' in libreria');
   tasto.appendChild(lungo);
   if (inModifica && inModifica.toccato) tasto.classList.add('da-salvare');
 }
@@ -4456,7 +4476,7 @@ async function salvaModifiche() {
   if (!inModifica) return false;
   const { record, effetti } = inModifica;
   const aggiornato = await store.get(record.id);
-  if (!aggiornato) { logLine('il preset non è più in libreria.', true); return false; }
+  if (!aggiornato) { logLine(tr('il preset non è più in libreria.'), true); return false; }
 
   aggiornato.effects = effetti.map(e => ({
     name: e.name,
@@ -4469,8 +4489,8 @@ async function salvaModifiche() {
   await store.put(aggiornato);
   inModifica.toccato = false;
   aggiornaTastoSalva(true);
-  logLine(`modifiche salvate su «${aggiornato.name}» in libreria. ` +
-          'Sull\'ampli il preset salvato non cambia finché non lo riscrivi in uno slot.');
+  logLine(tr('modifiche salvate su «{0}» in libreria. ' +
+          'Sull\'ampli il preset salvato non cambia finché non lo riscrivi in uno slot.', aggiornato.name));
   await ricarica();
   disegnaPreset();
   disegnaLive();
@@ -4503,25 +4523,25 @@ function chiediPrimaDiUscire(dopo) {
 
   const testa = document.createElement('div');
   testa.className = 'elenco-testa';
-  testa.textContent = 'modifiche non salvate';
+  testa.textContent = tr('modifiche non salvate');
 
   // Dove vanno a finire le modifiche buttate via **dipende dalla modalità**, e
   // dire «restano sull'ampli» a chi sta lavorando sul divano sarebbe una bugia:
   // senza ampli non è mai partito niente e si perde tutto.
   const domanda = document.createElement('div');
   domanda.className = 'elenco-domanda';
-  domanda.innerHTML = 'Hai girato qualcosa e <strong>non l\'hai ancora salvato ' +
-    'in libreria</strong>. ' + (inModifica && inModifica.offline
-      ? 'Uscendo così vanno perse: senza ampli non sono andate da nessuna parte.'
-      : 'Uscendo così le perdi: l\'ampli continua a suonarle finché non cambi ' +
-        'preset, ma in libreria non ne resta niente.');
+  domanda.innerHTML = tr('Hai girato qualcosa e <strong>non l\'hai ancora salvato ' +
+    'in libreria</strong>.') + ' ' + (inModifica && inModifica.offline
+      ? tr('Uscendo così vanno perse: senza ampli non sono andate da nessuna parte.')
+      : tr('Uscendo così le perdi: l\'ampli continua a suonarle finché non cambi ' +
+        'preset, ma in libreria non ne resta niente.'));
 
   const azioni = document.createElement('div');
   azioni.className = 'elenco-azioni';
 
   const salva = document.createElement('button');
   salva.className = 'primary';
-  salva.textContent = 'Salva ed esci';
+  salva.textContent = tr('Salva ed esci');
   salva.addEventListener('click', async () => {
     salva.disabled = true;
     // Se il salvataggio non riesce non si chiude niente: la domanda resta lì e
@@ -4531,7 +4551,7 @@ function chiediPrimaDiUscire(dopo) {
   });
 
   const butta = document.createElement('button');
-  butta.textContent = 'Esci senza salvare';
+  butta.textContent = tr('Esci senza salvare');
   butta.addEventListener('click', esci);
 
   // Chi ha chiesto di uscire può volere anche dell'altro — il logo, per dire,
@@ -4544,7 +4564,7 @@ function chiediPrimaDiUscire(dopo) {
   }
 
   const torna = document.createElement('button');
-  torna.textContent = 'Torna all\'editor';
+  torna.textContent = tr('Torna all\'editor');
   torna.addEventListener('click', () => chiudi());
 
   azioni.append(salva, butta, torna);
@@ -4590,7 +4610,7 @@ function disegnaElencoFamiglie() {
     const colore = document.createElement('input');
     colore.type = 'color';
     colore.value = famiglia.colore;
-    colore.title = `colore di ${famiglia.nome}`;
+    colore.title = tr`colore di ${famiglia.nome}`;
     colore.addEventListener('change', async () => {
       await store.setColoreFamiglia(famiglia.id, colore.value);
       await ricarica();
@@ -4604,7 +4624,7 @@ function disegnaElencoFamiglie() {
 
     const conta = document.createElement('span');
     conta.className = 'badge';
-    conta.textContent = quanti === 1 ? '1 preset' : `${quanti} preset`;
+    conta.textContent = quanti === 1 ? tr('1 preset') : tr`${quanti} preset`;
 
     voce.append(colore, nome, conta);
 
@@ -4614,7 +4634,7 @@ function disegnaElencoFamiglie() {
       const rimetti = document.createElement('button');
       rimetti.className = 'icon';
       rimetti.textContent = '↺';
-      rimetti.title = 'rimetti il colore di partenza';
+      rimetti.title = tr('rimetti il colore di partenza');
       rimetti.addEventListener('click', async () => {
         await store.setColoreFamiglia(famiglia.id, '');
         await ricarica();
@@ -4631,8 +4651,8 @@ function disegnaElencoCategorie() {
   const elenco = $('elencoCategorie');
   elenco.innerHTML = '';
   if (categorie.length === 0) {
-    elenco.innerHTML = '<div class="vuoto-sezione">Nessuna categoria. ' +
-                       'Creane una qui sopra, o dal dettaglio di un preset.</div>';
+    elenco.innerHTML = '<div class="vuoto-sezione">' + tr('Nessuna categoria. ' +
+                       'Creane una qui sopra, o dal dettaglio di un preset.') + '</div>';
     return;
   }
 
@@ -4654,19 +4674,19 @@ function disegnaElencoCategorie() {
 
     const conta = document.createElement('span');
     conta.className = 'badge';
-    conta.textContent = quanti === 1 ? '1 preset' : `${quanti} preset`;
+    conta.textContent = quanti === 1 ? tr('1 preset') : tr`${quanti} preset`;
 
     const via = document.createElement('button');
     via.className = 'icon';
     via.textContent = '✕';
-    via.title = 'elimina la categoria';
+    via.title = tr('elimina la categoria');
     via.addEventListener('click', async () => {
-      const avviso = `Eliminare la categoria <strong>${testoConNome(nome)}</strong>? ` +
+      const avviso = tr`Eliminare la categoria <strong>${testoConNome(nome)}</strong>?` + ' ' +
         (quanti === 0
-          ? 'Non ce l\'ha nessun preset.'
-          : `La perdono ${quanti} preset, che restano tutti in libreria.`);
-      if (!await conferma('eliminare la categoria', avviso,
-                          { ok: 'Elimina', pericolo: true })) return;
+          ? tr('Non ce l\'ha nessun preset.')
+          : tr`La perdono ${quanti} preset, che restano tutti in libreria.`);
+      if (!await conferma(tr('eliminare la categoria'), avviso,
+                          { ok: tr('Elimina'), pericolo: true })) return;
       await store.removeCategory(nome);
       await ricarica();
       disegnaElencoCategorie();
@@ -4694,12 +4714,12 @@ $('nuovaCategoria').addEventListener('keydown', event => {
 
 $('btnAzzeraCategorie').addEventListener('click', async () => {
   if (categorie.length === 0) return;
-  if (!await conferma('togliere tutte le categorie',
-    `Togliere tutte e ${categorie.length} le categorie? <strong>I preset restano ` +
-    'tutti</strong>, perdono solo l\'etichetta. Serve a ripartire da zero dopo un import.',
-    { ok: `Togli le ${categorie.length} categorie`, pericolo: true })) return;
+  if (!await conferma(tr('togliere tutte le categorie'),
+    tr('Togliere tutte e {0} le categorie? <strong>I preset restano ' +
+    'tutti</strong>, perdono solo l\'etichetta. Serve a ripartire da zero dopo un import.', categorie.length),
+    { ok: tr`Togli le ${categorie.length} categorie`, pericolo: true })) return;
   const quante = await store.clearCategories();
-  logLine(`tolte ${quante} categorie: i preset sono tutti al loro posto`);
+  logLine(tr`tolte ${quante} categorie: i preset sono tutti al loro posto`);
   await ricarica();
   disegnaElencoCategorie();
   disegnaPreset();
@@ -4714,6 +4734,19 @@ $('btnAltro').addEventListener('click', () => {
   leggiDataDropbox();          // la data di lassù si legge aprendo, non a ogni avvio
 });
 $('btnAbout').addEventListener('click', () => apriPannello('pannelloAbout'));
+
+// La lingua cambia ricaricando la pagina: con l'ampli collegato vuol dire
+// perderlo, quindi prima si chiede.
+for (const tasto of document.querySelectorAll('#sceltaLingua [data-lingua]')) {
+  const lingua = tasto.dataset.lingua;
+  tasto.classList.toggle('primary', lingua === Lingua.attuale);
+  tasto.addEventListener('click', async () => {
+    if (lingua === Lingua.attuale) return;
+    if (spark.connected && !await conferma(tr('Cambiare lingua?'),
+        tr('La pagina si ricarica e l\'ampli si scollega.'), { ok: tr('Cambia') })) return;
+    Lingua.imposta(lingua);
+  });
+}
 
 // La goliardata, fra una canzone e l'altra. Si apre **sopra** «Altro» invece
 // che al posto suo — `apriPannello` chiuderebbe tutto — così «Fatto» riporta
@@ -4733,14 +4766,14 @@ $('status').addEventListener('click', async () => {
   try {
     await spark.connect();
     await spark.identify();
-    $('status').title = spark.state.name || 'connesso';
+    $('status').title = spark.state.name || tr('connesso');
     // Appena connessi si legge da soli: la prima cosa che serve sapere è
     // cosa c'è davvero negli otto slot, e chiederlo a mano ogni volta è un
     // passaggio che si dimentica. `importFromAmp` non tocca il lavoro
     // dell'utente, quindi farlo in automatico non costa niente.
     await leggiDallAmpli();
   } catch (err) {
-    logLine('errore: ' + err.message);
+    logLine(tr('errore: {0}', err.message));
   }
 });
 
@@ -4751,7 +4784,7 @@ $('btnRead').addEventListener('click', () => leggiDallAmpli());
  * motivo è sempre lo stesso e cambia solo cosa si stava per fare.
  */
 const senzaAmpli = cosa =>
-  `per ${cosa} serve l'amplificatore: premi CONNETTI in alto e riprova.`;
+  tr`per ${cosa} serve l'amplificatore: premi CONNETTI in alto e riprova.`;
 
 /**
  * Legge gli otto slot e li riversa in libreria.
@@ -4761,19 +4794,19 @@ const senzaAmpli = cosa =>
  * infilerebbe un comando dentro una conversazione già in corso.
  */
 async function leggiDallAmpli() {
-  if (!spark.connected) return logLine(senzaAmpli('leggere gli otto slot'));
+  if (!spark.connected) return logLine(senzaAmpli(tr('leggere gli otto slot')));
   $('btnRead').disabled = true;
   live.occupato = true;
   disegnaLive();
 
   try {
     const presets = await spark.readLibrary(8, (i, max) => {
-      logProgress(`lettura slot ${i + 1} di ${max}…`);
+      logProgress(tr`lettura slot ${i + 1} di ${max}…`);
     });
     const { added, updated } = await store.importFromAmp(presets);
-    logLine(`letti ${presets.length} preset dall'ampli: ${added} nuovi, ${updated} aggiornati`);
+    logLine(tr`letti ${presets.length} preset dall'ampli: ${added} nuovi, ${updated} aggiornati`);
   } catch (err) {
-    logLine('lettura interrotta: ' + err.message);
+    logLine(tr('lettura interrotta: {0}', err.message));
   }
 
   live.occupato = false;
@@ -4800,36 +4833,36 @@ async function leggiDallAmpli() {
  * famiglia e ordine sono lavoro dell'utente e non si toccano.
  */
 $('btnLive').addEventListener('click', async () => {
-  if (!spark.connected) return logLine(senzaAmpli('prendere il suono di adesso'));
+  if (!spark.connected) return logLine(senzaAmpli(tr('prendere il suono di adesso')));
   $('btnLive').disabled = true;
   spark.lastFailedPayload = null;
-  logProgress('leggo il suono che l\'ampli sta facendo…');
+  logProgress(tr('leggo il suono che l\'ampli sta facendo…'));
   const corrente = await spark.readLiveState();
   if (corrente) {
     const catena = corrente.effects.filter(e => e.enabled).map(e => e.name).join(' · ');
-    logLine(`suono corrente: «${corrente.name}» — ${catena}`);
+    logLine(tr`suono corrente: «${corrente.name}» — ${catena}`);
 
     const esistente = corrente.uuid ? await store.byUuid(corrente.uuid) : null;
     const domanda = esistente
-      ? `<strong>${testoConNome(esistente.name)}</strong> è già in libreria. ` +
+      ? tr('<strong>{0}</strong> è già in libreria. ' +
         'Aggiornarne il suono con quello che l\'ampli sta suonando adesso? ' +
-        'Tag, note e famiglia restano.'
-      : `Salvare <strong>${testoConNome(corrente.name)}</strong> in libreria ` +
-        'come preset nuovo?';
-    if (await conferma(esistente ? 'aggiornare il suono' : 'salvare in libreria', domanda,
-                       { ok: esistente ? 'Aggiorna il suono' : 'Salva in libreria' })) {
+        'Tag, note e famiglia restano.', testoConNome(esistente.name))
+      : tr('Salvare <strong>{0}</strong> in libreria ' +
+        'come preset nuovo?', testoConNome(corrente.name));
+    if (await conferma(esistente ? tr('aggiornare il suono') : tr('salvare in libreria'), domanda,
+                       { ok: esistente ? tr('Aggiorna il suono') : tr('Salva in libreria') })) {
       const { added } = await store.importFromAmp([corrente]);
-      logLine(added ? `«${corrente.name}» aggiunto alla libreria`
-                    : `«${corrente.name}» aggiornato in libreria`);
+      logLine(added ? tr`«${corrente.name}» aggiunto alla libreria`
+                    : tr`«${corrente.name}» aggiornato in libreria`);
       await ricarica();
       disegnaPreset();
       disegnaLive();
     }
   } else if (spark.lastFailedPayload) {
     scaricaDiagnostica();
-    logLine('non so leggere il suono corrente: payload grezzo scaricato nei Download.');
+    logLine(tr('non so leggere il suono corrente: payload grezzo scaricato nei Download.'));
   } else {
-    logLine('nessuna risposta alla lettura del suono corrente.');
+    logLine(tr('nessuna risposta alla lettura del suono corrente.'));
   }
   $('btnLive').disabled = false;
 });
@@ -4845,12 +4878,12 @@ $('search').addEventListener('input', event => {
  * `disegnaPreset` gli dice solo cosa mostrare.
  */
 const ORDINI = [
-  { valore: 'nome',       testo: 'nome' },
-  { valore: 'aggiunto',   testo: 'aggiunti di recente' },
-  { valore: 'modificato', testo: 'modificati di recente' },
-  { valore: 'famiglia',   testo: 'famiglia di suono' },
+  { valore: 'nome',       testo: tr('nome') },
+  { valore: 'aggiunto',   testo: tr('aggiunti di recente') },
+  { valore: 'modificato', testo: tr('modificati di recente') },
+  { valore: 'famiglia',   testo: tr('famiglia di suono') },
 ];
-tendinaOrdine = tendinaFinta('come ordinare la libreria', ORDINI, vista.ordine,
+tendinaOrdine = tendinaFinta(tr('come ordinare la libreria'), ORDINI, vista.ordine,
   async scelto => {
     vista.ordine = scelto;
     disegnaPreset();                     // prima si vede, poi si salva
@@ -4890,7 +4923,7 @@ $('fileInput').addEventListener('change', async event => {
     disegnaPreset();
     disegnaLive();
   } catch (err) {
-    logLine('importazione fallita: ' + err.message);
+    logLine(tr('importazione fallita: {0}', err.message));
   }
   event.target.value = '';
 });
@@ -4905,26 +4938,26 @@ async function importaJson(file, bytes) {
   try {
     json = JSON.parse(new TextDecoder().decode(bytes));
   } catch (err) {
-    throw new Error(`${file.name} non è né uno zip né un JSON`);
+    throw new Error(tr`${file.name} non è né uno zip né un JSON`);
   }
 
   if (json && Array.isArray(json.presets)) {
     // Un file non è un altro apparecchio: le sue cancellazioni non valgono
     // (lapidi: false), e prima di toccare la libreria si chiede.
     const n = json.presets.length;
-    if (!await conferma('importare un backup',
-      `Mettere in libreria <strong>${n} preset</strong> da ` +
-      `<strong>${testoConNome(file.name)}</strong>? I preset che hai già prendono il ` +
-      'suono <strong>e anche tag, note e ordine</strong> del file. Non viene cancellato niente.',
-      { ok: n === 1 ? 'Importa il preset' : `Importa ${n} preset` })) return;
+    if (!await conferma(tr('importare un backup'),
+      tr('Mettere in libreria <strong>{0} preset</strong> da ' +
+      '<strong>{1}</strong>? I preset che hai già prendono il ' +
+      'suono <strong>e anche tag, note e ordine</strong> del file. Non viene cancellato niente.', n, testoConNome(file.name)),
+      { ok: n === 1 ? tr('Importa il preset') : tr`Importa ${n} preset` })) return;
     const quanti = await store.importBackup(json, { lapidi: false });
-    logLine(`importati ${quanti} preset da ${file.name}`);
+    logLine(tr`importati ${quanti} preset da ${file.name}`);
     return;
   }
 
   const grezzi = SparkBackup.trovaPresetUfficiali(json);
   if (grezzi.length === 0) {
-    throw new Error(`in ${file.name} non c'è nessun preset che sappia leggere`);
+    throw new Error(tr`in ${file.name} non c'è nessun preset che sappia leggere`);
   }
   await importaPresetSciolti(grezzi, file.name);
 }
@@ -4957,38 +4990,38 @@ async function importaPresetSciolti(grezzi, nomeFile) {
     }
   }
   if (presets.length === 0) {
-    throw new Error(`${nomeFile}: ${saltati[0] || 'nessun preset leggibile'}`);
+    throw new Error(`${nomeFile}: ${saltati[0] || tr('nessun preset leggibile')}`);
   }
 
   const nomi = presets.map(p => p.name).join(' · ');
   const uno  = presets.length === 1;
-  if (!await conferma(uno ? 'importare il preset' : 'importare i preset',
-    (uno ? `Mettere in libreria <strong>${testoConNome(presets[0].name)}</strong>?`
-         : `Mettere in libreria <strong>${presets.length} preset</strong> ` +
-           `(${testoConNome(nomi)})?`) +
-    ' Se ce l\'hai già, se ne aggiorna il suono: tag, note e famiglia restano.',
-    { ok: uno ? 'Importa il preset' : 'Importa' })) return;
+  if (!await conferma(uno ? tr('importare il preset') : tr('importare i preset'),
+    (uno ? tr`Mettere in libreria <strong>${testoConNome(presets[0].name)}</strong>?`
+         : tr('Mettere in libreria <strong>{0} preset</strong> ' +
+           '({1})?', presets.length, testoConNome(nomi))) +
+    tr(' Se ce l\'hai già, se ne aggiorna il suono: tag, note e famiglia restano.'),
+    { ok: uno ? tr('Importa il preset') : tr('Importa') })) return;
 
   const { added, updated } = await store.importFromBackup(presets);
-  logLine(`da ${nomeFile}: ${added} nuovi, ${updated} aggiornati — ${nomi}`);
+  logLine(tr`da ${nomeFile}: ${added} nuovi, ${updated} aggiornati — ${nomi}`);
   if (inventati) {
-    logLine(`${inventati} preset non portavano un identificativo: gliene ho dato uno io, ` +
-            'quindi reimportando lo stesso file se ne fa un doppione.');
+    logLine(tr('{0} preset non portavano un identificativo: gliene ho dato uno io, ' +
+            'quindi reimportando lo stesso file se ne fa un doppione.', inventati));
   }
-  if (saltati.length) logLine(`${saltati.length} saltati: ${saltati[0]}`);
+  if (saltati.length) logLine(tr`${saltati.length} saltati: ${saltati[0]}`);
 }
 
 /** preset_backup.zip dell'app ufficiale: le sue categorie restano fuori. */
 async function importaBackupUfficiale(file, buffer) {
-  logLine(`leggo ${file.name}…`);
+  logLine(tr`leggo ${file.name}…`);
   const { presets, saltati } = await SparkBackup.parseBackup(buffer);
 
   const { added, updated } = await store.importFromBackup(presets);
-  logLine(`${presets.length} preset dal backup dell'app: ${added} nuovi, ${updated} aggiornati`);
-  logLine('le categorie dell\'app ufficiale non sono state importate: ' +
-          'le tue le fai da «Categorie».');
+  logLine(tr`${presets.length} preset dal backup dell'app: ${added} nuovi, ${updated} aggiornati`);
+  logLine(tr('le categorie dell\'app ufficiale non sono state importate: ' +
+          'le tue le fai da «Categorie».'));
   if (saltati.length) {
-    logLine(`${saltati.length} preset saltati: ${saltati[0].motivo}`);
+    logLine(tr`${saltati.length} preset saltati: ${saltati[0].motivo}`);
   }
 }
 
@@ -5043,21 +5076,21 @@ function disegnaDropbox() {
 async function leggiDataDropbox() {
   if (!dropbox || !dropbox.autorizzato()) return;
   const riga = $('dropboxQuando');
-  riga.textContent = 'controllo cosa c\'è su Dropbox…';
+  riga.textContent = tr('controllo cosa c\'è su Dropbox…');
   try {
     const info = await dropbox.info();
     riga.textContent = info
-      ? `Lassù: ${new Date(info.quando).toLocaleString('it-IT')}, ` +
-        `${Math.round(info.byte / 1024)} KB.`
-      : 'Su Dropbox non c\'è ancora niente: il primo invio lo crea.';
+      ? tr('Lassù: {0}, {1} KB.', new Date(info.quando).toLocaleString(Lingua.attuale),
+           Math.round(info.byte / 1024))
+      : tr('Su Dropbox non c\'è ancora niente: il primo invio lo crea.');
   } catch (err) {
-    riga.textContent = 'non riesco a leggere Dropbox: ' + err.message;
+    riga.textContent = tr('non riesco a leggere Dropbox: {0}', err.message);
   }
 }
 
 $('btnDropboxCollega').addEventListener('click', async () => {
   const chiave = $('dropboxChiave').value.trim();
-  if (!chiave) { statoDelPannello('serve l\'app key della tua app Dropbox'); return; }
+  if (!chiave) { statoDelPannello(tr('serve l\'app key della tua app Dropbox')); return; }
   await store.setSetting('dropboxChiave', chiave);
   dropbox.appKey = chiave;
   try {
@@ -5081,80 +5114,80 @@ $('btnDropboxCollega').addEventListener('click', async () => {
     // toccare, e va detto.
     const finestra = window.open(url, '_blank', 'noopener');
     statoDelPannello(finestra
-      ? 'autorizza su Dropbox, poi incolla qui il codice'
-      : 'il browser ha bloccato la finestra: apri Dropbox col link qui sopra');
+      ? tr('autorizza su Dropbox, poi incolla qui il codice')
+      : tr('il browser ha bloccato la finestra: apri Dropbox col link qui sopra'));
   } catch (err) {
-    statoDelPannello('non riesco a partire: ' + err.message);
+    statoDelPannello(tr('non riesco a partire: {0}', err.message));
   }
 });
 
 $('btnDropboxFine').addEventListener('click', async () => {
   const codice = $('dropboxCodice').value.trim();
-  if (!codice) { statoDelPannello('incolla il codice che ti ha dato Dropbox'); return; }
+  if (!codice) { statoDelPannello(tr('incolla il codice che ti ha dato Dropbox')); return; }
   const verifier = await store.getSetting('dropboxVerifier', null);
-  if (!verifier) { statoDelPannello('l\'autorizzazione è scaduta: ricomincia'); return; }
+  if (!verifier) { statoDelPannello(tr('l\'autorizzazione è scaduta: ricomincia')); return; }
   try {
     await dropbox.completaAutorizzazione(verifier, codice);
     await store.setSetting('dropboxVerifier', null);
     $('dropboxCodice').value = '';
     $('dropboxPassoDue').hidden = true;
     disegnaDropbox();
-    logLine('Dropbox collegato');
+    logLine(tr('Dropbox collegato'));
     await leggiDataDropbox();
   } catch (err) {
     // Il verifier non si butta: la pagina di Dropbox si riapre dallo stesso
     // link e dà un codice nuovo per lo stesso segreto. Un codice si spende una
     // volta sola, ed è la causa di gran lunga più probabile di questo errore.
-    statoDelPannello('Dropbox non ha accettato il codice (' + err.message +
-      '). Un codice vale una volta sola: riapri Dropbox col link qui sopra e ' +
-      'incolla quello nuovo.');
+    statoDelPannello(tr('Dropbox non ha accettato il codice ({0}). ' +
+      'Un codice vale una volta sola: riapri Dropbox col link qui sopra e ' +
+      'incolla quello nuovo.', err.message));
   }
 });
 
 $('btnDropboxSu').addEventListener('click', async () => {
-  statoDelPannello('mando la libreria su Dropbox…');
+  statoDelPannello(tr('mando la libreria su Dropbox…'));
   try {
     const backup = await store.exportAll();
     await dropbox.carica(JSON.stringify(backup, null, 2));
-    logLine(`${backup.presets.length} preset mandati su Dropbox`);
+    logLine(tr`${backup.presets.length} preset mandati su Dropbox`);
     await leggiDataDropbox();
   } catch (err) {
-    statoDelPannello('non sono riuscito a mandarla su: ' + err.message);
+    statoDelPannello(tr('non sono riuscito a mandarla su: {0}', err.message));
   }
 });
 
 $('btnDropboxGiu').addEventListener('click', async () => {
   // Prendere può anche togliere: un preset cancellato sull'altro apparecchio
   // sparisce anche qui. È il gesto meno reversibile dei due, e va chiesto.
-  if (!await conferma('prendere da Dropbox',
-    'Prendere la libreria da Dropbox e fonderla con questa? ' +
+  if (!await conferma(tr('prendere da Dropbox'),
+    tr('Prendere la libreria da Dropbox e fonderla con questa? ' +
     '<strong>Quello che è stato cancellato sull\'altro apparecchio sparisce anche ' +
-    'qui</strong>, se qui non l\'hai toccato dopo.',
-    { ok: 'Prendi e fondi' })) return;
-  statoDelPannello('prendo la libreria da Dropbox…');
+    'qui</strong>, se qui non l\'hai toccato dopo.'),
+    { ok: tr('Prendi e fondi') })) return;
+  statoDelPannello(tr('prendo la libreria da Dropbox…'));
   try {
     const testo  = await dropbox.scarica();
     const quanti = await store.importBackup(JSON.parse(testo));
-    logLine(`${quanti} preset presi da Dropbox`);
+    logLine(tr`${quanti} preset presi da Dropbox`);
     await ricarica();
     disegnaPreset();
     disegnaLive();
     await leggiDataDropbox();
   } catch (err) {
-    statoDelPannello('non sono riuscito a prenderla: ' + err.message);
+    statoDelPannello(tr('non sono riuscito a prenderla: {0}', err.message));
   }
 });
 
 $('btnDropboxVia').addEventListener('click', async () => {
-  if (!await conferma('scollegare Dropbox',
-    'Scollegare Dropbox? La libreria qui e quella lassù restano dove sono: ' +
-    'smettono solo di parlarsi.', { ok: 'Scollega' })) return;
+  if (!await conferma(tr('scollegare Dropbox'),
+    tr('Scollegare Dropbox? La libreria qui e quella lassù restano dove sono: ' +
+    'smettono solo di parlarsi.'), { ok: tr('Scollega') })) return;
   const revocato = await dropbox.scollega();
   disegnaDropbox();
   logLine(revocato
-    ? 'Dropbox scollegato, e l\'autorizzazione è revocata anche lassù'
-    : 'Dropbox scollegato qui, ma lassù non ho potuto revocare l\'autorizzazione: ' +
-      'se vuoi, toglila da dropbox.com, nelle app collegate');
+    ? tr('Dropbox scollegato, e l\'autorizzazione è revocata anche lassù')
+    : tr('Dropbox scollegato qui, ma lassù non ho potuto revocare l\'autorizzazione: ' +
+      'se vuoi, toglila da dropbox.com, nelle app collegate'));
 });
 
 /**
@@ -5169,21 +5202,21 @@ $('btnDropboxVia').addEventListener('click', async () => {
 $('btnSvuota').addEventListener('click', async () => {
   const quanti = (await store.all()).filter(r => !(r.slots || []).length).length;
   if (!quanti) {
-    statoDelPannello('non c\'è niente da togliere: in libreria ci sono solo gli otto dell\'ampli');
+    statoDelPannello(tr('non c\'è niente da togliere: in libreria ci sono solo gli otto dell\'ampli'));
     return;
   }
-  if (!await conferma('svuotare la libreria',
-    `Eliminare <strong>${quanti} preset</strong> dalla libreria? Restano solo quelli ` +
-    'caricati sull\'ampli, e l\'ampli non viene toccato.',
-    { ok: `Elimina ${quanti} preset`, pericolo: true })) return;
-  if (!await conferma('ultima conferma',
-    `<strong>${quanti} preset, e non si torna indietro.</strong> Se usi Dropbox, al ` +
-    'prossimo «Manda su» spariranno anche dagli altri apparecchi.',
-    { ok: 'Sì, elimina', pericolo: true })) return;
+  if (!await conferma(tr('svuotare la libreria'),
+    tr('Eliminare <strong>{0} preset</strong> dalla libreria? Restano solo quelli ' +
+    'caricati sull\'ampli, e l\'ampli non viene toccato.', quanti),
+    { ok: tr`Elimina ${quanti} preset`, pericolo: true })) return;
+  if (!await conferma(tr('ultima conferma'),
+    tr('<strong>{0} preset, e non si torna indietro.</strong> Se usi Dropbox, al ' +
+    'prossimo «Manda su» spariranno anche dagli altri apparecchi.', quanti),
+    { ok: tr('Sì, elimina'), pericolo: true })) return;
 
-  statoDelPannello('elimino…');
+  statoDelPannello(tr('elimino…'));
   const tolti = await store.svuotaTranneAmpli();
-  logLine(`${tolti} preset eliminati dalla libreria; gli otto dell'ampli restano`);
+  logLine(tr`${tolti} preset eliminati dalla libreria; gli otto dell'ampli restano`);
   vista.aperto = null;
   await ricarica();
   disegnaPreset();
@@ -5313,15 +5346,15 @@ function riempiSceltaBanco() {
   const primaScelto = tendinaBancoPedale ? tendinaBancoPedale.valore : null;
   const voci = banchi.map(b => {
     const quanti = postiDiBanco(b).filter(Boolean).length;
-    return { valore: b.id, testo: `${b.nome} — ${quanti} preset` };
+    return { valore: b.id, testo: tr`${b.nome} — ${quanti} preset` };
   });
-  if (!banchi.length) voci.push({ valore: null, testo: 'nessun banco in libreria' });
+  if (!banchi.length) voci.push({ valore: null, testo: tr('nessun banco in libreria') });
   // Si riparte da quello che stavi guardando in Live, che quasi sempre è
   // quello che vuoi mandare; se non è un banco vero, dal primo.
   const preferito = banchi.some(b => b.id === primaScelto) ? primaScelto
                   : (bancoCorrente() ? bancoCorrente().id : (banchi[0] || {}).id);
 
-  const nuova = tendinaFinta('quale banco mandare', voci,
+  const nuova = tendinaFinta(tr('quale banco mandare'), voci,
                              preferito === undefined ? null : preferito,
                              aggiornaInvioPedale);
   if (tendinaBancoPedale) tendinaBancoPedale.replaceWith(nuova);
@@ -5336,8 +5369,8 @@ function aggiornaInvioPedale() {
   const banco = bancoDaMandare();
   const quanti = banco ? postiDiBanco(banco).filter(Boolean).length : 0;
   $('notaBancoDaMandare').textContent =
-    !banchi.length ? 'Non hai ancora banchi: creane uno nella vista Live e riempilo.'
-    : !quanti      ? 'Questo banco è vuoto: mettici dentro dei preset prima di mandarlo.'
+    !banchi.length ? tr('Non hai ancora banchi: creane uno nella vista Live e riempilo.')
+    : !quanti      ? tr('Questo banco è vuoto: mettici dentro dei preset prima di mandarlo.')
     : '';
   $('btnMandaAlPedale').disabled = !(pedale.comando && banco && quanti > 0);
 }
@@ -5357,14 +5390,14 @@ function disegnaSlotsPedale() {
 
     const nome = document.createElement('span');
     nome.className = 'nome';
-    nome.textContent = v ? v.nome : 'vuoto';
+    nome.textContent = v ? v.nome : tr('vuoto');
 
     riga.append(n, nome);
 
     if (v) {
       const quanti = document.createElement('span');
       quanti.className = 'quanti';
-      quanti.textContent = `${v.pieni} preset`;
+      quanti.textContent = tr`${v.pieni} preset`;
       riga.appendChild(quanti);
 
       // Le frecce e l'eliminazione lavorano **solo sulla copia locale**: si
@@ -5386,15 +5419,15 @@ function disegnaSlotsPedale() {
       }
 
       const suona = document.createElement('button');
-      suona.textContent = 'Suona';
+      suona.textContent = tr('Suona');
       // Questo invece è immediato: non è una modifica da applicare, è un
       // ordine di suonare adesso.
       suona.disabled = daApplicare();
-      suona.title = suona.disabled ? 'prima aggiorna il pedale' : 'fai suonare questo banco';
+      suona.title = suona.disabled ? tr('prima aggiorna il pedale') : tr('fai suonare questo banco');
       suona.addEventListener('click', () => comandoPedale(PedalePonte.CMD.USA, s));
 
       const canc = document.createElement('button');
-      canc.textContent = 'Togli';
+      canc.textContent = tr('Togli');
       canc.addEventListener('click', () => {
         pedale.locale[s] = null;
         disegnaSlotsPedale();
@@ -5420,7 +5453,7 @@ function aggiornaTastiModifiche() {
   $('btnApplicaPedale').disabled = !cambiato || !pedale.comando;
   $('btnAnnullaPedale').disabled = !cambiato;
   $('notaModifichePedale').textContent = cambiato
-    ? 'Ci sono spostamenti non ancora applicati al pedale.' : '';
+    ? tr('Ci sono spostamenti non ancora applicati al pedale.') : '';
 }
 
 /** Riparte dalla disposizione vera del pedale, buttando le modifiche locali. */
@@ -5458,9 +5491,9 @@ async function applicaAlPedale() {
     const t = stato[i]; stato[i] = stato[j]; stato[j] = t;
   }
 
-  if (!comandi.length) { logPedale('niente da applicare'); return; }
+  if (!comandi.length) { logPedale(tr('niente da applicare')); return; }
   $('btnApplicaPedale').disabled = true;
-  logPedale(`applico ${comandi.length} modifiche…`);
+  logPedale(tr`applico ${comandi.length} modifiche…`);
   for (const c of comandi) await comandoPedale(...c);
   await comandoPedale(PedalePonte.CMD.ELENCA);
 }
@@ -5486,13 +5519,13 @@ function inCodaPedale(lavoro) {
 }
 
 function comandoPedale(...byte) {
-  if (!pedale.comando) { logPedale('non collegato al pedale'); return Promise.resolve(); }
+  if (!pedale.comando) { logPedale(tr('non collegato al pedale')); return Promise.resolve(); }
   return inCodaPedale(async () => {
     try {
       await pedale.comando.writeValueWithResponse(new Uint8Array(byte));
       logPedale('→ ' + byte.map(b => b.toString(16).padStart(2, '0')).join(' '));
     } catch (err) {
-      logPedale('comando fallito: ' + err.message);
+      logPedale(tr('comando fallito: {0}', err.message));
     }
   });
 }
@@ -5502,7 +5535,7 @@ function rispostaPedale(e) {
   const testo = new TextDecoder().decode(v.subarray(1));
   if (v[0] === 0x82) {                       // l'elenco degli slot
     pedale.slots = PedalePonte.leggiElenco(testo);
-    logPedale(`elenco: ${pedale.slots.length} slot occupati`);
+    logPedale(tr`elenco: ${pedale.slots.length} slot occupati`);
     ripartiDaPedale();                       // la verità è quella del pedale
     return;
   }
@@ -5514,9 +5547,9 @@ function rispostaPedale(e) {
 }
 
 async function collegaPedale() {
-  if (!navigator.bluetooth) { logPedale('questo browser non parla col Bluetooth'); return; }
+  if (!navigator.bluetooth) { logPedale(tr('questo browser non parla col Bluetooth')); return; }
   try {
-    statoPedale(false, 'ricerca…');
+    statoPedale(false, tr('ricerca…'));
     pedale.device = await navigator.bluetooth.requestDevice({
       filters: [{ services: [PedalePonte.SERVIZIO] }],
       optionalServices: [PedalePonte.SERVIZIO],
@@ -5525,8 +5558,8 @@ async function collegaPedale() {
       pedale.comando = pedale.stato = null;
       pedale.slots = [];
       ripartiDaPedale();
-      statoPedale(false, 'non collegato');
-      logPedale('staccato — il pedale si riprende l\'ampli da solo');
+      statoPedale(false, tr('non collegato'));
+      logPedale(tr('staccato — il pedale si riprende l\'ampli da solo'));
     });
 
     const server   = await pedale.device.gatt.connect();
@@ -5536,17 +5569,17 @@ async function collegaPedale() {
     await pedale.stato.startNotifications();
     pedale.stato.addEventListener('characteristicvaluechanged', rispostaPedale);
 
-    statoPedale(true, pedale.device.name || 'pedale');
-    logPedale('collegato — da adesso il pedale ha mollato l\'ampli');
+    statoPedale(true, pedale.device.name || tr('pedale'));
+    logPedale(tr('collegato — da adesso il pedale ha mollato l\'ampli'));
     await comandoPedale(PedalePonte.CMD.ELENCA);
   } catch (err) {
-    statoPedale(false, 'non collegato');
+    statoPedale(false, tr('non collegato'));
     // Il caso più probabile non è un guasto: il ponte del pedale è chiuso, e
     // un pedale che non si annuncia non compare nell'elenco del browser.
     const scelto = /cancell|chosen|user/i.test(err.message || '');
-    logPedale('connessione fallita: ' + err.message +
-              (scelto ? ' — se nell\'elenco non c\'era nessun pedale, apri il ponte: ' +
-                        'due tasti banco insieme per un secondo e mezzo' : ''));
+    logPedale(tr('connessione fallita: {0}', err.message) +
+              (scelto ? tr(' — se nell\'elenco non c\'era nessun pedale, apri il ponte: ' +
+                        'due tasti banco insieme per un secondo e mezzo') : ''));
   }
 }
 
@@ -5567,10 +5600,10 @@ async function mandaBancoAlPedale() {
       const byte = await PedalePonte.invia(
         pedale.comando, { nome: banco.nome, posti }, slot,
         (fatti, totale) => { barra.style.width = Math.round(fatti / totale * 100) + '%'; });
-      logPedale(`"${banco.nome}" → slot ${slot + 1}: ${byte} byte in ` +
-                `${Math.round(performance.now() - t0)} ms`);
+      logPedale(tr('"{0}" → slot {1}: {2} byte in {3} ms', banco.nome, slot + 1, byte,
+                Math.round(performance.now() - t0)));
     } catch (err) {
-      logPedale('invio fallito: ' + err.message);
+      logPedale(tr('invio fallito: {0}', err.message));
     }
   });
   barra.style.width = '0';
@@ -5589,14 +5622,14 @@ $('btnCopiaLogPedale').addEventListener('click', async () => {
   const prima = tasto.textContent;
   try {
     await navigator.clipboard.writeText(testo);
-    tasto.textContent = 'copiato';
+    tasto.textContent = tr('copiato');
   } catch (err) {
     const sel = window.getSelection();
     const r = document.createRange();
     r.selectNodeContents($('statoPannelloPedale'));
     sel.removeAllRanges();
     sel.addRange(r);
-    tasto.textContent = 'selezionato, copia a mano';
+    tasto.textContent = tr('selezionato, copia a mano');
   }
   setTimeout(() => { tasto.textContent = prima; }, 2000);
 });
@@ -5605,15 +5638,15 @@ $('btnPedale').addEventListener('click', () => {
   if (!tendinaSlotPedale) {
     const posti = Array.from({ length: PedalePonte.POSTI },
                              (_, i) => ({ valore: i, testo: `slot ${i + 1}` }));
-    tendinaSlotPedale = tendinaFinta('in quale slot del pedale', posti, 0);
+    tendinaSlotPedale = tendinaFinta(tr('in quale slot del pedale'), posti, 0);
     $('postoSlotPedale').replaceWith(tendinaSlotPedale);
   }
   riempiSceltaBanco();
   aggiornaInvioPedale();
   disegnaSlotsPedale();
   if (!$('statoPannelloPedale').textContent)
-    logPedale('prima apri il ponte sul pedale: tieni premuti insieme i due tasti banco ' +
-              'per un secondo e mezzo. Resta aperto due minuti, e il display lo dice');
+    logPedale(tr('prima apri il ponte sul pedale: tieni premuti insieme i due tasti banco ' +
+              'per un secondo e mezzo. Resta aperto due minuti, e il display lo dice'));
   apriPannello('pannelloPedale');
 });
 $('btnPedaleConnetti').addEventListener('click', collegaPedale);
@@ -5650,21 +5683,22 @@ function mela() {
   // funziona lo stesso.
   if (!navigator.bluetooth) {
     $('status').disabled = true;
-    $('status').title = 'questo browser non può parlare col Bluetooth';
+    $('status').title = tr('questo browser non può parlare col Bluetooth');
     $('btnRead').title = $('status').title;
     const avviso = $('senzaBluetooth');
     avviso.hidden = false;
     avviso.innerHTML = mela()
-      ? 'Su iPhone e iPad <strong>nessun browser può usare il Bluetooth</strong>: su iOS ' +
+      ? tr('Su iPhone e iPad <strong>nessun browser può usare il Bluetooth</strong>: su iOS ' +
         'anche Chrome e Firefox girano sul motore di Apple, che non lo prevede — quindi ' +
         'l\'amplificatore da qui non si connette. La libreria però funziona tutta: ' +
         'sfogliare, cercare, organizzare, importare ed esportare. Per suonare serve un ' +
-        'telefono o un computer con Chrome, Edge o Opera.'
-      : 'Questo browser non ha il Bluetooth per le pagine web, quindi l\'amplificatore da ' +
+        'telefono o un computer con Chrome, Edge o Opera.')
+      : tr('Questo browser non ha il Bluetooth per le pagine web, quindi l\'amplificatore da ' +
         'qui non si connette. La libreria funziona tutta lo stesso. Con Chrome, Edge o ' +
-        'Opera aggiornati, su Android o su computer, si connette.';
-    logLine('Web Bluetooth non disponibile: la libreria resta consultabile, ' +
-            'ma non si può leggere dall\'ampli.');
+        'Opera aggiornati, su Android o su computer, si connette.');
+    logLine(tr('Web Bluetooth non disponibile: la libreria resta consultabile, ' +
+            'ma non si può leggere dall\'ampli.'));
+
   }
 
   await store.open();

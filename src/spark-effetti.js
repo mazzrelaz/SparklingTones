@@ -30,6 +30,9 @@
  */
 window.SparkEffetti = (function () {
   'use strict';
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
   /**
    * chiave   = identificativo che manda l'ampli
@@ -269,7 +272,7 @@ window.SparkEffetti = (function () {
        misurato. Per questo l'editor mostra sempre anche il numero della
        posizione — se sono sfasati si vede subito e si correggono senza
        indovinare. */
-    'bias.reverb': { nome: 'Riverbero', quante: 7,
+    'bias.reverb': { nome: tr('Riverbero'), quante: 7,
       scelte: { 6: ['Room Studio A', 'Chamber', 'Hall Natural', 'Plate Short',
                     'Hall Ambient', 'Plate Rich', 'Hall Medium', 'Plate Long',
                     'Room Studio B'] },
@@ -527,7 +530,7 @@ window.SparkEffetti = (function () {
    * parametri avanzano. Dove `quante` non c'è non si sa nemmeno quali siano
    * di troppo, e allora restano numeri.
    */
-  const NOME_EXTRA = 'Acceso/spento';
+  const NOME_EXTRA = tr('Acceso/spento');
 
   function nomeExtra(id) {
     const voce = TABELLA[id];

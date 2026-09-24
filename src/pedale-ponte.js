@@ -28,6 +28,9 @@
  */
 window.PedalePonte = (function () {
   'use strict';
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
   /* UUID del servizio del pedale. Nostri, non dello Spark. */
   const SERVIZIO = '7a9c0000-4b2e-4f6a-9d3c-1e5f8b2a6c40';
@@ -72,7 +75,7 @@ window.PedalePonte = (function () {
     // Un banco senza preset il pedale lo accetterebbe e poi resterebbe muto:
     // meglio fermarsi qui, dove si puo' ancora dire perche'.
     if (!(banco.posti || []).some(Boolean))
-      throw new Error(`il banco "${banco.nome}" non ha nemmeno un preset dentro`);
+      throw new Error(tr`il banco "${banco.nome}" non ha nemmeno un preset dentro`);
 
     const out = [0x53, 0x50, 0x42, 0x31, slot & 0xff];   // "SPB1"
     out.push(...testo(banco.nome));
@@ -83,7 +86,7 @@ window.PedalePonte = (function () {
       if (!record) { out.push(0); continue; }
       // Un record senza catena di effetti non e' un preset: mandarlo
       // produrrebbe un banco che il pedale accetta e non sa suonare.
-      if (!record.effects) throw new Error(`"${record.name}" non ha dati sonori`);
+      if (!record.effects) throw new Error(tr`"${record.name}" non ha dati sonori`);
       out.push(1);
       out.push(...testo(record.uuid || record.id || ''));
       out.push(...testo(record.name || ''));

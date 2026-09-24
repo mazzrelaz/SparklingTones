@@ -30,6 +30,9 @@
  */
 window.DropboxSync = (function () {
   'use strict';
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
   /** In un'app «scoped» questo percorso sta dentro Apps/<nome>/, non nella
    *  radice di Dropbox: l'app vede solo la sua cartella e nient'altro. */
@@ -103,15 +106,15 @@ window.DropboxSync = (function () {
   function messaggioErrore(stato, corpo) {
     const testo = typeof corpo === 'string' ? corpo : JSON.stringify(corpo || {});
     if (/path\/not_found/.test(testo)) {
-      return 'su Dropbox non c\'è ancora nessuna libreria: mandala su tu per primo';
+      return tr('su Dropbox non c\'è ancora nessuna libreria: mandala su tu per primo');
     }
     if (stato === 401 || /expired_access_token|invalid_access_token/.test(testo)) {
-      return 'l\'autorizzazione a Dropbox non vale più: rifalla';
+      return tr('l\'autorizzazione a Dropbox non vale più: rifalla');
     }
-    if (/insufficient_space/.test(testo)) return 'lo spazio su Dropbox è finito';
-    if (stato === 429) return 'Dropbox chiede di aspettare un momento e riprovare';
-    if (stato >= 500)  return 'Dropbox non risponde bene: riprova fra poco';
-    return 'Dropbox ha rifiutato (' + stato + '): ' + testo.slice(0, 200);
+    if (/insufficient_space/.test(testo)) return tr('lo spazio su Dropbox è finito');
+    if (stato === 429) return tr('Dropbox chiede di aspettare un momento e riprovare');
+    if (stato >= 500)  return tr('Dropbox non risponde bene: riprova fra poco');
+    return tr('Dropbox ha rifiutato ({0}): {1}', stato, testo.slice(0, 200));
   }
 
   /* ------------------------------------------------------------------ */
@@ -140,7 +143,7 @@ window.DropboxSync = (function () {
 
     /** Il primo passo: l'indirizzo da aprire e il verifier da tenersi. */
     async iniziaAutorizzazione() {
-      if (!this.appKey) throw new Error('manca la chiave dell\'app Dropbox');
+      if (!this.appKey) throw new Error(tr('manca la chiave dell\'app Dropbox'));
       const verifier = nuovoVerifier();
       return { verifier, url: urlAutorizza(this.appKey, await sfida(verifier)) };
     },
@@ -156,7 +159,7 @@ window.DropboxSync = (function () {
       if (!risposta.refresh_token) {
         // Senza refresh token l'autorizzazione varrebbe quattro ore e poi
         // andrebbe rifatta: meglio dirlo subito che scoprirlo a un concerto.
-        throw new Error('Dropbox non ha dato un refresh token: rifai l\'autorizzazione');
+        throw new Error(tr('Dropbox non ha dato un refresh token: rifai l\'autorizzazione'));
       }
       this.refresh = risposta.refresh_token;
       await this.salvaRefresh(this.refresh);
@@ -248,7 +251,7 @@ window.DropboxSync = (function () {
     /** Un token di accesso valido, rinnovandolo se serve. */
     async _accesso() {
       if (this.token && Date.now() < this.scadeA - MARGINE_MS) return this.token;
-      if (!this.refresh) throw new Error('Dropbox non è ancora collegato');
+      if (!this.refresh) throw new Error(tr('Dropbox non è ancora collegato'));
       const risposta = await this._token({
         grant_type: 'refresh_token',
         refresh_token: this.refresh,

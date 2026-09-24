@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Lingua — frasi da tradurre</title>
+<!--
+  Il controllo dell'inglese: quali frasi dell'app non hanno ancora la
+  traduzione in `src/lingua-en.js`, quali traduzioni non servono più, e quali
+  hanno segnaposto o tag diversi dall'italiano.
+
+  Si usa **solo quando si aggiorna l'inglese**, che è un lavoro a parte: di
+  regola l'app si cambia in italiano e l'inglese resta indietro, e una frase
+  senza traduzione compare in italiano (vedi `src/lingua.js`).
+
+  Le chiavi le raccoglie come le usa l'app:
+  - dall'HTML di `index.html`, con lo stesso `Lingua.raccogli` che all'avvio
+    traduce la pagina — quindi le due cose non possono andare in disaccordo;
+  - dal JavaScript (quello dentro `index.html` e i moduli che carica), ogni
+    `tr('…')`, `tr('…' + '…', x)` e `` tr`…${x}…` ``.
+
+  Da `file://` va aperto con `--allow-file-access-from-files` (Edge headless:
+  poi si legge `#riassunto`), altrimenti da localhost (`tools/serve.ps1`).
+-->
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; margin: 20px; background: #111; color: #ddd; }
+  h2 { font-size: 15px; margin: 22px 0 6px; }
+  textarea { width: 100%; height: 260px; background: #000; color: #9f9; font: 12px monospace; }
+  pre { white-space: pre-wrap; background: #000; padding: 8px; font-size: 12px; }
+  .male { color: #f66; }
+</style>
+</head>
+<body>
+<h1>Frasi da tradurre</h1>
+<pre id="riassunto">…</pre>
+<h2>Mancanti (JSON da riempire)</h2>
+<textarea id="mancanti" spellcheck="false"></textarea>
+<h2>Non più usate</h2>
+<pre id="inutili"></pre>
+<h2 class="male">Segnaposto o tag diversi</h2>
+<pre id="diverse"></pre>
+<h2>Chiamate con una chiave non letterale</h2>
+<pre id="dinamiche"></pre>
+<h2>Tutte le chiavi, in ordine</h2>
+<textarea id="tutte" spellcheck="false"></textarea>
+
+<script src="../src/lingua.js"></script>
+<script src="../src/lingua-en.js"></script>
+<script>
+'use strict';
+
+/* Un tokenizzatore piccolo: quanto basta per trovare le chiamate a `tr` senza
+   farsi ingannare da commenti, stringhe e regex. */
+function chiamateTr(src, file) {
+  const chiavi = [], dinamiche = [];
+  let i = 0, linea = 1, ultimo = '';
+  const n = src.length;
+  const regexDopo = /^(|[(,=:\[!&|?{};+\-*%<>~^]|return|typeof|case|in|of|new|delete|void|throw|else|do|=>)$/;
+  const avanza = k => { for (let j = 0; j < k; j++) { if (src[i] === '\n') linea++; i++; } };
+
+  function saltaStringa(q) {
+    const inizio = i; avanza(1);
+    while (i < n && src[i] !== q) { if (src[i] === '\\') avanza(2); else avanza(1); }
+    avanza(1);
+    return src.slice(inizio, i);
+  }
+  /** Torna le parti fisse del template (già interpretate) e salta le espressioni. */
+  function saltaTemplate() {
+    avanza(1);
+    const parti = []; let pezzo = '';
+    while (i < n && src[i] !== '`') {
+      if (src[i] === '\\') { pezzo += src[i] + src[i + 1]; avanza(2); continue; }
+      if (src[i] === '$' && src[i + 1] === '{') {
+        parti.push(pezzo); pezzo = '';
+        avanza(2); let prof = 1;
+        while (i < n && prof > 0) {
+          const c = src[i];
+          if (c === "'" || c === '"') { saltaStringa(c); continue; }
+          if (c === '`') { saltaTemplate(); continue; }
+          if (c === '{') prof++;
+          else if (c === '}') { prof--; if (!prof) break; }
+          avanza(1);
+        }
+        avanza(1);
+        continue;
+      }
+      pezzo += src[i]; avanza(1);
+    }
+    parti.push(pezzo);
+    avanza(1);
+    return parti.map(p => Function('return `' + p + '`')());
+  }
+  function saltaSpazi() {
+    for (;;) {
+      if (/\s/.test(src[i] || '')) { avanza(1); continue; }
+      if (src[i] === '/' && src[i + 1] === '/') { while (i < n && src[i] !== '\n') avanza(1); continue; }
+      if (src[i] === '/' && src[i + 1] === '*') { const f = src.indexOf('*/', i + 2); avanza(f + 2 - i); continue; }
+      return;
+    }
+  }
+  /** Dopo `tr(`: il primo argomento, se è fatto solo di stringhe sommate. */
+  function primoArgomento(lineaChiamata) {
+    let chiave = '';
+    for (;;) {
+      saltaSpazi();
+      const c = src[i];
+      if (c === "'" || c === '"') chiave += Function('return ' + saltaStringa(c))();
+      else if (c === '`') {
+        const parti = saltaTemplate();
+        if (parti.length > 1) { dinamiche.push(`${file}:${lineaChiamata} template con valori dentro tr(…)`); return null; }
+        chiave += parti[0];
+      } else { dinamiche.push(`${file}:${lineaChiamata} ${src.slice(i, i + 50).split('\n')[0]}`); return null; }
+      saltaSpazi();
+      if (src[i] === '+') { avanza(1); continue; }
+      if (src[i] === ',' || src[i] === ')') return chiave;
+      dinamiche.push(`${file}:${lineaChiamata} ${src.slice(i, i + 50).split('\n')[0]}`);
+      return null;
+    }
+  }
+
+  while (i < n) {
+    const c = src[i];
+    if (c === '/' && src[i + 1] === '/') { while (i < n && src[i] !== '\n') avanza(1); continue; }
+    if (c === '/' && src[i + 1] === '*') { const f = src.indexOf('*/', i + 2); avanza((f < 0 ? n : f + 2) - i); continue; }
+    if (c === "'" || c === '"') { saltaStringa(c); ultimo = 'str'; continue; }
+    if (c === '`') { saltaTemplate(); ultimo = 'str'; continue; }
+    if (c === '/') {
+      if (regexDopo.test(ultimo)) {
+        avanza(1); let classe = false;
+        while (i < n) {
+          if (src[i] === '\\') { avanza(2); continue; }
+          if (src[i] === '[') classe = true; else if (src[i] === ']') classe = false;
+          else if (src[i] === '/' && !classe) break;
+          avanza(1);
+        }
+        avanza(1); while (/[a-z]/.test(src[i] || '')) avanza(1);
+        ultimo = 'regex'; continue;
+      }
+      ultimo = '/'; avanza(1); continue;
+    }
+    if (/\s/.test(c)) { avanza(1); continue; }
+    if (/[A-Za-z_$0-9]/.test(c)) {
+      const prima = src[i - 1];
+      let w = '';
+      while (i < n && /[A-Za-z_$0-9]/.test(src[i])) { w += src[i]; avanza(1); }
+      if (w === 'tr' && prima !== '.' && !/[A-Za-z_$0-9]/.test(prima || '')) {
+        const lineaChiamata = linea;
+        if (src[i] === '`') {
+          const parti = saltaTemplate();
+          chiavi.push({ chiave: parti.reduce((a, p, k) => a + '{' + (k - 1) + '}' + p), dove: `${file}:${lineaChiamata}` });
+          ultimo = 'str'; continue;
+        }
+        if (src[i] === '(') {
+          avanza(1);
+          const chiave = primoArgomento(lineaChiamata);
+          if (chiave !== null) chiavi.push({ chiave, dove: `${file}:${lineaChiamata}` });
+          ultimo = 'id'; continue;
+        }
+      }
+      ultimo = /^[0-9]/.test(w) ? 'num' : (regexDopo.test(w) ? w : 'id');
+      continue;
+    }
+    if (c === ')' || c === ']') { ultimo = 'id'; avanza(1); continue; }
+    if (c === '}') { ultimo = '}'; avanza(1); continue; }
+    if (c === '=' && src[i + 1] === '>') { ultimo = '=>'; avanza(2); continue; }
+    ultimo = c; avanza(1);
+  }
+  return { chiavi, dinamiche };
+}
+
+(async function () {
+  const esci = (id, testo) => { document.getElementById(id).textContent = testo; };
+  try {
+    const html = await (await fetch('../index.html')).text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+
+    const trovate = [];
+    for (const chiave of Lingua.raccogli(doc.body)) trovate.push({ chiave, dove: 'index.html (HTML)' });
+
+    const dinamiche = [];
+    const inLinea = Array.from(doc.querySelectorAll('script:not([src])')).map(s => s.textContent).join('\n');
+    const r0 = chiamateTr(inLinea, 'index.html');
+    trovate.push(...r0.chiavi); dinamiche.push(...r0.dinamiche);
+
+    const moduli = Array.from(doc.querySelectorAll('script[src]'))
+      .map(s => s.getAttribute('src'))
+      .filter(s => !/lingua/.test(s));
+    for (const m of moduli) {
+      const r = chiamateTr(await (await fetch('../' + m)).text(), m);
+      trovate.push(...r.chiavi); dinamiche.push(...r.dinamiche);
+    }
+
+    const viste = new Map();
+    for (const t of trovate) if (!viste.has(t.chiave)) viste.set(t.chiave, t.dove);
+
+    const diz = window.LINGUA_EN || {};
+    const mancanti = [...viste.keys()].filter(k => !Object.prototype.hasOwnProperty.call(diz, k));
+    const inutili = Object.keys(diz).filter(k => !viste.has(k));
+
+    const segnaposto = s => (s.match(/\{\d+\}/g) || []).sort().join(' ');
+    const tag = s => (s.match(/<\/?[a-z]+/gi) || []).map(t => t.toLowerCase()).sort().join(' ');
+    const diverse = Object.entries(diz).filter(([k, v]) =>
+      segnaposto(k) !== segnaposto(v) || tag(k) !== tag(v));
+
+    const oggetto = {};
+    for (const k of mancanti) oggetto[k] = '';
+    document.getElementById('mancanti').textContent = JSON.stringify(oggetto, null, 1);
+    document.getElementById('tutte').textContent = JSON.stringify([...viste.keys()], null, 1);
+    esci('inutili', inutili.join('\n') || '—');
+    esci('diverse', diverse.map(([k, v]) => k + '\n  → ' + v).join('\n\n') || '—');
+    esci('dinamiche', dinamiche.join('\n') || '—');
+    esci('riassunto',
+      `chiavi nell'app: ${viste.size}\n` +
+      `tradotte: ${viste.size - mancanti.length}\n` +
+      `MANCANTI: ${mancanti.length}\n` +
+      `non più usate: ${inutili.length}\n` +
+      `segnaposto o tag diversi: ${diverse.length}\n` +
+      `chiamate non letterali: ${dinamiche.length}`);
+  } catch (err) {
+    esci('riassunto', 'ERRORE: ' + err.message + '\n' + err.stack);
+  }
+})();
+</script>
+</body>
+</html>

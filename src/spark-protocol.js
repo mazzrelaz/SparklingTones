@@ -19,6 +19,9 @@
  */
 window.Spark = (function () {
   'use strict';
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
   /* ======================================================================
      Codifica 7bit/8bit
@@ -135,12 +138,12 @@ window.Spark = (function () {
       if (b === TYPE.UINT8)    return this.u8();
       if (b === TYPE.UINT16)   return (this.u8() << 8) | this.u8();
       if (b === TYPE.UINT32)   return ((this.u8() << 24) >>> 0) + (this.u8() << 16) + (this.u8() << 8) + this.u8();
-      throw new Error(`atteso intero a ${this.i - 1}, trovato 0x${b.toString(16)}`);
+      throw new Error(tr`atteso intero a ${this.i - 1}, trovato 0x${b.toString(16)}`);
     },
 
     float() {
       const b = this.u8();
-      if (b !== TYPE.FLOAT) throw new Error(`atteso float a ${this.i - 1}, trovato 0x${b.toString(16)}`);
+      if (b !== TYPE.FLOAT) throw new Error(tr`atteso float a ${this.i - 1}, trovato 0x${b.toString(16)}`);
       const dv = new DataView(new ArrayBuffer(4));
       for (let k = 0; k < 4; k++) dv.setUint8(k, this.u8());
       return dv.getFloat32(0, false);
@@ -150,7 +153,7 @@ window.Spark = (function () {
       const b = this.u8();
       if (b === TYPE.TRUE)  return true;
       if (b === TYPE.FALSE) return false;
-      throw new Error(`atteso booleano a ${this.i - 1}, trovato 0x${b.toString(16)}`);
+      throw new Error(tr`atteso booleano a ${this.i - 1}, trovato 0x${b.toString(16)}`);
     },
 
     string() {
@@ -158,7 +161,7 @@ window.Spark = (function () {
       let len;
       if (b >= TYPE.STR_BASE && b <= 0xbf)  len = b - TYPE.STR_BASE;
       else if (b === TYPE.LONG_STR)         len = this.u8();
-      else throw new Error(`attesa stringa a ${this.i - 1}, trovato 0x${b.toString(16)}`);
+      else throw new Error(tr`attesa stringa a ${this.i - 1}, trovato 0x${b.toString(16)}`);
       let s = '';
       for (let k = 0; k < len; k++) s += String.fromCharCode(this.u8());
       return s;
@@ -173,7 +176,7 @@ window.Spark = (function () {
       const declared = this.int();
       const s = this.string();
       if (s.length !== declared) {
-        throw new Error(`lunghezza dichiarata ${declared} ma stringa di ${s.length}`);
+        throw new Error(tr`lunghezza dichiarata ${declared} ma stringa di ${s.length}`);
       }
       return s;
     },
@@ -181,7 +184,7 @@ window.Spark = (function () {
     arrayLen() {
       const b = this.u8();
       if (b >= TYPE.ARRAY_BASE && b <= 0x9f) return b - TYPE.ARRAY_BASE;
-      throw new Error(`atteso array a ${this.i - 1}, trovato 0x${b.toString(16)}`);
+      throw new Error(tr`atteso array a ${this.i - 1}, trovato 0x${b.toString(16)}`);
     },
   };
 
@@ -320,11 +323,11 @@ window.Spark = (function () {
    */
   function impostazioniConBpm(precedenti, bpm) {
     if (!precedenti || precedenti.length === 0) {
-      throw new Error('servono le impostazioni lette dall\'ampli');
+      throw new Error(tr('servono le impostazioni lette dall\'ampli'));
     }
     const n = Math.round(bpm);
     if (!(n >= BPM_MIN && n <= BPM_MAX)) {
-      throw new Error(`bpm fuori da ${BPM_MIN}–${BPM_MAX}: ${bpm}`);
+      throw new Error(tr`bpm fuori da ${BPM_MIN}–${BPM_MAX}: ${bpm}`);
     }
     const testa = n >= 128 ? [0xcc, n] : [n];
     return testa.concat(Array.from(precedenti).slice(_lunghezzaBpm(precedenti)));
@@ -452,8 +455,8 @@ window.Spark = (function () {
         const index  = r.int();
         const marker = r.u8();
         if (marker !== PARAM_MARKER) {
-          throw new Error(`marcatore inatteso 0x${marker.toString(16)} nel parametro ` +
-                          `${index} di ${effect.name}`);
+          throw new Error(tr('marcatore inatteso 0x{0} nel parametro {1} di {2}',
+                          marker.toString(16), index, effect.name));
         }
         effect.params.push({ index, value: r.float() });
       }
@@ -469,7 +472,7 @@ window.Spark = (function () {
     preset.checksum = r.remaining > 0 ? r.u8() : null;
 
     if (r.remaining > 0) {
-      throw new Error(`${r.remaining} byte non consumati in coda al preset`);
+      throw new Error(tr`${r.remaining} byte non consumati in coda al preset`);
     }
     return preset;
   }
@@ -517,8 +520,9 @@ window.Spark = (function () {
    */
   // La seconda posizione ospita anche i wah, non solo i compressori: è così
   // che la chiama l'app ufficiale, ed è coerente con i modelli che accetta.
-  const CATENA = ['Noise gate', 'Comp / Wah', 'Drive', 'Ampli',
-                  'Modulazione', 'Delay', 'Riverbero'];
+  // I nomi si mostrano, quindi passano da `tr`; nessuno li confronta.
+  const CATENA = [tr('Noise gate'), tr('Comp / Wah'), tr('Drive'), tr('Ampli'),
+                  tr('Modulazione'), tr('Delay'), tr('Riverbero')];
 
   const LIVE_TARGET      = { bank: 0x01, number: 0x00 };
   const slotTarget       = n => ({ bank: 0x00, number: n });
@@ -618,48 +622,48 @@ window.Spark = (function () {
     const numero = v => typeof v === 'number' && Number.isFinite(v);
 
     if (!preset || typeof preset !== 'object') {
-      return { errori: ['non è un preset'], avvisi };
+      return { errori: [tr('non è un preset')], avvisi };
     }
-    if (typeof preset.uuid !== 'string' || !preset.uuid) errori.push('manca l\'UUID');
-    else if (preset.uuid.length !== 36) avvisi.push(`UUID di ${preset.uuid.length} caratteri invece di 36`);
+    if (typeof preset.uuid !== 'string' || !preset.uuid) errori.push(tr('manca l\'UUID'));
+    else if (preset.uuid.length !== 36) avvisi.push(tr`UUID di ${preset.uuid.length} caratteri invece di 36`);
 
     for (const campo of ['name', 'version', 'description', 'icon']) {
-      if (typeof preset[campo] !== 'string') errori.push(`il campo ${campo} non è testo`);
+      if (typeof preset[campo] !== 'string') errori.push(tr`il campo ${campo} non è testo`);
     }
-    if (!numero(preset.bpm)) errori.push('i BPM non sono un numero');
+    if (!numero(preset.bpm)) errori.push(tr('i BPM non sono un numero'));
 
     if (!Array.isArray(preset.effects)) {
-      errori.push('manca la catena effetti');
+      errori.push(tr('manca la catena effetti'));
       return { errori, avvisi };
     }
     // Un fixarray arriva a 15: oltre, `ARRAY_BASE + n` sconfina in un altro tipo.
-    if (preset.effects.length > 15) errori.push(`${preset.effects.length} effetti: oltre i 15 di un fixarray`);
-    if (preset.effects.length !== 7) avvisi.push(`${preset.effects.length} effetti invece dei 7 soliti`);
+    if (preset.effects.length > 15) errori.push(tr`${preset.effects.length} effetti: oltre i 15 di un fixarray`);
+    if (preset.effects.length !== 7) avvisi.push(tr`${preset.effects.length} effetti invece dei 7 soliti`);
 
     preset.effects.forEach((effetto, i) => {
-      const dove = `effetto ${i + 1}`;
-      if (!effetto || typeof effetto !== 'object') { errori.push(`${dove}: non è un effetto`); return; }
-      if (typeof effetto.name !== 'string' || !effetto.name) errori.push(`${dove}: manca il nome`);
+      const dove = tr`effetto ${i + 1}`;
+      if (!effetto || typeof effetto !== 'object') { errori.push(tr`${dove}: non è un effetto`); return; }
+      if (typeof effetto.name !== 'string' || !effetto.name) errori.push(tr`${dove}: manca il nome`);
       else if (noti && !noti.has(effetto.name)) {
-        errori.push(`${dove}: il modello «${effetto.name}» non è fra quelli che l'ampli conosce`);
+        errori.push(tr`${dove}: il modello «${effetto.name}» non è fra quelli che l'ampli conosce`);
       }
-      if (!Array.isArray(effetto.params)) { errori.push(`${dove}: mancano i parametri`); return; }
+      if (!Array.isArray(effetto.params)) { errori.push(tr`${dove}: mancano i parametri`); return; }
       if (effetto.params.length > 15) {
-        errori.push(`${dove}: ${effetto.params.length} parametri, oltre i 15 di un fixarray`);
+        errori.push(tr`${dove}: ${effetto.params.length} parametri, oltre i 15 di un fixarray`);
       }
       effetto.params.forEach((param, j) => {
-        const nome = `${effetto.name || dove}, parametro ${j + 1}`;
-        if (!param || typeof param !== 'object') { errori.push(`${nome}: non è un parametro`); return; }
-        if (!numero(param.value)) errori.push(`${nome}: il valore non è un numero (${param.value})`);
-        else if (param.value < 0 || param.value > 1) avvisi.push(`${nome}: valore ${param.value} fuori da 0..1`);
+        const nome = tr`${effetto.name || dove}, parametro ${j + 1}`;
+        if (!param || typeof param !== 'object') { errori.push(tr`${nome}: non è un parametro`); return; }
+        if (!numero(param.value)) errori.push(tr`${nome}: il valore non è un numero (${param.value})`);
+        else if (param.value < 0 || param.value > 1) avvisi.push(tr`${nome}: valore ${param.value} fuori da 0..1`);
         if (!Number.isInteger(param.index) || param.index < 0 || param.index > 127) {
-          errori.push(`${nome}: indice ${param.index} non valido`);
+          errori.push(tr`${nome}: indice ${param.index} non valido`);
         }
       });
     });
 
     for (const value of preset.tail || []) {
-      if (!numero(value)) errori.push('la coda contiene un valore non numerico');
+      if (!numero(value)) errori.push(tr('la coda contiene un valore non numerico'));
     }
     return { errori, avvisi };
   }

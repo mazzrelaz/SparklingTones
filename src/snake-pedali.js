@@ -22,6 +22,9 @@
  * nella vita.
  */
 window.SnakePedali = (function () {
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
   /* ---- misure ---- */
   const CELLA = 16;                 // un pedalino sta in sedici pixel
@@ -92,8 +95,8 @@ window.SnakePedali = (function () {
   const SCHERMO =
     '<div class="barra-alta">' +
       '<h2 style="flex:1">StompSnake</h2>' +
-      '<button class="piccolo" data-snake="suono">suono</button>' +
-      '<button class="primary" data-snake="chiudi">Fatto</button>' +
+      '<button class="piccolo" data-snake="suono">' + tr('suono') + '</button>' +
+      '<button class="primary" data-snake="chiudi">' + tr('Fatto') + '</button>' +
     '</div>' +
     '<div class="snake-scena">' +
       // Il marchio sopra il campo. Finché l'immagine non c'è si vede la
@@ -104,28 +107,28 @@ window.SnakePedali = (function () {
         '<span data-snake="marchioScritto">STOMP<b>SNAKE</b></span>' +
       '</div>' +
       '<div class="snake-hud">' +
-        '<span>Pedali <b data-snake="punti">0</b></span>' +
+        '<span>' + tr('Pedali') + ' <b data-snake="punti">0</b></span>' +
         '<span class="snake-nome" data-snake="nome">&nbsp;</span>' +
         '<span>Record <b data-snake="record">0</b></span>' +
       '</div>' +
       '<div class="snake-tela">' +
         '<canvas width="' + LARG + '" height="' + ALT + '"></canvas>' +
         '<div class="snake-fine" data-snake="fine" hidden>' +
-          '<div class="snake-titolo" data-snake="titolo">Fine</div>' +
+          '<div class="snake-titolo" data-snake="titolo">' + tr('Fine') + '</div>' +
           '<div class="snake-motivo" data-snake="motivo"></div>' +
-          '<button class="primary" data-snake="ancora">Un&#39;altra</button>' +
+          '<button class="primary" data-snake="ancora">' + tr('Un\'altra') + '</button>' +
         '</div>' +
       '</div>' +
       '<div class="snake-pad">' +
-        '<button data-dir="su" aria-label="su">&#9650;</button>' +
-        '<button data-dir="sx" aria-label="sinistra">&#9664;</button>' +
-        '<button data-dir="giu" aria-label="giu">&#9660;</button>' +
-        '<button data-dir="dx" aria-label="destra">&#9654;</button>' +
+        '<button data-dir="su" aria-label="' + tr('su') + '">&#9650;</button>' +
+        '<button data-dir="sx" aria-label="' + tr('sinistra') + '">&#9664;</button>' +
+        '<button data-dir="giu" aria-label="' + tr('giù') + '">&#9660;</button>' +
+        '<button data-dir="dx" aria-label="' + tr('destra') + '">&#9654;</button>' +
       '</div>' +
       // Corta di proposito: il logo si è preso lo spazio, e questa riga la si
       // legge una volta sola. L'ampli non c'entra niente comunque.
-      '<p class="spiega snake-aiuto">Col dito sul campo, o coi tasti qui sopra. ' +
-        'Frecce e WASD, spazio per la pausa.</p>' +
+      '<p class="spiega snake-aiuto">' + tr('Col dito sul campo, o coi tasti qui sopra. ' +
+        'Frecce e WASD, spazio per la pausa.') + '</p>' +
     '</div>';
 
   const CSS =
@@ -298,7 +301,7 @@ window.SnakePedali = (function () {
   }
 
   function mostraSuono() {
-    parti.suono.textContent = suonoAcceso ? '♪ suono' : '✕ muto';
+    parti.suono.textContent = suonoAcceso ? tr('♪ suono') : tr('✕ muto');
   }
 
   const TASTI = {
@@ -372,7 +375,7 @@ window.SnakePedali = (function () {
     };
     p.batteria = postoLibero(p);
     parti.fine.hidden = true;
-    parti.nome.textContent = 'pronti? muovi';
+    parti.nome.textContent = tr('pronti? muovi');
     accumulo = 0;
     parti.punti.textContent = '0';
     parti.record.textContent = record;
@@ -398,14 +401,14 @@ window.SnakePedali = (function () {
     const testa = { x: p.catena[0].x + p.verso.x, y: p.catena[0].y + p.verso.y };
 
     if (testa.x < 0 || testa.x >= COLONNE || testa.y < 0 || testa.y >= RIGHE) {
-      morte('Sei caduto giù dalla pedaliera.');
+      morte(tr('Sei caduto giù dalla pedaliera.'));
       return;
     }
     // La coda si sposta nello stesso istante, quindi finirci sopra non è uno
     // scontro: è l'unica casella occupata che si sta liberando adesso.
     const corpo = p.catena.slice(0, p.catena.length - 1);
     if (corpo.some(s => s.x === testa.x && s.y === testa.y)) {
-      morte('Ti sei attorcigliato i cavi.');
+      morte(tr('Ti sei attorcigliato i cavi.'));
       return;
     }
 
@@ -424,7 +427,7 @@ window.SnakePedali = (function () {
       p.punti += WAH_VALE;
       p.cresci += WAH_VALE;
       p.wah = null;
-      parti.nome.textContent = '+ WAH! ne vale ' + WAH_VALE;
+      parti.nome.textContent = tr('+ WAH! ne vale {0}', WAH_VALE);
       // due note che salgono e ridiscendono: è un wah, si sente
       bip(440, 0.06);
       setTimeout(() => bip(880, 0.06), 60);
@@ -454,7 +457,7 @@ window.SnakePedali = (function () {
     if (p.cresci > 0) p.cresci--;
     else p.catena.pop();
 
-    if (!p.batteria) morte('Pedaliera piena. Non ci sta più niente.');
+    if (!p.batteria) morte(tr('Pedaliera piena. Non ci sta più niente.'));
   }
 
   /** Il premio compare, e da lì comincia a scappare. */
@@ -463,7 +466,7 @@ window.SnakePedali = (function () {
     const posto = postoLibero(p, [p.batteria]);
     if (!posto) return;               // non c'è dove metterlo, pazienza
     p.wah = { x: posto.x, y: posto.y, resta: WAH_DURATA };
-    parti.nome.textContent = 'un wah! prendilo';
+    parti.nome.textContent = tr('un wah! prendilo');
     if (!conSuono) return;
     bip(520, 0.05);
     setTimeout(() => bip(700, 0.05), 70);
@@ -476,16 +479,16 @@ window.SnakePedali = (function () {
     bip(320, 0.12);
     setTimeout(() => bip(200, 0.18), 110);
 
-    let titolo = 'Fine dei giochi';
+    let titolo = tr('Fine dei giochi');
     if (p.punti > record) {
       record = p.punti;
       scrivi(CHIAVE_RECORD, String(record));
-      titolo = 'Record nuovo!';
+      titolo = tr('Record nuovo!');
     }
     parti.titolo.textContent = titolo;
-    parti.motivo.textContent = motivo + ' ' + p.punti +
-      (p.punti === 1 ? ' batteria da 9 volt, ' : ' batterie da 9 volt, ') +
-      p.catena.length + ' pedalini in catena.';
+    parti.motivo.textContent = motivo + ' ' + (p.punti === 1
+      ? tr('1 batteria da 9 volt, {0} pedalini in catena.', p.catena.length)
+      : tr('{0} batterie da 9 volt, {1} pedalini in catena.', p.punti, p.catena.length));
     parti.fine.hidden = false;
     parti.punti.textContent = p.punti;
     parti.record.textContent = record;
@@ -528,7 +531,7 @@ window.SnakePedali = (function () {
       ctx.fillStyle = '#f0c040';
       ctx.font = 'bold 11px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('PAUSA', LARG / 2, Math.floor(ALT / 2) + 4);
+      ctx.fillText(tr('PAUSA'), LARG / 2, Math.floor(ALT / 2) + 4);
     }
   }
 
@@ -802,7 +805,7 @@ window.SnakePedali = (function () {
         p.wah.resta -= passato;
         if (p.wah.resta <= 0) {
           p.wah = null;
-          parti.nome.textContent = 'il wah se n\'è andato';
+          parti.nome.textContent = tr('il wah se n\'è andato');
           bip(300, 0.09);
         }
       }

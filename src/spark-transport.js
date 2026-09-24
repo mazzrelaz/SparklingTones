@@ -20,6 +20,9 @@
  */
 window.SparkTransport = (function () {
   'use strict';
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
   const SERVICE_UUID     = 0xffc0;
   const CHAR_WRITE_UUID  = 0xffc1;
@@ -72,9 +75,9 @@ window.SparkTransport = (function () {
     /* ---------------------------------------------------------------- */
 
     async connect() {
-      if (!navigator.bluetooth) throw new Error('Web Bluetooth non disponibile in questo browser');
+      if (!navigator.bluetooth) throw new Error(tr('Web Bluetooth non disponibile in questo browser'));
 
-      this.onStatus('connecting', 'Ricerca dispositivo…');
+      this.onStatus('connecting', tr('Ricerca dispositivo…'));
       this.device = await navigator.bluetooth.requestDevice({
         filters: [{ services: [SERVICE_UUID] }],
         optionalServices: [SERVICE_UUID],
@@ -82,11 +85,11 @@ window.SparkTransport = (function () {
       this.device.addEventListener('gattserverdisconnected', () => {
         this.writeChar = this.notifyChar = null;
         this.assembler.reset();
-        this._failAllWaiters('connessione persa');
-        this.onStatus('disconnected', 'Disconnesso');
+        this._failAllWaiters(tr('connessione persa'));
+        this.onStatus('disconnected', tr('Disconnesso'));
       });
 
-      this.onStatus('connecting', 'Connessione GATT…');
+      this.onStatus('connecting', tr('Connessione GATT…'));
       const server  = await this.device.gatt.connect();
       const service = await server.getPrimaryService(SERVICE_UUID);
       this.writeChar  = await service.getCharacteristic(CHAR_WRITE_UUID);
@@ -98,7 +101,7 @@ window.SparkTransport = (function () {
       });
 
       this.onStatus('connected', this.device.name || 'Spark');
-      this.onLog(`connesso a ${this.device.name}`);
+      this.onLog(tr`connesso a ${this.device.name}`);
       return this.device.name;
     },
 
@@ -126,13 +129,13 @@ window.SparkTransport = (function () {
      * @returns il sequence number usato, per correlare la risposta
      */
     send(command, forcedSeq, withBlockHeader) {
-      if (!this.writeChar) return Promise.reject(new Error('non connesso'));
+      if (!this.writeChar) return Promise.reject(new Error(tr('non connesso')));
       const seq   = forcedSeq === undefined ? this._nextSeq() : forcedSeq;
       const bytes = new Uint8Array(Spark.encode(command, seq, !!withBlockHeader));
 
       if (bytes.length > SAFE_WRITE_BYTES) {
-        this.onLog(`attenzione: messaggio da ${bytes.length} byte, oltre i ` +
-                   `${SAFE_WRITE_BYTES} verificati — l'ampli potrebbe disconnettersi`);
+        this.onLog(tr('attenzione: messaggio da {0} byte, oltre i ' +
+                   '{1} verificati — l\'ampli potrebbe disconnettersi', bytes.length, SAFE_WRITE_BYTES));
       }
 
       this.sendChain = this.sendChain.then(async () => {
@@ -140,7 +143,7 @@ window.SparkTransport = (function () {
         this.onLog(`TX 0x${hex(command.cmd)}${hex(command.sub)} seq=0x${hex(seq)} ${bytes.length}B`);
         await sleep(SEND_GAP_MS);
       }).catch(err => {
-        this.onLog('errore invio: ' + err.message);
+        this.onLog(tr('errore invio: {0}', err.message));
       });
 
       return this.sendChain.then(() => seq);
@@ -161,7 +164,7 @@ window.SparkTransport = (function () {
      * @returns il sequence number usato
      */
     sendSpezzato(command, max, forcedSeq, withBlockHeader) {
-      if (!this.writeChar) return Promise.reject(new Error('non connesso'));
+      if (!this.writeChar) return Promise.reject(new Error(tr('non connesso')));
       const seq   = forcedSeq === undefined ? this._nextSeq() : forcedSeq;
       const bytes = new Uint8Array(Spark.encode(command, seq, !!withBlockHeader));
       const passo = Math.max(1, max || 20);
@@ -175,7 +178,7 @@ window.SparkTransport = (function () {
                    `${bytes.length}B in ${pezzi} scritture da ${passo}`);
         await sleep(SEND_GAP_MS);
       }).catch(err => {
-        this.onLog('errore invio: ' + err.message);
+        this.onLog(tr('errore invio: {0}', err.message));
       });
 
       return this.sendChain.then(() => seq);
@@ -211,7 +214,7 @@ window.SparkTransport = (function () {
     _failAllWaiters(reason) {
       const pending = this.waiters.splice(0);
       pending.forEach(w => w.resolve(null));
-      if (pending.length) this.onLog(`${pending.length} attese annullate: ${reason}`);
+      if (pending.length) this.onLog(tr`${pending.length} attese annullate: ${reason}`);
     },
 
     _handleMessage(msg) {
@@ -310,7 +313,7 @@ window.SparkTransport = (function () {
       let precedenti = this.state.impostazioniLooper;
       if (!precedenti) precedenti = await this.readLooperSettings(timeoutMs);
       if (!precedenti) {
-        this.onLog('l\'ampli non ha mandato le impostazioni: tempo non scritto');
+        this.onLog(tr('l\'ampli non ha mandato le impostazioni: tempo non scritto'));
         return false;
       }
       let nuove;
@@ -354,8 +357,8 @@ window.SparkTransport = (function () {
         // niente — o non lo sentiamo più; se è maggiore di 0 sta parlando e
         // siamo noi a scartare quello che manda.
         const arrivati = this.rxTotali - rxPrima;
-        this.onLog(`${label}: nessuna risposta completa (${chunks.length} chunk buoni, ` +
-                   `${arrivati} messaggi arrivati in tutto)`);
+        this.onLog(tr('{0}: nessuna risposta completa ({1} chunk buoni, ' +
+                   '{2} messaggi arrivati in tutto)', label, chunks.length, arrivati));
         return null;
       }
 
@@ -367,8 +370,8 @@ window.SparkTransport = (function () {
         // l'ampli ha mandato qualcosa che non sappiamo ancora leggere, ed è
         // esattamente il materiale che serve per capire cosa.
         this.lastFailedPayload = { label, payload, error: err.message, at: new Date().toISOString() };
-        this.onLog(`${label}: errore di parsing — ${err.message} ` +
-                   `(payload di ${payload.length} byte conservato)`);
+        this.onLog(tr('{0}: errore di parsing — {1} ' +
+                   '(payload di {2} byte conservato)', label, err.message, payload.length));
         return null;
       }
     },
@@ -386,7 +389,7 @@ window.SparkTransport = (function () {
         if (onProgress) onProgress(i, max);
         const preset = await this.readPreset(i);
         if (preset) presets.push(preset);
-        else this.onLog(`slot ${i}: vuoto o non risponde`);
+        else this.onLog(tr`slot ${i}: vuoto o non risponde`);
         await sleep(150);
       }
       return presets;
@@ -430,7 +433,7 @@ window.SparkTransport = (function () {
      * @returns {{ok: boolean, sent: number, total: number, acks: number, error?: string}}
      */
     async writePreset(preset, target, onProgress, options) {
-      if (!this.writeChar) throw new Error('non connesso');
+      if (!this.writeChar) throw new Error(tr('non connesso'));
       const opts = options || {};
 
       // I due float di coda non vengono mandati: `create_preset` non li scrive
@@ -438,10 +441,10 @@ window.SparkTransport = (function () {
       const payload = Spark.serializePreset(preset, target, { omitTail: !opts.includeTail });
       const chunks  = Spark.splitPresetIntoChunks(payload, opts.chunkSize);
       const seq     = this._nextSeq();
-      this.onLog(`invio "${preset.name}" → bank ${payload[0]} numero ${payload[1]}: ` +
-                 `${payload.length} byte in ${chunks.length} chunk, ` +
-                 (opts.incrementSeq ? 'seq crescente' : `seq 0x${hex(seq)} per tutti`) +
-                 (opts.includeTail ? ', con coda' : ''));
+      this.onLog(tr('invio "{0}" → bank {1} numero {2}: ' +
+                 '{3} byte in {4} chunk, ', preset.name, payload[0], payload[1], payload.length, chunks.length) +
+                 (opts.incrementSeq ? tr('seq crescente') : tr`seq 0x${hex(seq)} per tutti`) +
+                 (opts.includeTail ? tr(', con coda') : ''));
 
       let acks = 0;
       for (let i = 0; i < chunks.length; i++) {
@@ -454,7 +457,7 @@ window.SparkTransport = (function () {
                           opts.incrementSeq ? undefined : seq,
                           opts.blockHeader);
         } catch (err) {
-          const error = `errore GATT al chunk ${i + 1} di ${chunks.length}: ${err.message}`;
+          const error = tr`errore GATT al chunk ${i + 1} di ${chunks.length}: ${err.message}`;
           this.onLog(error);
           return { ok: false, sent: i, total: chunks.length, acks, error };
         }
@@ -463,7 +466,7 @@ window.SparkTransport = (function () {
         // sblocca da solo dopo mezzo secondo (SparkIO.ino:139-142).
       }
       if (acks < chunks.length) {
-        this.onLog(`inviati tutti i chunk, ma solo ${acks} confermati su ${chunks.length}`);
+        this.onLog(tr`inviati tutti i chunk, ma solo ${acks} confermati su ${chunks.length}`);
       }
       return { ok: true, sent: chunks.length, total: chunks.length, acks };
     },
@@ -482,7 +485,7 @@ window.SparkTransport = (function () {
       const esito = await this.writePreset(preset, Spark.SOFTWARE_TARGET, onProgress, options);
       if (!esito.ok) return esito;
       await this.send(Spark.commands.changePreset(Spark.SOFTWARE_PRESET));
-      this.onLog('passato al preset software');
+      this.onLog(tr('passato al preset software'));
       return esito;
     },
 
@@ -509,7 +512,7 @@ window.SparkTransport = (function () {
       await this.send(Spark.commands.changePreset(altrove));
       await sleep(300);
       await this.send(Spark.commands.changePreset(slot));
-      this.onLog(`scritto nello slot ${slot}, con un cambio preset via e ritorno`);
+      this.onLog(tr`scritto nello slot ${slot}, con un cambio preset via e ritorno`);
       return esito;
     },
 

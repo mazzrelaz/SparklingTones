@@ -22,6 +22,9 @@
  */
 window.SparkBackup = (function () {
   'use strict';
+  // Le frasi passano da `tr` (src/lingua.js); dove lingua.js non c'è restano in italiano.
+  const tr = window.tr || ((s, ...v) => Array.isArray(s)
+    ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
   const EOCD_SIG    = 0x06054b50;   // fine della central directory
   const CENTRAL_SIG = 0x02014b50;   // voce della central directory
@@ -35,7 +38,7 @@ window.SparkBackup = (function () {
     const view  = new DataView(buffer);
     const bytes = new Uint8Array(buffer);
     const eocd  = trovaEOCD(view);
-    if (eocd < 0) throw new Error('non sembra un file zip');
+    if (eocd < 0) throw new Error(tr('non sembra un file zip'));
 
     const quante = view.getUint16(eocd + 10, true);
     let p        = view.getUint32(eocd + 16, true);
@@ -91,7 +94,7 @@ window.SparkBackup = (function () {
   async function parseBackup(buffer) {
     const files = await readZip(buffer, nome => PERCORSO_PRESET.test(nome));
     if (files.size === 0) {
-      throw new Error('nessun preset trovato: è il backup dell\'app Spark?');
+      throw new Error(tr('nessun preset trovato: è il backup dell\'app Spark?'));
     }
 
     const decoder   = new TextDecoder();
@@ -119,14 +122,14 @@ window.SparkBackup = (function () {
    */
   function convertiPreset(json, categoria) {
     const meta = json.meta || {};
-    if (!meta.id)     throw new Error('manca meta.id');
-    if (!json.sigpath) throw new Error('manca sigpath');
+    if (!meta.id)     throw new Error(tr('manca meta.id'));
+    if (!json.sigpath) throw new Error(tr('manca sigpath'));
 
     return {
       bank:        0,
       number:      0,
       uuid:        testo(meta.id, ''),
-      name:        testo(meta.name, '') || '(senza nome)',
+      name:        testo(meta.name, '') || tr('(senza nome)'),
       version:     testo(meta.version, '') || '0.7',
       description: testo(meta.description, ''),
       icon:        testo(meta.icon, '') || 'icon.png',
