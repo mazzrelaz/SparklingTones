@@ -468,7 +468,7 @@ scritto «finito»):
    3300 mAh diviso i mA. **Prima si chiedono le foto** del tester (rotella e prese: presa
    sbagliata = fusibile bruciato) e dell'interruttore coi suoi fili. Se il pedale si
    riavvia all'accensione, è la caduta di tensione del tester: portata più alta. Poi
-   il partitore su `D0`. Altrimenti la via lunga: la via lunga è lasciarlo acceso e guardare
+   il partitore su `D0`. Altrimenti la via lunga: lasciarlo acceso e guardare
    l'orologio. **Il partitore su `D0` non è saldato**, quindi l'indicatore di batteria non si
    può ancora scrivere.
 4. Il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
