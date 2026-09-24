@@ -53,7 +53,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.1";   // 1.1: modalita' MIDI
+static const char* VERSIONE = "1.2";   // 1.1: modalita' MIDI; 1.2: anche via Bluetooth
 
 /* Il banco che il pedale sta suonando. Se ne ha uno ricevuto dall'app usa
  * quello; altrimenti ripiega su preset_frames.h, che resta utile per provare
@@ -248,6 +248,17 @@ static int16_t programmaMidi = -1;             // l'ultimo Program Change mandat
 static uint8_t stompAccesi = 0;                // un bit per footswitch
 static bool    usbMontato  = false;
 
+/* Lo stesso MIDI anche via Bluetooth, per l'iPad (BIAS FX), chiesto il 24
+ * settembre 2026. Su Windows il BLE-MIDI non arriva ai programmi (prova del 29
+ * agosto), quindi l'USB resta la via del PC e il Bluetooth si aggiunge, non
+ * sostituisce: ogni comando parte da tutte e due. Servizio e caratteristica
+ * sono quelli dello standard BLE-MIDI, che iOS riconosce da solo. */
+#define UUID_MIDI      "03b80e5a-ede8-4b33-a751-6ce34ec4c700"
+#define UUID_MIDI_DATI "7772e5db-3868-4112-a1a9-f2669d106bf3"
+static BLECharacteristic* chMidi = nullptr;
+static volatile bool midiCentrale = false;     // un iPad (o altro) collegato per il MIDI
+static volatile bool midiUscito   = false;     // bandiera per il loop: riannunciarsi
+
 static const char* VIA_MODO = "/modo.txt";
 
 static void ricordaModo() {
@@ -402,7 +413,7 @@ static void disegnaAvvio() {
  *  alla rovescia del ponte aperto: sono le cose che vanno viste subito. */
 /** La modalita' MIDI sullo schermo: stessa forma di quella Spark, cosi' non si
  *  impara niente di nuovo. In alto la pagina e, a destra, il quadratino con la
- *  M, pieno quando il computer ha riconosciuto la pedaliera. Sotto i quattro
+ *  M, pieno quando il computer (USB) o l'iPad (Bluetooth) ha la pedaliera. Sotto i quattro
  *  comandi; in negativo il preset mandato per ultimo, o gli effetti accesi. */
 static void disegnaMidi(const char* avviso) {
   char testa[20];
@@ -413,7 +424,7 @@ static void disegnaMidi(const char* avviso) {
   schermo.setFont(u8g2_font_helvB08_tf);
   schermo.drawStr(0, 8, testa);
 
-  if (usbMontato) {
+  if (usbMontato || midiCentrale) {
     schermo.drawBox(118, 0, 10, 10);
     schermo.setDrawColor(0);
     schermo.setFont(u8g2_font_5x7_tf);
@@ -924,6 +935,25 @@ static void richiedi(uint8_t n) {
  *  **intero**: un rimbalzo su una linea qualunque allunga l'attesa di qualche
  *  millisecondo per tutte, che e' irrilevante sotto un piede e tiene il codice
  *  in un posto solo. */
+/** Un messaggio MIDI verso tutti e due: USB e, se c'e' qualcuno, Bluetooth.
+ *  Il BLE-MIDI vuole davanti due byte di tempo (13 bit, col bit alto acceso
+ *  su tutti e due): senza, il messaggio viene scartato in silenzio. */
+static void mandaMidi(uint8_t stato, uint8_t dato1, int dato2) {
+  if ((stato & 0xf0) == 0xc0) midi.programChange(dato1, (uint8_t)((stato & 0x0f) + 1));
+  else                        midi.controlChange(dato1, (uint8_t)dato2, (uint8_t)((stato & 0x0f) + 1));
+  if (!midiCentrale || !chMidi) return;
+  const uint16_t t = (uint16_t)(millis() & 0x1fff);
+  uint8_t p[5];
+  uint8_t n = 0;
+  p[n++] = (uint8_t)(0x80 | ((t >> 7) & 0x3f));
+  p[n++] = (uint8_t)(0x80 | (t & 0x7f));
+  p[n++] = stato;
+  p[n++] = dato1;
+  if (dato2 >= 0) p[n++] = (uint8_t)dato2;
+  chMidi->setValue(p, n);
+  chMidi->notify();
+}
+
 /** Un footswitch in modalita' MIDI. */
 static void midiPremuto(uint8_t k) {
   if (k == FS5) {
@@ -937,17 +967,19 @@ static void midiPremuto(uint8_t k) {
     Serial.printf("MIDI: preset %u-%u\n", gruppoMidi * 4 + 1, gruppoMidi * 4 + 4);
   } else if (paginaMidi == 0) {
     programmaMidi = (int16_t)(gruppoMidi * 4 + k);
-    midi.programChange((uint8_t)programmaMidi, MIDI_CANALE);
+    mandaMidi((uint8_t)(0xc0 | (MIDI_CANALE - 1)), (uint8_t)programmaMidi, -1);
     Serial.printf("MIDI: program change %d\n", programmaMidi);
   } else {
     stompAccesi ^= (uint8_t)(1 << k);
     const bool su = stompAccesi & (1 << k);
-    midi.controlChange((uint8_t)(MIDI_CC_STOMP + k), su ? 127 : 0, MIDI_CANALE);
+    mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), (uint8_t)(MIDI_CC_STOMP + k), su ? 127 : 0);
     Serial.printf("MIDI: CC %u = %u\n", MIDI_CC_STOMP + k, su ? 127 : 0);
   }
   aggiornaLed();
   schermoSporco = true;
 }
+
+static void annuncia();                    // sta col ponte, piu' giu'
 
 /** FS1 e FS4 tenuti insieme: si passa all'altra modalita'. Entrando in MIDI lo
  *  Spark si lascia libero (in MIDI non serve, e cosi' l'app lo trova); tornando
@@ -961,10 +993,13 @@ static void cambiaModo() {
     chScrittura = chNotifiche = nullptr;
     dentro = 0;
     nomeSuona[0] = 0;
+    annuncia();                            // l'iPad ora ci trova
     avvisa("modalita' MIDI");
   } else {
     momentoSgancio = millis();
     ultimoTentativo = 0;
+    if (midiCentrale && serverPonte) serverPonte->disconnect(connApp);
+    annuncia();
     avvisa("modalita' Spark");
   }
   Serial.printf("modalita' %s\n", modo == MODO_MIDI ? "MIDI" : "Spark");
@@ -1157,6 +1192,7 @@ static void eseguiComandoPesante(const uint8_t* d, size_t n);
 
 class Ponte : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* c) override {
+    if (!appCollegata) return;             // un iPad collegato per il MIDI non scrive banchi
     const uint8_t* d = c->getData();
     const size_t   n = c->getLength();
     if (!n) return;
@@ -1360,16 +1396,40 @@ class Collegamenti : public BLEServerCallbacks {
     connApp = s->getConnId();
     // A ponte chiuso non si molla l'ampli: si alza solo la bandiera, e il
     // loop lo scollega. Mai operazioni BLE dentro un callback BLE.
-    if (pontefino == 0) { cacciaApp = true; return; }
+    if (pontefino == 0) {
+      // A ponte chiuso, in modalita' MIDI chi arriva e' l'iPad per il MIDI:
+      // non tocca l'ampli (in MIDI non c'e') e non puo' scrivere banchi.
+      if (modo == MODO_MIDI) { midiCentrale = true; return; }
+      cacciaApp = true;
+      return;
+    }
     appCollegata = true;
     appEntrata   = true;
   }
-  void onDisconnect(BLEServer*) override { appCollegata = false; appUscita = true; }
+  void onDisconnect(BLEServer*) override {
+    if (midiCentrale) { midiCentrale = false; midiUscito = true; return; }
+    appCollegata = false;
+    appUscita = true;
+  }
 };
+
+/** Cosa annunciare, deciso in un posto solo. Due UUID da 128 bit non stanno
+ *  insieme nei 31 byte dell'annuncio, e comunque servono in momenti diversi:
+ *  col ponte aperto quello del ponte (l'app lo cerca per servizio), in
+ *  modalita' MIDI quello del MIDI (l'iPad lo cerca cosi'), altrimenti niente. */
+static void annuncia() {
+  BLEAdvertising* adv = BLEDevice::getAdvertising();
+  BLEDevice::stopAdvertising();
+  adv->removeServiceUUID(BLEUUID(UUID_PONTE));
+  adv->removeServiceUUID(BLEUUID(UUID_MIDI));
+  if (appCollegata || midiCentrale) return;          // c'e' gia' qualcuno
+  if (pontefino)             { adv->addServiceUUID(UUID_PONTE); BLEDevice::startAdvertising(); }
+  else if (modo == MODO_MIDI) { adv->addServiceUUID(UUID_MIDI);  BLEDevice::startAdvertising(); }
+}
 
 static void apriPonte() {
   pontefino = millis() + PONTE_APERTO_MS;
-  BLEDevice::startAdvertising();
+  annuncia();
   Serial.println(F("ponte aperto per due minuti: l'app puo' collegarsi"));
   schermoSporco = true;
 }
@@ -1377,7 +1437,7 @@ static void apriPonte() {
 static void chiudiPonte(const char* perche) {
   if (!pontefino && !appCollegata) return;
   pontefino = 0;
-  BLEDevice::stopAdvertising();
+  annuncia();
   if (appCollegata && serverPonte) serverPonte->disconnect(connApp);
   Serial.printf("ponte chiuso (%s)\n", perche);
   schermoSporco = true;
@@ -1411,7 +1471,19 @@ static void sbrigaPonte() {
     sganciato       = false;
     ultimoTentativo = 0;
     momentoSgancio  = millis();
-    BLEDevice::startAdvertising();   // senza, il pedale sparisce per sempre
+    annuncia();                      // senza, il pedale sparisce per sempre
+  }
+  if (midiUscito) {
+    midiUscito = false;
+    Serial.println(F("MIDI Bluetooth: scollegato, mi riannuncio"));
+    annuncia();
+    schermoSporco = true;
+  }
+  static bool eraCentrale = false;
+  if (midiCentrale != eraCentrale) {
+    eraCentrale = midiCentrale;
+    if (midiCentrale) Serial.println(F("MIDI Bluetooth: collegato"));
+    schermoSporco = true;
   }
 }
 
@@ -1428,6 +1500,12 @@ static void avviaPonte() {
     UUID_STATO, BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_NOTIFY);
 
   servizio->start();
+
+  BLEService* servMidi = server->createService(UUID_MIDI);
+  chMidi = servMidi->createCharacteristic(UUID_MIDI_DATI,
+    BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE_NR |
+    BLECharacteristic::PROPERTY_NOTIFY);
+  servMidi->start();
   serverPonte = server;
   BLEAdvertising* adv = BLEDevice::getAdvertising();
   adv->addServiceUUID(UUID_PONTE);
@@ -1494,6 +1572,7 @@ void setup() {
   aggiornaLed();   // spenti: finche' non si preme un tasto non suona niente di nostro
   BLEDevice::init("SparkPedale");
   avviaPonte();          // prima il server: cosi' l'app lo trova sempre
+  annuncia();            // in modalita' MIDI l'iPad deve trovarci subito
   avviaScansione();
 }
 

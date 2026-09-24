@@ -445,8 +445,13 @@ scritto «finito»):
    in MIDI il quinto passa fra pagina **preset** (otto Program Change 0–7: tasto banco SX = 1–4
    LED rosso, DX = 5–8 LED verde) e **stomp** (CC 80–83 a 127/0, LED verdi), canale 1, mappa fissa.
    **Da fare**: la prova in AmpliTube col MIDI learn (utente); la mappa scritta dall'app.
-   **Bluetooth-MIDI no** (Windows non lo passa ai programmi, prova del 29 agosto); se servirà
-   per iPad/Mac, si aggiunge.
+   **Anche BLE-MIDI, per l'iPad (BIAS FX), dalla 1.2 — NON ancora provato sull'iPad.**
+   Servizio MIDI standard sullo stesso server del ponte; `annuncia()` decide l'annuncio
+   (ponte aperto → UUID del ponte, modalità MIDI → UUID MIDI, due da 128 bit non ci stanno
+   insieme). A ponte chiuso in MIDI chi si collega è `midiCentrale` e non può scrivere
+   banchi. Ogni comando parte da USB e BLE (`mandaMidi`). Niente cifratura: se iOS non lo
+   accetta, prima ipotesi il bonding (`prova-midi` lo attivava per Windows).
+   Su Windows il BLE-MIDI non arriva ai programmi (29 agosto): lì resta l'USB.
 3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
    (mA) invece di aspettare che si scarichi; la via lunga è lasciarlo acceso e guardare
    l'orologio. **Il partitore su `D0` non è saldato**, quindi l'indicatore di batteria non si

@@ -1152,6 +1152,18 @@ prima del cambio: si agisce alla pressione, e la combinazione si riconosce solo 
 E **il caricamento del firmware cambia** (CLAUDE.md, «Il firmware lo compilo…»): la porta
 USB è di TinyUSB, quindi si passa dal tocco a 1200 baud che riavvia nel caricatore.
 
+**Anche via Bluetooth, per l'iPad — 24 settembre 2026, firmware 1.2.** L'utente usa BIAS FX
+sull'iPad, e iOS il BLE-MIDI lo capisce da solo. Si **aggiunge** all'USB (su Windows il
+BLE-MIDI non arriva ai programmi): ogni comando parte da tutte e due le strade. Il servizio
+MIDI standard (`03b80e5a-…`, caratteristica `7772e5db-…`) sta sullo stesso server GATT del
+ponte, creato prima del primo annuncio (la trappola di NimBLE). L'annuncio lo decide
+`annuncia()` in un posto solo: col ponte aperto l'UUID del ponte, in modalità MIDI quello del
+MIDI, altrimenti niente — due UUID da 128 bit non stanno nei 31 byte. A ponte chiuso, in
+modalità MIDI, chi si collega è l'iPad (`midiCentrale`): non tocca l'ampli e **la
+caratteristica del ponte ignora le sue scritture**, così la regola «banchi solo a ponte
+aperto» resta vera. Senza cifratura: se iOS rifiutasse, il bonding di `prova-midi` è la
+prima cosa da provare.
+
 **La mappa è fissa nel firmware** (canale 1, PC, CC 80–83): coi programmi che hanno il MIDI
 learn basta che i comandi siano diversi. Farla scrivere dal pannello «Pedale» dell'app resta
 il passo dopo, con la trappola di sempre: formato in due file che cambiano insieme.
