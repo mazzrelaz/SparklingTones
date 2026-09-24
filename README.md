@@ -1,5 +1,7 @@
 # SparklingTones
 
+*Italiano · [English](README.en.md)*
+
 App personale per controllare e organizzare i preset di un **Positive Grid Spark 2**
 via Bluetooth, dal browser. Più un pedale ESP32 che fa lo stesso col piede.
 
@@ -9,6 +11,10 @@ via Bluetooth, dal browser. Più un pedale ESP32 che fa lo stesso col piede.
 > sul mio ampli. Il protocollo dello Spark 2 non è documentato da nessuna parte: qui
 > è stato ricostruito osservando, misurando e verificando sull'hardware. Se stai
 > cercando quello, la parte che ti serve è in [`docs/`](docs/) — vedi in fondo.
+
+L'app è in italiano e in inglese (la lingua si sceglie nel pannello «Altro»). La
+documentazione tecnica è in italiano, tranne il protocollo, che c'è anche
+[in inglese](docs/protocollo-spark2.en.md).
 
 ---
 
@@ -154,35 +160,3 @@ MIT, Massimo Togni. Vedi [`LICENSE`](LICENSE) e [`NOTICE`](NOTICE).
 né supportato, e non usa loro codice. «Spark» e «Positive Grid» sono citati solo per
 dire con cosa funziona.
 
----
-
-## In English
-
-A personal web app (PWA, vanilla JS, no dependencies) to control and organise presets on
-a **Positive Grid Spark 2** amplifier over **Web Bluetooth**, plus ESP32-C3 firmware for
-a footswitch controller. Everything is in Italian — but the part likely to interest you
-probably is not the UI.
-
-**The Spark 2 BLE protocol is documented in
-[`docs/protocollo-spark2.md`](docs/protocollo-spark2.md)**, reverse-engineered by
-observation and verified on real hardware. Highlights, if you are building something
-similar:
-
-- Service `0xFFC0`, write `0xFFC1` (write-without-response only), notify `0xFFC2`.
-- Effect commands (`0x0115`, `0x0104`, `0x0106`) need a **trailing `0x00` byte** on the
-  Spark 2 — without it you get a normal ack and nothing happens. This is not in any
-  other source.
-- Preset chunks must carry **25 bytes** of payload, not 128: with 128 the Spark 2 drops
-  the connection.
-- **All chunks of one preset must share the same sequence number**, or the amp acks them
-  all and assembles none.
-- `0x0127` (save preset) does not work on the Spark 2, in any of the four forms tried.
-- Playing a preset and storing it into a slot are **two different sequences**.
-- The BLE **connection interval** is what makes preset loading slow (~1.2 s): it is
-  sixteen round-trips, not bandwidth. An ESP32 requesting a 7.5 ms interval does the same
-  transfer in ~330 ms. Web Bluetooth does not let you change it.
-
-Raw captures are in [`captures/`](captures/); the archived looper investigation —
-including everything that was ruled out — in [`docs/looper.md`](docs/looper.md).
-
-MIT licensed, by Massimo Togni. Not affiliated with Positive Grid Inc.

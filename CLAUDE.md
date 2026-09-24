@@ -215,9 +215,10 @@ si chiude): senza ampli rispondono con `senzaAmpli(cosa)`.
 
 **Regola dell'utente: app e sito si cambiano solo in italiano, e la parte inglese non si
 legge né si tocca finché non è lui a dire di aggiornare anche l'inglese.** Quindi mai aprire
-`src/lingua-en.js` né `sparklingtones-sito/en/`, e nelle ricerche escluderli
-(`--glob '!src/lingua-en.js'`, `--glob '!en/**'`). Il perché del disegno è in
-`docs/decisioni-ui.md`, «La decisione sull'inglese».
+`src/lingua-en.js`, i `*.en.md` (`README.en.md` dei due repo,
+`docs/protocollo-spark2.en.md`) né `sparklingtones-sito/en/`, e nelle ricerche escluderli
+(`--glob '!src/lingua-en.js'`, `--glob '!*.en.md'`, `--glob '!en/**'`). Il perché del
+disegno è in `docs/decisioni-ui.md`, «La decisione sull'inglese».
 
 - **Ogni testo nuovo dell'app, scritto in italiano, passa da `tr`** (`src/lingua.js`):
   `tr('…')`, `` tr`…${x}…` ``, o `tr('… {0} …' + '…', x)` per le frasi lunghe. I moduli di
@@ -232,13 +233,15 @@ legge né si tocca finché non è lui a dire di aggiornare anche l'inglese.** Qu
 - **Quando l'utente dice di aggiornare l'inglese**: `tools/lingua.html` (Edge headless con
   `--allow-file-access-from-files`, poi `#riassunto` e `#mancanti`) dà le frasi mancanti,
   quelle non più usate e quelle con segnaposto o tag diversi; si completa `lingua-en.js`, e
-  le pagine `en/` del sito si rifanno dalla versione italiana.
+  le pagine `en/` del sito e i `*.en.md` si rifanno dalla versione italiana.
 - La lingua sta in `localStorage` (`lingua`), altrimenti è quella del browser (non italiano
   → inglese); `?lang=en|it` la sceglie da fuori, e i link del sito la passano. Si cambia in
   cima al pannello «Altro» e **ricarica la pagina** (con l'ampli collegato chiede prima).
 - Il sito ha `en/index.html` ed `en/privacy.html`, copie tradotte **senza script** (la
   privacy lo promette): la lingua si cambia con un link, hreflang le accoppia.
-- Non tradotti: il firmware del pedale, `README.md`, `docs/`, il manifest, `live.html`.
+- Su GitHub sono tradotti il `README` (dei due repo) e il protocollo; ogni coppia ha in cima
+  il link all'altra lingua. Non tradotti: il resto di `docs/`, il firmware del pedale, il
+  manifest, `live.html`.
 
 ### Nomi di effetti e manopole (`src/spark-effetti.js`)
 

@@ -1,5 +1,7 @@
 # Protocollo Spark 2 — il dettaglio e come ci siamo arrivati
 
+*Italiano · [English](protocollo-spark2.en.md)*
+
 Spostato qui da `CLAUDE.md` il 14 agosto 2026. In `CLAUDE.md` restano le trappole che
 non vanno dimenticate mai; **qui c'è il perché**, con le misure che le hanno stabilite.
 Il dettaglio di comandi, tipi dati e catture originali sta in `HANDOFF-2026-08-10.md`.
