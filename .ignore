@@ -1,0 +1,11 @@
+# Le ricerche (Grep, Glob, rg) saltano questi file. Git no: restano nel repository.
+# Quando servono ci si arriva lo stesso, con Read o con `rg --no-ignore`.
+
+# L'inglese: non si legge finché l'utente non chiede di aggiornarlo (vedi CLAUDE.md).
+src/lingua-en.js
+*.en.md
+
+# Grossi e consultati di rado: una ricerca per parola li riversava in contesto.
+captures/
+reference/
+pcb/

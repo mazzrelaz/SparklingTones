@@ -910,6 +910,43 @@ errori in console e con `Lingua.mancanti` vuoto; sito con le quattro pagine onli
 link locale rotto, nessuno script, hreflang a coppie; i link dei `README` e del protocollo
 nelle due lingue tutti validi.
 
+### Estratto da CLAUDE.md, 24 settembre 2026 (sera) — la regola dell'inglese per esteso
+
+Accorciata in `CLAUDE.md` per il consumo di token; qui parola per parola.
+
+#### L'inglese — lingua secondaria (dal 24 settembre 2026)
+
+**Regola dell'utente: app e sito si cambiano solo in italiano, e la parte inglese non si
+legge né si tocca finché non è lui a dire di aggiornare anche l'inglese.** Quindi mai aprire
+`src/lingua-en.js`, i `*.en.md` (`README.en.md` dei due repo,
+`docs/protocollo-spark2.en.md`) né `sparklingtones-sito/en/`, e nelle ricerche escluderli
+(`--glob '!src/lingua-en.js'`, `--glob '!*.en.md'`, `--glob '!en/**'`). Il perché del
+disegno è in `docs/decisioni-ui.md`, «La decisione sull'inglese».
+
+- **Ogni testo nuovo dell'app, scritto in italiano, passa da `tr`** (`src/lingua.js`):
+  `tr('…')`, `` tr`…${x}…` ``, o `tr('… {0} …' + '…', x)` per le frasi lunghe. I moduli di
+  `src/` hanno già il ripiego (senza `lingua.js` resta l'italiano: test e strumenti non
+  cambiano). **Il testo scritto nell'HTML non vuole niente**: lo traduce
+  `Lingua.traduciPagina()` all'avvio, anche un paragrafo con grassetti e link, intero.
+- **La chiave è la frase italiana**: una frase nuova o cambiata, finché non ha traduzione,
+  esce in italiano anche in inglese. È il patto, non un difetto.
+- **Frasi intere, mai pezzi cuciti**: i valori nei segnaposto, così l'inglese li sposta. Un
+  nome mostrato che nasce in una costante (`Spark.CATENA`, `GRUPPI_AMPLI`, `NOME_EXTRA`)
+  passa da `tr` dove nasce o dove si mostra.
+- **Quando l'utente dice di aggiornare l'inglese**: `tools/lingua.html` (Edge headless con
+  `--allow-file-access-from-files`, poi `#riassunto` e `#mancanti`) dà le frasi mancanti,
+  quelle non più usate e quelle con segnaposto o tag diversi; si completa `lingua-en.js`, e
+  le pagine `en/` del sito e i `*.en.md` si rifanno dalla versione italiana.
+- La lingua sta in `localStorage` (`lingua`), altrimenti è quella del browser (non italiano
+  → inglese); `?lang=en|it` la sceglie da fuori, e i link del sito la passano. Si cambia in
+  cima al pannello «Altro» e **ricarica la pagina** (con l'ampli collegato chiede prima).
+- Il sito ha `en/index.html` ed `en/privacy.html`, copie tradotte **senza script** (la
+  privacy lo promette): la lingua si cambia con un link, hreflang le accoppia.
+- Su GitHub sono tradotti il `README` (dei due repo) e il protocollo; ogni coppia ha in cima
+  il link all'altra lingua. Non tradotti: il resto di `docs/`, il firmware del pedale, il
+  manifest, `live.html`.
+
+
 ### Estratto da CLAUDE.md, 24 settembre 2026 — copiato parola per parola
 
 Dalle Convenzioni:
