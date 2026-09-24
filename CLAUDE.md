@@ -119,6 +119,14 @@ CLI='C:\Users\massi\AppData\Local\Programs\Arduino IDE\resources\app\lib\backend
 La porta la dà `board list` (COM13 finora). Porta occupata = monitor seriale dell'IDE aperto.
 **Caricare riavvia la XIAO**: quello che lo sketch tiene in RAM si perde.
 
+**`prova-ble` dal 24 settembre 2026 si compila con `USBMode=default,CDCOnBoot=default`**
+(USB-OTG TinyUSB, per la modalità MIDI; con l'altro fqbn non compila, apposta). La porta USB
+diventa **«SparkPedale MIDI» + una seriale** (COM3), e `-u` da solo non basta più. Si carica
+così, **verificato**: aprire la seriale del pedale a **1200 baud** e chiuderla
+(`New-Object System.IO.Ports.SerialPort 'COM3',1200`, `Open()`; l'errore «dispositivo
+inesistente» è normale, la porta sparisce perché la XIAO si riavvia) → ricompare **COM13**, il
+caricatore → `upload -p COM13`. **Finché non si carica, il pedale è fermo** in download mode.
+
 ## Le regole dell'app
 
 Il perché di ognuna è in `docs/decisioni-ui.md`.
@@ -432,8 +440,13 @@ scritto «finito»):
    Togni», `VERSIONE`, da alzare a ogni cambio visibile), che non ferma niente. Avvisi e ponte aperto prendono per un attimo il posto del nome del
    banco. **Visto in foto e approvato nei caratteri il 24 settembre; il quadratino in negativo
    va ancora guardato.**
-2. **La modalità pedale MIDI**: il ragionamento è già in `docs/pedale.md` e non va rifatto,
-   il firmware sì.
+2. **La modalità MIDI c'è, verificata il 24 settembre** (Program Change e Control Change
+   arrivano a Windows, letti con `midiIn`): FS1+FS4 per 1,5 s cambiano modalità (ricordata),
+   in MIDI il quinto passa fra pagina **preset** (otto Program Change 0–7: tasto banco SX = 1–4
+   LED rosso, DX = 5–8 LED verde) e **stomp** (CC 80–83 a 127/0, LED verdi), canale 1, mappa fissa.
+   **Da fare**: la prova in AmpliTube col MIDI learn (utente); la mappa scritta dall'app.
+   **Bluetooth-MIDI no** (Windows non lo passa ai programmi, prova del 29 agosto); se servirà
+   per iPad/Mac, si aggiunge.
 3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
    (mA) invece di aspettare che si scarichi; la via lunga è lasciarlo acceso e guardare
    l'orologio. **Il partitore su `D0` non è saldato**, quindi l'indicatore di batteria non si

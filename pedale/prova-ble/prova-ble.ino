@@ -41,10 +41,19 @@
 #include "preset_frames.h"
 #include "banchi.h"
 #include "logo.h"
+#include "USB.h"
+#include "USBMIDI.h"
+
+/* La modalita' MIDI vuole l'USB-OTG (TinyUSB): con l'altra impostazione la
+ * porta USB e' quella seriale del chip e il PC non vede nessuna pedaliera.
+ * Meglio non compilare che caricare un pedale muto. */
+#if ARDUINO_USB_MODE
+#error "compilare con USBMode=default (USB-OTG TinyUSB): vedi CLAUDE.md"
+#endif
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.0";
+static const char* VERSIONE = "1.1";   // 1.1: modalita' MIDI
 
 /* Il banco che il pedale sta suonando. Se ne ha uno ricevuto dall'app usa
  * quello; altrimenti ripiega su preset_frames.h, che resta utile per provare
@@ -213,6 +222,50 @@ static bool ponteAperto() { return pontefino != 0; }
 static char    avvisoTesto[26] = "";
 static uint32_t avvisoFino = 0;
 
+/* --- Le due modalita' --------------------------------------------------------
+ *
+ * **Spark**: quello di sempre. **MIDI**: il pedale si presenta al computer come
+ * pedaliera USB-MIDI (nessun driver) e lascia stare lo Spark. Decise
+ * dall'utente il 29 agosto e il 24 settembre 2026:
+ *  - si passa dall'una all'altra tenendo **FS1 e FS4 insieme** per un secondo e
+ *    mezzo: i due piu' lontani, che un piede non prende per sbaglio;
+ *  - in MIDI ci sono due pagine, e **il quinto footswitch passa dall'una
+ *    all'altra**: *preset* (otto Program Change: 1-4 col tasto banco sinistro,
+ *    5-8 col destro) e *stomp* (quattro Control Change acceso/spento);
+ *  - la modalita' **si ricorda allo spegnimento**, come il banco.
+ *
+ * La mappa e' fissa nel firmware (canale 1, preset = Program Change, stomp =
+ * CC 80-83 a 127/0): i programmi sul PC hanno il MIDI learn, quindi basta che
+ * i comandi siano diversi fra loro. Farla scrivere dall'app e' il passo dopo. */
+static const uint8_t MODO_SPARK = 0, MODO_MIDI = 1;
+static uint8_t modo = MODO_SPARK;
+static USBMIDI midi("SparkPedale MIDI");
+static const uint8_t MIDI_CANALE = 1;
+static const uint8_t MIDI_CC_STOMP = 80;       // 80..83: liberi nello standard
+static uint8_t paginaMidi  = 0;                // 0 = preset, 1 = stomp
+static uint8_t gruppoMidi  = 0;                // i quattro preset mostrati: gruppo*4 .. +3
+static int16_t programmaMidi = -1;             // l'ultimo Program Change mandato
+static uint8_t stompAccesi = 0;                // un bit per footswitch
+static bool    usbMontato  = false;
+
+static const char* VIA_MODO = "/modo.txt";
+
+static void ricordaModo() {
+  File f = LittleFS.open(VIA_MODO, "w");
+  if (!f) { Serial.println(F("non riesco a ricordare la modalita'")); return; }
+  f.write(modo);
+  f.close();
+}
+
+static uint8_t modoRicordato() {
+  if (!LittleFS.exists(VIA_MODO)) return MODO_SPARK;
+  File f = LittleFS.open(VIA_MODO, "r");
+  if (!f) return MODO_SPARK;
+  const int v = f.read();
+  f.close();
+  return v == MODO_MIDI ? MODO_MIDI : MODO_SPARK;
+}
+
 static uint8_t metaMostrata = 0;         // 0 = A (posti 1-4), 1 = B (5-8)
 static uint8_t metaSuona    = 0;
 static char    nomeSuona[40] = "";       // vuoto = non e' ancora partito niente
@@ -294,6 +347,20 @@ static uint8_t  corrente       = 0;        // quale preset del banco sta suonand
 static void aggiornaLed() {
   if (mcp == 0) return;
   uint8_t maschera = 0;
+  /* In MIDI: nella pagina preset il rosso (verde per 5-8, come le due meta'
+   * in modalita' Spark) sul footswitch dell'ultimo preset
+   * mandato, se e' nel gruppo mostrato; nella pagina stomp il verde su ogni
+   * effetto acceso. Colori diversi, cosi' la pagina si riconosce dai piedi. */
+  if (modo == MODO_MIDI) {
+    for (uint8_t led = 0; led < 4; led++) {
+      if (paginaMidi == 0 && programmaMidi == gruppoMidi * 4 + led)
+        maschera |= (uint8_t)(1 << (gruppoMidi ? LINEA_VERDE[led] : LINEA_ROSSO[led]));
+      if (paginaMidi == 1 && (stompAccesi & (1 << led)))
+        maschera |= (uint8_t)(1 << LINEA_VERDE[led]);
+    }
+    mcpScrivi(MCP_OLATB, maschera);
+    return;
+  }
   if (nomeSuona[0] && slotSuona == slotBanco && metaSuona == metaMostrata) {
     const uint8_t led = corrente % 4;
     maschera = (uint8_t)(1 << (metaMostrata ? LINEA_VERDE[led] : LINEA_ROSSO[led]));
@@ -333,9 +400,61 @@ static void disegnaAvvio() {
  *
  *  Al posto del nome del banco, per il tempo che serve, un avviso o il conto
  *  alla rovescia del ponte aperto: sono le cose che vanno viste subito. */
+/** La modalita' MIDI sullo schermo: stessa forma di quella Spark, cosi' non si
+ *  impara niente di nuovo. In alto la pagina e, a destra, il quadratino con la
+ *  M, pieno quando il computer ha riconosciuto la pedaliera. Sotto i quattro
+ *  comandi; in negativo il preset mandato per ultimo, o gli effetti accesi. */
+static void disegnaMidi(const char* avviso) {
+  char testa[20];
+  if (avviso) snprintf(testa, sizeof(testa), "%s", avviso);
+  else if (paginaMidi == 0) snprintf(testa, sizeof(testa), "MIDI preset %u-%u",
+                                     gruppoMidi * 4 + 1, gruppoMidi * 4 + 4);
+  else snprintf(testa, sizeof(testa), "MIDI stomp");
+  schermo.setFont(u8g2_font_helvB08_tf);
+  schermo.drawStr(0, 8, testa);
+
+  if (usbMontato) {
+    schermo.drawBox(118, 0, 10, 10);
+    schermo.setDrawColor(0);
+    schermo.setFont(u8g2_font_5x7_tf);
+    schermo.drawStr(121, 8, "M");
+    schermo.setDrawColor(1);
+  } else {
+    schermo.drawFrame(118, 0, 10, 10);
+  }
+  schermo.drawHLine(0, 12, 128);
+
+  for (uint8_t i = 0; i < 4; i++) {
+    const int y = 15 + i * 12;
+    const bool acceso = paginaMidi == 0 ? programmaMidi == gruppoMidi * 4 + i
+                                        : (stompAccesi & (1 << i)) != 0;
+    if (acceso) { schermo.setDrawColor(1); schermo.drawBox(0, y, 128, 12); }
+    schermo.setDrawColor(acceso ? 0 : 1);
+    char etichetta[2] = { (char)('1' + i), 0 };
+    schermo.setFont(u8g2_font_6x13B_tf);
+    schermo.drawStr(1, y + 10, etichetta);
+    char riga[22];
+    if (paginaMidi == 0)
+      snprintf(riga, sizeof(riga), "Preset %u", gruppoMidi * 4 + i + 1);
+    else
+      snprintf(riga, sizeof(riga), "Stomp %u  %s", i + 1, acceso ? "ON" : "off");
+    schermo.setFont(u8g2_font_6x13_tf);
+    schermo.drawStr(17, y + 10, riga);
+  }
+  schermo.setDrawColor(1);
+  schermo.sendBuffer();
+}
+
 static void disegnaSchermo() {
   if (!schermoPresente) return;
   schermo.clearBuffer();
+  if (modo == MODO_MIDI) {
+    schermo.setFontMode(1);
+    schermo.setDrawColor(1);
+    const bool avviso = avvisoTesto[0] && (int32_t)(avvisoFino - millis()) > 0;
+    disegnaMidi(avviso ? avvisoTesto : nullptr);
+    return;
+  }
   schermo.setFontMode(1);                      // trasparente: serve al testo in negativo
   schermo.setDrawColor(1);
 
@@ -805,6 +924,54 @@ static void richiedi(uint8_t n) {
  *  **intero**: un rimbalzo su una linea qualunque allunga l'attesa di qualche
  *  millisecondo per tutte, che e' irrilevante sotto un piede e tiene il codice
  *  in un posto solo. */
+/** Un footswitch in modalita' MIDI. */
+static void midiPremuto(uint8_t k) {
+  if (k == FS5) {
+    paginaMidi = paginaMidi ? 0 : 1;
+    Serial.printf("MIDI: pagina %s\n", paginaMidi ? "stomp" : "preset");
+  } else if (k == BANCO_SX || k == BANCO_DX) {
+    if (paginaMidi == 1) { avvisa("i gruppi sono dei preset"); return; }
+    // Otto preset, chiesto dall'utente il 24 settembre: il tasto banco sinistro
+    // mostra 1-4, il destro 5-8. Diretti, non a giro: si sa sempre dove si va.
+    gruppoMidi = k == BANCO_DX ? 1 : 0;
+    Serial.printf("MIDI: preset %u-%u\n", gruppoMidi * 4 + 1, gruppoMidi * 4 + 4);
+  } else if (paginaMidi == 0) {
+    programmaMidi = (int16_t)(gruppoMidi * 4 + k);
+    midi.programChange((uint8_t)programmaMidi, MIDI_CANALE);
+    Serial.printf("MIDI: program change %d\n", programmaMidi);
+  } else {
+    stompAccesi ^= (uint8_t)(1 << k);
+    const bool su = stompAccesi & (1 << k);
+    midi.controlChange((uint8_t)(MIDI_CC_STOMP + k), su ? 127 : 0, MIDI_CANALE);
+    Serial.printf("MIDI: CC %u = %u\n", MIDI_CC_STOMP + k, su ? 127 : 0);
+  }
+  aggiornaLed();
+  schermoSporco = true;
+}
+
+/** FS1 e FS4 tenuti insieme: si passa all'altra modalita'. Entrando in MIDI lo
+ *  Spark si lascia libero (in MIDI non serve, e cosi' l'app lo trova); tornando
+ *  a Spark lo si ricerca. */
+static void cambiaModo() {
+  modo = modo == MODO_MIDI ? MODO_SPARK : MODO_MIDI;
+  ricordaModo();
+  inCoda = -1;
+  if (modo == MODO_MIDI) {
+    if (client && client->isConnected()) client->disconnect();
+    chScrittura = chNotifiche = nullptr;
+    dentro = 0;
+    nomeSuona[0] = 0;
+    avvisa("modalita' MIDI");
+  } else {
+    momentoSgancio = millis();
+    ultimoTentativo = 0;
+    avvisa("modalita' Spark");
+  }
+  Serial.printf("modalita' %s\n", modo == MODO_MIDI ? "MIDI" : "Spark");
+  aggiornaLed();
+  schermoSporco = true;
+}
+
 static void leggiTasto() {
   const uint8_t ingressi = leggiPortA();                   // bit alto = rilasciato
 
@@ -827,6 +994,16 @@ static void leggiTasto() {
     const bool giuOra   = !(ingressi & bit);
     if (!giuOra || giuPrima) continue;                     // solo le pressioni
     pressioniViste++;
+
+    // I due tasti banco insieme restano la combinazione del ponte anche qui.
+    if (modo == MODO_MIDI) {
+      if (k == BANCO_SX || k == BANCO_DX) {
+        const uint8_t altro = (k == BANCO_SX) ? BANCO_DX : BANCO_SX;
+        if (!(ingressi & (uint8_t)(1 << LINEA_PULSANTE[altro]))) continue;
+      }
+      midiPremuto(k);
+      continue;
+    }
 
     if (k == FS5)       { cambiaMeta();  continue; }
     // I due tasti banco insieme sono la combinazione che apre il ponte:
@@ -1312,6 +1489,8 @@ void setup() {
       break;
     }
   }
+  modo = modoRicordato();
+  Serial.printf("modalita' %s\n", modo == MODO_MIDI ? "MIDI" : "Spark");
   aggiornaLed();   // spenti: finche' non si preme un tasto non suona niente di nostro
   BLEDevice::init("SparkPedale");
   avviaPonte();          // prima il server: cosi' l'app lo trova sempre
@@ -1333,7 +1512,7 @@ void loop() {
     if (millis() - ultimoSecondo > 1000) { ultimoSecondo = millis(); schermoSporco = true; }
   }
   // Senza lo Spark i puntini di «lo sto cercando» si muovono.
-  if (!chScrittura && !sganciato && !inTrasferimento) {
+  if (modo == MODO_SPARK && !chScrittura && !sganciato && !inTrasferimento) {
     static uint32_t ultimoPasso = 0;
     if (millis() - ultimoPasso > 400) { ultimoPasso = millis(); schermoSporco = true; }
   }
@@ -1359,7 +1538,7 @@ void loop() {
   // rimettersi ad annunciarsi, quindi il primo tentativo va spesso a vuoto:
   // per mezzo minuto si riprova fitto, poi si rallenta per non stare a
   // scansionare in eterno.
-  if (!chScrittura && !sganciato && !scansioneInCorso && !trovato) {
+  if (modo == MODO_SPARK && !chScrittura && !sganciato && !scansioneInCorso && !trovato) {
     const uint32_t attesa = (millis() - momentoSgancio < 30000) ? 2000 : 5000;
     if (millis() - ultimoTentativo > attesa) {
       ultimoTentativo = millis();
@@ -1368,7 +1547,10 @@ void loop() {
   }
   // L'ampli si e' fatto vedere: ci si attacca **qui**, fuori dal callback
   // della scansione, che e' la regola di sempre per le operazioni BLE.
-  if (trovato && !scansioneInCorso && !chScrittura && !sganciato) agganciaAmpli();
+  if (trovato && !scansioneInCorso && !chScrittura && !sganciato) {
+    if (modo == MODO_SPARK) agganciaAmpli();
+    else { delete trovato; trovato = nullptr; }   // in MIDI lo Spark resta libero
+  }
 
   // La richiesta dell'intervallo, ripetuta a connessione matura: e' quella che
   // fa la differenza fra un secondo e mezzo e quattro decimi (vedi agganciaAmpli()).
@@ -1396,6 +1578,22 @@ void loop() {
       insiemeDa = 0;
     }
   }
+  /* FS1 e FS4 tenuti insieme per un secondo e mezzo cambiano modalita'. */
+  {
+    static uint32_t insiemeDa = 0;
+    static bool     cambiato  = false;     // tenendoli ancora non si ricambia: vanno lasciati
+    const uint8_t uno     = (uint8_t)(1 << LINEA_PULSANTE[0]);
+    const uint8_t quattro = (uint8_t)(1 << LINEA_PULSANTE[3]);
+    if (!(ingressiFermi & uno) && !(ingressiFermi & quattro)) {
+      if (insiemeDa == 0) insiemeDa = millis() | 1;
+      else if (!cambiato && millis() - insiemeDa > 1500) { cambiato = true; cambiaModo(); }
+    } else {
+      insiemeDa = 0;
+      cambiato = false;
+    }
+  }
+  if ((bool)USB != usbMontato) { usbMontato = (bool)USB; if (modo == MODO_MIDI) schermoSporco = true; }
+
   // La richiesta resta in coda **finche' non c'e' l'ampli**, invece di essere
   // buttata via. Mentre il pedale si sta riagganciando una pressione andava
   // persa e da fuori sembrava che il pedale ignorasse il piede: cosi' invece

@@ -1129,7 +1129,34 @@ siccome dentro l'ampli il tempo è già accoppiato agli effetti, **il delay segu
 non tocca a noi mappare bpm su posizione della manopola.
 
 
-## Modalità MIDI: lo stesso pedale per AmpliTube — discusso, non aperto
+## Modalità MIDI: lo stesso pedale per AmpliTube — fatta il 24 settembre 2026
+
+**Com'è andata.** USB-MIDI class compliant con l'USB-OTG della S3 (`USBMIDI` del core 3.3.11,
+composito con la seriale CDC: il costruttore globale registra l'interfaccia prima che
+`main.cpp` chiami `USB.begin()`). Windows lo mostra come **«SparkPedale MIDI»**, unico
+ingresso MIDI del PC, senza driver. Verificato leggendo con `midiInOpen` da PowerShell
+(script in C# via `Add-Type`, che per i callback winmm funziona): Program Change 0–3 e
+Control Change 80–83 a 127 sul canale 1.
+
+**Decisioni dell'utente del 24 settembre**: in MIDI **due pagine**, e il quinto footswitch
+passa dall'una all'altra — *preset* (otto Program Change: il tasto banco sinistro mostra 1–4
+col LED rosso, il destro 5–8 col verde — chiesto dall'utente lo stesso giorno, prima erano
+32 gruppi a giro) e *stomp* (quattro CC acceso/spento, lo stato sta nel pedale e i LED
+verdi lo mostrano). Il resto come deciso il 29 agosto: FS1+FS4 insieme per 1,5 s, modalità
+ricordata (`/modo.txt`), l'OLED dice sempre dove si è (`MIDI preset 1-4`, `MIDI stomp`, e il
+quadratino con la **M** pieno quando il PC ha montato la pedaliera). In MIDI lo Spark si
+lascia libero: niente scansione, niente aggancio.
+
+**Due conseguenze da sapere.** Premere FS1+FS4 fa partire anche il comando di FS1 e di FS4
+prima del cambio: si agisce alla pressione, e la combinazione si riconosce solo tenendo.
+E **il caricamento del firmware cambia** (CLAUDE.md, «Il firmware lo compilo…»): la porta
+USB è di TinyUSB, quindi si passa dal tocco a 1200 baud che riavvia nel caricatore.
+
+**La mappa è fissa nel firmware** (canale 1, PC, CC 80–83): coi programmi che hanno il MIDI
+learn basta che i comandi siano diversi. Farla scrivere dal pannello «Pedale» dell'app resta
+il passo dopo, con la trappola di sempre: formato in due file che cambiano insieme.
+
+### Il ragionamento del 29 agosto 2026
 
 Chiesto dall'utente il **29 agosto 2026**: usare lo stesso pedale anche come pedaliera MIDI
 per un programma sul PC (AmpliTube), con due modalità distinte — modo Spark e modo MIDI.
