@@ -444,13 +444,17 @@ scritto «finito»):
    arrivano a Windows, letti con `midiIn`): FS1+FS4 per 1,5 s cambiano modalità (ricordata),
    in MIDI il quinto passa fra pagina **preset** (otto Program Change 0–7: tasto banco SX = 1–4
    LED rosso, DX = 5–8 LED verde) e **stomp** (CC 80–83 a 127/0, LED verdi), canale 1, mappa fissa.
-   **Da fare**: la prova in AmpliTube col MIDI learn (utente); la mappa scritta dall'app.
-   **Anche BLE-MIDI, per l'iPad (BIAS FX), dalla 1.2 — NON ancora provato sull'iPad.**
+   **Fermo per scelta dell'utente** (24 settembre): vuole capire usandolo cosa gli serve,
+   prima di aggiungere altro. Non proporre la mappa dall'app né altre funzioni MIDI finché
+   non è lui a riaprire il discorso.
+   **Anche BLE-MIDI, per l'iPad (BIAS FX), dalla 1.2 — funziona, provato dall'utente il 24
+   settembre.** BIAS FX non ha un menu per collegarlo: **si collega da GarageBand**
+   (ingranaggio → Avanzate → Dispositivi Bluetooth MIDI) o da midimittr, e resta collegato
+   per tutto l'iPad.
    Servizio MIDI standard sullo stesso server del ponte; `annuncia()` decide l'annuncio
    (ponte aperto → UUID del ponte, modalità MIDI → UUID MIDI, due da 128 bit non ci stanno
    insieme). A ponte chiuso in MIDI chi si collega è `midiCentrale` e non può scrivere
-   banchi. Ogni comando parte da USB e BLE (`mandaMidi`). Niente cifratura: se iOS non lo
-   accetta, prima ipotesi il bonding (`prova-midi` lo attivava per Windows).
+   banchi. Ogni comando parte da USB e BLE (`mandaMidi`). Senza cifratura, e iOS lo accetta.
    Su Windows il BLE-MIDI non arriva ai programmi (29 agosto): lì resta l'USB.
 3. **L'autonomia**, l'ultima misura mai fatta. La via corta è il tester in serie alla cella
    (mA) invece di aspettare che si scarichi; la via lunga è lasciarlo acceso e guardare

@@ -1161,8 +1161,13 @@ ponte, creato prima del primo annuncio (la trappola di NimBLE). L'annuncio lo de
 MIDI, altrimenti niente — due UUID da 128 bit non stanno nei 31 byte. A ponte chiuso, in
 modalità MIDI, chi si collega è l'iPad (`midiCentrale`): non tocca l'ampli e **la
 caratteristica del ponte ignora le sue scritture**, così la regola «banchi solo a ponte
-aperto» resta vera. Senza cifratura: se iOS rifiutasse, il bonding di `prova-midi` è la
-prima cosa da provare.
+aperto» resta vera. Senza cifratura, e **iOS lo accetta: provato dall'utente il 24
+settembre con BIAS FX**. BIAS FX però non ha un menu per collegare pedaliere Bluetooth: il
+collegamento si fa da **GarageBand** (ingranaggio → Avanzate → Dispositivi Bluetooth MIDI) o
+da midimittr, e da lì vale per tutte le app dell'iPad.
+
+**Qui la modalità MIDI si ferma per scelta dell'utente**: vuole vedere usandola cosa gli
+serve e cosa no, prima di aggiungere altro (mappa scritta dall'app, altri comandi).
 
 **La mappa è fissa nel firmware** (canale 1, PC, CC 80–83): coi programmi che hanno il MIDI
 learn basta che i comandi siano diversi. Farla scrivere dal pannello «Pedale» dell'app resta
