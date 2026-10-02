@@ -371,9 +371,13 @@ ampli finto):
    `0x0138` come lo Spark 2. L'app sceglie dal nome (`Spark.profiloAmpli`): l'ultimo ampli
    collegato sta in `settings.ultimoAmpli`, e leggendo dal NEO gli slot 4–7 si svuotano
    (`importFromAmp(…, { slotVuoti })`): gli slot in libreria sono sempre dell'ultimo ampli.
-   **Da provare sul NEO**: l'app vera (v78), scrittura in uno slot, manopole (`0x0104`),
-   acceso/spento, bpm, Hendrix, il pedale (cerca chiunque annunci `0xFFC0`: col NEO acceso
-   e lo Spark 2 spento dovrebbe agganciarlo).
+   **Provata dall'utente sul NEO (v78): funziona tutto** — lettura, CH1–CH4, live, «Regola»
+   e manopole — **tranne «Seleziona CHx»** nella pagina Preset: «niente», mentre lo stesso
+   `0x0138` dai pulsantoni live va. **Si riprende da qui**: in v79 il pulsante aspetta l'ack
+   e chiede `0x0210`, e scrive la risposta nella riga grigia in fondo alla pagina; si
+   aspetta che l'utente la copi (prova: da CH1, «Seleziona CH3»). Ancora da provare:
+   «Invia a preset HW» sul NEO, Hendrix, il pedale (cerca chiunque annunci `0xFFC0`: col
+   NEO acceso e lo Spark 2 spento dovrebbe agganciarlo).
 
 **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
 i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
