@@ -2299,8 +2299,20 @@ function dettaglio(record, slot) {
     attiva.title = tr('seleziona lo slot sull\'ampli, senza scrivere nulla');
     attiva.disabled = !spark.connected;
     attiva.addEventListener('click', async () => {
-      await spark.send(Spark.commands.changePreset(slot));
-      logLine(tr`selezionato ${nomeSlot(slot)}`);
+      // Sul NEO l'utente ha visto «niente» (2 ottobre 2026), mentre lo stesso
+      // `0x0138` dai pulsantoni live funziona: si chiede all'ampli quale slot
+      // ha davanti, e la riga dice la sua risposta invece della nostra intenzione.
+      const ack = await spark.sendAndAwaitAck(Spark.commands.changePreset(slot), 1500);
+      const msg = await spark.request(Spark.commands.getCurrentPreset(),
+        m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x10, 1500);
+      const davanti = msg ? msg.data[msg.data.length - 1] : null;
+      logLine(davanti === slot
+        ? tr`selezionato ${nomeSlot(slot)}`
+        : tr('chiesto {0}: l\'ampli {1}, e dice di avere davanti {2}',
+             nomeSlot(slot), ack ? tr('ha confermato') : tr('non ha confermato'),
+             davanti === null ? '?'
+               : davanti === Spark.SOFTWARE_PRESET ? tr('il preset mandato dall\'app')
+               : nomeSlot(davanti)));
     });
     azioni.insertBefore(riga('sola'), rigaSuono).appendChild(attiva);
   }
