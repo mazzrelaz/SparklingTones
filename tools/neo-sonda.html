@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — sonda NEO</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:#14161a; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; }
+  h1 { font-size:1.15rem; margin:0 0 2px; }
+  .sub { color:#8a8f98; font-size:0.85rem; margin-bottom:14px; line-height:1.45; }
+  .status { display:inline-block; padding:4px 10px; border-radius:12px;
+            font-size:0.8rem; font-weight:600; }
+  .status.disconnected { background:#3a2020; color:#ff8080; }
+  .status.connected    { background:#1f3a24; color:#7fe08a; }
+  .status.connecting   { background:#3a3520; color:#f0d060; }
+  button { background:#ff6a3d; color:#fff; border:none; padding:12px 16px;
+           border-radius:9px; font-size:0.95rem; font-weight:600; cursor:pointer;
+           margin:0 6px 8px 0; }
+  button:disabled { background:#3a3d42; color:#7a7d82; cursor:not-allowed; }
+  button.secondary { background:#2a2d33; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  #riassunto { background:#181a1f; border:1px solid #24272c; border-radius:10px;
+               padding:12px 14px; margin:10px 0; font-size:0.9rem; line-height:1.6;
+               white-space:pre-wrap; }
+  #riassunto:empty { display:none; }
+  .fuori { color:#ffb070; }
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         max-height:45vh; overflow-y:auto; margin-top:12px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.72rem; line-height:1.5;
+         color:#8a8f98; word-break:break-all; }
+</style>
+</head>
+<body>
+
+<h1>Sonda NEO — sola lettura</h1>
+<div class="sub">
+  Chiede all'ampli come si chiama, il firmware, il preset corrente, il suono che sta suonando
+  e gli slot da 0 a 7. <b>Non scrive niente</b>: nessun preset, nessun cambio, nessuna manopola.
+  Prima chiudi l'app ufficiale Spark, sennò l'ampli non si lascia trovare.
+</div>
+
+<div class="row">
+  <button id="btnConnetti">Connetti</button>
+  <button id="btnTutti" class="secondary">Non lo trovo: cerca fra tutti</button>
+  <span class="status disconnected" id="stato">Disconnesso</span>
+</div>
+<div class="row">
+  <button id="btnLeggi" disabled>Leggi tutto</button>
+  <button id="btnScarica" class="secondary" disabled>Scarica il registro</button>
+  <button id="btnStacca" class="secondary" disabled>Disconnetti</button>
+</div>
+
+<div id="riassunto"></div>
+<div id="log"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script src="../src/spark-effetti.js"></script>
+<script>
+'use strict';
+
+/* Sonda di sola lettura per lo Spark NEO (2 ottobre 2026).
+   Manda solo richieste 0x02xx; il seriale (0x0223) non si chiede, e se arriva
+   da solo nel registro resta mascherato: la cattura deve poter finire in docs/. */
+
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const hex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(' ');
+const modelliNoti = new Set(SparkEffetti.MODELLI.flat());
+
+let registro = nuovoRegistro();
+
+function nuovoRegistro() {
+  return { quando: new Date().toISOString(), dispositivo: null, nome: null, firmware: null,
+           presetCorrente: null, live: null, slot: {}, fuoriCatalogo: [],
+           notifiche: { quante: 0, maxByte: 0, misure: {} }, messaggi: [], righe: [] };
+}
+
+function scrivi(testo, classe) {
+  const riga = `[${new Date().toTimeString().slice(0, 8)}] ${testo}`;
+  registro.righe.push(riga);
+  const div = document.createElement('div');
+  if (classe) div.className = classe;
+  div.textContent = riga;
+  $('log').appendChild(div);
+  $('log').scrollTop = $('log').scrollHeight;
+}
+
+const spark = new SparkTransport({
+  onStatus: (stato, etichetta) => {
+    $('stato').className = 'status ' + stato;
+    $('stato').textContent = stato === 'connected' ? 'Connesso: ' + etichetta : etichetta;
+    const on = stato === 'connected';
+    $('btnConnetti').disabled = $('btnTutti').disabled = on;
+    $('btnLeggi').disabled = $('btnStacca').disabled = !on;
+  },
+  onLog: msg => scrivi(msg),
+  onMessage: msg => {
+    const dati = msg.sub === 0x23 ? '(seriale, mascherato)' : hex(msg.data);
+    registro.messaggi.push({ cmd: msg.cmd, sub: msg.sub, seq: msg.seq, dati });
+    scrivi(`RX 0x${msg.cmd.toString(16).padStart(2, '0')}${msg.sub.toString(16).padStart(2, '0')} ` +
+           `seq=0x${msg.seq.toString(16)} ${msg.data.length}B: ${dati.slice(0, 120)}`);
+  },
+});
+
+async function connetti(fraTutti) {
+  registro = nuovoRegistro();
+  $('log').innerHTML = '';
+  $('riassunto').textContent = '';
+  const originale = navigator.bluetooth && navigator.bluetooth.requestDevice;
+  if (fraTutti && originale) {
+    // Se il NEO non annuncia il servizio FFC0 il filtro normale non lo mostra:
+    // si elencano tutti i dispositivi, e si chiede comunque l'accesso a FFC0.
+    navigator.bluetooth.requestDevice = opts => originale.call(navigator.bluetooth,
+      { acceptAllDevices: true, optionalServices: opts.optionalServices });
+  }
+  try {
+    await spark.connect();
+    registro.dispositivo = spark.device.name || null;
+    spark.notifyChar.addEventListener('characteristicvaluechanged', e => {
+      const n = e.target.value.byteLength;
+      const r = registro.notifiche;
+      r.quante++;
+      r.maxByte = Math.max(r.maxByte, n);
+      r.misure[n] = (r.misure[n] || 0) + 1;
+    });
+    $('btnScarica').disabled = false;
+  } catch (err) {
+    scrivi('errore: ' + err.message, 'fuori');
+    if (/service|servizi/i.test(err.message)) {
+      scrivi('questo dispositivo non ha il servizio FFC0: non è il canale di controllo dello Spark', 'fuori');
+    }
+  } finally {
+    if (originale) navigator.bluetooth.requestDevice = originale;
+  }
+}
+
+$('btnConnetti').addEventListener('click', () => connetti(false));
+$('btnTutti').addEventListener('click', () => connetti(true));
+$('btnStacca').addEventListener('click', () => spark.disconnect());
+
+function descriviPreset(p) {
+  const catena = p.effects.map(e => {
+    const fuori = !modelliNoti.has(e.name);
+    if (fuori && !registro.fuoriCatalogo.includes(e.name)) registro.fuoriCatalogo.push(e.name);
+    return (e.enabled ? '' : '(spento) ') + e.name + (fuori ? ' ⚠ fuori catalogo' : '');
+  });
+  return { nome: p.name, uuid: p.uuid, bpm: p.bpm, catena, effetti: p.effects };
+}
+
+$('btnLeggi').addEventListener('click', async () => {
+  $('btnLeggi').disabled = true;
+  try {
+    scrivi('— nome');
+    await spark.request(Spark.commands.getName(),
+      m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x11);
+    registro.nome = spark.state.name;
+
+    scrivi('— firmware');
+    const fw = await spark.request(Spark.commands.getFirmware(),
+      m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x2f);
+    if (fw) {
+      const d = Array.from(fw.data);
+      registro.firmware = d[0] === 0xce && d.length >= 5 ? d.slice(1, 5).join('.') : hex(d);
+    }
+
+    scrivi('— preset corrente');
+    await spark.request(Spark.commands.getCurrentPreset(),
+      m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x10);
+    registro.presetCorrente = spark.state.currentPreset;
+
+    scrivi('— suono che sta suonando');
+    const live = await spark.readLiveState(5000);
+    registro.live = live ? descriviPreset(live) : null;
+
+    for (let i = 0; i < 8; i++) {
+      scrivi(`— slot ${i}`);
+      const p = await spark.readPreset(i, 4000);
+      registro.slot[i] = p ? descriviPreset(p) : null;
+      await sleep(200);
+    }
+  } catch (err) {
+    scrivi('errore: ' + err.message, 'fuori');
+  }
+  scrivi(`messaggi arrivati in tutto: ${spark.rxTotali}`);
+  riassumi();
+  $('btnLeggi').disabled = !spark.connected;
+});
+
+function riassumi() {
+  const r = registro;
+  const slotBuoni = Object.keys(r.slot).filter(k => r.slot[k]);
+  const righe = [
+    `Dispositivo: ${r.dispositivo || '?'}`,
+    `Nome dichiarato: ${r.nome || 'nessuna risposta'}`,
+    `Firmware: ${r.firmware || 'nessuna risposta'}`,
+    `Preset corrente: ${r.presetCorrente === null ? 'nessuna risposta' : r.presetCorrente}`,
+    `Suono che sta suonando: ${r.live ? '«' + r.live.nome + '»' : 'non letto'}`,
+    `Slot che rispondono: ${slotBuoni.length ? slotBuoni.join(', ') : 'nessuno'}`,
+    ...slotBuoni.map(k => `  ${k}: «${r.slot[k].nome}» — ${r.slot[k].catena.join(', ')}`),
+    `Modelli fuori dal nostro catalogo: ${r.fuoriCatalogo.length ? r.fuoriCatalogo.join(', ') : 'nessuno'}`,
+    `Notifiche BLE: ${r.notifiche.quante}, la più lunga ${r.notifiche.maxByte} byte`,
+  ];
+  $('riassunto').textContent = righe.join('\n');
+}
+
+$('btnScarica').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(registro, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `neo-sonda-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>
