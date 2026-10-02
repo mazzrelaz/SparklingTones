@@ -363,6 +363,10 @@ ampli finto):
 6. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
 7. **Togliere dal catalogo altri modelli che l'ampli non ha.**
 8. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
+9. **Spark NEO** (l'utente ce l'ha, 2 ottobre 2026): si aspetta il registro di
+   `tools/neo-sonda.html` (sola lettura, pubblicata). Secondo Ignitron, **non misurato**: stesso
+   GATT, 4 slot in un banco, chunk da 128 come lo Spark 40, niente looper; il catalogo dei
+   modelli è da rifare per lui. Si adatta l'app solo dopo la cattura.
 
 **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
 i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
