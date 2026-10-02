@@ -522,3 +522,27 @@ e viene buttato via. Tutto ciò che è stato eliminato — canale, opcode, bondi
 `0x0170`, e non è una porta che apriamo**. **Non aggiungere sonde sui byte.** L'unica cosa che
 resterebbe è **chiedere a Ignitron**, che manda COUNTIN senza nessuna chiave: se a loro
 funziona, la conclusione cade.
+
+## Spark NEO — 2 ottobre 2026
+
+L'utente ha uno Spark NEO (cuffie con l'ampli dentro). Misurato con `tools/neo-sonda.html`, catture
+`captures/2026-10-02-neo-sonda-lettura.json` e `…-caricamento.json`:
+
+- **Si trova col filtro di sempre** (servizio `0xFFC0`): il nome BLE è «Spark NEO Control»,
+  `0x0311` risponde «Spark NEO», firmware `0x032f` = `ce 01 10 01 3c` → 1.16.1.60.
+- **4 slot, 0–3.** `0x0201` sugli slot 4–7 risponde un solo `0x0301` corto, `00 n 00`, e
+  basta: la lettura scade (4 s l'uno).
+- I preset si leggono e si interpretano col nostro decoder senza errori; i modelli dei quattro
+  preset dell'utente sono tutti in `MODELLI`.
+- **Le notifiche non superano i 20 byte** (lo Spark 2 arriva a 39), **ma le write da 39
+  passano**: preset intero in 16 chunk da 25, stesso seq, write non spezzate → 16 ack, riletto
+  dal `0x0201` live, **sentito cambiare in cuffia**. Poi `0x0138` su 0 torna allo slot 1.
+  Quindi la strada del pedale (`0x0101` su `0x7f` + `0x0138` con `0x7f`) vale anche qui.
+- Gli ack dei chunk sono `0x0501` sugli intermedi e `0x0401` sull'ultimo: il contrario di
+  quanto annotato per lo Spark 2. Il trasporto accetta tutti e due, nessun effetto.
+- Arriva da solo un `0x0371` (`10 01 00 00 cd 0e c7 cd 07 e5 1a`), ignoto. `cd 0e c7` = 3783:
+  forse la batteria in mV. **Ipotesi, non verificata.**
+- **Non provati**: scrittura in uno slot, `0x0104`/`0x0115` (manopole, acceso/spento), bpm
+  (`0x0376`), Hendrix. Looper: secondo Ignitron il NEO non ce l'ha.
+- Secondo Ignitron (non misurato) il NEO accetta chunk da 128 e write da 173 come lo Spark
+  40: non serve, i nostri vanno bene.
