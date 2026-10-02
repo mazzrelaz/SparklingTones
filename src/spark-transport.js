@@ -429,7 +429,9 @@ window.SparkTransport = (function () {
      *               suono corrente senza sovrascrivere nulla di salvato
      * @param options varianti da provare quando l'ampli non applica il preset:
      *                `incrementSeq` (comportamento Spark 40), `includeTail`,
-     *                `blockHeader`, `chunkSize`, `ackTimeout`
+     *                `blockHeader`, `chunkSize`, `ackTimeout`, `scritturaMax`
+     *                (write BLE spezzate a quei byte: lo Spark NEO non manda
+     *                notifiche oltre i 20, misurato il 2 ottobre 2026)
      * @returns {{ok: boolean, sent: number, total: number, acks: number, error?: string}}
      */
     async writePreset(preset, target, onProgress, options) {
@@ -453,9 +455,11 @@ window.SparkTransport = (function () {
           m => (m.cmd === Spark.CMD_ACK || m.cmd === CMD_ACK_FINAL) && m.sub === 0x01,
           opts.ackTimeout || PRESET_ACK_TIMEOUT);
         try {
-          await this.send({ cmd: Spark.CMD_ACTION, sub: 0x01, data: chunks[i] },
-                          opts.incrementSeq ? undefined : seq,
-                          opts.blockHeader);
+          const chunk = { cmd: Spark.CMD_ACTION, sub: 0x01, data: chunks[i] };
+          const seqChunk = opts.incrementSeq ? undefined : seq;
+          await (opts.scritturaMax
+            ? this.sendSpezzato(chunk, opts.scritturaMax, seqChunk, opts.blockHeader)
+            : this.send(chunk, seqChunk, opts.blockHeader));
         } catch (err) {
           const error = tr`errore GATT al chunk ${i + 1} di ${chunks.length}: ${err.message}`;
           this.onLog(error);

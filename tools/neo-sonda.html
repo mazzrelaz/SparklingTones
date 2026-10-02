@@ -53,6 +53,18 @@
 </div>
 
 <div id="riassunto"></div>
+
+<h1 style="margin-top:18px">Prova di caricamento</h1>
+<div class="sub">
+  Dopo «Leggi tutto». Prende il preset dello <b>slot 2 (A2)</b>, come l'ha dato l'ampli, e lo fa
+  suonare senza salvarlo da nessuna parte: gli slot restano come sono. <b>Abbassa il volume
+  delle cuffie</b>, poi una prova alla volta, e tra una e l'altra «Torna ad A1».
+</div>
+<div class="row">
+  <button id="btnProvaA" disabled>Prova A: come lo Spark 2</button>
+  <button id="btnProvaB" disabled>Prova B: scritture da 20 byte</button>
+  <button id="btnA1" class="secondary" disabled>Torna ad A1</button>
+</div>
 <div id="log"></div>
 
 <script src="../src/spark-protocol.js"></script>
@@ -71,11 +83,18 @@ const hex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).joi
 const modelliNoti = new Set(SparkEffetti.MODELLI.flat());
 
 let registro = nuovoRegistro();
+const presetLetti = {};   // i preset interi, come li ha dati l'ampli, per la prova di caricamento
+
+function aggiornaProve() {
+  const si = spark.connected && !!presetLetti[1];
+  $('btnProvaA').disabled = $('btnProvaB').disabled = !si;
+  $('btnA1').disabled = !spark.connected;
+}
 
 function nuovoRegistro() {
   return { quando: new Date().toISOString(), dispositivo: null, nome: null, firmware: null,
            presetCorrente: null, live: null, slot: {}, fuoriCatalogo: [],
-           notifiche: { quante: 0, maxByte: 0, misure: {} }, messaggi: [], righe: [] };
+           notifiche: { quante: 0, maxByte: 0, misure: {} }, messaggi: [], righe: [], prove: [] };
 }
 
 function scrivi(testo, classe) {
@@ -95,6 +114,7 @@ const spark = new SparkTransport({
     const on = stato === 'connected';
     $('btnConnetti').disabled = $('btnTutti').disabled = on;
     $('btnLeggi').disabled = $('btnStacca').disabled = !on;
+    aggiornaProve();
   },
   onLog: msg => scrivi(msg),
   onMessage: msg => {
@@ -179,6 +199,7 @@ $('btnLeggi').addEventListener('click', async () => {
       scrivi(`— slot ${i}`);
       const p = await spark.readPreset(i, 4000);
       registro.slot[i] = p ? descriviPreset(p) : null;
+      if (p) presetLetti[i] = p;
       await sleep(200);
     }
   } catch (err) {
@@ -187,6 +208,42 @@ $('btnLeggi').addEventListener('click', async () => {
   scrivi(`messaggi arrivati in tutto: ${spark.rxTotali}`);
   riassumi();
   $('btnLeggi').disabled = !spark.connected;
+  aggiornaProve();
+});
+
+/* La prova: 0x0101 verso il buffer software 0x7f e poi 0x0138 con 0x7f,
+   come fa il pedale. Una variante alla volta; si verifica rileggendo. */
+async function prova(nome, opzioni) {
+  const p = presetLetti[1];
+  $('btnProvaA').disabled = $('btnProvaB').disabled = true;
+  const rxPrima = spark.rxTotali;
+  scrivi(`— prova ${nome}: carico «${p.name}»`);
+  const esito = { prova: nome, preset: p.name };
+  try {
+    const r = await spark.loadPreset(p, null, opzioni);
+    Object.assign(esito, { inviati: r.sent, chunk: r.total, ack: r.acks, errore: r.error || null });
+    await sleep(600);
+    const live = await spark.readLiveState(5000);
+    esito.riletto = live ? live.name : null;
+  } catch (err) {
+    esito.errore = err.message;
+  }
+  esito.connesso = spark.connected;
+  esito.messaggi = spark.rxTotali - rxPrima;
+  registro.prove.push(esito);
+  scrivi(`prova ${nome}: ${esito.ack}/${esito.chunk} ack, riletto «${esito.riletto}», ` +
+         `${esito.messaggi} messaggi, ${esito.connesso ? 'ancora connesso' : 'DISCONNESSO'}` +
+         (esito.errore ? `, errore: ${esito.errore}` : ''), 'fuori');
+  $('riassunto').textContent += `\nProva ${nome}: ${esito.ack}/${esito.chunk} ack, ` +
+    `suona «${esito.riletto || '?'}»${esito.connesso ? '' : ' — si è disconnesso'}`;
+  aggiornaProve();
+}
+
+$('btnProvaA').addEventListener('click', () => prova('A', {}));
+$('btnProvaB').addEventListener('click', () => prova('B', { scritturaMax: 20 }));
+$('btnA1').addEventListener('click', async () => {
+  await spark.send(Spark.commands.changePreset(0));
+  scrivi('tornato ad A1');
 });
 
 function riassumi() {
