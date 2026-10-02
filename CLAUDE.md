@@ -358,6 +358,8 @@ Sull'app (guscio `v77` in `sw.js`; **`index.html` non ha suite**, le mie prove s
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
+   **In stand-by per scelta dell'utente** (2 ottobre 2026): non va né sul NEO né, dice lui,
+   sullo Spark 2. Non riaprirlo finché non lo riapre lui.
 4. **Editor con l'ampli acceso e sul telefono**.
 5. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
 6. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
