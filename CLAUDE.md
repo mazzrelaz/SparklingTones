@@ -125,7 +125,7 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
 
 ### Sezione Preset
 
-- **Gli otto preset dell'ampli stanno sopra** (A1…B4, rosso banco A, verde B), gli altri sotto,
+- **Gli otto preset dell'ampli stanno sopra** (A1…B4, rosso banco A, verde B; sul NEO quattro, CH1–CH4), gli altri sotto,
   **mai in tutti e due i posti**. **Sovrascrivere uno slot non perde il preset**:
   `_sistemaSlot` gli toglie lo slot e ricompare sotto; il record non si cancella mai.
 - **`slots` è una lista**; `normalizzaSlots` cancella il vecchio `slot`. **`_sistemaSlot(visti)`
@@ -363,10 +363,15 @@ ampli finto):
 6. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
 7. **Togliere dal catalogo altri modelli che l'ampli non ha.**
 8. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
-9. **Spark NEO** (l'utente ce l'ha, 2 ottobre 2026): si aspetta il registro di
-   `tools/neo-sonda.html` (sola lettura, pubblicata). Secondo Ignitron, **non misurato**: stesso
-   GATT, 4 slot in un banco, chunk da 128 come lo Spark 40, niente looper; il catalogo dei
-   modelli è da rifare per lui. Si adatta l'app solo dopo la cattura.
+9. **Spark NEO** (l'utente ce l'ha, 2 ottobre 2026; misure in `docs/protocollo-spark2.md`,
+   «Spark NEO»). **Verificato in cuffia**: si collega col filtro di sempre, **4 slot**
+   (CH1–CH4, nessun LED: si vedono solo dall'app ufficiale), lettura e `0x0101`→`0x7f` +
+   `0x0138` come lo Spark 2. L'app sceglie dal nome (`Spark.profiloAmpli`): l'ultimo ampli
+   collegato sta in `settings.ultimoAmpli`, e leggendo dal NEO gli slot 4–7 si svuotano
+   (`importFromAmp(…, { slotVuoti })`): gli slot in libreria sono sempre dell'ultimo ampli.
+   **Da provare sul NEO**: l'app vera (v78), scrittura in uno slot, manopole (`0x0104`),
+   acceso/spento, bpm, Hendrix, il pedale (cerca chiunque annunci `0xFFC0`: col NEO acceso
+   e lo Spark 2 spento dovrebbe agganciarlo).
 
 **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
 i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di

@@ -475,11 +475,16 @@ window.PresetStore = (function () {
      * Inserisce i preset letti dall'ampli. Quelli già presenti (stesso UUID)
      * vengono aggiornati solo nella parte sonora: tag, note, preferiti e
      * ordine restano quelli dell'utente.
+     *
+     * `opzioni.slotVuoti`: slot che quest'ampli non ha (lo Spark NEO ne ha 4).
+     * Valgono come osservati e vuoti, così chi li teneva su un altro ampli li
+     * perde invece di restare in cima come se fosse qui; il record resta.
      * @returns {{added: number, updated: number}}
      */
-    async importFromAmp(presets) {
+    async importFromAmp(presets, opzioni) {
       let added = 0, updated = 0;
       const visti = new Map();          // slot letto → uuid che ci sta
+      for (const s of (opzioni && opzioni.slotVuoti) || []) visti.set(s, null);
 
       for (const preset of presets) {
         if (preset.slot !== null && preset.slot !== undefined) {

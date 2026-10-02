@@ -496,7 +496,27 @@ window.Spark = (function () {
    */
   const SLOTS_PER_BANK = 4;
 
-  function slotLabel(n) {
+  /**
+   * Quello che cambia da un ampli all'altro, ricavato dal nome che risponde a
+   * `0x0211`. Lo Spark NEO ha **4 slot** e nessun LED che li mostri: si vedono
+   * solo dall'app ufficiale, come CH1–CH4 (misurato il 2 ottobre 2026, gli slot
+   * 4–7 rispondono vuoti). Un nome che non conosciamo vale come lo Spark 2,
+   * l'unico verificato fino in fondo.
+   */
+  const PROFILI_AMPLI = {
+    'Spark NEO': { slot: 4, banchi: false },
+  };
+  const PROFILO_SPARK2 = { slot: 8, banchi: true };
+
+  function profiloAmpli(nome) {
+    const profilo = PROFILI_AMPLI[nome] || PROFILO_SPARK2;
+    return Object.assign({ nome: nome || null }, profilo);
+  }
+
+  function slotLabel(n, profilo) {
+    if (profilo && !profilo.banchi) {
+      return { bank: null, position: n + 1, color: null, label: 'CH' + (n + 1) };
+    }
     const bank     = n < SLOTS_PER_BANK ? 'A' : 'B';
     const position = (n % SLOTS_PER_BANK) + 1;
     return {
@@ -717,7 +737,7 @@ window.Spark = (function () {
     controllaPreset,
     presetChecksum, PARAM_MARKER, PRESET_CHUNK_SIZE,
     LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET, CATENA,
-    slotLabel, SLOTS_PER_BANK,
+    slotLabel, SLOTS_PER_BANK, profiloAmpli,
     bpmDaImpostazioni, impostazioniConBpm, BPM_MIN, BPM_MAX,
     CMD_ACTION, CMD_QUERY, CMD_NOTIFY, CMD_ACK, TYPE,
   };

@@ -282,6 +282,16 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('una lettura parziale lascia in pace gli slot che non ha visto',
         (await store.byUuid('uuid-b')).slots, [1, 3]);
 
+  // un ampli con meno slot (Spark NEO, 4): quelli che non ha si svuotano
+  const conB = Object.assign(makePreset('uuid-d', 'Solo B', []), { slot: 6 });
+  await store.importFromAmp([conB]);
+  await store.importFromAmp([copiato(0)], { slotVuoti: [4, 5, 6, 7] });
+  check('gli slot che l\'ampli non ha si svuotano', (await store.byUuid('uuid-d')).slots, []);
+  check('ma il preset resta in libreria', (await store.byUuid('uuid-d')).name, 'Solo B');
+  check('e gli slot letti restano', (await store.byUuid('uuid-c')).slots, [0]);
+  check('nessuno resta oltre il quarto posto',
+        (await store.hardware()).slice(4).every(r => r === null), true);
+
   /* ------------------------------------------------------------------ */
   group('banchi');
 

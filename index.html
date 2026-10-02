@@ -239,6 +239,8 @@
   .pannello-ampli { display:grid; grid-template-columns:1fr 1fr; gap:8px;
                     align-items:start; }
   .colonna-banco { display:grid; gap:8px; align-content:start; }
+  .colonna-banco.unica { grid-column:1 / -1; grid-template-columns:1fr 1fr; }
+  .colonna-banco.unica .banco-eti { grid-column:1 / -1; }
   .banco-eti { font-family:var(--strumento); font-size:0.66rem; letter-spacing:0.1em;
                text-transform:uppercase; font-weight:700; color:var(--faint); }
   .banco-eti.a { color:#ff9b9b; }
@@ -433,6 +435,8 @@
           grid-auto-flow:column;
           padding:0 calc(12px + env(safe-area-inset-right)) 10px
                     calc(12px + env(safe-area-inset-left)); }
+  /* Lo Spark NEO ha quattro slot: due e due, pulsanti più alti. */
+  #pads.quattro { grid-template-rows:repeat(2, 1fr); }
 
   /* I pulsantoni hanno lo stesso vestito dei tasselli dell'editor: fondo più
      scuro della pagina, un bordo sottile, e quando sono accesi l'alone del
@@ -1518,7 +1522,11 @@ const spark = new SparkTransport({
    ==================================================================== */
 
 let tutti      = [];      // tutti i record, nell'ordine dell'utente
-let suAmpli    = [];      // otto posti: il record che sta in quello slot, o null
+let suAmpli    = [];      // un posto per slot dell'ampli: il record che ci sta, o null
+// Quale ampli: lo Spark 2 ha otto slot in due banchi, lo Spark NEO quattro
+// (CH1–CH4). È l'ultimo collegato, anche senza radio: gli slot in libreria
+// sono i suoi, perché alla connessione si rileggono tutti.
+let modelloAmpli = Spark.profiloAmpli(null);
 let categorie  = [];      // {nome, quanti}
 let banchi     = [];      // banchi salvati, quelli inventati dall'utente
 let nomiParam  = {};      // nomi dati dall'utente ai parametri, per modello
@@ -1538,7 +1546,9 @@ const BANCO_AMPLI = 'ampli';
 
 async function ricarica() {
   tutti     = await store.all();
-  suAmpli   = await store.hardware();
+  modelloAmpli = Spark.profiloAmpli(
+    (spark.connected && spark.state.name) || await store.getSetting('ultimoAmpli', null));
+  suAmpli   = (await store.hardware()).slice(0, modelloAmpli.slot);
   categorie = await store.allCategories();
   banchi    = await store.getBanks();
   nomiParam = await store.getParamNames();
@@ -1632,11 +1642,24 @@ function ordinaLibreria(lista) {
 
 const perId = id => tutti.find(r => r.id === id) || null;
 
-/** Gli slot dell'ampli occupati da un preset: sono una lista, non un numero. */
-const slotsDi   = record => (record && record.slots) || [];
+/**
+ * Gli slot dell'ampli occupati da un preset: sono una lista, non un numero.
+ * Solo quelli che l'ampli di adesso ha: uno slot 6 sul NEO non esiste, e un
+ * `0x0138` mandato lì sarebbe un comando a vuoto.
+ */
+const slotsDi   = record => ((record && record.slots) || []).filter(s => s < modelloAmpli.slot);
 const residente = record => slotsDi(record).length > 0;
+/** Come si chiama uno slot su quest'ampli: A1…B4 sullo Spark 2, CH1…CH4 sul NEO. */
+const postoAmpli = slot => Spark.slotLabel(slot, modelloAmpli);
 const etichetteSlot = record =>
-  slotsDi(record).map(s => Spark.slotLabel(s).label).join(' ');
+  slotsDi(record).map(s => postoAmpli(s).label).join(' ');
+/** Il titolo di uno slot: sullo Spark 2 col LED del pannello, sul NEO non c'è. */
+const titoloSlot = slot => {
+  const posizione = postoAmpli(slot);
+  return posizione.color
+    ? tr`slot ${slot} — LED ${nomeColore(posizione.color)} numero ${posizione.position}`
+    : `slot ${slot} — ${posizione.label}`;
+};
 /** Il colore di un LED dell'ampli, da mostrare: `Spark.slotLabel` lo dà in italiano. */
 const nomeColore = colore => colore === 'rosso' ? tr('rosso') : tr('verde');
 
@@ -1838,13 +1861,17 @@ function disegnaPreset() {
   griglia.className = 'pannello-ampli';
   let apertoSlot = null;
 
-  for (const banco of [0, 1]) {
+  // Lo Spark NEO ha quattro slot e nessun banco: una colonna sola, a tutta
+  // larghezza, che dispone CH1–CH4 due per riga.
+  const banchiAmpli = modelloAmpli.banchi ? [0, 1] : [0];
+  for (const banco of banchiAmpli) {
     const colonna = document.createElement('div');
-    colonna.className = 'colonna-banco';
+    colonna.className = 'colonna-banco' + (modelloAmpli.banchi ? '' : ' unica');
 
     const eti = document.createElement('div');
-    eti.className = 'banco-eti ' + (banco === 0 ? 'a' : 'b');
-    eti.textContent = tr('banco {0}', banco === 0 ? 'A' : 'B');
+    eti.className = 'banco-eti ' + (modelloAmpli.banchi ? (banco === 0 ? 'a' : 'b') : '');
+    eti.textContent = modelloAmpli.banchi ? tr('banco {0}', banco === 0 ? 'A' : 'B')
+                                          : modelloAmpli.nome;
     colonna.appendChild(eti);
 
     for (let posto = 0; posto < 4; posto++) {
@@ -1931,7 +1958,7 @@ function disegnaFiltriCategoria() {
  * tratteggiato e lo dice, invece di far finta di essere vuoto.
  */
 function schedaSlot(record, slot) {
-  const posizione = Spark.slotLabel(slot);
+  const posizione = postoAmpli(slot);
   const card = document.createElement('div');
   card.className = 'slotcard' + (record ? '' : ' libero');
   // Niente striscia della famiglia qui: tolta su richiesta il 26 agosto 2026.
@@ -1944,10 +1971,11 @@ function schedaSlot(record, slot) {
   const led = document.createElement('span');
   led.className = 'led ' + (posizione.color === 'rosso' ? 'a' : 'b') +
                   (record ? '' : ' spento');
+  led.hidden = !posizione.color;          // il NEO non ha LED degli slot
   const sigla = document.createElement('span');
   sigla.className = 'sigla';
   sigla.textContent = posizione.label;
-  sigla.title = tr`slot ${slot} — LED ${nomeColore(posizione.color)} numero ${posizione.position}`;
+  sigla.title = titoloSlot(slot);
   alto.append(led, sigla);
   // Il bollo va **in cima e a destra**: la riga della sigla è l'unica che ha
   // spazio, e il nome sotto sta su due righe e non ne ha da cedere.
@@ -2045,11 +2073,11 @@ function coloreLed(record) {
 }
 
 function etichettaSlot(slot) {
-  const posizione = Spark.slotLabel(slot);
+  const posizione = postoAmpli(slot);
   const el = document.createElement('span');
-  el.className = 'slot ' + (posizione.color === 'rosso' ? 'a' : 'b');
+  el.className = 'slot' + (posizione.color ? (posizione.color === 'rosso' ? ' a' : ' b') : '');
   el.textContent = posizione.label;
-  el.title = tr`slot ${slot} — LED ${nomeColore(posizione.color)} numero ${posizione.position}`;
+  el.title = titoloSlot(slot);
   return el;
 }
 
@@ -2260,14 +2288,14 @@ function dettaglio(record, slot) {
       avvisoAltriSlot = document.createElement('div');
       avvisoAltriSlot.style.cssText = 'color:var(--dim);font-size:0.76rem';
       avvisoAltriSlot.textContent = tr('Lo stesso preset sta anche in {0}.',
-        altri.map(s => Spark.slotLabel(s).label).join(', '));
+        altri.map(s => postoAmpli(s).label).join(', '));
     }
 
     // Sta in una riga sua, sopra le quattro: non è un'azione sul preset ma
     // sull'ampli — gli dice quale slot mettere davanti — e compare solo
     // aprendo uno degli otto posti hardware.
     const attiva = document.createElement('button');
-    attiva.textContent = tr('Seleziona {0}', Spark.slotLabel(slot).label);
+    attiva.textContent = tr('Seleziona {0}', postoAmpli(slot).label);
     attiva.title = tr('seleziona lo slot sull\'ampli, senza scrivere nulla');
     attiva.disabled = !spark.connected;
     attiva.addEventListener('click', async () => {
@@ -2300,10 +2328,12 @@ function dettaglio(record, slot) {
   // Gli otto posti dell'ampli, col LED che si vede sul pannello: la sigla da
   // sola (A1, B3) dice poco a chi guarda l'apparecchio invece dello schermo.
   const posti = [];
-  for (let i = 0; i < 8; i++) {
-    const posizione = Spark.slotLabel(i);
+  for (let i = 0; i < modelloAmpli.slot; i++) {
+    const posizione = postoAmpli(i);
     posti.push({ valore: i,
-                 testo: tr`${posizione.label} — LED ${nomeColore(posizione.color)} ${posizione.position}` });
+                 testo: posizione.color
+                   ? tr`${posizione.label} — LED ${nomeColore(posizione.color)} ${posizione.position}`
+                   : posizione.label });
   }
   const scelta = tendinaFinta(tr('dove scriverlo sull\'ampli'), posti,
                               slot !== null ? slot : 0);
@@ -2419,7 +2449,7 @@ function dettaglio(record, slot) {
 
 /** Nome dello slot come lo mostra l'ampli: "B2 (slot 5)". */
 function nomeSlot(n) {
-  return `${Spark.slotLabel(n).label} (slot ${n})`;
+  return `${postoAmpli(n).label} (slot ${n})`;
 }
 
 /* ====================================================================
@@ -2434,7 +2464,7 @@ function bancoCorrente() {
 /** Gli otto record del banco mostrato: dall'ampli o dal banco salvato. */
 function postiDelBanco() {
   const banco = bancoCorrente();
-  if (!banco) return suAmpli.slice();
+  if (!banco) return suAmpli.slice();      // otto sullo Spark 2, quattro sul NEO
   return banco.posti.map(id => (id === null ? null : perId(id)));
 }
 
@@ -2462,6 +2492,7 @@ function disegnaLive() {
   griglia.innerHTML = '';
   const banco = bancoCorrente();
   const posti = postiDelBanco();
+  griglia.classList.toggle('quattro', posti.length === 4);
 
   posti.forEach((record, posto) => {
     const pad = document.createElement('button');
@@ -2480,7 +2511,7 @@ function disegnaLive() {
 
     const numero = document.createElement('span');
     numero.className = 'n';
-    numero.textContent = banco ? posto + 1 : Spark.slotLabel(posto).label;
+    numero.textContent = banco ? posto + 1 : postoAmpli(posto).label;
 
     const nome = document.createElement('span');
     nome.textContent = vuoto
@@ -2628,7 +2659,7 @@ async function attiva(record, barra) {
       // Se sta in più slot va bene il primo: il suono è lo stesso.
       const slot = slotsDi(record)[0];
       await spark.send(Spark.commands.changePreset(slot));
-      logLine(`${record.name} — ${Spark.slotLabel(slot).label}`);
+      logLine(`${record.name} — ${postoAmpli(slot).label}`);
     } else {
       await spark.loadPreset(record, (i, total) => {
         barra.style.width = Math.round(((i + 1) / total) * 100) + '%';
@@ -4767,6 +4798,9 @@ $('status').addEventListener('click', async () => {
     await spark.connect();
     await spark.identify();
     $('status').title = spark.state.name || tr('connesso');
+    // Il nome dice quanti slot ha (Spark 2 otto, NEO quattro), e resta per
+    // quando l'ampli è spento: gli slot in libreria sono i suoi.
+    if (spark.state.name) await store.setSetting('ultimoAmpli', spark.state.name);
     // Appena connessi si legge da soli: la prima cosa che serve sapere è
     // cosa c'è davvero negli otto slot, e chiederlo a mano ogni volta è un
     // passaggio che si dimentica. `importFromAmp` non tocca il lavoro
@@ -4800,10 +4834,15 @@ async function leggiDallAmpli() {
   disegnaLive();
 
   try {
-    const presets = await spark.readLibrary(8, (i, max) => {
+    // Gli slot che quest'ampli non ha valgono come letti e vuoti: chi li
+    // teneva su un altro ampli li perde, e torna nella libreria qui sotto.
+    const profilo = Spark.profiloAmpli(spark.state.name);
+    const presets = await spark.readLibrary(profilo.slot, (i, max) => {
       logProgress(tr`lettura slot ${i + 1} di ${max}…`);
     });
-    const { added, updated } = await store.importFromAmp(presets);
+    const slotVuoti = [];
+    for (let s = profilo.slot; s < 8; s++) slotVuoti.push(s);
+    const { added, updated } = await store.importFromAmp(presets, { slotVuoti });
     logLine(tr`letti ${presets.length} preset dall'ampli: ${added} nuovi, ${updated} aggiornati`);
   } catch (err) {
     logLine(tr('lettura interrotta: {0}', err.message));

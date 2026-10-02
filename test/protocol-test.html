@@ -200,6 +200,18 @@ check('lo slot 5 è il secondo LED verde — verificato sull\'ampli',
       Spark.slotLabel(5), { bank: 'B', position: 2, color: 'verde', label: 'B2' });
 check('il banco A è rosso', Spark.slotLabel(0).color, 'rosso');
 
+// Lo Spark NEO: 4 slot, nessun LED, si chiamano CH1-CH4 (misurato il 2 ottobre 2026).
+check('lo Spark NEO ha quattro slot senza banchi',
+      Spark.profiloAmpli('Spark NEO'), { nome: 'Spark NEO', slot: 4, banchi: false });
+check('un nome sconosciuto vale come lo Spark 2',
+      Spark.profiloAmpli('Spark Qualcosa'), { nome: 'Spark Qualcosa', slot: 8, banchi: true });
+check('sul NEO gli slot sono CH1-CH4, senza colore',
+      [0, 3].map(n => Spark.slotLabel(n, Spark.profiloAmpli('Spark NEO'))),
+      [{ bank: null, position: 1, color: null, label: 'CH1' },
+       { bank: null, position: 4, color: null, label: 'CH4' }]);
+check('col profilo dello Spark 2 le etichette non cambiano',
+      Spark.slotLabel(5, Spark.profiloAmpli('Spark 2')).label, 'B2');
+
 /* ---------- stato live: stesso formato, coda diversa ---------- */
 
 const live = Spark.parsePreset(FIXTURE_LIVE_PAYLOAD);
