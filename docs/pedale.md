@@ -62,6 +62,19 @@ disegno la schedina basta.
 mostrare invece di otto, un elenco di quattro righe intere dà ~22 caratteri a testa e
 quasi tutti i nomi veri ci stanno.
 
+> **Cambiato il 4 ottobre 2026, su decisione dell'utente.** Arrivato lo Spark NEO, l'«Amp
+> Preset» del firmware (una copia fissa degli otto preset dello Spark 2, da
+> `preset_frames.h`) mostrava sul NEO i preset sbagliati. L'utente ha scelto che il banco
+> dell'ampli **sia sempre letto dall'ampli**, e fra «l'app lo manda» e «il pedale lo legge e
+> seleziona gli slot» ha scelto la seconda. Quindi: collegandosi il pedale chiede `0x0211`
+> (è l'ampli scelto? se no lo molla e lo salta per un minuto) e un `0x0201` per slot, di cui
+> tiene **solo il nome** (banco, numero, UUID, nome: un parser di quattro campi, non dei
+> preset); premendo un footswitch dell'Amp Preset manda `0x0138` sullo slot: istantaneo, e
+> **sull'ampli non scrive niente**. I banchi mandati dall'app restano come sotto. La scelta fra
+> Spark 2 e NEO sta sul display quando l'ampli non c'è (tre secondi dopo il logo, e ogni volta
+> che lo cerca): tasto banco sinistro Spark 2, destro NEO, ricordata in `/ampli.txt`.
+> Firmware 1.3.
+
 **Il pedale non tocca mai gli slot hardware** — deciso dall'utente il 14 agosto 2026,
 coerente con la regola dei banchi inventati nella vista live. Quindi ogni cambio preset è
 `0x0101` verso il buffer `0x7f` + `0x0138` con `0x7f`, ~1 s, e va bene così («non importa

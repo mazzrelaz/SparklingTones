@@ -286,9 +286,14 @@ suona.
 
 **Le regole che non si toccano:**
 
-- **Mai gli slot hardware**: ogni cambio è `0x0101` su `0x7f` + `0x0138` con `0x7f`. Due soli
-  comandi, nessun parser; il LED dell'ampli lampeggia sempre, ed è giusto. **E adesso è vero
-  anche coi banchi che arrivano da fuori**: `frameAccettabile()` in `banchi.h` accetta solo
+- **Mai scrivere sugli slot hardware.** I banchi dall'app: `0x0101` su `0x7f` + `0x0138` con
+  `0x7f`, e il LED dell'ampli lampeggia, ed è giusto. **L'«Amp Preset» invece, dal 4 ottobre
+  2026 (decisione dell'utente, cambia quella del 14 agosto), è letto dall'ampli a ogni
+  collegamento** (`0x0211` per il nome, `0x0201` per slot, se ne tiene solo il nome) **e si
+  suona selezionando lo slot** con `0x0138`: istantaneo, non scrive niente. Spark 2 o NEO li
+  sceglie l'utente coi tasti banco quando l'ampli non c'è (sinistro Spark 2, destro NEO;
+  `/ampli.txt`); `preset_frames.h` non è più incluso. **Verificato sul pedale col NEO il 4 ottobre (1.3)**:
+  si collega, l'Amp Preset cambia subito; **i banchi dall'app sul NEO sono lenti**, da misurare. **Banchi da fuori**: `frameAccettabile()` in `banchi.h` accetta solo
   frame `0x0101` verso `0x7f`, e **il ponte BLE parte chiuso** — si apre coi due tasti banco
   insieme per 1,5 s, due minuti alla volta (`docs/sicurezza.md`).
 - **L'app preserializza**: il firmware patcha solo il seq (indice 2; il checksum non lo copre).

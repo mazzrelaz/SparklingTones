@@ -38,7 +38,6 @@
 #include <Wire.h>
 #include <U8g2lib.h>
 #include <BLEDevice.h>
-#include "preset_frames.h"
 #include "banchi.h"
 #include "logo.h"
 #include "USB.h"
@@ -53,17 +52,31 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.2";   // 1.1: modalita' MIDI; 1.2: anche via Bluetooth
+static const char* VERSIONE = "1.3";   // 1.1: MIDI; 1.2: anche via Bluetooth; 1.3: Spark 2 e NEO
 
-/* Il banco che il pedale sta suonando. Se ne ha uno ricevuto dall'app usa
- * quello; altrimenti ripiega su preset_frames.h, che resta utile per provare
- * senza dipendere dalla memoria. */
+/* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
+ * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
+ * Lo Spark 2 ha 8 preset salvati, il NEO 4, che l'app ufficiale chiama CH1-CH4. */
+static const uint8_t AMPLI_SPARK2 = 0, AMPLI_NEO = 1;
+static volatile uint8_t ampliScelto = AMPLI_SPARK2;
+static uint8_t slotDellAmpli() { return ampliScelto == AMPLI_NEO ? 4 : 8; }
+
+/* L'«Amp Preset»: i preset salvati nell'ampli, **letti dall'ampli** a ogni
+ * collegamento (deciso dall'utente il 4 ottobre 2026: prima era una copia
+ * fissa scritta nel firmware, che col NEO mostrava i preset dello Spark 2).
+ * Si suonano **selezionando lo slot** con 0x0138: istantaneo, e non scrive
+ * niente sull'ampli. Gli altri banchi restano sul buffer 0x7f come sempre. */
+static char nomiAmpli[8][32] = {};
+
+/* Il banco che il pedale sta suonando: uno ricevuto dall'app, oppure, se non
+ * e' valido, quello dell'ampli. */
 static BancoCaricato bancoAttivo = {};
 
-static uint8_t     quantiPosti()            { return bancoAttivo.valido ? POSTI_PER_BANCO : BANCO_QUANTI; }
-static bool        postoPieno(uint8_t n)    { return bancoAttivo.valido ? bancoAttivo.posti[n].presente : true; }
-static const char* nomePosto(uint8_t n)     { return bancoAttivo.valido ? bancoAttivo.posti[n].nome : BANCO_NOMI[n]; }
-static uint8_t     chunkDelPosto(uint8_t n) { return bancoAttivo.valido ? bancoAttivo.posti[n].quanti : BANCO_CHUNK[n]; }
+static uint8_t     quantiPosti()            { return bancoAttivo.valido ? POSTI_PER_BANCO : slotDellAmpli(); }
+static bool        postoPieno(uint8_t n)    { return bancoAttivo.valido ? bancoAttivo.posti[n].presente : n < slotDellAmpli(); }
+static const char* nomePosto(uint8_t n)     { return bancoAttivo.valido ? bancoAttivo.posti[n].nome
+                                                     : (nomiAmpli[n][0] ? nomiAmpli[n] : "..."); }
+static uint8_t     chunkDelPosto(uint8_t n) { return bancoAttivo.valido ? bancoAttivo.posti[n].quanti : 0; }
 
 /** Il prossimo posto **pieno**: coi banchi veri i posti vuoti ci sono, e
  *  fermarcisi sopra fa sembrare il pedale morto. */
@@ -86,8 +99,8 @@ static const uint8_t* frameDelPosto(uint8_t n, uint8_t c, uint8_t& lunghezza) {
     lunghezza = bancoAttivo.posti[n].lung[c];
     return bancoAttivo.dati + bancoAttivo.posti[n].inizio[c];
   }
-  lunghezza = BANCO_LUNGH[n][c];
-  return BANCO_FRAME[n][c];
+  lunghezza = 0;                           // il banco dell'ampli non ha frame
+  return nullptr;
 }
 
 /* --- GATT dello Spark: service 0xFFC0, write 0xFFC1, notify 0xFFC2 ------ */
@@ -99,6 +112,8 @@ static BLEAdvertisedDevice* trovato    = nullptr;
 static BLEClient*           client     = nullptr;
 static BLERemoteCharacteristic* chScrittura = nullptr;
 static BLERemoteCharacteristic* chNotifiche = nullptr;
+static char     escluso[20] = "";       // un ampli dell'altro tipo, da non riprendere
+static uint32_t esclusoFino = 0;
 
 /* Un pedale non si arrende. Se si accende prima dell'ampli, o se la
  * connessione cade a meta' concerto, deve riprovare da solo: senza questo
@@ -276,6 +291,33 @@ static uint8_t modoRicordato() {
   f.close();
   return v == MODO_MIDI ? MODO_MIDI : MODO_SPARK;
 }
+
+static const char* VIA_AMPLI = "/ampli.txt";
+
+static void ricordaAmpli() {
+  File f = LittleFS.open(VIA_AMPLI, "w");
+  if (!f) { Serial.println(F("non riesco a ricordare l'ampli")); return; }
+  f.write(ampliScelto);
+  f.close();
+}
+
+static uint8_t ampliRicordato() {
+  if (!LittleFS.exists(VIA_AMPLI)) return AMPLI_SPARK2;
+  File f = LittleFS.open(VIA_AMPLI, "r");
+  if (!f) return AMPLI_SPARK2;
+  const int v = f.read();
+  f.close();
+  return v == AMPLI_NEO ? AMPLI_NEO : AMPLI_SPARK2;
+}
+
+/* All'accensione, finita la schermata di avvio, il display chiede per tre
+ * secondi quale ampli: in quel tempo il pedale cerca ma non si aggancia, cosi'
+ * c'e' modo di cambiare idea. Un tasto banco sceglie e chiude subito la scelta;
+ * senza tocchi parte con l'ultimo. Anche dopo, finche' l'ampli non c'e', i
+ * tasti banco scelgono quale cercare. */
+static const uint32_t SCELTA_MS = 3000;
+static uint32_t sceltaFino = 0;
+static bool inScelta() { return sceltaFino && (int32_t)(sceltaFino - millis()) > 0; }
 
 static uint8_t metaMostrata = 0;         // 0 = A (posti 1-4), 1 = B (5-8)
 static uint8_t metaSuona    = 0;
@@ -473,6 +515,8 @@ static void disegnaSchermo() {
   char testa[20];
   if (avvisoTesto[0] && (int32_t)(avvisoFino - millis()) > 0) {
     snprintf(testa, sizeof(testa), "%s", avvisoTesto);
+  } else if (inScelta() && !chScrittura) {
+    snprintf(testa, sizeof(testa), "Quale ampli?");
   } else if (pontefino) {
     const uint32_t restano = (int32_t)(pontefino - millis()) > 0
                              ? (pontefino - millis()) / 1000 : 0;
@@ -484,12 +528,13 @@ static void disegnaSchermo() {
   schermo.setFont(u8g2_font_helvB08_tf);
   schermo.drawStr(0, 8, testa);
 
-  // Connesso: quadratino pieno con la S in negativo. Non connesso: vuoto.
+  // Connesso: quadratino pieno con la S (Spark 2) o la N (NEO) in negativo.
+  // Non connesso: vuoto.
   if (chScrittura) {
     schermo.drawBox(118, 0, 10, 10);
     schermo.setDrawColor(0);
     schermo.setFont(u8g2_font_5x7_tf);
-    schermo.drawStr(121, 8, "S");
+    schermo.drawStr(121, 8, ampliScelto == AMPLI_NEO ? "N" : "S");
     schermo.setDrawColor(1);
   } else {
     schermo.drawFrame(118, 0, 10, 10);
@@ -499,11 +544,31 @@ static void disegnaSchermo() {
   /* Senza lo Spark, al posto dei preset si dice cosa manca. Coi preset al loro
    * posto e l'ultimo ancora in negativo il pedale sembrava piantato (foto del
    * 24 settembre): i puntini che si muovono dicono che sta cercando. */
-  if (!chScrittura) {
+  if (!chScrittura && sganciato) {
     schermo.setFont(u8g2_font_6x13B_tf);
-    const char* riga1 = sganciato ? "Spark all'app" : "Accendi lo Spark";
+    const char* riga1 = "Spark all'app";
     schermo.drawStr((128 - schermo.getStrWidth(riga1)) / 2, 33, riga1);
-    if (!sganciato) {
+    schermo.sendBuffer();
+    return;
+  }
+  /* Senza lo Spark si sceglie quale cercare (4 ottobre 2026): due caselle,
+   * tasto banco sinistro lo Spark 2, destro il NEO; quella scelta in negativo. */
+  if (!chScrittura) {
+    const char* nomi[2] = { "Spark 2", "NEO" };
+    schermo.setFont(u8g2_font_6x13B_tf);
+    for (uint8_t a = 0; a < 2; a++) {
+      const int x = a ? 66 : 0;
+      const bool scelto = ampliScelto == a;
+      if (scelto) schermo.drawBox(x, 17, 62, 18); else schermo.drawFrame(x, 17, 62, 18);
+      schermo.setDrawColor(scelto ? 0 : 1);
+      schermo.drawStr(x + (62 - schermo.getStrWidth(nomi[a])) / 2, 30, nomi[a]);
+      schermo.setDrawColor(1);
+    }
+    if (inScelta()) {
+      schermo.setFont(u8g2_font_6x13_tf);
+      const char* riga2 = "tasti banco: scegli";
+      schermo.drawStr((128 - schermo.getStrWidth(riga2)) / 2, 52, riga2);
+    } else {
       schermo.setFont(u8g2_font_6x13_tf);
       const char* riga2 = "lo sto cercando";
       const int largo = schermo.getStrWidth(riga2) + 18;   // i puntini hanno il loro posto fisso
@@ -527,14 +592,19 @@ static void disegnaSchermo() {
     if (acceso) { schermo.setDrawColor(1); schermo.drawBox(0, y, 128, 12); }
     schermo.setDrawColor(acceso ? 0 : 1);
 
-    char etichetta[3] = { metaMostrata ? 'B' : 'A', (char)('1' + i), 0 };
+    // Sul NEO i preset salvati si chiamano CH1-CH4, come nell'app ufficiale;
+    // l'etichetta e' piu' larga e il nome si sposta di un carattere.
+    const bool ch = !bancoAttivo.valido && ampliScelto == AMPLI_NEO;
+    char etichetta[4];
+    if (ch) snprintf(etichetta, sizeof(etichetta), "CH%u", i + 1);
+    else    snprintf(etichetta, sizeof(etichetta), "%c%u", metaMostrata ? 'B' : 'A', i + 1);
     schermo.setFont(u8g2_font_6x13B_tf);
     schermo.drawStr(1, y + 10, etichetta);
     char nome[19];
-    snprintf(nome, sizeof(nome), "%s",
+    snprintf(nome, ch ? 18 : sizeof(nome), "%s",
              posto < quantiPosti() && postoPieno(posto) ? nomePosto(posto) : "-");
     schermo.setFont(u8g2_font_6x13_tf);
-    schermo.drawStr(17, y + 10, nome);
+    schermo.drawStr(ch ? 23 : 17, y + 10, nome);
   }
   schermo.setDrawColor(1);
 
@@ -561,9 +631,63 @@ static void leggiTasto();                  // usata dentro l'attesa degli ack
 
 static bool silenzioso = false;   // durante un preset i 15 ack sono rumore
 
+/* --- Le risposte che il pedale legge: il nome dell'ampli e i preset --------
+ *
+ * Arrivano nel callback delle notifiche, cioe' nel task dello stack BLE: qui
+ * si copiano byte e si alzano bandiere, il resto lo fa il loop (la regola di
+ * sempre). Si tiene **solo l'inizio** di un preset, i pezzi da 0 a 5: il nome
+ * sta nei primi cento byte, dopo banco, numero e UUID. */
+static volatile uint8_t attesaSeq = 0;           // 0 = non si aspetta niente
+static volatile uint8_t attesaSub = 0;           // 0x11 il nome, 0x01 un preset
+static volatile bool    rispostaFinita = false;
+static volatile uint32_t ultimoPezzo = 0;
+static char    nomeLetto[24] = "";
+static uint8_t pezzi[6][32];
+static uint8_t lungPezzo[6];
+
+/** L'inverso di impacchetta: ogni gruppo di 8 byte e' un byte coi bit alti,
+ *  LSB-first, seguito da fino a 7 byte dati. */
+static size_t spacchetta(const uint8_t* dentroP, size_t n, uint8_t* fuori, size_t max) {
+  size_t out = 0;
+  for (size_t i = 0; i < n; i += 8) {
+    const uint8_t alti = dentroP[i];
+    for (size_t k = 1; k < 8 && i + k < n && out < max; k++)
+      fuori[out++] = dentroP[i + k] | ((alti & (1 << (k - 1))) ? 0x80 : 0);
+  }
+  return out;
+}
+
+static void ascoltaRisposta(const uint8_t* m, size_t n) {
+  if (!attesaSeq || n < 8 || m[4] != 0x03 || m[5] != attesaSub || m[2] != attesaSeq) return;
+  uint8_t dati[128];
+  const size_t nd = spacchetta(m + 6, n - 7, dati, sizeof(dati));
+  ultimoPezzo = millis();
+  if (attesaSub == 0x11) {
+    // [lunghezza, 0xa0+lunghezza, caratteri]: «Spark NEO», «Spark 2»
+    const uint8_t l = nd >= 2 ? dati[0] : 0;
+    size_t k = 0;
+    for (; k < l && k + 2 < nd && k < sizeof(nomeLetto) - 1; k++) nomeLetto[k] = (char)dati[k + 2];
+    nomeLetto[k] = 0;
+    rispostaFinita = true;
+    return;
+  }
+  // un pezzo di preset: [quanti in tutto, indice, byte utili, byte...]
+  if (nd < 3) return;
+  const uint8_t tutti = dati[0], indice = dati[1];
+  uint8_t utili = dati[2];
+  if (utili > nd - 3) utili = (uint8_t)(nd - 3);
+  if (indice < 6) {
+    if (utili > sizeof(pezzi[0])) utili = sizeof(pezzi[0]);
+    memcpy(pezzi[indice], dati + 3, utili);
+    lungPezzo[indice] = utili;
+  }
+  if (indice + 1 >= tutti) rispostaFinita = true;
+}
+
 static void messaggioIntero(const uint8_t* m, size_t n) {
   rxTotali++;
   ultimoRx = millis();
+  ascoltaRisposta(m, n);
   if (silenzioso) return;
   Serial.print(F("  RX "));
   if (n >= 6) {
@@ -662,6 +786,15 @@ static bool cambiaPreset(uint8_t slot) {
 class Scansione : public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice d) override {
     if (d.haveServiceUUID() && d.isAdvertisingService(UUID_SERVIZIO)) {
+      /* Solo l'ampli scelto. Il nome nell'annuncio: «Spark 2 BLE», «Spark NEO
+       * Control». Se manca si prende lo stesso, e decide il 0x0211 dopo
+       * l'aggancio (leggiAmpli); quello scartato li' resta escluso un minuto. */
+      const auto nomeAnnuncio = d.getName();   // la copia resta viva: c_str() punta dentro
+      const char* nome = nomeAnnuncio.c_str();
+      const bool neo = strstr(nome, "NEO") != nullptr;
+      if (nome[0] && neo != (ampliScelto == AMPLI_NEO)) return;
+      if (escluso[0] && (int32_t)(esclusoFino - millis()) > 0
+          && strcmp(escluso, d.getAddress().toString().c_str()) == 0) return;
       Serial.printf("trovato: %s  [%s]  rssi %d\n",
                     d.getName().c_str(), d.getAddress().toString().c_str(), d.getRSSI());
       BLEDevice::getScan()->stop();
@@ -682,6 +815,7 @@ class Scansione : public BLEAdvertisedDeviceCallbacks {
  * Adesso la scansione parte e torna subito; quando l'ampli si fa vedere,
  * `Scansione` alza `trovato` e l'aggancio lo fa il loop. */
 static bool scansioneInCorso = false;
+static bool daLeggere = false;           // agganciato, nomi dei preset ancora da chiedere
 
 static void fineScansione(BLEScanResults) {
   scansioneInCorso = false;
@@ -753,8 +887,8 @@ static void chiediIntervallo(uint16_t minUnita, uint16_t maxUnita) {
 /* ======================================================================
    Il preset intero: 0x0101 sul buffer 0x7f, poi 0x0138 con 0x7f.
 
-   Questo e' il pedale vero. I frame arrivano gia' pronti dall'app
-   (preset_frames.h), il firmware non serializza niente: **corregge un byte
+   Vale per i banchi mandati dall'app (l'Amp Preset seleziona lo slot e
+   basta). I frame arrivano gia' pronti, il firmware non serializza niente: **corregge un byte
    solo**, il sequence number all'indice 2, perche' il checksum e' uno XOR
    dei soli byte impacchettati e quindi non lo copre.
 
@@ -763,10 +897,118 @@ static void chiediIntervallo(uint16_t minUnita, uint16_t maxUnita) {
    senza assemblarne nessuno.
    ====================================================================== */
 
+/** Manda una domanda e aspetta la risposta intera, leggendo i tasti nel
+ *  frattempo. `silenzio` e' il tempo senza pezzi dopo cui ci si arrende: ogni
+ *  pezzo che arriva fa ripartire l'attesa (sul NEO certi giorni arrivano lenti,
+ *  4 ottobre 2026). Ritorna true se la risposta e' finita. */
+static bool chiediEAspetta(uint8_t cmd, uint8_t sub, const uint8_t* dati, size_t n,
+                           uint8_t subRisposta, uint32_t silenzio) {
+  uint8_t frame[32];
+  attesaSeq = 0;
+  memset(lungPezzo, 0, sizeof(lungPezzo));
+  nomeLetto[0] = 0;
+  rispostaFinita = false;
+  const uint8_t mio = seq;
+  const size_t len = costruisci(cmd, sub, dati, n, frame);
+  attesaSub = subRisposta;
+  attesaSeq = mio;
+  ultimoPezzo = millis();
+  manda(frame, len);
+  while (!rispostaFinita && chScrittura && millis() - ultimoPezzo < silenzio) { leggiTasto(); delay(1); }
+  attesaSeq = 0;
+  return rispostaFinita;
+}
+
+/** Il nome di un preset, dall'inizio del payload: banco, numero, UUID, nome.
+ *  Interi diretti sotto 0x80 o con prefisso 0xcc/0xcd/0xce; stringhe 0xa0+n o
+ *  0xd9 n. Se qualcosa non torna, il nome resta vuoto e il display dice «...». */
+static void nomeDalPreset(char* fuori, size_t max) {
+  uint8_t p[6 * 32];
+  size_t np = 0;
+  for (uint8_t i = 0; i < 6 && lungPezzo[i]; i++) {
+    memcpy(p + np, pezzi[i], lungPezzo[i]);
+    np += lungPezzo[i];
+  }
+  fuori[0] = 0;
+  size_t i = 0;
+  for (uint8_t intero = 0; intero < 2; intero++) {
+    if (i >= np) return;
+    const uint8_t b = p[i++];
+    if (b == 0xcc) i += 1; else if (b == 0xcd) i += 2; else if (b == 0xce) i += 4;
+    else if (b > 0x7f) return;
+  }
+  for (uint8_t stringa = 0; stringa < 2; stringa++) {
+    if (i >= np) return;
+    const uint8_t b = p[i++];
+    size_t l;
+    if (b >= 0xa0 && b <= 0xbf) l = b - 0xa0;
+    else if (b == 0xd9 && i < np) l = p[i++];
+    else return;
+    if (i + l > np) return;
+    if (stringa == 1) {
+      // il nome: niente spazi in coda, che il display non mostra comunque
+      while (l && p[i + l - 1] == ' ') l--;
+      const size_t c = l < max - 1 ? l : max - 1;
+      memcpy(fuori, p + i, c);
+      fuori[c] = 0;
+    }
+    i += l;
+  }
+}
+
+
+/** Appena collegati: e' l'ampli scelto? E come si chiamano i suoi preset?
+ *  Il nome si chiede con 0x0211; se e' l'altro ampli lo si molla e lo si salta
+ *  per un minuto. Poi un 0x0201 per slot: dei preset si tiene solo il nome. */
+static void avvisa(const char* testo);
+
+static void leggiAmpli() {
+  memset(nomiAmpli, 0, sizeof(nomiAmpli));   // quelli di prima erano di un altro collegamento
+  silenzioso = true;                     // sedici pezzi per preset: rumore sul seriale
+  if (chiediEAspetta(0x02, 0x11, nullptr, 0, 0x11, 1500)) {
+    const bool neo = strstr(nomeLetto, "NEO") != nullptr;
+    Serial.printf("l'ampli dice di chiamarsi \"%s\"\n", nomeLetto);
+    if (neo != (ampliScelto == AMPLI_NEO)) {
+      Serial.println(F("non e' l'ampli scelto: lo mollo"));
+      snprintf(escluso, sizeof(escluso), "%s", client->getPeerAddress().toString().c_str());
+      esclusoFino = millis() + 60000;
+      avvisa(neo ? "e' il NEO" : "e' lo Spark 2");
+      client->disconnect();
+      silenzioso = false;
+      return;
+    }
+  }
+  for (uint8_t s = 0; s < slotDellAmpli() && chScrittura; s++) {
+    const uint8_t dati[2] = { 0x00, s };
+    const uint32_t t0 = millis();
+    const bool finito = chiediEAspetta(0x02, 0x01, dati, 2, 0x01, 1500);
+    nomeDalPreset(nomiAmpli[s], sizeof(nomiAmpli[s]));
+    Serial.printf("slot %u: \"%s\" — %lu ms%s\n", s, nomiAmpli[s], millis() - t0,
+                  finito ? "" : "  (risposta incompleta)");
+    schermoSporco = true;
+    if (!bancoAttivo.valido) disegnaSchermo();    // i nomi compaiono uno alla volta
+  }
+  silenzioso = false;
+}
+
 static void mandaPreset(uint8_t n) {
   if (!chScrittura) { Serial.println(F("non connesso")); return; }
   if (n >= quantiPosti()) return;
   if (!postoPieno(n)) { Serial.printf("[%u] posto vuoto\n", n + 1); return; }
+
+  /* L'Amp Preset: si seleziona lo slot, e basta. Istantaneo, e sull'ampli non
+   * si scrive niente. */
+  if (!bancoAttivo.valido) {
+    cambiaPreset(n);
+    Serial.printf("[%u] %s — slot selezionato\n", n + 1, nomePosto(n));
+    corrente = n;
+    metaSuona = (uint8_t)(n / 4);
+    slotSuona = slotBanco;
+    snprintf(nomeSuona, sizeof(nomeSuona), "%s", nomePosto(n));
+    aggiornaLed();
+    schermoSporco = true;
+    return;
+  }
 
   const uint8_t quanti = chunkDelPosto(n);
   const uint8_t mio    = seq;
@@ -857,6 +1099,11 @@ static void avvisa(const char* testo) {
  *  e' il difetto peggiore. Costa una pedalata in piu' per la coppia
  *  strofa/ritornello, e va bene cosi'. */
 static void cambiaMeta() {
+  if (quantiPosti() <= 4) {              // l'Amp Preset del NEO: quattro, una meta' sola
+    metaMostrata = 0;
+    avvisa("4 preset, una meta'");
+    return;
+  }
   metaMostrata = metaMostrata ? 0 : 1;
   Serial.printf("meta' %c mostrata; suona ancora %s\n",
                 metaMostrata ? 'B' : 'A', nomeSuona[0] ? nomeSuona : "(niente)");
@@ -887,7 +1134,7 @@ static void cambiaBanco(int8_t passo) {
   int8_t elenco[BANCHI_MAX + 1];
   const uint8_t quanti = elencoBanchi(elenco);
   if (quanti < 2) {
-    Serial.println(F("c'e' solo il banco del firmware"));
+    Serial.println(F("c'e' solo il banco dell'ampli"));
     avvisa("un solo banco");
     return;
   }
@@ -1007,6 +1254,22 @@ static void cambiaModo() {
   schermoSporco = true;
 }
 
+/** I tasti banco senza lo Spark: sinistro lo Spark 2, destro il NEO. Se si
+ *  cambia, quello gia' trovato era l'altro: si butta e si ricerca subito. */
+static void scegliAmpli(uint8_t a) {
+  sceltaFino = 0;                        // scelto: niente piu' attesa
+  schermoSporco = true;
+  if (a == ampliScelto) return;
+  ampliScelto = a;
+  ricordaAmpli();
+  memset(nomiAmpli, 0, sizeof(nomiAmpli));
+  if (metaMostrata && quantiPosti() <= 4) metaMostrata = 0;
+  if (scansioneInCorso) { BLEDevice::getScan()->stop(); scansioneInCorso = false; }
+  if (trovato) { delete trovato; trovato = nullptr; }
+  ultimoTentativo = 0;
+  Serial.printf("cerco %s\n", a == AMPLI_NEO ? "lo Spark NEO" : "lo Spark 2");
+}
+
 static void leggiTasto() {
   const uint8_t ingressi = leggiPortA();                   // bit alto = rilasciato
 
@@ -1046,6 +1309,7 @@ static void leggiTasto() {
     if (k == BANCO_SX || k == BANCO_DX) {
       const uint8_t altro = (k == BANCO_SX) ? BANCO_DX : BANCO_SX;
       if (!(ingressi & (uint8_t)(1 << LINEA_PULSANTE[altro]))) continue;
+      if (!chScrittura && !sganciato) { scegliAmpli(k == BANCO_DX ? AMPLI_NEO : AMPLI_SPARK2); continue; }
       cambiaBanco(k == BANCO_DX ? +1 : -1);
       continue;
     }
@@ -1533,8 +1797,7 @@ void setup() {
    * il PC non c'e'. Vedi CLAUDE.md, «Trappole dell'ambiente». */
   Serial.setTxTimeoutMs(0);
   delay(600);
-  Serial.println(F("\nprova-ble — pedale Spark 2"));
-  Serial.printf("banco di %u preset nel firmware. Premi BOOT per il prossimo.\n\n", BANCO_QUANTI);
+  Serial.println(F("\nprova-ble — pedale Spark 2 / Spark NEO"));
   pinMode(PIN_TASTO, INPUT_PULLUP);
   avviaEspansore();
   schermoPresente = schermo.begin();
@@ -1552,8 +1815,8 @@ void setup() {
   const int16_t ricordato = bancoRicordato();
   bool scelto = false;
   if (ricordato == -1) {
-    scelto = true;                       // era il banco del firmware, e resta quello
-    Serial.println(F("riparto dal banco del firmware, quello di prima dello spegnimento"));
+    scelto = true;                       // era il banco dell'ampli, e resta quello
+    Serial.println(F("riparto dall'Amp Preset, quello di prima dello spegnimento"));
   } else if (ricordato >= 0 && bancoCarica((uint8_t)ricordato, bancoAttivo)) {
     slotBanco = (int8_t)ricordato;
     scelto = true;
@@ -1568,6 +1831,9 @@ void setup() {
     }
   }
   modo = modoRicordato();
+  ampliScelto = ampliRicordato();
+  sceltaFino = millis() + AVVIO_MS + SCELTA_MS;   // dopo il logo, tre secondi per cambiare ampli
+  Serial.printf("ampli: %s\n", ampliScelto == AMPLI_NEO ? "Spark NEO" : "Spark 2");
   Serial.printf("modalita' %s\n", modo == MODO_MIDI ? "MIDI" : "Spark");
   aggiornaLed();   // spenti: finche' non si preme un tasto non suona niente di nostro
   BLEDevice::init("SparkPedale");
@@ -1626,8 +1892,8 @@ void loop() {
   }
   // L'ampli si e' fatto vedere: ci si attacca **qui**, fuori dal callback
   // della scansione, che e' la regola di sempre per le operazioni BLE.
-  if (trovato && !scansioneInCorso && !chScrittura && !sganciato) {
-    if (modo == MODO_SPARK) agganciaAmpli();
+  if (trovato && !scansioneInCorso && !chScrittura && !sganciato && !inScelta()) {
+    if (modo == MODO_SPARK && agganciaAmpli()) daLeggere = true;
     else { delete trovato; trovato = nullptr; }   // in MIDI lo Spark resta libero
   }
 
@@ -1677,6 +1943,12 @@ void loop() {
   // buttata via. Mentre il pedale si sta riagganciando una pressione andava
   // persa e da fuori sembrava che il pedale ignorasse il piede: cosi' invece
   // il suono arriva appena si puo', ed e' il comportamento che serve sul palco.
+  // Appena agganciato: e' quello giusto, e come si chiamano i suoi preset.
+  if (daLeggere && chScrittura && !inTrasferimento) {
+    daLeggere = false;
+    leggiAmpli();
+  }
+
   if (inCoda >= 0 && !inTrasferimento && chScrittura) {
     const uint8_t n = (uint8_t)inCoda;
     inCoda = -1;
