@@ -546,3 +546,16 @@ L'utente ha uno Spark NEO (cuffie con l'ampli dentro). Misurato con `tools/neo-s
   (`0x0376`), Hendrix. Looper: secondo Ignitron il NEO non ce l'ha.
 - Secondo Ignitron (non misurato) il NEO accetta chunk da 128 e write da 173 come lo Spark
   40: non serve, i nostri vanno bene.
+
+### Spark NEO, 4 ottobre 2026: perché i banchi sono lenti
+
+- **Il NEO digerisce un pezzo ogni ~90 ms.** Dal pedale: giro `0x0138`→ack ~100 ms anche a
+  intervallo 7,5 ms (Spark 2: 26 ms); a 30–50 ms sale a 155, quindi l'intervallo lo accetta.
+  Un preset dei banchi (15–17 pezzi da 25) = 1,0–1,1 s col pedale, 1,9 s dal telefono.
+- **Pezzi di fila senza aspettare l'ack** (pedale, `z`, 30 ms): 1,3–1,4 s, peggio; gli ack
+  arrivano per quasi un secondo dopo l'ultimo pezzo.
+- **Pezzi da 128 come Ignitron** (`neo-sonda`, Prova C, write spezzate a 20): 4 pezzi, il NEO
+  **li accetta**, preset riletto giusto e sentito cambiare. 1346 ms, di cui ~700 ad aspettare
+  l'ack dell'ultimo pezzo che non è arrivato (3/4): il trasferimento vero ~650 ms contro 1860.
+  Cattura `captures/2026-10-04-neo-sonda-pezzi-grandi.json`. **Sullo Spark 2 i 128
+  disconnettono**: un banco a pezzi grandi vale solo per il NEO.

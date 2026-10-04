@@ -1,0 +1,1892 @@
+{
+  "quando": "2026-10-04T08:21:00.572Z",
+  "dispositivo": "Spark NEO Control",
+  "nome": "Spark NEO",
+  "firmware": "1.16.1.60",
+  "presetCorrente": 1,
+  "live": {
+    "nome": "AC - Nylon Warm",
+    "uuid": "75274425-ff65-4b9b-b50b-475ca05da7dc",
+    "bpm": 120,
+    "catena": [
+      "(spento) bias.noisegate",
+      "(spento) LA2AComp",
+      "(spento) ProCoRat",
+      "Acoustic",
+      "ChorusAnalog",
+      "(spento) DelayMono",
+      "bias.reverb"
+    ],
+    "effetti": [
+      {
+        "name": "bias.noisegate",
+        "enabled": false,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.053700000047683716
+          },
+          {
+            "index": 1,
+            "value": 0.0031079999171197414
+          },
+          {
+            "index": 2,
+            "value": 0
+          }
+        ]
+      },
+      {
+        "name": "LA2AComp",
+        "enabled": false,
+        "params": [
+          {
+            "index": 0,
+            "value": 0
+          },
+          {
+            "index": 1,
+            "value": 0.7126444578170776
+          },
+          {
+            "index": 2,
+            "value": 0.7248061895370483
+          }
+        ]
+      },
+      {
+        "name": "ProCoRat",
+        "enabled": false,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.8952109813690186
+          },
+          {
+            "index": 1,
+            "value": 0.28289198875427246
+          },
+          {
+            "index": 2,
+            "value": 0.7338330149650574
+          }
+        ]
+      },
+      {
+        "name": "Acoustic",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.44999998807907104
+          },
+          {
+            "index": 1,
+            "value": 0.3499999940395355
+          },
+          {
+            "index": 2,
+            "value": 0.5
+          },
+          {
+            "index": 3,
+            "value": 0.6000000238418579
+          },
+          {
+            "index": 4,
+            "value": 0.550000011920929
+          }
+        ]
+      },
+      {
+        "name": "ChorusAnalog",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.20000000298023224
+          },
+          {
+            "index": 1,
+            "value": 0.18000000715255737
+          },
+          {
+            "index": 2,
+            "value": 0.23000000417232513
+          },
+          {
+            "index": 3,
+            "value": 0.47999998927116394
+          }
+        ]
+      },
+      {
+        "name": "DelayMono",
+        "enabled": false,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.2601340115070343
+          },
+          {
+            "index": 1,
+            "value": 0.25038599967956543
+          },
+          {
+            "index": 2,
+            "value": 0.2146269977092743
+          },
+          {
+            "index": 3,
+            "value": 0.699999988079071
+          },
+          {
+            "index": 4,
+            "value": 0
+          }
+        ]
+      },
+      {
+        "name": "bias.reverb",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.30000001192092896
+          },
+          {
+            "index": 1,
+            "value": 0.3799999952316284
+          },
+          {
+            "index": 2,
+            "value": 0.2800000011920929
+          },
+          {
+            "index": 3,
+            "value": 0.36000001430511475
+          },
+          {
+            "index": 4,
+            "value": 0.3400000035762787
+          },
+          {
+            "index": 5,
+            "value": 0.6499999761581421
+          },
+          {
+            "index": 6,
+            "value": 0
+          },
+          {
+            "index": 7,
+            "value": 1
+          }
+        ]
+      }
+    ]
+  },
+  "slot": {
+    "0": {
+      "nome": "Clean Tube ",
+      "uuid": "2271f7c0-cf8f-4614-bc7e-ce695da5c3b9",
+      "bpm": 120,
+      "catena": [
+        "bias.noisegate",
+        "LA2AComp",
+        "(spento) DistortionTS9",
+        "AcousticAmpV2",
+        "GuitarEQ6",
+        "(spento) DelayRe201",
+        "bias.reverb"
+      ],
+      "effetti": [
+        {
+          "name": "bias.noisegate",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.32019999623298645
+            },
+            {
+              "index": 1,
+              "value": 0.3955000042915344
+            },
+            {
+              "index": 2,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "LA2AComp",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0
+            },
+            {
+              "index": 1,
+              "value": 0.795799970626831
+            },
+            {
+              "index": 2,
+              "value": 0.30570000410079956
+            }
+          ]
+        },
+        {
+          "name": "DistortionTS9",
+          "enabled": false,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.5699999928474426
+            },
+            {
+              "index": 1,
+              "value": 0.5
+            },
+            {
+              "index": 2,
+              "value": 0.6200000047683716
+            }
+          ]
+        },
+        {
+          "name": "AcousticAmpV2",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.7286999821662903
+            },
+            {
+              "index": 1,
+              "value": 0.6916000247001648
+            },
+            {
+              "index": 2,
+              "value": 0.1835000067949295
+            },
+            {
+              "index": 3,
+              "value": 0.40869998931884766
+            },
+            {
+              "index": 4,
+              "value": 0.8495321869850159
+            }
+          ]
+        },
+        {
+          "name": "GuitarEQ6",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.5786908864974976
+            },
+            {
+              "index": 1,
+              "value": 0.5
+            },
+            {
+              "index": 2,
+              "value": 0.5
+            },
+            {
+              "index": 3,
+              "value": 0.5
+            },
+            {
+              "index": 4,
+              "value": 0.5
+            },
+            {
+              "index": 5,
+              "value": 0.5
+            },
+            {
+              "index": 6,
+              "value": 0.5
+            }
+          ]
+        },
+        {
+          "name": "DelayRe201",
+          "enabled": false,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.22256121039390564
+            },
+            {
+              "index": 1,
+              "value": 0.20175205171108246
+            },
+            {
+              "index": 2,
+              "value": 0.2643235921859741
+            },
+            {
+              "index": 3,
+              "value": 0.36197739839553833
+            },
+            {
+              "index": 4,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "bias.reverb",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.46140000224113464
+            },
+            {
+              "index": 1,
+              "value": 0.965399980545044
+            },
+            {
+              "index": 2,
+              "value": 0.17800000309944153
+            },
+            {
+              "index": 3,
+              "value": 0.14890000224113464
+            },
+            {
+              "index": 4,
+              "value": 0.6699000000953674
+            },
+            {
+              "index": 5,
+              "value": 0.06729999929666519
+            },
+            {
+              "index": 6,
+              "value": 0.30000001192092896
+            },
+            {
+              "index": 7,
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "1": {
+      "nome": "AC - Nylon Warm",
+      "uuid": "75274425-ff65-4b9b-b50b-475ca05da7dc",
+      "bpm": 120,
+      "catena": [
+        "(spento) bias.noisegate",
+        "(spento) LA2AComp",
+        "(spento) ProCoRat",
+        "Acoustic",
+        "ChorusAnalog",
+        "(spento) DelayMono",
+        "bias.reverb"
+      ],
+      "effetti": [
+        {
+          "name": "bias.noisegate",
+          "enabled": false,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.053700000047683716
+            },
+            {
+              "index": 1,
+              "value": 0.0031079999171197414
+            }
+          ]
+        },
+        {
+          "name": "LA2AComp",
+          "enabled": false,
+          "params": [
+            {
+              "index": 0,
+              "value": 0
+            },
+            {
+              "index": 1,
+              "value": 0.7126444578170776
+            },
+            {
+              "index": 2,
+              "value": 0.7248061895370483
+            }
+          ]
+        },
+        {
+          "name": "ProCoRat",
+          "enabled": false,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.8952109813690186
+            },
+            {
+              "index": 1,
+              "value": 0.28289198875427246
+            },
+            {
+              "index": 2,
+              "value": 0.7338330149650574
+            }
+          ]
+        },
+        {
+          "name": "Acoustic",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.44999998807907104
+            },
+            {
+              "index": 1,
+              "value": 0.3499999940395355
+            },
+            {
+              "index": 2,
+              "value": 0.5
+            },
+            {
+              "index": 3,
+              "value": 0.6000000238418579
+            },
+            {
+              "index": 4,
+              "value": 0.550000011920929
+            }
+          ]
+        },
+        {
+          "name": "ChorusAnalog",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.20000000298023224
+            },
+            {
+              "index": 1,
+              "value": 0.18000000715255737
+            },
+            {
+              "index": 2,
+              "value": 0.23000000417232513
+            },
+            {
+              "index": 3,
+              "value": 0.47999998927116394
+            }
+          ]
+        },
+        {
+          "name": "DelayMono",
+          "enabled": false,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.2601340115070343
+            },
+            {
+              "index": 1,
+              "value": 0.25038599967956543
+            },
+            {
+              "index": 2,
+              "value": 0.2146269977092743
+            },
+            {
+              "index": 3,
+              "value": 0.699999988079071
+            },
+            {
+              "index": 4,
+              "value": 0
+            }
+          ]
+        },
+        {
+          "name": "bias.reverb",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.30000001192092896
+            },
+            {
+              "index": 1,
+              "value": 0.3799999952316284
+            },
+            {
+              "index": 2,
+              "value": 0.2800000011920929
+            },
+            {
+              "index": 3,
+              "value": 0.36000001430511475
+            },
+            {
+              "index": 4,
+              "value": 0.3400000035762787
+            },
+            {
+              "index": 5,
+              "value": 0.6499999761581421
+            },
+            {
+              "index": 6,
+              "value": 0
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "nome": "BM - Bijou",
+      "uuid": "508c6006-ce22-4bec-a44a-d52e141b42d0",
+      "bpm": 120,
+      "catena": [
+        "bias.noisegate",
+        "LA2AComp",
+        "DistortionTS9",
+        "AC Boost",
+        "ChorusAnalog",
+        "DelayMono",
+        "bias.reverb"
+      ],
+      "effetti": [
+        {
+          "name": "bias.noisegate",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.03849999979138374
+            },
+            {
+              "index": 1,
+              "value": 0.22464294731616974
+            },
+            {
+              "index": 2,
+              "value": 0
+            }
+          ]
+        },
+        {
+          "name": "LA2AComp",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0
+            },
+            {
+              "index": 1,
+              "value": 0.8523935675621033
+            },
+            {
+              "index": 2,
+              "value": 0.3730719983577728
+            }
+          ]
+        },
+        {
+          "name": "DistortionTS9",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.5012000203132629
+            },
+            {
+              "index": 1,
+              "value": 0.6036999821662903
+            },
+            {
+              "index": 2,
+              "value": 0.7059000134468079
+            },
+            {
+              "index": 3,
+              "value": 0
+            }
+          ]
+        },
+        {
+          "name": "AC Boost",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.5613999962806702
+            },
+            {
+              "index": 1,
+              "value": 0.6980999708175659
+            },
+            {
+              "index": 2,
+              "value": 0.6478000283241272
+            },
+            {
+              "index": 3,
+              "value": 0.453000009059906
+            },
+            {
+              "index": 4,
+              "value": 0.36000001430511475
+            }
+          ]
+        },
+        {
+          "name": "ChorusAnalog",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.42419999837875366
+            },
+            {
+              "index": 1,
+              "value": 0.04149999842047691
+            },
+            {
+              "index": 2,
+              "value": 0.25200000405311584
+            },
+            {
+              "index": 3,
+              "value": 0.567796528339386
+            }
+          ]
+        },
+        {
+          "name": "DelayMono",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.38177722692489624
+            },
+            {
+              "index": 1,
+              "value": 0.39830508828163147
+            },
+            {
+              "index": 2,
+              "value": 0.5384615659713745
+            },
+            {
+              "index": 3,
+              "value": 0.4000000059604645
+            },
+            {
+              "index": 4,
+              "value": 1
+            }
+          ]
+        },
+        {
+          "name": "bias.reverb",
+          "enabled": true,
+          "params": [
+            {
+              "index": 0,
+              "value": 0.2632000148296356
+            },
+            {
+              "index": 1,
+              "value": 0.14999999105930328
+            },
+            {
+              "index": 2,
+              "value": 0.5
+            },
+            {
+              "index": 3,
+              "value": 0.6214286088943481
+            },
+            {
+              "index": 4,
+              "value": 0.3699047565460205
+            },
+            {
+              "index": 5,
+              "value": 0.3499999940395355
+            },
+            {
+              "index": 6,
+              "value": 0.10000000149011612
+            }
+          ]
+        }
+      ]
+    },
+    "3": null,
+    "4": null,
+    "5": null,
+    "6": null,
+    "7": null
+  },
+  "fuoriCatalogo": [],
+  "notifiche": {
+    "quante": 281,
+    "maxByte": 20,
+    "misure": {
+      "7": 24,
+      "8": 1,
+      "10": 48,
+      "11": 4,
+      "13": 1,
+      "16": 3,
+      "19": 1,
+      "20": 199
+    }
+  },
+  "messaggi": [
+    {
+      "cmd": 3,
+      "sub": 17,
+      "seq": 1,
+      "dati": "09 a9 53 70 61 72 6b 20 4e 45 4f"
+    },
+    {
+      "cmd": 3,
+      "sub": 47,
+      "seq": 2,
+      "dati": "ce 01 10 01 3c"
+    },
+    {
+      "cmd": 3,
+      "sub": 16,
+      "seq": 3,
+      "dati": "00 01"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 00 19 01 00 d9 24 37 35 32 37 34 34 32 35 2d 66 66 36 35 2d 34 62 39 62 2d 62 35"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 01 19 30 62 2d 34 37 35 63 61 30 35 64 61 37 64 63 af 41 43 20 2d 20 4e 79 6c 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 02 19 6e 20 57 61 72 6d a3 30 2e 37 d9 28 53 74 65 76 65 20 56 61 69 27 73 20 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 03 19 6d 61 7a 69 6e 67 20 74 6f 6e 65 20 66 6f 72 20 74 68 65 20 73 6f 6e 67 2e"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 04 19 2e 2e a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61 73 2e 6e 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 05 19 69 73 65 67 61 74 65 c2 93 00 91 ca 3d 5b f4 88 01 91 ca 3b 4b af 96 02 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 06 19 ca 00 00 00 00 a8 4c 41 32 41 43 6f 6d 70 c2 93 00 91 ca 00 00 00 00 01 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 07 19 ca 3f 36 6f de 02 91 ca 3f 39 8c e6 a8 50 72 6f 43 6f 52 61 74 c2 93 00 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 08 19 ca 3f 65 2c 8c 01 91 ca 3e 90 d7 38 02 91 ca 3f 3b dc 7b a8 41 63 6f 75 73"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 09 19 74 69 63 c3 95 00 91 ca 3e e6 66 66 01 91 ca 3e b3 33 33 02 91 ca 3f 00 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 0a 19 00 03 91 ca 3f 19 99 9a 04 91 ca 3f 0c cc cd ac 43 68 6f 72 75 73 41 6e 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 0b 19 6c 6f 67 c3 94 00 91 ca 3e 4c cc cd 01 91 ca 3e 38 51 ec 02 91 ca 3e 6b 85"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 0c 19 1f 03 91 ca 3e f5 c2 8f a9 44 65 6c 61 79 4d 6f 6e 6f c2 95 00 91 ca 3e 85"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 0d 19 30 49 01 91 ca 3e 80 32 98 02 91 ca 3e 5b c7 2e 03 91 ca 3f 33 33 33 04 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 0e 19 ca 00 00 00 00 ab 62 69 61 73 2e 72 65 76 65 72 62 c3 98 00 91 ca 3e 99 99"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 0f 19 9a 01 91 ca 3e c2 8f 5c 02 91 ca 3e 8f 5c 29 03 91 ca 3e b8 51 ec 04 91 ca"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 10 19 3e ae 14 7b 05 91 ca 3f 26 66 66 06 91 ca 00 00 00 00 07 91 ca 3f 80 00 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 4,
+      "dati": "12 11 0b ca 46 1c 18 00 ca 3f 00 00 00 28"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 00 19 00 00 d9 24 32 32 37 31 66 37 63 30 2d 63 66 38 66 2d 34 36 31 34 2d 62 63"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 01 19 37 65 2d 63 65 36 39 35 64 61 35 63 33 62 39 ab 43 6c 65 61 6e 20 54 75 62"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 02 19 65 20 a3 30 2e 37 a0 a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 03 19 61 73 2e 6e 6f 69 73 65 67 61 74 65 c3 93 00 91 ca 3e a3 f1 41 01 91 ca 3e"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 04 19 ca 7e fa 02 91 ca 3f 80 00 00 a8 4c 41 32 41 43 6f 6d 70 c3 93 00 91 ca 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 05 19 00 00 00 01 91 ca 3f 4b b9 8c 02 91 ca 3e 9c 84 b6 ad 44 69 73 74 6f 72 74"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 06 19 69 6f 6e 54 53 39 c2 93 00 91 ca 3f 11 eb 85 01 91 ca 3f 00 00 00 02 91 ca"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 07 19 3f 1e b8 52 ad 41 63 6f 75 73 74 69 63 41 6d 70 56 32 c3 95 00 91 ca 3f 3a"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 08 19 8c 15 01 91 ca 3f 31 0c b3 02 91 ca 3e 3b e7 6d 03 91 ca 3e d1 41 20 04 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 09 19 ca 3f 59 7a f1 a9 47 75 69 74 61 72 45 51 36 c3 97 00 91 ca 3f 14 25 16 01"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 0a 19 91 ca 3f 00 00 00 02 91 ca 3f 00 00 00 03 91 ca 3f 00 00 00 04 91 ca 3f 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 0b 19 00 00 05 91 ca 3f 00 00 00 06 91 ca 3f 00 00 00 aa 44 65 6c 61 79 52 65 32"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 0c 19 30 31 c2 95 00 91 ca 3e 63 e7 16 01 91 ca 3e 4e 98 17 02 91 ca 3e 87 55 6c"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 0d 19 03 91 ca 3e b9 55 1a 04 91 ca 3f 80 00 00 ab 62 69 61 73 2e 72 65 76 65 72"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 0e 19 62 c3 98 00 91 ca 3e ec 3c 9f 01 91 ca 3f 77 24 74 02 91 ca 3e 36 45 a2 03"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 0f 19 91 ca 3e 18 79 3e 04 91 ca 3f 2b 7e 91 05 91 ca 3d 89 d4 95 06 91 ca 3e 99"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 5,
+      "dati": "11 10 14 99 9a 07 91 ca 3f 80 00 00 ca c1 35 e1 52 ca 3f 00 00 00 86"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 00 19 00 01 d9 24 37 35 32 37 34 34 32 35 2d 66 66 36 35 2d 34 62 39 62 2d 62 35"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 01 19 30 62 2d 34 37 35 63 61 30 35 64 61 37 64 63 af 41 43 20 2d 20 4e 79 6c 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 02 19 6e 20 57 61 72 6d a3 30 2e 37 d9 28 53 74 65 76 65 20 56 61 69 27 73 20 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 03 19 6d 61 7a 69 6e 67 20 74 6f 6e 65 20 66 6f 72 20 74 68 65 20 73 6f 6e 67 2e"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 04 19 2e 2e a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61 73 2e 6e 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 05 19 69 73 65 67 61 74 65 c2 92 00 91 ca 3d 5b f4 88 01 91 ca 3b 4b af 96 a8 4c"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 06 19 41 32 41 43 6f 6d 70 c2 93 00 91 ca 00 00 00 00 01 91 ca 3f 36 6f de 02 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 07 19 ca 3f 39 8c e6 a8 50 72 6f 43 6f 52 61 74 c2 93 00 91 ca 3f 65 2c 8c 01 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 08 19 ca 3e 90 d7 38 02 91 ca 3f 3b dc 7b a8 41 63 6f 75 73 74 69 63 c3 95 00 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 09 19 ca 3e e6 66 66 01 91 ca 3e b3 33 33 02 91 ca 3f 00 00 00 03 91 ca 3f 19 99"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 0a 19 9a 04 91 ca 3f 0c cc cd ac 43 68 6f 72 75 73 41 6e 61 6c 6f 67 c3 94 00 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 0b 19 ca 3e 4c cc cd 01 91 ca 3e 38 51 ec 02 91 ca 3e 6b 85 1f 03 91 ca 3e f5 c2"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 0c 19 8f a9 44 65 6c 61 79 4d 6f 6e 6f c2 95 00 91 ca 3e 85 30 49 01 91 ca 3e 80"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 0d 19 32 98 02 91 ca 3e 5b c7 2e 03 91 ca 3f 33 33 33 04 91 ca 00 00 00 00 ab 62"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 0e 19 69 61 73 2e 72 65 76 65 72 62 c3 97 00 91 ca 3e 99 99 9a 01 91 ca 3e c2 8f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 0f 19 5c 02 91 ca 3e 8f 5c 29 03 91 ca 3e b8 51 ec 04 91 ca 3e ae 14 7b 05 91 ca"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 6,
+      "dati": "11 10 0c 3f 26 66 66 06 91 ca 00 00 00 00 5b"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 00 19 00 02 d9 24 35 30 38 63 36 30 30 36 2d 63 65 32 32 2d 34 62 65 63 2d 61 34"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 01 19 34 61 2d 64 35 32 65 31 34 31 62 34 32 64 30 aa 42 4d 20 2d 20 42 69 6a 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 02 19 75 a3 30 2e 37 a0 a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 03 19 73 2e 6e 6f 69 73 65 67 61 74 65 c3 93 00 91 ca 3d 1d b2 2d 01 91 ca 3e 66"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 04 19 08 cd 02 91 ca 00 00 00 00 a8 4c 41 32 41 43 6f 6d 70 c3 93 00 91 ca 00 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 05 19 00 00 01 91 ca 3f 5a 36 77 02 91 ca 3e bf 03 4b ad 44 69 73 74 6f 72 74 69"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 06 19 6f 6e 54 53 39 c3 94 00 91 ca 3f 00 4e a5 01 91 ca 3f 1a 8c 15 02 91 ca 3f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 07 19 34 b5 dd 03 91 ca 00 00 00 00 a8 41 43 20 42 6f 6f 73 74 c3 95 00 91 ca 3f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 08 19 0f b7 e9 01 91 ca 3f 32 b6 ae 02 91 ca 3f 25 d6 39 03 91 ca 3e e7 ef 9e 04"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 09 19 91 ca 3e b8 51 ec ac 43 68 6f 72 75 73 41 6e 61 6c 6f 67 c3 94 00 91 ca 3e"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 0a 19 d9 30 be 01 91 ca 3d 29 fb e7 02 91 ca 3e 81 06 25 03 91 ca 3f 11 5b 1d a9"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 0b 19 44 65 6c 61 79 4d 6f 6e 6f c3 95 00 91 ca 3e c3 78 4e 01 91 ca 3e cb ee a5"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 0c 19 02 91 ca 3f 09 d8 9e 03 91 ca 3e cc cc cd 04 91 ca 3f 80 00 00 ab 62 69 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 0d 19 73 2e 72 65 76 65 72 62 c3 97 00 91 ca 3e 86 c2 27 01 91 ca 3e 19 99 99 02"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 0e 19 91 ca 3f 00 00 00 03 91 ca 3f 1f 15 f2 04 91 ca 3e bd 64 28 05 91 ca 3e b3"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 7,
+      "dati": "10 0f 0a 33 33 06 91 ca 3d cc cc cd 51"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 00 19 00 03 d9 24 34 66 65 64 39 65 33 36 2d 37 38 32 37 2d 34 38 30 63 2d 62 31"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 01 19 33 32 2d 33 30 39 63 63 62 61 64 35 30 39 63 ac 44 47 20 2d 20 45 63 68 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 02 19 65 73 20 a3 30 2e 37 a0 a8 69 63 6f 6e 2e 70 6e 67 ca 42 f6 00 00 97 ae 62"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 03 19 69 61 73 2e 6e 6f 69 73 65 67 61 74 65 c3 92 00 91 ca 00 00 00 00 01 91 ca"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 04 19 3f 11 c8 11 a8 42 6c 75 65 43 6f 6d 70 c3 94 00 91 ca 3f 4a 58 a8 01 91 ca"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 05 19 3f 59 d6 d6 02 91 ca 3f 0e 56 04 03 91 ca 3f 80 00 00 ad 44 69 73 74 6f 72"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 06 19 74 69 6f 6e 54 53 39 c3 93 00 91 ca 3f 30 69 07 01 91 ca 3f 18 61 90 02 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 07 19 ca 3f 16 27 62 ad 53 77 69 74 63 68 41 78 65 4c 65 61 64 c3 95 00 91 ca 3f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 08 19 01 3e a3 01 91 ca 3f 01 04 92 02 91 ca 3e e1 de 0f 03 91 ca 3f 1a 64 4d 04"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 09 19 91 ca 3f 4a 5f 57 ac 43 68 6f 72 75 73 41 6e 61 6c 6f 67 c3 94 00 91 ca 3f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 0a 19 09 ea a2 01 91 ca 3d cb e2 a6 02 91 ca 3e c8 9b f2 03 91 ca 3f 12 5b 1c a9"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 0b 19 44 65 6c 61 79 4d 6f 6e 6f c3 95 00 91 ca 3e 4d a9 dd 01 91 ca 3e 01 d7 cf"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 8,
+      "dati": "10 0c 19 02 91 ca 3f 1a 24 b0 03 91 ca 3e 99 99 9a 04 91 ca 3f 80 00 00 ab 62 69 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 9,
+      "dati": "00 04 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 10,
+      "dati": "00 05 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 11,
+      "dati": "00 06 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 12,
+      "dati": "00 07 00"
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 4,
+      "sub": 1,
+      "seq": 13,
+      "dati": ""
+    },
+    {
+      "cmd": 4,
+      "sub": 56,
+      "seq": 14,
+      "dati": ""
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 00 19 01 00 d9 24 37 35 32 37 34 34 32 35 2d 66 66 36 35 2d 34 62 39 62 2d 62 35"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 01 19 30 62 2d 34 37 35 63 61 30 35 64 61 37 64 63 af 41 43 20 2d 20 4e 79 6c 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 02 19 6e 20 57 61 72 6d a3 30 2e 37 d9 28 53 74 65 76 65 20 56 61 69 27 73 20 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 03 19 6d 61 7a 69 6e 67 20 74 6f 6e 65 20 66 6f 72 20 74 68 65 20 73 6f 6e 67 2e"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 04 19 2e 2e a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61 73 2e 6e 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 05 19 69 73 65 67 61 74 65 c2 93 00 91 ca 3d 5b f4 88 01 91 ca 3b 4b af 96 02 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 06 19 ca 00 00 00 00 a8 4c 41 32 41 43 6f 6d 70 c2 93 00 91 ca 00 00 00 00 01 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 07 19 ca 3f 36 6f de 02 91 ca 3f 39 8c e6 a8 50 72 6f 43 6f 52 61 74 c2 93 00 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 08 19 ca 3f 65 2c 8c 01 91 ca 3e 90 d7 38 02 91 ca 3f 3b dc 7b a8 41 63 6f 75 73"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 09 19 74 69 63 c3 95 00 91 ca 3e e6 66 66 01 91 ca 3e b3 33 33 02 91 ca 3f 00 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 0a 19 00 03 91 ca 3f 19 99 9a 04 91 ca 3f 0c cc cd ac 43 68 6f 72 75 73 41 6e 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 0b 19 6c 6f 67 c3 94 00 91 ca 3e 4c cc cd 01 91 ca 3e 38 51 ec 02 91 ca 3e 6b 85"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 0c 19 1f 03 91 ca 3e f5 c2 8f a9 44 65 6c 61 79 4d 6f 6e 6f c2 95 00 91 ca 3e 85"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 0d 19 30 49 01 91 ca 3e 80 32 98 02 91 ca 3e 5b c7 2e 03 91 ca 3f 33 33 33 04 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 0e 19 ca 00 00 00 00 ab 62 69 61 73 2e 72 65 76 65 72 62 c3 98 00 91 ca 3e 99 99"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 0f 19 9a 01 91 ca 3e c2 8f 5c 02 91 ca 3e 8f 5c 29 03 91 ca 3e b8 51 ec 04 91 ca"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 10 19 3e ae 14 7b 05 91 ca 3f 26 66 66 06 91 ca 00 00 00 00 07 91 ca 3f 80 00 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 15,
+      "dati": "12 11 0b ca 46 1c 18 00 ca 3f 00 00 00 28"
+    },
+    {
+      "cmd": 4,
+      "sub": 56,
+      "seq": 16,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 17,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 17,
+      "dati": ""
+    },
+    {
+      "cmd": 5,
+      "sub": 1,
+      "seq": 17,
+      "dati": ""
+    },
+    {
+      "cmd": 4,
+      "sub": 56,
+      "seq": 18,
+      "dati": ""
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 00 19 01 00 d9 24 37 35 32 37 34 34 32 35 2d 66 66 36 35 2d 34 62 39 62 2d 62 35"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 01 19 30 62 2d 34 37 35 63 61 30 35 64 61 37 64 63 af 41 43 20 2d 20 4e 79 6c 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 02 19 6e 20 57 61 72 6d a3 30 2e 37 d9 28 53 74 65 76 65 20 56 61 69 27 73 20 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 03 19 6d 61 7a 69 6e 67 20 74 6f 6e 65 20 66 6f 72 20 74 68 65 20 73 6f 6e 67 2e"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 04 19 2e 2e a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61 73 2e 6e 6f"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 05 19 69 73 65 67 61 74 65 c2 93 00 91 ca 3d 5b f4 88 01 91 ca 3b 4b af 96 02 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 06 19 ca 00 00 00 00 a8 4c 41 32 41 43 6f 6d 70 c2 93 00 91 ca 00 00 00 00 01 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 07 19 ca 3f 36 6f de 02 91 ca 3f 39 8c e6 a8 50 72 6f 43 6f 52 61 74 c2 93 00 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 08 19 ca 3f 65 2c 8c 01 91 ca 3e 90 d7 38 02 91 ca 3f 3b dc 7b a8 41 63 6f 75 73"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 09 19 74 69 63 c3 95 00 91 ca 3e e6 66 66 01 91 ca 3e b3 33 33 02 91 ca 3f 00 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 0a 19 00 03 91 ca 3f 19 99 9a 04 91 ca 3f 0c cc cd ac 43 68 6f 72 75 73 41 6e 61"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 0b 19 6c 6f 67 c3 94 00 91 ca 3e 4c cc cd 01 91 ca 3e 38 51 ec 02 91 ca 3e 6b 85"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 0c 19 1f 03 91 ca 3e f5 c2 8f a9 44 65 6c 61 79 4d 6f 6e 6f c2 95 00 91 ca 3e 85"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 0d 19 30 49 01 91 ca 3e 80 32 98 02 91 ca 3e 5b c7 2e 03 91 ca 3f 33 33 33 04 91"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 0e 19 ca 00 00 00 00 ab 62 69 61 73 2e 72 65 76 65 72 62 c3 98 00 91 ca 3e 99 99"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 0f 19 9a 01 91 ca 3e c2 8f 5c 02 91 ca 3e 8f 5c 29 03 91 ca 3e b8 51 ec 04 91 ca"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 10 19 3e ae 14 7b 05 91 ca 3f 26 66 66 06 91 ca 00 00 00 00 07 91 ca 3f 80 00 00"
+    },
+    {
+      "cmd": 3,
+      "sub": 1,
+      "seq": 19,
+      "dati": "12 11 0b ca 46 1c 18 00 ca 3f 00 00 00 28"
+    }
+  ],
+  "righe": [
+    "[10:21:26] connesso a Spark NEO Control",
+    "[10:21:30] — nome",
+    "[10:21:30] TX 0x0211 seq=0x01 7B",
+    "[10:21:30] RX 0x0311 seq=0x1 11B: 09 a9 53 70 61 72 6b 20 4e 45 4f",
+    "[10:21:30] — firmware",
+    "[10:21:30] TX 0x022f seq=0x02 7B",
+    "[10:21:30] RX 0x032f seq=0x2 5B: ce 01 10 01 3c",
+    "[10:21:30] — preset corrente",
+    "[10:21:30] TX 0x0210 seq=0x03 7B",
+    "[10:21:30] RX 0x0310 seq=0x3 2B: 00 01",
+    "[10:21:30] — suono che sta suonando",
+    "[10:21:30] TX 0x0201 seq=0x04 10B",
+    "[10:21:30] RX 0x0301 seq=0x4 28B: 12 00 19 01 00 d9 24 37 35 32 37 34 34 32 35 2d 66 66 36 35 2d 34 62 39 62 2d 62 35",
+    "[10:21:30] RX 0x0301 seq=0x4 28B: 12 01 19 30 62 2d 34 37 35 63 61 30 35 64 61 37 64 63 af 41 43 20 2d 20 4e 79 6c 6f",
+    "[10:21:30] RX 0x0301 seq=0x4 28B: 12 02 19 6e 20 57 61 72 6d a3 30 2e 37 d9 28 53 74 65 76 65 20 56 61 69 27 73 20 61",
+    "[10:21:30] RX 0x0301 seq=0x4 28B: 12 03 19 6d 61 7a 69 6e 67 20 74 6f 6e 65 20 66 6f 72 20 74 68 65 20 73 6f 6e 67 2e",
+    "[10:21:30] RX 0x0301 seq=0x4 28B: 12 04 19 2e 2e a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61 73 2e 6e 6f",
+    "[10:21:30] RX 0x0301 seq=0x4 28B: 12 05 19 69 73 65 67 61 74 65 c2 93 00 91 ca 3d 5b f4 88 01 91 ca 3b 4b af 96 02 91",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 06 19 ca 00 00 00 00 a8 4c 41 32 41 43 6f 6d 70 c2 93 00 91 ca 00 00 00 00 01 91",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 07 19 ca 3f 36 6f de 02 91 ca 3f 39 8c e6 a8 50 72 6f 43 6f 52 61 74 c2 93 00 91",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 08 19 ca 3f 65 2c 8c 01 91 ca 3e 90 d7 38 02 91 ca 3f 3b dc 7b a8 41 63 6f 75 73",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 09 19 74 69 63 c3 95 00 91 ca 3e e6 66 66 01 91 ca 3e b3 33 33 02 91 ca 3f 00 00",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 0a 19 00 03 91 ca 3f 19 99 9a 04 91 ca 3f 0c cc cd ac 43 68 6f 72 75 73 41 6e 61",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 0b 19 6c 6f 67 c3 94 00 91 ca 3e 4c cc cd 01 91 ca 3e 38 51 ec 02 91 ca 3e 6b 85",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 0c 19 1f 03 91 ca 3e f5 c2 8f a9 44 65 6c 61 79 4d 6f 6e 6f c2 95 00 91 ca 3e 85",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 0d 19 30 49 01 91 ca 3e 80 32 98 02 91 ca 3e 5b c7 2e 03 91 ca 3f 33 33 33 04 91",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 0e 19 ca 00 00 00 00 ab 62 69 61 73 2e 72 65 76 65 72 62 c3 98 00 91 ca 3e 99 99",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 0f 19 9a 01 91 ca 3e c2 8f 5c 02 91 ca 3e 8f 5c 29 03 91 ca 3e b8 51 ec 04 91 ca",
+    "[10:21:31] RX 0x0301 seq=0x4 28B: 12 10 19 3e ae 14 7b 05 91 ca 3f 26 66 66 06 91 ca 00 00 00 00 07 91 ca 3f 80 00 00",
+    "[10:21:31] RX 0x0301 seq=0x4 14B: 12 11 0b ca 46 1c 18 00 ca 3f 00 00 00 28",
+    "[10:21:31] — slot 0",
+    "[10:21:31] TX 0x0201 seq=0x05 10B",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 00 19 00 00 d9 24 32 32 37 31 66 37 63 30 2d 63 66 38 66 2d 34 36 31 34 2d 62 63",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 01 19 37 65 2d 63 65 36 39 35 64 61 35 63 33 62 39 ab 43 6c 65 61 6e 20 54 75 62",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 02 19 65 20 a3 30 2e 37 a0 a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 03 19 61 73 2e 6e 6f 69 73 65 67 61 74 65 c3 93 00 91 ca 3e a3 f1 41 01 91 ca 3e",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 04 19 ca 7e fa 02 91 ca 3f 80 00 00 a8 4c 41 32 41 43 6f 6d 70 c3 93 00 91 ca 00",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 05 19 00 00 00 01 91 ca 3f 4b b9 8c 02 91 ca 3e 9c 84 b6 ad 44 69 73 74 6f 72 74",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 06 19 69 6f 6e 54 53 39 c2 93 00 91 ca 3f 11 eb 85 01 91 ca 3f 00 00 00 02 91 ca",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 07 19 3f 1e b8 52 ad 41 63 6f 75 73 74 69 63 41 6d 70 56 32 c3 95 00 91 ca 3f 3a",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 08 19 8c 15 01 91 ca 3f 31 0c b3 02 91 ca 3e 3b e7 6d 03 91 ca 3e d1 41 20 04 91",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 09 19 ca 3f 59 7a f1 a9 47 75 69 74 61 72 45 51 36 c3 97 00 91 ca 3f 14 25 16 01",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 0a 19 91 ca 3f 00 00 00 02 91 ca 3f 00 00 00 03 91 ca 3f 00 00 00 04 91 ca 3f 00",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 0b 19 00 00 05 91 ca 3f 00 00 00 06 91 ca 3f 00 00 00 aa 44 65 6c 61 79 52 65 32",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 0c 19 30 31 c2 95 00 91 ca 3e 63 e7 16 01 91 ca 3e 4e 98 17 02 91 ca 3e 87 55 6c",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 0d 19 03 91 ca 3e b9 55 1a 04 91 ca 3f 80 00 00 ab 62 69 61 73 2e 72 65 76 65 72",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 0e 19 62 c3 98 00 91 ca 3e ec 3c 9f 01 91 ca 3f 77 24 74 02 91 ca 3e 36 45 a2 03",
+    "[10:21:31] RX 0x0301 seq=0x5 28B: 11 0f 19 91 ca 3e 18 79 3e 04 91 ca 3f 2b 7e 91 05 91 ca 3d 89 d4 95 06 91 ca 3e 99",
+    "[10:21:31] RX 0x0301 seq=0x5 23B: 11 10 14 99 9a 07 91 ca 3f 80 00 00 ca c1 35 e1 52 ca 3f 00 00 00 86",
+    "[10:21:32] — slot 1",
+    "[10:21:32] TX 0x0201 seq=0x06 10B",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 00 19 00 01 d9 24 37 35 32 37 34 34 32 35 2d 66 66 36 35 2d 34 62 39 62 2d 62 35",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 01 19 30 62 2d 34 37 35 63 61 30 35 64 61 37 64 63 af 41 43 20 2d 20 4e 79 6c 6f",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 02 19 6e 20 57 61 72 6d a3 30 2e 37 d9 28 53 74 65 76 65 20 56 61 69 27 73 20 61",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 03 19 6d 61 7a 69 6e 67 20 74 6f 6e 65 20 66 6f 72 20 74 68 65 20 73 6f 6e 67 2e",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 04 19 2e 2e a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61 73 2e 6e 6f",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 05 19 69 73 65 67 61 74 65 c2 92 00 91 ca 3d 5b f4 88 01 91 ca 3b 4b af 96 a8 4c",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 06 19 41 32 41 43 6f 6d 70 c2 93 00 91 ca 00 00 00 00 01 91 ca 3f 36 6f de 02 91",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 07 19 ca 3f 39 8c e6 a8 50 72 6f 43 6f 52 61 74 c2 93 00 91 ca 3f 65 2c 8c 01 91",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 08 19 ca 3e 90 d7 38 02 91 ca 3f 3b dc 7b a8 41 63 6f 75 73 74 69 63 c3 95 00 91",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 09 19 ca 3e e6 66 66 01 91 ca 3e b3 33 33 02 91 ca 3f 00 00 00 03 91 ca 3f 19 99",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 0a 19 9a 04 91 ca 3f 0c cc cd ac 43 68 6f 72 75 73 41 6e 61 6c 6f 67 c3 94 00 91",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 0b 19 ca 3e 4c cc cd 01 91 ca 3e 38 51 ec 02 91 ca 3e 6b 85 1f 03 91 ca 3e f5 c2",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 0c 19 8f a9 44 65 6c 61 79 4d 6f 6e 6f c2 95 00 91 ca 3e 85 30 49 01 91 ca 3e 80",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 0d 19 32 98 02 91 ca 3e 5b c7 2e 03 91 ca 3f 33 33 33 04 91 ca 00 00 00 00 ab 62",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 0e 19 69 61 73 2e 72 65 76 65 72 62 c3 97 00 91 ca 3e 99 99 9a 01 91 ca 3e c2 8f",
+    "[10:21:32] RX 0x0301 seq=0x6 28B: 11 0f 19 5c 02 91 ca 3e 8f 5c 29 03 91 ca 3e b8 51 ec 04 91 ca 3e ae 14 7b 05 91 ca",
+    "[10:21:32] RX 0x0301 seq=0x6 15B: 11 10 0c 3f 26 66 66 06 91 ca 00 00 00 00 5b",
+    "[10:21:32] — slot 2",
+    "[10:21:32] TX 0x0201 seq=0x07 10B",
+    "[10:21:32] RX 0x0301 seq=0x7 28B: 10 00 19 00 02 d9 24 35 30 38 63 36 30 30 36 2d 63 65 32 32 2d 34 62 65 63 2d 61 34",
+    "[10:21:32] RX 0x0301 seq=0x7 28B: 10 01 19 34 61 2d 64 35 32 65 31 34 31 62 34 32 64 30 aa 42 4d 20 2d 20 42 69 6a 6f",
+    "[10:21:32] RX 0x0301 seq=0x7 28B: 10 02 19 75 a3 30 2e 37 a0 a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61",
+    "[10:21:32] RX 0x0301 seq=0x7 28B: 10 03 19 73 2e 6e 6f 69 73 65 67 61 74 65 c3 93 00 91 ca 3d 1d b2 2d 01 91 ca 3e 66",
+    "[10:21:32] RX 0x0301 seq=0x7 28B: 10 04 19 08 cd 02 91 ca 00 00 00 00 a8 4c 41 32 41 43 6f 6d 70 c3 93 00 91 ca 00 00",
+    "[10:21:32] RX 0x0301 seq=0x7 28B: 10 05 19 00 00 01 91 ca 3f 5a 36 77 02 91 ca 3e bf 03 4b ad 44 69 73 74 6f 72 74 69",
+    "[10:21:32] RX 0x0301 seq=0x7 28B: 10 06 19 6f 6e 54 53 39 c3 94 00 91 ca 3f 00 4e a5 01 91 ca 3f 1a 8c 15 02 91 ca 3f",
+    "[10:21:33] RX 0x0301 seq=0x7 28B: 10 07 19 34 b5 dd 03 91 ca 00 00 00 00 a8 41 43 20 42 6f 6f 73 74 c3 95 00 91 ca 3f",
+    "[10:21:33] RX 0x0301 seq=0x7 28B: 10 08 19 0f b7 e9 01 91 ca 3f 32 b6 ae 02 91 ca 3f 25 d6 39 03 91 ca 3e e7 ef 9e 04",
+    "[10:21:33] RX 0x0301 seq=0x7 28B: 10 09 19 91 ca 3e b8 51 ec ac 43 68 6f 72 75 73 41 6e 61 6c 6f 67 c3 94 00 91 ca 3e",
+    "[10:21:33] RX 0x0301 seq=0x7 28B: 10 0a 19 d9 30 be 01 91 ca 3d 29 fb e7 02 91 ca 3e 81 06 25 03 91 ca 3f 11 5b 1d a9",
+    "[10:21:33] RX 0x0301 seq=0x7 28B: 10 0b 19 44 65 6c 61 79 4d 6f 6e 6f c3 95 00 91 ca 3e c3 78 4e 01 91 ca 3e cb ee a5",
+    "[10:21:33] RX 0x0301 seq=0x7 28B: 10 0c 19 02 91 ca 3f 09 d8 9e 03 91 ca 3e cc cc cd 04 91 ca 3f 80 00 00 ab 62 69 61",
+    "[10:21:33] RX 0x0301 seq=0x7 28B: 10 0d 19 73 2e 72 65 76 65 72 62 c3 97 00 91 ca 3e 86 c2 27 01 91 ca 3e 19 99 99 02",
+    "[10:21:33] RX 0x0301 seq=0x7 28B: 10 0e 19 91 ca 3f 00 00 00 03 91 ca 3f 1f 15 f2 04 91 ca 3e bd 64 28 05 91 ca 3e b3",
+    "[10:21:33] RX 0x0301 seq=0x7 13B: 10 0f 0a 33 33 06 91 ca 3d cc cc cd 51",
+    "[10:21:33] — slot 3",
+    "[10:21:33] TX 0x0201 seq=0x08 10B",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 00 19 00 03 d9 24 34 66 65 64 39 65 33 36 2d 37 38 32 37 2d 34 38 30 63 2d 62 31",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 01 19 33 32 2d 33 30 39 63 63 62 61 64 35 30 39 63 ac 44 47 20 2d 20 45 63 68 6f",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 02 19 65 73 20 a3 30 2e 37 a0 a8 69 63 6f 6e 2e 70 6e 67 ca 42 f6 00 00 97 ae 62",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 03 19 69 61 73 2e 6e 6f 69 73 65 67 61 74 65 c3 92 00 91 ca 00 00 00 00 01 91 ca",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 04 19 3f 11 c8 11 a8 42 6c 75 65 43 6f 6d 70 c3 94 00 91 ca 3f 4a 58 a8 01 91 ca",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 05 19 3f 59 d6 d6 02 91 ca 3f 0e 56 04 03 91 ca 3f 80 00 00 ad 44 69 73 74 6f 72",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 06 19 74 69 6f 6e 54 53 39 c3 93 00 91 ca 3f 30 69 07 01 91 ca 3f 18 61 90 02 91",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 07 19 ca 3f 16 27 62 ad 53 77 69 74 63 68 41 78 65 4c 65 61 64 c3 95 00 91 ca 3f",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 08 19 01 3e a3 01 91 ca 3f 01 04 92 02 91 ca 3e e1 de 0f 03 91 ca 3f 1a 64 4d 04",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 09 19 91 ca 3f 4a 5f 57 ac 43 68 6f 72 75 73 41 6e 61 6c 6f 67 c3 94 00 91 ca 3f",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 0a 19 09 ea a2 01 91 ca 3d cb e2 a6 02 91 ca 3e c8 9b f2 03 91 ca 3f 12 5b 1c a9",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 0b 19 44 65 6c 61 79 4d 6f 6e 6f c3 95 00 91 ca 3e 4d a9 dd 01 91 ca 3e 01 d7 cf",
+    "[10:21:33] RX 0x0301 seq=0x8 28B: 10 0c 19 02 91 ca 3f 1a 24 b0 03 91 ca 3e 99 99 9a 04 91 ca 3f 80 00 00 ab 62 69 61",
+    "[10:21:37] preset 3: nessuna risposta completa (13 chunk buoni, 13 messaggi arrivati in tutto)",
+    "[10:21:37] preset 3: ne aspettavo 16, mancano i pezzi 13 14 15 (dopo 4398 ms)",
+    "[10:21:38] — slot 4",
+    "[10:21:38] TX 0x0201 seq=0x09 10B",
+    "[10:21:38] RX 0x0301 seq=0x9 3B: 00 04 00",
+    "[10:21:42] preset 4: nessuna risposta completa (1 chunk buoni, 1 messaggi arrivati in tutto)",
+    "[10:21:42] preset 4: ne aspettavo 0, mancano i pezzi — (dopo 4206 ms)",
+    "[10:21:42] — slot 5",
+    "[10:21:42] TX 0x0201 seq=0x0a 10B",
+    "[10:21:42] RX 0x0301 seq=0xa 3B: 00 05 00",
+    "[10:21:46] preset 5: nessuna risposta completa (1 chunk buoni, 1 messaggi arrivati in tutto)",
+    "[10:21:46] preset 5: ne aspettavo 0, mancano i pezzi — (dopo 4176 ms)",
+    "[10:21:46] — slot 6",
+    "[10:21:46] TX 0x0201 seq=0x0b 10B",
+    "[10:21:47] RX 0x0301 seq=0xb 3B: 00 06 00",
+    "[10:21:51] preset 6: nessuna risposta completa (1 chunk buoni, 1 messaggi arrivati in tutto)",
+    "[10:21:51] preset 6: ne aspettavo 0, mancano i pezzi — (dopo 4236 ms)",
+    "[10:21:51] — slot 7",
+    "[10:21:51] TX 0x0201 seq=0x0c 10B",
+    "[10:21:51] RX 0x0301 seq=0xc 3B: 00 07 00",
+    "[10:21:55] preset 7: nessuna risposta completa (1 chunk buoni, 1 messaggi arrivati in tutto)",
+    "[10:21:55] preset 7: ne aspettavo 0, mancano i pezzi — (dopo 4174 ms)",
+    "[10:21:55] messaggi arrivati in tutto: 88",
+    "[10:22:07] — prova A: carico «AC - Nylon Warm»",
+    "[10:22:07] invio \"AC - Nylon Warm\" → bank 0 numero 127: 412 byte in 17 chunk, seq 0x0d per tutti",
+    "[10:22:07] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:08] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:08] TX 0x0101 seq=0x0d 39B",
+    "[10:22:09] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:09] TX 0x0101 seq=0x0d 39B",
+    "[10:22:09] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:09] TX 0x0101 seq=0x0d 39B",
+    "[10:22:09] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:09] TX 0x0101 seq=0x0d 39B",
+    "[10:22:09] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:09] TX 0x0101 seq=0x0d 39B",
+    "[10:22:09] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:09] TX 0x0101 seq=0x0d 39B",
+    "[10:22:09] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:09] TX 0x0101 seq=0x0d 39B",
+    "[10:22:09] RX 0x0501 seq=0xd 0B: ",
+    "[10:22:09] TX 0x0101 seq=0x0d 25B",
+    "[10:22:09] RX 0x0401 seq=0xd 0B: ",
+    "[10:22:09] TX 0x0138 seq=0x0e 10B",
+    "[10:22:09] passato al preset software",
+    "[10:22:09] RX 0x0438 seq=0xe 0B: ",
+    "[10:22:10] TX 0x0201 seq=0x0f 10B",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 00 19 01 00 d9 24 37 35 32 37 34 34 32 35 2d 66 66 36 35 2d 34 62 39 62 2d 62 35",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 01 19 30 62 2d 34 37 35 63 61 30 35 64 61 37 64 63 af 41 43 20 2d 20 4e 79 6c 6f",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 02 19 6e 20 57 61 72 6d a3 30 2e 37 d9 28 53 74 65 76 65 20 56 61 69 27 73 20 61",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 03 19 6d 61 7a 69 6e 67 20 74 6f 6e 65 20 66 6f 72 20 74 68 65 20 73 6f 6e 67 2e",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 04 19 2e 2e a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61 73 2e 6e 6f",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 05 19 69 73 65 67 61 74 65 c2 93 00 91 ca 3d 5b f4 88 01 91 ca 3b 4b af 96 02 91",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 06 19 ca 00 00 00 00 a8 4c 41 32 41 43 6f 6d 70 c2 93 00 91 ca 00 00 00 00 01 91",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 07 19 ca 3f 36 6f de 02 91 ca 3f 39 8c e6 a8 50 72 6f 43 6f 52 61 74 c2 93 00 91",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 08 19 ca 3f 65 2c 8c 01 91 ca 3e 90 d7 38 02 91 ca 3f 3b dc 7b a8 41 63 6f 75 73",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 09 19 74 69 63 c3 95 00 91 ca 3e e6 66 66 01 91 ca 3e b3 33 33 02 91 ca 3f 00 00",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 0a 19 00 03 91 ca 3f 19 99 9a 04 91 ca 3f 0c cc cd ac 43 68 6f 72 75 73 41 6e 61",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 0b 19 6c 6f 67 c3 94 00 91 ca 3e 4c cc cd 01 91 ca 3e 38 51 ec 02 91 ca 3e 6b 85",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 0c 19 1f 03 91 ca 3e f5 c2 8f a9 44 65 6c 61 79 4d 6f 6e 6f c2 95 00 91 ca 3e 85",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 0d 19 30 49 01 91 ca 3e 80 32 98 02 91 ca 3e 5b c7 2e 03 91 ca 3f 33 33 33 04 91",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 0e 19 ca 00 00 00 00 ab 62 69 61 73 2e 72 65 76 65 72 62 c3 98 00 91 ca 3e 99 99",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 0f 19 9a 01 91 ca 3e c2 8f 5c 02 91 ca 3e 8f 5c 29 03 91 ca 3e b8 51 ec 04 91 ca",
+    "[10:22:10] RX 0x0301 seq=0xf 28B: 12 10 19 3e ae 14 7b 05 91 ca 3f 26 66 66 06 91 ca 00 00 00 00 07 91 ca 3f 80 00 00",
+    "[10:22:10] RX 0x0301 seq=0xf 14B: 12 11 0b ca 46 1c 18 00 ca 3f 00 00 00 28",
+    "[10:22:10] prova A: 1859 ms, 17/17 ack, riletto «AC - Nylon Warm», 36 messaggi, ancora connesso",
+    "[10:22:17] TX 0x0138 seq=0x10 10B",
+    "[10:22:17] tornato ad A1",
+    "[10:22:17] RX 0x0438 seq=0x10 0B: ",
+    "[10:22:24] — prova C: carico «AC - Nylon Warm»",
+    "[10:22:24] invio \"AC - Nylon Warm\" → bank 0 numero 127: 412 byte in 4 chunk, seq 0x11 per tutti",
+    "[10:22:24] TX 0x0101 seq=0x11 157B in 8 scritture da 20",
+    "[10:22:24] RX 0x0501 seq=0x11 0B: ",
+    "[10:22:24] TX 0x0101 seq=0x11 157B in 8 scritture da 20",
+    "[10:22:24] RX 0x0501 seq=0x11 0B: ",
+    "[10:22:24] TX 0x0101 seq=0x11 157B in 8 scritture da 20",
+    "[10:22:24] RX 0x0501 seq=0x11 0B: ",
+    "[10:22:24] TX 0x0101 seq=0x11 43B in 3 scritture da 20",
+    "[10:22:25] inviati tutti i chunk, ma solo 3 confermati su 4",
+    "[10:22:25] TX 0x0138 seq=0x12 10B",
+    "[10:22:25] passato al preset software",
+    "[10:22:25] RX 0x0438 seq=0x12 0B: ",
+    "[10:22:26] TX 0x0201 seq=0x13 10B",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 00 19 01 00 d9 24 37 35 32 37 34 34 32 35 2d 66 66 36 35 2d 34 62 39 62 2d 62 35",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 01 19 30 62 2d 34 37 35 63 61 30 35 64 61 37 64 63 af 41 43 20 2d 20 4e 79 6c 6f",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 02 19 6e 20 57 61 72 6d a3 30 2e 37 d9 28 53 74 65 76 65 20 56 61 69 27 73 20 61",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 03 19 6d 61 7a 69 6e 67 20 74 6f 6e 65 20 66 6f 72 20 74 68 65 20 73 6f 6e 67 2e",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 04 19 2e 2e a8 69 63 6f 6e 2e 70 6e 67 ca 42 f0 00 00 97 ae 62 69 61 73 2e 6e 6f",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 05 19 69 73 65 67 61 74 65 c2 93 00 91 ca 3d 5b f4 88 01 91 ca 3b 4b af 96 02 91",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 06 19 ca 00 00 00 00 a8 4c 41 32 41 43 6f 6d 70 c2 93 00 91 ca 00 00 00 00 01 91",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 07 19 ca 3f 36 6f de 02 91 ca 3f 39 8c e6 a8 50 72 6f 43 6f 52 61 74 c2 93 00 91",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 08 19 ca 3f 65 2c 8c 01 91 ca 3e 90 d7 38 02 91 ca 3f 3b dc 7b a8 41 63 6f 75 73",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 09 19 74 69 63 c3 95 00 91 ca 3e e6 66 66 01 91 ca 3e b3 33 33 02 91 ca 3f 00 00",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 0a 19 00 03 91 ca 3f 19 99 9a 04 91 ca 3f 0c cc cd ac 43 68 6f 72 75 73 41 6e 61",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 0b 19 6c 6f 67 c3 94 00 91 ca 3e 4c cc cd 01 91 ca 3e 38 51 ec 02 91 ca 3e 6b 85",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 0c 19 1f 03 91 ca 3e f5 c2 8f a9 44 65 6c 61 79 4d 6f 6e 6f c2 95 00 91 ca 3e 85",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 0d 19 30 49 01 91 ca 3e 80 32 98 02 91 ca 3e 5b c7 2e 03 91 ca 3f 33 33 33 04 91",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 0e 19 ca 00 00 00 00 ab 62 69 61 73 2e 72 65 76 65 72 62 c3 98 00 91 ca 3e 99 99",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 0f 19 9a 01 91 ca 3e c2 8f 5c 02 91 ca 3e 8f 5c 29 03 91 ca 3e b8 51 ec 04 91 ca",
+    "[10:22:26] RX 0x0301 seq=0x13 28B: 12 10 19 3e ae 14 7b 05 91 ca 3f 26 66 66 06 91 ca 00 00 00 00 07 91 ca 3f 80 00 00",
+    "[10:22:26] RX 0x0301 seq=0x13 14B: 12 11 0b ca 46 1c 18 00 ca 3f 00 00 00 28",
+    "[10:22:26] prova C: 1346 ms, 3/4 ack, riletto «AC - Nylon Warm», 22 messaggi, ancora connesso"
+  ],
+  "prove": [
+    {
+      "prova": "A",
+      "preset": "AC - Nylon Warm",
+      "ms": 1859,
+      "inviati": 17,
+      "chunk": 17,
+      "ack": 17,
+      "errore": null,
+      "riletto": "AC - Nylon Warm",
+      "connesso": true,
+      "messaggi": 36
+    },
+    {
+      "prova": "C",
+      "preset": "AC - Nylon Warm",
+      "ms": 1346,
+      "inviati": 4,
+      "chunk": 4,
+      "ack": 3,
+      "errore": null,
+      "riletto": "AC - Nylon Warm",
+      "connesso": true,
+      "messaggi": 22
+    }
+  ]
+}
