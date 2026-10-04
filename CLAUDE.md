@@ -293,10 +293,15 @@ suona.
   suona selezionando lo slot** con `0x0138`: istantaneo, non scrive niente. Spark 2 o NEO li
   sceglie l'utente coi tasti banco quando l'ampli non c'è (sinistro Spark 2, destro NEO;
   `/ampli.txt`); `preset_frames.h` non è più incluso. **Verificato sul pedale col NEO il 4 ottobre (1.3)**:
-  si collega, l'Amp Preset cambia subito; **i banchi dall'app sul NEO sono lenti**, da misurare. **Banchi da fuori**: `frameAccettabile()` in `banchi.h` accetta solo
+  si collega, l'Amp Preset cambia subito. I banchi sul NEO: vedi l'eccezione qui sotto. **Banchi da fuori**: `frameAccettabile()` in `banchi.h` accetta solo
   frame `0x0101` verso `0x7f`, e **il ponte BLE parte chiuso** — si apre coi due tasti banco
   insieme per 1,5 s, due minuti alla volta (`docs/sicurezza.md`).
 - **L'app preserializza**: il firmware patcha solo il seq (indice 2; il checksum non lo copre).
+  **Eccezione dal 4 ottobre 2026 (1.4, scelta dell'utente, «strada A»): sul NEO il pedale
+  ricompone il payload dai frame e lo ridivide a pezzi da 128** (`mandaPresetNeo`): il NEO
+  costa ~40 ms a pezzo più ~1 ms a byte, e così un preset passa da 1,0–1,15 s a 0,5–0,77 s.
+  **Mai sullo Spark 2: i 128 lo disconnettono.** I banchi restano uguali per i due ampli. **Verificato
+  sul pedale il 4 ottobre (1.4): NEO e Spark 2, banchi e Amp Preset.**
 - **Un padrone alla volta**: con l'ampli connesso al pedale il browser non lo trova. **Se un
   footswitch non fa niente, primo sospetto: l'app ancora collegata al pedale.**
 - **Mai operazioni BLE dentro un callback BLE** (NimBLE si blocca): bandiera, e lavoro nel

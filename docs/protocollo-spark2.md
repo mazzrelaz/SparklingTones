@@ -559,3 +559,8 @@ L'utente ha uno Spark NEO (cuffie con l'ampli dentro). Misurato con `tools/neo-s
   l'ack dell'ultimo pezzo che non è arrivato (3/4): il trasferimento vero ~650 ms contro 1860.
   Cattura `captures/2026-10-04-neo-sonda-pezzi-grandi.json`. **Sullo Spark 2 i 128
   disconnettono**: un banco a pezzi grandi vale solo per il NEO.
+- **Dal pedale, stessi preset** (`Pink Floyd`): pezzi da 25 → 1036/1147 ms (15/17 pezzi), pezzi
+  da 128 → 506/590 ms (3/4), premendo i footswitch 635–766 ms. Ogni pezzo grande ~170 ms
+  contro 65–70: **~40 ms a pezzo + ~1 ms a byte**, quindi sotto il mezzo secondo non si scende
+  (un preset è ~420 byte). L'utente: «molto meglio, anche se non siamo ai livelli dello
+  Spark». Scelta la strada A: il pedale ridivide da sé sul NEO (firmware 1.4).

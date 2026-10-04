@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.3";   // 1.1: MIDI; 1.2: anche via Bluetooth; 1.3: Spark 2 e NEO
+static const char* VERSIONE = "1.4";   // 1.1: MIDI; 1.2: Bluetooth; 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -991,17 +991,15 @@ static void leggiAmpli() {
   silenzioso = false;
 }
 
-/* La prova del 4 ottobre 2026: col NEO un giro di andata e ritorno costa
- * ~100 ms anche a intervallo 7,5 ms (lo Spark 2 ne fa 26), quindi aspettare
- * l'ack dopo ognuno dei 16 pezzi fa 1,7 s a preset. Con `pausaSenzaAck` > 0 i
- * pezzi partono di fila, distanziati di quei ms, e gli ack si contano alla
- * fine. Si sceglie dal seriale con 'z'; 0 = come sempre. */
-static uint8_t pausaSenzaAck = 0;
+static void mandaPresetNeo(uint8_t n);
 
 static void mandaPreset(uint8_t n) {
   if (!chScrittura) { Serial.println(F("non connesso")); return; }
   if (n >= quantiPosti()) return;
   if (!postoPieno(n)) { Serial.printf("[%u] posto vuoto\n", n + 1); return; }
+
+  // Sul NEO i banchi vanno a pezzi grandi: meta' del tempo (vedi mandaPresetNeo).
+  if (bancoAttivo.valido && ampliScelto == AMPLI_NEO) { mandaPresetNeo(n); return; }
 
   /* L'Amp Preset: si seleziona lo slot, e basta. Istantaneo, e sull'ampli non
    * si scrive niente. */
@@ -1037,29 +1035,11 @@ static void mandaPreset(uint8_t n) {
     const uint32_t prima = rxTotali;
     chScrittura->writeValue(frame, len, false);
     const uint32_t t = millis();
-    if (pausaSenzaAck) {
-      while (millis() - t < pausaSenzaAck) { leggiTasto(); delay(1); }
-      continue;
-    }
     while (rxTotali == prima && millis() - t < 500) { leggiTasto(); delay(1); }
     // Un ack mancante non e' motivo di fermarsi: anche il firmware dell'ampli
     // si sblocca da solo dopo mezzo secondo, e interrompersi lascerebbe il
     // preset scritto a meta'.
     if (rxTotali > prima) ack++; else persi++;
-  }
-  if (pausaSenzaAck) {
-    // Si aspettano gli ack arrivati in ritardo: il 0x0138 deve partire a
-    // buffer finito. Fino a quanti sono i pezzi, o 600 ms di silenzio.
-    const uint32_t daContare = rxTotali;
-    uint32_t visti = 0;
-    uint32_t t = millis();
-    while (millis() - t < 600) {
-      if (rxTotali != daContare + visti) { visti = rxTotali - daContare; t = millis(); }
-      if (visti >= quanti) break;
-      leggiTasto(); delay(1);
-    }
-    ack = rxTotali - daContare;          // contati dall'ultimo pezzo: una stima per difetto
-    persi = 0;
   }
   silenzioso = false;
   inTrasferimento = false;
@@ -1074,6 +1054,83 @@ static void mandaPreset(uint8_t n) {
   // Da qui dipendono i LED: il suono che si sente, da che meta' e da che banco
   // viene. Il nome si **copia**, perche' cambiando banco quello di prima non
   // esiste piu' e la riga ♪ resterebbe senza niente da dire.
+  metaSuona = (uint8_t)(n / 4);
+  slotSuona = slotBanco;
+  snprintf(nomeSuona, sizeof(nomeSuona), "%s", nomePosto(n));
+  aggiornaLed();
+  schermoSporco = true;
+}
+
+/* --- Sul NEO: lo stesso preset a pezzi da 128 ------------------------------
+ *
+ * Misurato il 4 ottobre 2026 col NEO: ogni pezzo costa ~40 ms piu' ~1 ms per
+ * byte, qualunque sia l'intervallo di connessione (il giro e' ~100 ms anche a
+ * 7,5 ms; lo Spark 2 ne fa 26). Coi pezzi da 25 dell'app un preset sono 15-17
+ * pezzi e 1,0-1,15 s; a pezzi da 128, come fa Ignitron col NEO, 3-4 pezzi e
+ * 0,5-0,77 s premendo i footswitch, tutti confermati. Mandarli di fila senza
+ * aspettare l'ack invece peggiorava (1,3-1,4 s).
+ *
+ * **Sullo Spark 2 i pezzi da 128 lo disconnettono**: questa strada e' solo
+ * per il NEO. I banchi restano quelli dell'app, uguali per tutti e due gli
+ * ampli: qui il firmware ricompone il payload dai frame e lo ridivide, senza
+ * toccare il preset (deciso dall'utente, strada A, il 4 ottobre 2026). */
+static void mandaPresetNeo(uint8_t n) {
+  if (!chScrittura) { Serial.println(F("non connesso")); return; }
+  if (ampliScelto != AMPLI_NEO || !bancoAttivo.valido || n >= quantiPosti() || !postoPieno(n)) return;
+
+  static uint8_t payload[1024];
+  size_t np = 0;
+  for (uint8_t i = 0; i < chunkDelPosto(n); i++) {
+    uint8_t len = 0;
+    const uint8_t* f = frameDelPosto(n, i, len);
+    uint8_t dati[64];
+    const size_t nd = spacchetta(f + 6, len - 7, dati, sizeof(dati));
+    if (nd < 3) { Serial.println(F("frame illeggibile")); return; }
+    uint8_t utili = dati[2];
+    if (utili > nd - 3) utili = (uint8_t)(nd - 3);
+    if (np + utili > sizeof(payload)) { Serial.println(F("preset troppo grande")); return; }
+    memcpy(payload + np, dati + 3, utili);
+    np += utili;
+  }
+
+  const uint8_t GRANDE = 128;
+  const uint8_t quanti = (uint8_t)((np + GRANDE - 1) / GRANDE);
+  const uint8_t mio = seq;
+  if (++seq > 0x3e) seq = 0x01;
+  inTrasferimento = true;
+  silenzioso = true;
+  const uint32_t t0 = millis();
+  uint32_t ack = 0;
+  for (uint8_t c = 0; c < quanti; c++) {
+    const size_t da = (size_t)c * GRANDE;
+    const uint8_t pezzo = (uint8_t)((np - da) < GRANDE ? (np - da) : GRANDE);
+    uint8_t dati[3 + 128];
+    dati[0] = quanti; dati[1] = c; dati[2] = pezzo;
+    memcpy(dati + 3, payload + da, pezzo);
+    uint8_t packed[160];
+    const size_t nk = impacchetta(dati, 3 + pezzo, packed);
+    uint8_t frame[200];
+    size_t out = 0;
+    uint8_t checksum = 0;
+    for (size_t k = 0; k < nk; k++) checksum ^= packed[k];
+    frame[out++] = 0xf0; frame[out++] = 0x01; frame[out++] = mio; frame[out++] = checksum;
+    frame[out++] = 0x01; frame[out++] = 0x01;
+    memcpy(frame + out, packed, nk); out += nk;
+    frame[out++] = 0xf7;
+
+    const uint32_t prima = rxTotali;
+    for (size_t k = 0; k < out; k += 20)          // write da 20: l'MTU non conta
+      chScrittura->writeValue(frame + k, (out - k) < 20 ? (out - k) : 20, false);
+    const uint32_t t = millis();
+    while (rxTotali == prima && millis() - t < 500) { leggiTasto(); delay(1); }
+    if (rxTotali > prima) ack++;
+  }
+  silenzioso = false;
+  inTrasferimento = false;
+  cambiaPreset(0x7f);
+  Serial.printf("[%u] %s — %lu ms, %lu/%u ack (NEO, pezzi da 128)\n",
+                n + 1, nomePosto(n), millis() - t0, ack, quanti);
+  corrente = n;
   metaSuona = (uint8_t)(n / 4);
   slotSuona = slotBanco;
   snprintf(nomeSuona, sizeof(nomeSuona), "%s", nomePosto(n));
@@ -1402,7 +1459,6 @@ static void elenco() {
     "  v     chiedi intervallo 7,5 ms\n"
     "  w     chiedi intervallo 15 ms\n"
     "  s     chiedi intervallo lento (30 ms)\n"
-    "  z     modo di invio: aspetta l'ack / 30, 15, 5 ms senza aspettare\n"
     "  x     molla l'ampli (cosi' l'app nel browser lo trova)\n"
     "  r     riprendi l'ampli\n"));
 }
@@ -2020,11 +2076,6 @@ void loop() {
       // connesso non si annuncia, quindi si leggerebbe «nessuno Spark».
       if (chScrittura) Serial.println(F("gia' collegato all'ampli"));
       else { momentoSgancio = millis(); ultimoTentativo = 0; avviaScansione(); }
-    }
-    else if (c == 'z') {
-      pausaSenzaAck = pausaSenzaAck == 0 ? 30 : pausaSenzaAck == 30 ? 15 : pausaSenzaAck == 15 ? 5 : 0;
-      if (pausaSenzaAck) Serial.printf("pezzi di fila, %u ms fra uno e l'altro, senza aspettare l'ack\n", pausaSenzaAck);
-      else Serial.println(F("pezzi uno alla volta, aspettando l'ack (come sempre)"));
     }
     else if (c == 'x') {
       sganciato = true;
