@@ -376,7 +376,7 @@ ampli finto):
    l'ampli (il primo «niente» non si è ripetuto; forse premuto durante la lettura).
    **Il NEO certi giorni manda lento**: 13 pezzi su 16 in 4 s, e la lettura si arrendeva
    sulla coda. Dalla v81 il tempo di `_readPresetVia` è il **silenzio** (riparte a ogni
-   pezzo, tetto a 4×); **da verificare sul NEO** che legga tutti e quattro. Ancora da provare:
+   pezzo, tetto a 4×): **verificato sul NEO il 4 ottobre**, letti tutti e quattro. Ancora da provare:
    «Invia a preset HW» sul NEO, Hendrix, il pedale (cerca chiunque annunci `0xFFC0`: col
    NEO acceso e lo Spark 2 spento dovrebbe agganciarlo).
 
