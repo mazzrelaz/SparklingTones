@@ -2302,9 +2302,18 @@ function dettaglio(record, slot) {
       // Sul NEO l'utente ha visto «niente» (2 ottobre 2026), mentre lo stesso
       // `0x0138` dai pulsantoni live funziona: si chiede all'ampli quale slot
       // ha davanti, e la riga dice la sua risposta invece della nostra intenzione.
-      const ack = await spark.sendAndAwaitAck(Spark.commands.changePreset(slot), 1500);
-      const msg = await spark.request(Spark.commands.getCurrentPreset(),
-        m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x10, 1500);
+      // La prima volta la riga non è comparsa affatto (4 ottobre): da qui si
+      // vede se il tocco arriva, e se qualcosa si pianta o salta, dove.
+      logProgress(tr('mando {0} all\'ampli…', nomeSlot(slot)));
+      let ack, msg;
+      try {
+        ack = await spark.sendAndAwaitAck(Spark.commands.changePreset(slot), 1500);
+        logProgress(tr('chiedo all\'ampli cosa ha davanti…'));
+        msg = await spark.request(Spark.commands.getCurrentPreset(),
+          m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x10, 1500);
+      } catch (err) {
+        return logLine(tr('{0}: errore — {1}', nomeSlot(slot), err.message));
+      }
       const davanti = msg ? msg.data[msg.data.length - 1] : null;
       logLine(davanti === slot
         ? tr`selezionato ${nomeSlot(slot)}`

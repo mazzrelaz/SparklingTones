@@ -359,6 +359,16 @@ window.SparkTransport = (function () {
         const arrivati = this.rxTotali - rxPrima;
         this.onLog(tr('{0}: nessuna risposta completa ({1} chunk buoni, ' +
                    '{2} messaggi arrivati in tutto)', label, chunks.length, arrivati));
+        // Quali pezzi mancano: un buco in mezzo è una notifica persa per
+        // strada, la coda mancante è l'ampli che smette di mandare.
+        if (chunks.length) {
+          const asm = Spark.assemblePresetPayload(chunks);
+          const visti = new Set(chunks.map(m => m.data[1]));
+          const mancano = [];
+          for (let i = 0; i < asm.total; i++) if (!visti.has(i)) mancano.push(i);
+          this.onLog(tr('{0}: ne aspettavo {1}, mancano i pezzi {2}',
+                     label, asm.total, mancano.join(' ') || '—'));
+        }
         return null;
       }
 
