@@ -162,7 +162,11 @@ scritto «finito»):
    insieme). A ponte chiuso in MIDI chi si collega è `midiCentrale` e non può scrivere
    banchi. Ogni comando parte da USB e BLE (`mandaMidi`). Senza cifratura, e iOS lo accetta.
    Su Windows il BLE-MIDI non arriva ai programmi (29 agosto): lì resta l'USB.
-3. **L'autonomia**, l'ultima misura mai fatta, **rimandata dall'utente il 24 settembre**. Il
+3. **L'autonomia: misurata il 4 ottobre 2026, 0,15 A** (tester su 10A sui contatti
+   dell'interruttore spento, USB staccato, pedale col NEO e fermo): **~17 ore** su 2600 mAh
+   utili. Piu' dei 70–100 stimati; le leve, se l'utente vuole piu' ore: luminosita' del
+   display (`setContrast(255)`) o spegnerlo da fermo, intervallo BLE da 7,5 ms. Sotto, il piano
+   di prima, ormai storia. 3. **L'autonomia**, l'ultima misura mai fatta, **rimandata dall'utente il 24 settembre**. Il
    piano deciso: **tester sui due contatti dell'interruttore lasciato spento** (è sul
    positivo fra cella e XIAO, quindi il tester fa da interruttore e misura), USB staccato;
    tre letture (collegato allo Spark e fermo, picco a un footswitch, modalità MIDI);
