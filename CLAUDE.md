@@ -362,8 +362,9 @@ finché l'utente non dice di aggiornarlo.
 `prova-ble` **1.5** (4 ottobre 2026): Spark 2 e NEO, Amp Preset letto dall'ampli, NEO a
 pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester).
 **Consumo misurato: 0,15 A, ~17 ore.** **La ricarica non va**: il modulo montato carica a
-0,09 A anche con R3 a 1,19 kΩ, caricatore e saldature esclusi; l'utente lo sostituisce con
-un ricambio (stesse piazzole), poi si tocca il chip: a 1 A deve scottare. Restano: il display
+0,09 A anche con R3 a 1,19 kΩ, caricatore e saldature esclusi. **Ordinato un Adafruit 6091
+(bq25185, power path)**: quando arriva, cablaggio nuovo spiegato filo per filo dalle foto
+(`docs/pedale-lavoro.md`). Restano: il display
 (il quadratino in negativo va ancora guardato), il looper col conteggio fatto in casa. **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
