@@ -335,19 +335,30 @@ window.SparkTransport = (function () {
       const rxPrima = this.rxTotali;
       let expectedSeq = null;
 
+      // `timeout` è il **silenzio** che si accetta, non la durata della lettura:
+      // ogni pezzo che arriva fa ripartire l'attesa. Lo Spark NEO, un giorno
+      // più lento dell'altro, mandava 13 pezzi su 16 in 4 s e la lettura si
+      // arrendeva sugli ultimi tre (4 ottobre 2026). Un tetto a quattro volte
+      // il silenzio tiene comunque la lettura finita.
+      const partenza = Date.now();
+      let timer = null;
       const done = new Promise(resolve => {
+        const scade = () => { if (this._removeWaiter(waiter)) { clearTimeout(tetto); resolve(null); } };
+        const arma  = () => { clearTimeout(timer); timer = setTimeout(scade, timeout); };
         const waiter = {
           match: msg => {
             if (msg.cmd !== Spark.CMD_NOTIFY || msg.sub !== 0x01) return false;
             if (expectedSeq !== null && msg.seq !== expectedSeq) return false;
             chunks.push(msg);
+            arma();
             const asm = Spark.assemblePresetPayload(chunks);
             return asm.complete;                 // resta in ascolto finché non è completo
           },
-          resolve,
+          resolve: msg => { clearTimeout(timer); clearTimeout(tetto); resolve(msg); },
         };
         this.waiters.push(waiter);
-        setTimeout(() => { if (this._removeWaiter(waiter)) resolve(null); }, timeout);
+        const tetto = setTimeout(scade, timeout * 4);
+        arma();
       });
 
       expectedSeq = await this.send(command);
@@ -366,8 +377,8 @@ window.SparkTransport = (function () {
           const visti = new Set(chunks.map(m => m.data[1]));
           const mancano = [];
           for (let i = 0; i < asm.total; i++) if (!visti.has(i)) mancano.push(i);
-          this.onLog(tr('{0}: ne aspettavo {1}, mancano i pezzi {2}',
-                     label, asm.total, mancano.join(' ') || '—'));
+          this.onLog(tr('{0}: ne aspettavo {1}, mancano i pezzi {2} (dopo {3} ms)',
+                     label, asm.total, mancano.join(' ') || '—', Date.now() - partenza));
         }
         return null;
       }

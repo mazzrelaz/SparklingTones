@@ -79,6 +79,29 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('nessun waiter rimasto appeso', t.waiters.length, 0);
   }
 
+  /* ---------- readPreset: pezzi lenti ma continui (lo Spark NEO, 4 ottobre 2026) ---------- */
+  {
+    const t = fakeTransport(FIXTURE_PRESET0_SEQ);
+    const pending = t.readPreset(0, 150);             // 150 ms di silenzio al massimo
+    await sleep(0);
+    for (const c of FIXTURE_PRESET0) {                // 16 pezzi a 30 ms: mezzo secondo, sotto il tetto di 600
+      feed(t, [c]);
+      await sleep(30);
+    }
+    const preset = await pending;
+    check('il tempo è il silenzio, non la durata: i pezzi lenti arrivano tutti',
+          preset && preset.name, 'DG - Shine On  clean');
+    check('e non resta nessun waiter', t.waiters.length, 0);
+  }
+  {
+    const t = fakeTransport(FIXTURE_PRESET0_SEQ);
+    const pending = t.readPreset(0, 150);
+    await sleep(0);
+    feed(t, FIXTURE_PRESET0.slice(0, 13));            // l'ampli tace sugli ultimi tre
+    check('se l\'ampli tace la lettura scade lo stesso', await pending, null);
+    check('e il waiter viene rimosso', t.waiters.length, 0);
+  }
+
   /* ---------- readPreset: chunk con seq sbagliato ---------- */
   {
     const t = fakeTransport(0x02);

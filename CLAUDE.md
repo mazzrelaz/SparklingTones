@@ -54,7 +54,7 @@ pedale/prova-espansore/           pulsanti e LED: mappatura guidata e prova a ma
 pedale/prova-usb|display|midi/    altri sketch di prova
 pcb/                              scheda in KiCad, ACCANTONATA: non si tocca e non si propone
 tools/                            simulatore, generatori, sonde, serve.ps1, script scatola
-test/*.html                       protocol 143, transport 60, store 139, backup 41, dropbox 38
+test/*.html                       protocol 147, transport 64, store 143, backup 41, dropbox 38
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
 ```
 
@@ -371,11 +371,12 @@ ampli finto):
    `0x0138` come lo Spark 2. L'app sceglie dal nome (`Spark.profiloAmpli`): l'ultimo ampli
    collegato sta in `settings.ultimoAmpli`, e leggendo dal NEO gli slot 4–7 si svuotano
    (`importFromAmp(…, { slotVuoti })`): gli slot in libreria sono sempre dell'ultimo ampli.
-   **Provata dall'utente sul NEO (v78): funziona tutto** — lettura, CH1–CH4, live, «Regola»
-   e manopole — **tranne «Seleziona CHx»** nella pagina Preset: «niente», mentre lo stesso
-   `0x0138` dai pulsantoni live va. **Si riprende da qui**: in v79 il pulsante aspetta l'ack
-   e chiede `0x0210`, e scrive la risposta nella riga grigia in fondo alla pagina; si
-   aspetta che l'utente la copi (prova: da CH1, «Seleziona CH3»). Ancora da provare:
+   **Provata dall'utente sul NEO: funziona tutto** — lettura, CH1–CH4, live, «Regola»,
+   manopole, e dal 4 ottobre (v80) anche «Seleziona CHx», che adesso scrive cosa risponde
+   l'ampli (il primo «niente» non si è ripetuto; forse premuto durante la lettura).
+   **Il NEO certi giorni manda lento**: 13 pezzi su 16 in 4 s, e la lettura si arrendeva
+   sulla coda. Dalla v81 il tempo di `_readPresetVia` è il **silenzio** (riparte a ogni
+   pezzo, tetto a 4×); **da verificare sul NEO** che legga tutti e quattro. Ancora da provare:
    «Invia a preset HW» sul NEO, Hendrix, il pedale (cerca chiunque annunci `0xFFC0`: col
    NEO acceso e lo Spark 2 spento dovrebbe agganciarlo).
 
