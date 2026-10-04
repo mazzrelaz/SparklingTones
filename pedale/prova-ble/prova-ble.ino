@@ -991,6 +991,13 @@ static void leggiAmpli() {
   silenzioso = false;
 }
 
+/* La prova del 4 ottobre 2026: col NEO un giro di andata e ritorno costa
+ * ~100 ms anche a intervallo 7,5 ms (lo Spark 2 ne fa 26), quindi aspettare
+ * l'ack dopo ognuno dei 16 pezzi fa 1,7 s a preset. Con `pausaSenzaAck` > 0 i
+ * pezzi partono di fila, distanziati di quei ms, e gli ack si contano alla
+ * fine. Si sceglie dal seriale con 'z'; 0 = come sempre. */
+static uint8_t pausaSenzaAck = 0;
+
 static void mandaPreset(uint8_t n) {
   if (!chScrittura) { Serial.println(F("non connesso")); return; }
   if (n >= quantiPosti()) return;
@@ -1030,11 +1037,29 @@ static void mandaPreset(uint8_t n) {
     const uint32_t prima = rxTotali;
     chScrittura->writeValue(frame, len, false);
     const uint32_t t = millis();
+    if (pausaSenzaAck) {
+      while (millis() - t < pausaSenzaAck) { leggiTasto(); delay(1); }
+      continue;
+    }
     while (rxTotali == prima && millis() - t < 500) { leggiTasto(); delay(1); }
     // Un ack mancante non e' motivo di fermarsi: anche il firmware dell'ampli
     // si sblocca da solo dopo mezzo secondo, e interrompersi lascerebbe il
     // preset scritto a meta'.
     if (rxTotali > prima) ack++; else persi++;
+  }
+  if (pausaSenzaAck) {
+    // Si aspettano gli ack arrivati in ritardo: il 0x0138 deve partire a
+    // buffer finito. Fino a quanti sono i pezzi, o 600 ms di silenzio.
+    const uint32_t daContare = rxTotali;
+    uint32_t visti = 0;
+    uint32_t t = millis();
+    while (millis() - t < 600) {
+      if (rxTotali != daContare + visti) { visti = rxTotali - daContare; t = millis(); }
+      if (visti >= quanti) break;
+      leggiTasto(); delay(1);
+    }
+    ack = rxTotali - daContare;          // contati dall'ultimo pezzo: una stima per difetto
+    persi = 0;
   }
   silenzioso = false;
   inTrasferimento = false;
@@ -1377,6 +1402,7 @@ static void elenco() {
     "  v     chiedi intervallo 7,5 ms\n"
     "  w     chiedi intervallo 15 ms\n"
     "  s     chiedi intervallo lento (30 ms)\n"
+    "  z     modo di invio: aspetta l'ack / 30, 15, 5 ms senza aspettare\n"
     "  x     molla l'ampli (cosi' l'app nel browser lo trova)\n"
     "  r     riprendi l'ampli\n"));
 }
@@ -1994,6 +2020,11 @@ void loop() {
       // connesso non si annuncia, quindi si leggerebbe «nessuno Spark».
       if (chScrittura) Serial.println(F("gia' collegato all'ampli"));
       else { momentoSgancio = millis(); ultimoTentativo = 0; avviaScansione(); }
+    }
+    else if (c == 'z') {
+      pausaSenzaAck = pausaSenzaAck == 0 ? 30 : pausaSenzaAck == 30 ? 15 : pausaSenzaAck == 15 ? 5 : 0;
+      if (pausaSenzaAck) Serial.printf("pezzi di fila, %u ms fra uno e l'altro, senza aspettare l'ack\n", pausaSenzaAck);
+      else Serial.println(F("pezzi uno alla volta, aspettando l'ack (come sempre)"));
     }
     else if (c == 'x') {
       sganciato = true;

@@ -63,6 +63,7 @@
 <div class="row">
   <button id="btnProvaA" disabled>Prova A: come lo Spark 2</button>
   <button id="btnProvaB" disabled>Prova B: scritture da 20 byte</button>
+  <button id="btnProvaC" disabled>Prova C: pezzi grandi (128)</button>
   <button id="btnA1" class="secondary" disabled>Torna ad A1</button>
 </div>
 <div id="log"></div>
@@ -87,7 +88,7 @@ const presetLetti = {};   // i preset interi, come li ha dati l'ampli, per la pr
 
 function aggiornaProve() {
   const si = spark.connected && !!presetLetti[1];
-  $('btnProvaA').disabled = $('btnProvaB').disabled = !si;
+  $('btnProvaA').disabled = $('btnProvaB').disabled = $('btnProvaC').disabled = !si;
   $('btnA1').disabled = !spark.connected;
 }
 
@@ -215,12 +216,14 @@ $('btnLeggi').addEventListener('click', async () => {
    come fa il pedale. Una variante alla volta; si verifica rileggendo. */
 async function prova(nome, opzioni) {
   const p = presetLetti[1];
-  $('btnProvaA').disabled = $('btnProvaB').disabled = true;
+  $('btnProvaA').disabled = $('btnProvaB').disabled = $('btnProvaC').disabled = true;
   const rxPrima = spark.rxTotali;
   scrivi(`— prova ${nome}: carico «${p.name}»`);
   const esito = { prova: nome, preset: p.name };
   try {
+    const t0 = performance.now();
     const r = await spark.loadPreset(p, null, opzioni);
+    esito.ms = Math.round(performance.now() - t0);
     Object.assign(esito, { inviati: r.sent, chunk: r.total, ack: r.acks, errore: r.error || null });
     await sleep(600);
     const live = await spark.readLiveState(5000);
@@ -231,15 +234,19 @@ async function prova(nome, opzioni) {
   esito.connesso = spark.connected;
   esito.messaggi = spark.rxTotali - rxPrima;
   registro.prove.push(esito);
-  scrivi(`prova ${nome}: ${esito.ack}/${esito.chunk} ack, riletto «${esito.riletto}», ` +
+  scrivi(`prova ${nome}: ${esito.ms} ms, ${esito.ack}/${esito.chunk} ack, riletto «${esito.riletto}», ` +
          `${esito.messaggi} messaggi, ${esito.connesso ? 'ancora connesso' : 'DISCONNESSO'}` +
          (esito.errore ? `, errore: ${esito.errore}` : ''), 'fuori');
-  $('riassunto').textContent += `\nProva ${nome}: ${esito.ack}/${esito.chunk} ack, ` +
+  $('riassunto').textContent += `\nProva ${nome}: ${esito.ms} ms, ${esito.ack}/${esito.chunk} ack, ` +
     `suona «${esito.riletto || '?'}»${esito.connesso ? '' : ' — si è disconnesso'}`;
   aggiornaProve();
 }
 
 $('btnProvaA').addEventListener('click', () => prova('A', {}));
+// Il NEO digerisce un pezzo ogni ~90 ms (misurato dal pedale il 4 ottobre 2026):
+// meno pezzi, meno attesa. Ignitron col NEO usa chunk da 128; sullo Spark 2 128
+// disconnette. Le write restano spezzate a 20, cosi' l'MTU non conta.
+$('btnProvaC').addEventListener('click', () => prova('C', { chunkSize: 128, scritturaMax: 20 }));
 $('btnProvaB').addEventListener('click', () => prova('B', { scritturaMax: 20 }));
 $('btnA1').addEventListener('click', async () => {
   await spark.send(Spark.commands.changePreset(0));
