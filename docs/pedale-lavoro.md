@@ -102,6 +102,14 @@ XIAO anche senza cella).
   portacella a posto (4,06 sulla cella, 4,07 sul portacella in carica). **R3 di un ricambio:
   1,19 kΩ = 1 A**, quindi è quel pezzo. Si sostituisce con un ricambio; i fili sulle stesse
   piazzole (B+/B−/OUT+/OUT−), dalla foto. Dopo: rimisurare la corrente, ~0,9–1 A.
+  **Aggiornamento, stesso giorno**: anche R3 del modulo montato è 1,19 kΩ, e con un altro
+  caricatore resta 0,09 A: causa non trovata (non R3, non caricatore, non portacella; saldature
+  «perfette» per l'utente). **L'utente ordina un Adafruit 6091, bq25185** (Kamami, su Allegro,
+  38,90 zł): USB-C, 1 A di serie (ponticelli 500/250), **power path** (si suona mentre carica,
+  fine carica affidabile), LED carica/errore/alimentazione, uscita LOAD fino a 4,5 V, 32 × 26 mm.
+  **Cablaggio da rifare quando arriva**: cella solo sul BAT del modulo; il pedale da LOAD
+  attraverso l'interruttore (dove, sulla XIAO: da decidere col pezzo in mano, il 5V o il BAT);
+  il partitore su D0 deve misurare la cella, non LOAD. Si chiedono le foto dei due lati.
 - **Indicatore di batteria: fatto il 4 ottobre 2026 (firmware 1.5).** Partitore saldato
   dall'utente: due 100 kΩ in due cavetti, dal + del morsetto verde (vite in basso, i rossi) e
   dal − (vite in alto, nero e marrone) a **D0**, il primo piedino in basso a sinistra con la
