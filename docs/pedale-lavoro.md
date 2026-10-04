@@ -97,6 +97,11 @@ XIAO anche senza cella).
   diretto**, con la sua presa affacciata alla sponda — deciso il 23 settembre, dopo che le
   prese da pannello non ci stavano — quindi va **bloccato dietro il pannello**: gli strattoni
   del cavo arrivano alle sue saldature.
+- **Il modulo di ricarica montato caricava a 90 mA** (misurato il 4 ottobre 2026, tester in serie
+  sul − della cella): dopo 10 ore cella a 4,03 V e LED sempre rosso, chip freddo. Cella e
+  portacella a posto (4,06 sulla cella, 4,07 sul portacella in carica). **R3 di un ricambio:
+  1,19 kΩ = 1 A**, quindi è quel pezzo. Si sostituisce con un ricambio; i fili sulle stesse
+  piazzole (B+/B−/OUT+/OUT−), dalla foto. Dopo: rimisurare la corrente, ~0,9–1 A.
 - **Indicatore di batteria da scrivere**: quattro tacche, **mai percentuali**, avviso sotto
   **3,50 V**.
 - **Pull-up I²C dell'espansore non verificati**: se il bus non parte, due 4,7 kΩ.
