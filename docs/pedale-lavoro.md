@@ -102,8 +102,14 @@ XIAO anche senza cella).
   portacella a posto (4,06 sulla cella, 4,07 sul portacella in carica). **R3 di un ricambio:
   1,19 kΩ = 1 A**, quindi è quel pezzo. Si sostituisce con un ricambio; i fili sulle stesse
   piazzole (B+/B−/OUT+/OUT−), dalla foto. Dopo: rimisurare la corrente, ~0,9–1 A.
-- **Indicatore di batteria da scrivere**: quattro tacche, **mai percentuali**, avviso sotto
-  **3,50 V**.
+- **Indicatore di batteria: fatto il 4 ottobre 2026 (firmware 1.5).** Partitore saldato
+  dall'utente: due 100 kΩ in due cavetti, dal + del morsetto verde (vite in basso, i rossi) e
+  dal − (vite in alto, nero e marrone) a **D0**, il primo piedino in basso a sinistra con la
+  presa USB verso sinistra. Sta dopo l'interruttore: a pedale spento non consuma. Verificato:
+  D0 1,87 V con la cella a ~3,74; col cavo attaccato il pedale legge 4,052 V e il tester
+  4,04 (taratura non serve). Icona a sinistra del quadratino, quattro tacche (>= 4,05 / 3,85
+  / 3,70 / 3,50), sotto 3,50 lampeggia e avvisa; 'u' dal seriale. **Col cavo USB attaccato
+  la XIAO carica a 50 mA e la tensione sale**: le tacche giuste si vedono a cavo staccato.
 - **Pull-up I²C dell'espansore non verificati**: se il bus non parte, due 4,7 kΩ.
 - **Il laser dell'utente non taglia il plexi** (fonde): il plexi si riga e si spezza. **Nei suoi
   DXF i fori sono nominali, il kerf li allarga di ~3 decimi**: mai concludere dal DXF che un
@@ -174,8 +180,7 @@ scritto «finito»):
    sbagliata = fusibile bruciato) e dell'interruttore coi suoi fili. Se il pedale si
    riavvia all'accensione, è la caduta di tensione del tester: portata più alta. Poi
    il partitore su `D0`. Altrimenti la via lunga: lasciarlo acceso e guardare
-   l'orologio. **Il partitore su `D0` non è saldato**, quindi l'indicatore di batteria non si
-   può ancora scrivere.
+   l'orologio. (Il partitore su `D0` è saldato dal 4 ottobre: vedi l'indicatore, sopra.)
 4. Il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
    dell'uno manda `0x0175` `04`).
 

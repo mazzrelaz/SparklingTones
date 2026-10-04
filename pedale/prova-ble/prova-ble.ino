@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.4";   // 1.1: MIDI; 1.2: Bluetooth; 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi
+static const char* VERSIONE = "1.5";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -457,6 +457,53 @@ static void disegnaAvvio() {
  *  impara niente di nuovo. In alto la pagina e, a destra, il quadratino con la
  *  M, pieno quando il computer (USB) o l'iPad (Bluetooth) ha la pedaliera. Sotto i quattro
  *  comandi; in negativo il preset mandato per ultimo, o gli effetti accesi. */
+/* --- La batteria -----------------------------------------------------------
+ *
+ * Chiesta dall'utente il 4 ottobre 2026. Partitore 1:2 su D0 (A0, GPIO1): due
+ * 100 kΩ, dal + della batteria **dopo l'interruttore** a D0 e da D0 al −, cosi'
+ * a pedale spento non consumano niente. Si legge ogni due secondi, sedici
+ * campioni, media mobile lenta: la tensione di un litio sotto carico balla.
+ *
+ * Quattro tacche e niente percentuali (docs/pedale.md: la tensione di un litio
+ * resta piatta sui 3,7 per gran parte della scarica, un «73%» sarebbe
+ * inventato): >= 4,05 / 3,85 / 3,70 / 3,50 V. Sotto 3,50 l'icona lampeggia e
+ * per un attimo lo dice. Fuori da 2,8-4,6 V il partitore non c'e' (o il piedino
+ * e' per aria) e l'icona non compare. */
+static const uint8_t PIN_BATTERIA = A0;
+static uint16_t mvBatteria = 0;          // 0 = nessuna lettura sensata
+static uint16_t mvGrezzo   = 0;          // l'ultima media, per il seriale
+static uint32_t ultimaBatteria = 0;
+
+static uint8_t tacche(uint16_t mv) {
+  return mv >= 4050 ? 4 : mv >= 3850 ? 3 : mv >= 3700 ? 2 : mv >= 3500 ? 1 : 0;
+}
+
+static void avvisa(const char* testo);
+
+static void leggiBatteria() {
+  if (ultimaBatteria && millis() - ultimaBatteria < 2000) return;
+  ultimaBatteria = millis();
+  uint32_t somma = 0;
+  for (uint8_t i = 0; i < 16; i++) somma += analogReadMilliVolts(PIN_BATTERIA);
+  mvGrezzo = (uint16_t)(somma / 16 * 2);                 // partitore 1:2
+  const uint16_t prima = mvBatteria;
+  if (mvGrezzo < 2800 || mvGrezzo > 4600) mvBatteria = 0;
+  else mvBatteria = prima ? (uint16_t)((prima * 7u + mvGrezzo) / 8u) : mvGrezzo;
+  if ((prima == 0) != (mvBatteria == 0) || tacche(prima) != tacche(mvBatteria)) schermoSporco = true;
+  if (prima >= 3500 && mvBatteria && mvBatteria < 3500) avvisa("batteria scarica");
+}
+
+/** L'icona, a sinistra del quadratino: 15x8 piu' il polo. */
+static void disegnaBatteria() {
+  if (!mvBatteria) return;
+  const uint8_t t = tacche(mvBatteria);
+  if (t == 0 && (millis() / 500) % 2) return;              // scarica: lampeggia
+  const int x = 99;
+  schermo.drawFrame(x, 1, 15, 8);
+  schermo.drawBox(x + 15, 3, 2, 4);
+  for (uint8_t k = 0; k < t; k++) schermo.drawBox(x + 2 + k * 3, 3, 2, 4);
+}
+
 static void disegnaMidi(const char* avviso) {
   char testa[20];
   if (avviso) snprintf(testa, sizeof(testa), "%s", avviso);
@@ -464,7 +511,10 @@ static void disegnaMidi(const char* avviso) {
                                      gruppoMidi * 4 + 1, gruppoMidi * 4 + 4);
   else snprintf(testa, sizeof(testa), "MIDI stomp");
   schermo.setFont(u8g2_font_helvB08_tf);
+  schermo.setClipWindow(0, 0, 96, 11);   // a destra stanno la batteria e il quadratino
   schermo.drawStr(0, 8, testa);
+  schermo.setMaxClipWindow();
+  disegnaBatteria();
 
   if (usbMontato || midiCentrale) {
     schermo.drawBox(118, 0, 10, 10);
@@ -526,7 +576,10 @@ static void disegnaSchermo() {
     snprintf(testa, sizeof(testa), "%s", bancoAttivo.valido ? bancoAttivo.nome : "Amp Preset");
   }
   schermo.setFont(u8g2_font_helvB08_tf);
+  schermo.setClipWindow(0, 0, 96, 11);   // a destra stanno la batteria e il quadratino
   schermo.drawStr(0, 8, testa);
+  schermo.setMaxClipWindow();
+  disegnaBatteria();
 
   // Connesso: quadratino pieno con la S (Spark 2) o la N (NEO) in negativo.
   // Non connesso: vuoto.
@@ -1459,6 +1512,7 @@ static void elenco() {
     "  v     chiedi intervallo 7,5 ms\n"
     "  w     chiedi intervallo 15 ms\n"
     "  s     chiedi intervallo lento (30 ms)\n"
+    "  u     tensione della batteria\n"
     "  x     molla l'ampli (cosi' l'app nel browser lo trova)\n"
     "  r     riprendi l'ampli\n"));
 }
@@ -1943,6 +1997,11 @@ void loop() {
     static uint32_t ultimoPasso = 0;
     if (millis() - ultimoPasso > 400) { ultimoPasso = millis(); schermoSporco = true; }
   }
+  if (!inTrasferimento) leggiBatteria();
+  if (mvBatteria && tacche(mvBatteria) == 0) {
+    static uint32_t ultimoLampo = 0;
+    if (millis() - ultimoLampo > 500) { ultimoLampo = millis(); schermoSporco = true; }
+  }
   if (schermoPresente && schermoSporco && !inTrasferimento
       && (int32_t)(millis() - avvioFino) >= 0) {
     schermoSporco = false;
@@ -2083,6 +2142,9 @@ void loop() {
       chScrittura = chNotifiche = nullptr;
       Serial.println(F("sganciato: l'ampli e' libero, l'app puo' trovarlo. 'r' per riprenderlo."));
     }
+    else if (c == 'u') Serial.printf("batteria: %u mV letti, %u mV mediati, %u tacche%s\n",
+                                     mvGrezzo, mvBatteria, tacche(mvBatteria),
+                                     mvBatteria ? "" : "  (partitore assente?)");
     else if (c == '?') elenco();
   }
   // 2 ms, non 10: una battuta secca su un tattile puo' durare pochi

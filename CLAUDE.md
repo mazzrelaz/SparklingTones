@@ -359,9 +359,12 @@ Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta
 finché l'utente non dice di aggiornarlo.
 
 **Pedale** (tutto in `docs/pedale-lavoro.md`, «Dove si riprende col pedale»): sulla XIAO c'è
-`prova-ble`, il firmware vero, verificato il 24 settembre. Restano, e **non è poco** (parole
-dell'utente): il display (il quadratino in negativo va ancora guardato), l'autonomia
-(rimandata da lui, il piano è scritto), il looper col conteggio fatto in casa. **La modalità
+`prova-ble` **1.5** (4 ottobre 2026): Spark 2 e NEO, Amp Preset letto dall'ampli, NEO a
+pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester).
+**Consumo misurato: 0,15 A, ~17 ore.** **La ricarica non va**: il modulo montato carica a
+0,09 A anche con R3 a 1,19 kΩ, caricatore e saldature esclusi; l'utente lo sostituisce con
+un ricambio (stesse piazzole), poi si tocca il chip: a 1 A deve scottare. Restano: il display
+(il quadratino in negativo va ancora guardato), il looper col conteggio fatto in casa. **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
 Sull'app (guscio `v77` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
