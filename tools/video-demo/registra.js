@@ -1,6 +1,9 @@
 // Registra il video dimostrativo dell'app.
 //
-//   node tools/video-demo/registra.js <cartella di uscita> [it|en] [--voce voce.json]
+//   node tools/video-demo/registra.js <cartella di uscita> [it|en] [--voce voce.json] [--solo-montaggio]
+//
+// --solo-montaggio rifà soltanto il montaggio dai fotogrammi già registrati in
+// quella cartella (linea.json e fotogrammi/), con la voce se c'è --voce.
 //
 // Con --voce il copione va coi tempi di una voce registrata (testo-voce.md):
 // voce.json sta nella cartella di uscita e dice il file audio, quanti secondi
@@ -15,7 +18,8 @@
 // (ampli-finto.js) al posto del Bluetooth, e recita il copione qui sotto
 // toccando l'app come un dito. I fotogrammi arrivano dallo screencast di
 // Chrome DevTools; alla fine monta.html li rimonta in tempo reale su un
-// canvas verticale 1080×1920 con le didascalie, e MediaRecorder ne fa un MP4.
+// canvas verticale 1080×1920 con le didascalie e li codifica a 30 fps fissi
+// (WebCodecs); scrivi-mp4.js ne fa un MP4 classico, che DaVinci Resolve importa.
 //
 // Niente dipendenze: Node 24 ha già WebSocket e fetch.
 
@@ -29,6 +33,7 @@ const RADICE = path.resolve(__dirname, '..', '..');
 const USCITA = path.resolve(process.argv[2] || path.join(require('os').tmpdir(), 'spark-video'));
 const LINGUA = process.argv[3] === 'en' ? 'en' : 'it';
 const iVoce = process.argv.indexOf('--voce');
+const SOLO_MONTAGGIO = process.argv.includes('--solo-montaggio');
 const VOCE = iVoce > 0 ? JSON.parse(fs.readFileSync(path.resolve(USCITA, process.argv[iVoce + 1]), 'utf8')) : null;
 const FOTO = path.join(USCITA, 'fotogrammi');
 const PORTA_WEB = 8123, PORTA_CDP = 9333;
@@ -51,9 +56,10 @@ const server = http.createServer((req, res) => {
     const pezzi = [];
     req.on('data', d => pezzi.push(d));
     req.on('end', () => {
+      if (nome === 'passo') { console.log(new Date().toLocaleTimeString(), 'montaggio', Buffer.concat(pezzi).toString()); return res.end('ok'); }
       fs.writeFileSync(path.join(USCITA, nome), Buffer.concat(pezzi));
       res.end('ok');
-      if (fineMontaggio) fineMontaggio(nome);
+      if (fineMontaggio && (nome === 'fatto.json' || nome === 'errore.txt')) fineMontaggio(nome);
     });
     return;
   }
@@ -183,13 +189,15 @@ const T = TESTI[LINGUA] || TESTI.it;
 
 async function main() {
   fs.mkdirSync(FOTO, { recursive: true });
-  for (const f of fs.readdirSync(FOTO)) fs.unlinkSync(path.join(FOTO, f));
+  // in «solo montaggio» i fotogrammi sono proprio quello che serve: guai a toglierli
+  if (!SOLO_MONTAGGIO) for (const f of fs.readdirSync(FOTO)) fs.unlinkSync(path.join(FOTO, f));
   await new Promise(r => server.listen(PORTA_WEB, r));
   const { edge, cdp } = await apriEdge();
 
   try {
     await cdp.manda('Page.enable');
     await cdp.manda('Runtime.enable');
+    if (!SOLO_MONTAGGIO) {
     await cdp.manda('Emulation.setDeviceMetricsOverride',
       { width: LARGO, height: ALTO, deviceScaleFactor: DPR, mobile: true });
 
@@ -444,17 +452,27 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
     console.log(`registrati ${fotogrammi.length} fotogrammi in ${(fine - inizio).toFixed(1)} s`);
 
+    }
+    if (SOLO_MONTAGGIO && VOCE) {
+      // la voce di adesso, che può avere silenzi nuovi
+      const linea = JSON.parse(fs.readFileSync(path.join(USCITA, 'linea.json'), 'utf8'));
+      linea.voce = { file: VOCE.file, taglio: VOCE.taglio, silenzi: VOCE.silenzi || [] };
+      fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
+    }
+
     /* ---------- il montaggio ---------- */
 
     const fatto = new Promise(r => { fineMontaggio = r; });
-    carico = cdp.evento('Page.loadEventFired');
+    const carico = cdp.evento('Page.loadEventFired');
     await cdp.manda('Emulation.clearDeviceMetricsOverride');
     await cdp.manda('Page.navigate', { url: `http://localhost:${PORTA_WEB}/tools/video-demo/monta.html` });
     await carico;
     const tipo = await cdp.js('monta()');
     console.log('montaggio:', tipo);
     const nome = await fatto;
-    console.log('salvato', path.join(USCITA, nome));
+    if (nome === 'errore.txt') throw new Error('montaggio: ' + fs.readFileSync(path.join(USCITA, nome), 'utf8'));
+    const mp4 = require('./scrivi-mp4')(USCITA);
+    console.log('salvato', mp4.file, `(${mp4.secondi} s, ${mp4.fotogrammi} fotogrammi, ${mp4.pacchettiAudio} pacchetti audio)`);
   } finally {
     edge.kill();
     server.close();

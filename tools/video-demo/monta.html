@@ -30,36 +30,33 @@ async function monta() {
   const linea = await (await fetch('/__uscita/linea.json')).json();
   await document.fonts.load('700 60px "Space Grotesk"');
   await document.fonts.load('500 40px Inter');
+  await new Promise(r => { if (logo.complete) r(); else logo.onload = logo.onerror = r; });
   if (linea.outro) OUTRO = linea.outro;
-  // La voce, se c'è: decodificata tutta prima, così parte quando si vuole.
+  // La voce, se c'è: decodificata tutta prima, a 48 kHz.
   let voce = null;
   if (linea.voce) {
-    const ctx = new AudioContext();
-    await ctx.resume();
+    const ctx = new OfflineAudioContext(2, 1, 48000);
     const buf = await ctx.decodeAudioData(await (await fetch('/__uscita/' + linea.voce.file)).arrayBuffer());
-    voce = { ctx, buf, taglio: linea.voce.taglio || 0, uscita: ctx.createMediaStreamDestination() };
+    voce = { buf, taglio: linea.voce.taglio || 0, silenzi: linea.voce.silenzi || [] };
   }
-  const tipi = (voce ? ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2',
-                        'video/webm;codecs=vp9,opus'] : [])
-    .concat(['video/mp4;codecs=avc1.640028', 'video/mp4;codecs=avc1', 'video/mp4',
-             'video/webm;codecs=vp9', 'video/webm']);
-  const tipo = tipi.find(t => MediaRecorder.isTypeSupported(t));
-  const estensione = tipo.startsWith('video/mp4') ? 'mp4' : 'webm';
-  avvia(linea, tipo, estensione, voce);
-  return tipo;
+  avvia(linea, voce).catch(e =>
+    fetch('/__salva?nome=errore.txt', { method: 'POST', body: String((e && e.stack) || e) }));
+  return 'H.264 ' + FPS + ' fps costanti' + (voce ? ' + AAC' : '');
 }
 
-function avvia(linea, tipo, estensione, voce) {
+async function avvia(linea, voce) {
   const F = linea.fotogrammi;
   const durata = linea.fine - linea.inizio;
   const cache = new Map();                    // indice → ImageBitmap
+  let guasto = null;
   const inCorso = new Set();
 
   const carica = i => {
     if (i < 0 || i >= F.length || cache.has(i) || inCorso.has(i)) return;
     inCorso.add(i);
     fetch('/__uscita/fotogrammi/' + F[i].f).then(r => r.blob()).then(createImageBitmap)
-      .then(b => { cache.set(i, b); inCorso.delete(i); });
+      .then(b => { cache.set(i, b); inCorso.delete(i); })
+      .catch(e => { guasto = new Error('fotogramma ' + F[i].f + ': ' + e.message); });
   };
   // l'ultimo fotogramma non successivo al tempo t
   const indice = t => {
@@ -169,49 +166,108 @@ function avvia(linea, tipo, estensione, voce) {
     }
   }
 
-  // Si parte quando i primi due secondi sono in memoria.
-  for (let k = 0; k < 40; k++) carica(k);
-  const pronto = () => new Promise(r => {
-    const giro = setInterval(() => { if (cache.has(0) && inCorso.size === 0) { clearInterval(giro); r(); } }, 50);
-  });
+  /* Il montaggio non va più in tempo reale: ogni fotogramma si disegna e si
+     codifica col suo tempo esatto, k/30 di secondo. Così la cadenza è fissa
+     (DaVinci Resolve non vuole i video a cadenza variabile, e MediaRecorder
+     li faceva così) e il risultato non dipende da quanto è carico il computer.
+     I byte codificati vanno a registra.js, che scrive l'MP4 (scrivi-mp4.js). */
+  const dorme = ms => new Promise(r => setTimeout(r, ms));
+  const assicura = async i => { carica(i); while (!cache.has(i)) { if (guasto) throw guasto; await dorme(4); } };
 
-  pronto().then(() => {
-    const flusso = tela.captureStream(FPS);
-    if (voce) voce.uscita.stream.getAudioTracks().forEach(t => flusso.addTrack(t));
-    const rec = new MediaRecorder(flusso, { mimeType: tipo, videoBitsPerSecond: 10_000_000 });
-    const pezzi = [];
-    rec.ondataavailable = e => { if (e.data.size) pezzi.push(e.data); };
-    rec.onstop = async () => {
-      const blob = new Blob(pezzi, { type: tipo });
-      await fetch('/__salva?nome=demo.' + estensione, { method: 'POST', body: blob });
-    };
-    disegna(0);
-    rec.start(1000);
-    if (voce) {
-      const sorgente = voce.ctx.createBufferSource();
-      sorgente.buffer = voce.buf;
-      // I rumori si zittiscono con un volume a zero, in tempi del file audio.
-      const volume = voce.ctx.createGain();
-      const t0a = voce.ctx.currentTime + 0.05;
-      for (const [da, a] of linea.voce.silenzi || []) {
-        const x = t0a + da - voce.taglio, y = t0a + a - voce.taglio;
-        if (y <= t0a) continue;
-        volume.gain.setValueAtTime(1, Math.max(t0a, x - 0.05));
-        volume.gain.linearRampToValueAtTime(0, Math.max(t0a, x));
-        volume.gain.setValueAtTime(0, y);
-        volume.gain.linearRampToValueAtTime(1, y + 0.05);
-      }
-      sorgente.connect(volume);
-      volume.connect(voce.uscita);
-      sorgente.start(t0a, voce.taglio);
-    }
-    const t0 = performance.now();
-    const giro = setInterval(() => {
-      const tau = (performance.now() - t0) / 1000;
-      if (tau >= durata) { clearInterval(giro); disegna(durata); setTimeout(() => rec.stop(), 200); return; }
-      disegna(tau);
-    }, 1000 / FPS);
+  const video = { misure: [], chiavi: [], pezzi: [], tempi: [], descrizione: null };
+  const enc = new VideoEncoder({
+    output: (c, meta) => {
+      const d = meta && meta.decoderConfig && meta.decoderConfig.description;
+      if (d && !video.descrizione) video.descrizione = Array.from(new Uint8Array(d.buffer || d));
+      const byte = new Uint8Array(c.byteLength);
+      c.copyTo(byte);
+      video.pezzi.push(byte); video.misure.push(byte.length);
+      video.chiavi.push(c.type === 'key'); video.tempi.push(c.timestamp);
+    },
+    error: e => { guasto = e; },
   });
+  enc.configure({ codec: 'avc1.640028', width: L, height: H, bitrate: 8_000_000, framerate: FPS,
+                  hardwareAcceleration: 'prefer-software', avc: { format: 'avc' } });
+  const N = Math.round(durata * FPS);
+  for (let k = 0; k < N; k++) {
+    if (guasto) throw guasto;
+    const tau = k / FPS;
+    const i = indice(linea.inizio + tau);
+    for (let j = i; j < i + 30; j++) carica(j);
+    await assicura(i);
+    disegna(tau);
+    const fotogramma = new VideoFrame(tela, { timestamp: Math.round(k * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
+    enc.encode(fotogramma, { keyFrame: k % (FPS * 2) === 0 });
+    fotogramma.close();
+    while (enc.encodeQueueSize > 6) await dorme(2);
+    if (k % 150 === 0) fetch('/__salva?nome=passo', { method: 'POST', body: k + '/' + N });
+  }
+  await enc.flush();
+  enc.close();
+  if (guasto) throw guasto;
+  for (let k = 1; k < video.tempi.length; k++) {
+    if (video.tempi[k] <= video.tempi[k - 1]) throw new Error('fotogrammi fuori ordine: B-frame non previsti');
+  }
+
+  // La voce: tagliata in testa, coi rumori zittiti, lunga quanto il video.
+  let audio = null;
+  if (voce) {
+    const sr = 48000, ch = 2, n = Math.round(durata * sr);
+    const pcm = [new Float32Array(n), new Float32Array(n)];
+    const da = Math.round(voce.taglio * voce.buf.sampleRate);
+    for (let c = 0; c < ch; c++) {
+      const sorgente = voce.buf.getChannelData(Math.min(c, voce.buf.numberOfChannels - 1));
+      pcm[c].set(sorgente.subarray(da, da + n));
+    }
+    const rampa = 480;                                   // 10 ms, niente clic
+    for (const [x0, x1] of voce.silenzi) {
+      const p = Math.max(0, Math.round((x0 - voce.taglio) * sr));
+      const q = Math.min(n, Math.round((x1 - voce.taglio) * sr));
+      if (q <= p) continue;
+      for (const canale of pcm) {
+        for (let j = 0; j < rampa; j++) {
+          if (p - rampa + j >= 0) canale[p - rampa + j] *= 1 - j / rampa;
+          if (q + j < n) canale[q + j] *= j / rampa;
+        }
+        canale.fill(0, p, q);
+      }
+    }
+    audio = { sr, ch, misure: [], pezzi: [], descrizione: null };
+    const aenc = new AudioEncoder({
+      output: (c, meta) => {
+        const d = meta && meta.decoderConfig && meta.decoderConfig.description;
+        if (d && !audio.descrizione) audio.descrizione = Array.from(new Uint8Array(d.buffer || d));
+        const byte = new Uint8Array(c.byteLength);
+        c.copyTo(byte);
+        audio.pezzi.push(byte); audio.misure.push(byte.length);
+      },
+      error: e => { guasto = e; },
+    });
+    aenc.configure({ codec: 'mp4a.40.2', sampleRate: sr, numberOfChannels: ch, bitrate: 192000 });
+    const blocco = 4800;
+    for (let j = 0; j < n; j += blocco) {
+      const m = Math.min(blocco, n - j);
+      const dati = new Float32Array(m * ch);
+      for (let c = 0; c < ch; c++) dati.set(pcm[c].subarray(j, j + m), c * m);
+      aenc.encode(new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: m,
+                                  numberOfChannels: ch, timestamp: Math.round(j * 1e6 / sr), data: dati }));
+      while (aenc.encodeQueueSize > 20) await dorme(2);
+    }
+    await aenc.flush();
+    aenc.close();
+    if (guasto) throw guasto;
+    // AAC-LC, 48 kHz, stereo, se l'encoder non l'ha detto da sé
+    if (!audio.descrizione) audio.descrizione = [0x11, 0x90];
+  }
+
+  const posta = (nome, corpo) => fetch('/__salva?nome=' + nome, { method: 'POST', body: corpo });
+  await posta('video.bin', new Blob(video.pezzi));
+  if (audio) await posta('audio.bin', new Blob(audio.pezzi));
+  await posta('fatto.json', JSON.stringify({
+    fps: FPS, larghezza: L, altezza: H,
+    video: { misure: video.misure, chiavi: video.chiavi, descrizione: video.descrizione },
+    audio: audio && { sr: audio.sr, ch: audio.ch, misure: audio.misure, descrizione: audio.descrizione },
+  }));
 }
 </script>
 </body>

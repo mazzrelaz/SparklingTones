@@ -39,6 +39,22 @@ con Chrome DevTools (il WebSocket di Node 24), fotogrammi dallo screencast, poi
   indietro (un giro con Audacity aperto e un'installazione in corso: 161 s invece di 139). Si
   vede subito dai tempi delle didascalie in `linea.json`; si rifà.
 - **Nella vista live i tocchi sono due, non tre**: la voce inglese dura lì 6 s e la scena 9.
+- **DaVinci Resolve non importava i video.** Due motivi, misurati sul file: MediaRecorder
+  scrive un **MP4 frammentato** (44 moof, durata 0 nell'intestazione) e a **cadenza variabile**
+  (27 fps di media, fotogrammi fermi fino a 0,8 s). Ricomporre il file non bastava:
+  uniformare la cadenza avrebbe spostato le immagini fino a 1,7 s rispetto alla voce.
+  **Rimedio: il montaggio non è più in tempo reale.** `monta.html` disegna ogni fotogramma
+  al suo k/30 e lo codifica con WebCodecs (`VideoEncoder` H.264, `prefer-software`, niente
+  B-frame; `AudioEncoder` AAC 48 kHz), e `scrivi-mp4.js` scrive un MP4 classico (moov in
+  testa, un mdat, `co64`). 30 fps esatti, e non dipende più da quanto è carico il computer:
+  ~1 minuto per 2:20 di video.
+- **`--solo-montaggio`** rifà il montaggio dai fotogrammi già registrati. **Trappola
+  pagata**: all'avvio il registratore svuotava `fotogrammi/` anche in quel modo, e i
+  fotogrammi inglesi sono andati persi (rifatta la registrazione); adesso li svuota solo
+  quando registra. Un fotogramma che manca ferma il montaggio con `errore.txt` invece di
+  appenderlo per sempre.
+- Il mio provino (un `<video>` che salta ai tempi e disegna) **dà bianco il primo
+  fotogramma che preleva**, qualunque sia: non è il video.
 - **Il pedale, aggiunto lo stesso giorno su richiesta dell'utente** («anche se non si vede»):
   il copione crea il banco «Prove» nella vista live, mostra un cartello sul pedale e manda il
   banco con il pannello «Pedale». Il pedale finto sta in `ampli-finto.js` e risponde al
