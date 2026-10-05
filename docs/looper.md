@@ -421,3 +421,26 @@ si impara cosa fanno di diverso. Nel loro tracker non c'è niente in proposito (
 E per il pedale la cosa non cambia niente: **il click se lo fa da sé**. Il bpm glielo
 dicono `0x0363` e `0x0376`, e quattro lampeggi di un LED — o un buzzer — prima di mandare
 `04` sono venti righe di firmware.
+
+## Il looper sul pedale — 5 ottobre 2026, firmware 1.6
+
+Chiesto dall'utente: una **modalità looper** dentro la modalità Spark, solo Spark 2 (il NEO
+il looper non ce l'ha: scegliendolo si esce, e da NEO non si entra).
+
+- **FS5 tenuto 3 s** entra ed esce. FS5 alla pressione cambia metà come sempre; tenuto, la
+  metà si rimette com'era. Nel looper FS5 premuto e i tasti banco dicono «tieni FS5: esci».
+- **FS1** registra (`04`), ripremuto mentre registra chiude e suona (`05`); **FS2**
+  sovraincide (`0b`), ripremuto chiude (`0c`); **FS3** suona (`08`); **FS4** ferma (`09`),
+  **tenuto 2 s** cancella (`0a`).
+- **Lo stato lo dice l'ampli**: ogni `0x0375` finisce in una coda dal callback e il loop
+  aggiorna LED e display; entrando, e dopo ogni riaggancio, si chiede `0x0275`. Così anche i
+  tasti del pannello dell'ampli si vedono sul pedale.
+- LED: rosso FS1 mentre registra, rosso FS2 mentre sovraincide, verde FS3 mentre suona,
+  verde FS4 da fermo col loop pronto. Display: «Looper» (o «Looper - vuoto») e le quattro
+  righe, quella attiva in negativo.
+- I comandi passano dal loop (`looperInCoda`), mai in mezzo a un preset che sta passando.
+
+**Compilato, non ancora provato sul pedale.** Da verificare: che `0x0275` risponda con gli
+stessi codici degli eventi; cosa fa `04` con un loop già presente; cosa fa `05` in Auto Mode
+(click acceso, dove dal pannello REC non chiude); se uscire dal looper e cambiare preset
+lascia suonare il loop. Il conteggio fatto in casa non c'è ancora.

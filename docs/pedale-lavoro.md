@@ -189,7 +189,7 @@ scritto «finito»):
    riavvia all'accensione, è la caduta di tensione del tester: portata più alta. Poi
    il partitore su `D0`. Altrimenti la via lunga: lasciarlo acceso e guardare
    l'orologio. (Il partitore su `D0` è saldato dal 4 ottobre: vedi l'indicatore, sopra.)
-4. Il **looper col conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
+4. Il **looper**: la modalità c'è dalla 1.6 (5 ottobre 2026, `docs/looper.md` in fondo), **da provare sul pedale**. Manca il **conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
    dell'uno manda `0x0175` `04`).
 
 **Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare

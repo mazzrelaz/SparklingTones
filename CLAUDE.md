@@ -366,7 +366,7 @@ pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester
 0,09 A anche con R3 a 1,19 kΩ, caricatore e saldature esclusi. **Ordinato un Adafruit 6091
 (bq25185, power path)**: quando arriva, cablaggio nuovo spiegato filo per filo dalle foto
 (`docs/pedale-lavoro.md`). Restano: il display
-(il quadratino in negativo va ancora guardato), il looper col conteggio fatto in casa. **La modalità
+(il quadratino in negativo va ancora guardato), **il looper (1.6, 5 ottobre 2026: FS5 tenuto 3 s, compilato e non ancora provato; `docs/looper.md`, in fondo)**, poi il conteggio fatto in casa. **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
 Sull'app (guscio `v77` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
