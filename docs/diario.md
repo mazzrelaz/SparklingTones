@@ -25,7 +25,12 @@ con Chrome DevTools (il WebSocket di Node 24), fotogrammi dallo screencast, poi
 - Trappole incontrate: i pad hanno il numero davanti al nome (si cerca con `includes`);
   «Salva» dell'editor è `#btnSalvaModifiche`; l'invito a installare la PWA va spento
   (`pwa-installa-no`); «non ancora letto» compare anche fuori dalle schede degli slot.
-- L'inglese (`en`) ha solo il posto: le didascalie inglesi non sono scritte.
+- **L'inglese, chiesto dall'utente lo stesso giorno**: `registra.js <cartella> en` apre
+  l'app con `?lang=en` e usa le didascalie inglesi; i banchi finti si chiamano «Gig» e
+  «Rehearsal». **I tasti il copione li cerca con `tr()` della pagina** (`tradotto()`), così
+  lo stesso copione va nelle due lingue. Le scritte troppo larghe il montaggio le stringe.
+  Il testo per la voce inglese è `testo-voce.en.md`, coi nomi veri dei tasti inglesi
+  («Tweak», «Send»…). Video inglese senza voce: 2:09.
 - **Il pedale, aggiunto lo stesso giorno su richiesta dell'utente** («anche se non si vede»):
   il copione crea il banco «Prove» nella vista live, mostra un cartello sul pedale e manda il
   banco con il pannello «Pedale». Il pedale finto sta in `ampli-finto.js` e risponde al

@@ -149,6 +149,33 @@ const TESTI = {
     fine1: 'SparklingTones', fine2: 'web app gratuita · anche offline',
     fine3: 'mazzrelaz.github.io/SparklingTones',
     nota: 'registrato con ampli e pedale simulati',
+    bancoPronto: 'Concerto', bancoNuovo: 'Prove',
+  },
+  en: {
+    titolo: 'SparklingTones', sottotitolo: 'Your Spark 2, from your phone and your feet',
+    connetti: 'One tap, and it connects over Bluetooth',
+    letti: 'It reads the amp’s eight presets by itself',
+    libreria: 'Below, your library: all your other sounds',
+    suona: '▶ sends it to the amp, and it plays at once',
+    scheda: 'Every preset: name, family, categories, notes',
+    editor: 'The editor: the effects chain, block by block',
+    manopole: 'Turn a knob and the amp changes as you play',
+    modello: 'Swap a pedal or an amp from a list',
+    salva: 'Save to the library only when you like it',
+    live: 'Live view: big buttons to hit while you play',
+    banco: 'Banks: eight sounds at your feet',
+    nuovoBanco: 'A new bank: give it a name…',
+    riempi: '…and fill it from your library',
+    cartello: ['And then there’s the pedal', 'four footswitches, four sounds',
+               'the fifth flips between A and B', 'display and LEDs: you see what’s on',
+               'it runs on its own with the Spark'],
+    pedale: 'Send your banks to the pedal over Bluetooth',
+    slotPedale: 'Pick the bank and its place in the pedal',
+    inviato: 'They stay there, even with the pedal off',
+    fine1: 'SparklingTones', fine2: 'free web app · works offline',
+    fine3: 'mazzrelaz.github.io/SparklingTones',
+    nota: 'recorded with a simulated amp and pedal',
+    bancoPronto: 'Gig', bancoNuovo: 'Rehearsal',
   },
 };
 const T = TESTI[LINGUA] || TESTI.it;
@@ -169,6 +196,7 @@ async function main() {
     const slot = Array.isArray(catture) ? catture : Object.values(catture);
     // Niente invito a installare la PWA in mezzo al video.
     const prima = `try { localStorage.setItem('pwa-installa-no', '1'); } catch (_) {}
+window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
 ` +
       `window.__PRESET_AMPLI = ${JSON.stringify(slot)};\n` +
       fs.readFileSync(path.join(__dirname, 'ampli-finto.js'), 'utf8') + '\n' +
@@ -197,7 +225,7 @@ async function main() {
         try { await store.setFamiglia(r.id, f); } catch (e) {}
       }
       const id = n => tutti.find(x => x.name === n).id;
-      const banco = await store.addBank('Concerto');
+      const banco = await store.addBank(${JSON.stringify(T.bancoPronto)});
       const banchi = await store.getSetting('banchi', []);
       banchi.find(b => b.id === banco.id).posti =
         ['Funk Rhythm','Blues Breaker','Crunch Rock','Lead Hendrix',
@@ -304,7 +332,8 @@ async function main() {
       }
       return p;
     };
-    const bottone = t => centro(`[...document.querySelectorAll('button')].find(b => b.offsetParent && b.textContent.trim() === ${JSON.stringify(t)})`);
+    const tradotto = t => cdp.js(`tr(${JSON.stringify(t)})`);
+    const bottone = async t => centro(`[...document.querySelectorAll('button')].find(b => b.offsetParent && b.textContent.trim() === ${JSON.stringify(await tradotto(t))})`);
     const conTesto = (sel, t) => centro(`[...document.querySelectorAll(${JSON.stringify(sel)})].find(e => e.offsetParent && e.textContent.includes(${JSON.stringify(t)}))`);
 
     /* ---------- il copione ---------- */
@@ -321,7 +350,7 @@ async function main() {
     await dorme(1600);
     await dici('letti');
     // La didascalia resta finché gli otto slot non si sono riempiti, e un po' oltre.
-    for (let i = 0; i < 100 && await cdp.js("[...document.querySelectorAll('.slotcard')].some(e => e.textContent.includes('non ancora letto'))"); i++) {
+    for (let i = 0; i < 100 && await cdp.js("[...document.querySelectorAll('.slotcard')].some(e => e.textContent.includes(tr('non ancora letto')))"); i++) {
       await dorme(100);
     }
     await dorme(1800);
@@ -347,7 +376,7 @@ async function main() {
     await dorme(900);
 
     await dici('modello');
-    await tocca(await conTesto('button.tassello', 'Drive'), 700);
+    await tocca(await conTesto('button.tassello', await tradotto('Drive')), 700);
     await tocca(await centro("document.querySelector('button.nome-effetto')"), 1100);
     await tocca(await conTesto('.elenco-voce', 'Tube Drive'), 1400);
     await trascina(await centro("document.querySelectorAll('.pomello')[0]"), -50, 700);
@@ -364,14 +393,14 @@ async function main() {
       await tocca(await conTesto('.pad', s), 1100);
     }
     await dici('banco');
-    await tocca(await conTesto('#banchi .banco', 'Concerto'), 1000);
+    await tocca(await conTesto('#banchi .banco', T.bancoPronto), 1000);
     await tocca(await conTesto('.pad', 'Blues'), 1700);
     await tocca(await conTesto('.pad', 'Lead'), 1700);
 
     await dici('nuovoBanco');
     await tocca(await conTesto('#banchi .banco', '＋'), 900);
     await cdp.js("document.querySelector('.elenco-campo').select()");
-    await scrivi('Prove');
+    await scrivi(T.bancoNuovo);
     await dorme(500);
     await tocca(await bottone('Crea il banco'), 900);
     await dici('riempi');

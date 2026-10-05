@@ -90,6 +90,11 @@ function avvia(linea, tipo, estensione, voce) {
   }
   function testoCentrato(testo, y, font, colore, alfa = 1) {
     g.save(); g.globalAlpha = alfa; g.font = font; g.fillStyle = colore;
+    const largo = g.measureText(testo).width;
+    if (largo > L - 80) {
+      const px = parseFloat(font.match(/(\d+)px/)[1]);
+      g.font = font.replace(/\d+px/, Math.floor(px * (L - 80) / largo) + 'px');
+    }
     g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(testo, L / 2, y); g.restore();
   }
   const dolce = k => k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k);

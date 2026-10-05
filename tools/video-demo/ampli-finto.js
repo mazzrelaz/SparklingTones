@@ -131,7 +131,7 @@
      pedale/prova-ble, con l'elenco dei banchi e il «salvato» dopo un invio.
      Parte con un banco già dentro, così l'elenco non è vuoto. */
   function pedaleFinto() {
-    const banchi = [{ slot: 0, nome: 'Concerto', pieni: 7 }];
+    const banchi = [{ slot: 0, nome: window.__BANCO_PEDALE || 'Concerto', pieni: 7 }];
     const ascoltatori = [];
     let ric = null;                                  // il banco in arrivo
 
