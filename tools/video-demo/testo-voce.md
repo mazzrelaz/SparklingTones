@@ -76,5 +76,7 @@ SparklingTones: gratis, funziona anche offline, con lo Spark 2 e con lo Spark NE
 3. Fai partire il video senza audio sul computer, e comincia a leggere quando compare il
    titolo. Se un pezzo ti viene lungo, salta una frase: le didascalie dicono già il resto.
 4. Se sbagli, ricomincia da capo: sono due minuti, si rifanno in fretta.
-5. Il file audio si monta poi sul video (`monta.html` può mettere una traccia audio nel
-   MediaRecorder): la voce parte insieme al titolo.
+5. Il file audio si monta poi sul video: si scrive `voce.json` (quanto tagliare in testa e
+   quando parte ogni pezzo, presi dalle pause della registrazione) nella cartella di uscita e
+   si rifà il video con `node tools/video-demo/registra.js <cartella> it --voce voce.json`.
+   Le scene aspettano la voce, non il contrario.

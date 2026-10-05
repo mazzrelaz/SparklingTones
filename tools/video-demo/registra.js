@@ -1,6 +1,14 @@
 // Registra il video dimostrativo dell'app.
 //
-//   node tools/video-demo/registra.js <cartella di uscita> [it|en]
+//   node tools/video-demo/registra.js <cartella di uscita> [it|en] [--voce voce.json]
+//
+// Con --voce il copione va coi tempi di una voce registrata (testo-voce.md):
+// voce.json sta nella cartella di uscita e dice il file audio, quanti secondi
+// tagliarne in testa, e quando parte ogni pezzo nel video:
+//   { "file": "voce.mp3", "taglio": 4.5, "tempi": { "connetti": 3.5, … },
+//     "finale": 134.5, "fine": 141.5 }
+// Ogni didascalia con un tempo aspetta il suo pezzo prima di partire; il
+// montaggio mette l'audio nell'MP4.
 //
 // Apre Edge senza finestra in formato telefono, con l'ampli finto
 // (ampli-finto.js) al posto del Bluetooth, e recita il copione qui sotto
@@ -19,6 +27,8 @@ const { spawn } = require('child_process');
 const RADICE = path.resolve(__dirname, '..', '..');
 const USCITA = path.resolve(process.argv[2] || path.join(require('os').tmpdir(), 'spark-video'));
 const LINGUA = process.argv[3] === 'en' ? 'en' : 'it';
+const iVoce = process.argv.indexOf('--voce');
+const VOCE = iVoce > 0 ? JSON.parse(fs.readFileSync(path.resolve(USCITA, process.argv[iVoce + 1]), 'utf8')) : null;
 const FOTO = path.join(USCITA, 'fotogrammi');
 const PORTA_WEB = 8123, PORTA_CDP = 9333;
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
@@ -94,7 +104,7 @@ async function apriEdge() {
   const profilo = path.join(USCITA, 'profilo-edge');
   fs.rmSync(profilo, { recursive: true, force: true });
   const edge = spawn(EDGE, ['--headless=new', `--remote-debugging-port=${PORTA_CDP}`,
-    `--user-data-dir=${profilo}`, '--no-first-run', '--hide-scrollbars', '--mute-audio',
+    `--user-data-dir=${profilo}`, '--no-first-run', '--hide-scrollbars', ...(VOCE ? [] : ['--mute-audio']),
     `--window-size=${LARGO},${ALTO}`, '--autoplay-policy=no-user-gesture-required',
     `--lang=${LINGUA}`, 'about:blank'], { stdio: 'ignore' });
   for (let i = 0; i < 50; i++) {
@@ -211,16 +221,28 @@ async function main() {
       cdp.manda('Page.screencastFrameAck', { sessionId: m.params.sessionId }).catch(() => {});
     });
     const ora = () => Date.now() / 1000;
-    const dici = testo => didascalie.push({ t: ora(), testo });
+    // Con la voce, la didascalia aspetta il suo pezzo (un po' prima: si legge
+    // e poi si sente). Senza, parte subito.
+    const aspetta = async chiave => {
+      const quando = VOCE && VOCE.tempi[chiave];
+      if (quando === undefined) return;
+      while (ora() - inizio < quando - 0.3) await dorme(20);
+    };
+    const dici = async chiave => {
+      if (chiave) await aspetta(chiave);
+      didascalie.push({ t: ora(), testo: chiave ? T[chiave] : null });
+    };
     // Un cartello a tutto schermo, disegnato dal montaggio sopra l'app ferma.
     const cartelli = [];
-    async function cartello(righe, ms) {
+    async function cartello(righe, ms, finoA) {
+      await aspetta('cartello');
       const t0 = ora();
-      await dorme(ms);
+      if (VOCE && VOCE.tempi[finoA] !== undefined) await aspetta(finoA);
+      else await dorme(ms);
       cartelli.push({ t0, t1: ora(), righe });
     }
     async function scrivi(testo) {
-      for (const c of testo) { await cdp.manda('Input.insertText', { text: c }); await dorme(120); }
+      for (const c of testo) { await cdp.manda('Input.insertText', { text: c }); await dorme(90); }
     }
 
     let dito = { x: LARGO / 2, y: ALTO * 0.62 };
@@ -293,95 +315,102 @@ async function main() {
     await cdp.js('__dito.mostra(-100,-100)');
     await dorme(3200);                                        // sotto il titolo
 
-    dici(T.connetti);
+    await dici('connetti');
     await tocca(await centro("document.getElementById('status')"), 300);
     await cdp.js('__dito.nascondi()');
     await dorme(1600);
-    dici(T.letti);
+    await dici('letti');
     // La didascalia resta finché gli otto slot non si sono riempiti, e un po' oltre.
     for (let i = 0; i < 100 && await cdp.js("[...document.querySelectorAll('.slotcard')].some(e => e.textContent.includes('non ancora letto'))"); i++) {
       await dorme(100);
     }
     await dorme(1800);
 
-    dici(T.libreria);
+    await dici('libreria');
     await scorri(560, 1100);
     await dorme(1200);
-    dici(T.suona);
+    await dici('suona');
     await tocca(await centro(`[...document.querySelectorAll('#listaLibreria .row')].find(r => r.textContent.includes('Blues Breaker')).querySelector('.via')`), 2400);
 
     await scorri(-560, 900);
-    dici(T.scheda);
+    await dici('scheda');
     await tocca(await centro("document.querySelector('.slotcard')"), 600);
     await scorri(330, 800);
     await dorme(1800);
 
-    dici(T.editor);
+    await dici('editor');
     await tocca(await bottone('Regola'), 2200);
-    dici(T.manopole);
+    await dici('manopole');
     await trascina(await centro("document.querySelectorAll('.pomello')[0]"), -70, 900);
     await dorme(300);
     await trascina(await centro("document.querySelectorAll('.pomello')[3]"), 55, 800);
     await dorme(900);
 
-    dici(T.modello);
+    await dici('modello');
     await tocca(await conTesto('button.tassello', 'Drive'), 700);
     await tocca(await centro("document.querySelector('button.nome-effetto')"), 1100);
     await tocca(await conTesto('.elenco-voce', 'Tube Drive'), 1400);
     await trascina(await centro("document.querySelectorAll('.pomello')[0]"), -50, 700);
     await dorme(700);
 
-    dici(T.salva);
+    await dici('salva');
     await tocca(await centro("document.getElementById('btnSalvaModifiche')"), 1500);
     await tocca(await centro("document.querySelector('[data-chiudi=pannelloEditor]')"), 1000);
 
     await scorri(-(await cdp.js('scrollY')), 700);
-    dici(T.live);
+    await dici('live');
     await tocca(await centro("document.getElementById('btnVista')"), 1000);
     for (const s of ['A2', 'B1', 'A4']) {
       await tocca(await conTesto('.pad', s), 1100);
     }
-    dici(T.banco);
+    await dici('banco');
     await tocca(await conTesto('#banchi .banco', 'Concerto'), 1000);
     await tocca(await conTesto('.pad', 'Blues'), 1700);
     await tocca(await conTesto('.pad', 'Lead'), 1700);
 
-    dici(T.nuovoBanco);
+    await dici('nuovoBanco');
     await tocca(await conTesto('#banchi .banco', '＋'), 900);
     await cdp.js("document.querySelector('.elenco-campo').select()");
     await scrivi('Prove');
     await dorme(500);
     await tocca(await bottone('Crea il banco'), 900);
-    dici(T.riempi);
+    await dici('riempi');
     for (const [i, nome] of [[0, 'Funk Rhythm'], [1, 'Crunch Rock'], [2, 'Lead Hendrix']]) {
-      await tocca(await centro(`document.querySelectorAll('.pad')[${i}]`), 800);
-      await tocca(await conTesto('#elencoScegli .voce', nome), 900);
+      await tocca(await centro(`document.querySelectorAll('.pad')[${i}]`), 650);
+      await tocca(await conTesto('#elencoScegli .voce', nome), 700);
     }
-    await tocca(await centro("document.getElementById('btnMenu')"), 600);
-    await tocca(await centro("document.getElementById('btnModifica')"), 1500);
+    await tocca(await centro("document.getElementById('btnMenu')"), 500);
+    await tocca(await centro("document.getElementById('btnModifica')"), 800);
 
     await cdp.js('__dito.nascondi()');
-    dici(null);
-    await cartello(T.cartello, 12000);
-    dici(T.pedale);
+    await dici(null);
+    await cartello(T.cartello, 12000, 'pedale');
+    await dici('pedale');
     await tocca(await centro("document.getElementById('btnMenu')"), 600);
     await tocca(await centro("document.getElementById('btnPedale')"), 1300);
     await tocca(await centro("document.getElementById('btnPedaleConnetti')"), 2600);
-    dici(T.slotPedale);
+    await dici('slotPedale');
     await tocca(await centro("document.querySelectorAll('#pannelloPedale .tendina-finta')[1]"), 900);
     await tocca(await conTesto('.elenco-voce', 'slot 2'), 900);
     await tocca(await centro("document.getElementById('btnMandaAlPedale')"), 2400);
-    dici(T.inviato);
+    await dici('inviato');
     await scorri(320, 1000, '#pannelloPedale');
     await dorme(3200);
     await cdp.js('__dito.nascondi()');
-    dici(null);
-    await dorme(4500);                                        // sotto il finale
+    await dici(null);
+    let outro = 4.5;                                          // sotto il finale
+    if (VOCE) {
+      await aspetta('finale');
+      const t = ora() - inizio;
+      while (ora() - inizio < VOCE.fine) await dorme(20);
+      outro = VOCE.fine - t;
+    } else await dorme(4500);
     const fine = ora();
     await cdp.manda('Page.stopScreencast');
     await dorme(300);
 
-    const linea = { inizio, fine, fotogrammi, didascalie, cartelli, testi: T, largo: LARGO * DPR, alto: ALTO * DPR };
+    const linea = { inizio, fine, outro, voce: VOCE && { file: VOCE.file, taglio: VOCE.taglio },
+                    fotogrammi, didascalie, cartelli, testi: T, largo: LARGO * DPR, alto: ALTO * DPR };
     fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
     console.log(`registrati ${fotogrammi.length} fotogrammi in ${(fine - inizio).toFixed(1)} s`);
 

@@ -19,7 +19,8 @@
 'use strict';
 
 const L = 1080, H = 1920, FPS = 30;
-const INTRO = 3.0, OUTRO = 4.5;
+const INTRO = 3.0;
+let OUTRO = 4.5;
 const tela = document.getElementById('tela');
 const g = tela.getContext('2d');
 const logo = new Image();
@@ -29,15 +30,26 @@ async function monta() {
   const linea = await (await fetch('/__uscita/linea.json')).json();
   await document.fonts.load('700 60px "Space Grotesk"');
   await document.fonts.load('500 40px Inter');
-  const tipi = ['video/mp4;codecs=avc1.640028', 'video/mp4;codecs=avc1', 'video/mp4',
-                'video/webm;codecs=vp9', 'video/webm'];
+  if (linea.outro) OUTRO = linea.outro;
+  // La voce, se c'è: decodificata tutta prima, così parte quando si vuole.
+  let voce = null;
+  if (linea.voce) {
+    const ctx = new AudioContext();
+    await ctx.resume();
+    const buf = await ctx.decodeAudioData(await (await fetch('/__uscita/' + linea.voce.file)).arrayBuffer());
+    voce = { ctx, buf, taglio: linea.voce.taglio || 0, uscita: ctx.createMediaStreamDestination() };
+  }
+  const tipi = (voce ? ['video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a.40.2',
+                        'video/webm;codecs=vp9,opus'] : [])
+    .concat(['video/mp4;codecs=avc1.640028', 'video/mp4;codecs=avc1', 'video/mp4',
+             'video/webm;codecs=vp9', 'video/webm']);
   const tipo = tipi.find(t => MediaRecorder.isTypeSupported(t));
   const estensione = tipo.startsWith('video/mp4') ? 'mp4' : 'webm';
-  avvia(linea, tipo, estensione);
+  avvia(linea, tipo, estensione, voce);
   return tipo;
 }
 
-function avvia(linea, tipo, estensione) {
+function avvia(linea, tipo, estensione, voce) {
   const F = linea.fotogrammi;
   const durata = linea.fine - linea.inizio;
   const cache = new Map();                    // indice → ImageBitmap
@@ -160,6 +172,7 @@ function avvia(linea, tipo, estensione) {
 
   pronto().then(() => {
     const flusso = tela.captureStream(FPS);
+    if (voce) voce.uscita.stream.getAudioTracks().forEach(t => flusso.addTrack(t));
     const rec = new MediaRecorder(flusso, { mimeType: tipo, videoBitsPerSecond: 10_000_000 });
     const pezzi = [];
     rec.ondataavailable = e => { if (e.data.size) pezzi.push(e.data); };
@@ -169,6 +182,12 @@ function avvia(linea, tipo, estensione) {
     };
     disegna(0);
     rec.start(1000);
+    if (voce) {
+      const sorgente = voce.ctx.createBufferSource();
+      sorgente.buffer = voce.buf;
+      sorgente.connect(voce.uscita);
+      sorgente.start(0, voce.taglio);
+    }
     const t0 = performance.now();
     const giro = setInterval(() => {
       const tau = (performance.now() - t0) / 1000;

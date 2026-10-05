@@ -31,9 +31,16 @@ con Chrome DevTools (il WebSocket di Node 24), fotogrammi dallo screencast, poi
   banco con il pannello «Pedale». Il pedale finto sta in `ampli-finto.js` e risponde al
   ponte come `prova-ble` (elenco, «salvato», rilettura); parte con «Concerto» nello slot 1.
   Il video passa a 2:11, il finale dice «ampli e pedale simulati».
-- **La voce**: `testo-voce.md`, un pezzo per didascalia coi tempi della registrazione. Se
-  l'utente manda l'audio, va montato in `monta.html` (un `<audio>` con `captureStream()`
-  nel MediaRecorder): non è ancora scritto.
+- **La voce**: `testo-voce.md`, un pezzo per didascalia coi tempi della registrazione.
+  L'utente l'ha registrata lo stesso giorno (mp3, 150 s, voce da 5,7 s). **Si allinea dalle
+  pause, non dalle parole** (non la ascolto): un Edge senza finestra decodifica l'audio e dà
+  il volume ogni 100 ms, e i tratti di parlato si contano contro i 15 pezzi del testo. Da lì
+  `voce.json` (taglio in testa e tempo di ogni pezzo nel video) e
+  `registra.js … --voce voce.json`: ogni didascalia aspetta il suo pezzo, il cartello dura
+  fino al pezzo dopo, e `monta.html` decodifica l'audio e lo mette nel MediaRecorder
+  (`avc1 + mp4a`). Ricontrollato decodificando l'audio dell'MP4 finito: tutti i pezzi al
+  decimo di secondo. Il video con la voce dura 2:21. Dopo il pezzo finale c'è un suono
+  piano di 1,3 s (142 s dell'mp3): forse il finale detto a voce bassa, da chiedere.
 
 ## 28 agosto 2026
 
