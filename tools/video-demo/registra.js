@@ -116,7 +116,7 @@ async function apriEdge() {
 
 const TESTI = {
   it: {
-    titolo: 'SparklingTones', sottotitolo: 'Il tuo Spark 2, dal telefono',
+    titolo: 'SparklingTones', sottotitolo: 'Il tuo Spark 2, dal telefono e dal pedale',
     connetti: 'Un tocco, e si collega via Bluetooth',
     letti: 'Legge da solo gli otto preset dell\'ampli',
     libreria: 'Sotto, la tua libreria: tutti gli altri suoni',
@@ -127,10 +127,18 @@ const TESTI = {
     modello: 'Cambi pedale o ampli da un elenco',
     salva: 'Salvi in libreria solo quando ti piace',
     live: 'La vista live: pulsantoni da toccare suonando',
-    banco: 'E banchi tuoi, otto suoni presi dalla libreria',
+    banco: 'I banchi: otto suoni a portata di piede',
+    nuovoBanco: 'Un banco nuovo: gli dai un nome…',
+    riempi: '…e ci metti i suoni della libreria',
+    cartello: ['E poi c’è il pedale', 'quattro footswitch, quattro suoni',
+               'il quinto passa da A a B', 'display e LED: sai cosa suona',
+               'va da solo con lo Spark'],
+    pedale: 'I banchi li mandi al pedale via Bluetooth',
+    slotPedale: 'Scegli il banco e il posto nel pedale',
+    inviato: 'Lì restano, anche a pedale spento',
     fine1: 'SparklingTones', fine2: 'web app gratuita · anche offline',
     fine3: 'mazzrelaz.github.io/SparklingTones',
-    nota: 'registrato con un ampli simulato',
+    nota: 'registrato con ampli e pedale simulati',
   },
 };
 const T = TESTI[LINGUA] || TESTI.it;
@@ -204,6 +212,16 @@ async function main() {
     });
     const ora = () => Date.now() / 1000;
     const dici = testo => didascalie.push({ t: ora(), testo });
+    // Un cartello a tutto schermo, disegnato dal montaggio sopra l'app ferma.
+    const cartelli = [];
+    async function cartello(righe, ms) {
+      const t0 = ora();
+      await dorme(ms);
+      cartelli.push({ t0, t1: ora(), righe });
+    }
+    async function scrivi(testo) {
+      for (const c of testo) { await cdp.manda('Input.insertText', { text: c }); await dorme(120); }
+    }
 
     let dito = { x: LARGO / 2, y: ALTO * 0.62 };
     const mouse = (type, x, y, extra = {}) =>
@@ -238,16 +256,17 @@ async function main() {
       await mouse('mouseReleased', dito.x, dito.y, { clickCount: 1 });
       await cdp.js('__dito.premi(false)');
     }
-    // Lo scorrimento del documento, col dito che lo accompagna.
-    async function scorri(dy, ms = 900) {
-      const da = await cdp.js('scrollY');
+    // Lo scorrimento del documento, o di un pannello, col dito che lo accompagna.
+    async function scorri(dy, ms = 900, dove) {
+      const el = dove ? `document.querySelector(${JSON.stringify(dove)})` : null;
+      const da = await cdp.js(el ? el + '.scrollTop' : 'scrollY');
       const x = LARGO * 0.55, y0 = dy > 0 ? ALTO * 0.75 : ALTO * 0.3;
       await muovi(x, y0, 350);
       await cdp.js('__dito.premi(true)');
       const passi = Math.round(ms / 16);
       for (let i = 1; i <= passi; i++) {
         const k = i / passi, e = 1 - Math.pow(1 - k, 3);
-        await cdp.js(`scrollTo(0, ${da + dy * e}); __dito.mostra(${x}, ${y0 - dy * e * 0.5})`);
+        await cdp.js(`${el ? el + '.scrollTop = ' : 'scrollTo(0, '}${da + dy * e}${el ? '' : ')'}; __dito.mostra(${x}, ${y0 - dy * e * 0.5})`);
         await dorme(16);
       }
       dito = { x, y: y0 - dy * 0.5 };
@@ -326,6 +345,35 @@ async function main() {
     await tocca(await conTesto('#banchi .banco', 'Concerto'), 1000);
     await tocca(await conTesto('.pad', 'Blues'), 1700);
     await tocca(await conTesto('.pad', 'Lead'), 1700);
+
+    dici(T.nuovoBanco);
+    await tocca(await conTesto('#banchi .banco', '＋'), 900);
+    await cdp.js("document.querySelector('.elenco-campo').select()");
+    await scrivi('Prove');
+    await dorme(500);
+    await tocca(await bottone('Crea il banco'), 900);
+    dici(T.riempi);
+    for (const [i, nome] of [[0, 'Funk Rhythm'], [1, 'Crunch Rock'], [2, 'Lead Hendrix']]) {
+      await tocca(await centro(`document.querySelectorAll('.pad')[${i}]`), 800);
+      await tocca(await conTesto('#elencoScegli .voce', nome), 900);
+    }
+    await tocca(await centro("document.getElementById('btnMenu')"), 600);
+    await tocca(await centro("document.getElementById('btnModifica')"), 1500);
+
+    await cdp.js('__dito.nascondi()');
+    dici(null);
+    await cartello(T.cartello, 12000);
+    dici(T.pedale);
+    await tocca(await centro("document.getElementById('btnMenu')"), 600);
+    await tocca(await centro("document.getElementById('btnPedale')"), 1300);
+    await tocca(await centro("document.getElementById('btnPedaleConnetti')"), 2600);
+    dici(T.slotPedale);
+    await tocca(await centro("document.querySelectorAll('#pannelloPedale .tendina-finta')[1]"), 900);
+    await tocca(await conTesto('.elenco-voce', 'slot 2'), 900);
+    await tocca(await centro("document.getElementById('btnMandaAlPedale')"), 2400);
+    dici(T.inviato);
+    await scorri(320, 1000, '#pannelloPedale');
+    await dorme(3200);
     await cdp.js('__dito.nascondi()');
     dici(null);
     await dorme(4500);                                        // sotto il finale
@@ -333,7 +381,7 @@ async function main() {
     await cdp.manda('Page.stopScreencast');
     await dorme(300);
 
-    const linea = { inizio, fine, fotogrammi, didascalie, testi: T, largo: LARGO * DPR, alto: ALTO * DPR };
+    const linea = { inizio, fine, fotogrammi, didascalie, cartelli, testi: T, largo: LARGO * DPR, alto: ALTO * DPR };
     fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
     console.log(`registrati ${fotogrammi.length} fotogrammi in ${(fine - inizio).toFixed(1)} s`);
 

@@ -115,6 +115,22 @@ function avvia(linea, tipo, estensione) {
     if (ultimaBitmap) g.drawImage(ultimaBitmap, x0, y0, w, h);
     g.restore();
 
+    // i cartelli, sopra l'app ferma: il primo rigo grande, gli altri sotto
+    for (const c of linea.cartelli || []) {
+      if (t < c.t0 || t > c.t1) continue;
+      const a = Math.min(dolce((t - c.t0) / 0.5), dolce((c.t1 - t) / 0.5));
+      g.save(); g.globalAlpha = a * 0.95; g.fillStyle = '#060607'; g.fillRect(0, 0, L, H); g.restore();
+      if (logo.complete && logo.naturalWidth) {
+        g.save(); g.globalAlpha = a; g.drawImage(logo, L / 2 - 70, 560, 140, 140); g.restore();
+      }
+      testoCentrato(c.righe[0], 800, '700 84px "Space Grotesk"', '#ffffff', a);
+      c.righe.slice(1).forEach((r, k) => {
+        // le righe entrano una dopo l'altra
+        const ak = a * dolce((t - c.t0 - 0.8 - k * 0.9) / 0.5);
+        testoCentrato(r, 930 + k * 80, '500 46px Inter', k === c.righe.length - 2 ? '#f43f5e' : '#d4d4d8', ak);
+      });
+    }
+
     // titolo e finale
     let velo = 0, quale = null;
     if (tau < INTRO) { velo = 1 - dolce((tau - (INTRO - 0.8)) / 0.8); quale = 'intro'; }

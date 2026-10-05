@@ -1,7 +1,8 @@
 // Ampli finto per il video dimostrativo: sostituisce navigator.bluetooth con
 // uno Spark 2 che vive nella pagina e risponde ai comandi del protocollo vero
 // (lettura degli slot, stato live, invio di un preset, cambio preset,
-// parametri). Serve solo a registrare l'app senza l'ampli davanti: niente di
+// parametri), e con un pedale finto che riceve i banchi dal ponte.
+// Serve solo a registrare l'app senza l'ampli davanti: niente di
 // quello che passa di qui è una misura, e niente finisce nelle catture.
 //
 // I preset degli slot arrivano da window.__PRESET_AMPLI, messo dal
@@ -126,11 +127,100 @@
     };
   }
 
-  let apparecchio = null;
+  /* Il pedale finto: risponde al ponte di src/pedale-ponte.js come
+     pedale/prova-ble, con l'elenco dei banchi e il «salvato» dopo un invio.
+     Parte con un banco già dentro, così l'elenco non è vuoto. */
+  function pedaleFinto() {
+    const banchi = [{ slot: 0, nome: 'Concerto', pieni: 7 }];
+    const ascoltatori = [];
+    let ric = null;                                  // il banco in arrivo
+
+    const rispondi = (codice, testo) => {
+      const b = new TextEncoder().encode(testo);
+      const v = new Uint8Array(1 + b.length);
+      v[0] = codice; v.set(b, 1);
+      setTimeout(() => ascoltatori.forEach(f => f({ target: { value: new DataView(v.buffer) } })), 40);
+    };
+    const elenco = () => rispondi(0x82, banchi.slice().sort((a, b) => a.slot - b.slot)
+      .map(x => `${x.slot}:${x.nome}:${x.pieni}\n`).join(''));
+
+    // nome e preset pieni dal blocco "SPB1": vedi PedalePonte.blocco
+    function leggiBlocco(b) {
+      let i = 5;
+      const testo = () => { const n = b[i++]; const s = new TextDecoder().decode(b.subarray(i, i + n)); i += n; return s; };
+      const nome = testo();
+      const posti = b[i++];
+      let pieni = 0;
+      for (let p = 0; p < posti; p++) {
+        if (!b[i++]) continue;
+        pieni++;
+        testo(); testo();
+        const frame = b[i++];
+        for (let f = 0; f < frame; f++) i += 1 + b[i];
+      }
+      return { nome, pieni };
+    }
+
+    const comando = {
+      writeValueWithResponse: async dati => {
+        const b = new Uint8Array(dati);
+        await dorme(b[0] === 0x11 ? 70 : 20);
+        switch (b[0]) {
+          case 0x01: return rispondi(0x81, 'SparkPedale demo');
+          case 0x02: return elenco();
+          case 0x10:
+            ric = { slot: b[1], dati: [] };
+            return;
+          case 0x11:
+            if (ric) ric.dati.push(...b.subarray(3));
+            return;
+          case 0x12: {
+            if (!ric) return;
+            const { nome, pieni } = leggiBlocco(new Uint8Array(ric.dati));
+            const vecchio = banchi.findIndex(x => x.slot === ric.slot);
+            if (vecchio >= 0) banchi.splice(vecchio, 1);
+            banchi.push({ slot: ric.slot, nome, pieni });
+            rispondi(0x81, `banco "${nome}" salvato nello slot ${ric.slot + 1}`);
+            ric = null;
+            return;
+          }
+          case 0x20: {
+            const k = banchi.findIndex(x => x.slot === b[1]);
+            if (k >= 0) banchi.splice(k, 1);
+            return rispondi(0x81, 'tolto');
+          }
+          case 0x21: return rispondi(0x81, `suona il banco ${b[1] + 1}`);
+          case 0x22:
+            banchi.forEach(x => { x.slot = x.slot === b[1] ? b[2] : x.slot === b[2] ? b[1] : x.slot; });
+            return rispondi(0x81, 'scambiati');
+        }
+      },
+    };
+    const stato = {
+      startNotifications: async () => stato,
+      addEventListener: (tipo, f) => { if (tipo === 'characteristicvaluechanged') ascoltatori.push(f); },
+    };
+    const servizio = {
+      getCharacteristic: async uuid => (String(uuid).startsWith('7a9c0001') ? comando : stato),
+    };
+    let connesso = false;
+    const fine = [];
+    const gatt = {
+      get connected() { return connesso; },
+      connect: async () => { await dorme(600); connesso = true; return gatt; },
+      disconnect: () => { connesso = false; fine.forEach(f => f()); },
+      getPrimaryService: async () => servizio,
+    };
+    return { name: 'SparkPedale', id: 'demo-pedale', gatt,
+             addEventListener: (tipo, f) => { if (tipo === 'gattserverdisconnected') fine.push(f); } };
+  }
+
+  let apparecchio = null, pedale = null;
   const bt = {
     getAvailability: async () => true,
     requestDevice: async opzioni => {
       await dorme(700);
+      if (JSON.stringify(opzioni || {}).includes('7a9c0000')) return (pedale = pedale || pedaleFinto());
       return (apparecchio = apparecchio || ampliFinto());
     },
     addEventListener() {}, removeEventListener() {},

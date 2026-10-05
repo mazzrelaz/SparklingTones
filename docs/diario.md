@@ -10,8 +10,8 @@ Le voci sono in ordine dal più recente al più vecchio.
 ## 5 ottobre 2026 — il video dimostrativo
 
 **`node tools/video-demo/registra.js <cartella> [it|en]`** fa un MP4 verticale 1080×1920 di
-~75 s: collegamento, lettura degli slot, libreria, ▶, scheda, editor (manopole, cambio di
-modello, Salva), vista live, banco. Niente dipendenze: Edge senza finestra guidato da Node
+~2 min: collegamento, lettura degli slot, libreria, ▶, scheda, editor (manopole, cambio di
+modello, Salva), vista live, banchi, invio di un banco al pedale. Niente dipendenze: Edge senza finestra guidato da Node
 con Chrome DevTools (il WebSocket di Node 24), fotogrammi dallo screencast, poi
 `monta.html` li rimonta su un canvas con le didascalie e **MediaRecorder dà l'MP4**
 (H.264: Edge lo ha). Il montaggio va in tempo reale, quindi il giro intero dura ~3 minuti.
@@ -26,6 +26,14 @@ con Chrome DevTools (il WebSocket di Node 24), fotogrammi dallo screencast, poi
   «Salva» dell'editor è `#btnSalvaModifiche`; l'invito a installare la PWA va spento
   (`pwa-installa-no`); «non ancora letto» compare anche fuori dalle schede degli slot.
 - L'inglese (`en`) ha solo il posto: le didascalie inglesi non sono scritte.
+- **Il pedale, aggiunto lo stesso giorno su richiesta dell'utente** («anche se non si vede»):
+  il copione crea il banco «Prove» nella vista live, mostra un cartello sul pedale e manda il
+  banco con il pannello «Pedale». Il pedale finto sta in `ampli-finto.js` e risponde al
+  ponte come `prova-ble` (elenco, «salvato», rilettura); parte con «Concerto» nello slot 1.
+  Il video passa a 2:11, il finale dice «ampli e pedale simulati».
+- **La voce**: `testo-voce.md`, un pezzo per didascalia coi tempi della registrazione. Se
+  l'utente manda l'audio, va montato in `monta.html` (un `<audio>` con `captureStream()`
+  nel MediaRecorder): non è ancora scritto.
 
 ## 28 agosto 2026
 
