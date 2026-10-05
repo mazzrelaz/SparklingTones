@@ -466,3 +466,26 @@ provare sul pedale.
 **Trappola**: leggere la seriale del pedale da PowerShell (`SerialPort` con DTR alto, RTS
 basso) e poi chiudere il processo l'ha mandato **in download mode** (COM13): pedale fermo
 finché non si ricarica. Senza DTR la porta si apre ma il pedale non scrive niente.
+
+### La 1.8, e la seriale del pedale che finalmente si legge — 5 ottobre 2026
+
+**Il registro dal cavo** (`tools/ascolta-pedale.ps1`, catture in
+`captures/2026-10-05-pedale-looper-1.7.txt` e `-1.8.txt`): il core ESP32 scrive solo con
+**DTR e RTS alti**, e va in download mode se le linee passano per (0,1) (1,1) (1,0) (0,0).
+Lo script apre con tutte e due alte e chiude abbassando prima il DTR; **non si uccide il
+processo**: si crea il file `basta` in `%TEMP%` (il registro va in `%TEMP%\seriale-pedale.txt`). Verificato: il pedale resta su COM3.
+
+**Cosa ha detto il registro della 1.7**: `04` → ack e `0x0375 04`; alla fine delle battute
+`07` `08` da soli. Ma **a `0b` e a `09` mandati da noi l'ampli risponde solo l'ack, senza
+`0x0375`**, e la sovraincisione parte lo stesso (l'«annulla» dopo ha avuto effetto). Il
+pedale credeva di suonare, e «ferma» mandava solo `09`: chitarra muta.
+
+**La 1.8**: ogni comando che parte lo segna anche il pedale (`looperEvento(c, true)`),
+la sovraincisione è `0b` + `08` (come Ignitron). **Verificato dall'utente sul pedale**:
+FS1 registra e chiude, FS1 sovraincide e si sente, **FS4 ferma e la chitarra si sente**,
+FS3 riparte.
+
+**Resta FS2**: `0d` mandato **durante** una sovraincisione → ack e niente (registro 1.8, a
+132 s e 152 s). Nella 1.7 un `0d` aveva fatto tornare `07` `08` al giro dopo. Da provare:
+FS2 **dopo** aver chiuso la sovraincisione con FS1; se è quello, FS2 durante la
+sovraincisione manda prima `0c`.

@@ -1,0 +1,71 @@
+   0,321  batteria: 4008 mV letti, 4003 mV mediati, 3 tacche
+  18,840  meta' B mostrata; suona ancora (niente)
+  21,833  looper acceso
+  21,833    TX f0 01 0a 00 02 75 f7
+  21,883    RX 0x0375  f0 01 0a 00 03 75 looper: 0x00 (dall'ampli)
+  21,883  
+  24,522    TX f0 01 0b 04 01 75 00 04 f7
+  24,522  looper: 0x04 (mandato)
+  24,543    RX 0x0475  f0 01 0b 00 04 75 f7
+  24,576    RX 0x0375  f0 01 64 04 03 75 00 04 f7
+  32,558    RX 0x0375  f0 01 65 07 03 75 00 07 f7
+  32,558  looper: 0x07 (dall'ampli)
+  32,597    RX 0x0375  f0 01 66 08 03 75 00 08 f7
+  32,597  looper: 0x08 (dall'ampli)
+  36,566    TX f0 01 0c 0b 01 75 00 0b f7
+  36,566  looper: 0x0b (mandato)
+  36,582    RX 0x0475  f0 01 0c 00 04 75 f7
+  36,865    TX f0 01 0d 08 01 75 00 08 f7
+  36,865  looper: 0x08 (mandato)
+  36,898    RX 0x0475  f0 01 0d 00 04 75 f7
+  36,931    RX 0x0375  f0 01 7d 08 03 75 00 08 f7
+  36,931  looper: 0x08 (dall'ampli)
+  53,394    TX f0 01 0e 0c 01 75 00 0c f7
+  53,394  looper: 0x0c (mandato)
+  53,436    RX 0x0475  f0 01 0e 00 04 75 f7
+  53,693    TX f0 01 0f 09 01 75 00 09 f7
+  53,693  looper: 0x09 (mandato)
+  53,743    RX 0x0475  f0 01 0f 00 04 75 f7
+  58,985    TX f0 01 10 08 01 75 00 08 f7
+  58,985  looper: 0x08 (mandato)
+  59,014    RX 0x0475  f0 01 10 00 04 75 f7
+  59,047    RX 0x0375  f0 01 53 08 03 75 00 08 f7
+  63,720    TX f0 01 11 09 01 75 00 09 f7
+  63,720  looper: 0x09 (mandato)
+  63,736    RX 0x0475  f0 01 11 00 04 75 f7
+ 126,775    TX f0 01 12 0b 01 75 00 0b f7
+ 126,775  looper: 0x0b (mandato)
+ 126,792    RX 0x0475  f0 01 12 00 04 75 f7
+ 126,825    RX 0x0375  f0 01 6c 08 03 75 00 08 f7
+ 126,825  looper: 0x08 (dall'ampli)
+ 127,075    TX f0 01 13 08 01 75 00 08 f7
+ 127,075  looper: 0x08 (mandato)
+ 127,116    RX 0x0475  f0 01 13 00 04 75 f7
+ 127,141    RX 0x0375  f0 01 6f 08 03 75 00 08 f7
+ 127,141  looper: 0x08 (dall'ampli)
+ 132,229    TX f0 01 14 0d 01 75 00 0d f7
+ 132,229  looper: 0x0d (mandato)
+ 132,262    RX 0x0475  f0 01 14 00 04 75 f7
+ 141,974    TX f0 01 15 0c 01 75 00 0c f7
+ 141,974  looper: 0x0c (mandato)
+ 142,007    RX 0x0475  f0 01 15 00 04 75 f7
+ 144,384    TX f0 01 16 0b 01 75 00 0b f7
+ 144,384  looper: 0x0b (mandato)
+ 144,417    RX 0x0475  f0 01 16 00 04 75 f7
+ 144,684    TX f0 01 17 08 01 75 00 08 f7
+ 144,684  looper: 0x08 (mandato)
+ 152,758    TX f0 01 18 0d 01 75 00 0d f7
+ 152,758  looper: 0x0d (mandato)
+ 152,785    RX 0x0475  f0 01 18 00 04 75 f7
+ 153,846    TX f0 01 19 0e 01 75 00 0e f7
+ 153,846  looper: 0x0e (mandato)
+ 153,868    RX 0x0475  f0 01 19 00 04 75 f7
+ 154,456    TX f0 01 1a 0d 01 75 00 0d f7
+ 154,456  looper: 0x0d (mandato)
+ 154,492    RX 0x0475  f0 01 1a 00 04 75 f7
+ 156,648    TX f0 01 1b 0c 01 75 00 0c f7
+ 156,648  looper: 0x0c (mandato)
+ 156,690    RX 0x0475  f0 01 1b 00 04 75 f7
+ 156,939    TX f0 01 1c 09 01 75 00 09 f7
+ 156,939  looper: 0x09 (mandato)
+ 156,972    RX 0x0475  f0 01 1c 00 04 75 f7

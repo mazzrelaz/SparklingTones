@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.7";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello
+static const char* VERSIONE = "1.8";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -278,8 +278,9 @@ static bool    usbMontato  = false;
  * dell'utente, 5 ottobre). Quindi FS4 chiude prima quello che sta registrando.
  *
  * Il comando e' 0x0175 con un byte, **senza 0x00 in coda** (docs/looper.md).
- * Lo stato non lo indoviniamo: lo racconta l'ampli con 0x0375, anche quando si
- * preme un tasto sul suo pannello, e alla domanda 0x0275. Il conteggio col click
+ * Lo stato lo racconta l'ampli con 0x0375, anche quando si preme un tasto sul
+ * suo pannello, e alla domanda 0x0275; ma non tutto (0x0b e 0x09 mandati da
+ * noi no), quindi ogni comando che parte lo segniamo anche noi (looperEvento). Il conteggio col click
  * non si comanda (docs/looper.md): 0x04 registra subito. 0x0d/0x0e (annulla,
  * ripeti) vengono da Ignitron e non sono ancora provati. */
 static bool looper = false;
@@ -1450,8 +1451,13 @@ static void midiPremuto(uint8_t k) {
   schermoSporco = true;
 }
 
-/** Uno stato del looper, raccontato dall'ampli. */
-static void looperEvento(uint8_t v) {
+/** Uno stato del looper: raccontato dall'ampli, o segnato da noi appena il
+ *  comando parte (`mandato`). Serve il secondo perche' **l'ampli non racconta
+ *  tutto**: misurato il 5 ottobre 2026, a 0x0b e a 0x09 mandati da noi risponde
+ *  solo l'ack, eppure la sovraincisione parte e il loop si ferma. Senza
+ *  segnarli, il pedale crede di suonare mentre sovraincide, e «ferma» lascia la
+ *  chitarra muta. Ignitron fa lo stesso. */
+static void looperEvento(uint8_t v, bool mandato = false) {
   switch (v) {
     case LOOP_CONTA: case LOOP_REC:
       loopRegistra = true; loopSovraincide = false; loopSuona = false; loopRipetibile = false; break;
@@ -1476,21 +1482,21 @@ static void looperEvento(uint8_t v) {
       Serial.printf("looper: stato 0x%02x sconosciuto\n", v);
       return;
   }
-  Serial.printf("looper: 0x%02x\n", v);
+  Serial.printf("looper: 0x%02x %s\n", v, mandato ? "(mandato)" : "(dall'ampli)");
   if (looper) { aggiornaLed(); schermoSporco = true; }
 }
 
 /** Un footswitch nel looper. Il comando non parte da qui: lo manda il loop,
- *  cosi' non si infila mai in mezzo a un preset che sta passando. Le
- *  sequenze sono quelle dell'app ufficiale: dopo 0x05 l'ampli manda da solo
- *  0x07 e 0x08, dopo 0x0b da solo 0x08. */
+ *  cosi' non si infila mai in mezzo a un preset che sta passando. Dopo 0x05
+ *  l'ampli manda da solo 0x07 e 0x08; la sovraincisione e' 0x0b piu' 0x08,
+ *  come la manda Ignitron e come la racconta il pannello. */
 static void looperPremuto(uint8_t k) {
   if (!chScrittura) return;                // lo schermo dice gia' che lo Spark non c'e'
   switch (k) {
     case 0:                                // REC/DUB, come il tasto del pannello
       if (loopRegistra)         looperAccoda(LOOP_FINE_REC);
       else if (loopSovraincide) looperAccoda(LOOP_FINE_DUB);
-      else if (loopPresente)    looperAccoda(LOOP_DUB);
+      else if (loopPresente)    looperAccoda(LOOP_DUB, LOOP_SUONA);
       else                      looperAccoda(LOOP_REC);
       break;
     case 1:                                // annulla / ripeti
@@ -2315,6 +2321,7 @@ void loop() {
       const uint8_t c = looperSequenza[looperFatti++];
       looperProssimo = millis() + LOOP_PAUSA_MS;
       manda(frame, costruisci(0x01, 0x75, &c, 1, frame));
+      looperEvento(c, true);               // l'ampli non sempre lo racconta
     }
   }
 

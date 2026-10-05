@@ -192,7 +192,7 @@ scritto «finito»):
 4. Il **looper**: la modalità c'è dalla 1.6, rifatta nella 1.7 (5 ottobre 2026, `docs/looper.md` in fondo), **da provare sul pedale**. Manca il **conteggio fatto in casa** (il pedale conta quattro tempi e 40 ms prima
    dell'uno manda `0x0175` `04`).
 
-**Non leggere la seriale del pedale con `SerialPort` di PowerShell**: con DTR alto, alla chiusura il pedale è finito in download mode (5 ottobre 2026); senza DTR non scrive niente. Si ricarica il firmware su COM13 e riparte.
+**La seriale del pedale si legge con `tools/ascolta-pedale.ps1`** (DTR e RTS alti, chiusura col file `basta`, mai uccidendo il processo: altrimenti download mode, e si ricarica su COM13). Il perché in `docs/looper.md`, «La 1.8».
 
 **Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare
 il firmware il cavo va infilato **dentro**, direttamente nella XIAO.
