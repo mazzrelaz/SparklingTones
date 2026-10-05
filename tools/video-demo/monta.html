@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Montaggio del video</title>
+<style>
+  @font-face { font-family:'Inter'; src:url('../../fonts/inter-latin.woff2') format('woff2'); font-weight:400 700; }
+  @font-face { font-family:'Space Grotesk'; src:url('../../fonts/space-grotesk-latin.woff2') format('woff2'); font-weight:500 700; }
+  body { margin:0; background:#000; }
+  canvas { width:270px; height:480px; }
+</style>
+</head>
+<body>
+<canvas id="tela" width="1080" height="1920"></canvas>
+<script>
+// Rimonta i fotogrammi registrati da registra.js in un video verticale 1080×1920:
+// il telefono al centro, la didascalia sopra, titolo e finale in dissolvenza.
+// Va in tempo reale, perché MediaRecorder prende i tempi dall'orologio.
+'use strict';
+
+const L = 1080, H = 1920, FPS = 30;
+const INTRO = 3.0, OUTRO = 4.5;
+const tela = document.getElementById('tela');
+const g = tela.getContext('2d');
+const logo = new Image();
+logo.src = '../../icons/icon-192.png';
+
+async function monta() {
+  const linea = await (await fetch('/__uscita/linea.json')).json();
+  await document.fonts.load('700 60px "Space Grotesk"');
+  await document.fonts.load('500 40px Inter');
+  const tipi = ['video/mp4;codecs=avc1.640028', 'video/mp4;codecs=avc1', 'video/mp4',
+                'video/webm;codecs=vp9', 'video/webm'];
+  const tipo = tipi.find(t => MediaRecorder.isTypeSupported(t));
+  const estensione = tipo.startsWith('video/mp4') ? 'mp4' : 'webm';
+  avvia(linea, tipo, estensione);
+  return tipo;
+}
+
+function avvia(linea, tipo, estensione) {
+  const F = linea.fotogrammi;
+  const durata = linea.fine - linea.inizio;
+  const cache = new Map();                    // indice → ImageBitmap
+  const inCorso = new Set();
+
+  const carica = i => {
+    if (i < 0 || i >= F.length || cache.has(i) || inCorso.has(i)) return;
+    inCorso.add(i);
+    fetch('/__uscita/fotogrammi/' + F[i].f).then(r => r.blob()).then(createImageBitmap)
+      .then(b => { cache.set(i, b); inCorso.delete(i); });
+  };
+  // l'ultimo fotogramma non successivo al tempo t
+  const indice = t => {
+    let lo = 0, hi = F.length - 1, ris = 0;
+    while (lo <= hi) { const m = (lo + hi) >> 1; if (F[m].t <= t) { ris = m; lo = m + 1; } else hi = m - 1; }
+    return ris;
+  };
+  const didascalia = t => {
+    let d = null;
+    for (const x of linea.didascalie) if (x.t <= t) d = x;
+    return d;
+  };
+
+  // il telefono
+  const s = 0.95, w = linea.largo * s, h = linea.alto * s;
+  const x0 = (L - w) / 2, y0 = H - h - 56;
+
+  function rettangoloTondo(x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+  }
+  function fondo() {
+    g.fillStyle = '#060607'; g.fillRect(0, 0, L, H);
+    const r = g.createRadialGradient(L / 2, 120, 20, L / 2, 120, 900);
+    r.addColorStop(0, 'rgba(230,30,45,.22)'); r.addColorStop(1, 'rgba(230,30,45,0)');
+    g.fillStyle = r; g.fillRect(0, 0, L, H);
+  }
+  function testoCentrato(testo, y, font, colore, alfa = 1) {
+    g.save(); g.globalAlpha = alfa; g.font = font; g.fillStyle = colore;
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(testo, L / 2, y); g.restore();
+  }
+  const dolce = k => k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k);
+
+  let ultimoIndiceDisegnato = -1;
+  let ultimaBitmap = null;
+  function disegna(tau) {
+    const t = linea.inizio + tau;
+    const i = indice(t);
+    for (let k = i; k < i + 45; k++) carica(k);
+    for (const k of cache.keys()) if (k < i - 2) { cache.get(k).close(); cache.delete(k); }
+    let b = null;
+    for (let k = i; k >= 0 && k > i - 60; k--) if (cache.has(k)) { b = cache.get(k); break; }
+    if (b) ultimaBitmap = b;
+
+    fondo();
+    // la didascalia, che entra in dissolvenza
+    const d = didascalia(t);
+    if (d && d.testo) {
+      const a = dolce((t - d.t) / 0.3);
+      g.save(); g.globalAlpha = a;
+      g.fillStyle = '#e11d2e'; g.fillRect(L / 2 - 40, 70, 80, 6);
+      g.restore();
+      testoCentrato(d.testo, 150, '600 46px Inter', '#f4f4f5', a);
+    }
+    // il telefono
+    g.save();
+    g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = 50;
+    rettangoloTondo(x0 - 6, y0 - 6, w + 12, h + 12, 44);
+    g.fillStyle = '#1b1b1f'; g.fill();
+    g.restore();
+    g.save();
+    rettangoloTondo(x0, y0, w, h, 38); g.clip();
+    g.fillStyle = '#000'; g.fillRect(x0, y0, w, h);
+    if (ultimaBitmap) g.drawImage(ultimaBitmap, x0, y0, w, h);
+    g.restore();
+
+    // titolo e finale
+    let velo = 0, quale = null;
+    if (tau < INTRO) { velo = 1 - dolce((tau - (INTRO - 0.8)) / 0.8); quale = 'intro'; }
+    if (tau > durata - OUTRO) { velo = dolce((tau - (durata - OUTRO)) / 0.7); quale = 'outro'; }
+    if (velo > 0) {
+      g.save(); g.globalAlpha = velo * 0.94; g.fillStyle = '#060607'; g.fillRect(0, 0, L, H); g.restore();
+      const T = linea.testi;
+      if (logo.complete && logo.naturalWidth) {
+        g.save(); g.globalAlpha = velo; g.drawImage(logo, L / 2 - 90, 620, 180, 180); g.restore();
+      }
+      testoCentrato(quale === 'intro' ? T.titolo : T.fine1, 900, '700 96px "Space Grotesk"', '#ffffff', velo);
+      if (quale === 'intro') {
+        testoCentrato(T.sottotitolo, 1000, '500 46px Inter', '#d4d4d8', velo);
+      } else {
+        testoCentrato(T.fine2, 1000, '500 44px Inter', '#d4d4d8', velo);
+        testoCentrato(T.fine3, 1080, '600 40px Inter', '#f43f5e', velo);
+        testoCentrato(T.nota, 1800, '400 28px Inter', '#71717a', velo);
+      }
+    }
+  }
+
+  // Si parte quando i primi due secondi sono in memoria.
+  for (let k = 0; k < 40; k++) carica(k);
+  const pronto = () => new Promise(r => {
+    const giro = setInterval(() => { if (cache.has(0) && inCorso.size === 0) { clearInterval(giro); r(); } }, 50);
+  });
+
+  pronto().then(() => {
+    const flusso = tela.captureStream(FPS);
+    const rec = new MediaRecorder(flusso, { mimeType: tipo, videoBitsPerSecond: 10_000_000 });
+    const pezzi = [];
+    rec.ondataavailable = e => { if (e.data.size) pezzi.push(e.data); };
+    rec.onstop = async () => {
+      const blob = new Blob(pezzi, { type: tipo });
+      await fetch('/__salva?nome=demo.' + estensione, { method: 'POST', body: blob });
+    };
+    disegna(0);
+    rec.start(1000);
+    const t0 = performance.now();
+    const giro = setInterval(() => {
+      const tau = (performance.now() - t0) / 1000;
+      if (tau >= durata) { clearInterval(giro); disegna(durata); setTimeout(() => rec.stop(), 200); return; }
+      disegna(tau);
+    }, 1000 / FPS);
+  });
+}
+</script>
+</body>
+</html>

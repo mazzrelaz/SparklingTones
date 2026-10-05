@@ -54,6 +54,7 @@ pedale/prova-espansore/           pulsanti e LED: mappatura guidata e prova a ma
 pedale/prova-usb|display|midi/    altri sketch di prova
 pcb/                              scheda in KiCad, ACCANTONATA: non si tocca e non si propone
 tools/                            simulatore, generatori, sonde, serve.ps1, script scatola
+tools/video-demo/                 video dimostrativo: ampli finto + regia + montaggio MP4
 test/*.html                       protocol 147, transport 64, store 143, backup 41, dropbox 38
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
 ```

@@ -7,6 +7,26 @@ riprende» pesava da sola 13 KB.
 
 Le voci sono in ordine dal più recente al più vecchio.
 
+## 5 ottobre 2026 — il video dimostrativo
+
+**`node tools/video-demo/registra.js <cartella> [it|en]`** fa un MP4 verticale 1080×1920 di
+~75 s: collegamento, lettura degli slot, libreria, ▶, scheda, editor (manopole, cambio di
+modello, Salva), vista live, banco. Niente dipendenze: Edge senza finestra guidato da Node
+con Chrome DevTools (il WebSocket di Node 24), fotogrammi dallo screencast, poi
+`monta.html` li rimonta su un canvas con le didascalie e **MediaRecorder dà l'MP4**
+(H.264: Edge lo ha). Il montaggio va in tempo reale, quindi il giro intero dura ~3 minuti.
+
+- **L'ampli è finto** (`ampli-finto.js`): sostituisce `navigator.bluetooth` e risponde al
+  protocollo vero coi preset di `captures/2026-08-10-libreria-8-preset.json`. La libreria
+  in più e il banco «Concerto» li semina il copione. Nel finale c'è scritto «registrato con
+  un ampli simulato».
+- **Il dito** (`dito.js`) è un cerchio nella pagina; i tocchi sono eventi mouse veri.
+- **Se il copione non trova un elemento** si ferma e lascia `errore.png` nella cartella.
+- Trappole incontrate: i pad hanno il numero davanti al nome (si cerca con `includes`);
+  «Salva» dell'editor è `#btnSalvaModifiche`; l'invito a installare la PWA va spento
+  (`pwa-installa-no`); «non ancora letto» compare anche fuori dalle schede degli slot.
+- L'inglese (`en`) ha solo il posto: le didascalie inglesi non sono scritte.
+
 ## 28 agosto 2026
 
 **Il looper è chiuso, e il bpm si scrive.** Due risultati in una sessione, il secondo più
