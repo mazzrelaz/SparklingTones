@@ -260,7 +260,25 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     const ora = () => Date.now() / 1000;
     // Con la voce, la didascalia aspetta il suo pezzo (un po' prima: si legge
     // e poi si sente). Senza, parte subito.
+    // Con una voce a pezzi (voce-sintetica.mjs) invece i tempi non sono
+    // fissati prima: la scena aspetta che il pezzo di prima sia finito, e il
+    // suo pezzo partirà quando la scena è partita davvero (`momenti`, che il
+    // montaggio usa per mettere ogni pezzo al suo posto).
+    const momenti = {};
+    let ultimoPezzo = null;
+    const finitoIlPezzo = async () => {
+      if (!ultimoPezzo) return;
+      const libero = momenti[ultimoPezzo] + VOCE.pezzi[ultimoPezzo].durata + (VOCE.pausa || 0.7);
+      while (ora() - inizio < libero - 0.3) await dorme(20);
+    };
     const aspetta = async chiave => {
+      if (VOCE && VOCE.pezzi) {
+        if (!VOCE.pezzi[chiave]) return;
+        await finitoIlPezzo();
+        momenti[chiave] = ora() - inizio + 0.3;      // la didascalia appare, la voce subito dopo
+        ultimoPezzo = chiave;
+        return;
+      }
       const quando = VOCE && VOCE.tempi[chiave];
       if (quando === undefined) return;
       while (ora() - inizio < quando - 0.3) await dorme(20);
@@ -274,7 +292,8 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     async function cartello(righe, ms, finoA) {
       await aspetta('cartello');
       const t0 = ora();
-      if (VOCE && VOCE.tempi[finoA] !== undefined) await aspetta(finoA);
+      if (VOCE && VOCE.pezzi) await finitoIlPezzo();            // il cartello dura quanto la sua voce
+      else if (VOCE && VOCE.tempi[finoA] !== undefined) await aspetta(finoA);
       else await dorme(ms);
       cartelli.push({ t0, t1: ora(), righe });
     }
@@ -350,6 +369,7 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await cdp.manda('Page.startScreencast',
       { format: 'jpeg', quality: 88, maxWidth: LARGO * DPR, maxHeight: ALTO * DPR, everyNthFrame: 1 });
     const inizio = ora();
+    if (VOCE && VOCE.pezzi && VOCE.pezzi.titolo) { momenti.titolo = 0.8; ultimoPezzo = 'titolo'; }
     await cdp.js('__dito.mostra(-100,-100)');
     await dorme(3200);                                        // sotto il titolo
 
@@ -437,7 +457,12 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await cdp.js('__dito.nascondi()');
     await dici(null);
     let outro = 4.5;                                          // sotto il finale
-    if (VOCE) {
+    if (VOCE && VOCE.pezzi) {
+      await aspetta('finale');
+      const t = ora() - inizio;
+      outro = Math.max(4.5, VOCE.pezzi.finale.durata + 1.5);
+      while (ora() - inizio < t + outro) await dorme(20);
+    } else if (VOCE) {
       await aspetta('finale');
       const t = ora() - inizio;
       while (ora() - inizio < VOCE.fine) await dorme(20);
@@ -447,7 +472,8 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await cdp.manda('Page.stopScreencast');
     await dorme(300);
 
-    const linea = { inizio, fine, outro, voce: VOCE && { file: VOCE.file, taglio: VOCE.taglio, silenzi: VOCE.silenzi || [] },
+    const linea = { inizio, fine, outro, voce: VOCE && { file: VOCE.file, taglio: VOCE.taglio, silenzi: VOCE.silenzi || [],
+                                      pezzi: VOCE.pezzi, momenti },
                     fotogrammi, didascalie, cartelli, testi: T, largo: LARGO * DPR, alto: ALTO * DPR };
     fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
     console.log(`registrati ${fotogrammi.length} fotogrammi in ${(fine - inizio).toFixed(1)} s`);

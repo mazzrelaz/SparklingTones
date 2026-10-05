@@ -37,7 +37,8 @@ async function monta() {
   if (linea.voce) {
     const ctx = new OfflineAudioContext(2, 1, 48000);
     const buf = await ctx.decodeAudioData(await (await fetch('/__uscita/' + linea.voce.file)).arrayBuffer());
-    voce = { buf, taglio: linea.voce.taglio || 0, silenzi: linea.voce.silenzi || [] };
+    voce = { buf, taglio: linea.voce.taglio || 0, silenzi: linea.voce.silenzi || [],
+             pezzi: linea.voce.pezzi, momenti: linea.voce.momenti };
   }
   avvia(linea, voce).catch(e =>
     fetch('/__salva?nome=errore.txt', { method: 'POST', body: String((e && e.stack) || e) }));
@@ -214,10 +215,20 @@ async function avvia(linea, voce) {
   if (voce) {
     const sr = 48000, ch = 2, n = Math.round(durata * sr);
     const pcm = [new Float32Array(n), new Float32Array(n)];
-    const da = Math.round(voce.taglio * voce.buf.sampleRate);
     for (let c = 0; c < ch; c++) {
       const sorgente = voce.buf.getChannelData(Math.min(c, voce.buf.numberOfChannels - 1));
-      pcm[c].set(sorgente.subarray(da, da + n));
+      if (voce.pezzi) {
+        // a pezzi: ognuno dove la sua scena è partita davvero
+        for (const [chiave, quando] of Object.entries(voce.momenti)) {
+          const pz = voce.pezzi[chiave];
+          const x = Math.round(pz.da * sr), y = Math.round((pz.da + pz.durata) * sr);
+          const dove = Math.round(quando * sr);
+          pcm[c].set(sorgente.subarray(x, Math.min(y, x + n - dove)), dove);
+        }
+      } else {
+        const da = Math.round(voce.taglio * voce.buf.sampleRate);
+        pcm[c].set(sorgente.subarray(da, da + n));
+      }
     }
     const rampa = 480;                                   // 10 ms, niente clic
     for (const [x0, x1] of voce.silenzi) {

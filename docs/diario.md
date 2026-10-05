@@ -55,6 +55,17 @@ con Chrome DevTools (il WebSocket di Node 24), fotogrammi dallo screencast, poi
   appenderlo per sempre.
 - Il mio provino (un `<video>` che salta ai tempi e disegna) **dà bianco il primo
   fotogramma che preleva**, qualunque sia: non è il video.
+- **La voce inglese è sintetica** (l'utente non voleva la sua): **Kokoro** (Apache 2.0, in
+  locale, niente account), voce `am_michael` scelta fra cinque prove. `voce-sintetica.mjs`
+  genera un pezzo per scena e scrive `voce.wav` + `voce.json` con `pezzi` (dove sta ogni
+  pezzo e quanto dura). **Con i pezzi i tempi non si fissano prima**: ogni scena aspetta che
+  il pezzo di prima sia finito (+0,7 s), e il montaggio mette ogni pezzo dove la sua scena è
+  partita davvero (`momenti` in `linea.json`). Il primo tentativo, coi tempi fissati prima,
+  sfasava di 4 s: la scena del pedale ci aveva messo 14 s invece di 8.
+  **Kokoro non sta nel repository**: `npm install kokoro-js` in una cartella qualunque (gli
+  script d'installazione bloccati da npm 11 non servono su Windows), e quella cartella si
+  passa allo script. Il modello (fp32, 325 MB) lo scarica da Hugging Face alla prima volta;
+  al primo caricamento l'antivirus lo tiene bloccato (errore 13): si riprova.
 - **Il pedale, aggiunto lo stesso giorno su richiesta dell'utente** («anche se non si vede»):
   il copione crea il banco «Prove» nella vista live, mostra un cartello sul pedale e manda il
   banco con il pannello «Pedale». Il pedale finto sta in `ampli-finto.js` e risponde al
