@@ -444,3 +444,25 @@ il looper non ce l'ha: scegliendolo si esce, e da NEO non si entra).
 stessi codici degli eventi; cosa fa `04` con un loop già presente; cosa fa `05` in Auto Mode
 (click acceso, dove dal pannello REC non chiude); se uscire dal looper e cambiare preset
 lascia suonare il loop. Il conteggio fatto in casa non c'è ancora.
+
+### La prima prova dell'utente, e la 1.7 — 5 ottobre 2026
+
+Con la 1.6, dall'utente: FS1 registra, e dopo le battute impostate **l'ampli passa da solo a
+sovraincidere**; FS4 non lo ferma (va ripremuto FS1, che chiude e suona); FS2 è inutile,
+perché sul pannello REC/DUB è un tasto solo; e **dopo FS4 la chitarra dal vivo a volte
+sparisce**, finché non si preme «suona». Col PLAY/STOP del pannello la chitarra si sente.
+
+**La causa, dalla cattura dell'app ufficiale del 14 agosto**: per fermare una sovraincisione
+l'app manda **`0c` e poi `09`**; noi mandavamo solo `09`, e l'ampli restava a sovraincidere
+col loop fermo. Ignitron fa lo stesso (`sparkLooperStopAll`: `09` più la chiusura della
+registrazione).
+
+**La 1.7** imita il pannello: **FS1 = REC/DUB** (vuoto → `04`; registra → `05`, e l'ampli
+manda da solo `07` `08`; loop pronto → `0b`, e l'ampli manda `08`; sovraincide → `0c`),
+**FS2 = annulla/ripeti** (`0d`/`0e`, da Ignitron, **mai provati**), FS3 `08`, **FS4 chiude
+prima quello che registra** (`05` o `0c`, poi `09` dopo 300 ms), tenuto 2 s `0a`. Da
+provare sul pedale.
+
+**Trappola**: leggere la seriale del pedale da PowerShell (`SerialPort` con DTR alto, RTS
+basso) e poi chiudere il processo l'ha mandato **in download mode** (COM13): pedale fermo
+finché non si ricarica. Senza DTR la porta si apre ma il pedale non scrive niente.

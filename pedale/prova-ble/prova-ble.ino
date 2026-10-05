@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.6";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper
+static const char* VERSIONE = "1.7";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -266,22 +266,40 @@ static bool    usbMontato  = false;
 /* --- Il looper dello Spark 2 -------------------------------------------------
  *
  * Chiesto dall'utente il 5 ottobre 2026, dentro la modalita' Spark: **FS5 tenuto
- * tre secondi** entra ed esce; FS1 registra (ripremuto chiude e suona), FS2
- * sovraincide (ripremuto chiude), FS3 suona, FS4 ferma, **FS4 tenuto due
- * secondi cancella il loop**. Il NEO il looper non ce l'ha. Non si ricorda allo
- * spegnimento: si riparte dai preset.
+ * tre secondi** entra ed esce. Rifatto lo stesso giorno dopo la prima prova, sul
+ * modello del pannello e dell'app ufficiale: **FS1 e' REC/DUB** (registra; se
+ * registra chiude e suona; col loop pronto sovraincide; se sovraincide chiude),
+ * FS2 annulla/ripeti, FS3 suona, FS4 ferma, **FS4 tenuto due secondi cancella
+ * il loop**. Il NEO il looper non ce l'ha. Non si ricorda allo spegnimento.
+ *
+ * **Fermare non e' solo 0x09.** Durante una sovraincisione l'app ufficiale manda
+ * prima 0x0c e poi 0x09 (cattura del 14 agosto); col solo 0x09 l'ampli resta a
+ * sovraincidere col loop fermo e **la chitarra dal vivo sparisce** (prova
+ * dell'utente, 5 ottobre). Quindi FS4 chiude prima quello che sta registrando.
  *
  * Il comando e' 0x0175 con un byte, **senza 0x00 in coda** (docs/looper.md).
  * Lo stato non lo indoviniamo: lo racconta l'ampli con 0x0375, anche quando si
  * preme un tasto sul suo pannello, e alla domanda 0x0275. Il conteggio col click
- * non si comanda (docs/looper.md): 0x04 registra subito. */
+ * non si comanda (docs/looper.md): 0x04 registra subito. 0x0d/0x0e (annulla,
+ * ripeti) vengono da Ignitron e non sono ancora provati. */
 static bool looper = false;
 static const uint8_t LOOP_CONTA = 0x02, LOOP_REC = 0x04, LOOP_FINE_REC = 0x05,
                      LOOP_REC_FATTA = 0x07, LOOP_SUONA = 0x08, LOOP_FERMA = 0x09,
                      LOOP_CANCELLA = 0x0a, LOOP_DUB = 0x0b, LOOP_FINE_DUB = 0x0c,
-                     LOOP_VUOTO = 0x00;
+                     LOOP_ANNULLA = 0x0d, LOOP_RIPETI = 0x0e, LOOP_VUOTO = 0x00;
 static bool loopRegistra = false, loopSovraincide = false, loopSuona = false, loopPresente = false;
-static int16_t looperInCoda = -1;              // il comando da mandare, lo manda il loop
+static bool loopRipetibile = false;            // dopo un «annulla»: il prossimo e' «ripeti»
+/* I comandi da mandare, anche due di fila (0x0c poi 0x09): li manda il loop,
+ * uno ogni LOOP_PAUSA_MS, cosi' l'ampli finisce il primo prima del secondo. */
+static uint8_t  looperSequenza[3];
+static uint8_t  looperQuanti = 0, looperFatti = 0;
+static uint32_t looperProssimo = 0;
+static const uint32_t LOOP_PAUSA_MS = 300;   // dopo 0x05 l'ampli manda 0x07 0x08 entro ~150 ms
+static void looperAccoda(uint8_t a, uint8_t b = 0xff) {
+  looperQuanti = looperFatti = 0;              // vince l'ultima pressione
+  looperSequenza[looperQuanti++] = a;
+  if (b != 0xff) looperSequenza[looperQuanti++] = b;
+}
 static bool    looperChiedi = false;           // chiedere lo stato (0x0275) appena si puo'
 static uint8_t metaPrimaDiFS5 = 0;             // FS5 cambia meta' alla pressione: tenuto, si rimette
 /* Gli 0x0375 arrivano nel callback delle notifiche, a volte due attaccati
@@ -440,12 +458,11 @@ static void aggiornaLed() {
     mcpScrivi(MCP_OLATB, maschera);
     return;
   }
-  /* Nel looper: rosso su FS1 mentre registra e su FS2 mentre sovraincide, verde
-   * su FS3 mentre suona, verde su FS4 da fermo col loop pronto. */
+  /* Nel looper: rosso su FS1 mentre registra o sovraincide, verde su FS3 mentre
+   * il loop suona, verde su FS4 da fermo col loop pronto. */
   if (looper) {
-    if (loopRegistra)    maschera |= (uint8_t)(1 << LINEA_ROSSO[0]);
-    if (loopSovraincide) maschera |= (uint8_t)(1 << LINEA_ROSSO[1]);
-    if (loopSuona && !loopSovraincide && !loopRegistra) maschera |= (uint8_t)(1 << LINEA_VERDE[2]);
+    if (loopRegistra || loopSovraincide) maschera |= (uint8_t)(1 << LINEA_ROSSO[0]);
+    if (loopSuona && !loopRegistra)      maschera |= (uint8_t)(1 << LINEA_VERDE[2]);
     if (loopPresente && !loopSuona && !loopRegistra)    maschera |= (uint8_t)(1 << LINEA_VERDE[3]);
     mcpScrivi(MCP_OLATB, maschera);
     return;
@@ -675,9 +692,12 @@ static void disegnaSchermo() {
   /* Il looper: le quattro righe dicono cosa fa ogni footswitch, e in negativo
    * quello che l'ampli sta facendo, con la stessa regola dei LED. */
   if (looper) {
-    static const char* voci[4] = { "Registra", "Sovraincidi", "Suona", "Ferma / Cancella" };
-    const bool accesi[4] = { loopRegistra, loopSovraincide,
-                             loopSuona && !loopSovraincide && !loopRegistra,
+    // La prima riga dice cosa fa FS1 adesso, come il tasto REC/DUB del pannello.
+    const char* rec = loopRegistra ? "Rec: chiudi" : loopSovraincide ? "Dub: chiudi"
+                    : loopPresente ? "Sovraincidi" : "Registra";
+    const char* voci[4] = { rec, loopRipetibile ? "Ripeti" : "Annulla", "Suona", "Ferma / Cancella" };
+    const bool accesi[4] = { loopRegistra || loopSovraincide, false,
+                             loopSuona && !loopRegistra,
                              loopPresente && !loopSuona && !loopRegistra };
     for (uint8_t i = 0; i < 4; i++) {
       const int y = 15 + i * 12;
@@ -1434,7 +1454,11 @@ static void midiPremuto(uint8_t k) {
 static void looperEvento(uint8_t v) {
   switch (v) {
     case LOOP_CONTA: case LOOP_REC:
-      loopRegistra = true; loopSovraincide = false; loopSuona = false; break;
+      loopRegistra = true; loopSovraincide = false; loopSuona = false; loopRipetibile = false; break;
+    case LOOP_ANNULLA:
+      loopRipetibile = true; break;
+    case LOOP_RIPETI:
+      loopRipetibile = false; break;
     case LOOP_FINE_REC: case LOOP_REC_FATTA:
       loopRegistra = false; loopPresente = true; break;
     case LOOP_SUONA:
@@ -1442,12 +1466,12 @@ static void looperEvento(uint8_t v) {
     case LOOP_FERMA:
       loopRegistra = loopSovraincide = loopSuona = false; break;
     case LOOP_DUB:
-      loopSovraincide = true; loopPresente = true; break;
+      loopSovraincide = true; loopPresente = true; loopRipetibile = false; break;
     case LOOP_FINE_DUB:
       loopSovraincide = false; break;
     case LOOP_CANCELLA: case LOOP_VUOTO:
       if (looper && loopPresente) avvisa("loop cancellato");
-      loopRegistra = loopSovraincide = loopSuona = loopPresente = false; break;
+      loopRegistra = loopSovraincide = loopSuona = loopPresente = loopRipetibile = false; break;
     default:
       Serial.printf("looper: stato 0x%02x sconosciuto\n", v);
       return;
@@ -1457,12 +1481,31 @@ static void looperEvento(uint8_t v) {
 }
 
 /** Un footswitch nel looper. Il comando non parte da qui: lo manda il loop,
- *  cosi' non si infila mai in mezzo a un preset che sta passando. */
+ *  cosi' non si infila mai in mezzo a un preset che sta passando. Le
+ *  sequenze sono quelle dell'app ufficiale: dopo 0x05 l'ampli manda da solo
+ *  0x07 e 0x08, dopo 0x0b da solo 0x08. */
 static void looperPremuto(uint8_t k) {
   if (!chScrittura) return;                // lo schermo dice gia' che lo Spark non c'e'
-  looperInCoda = k == 0 ? (loopRegistra ? LOOP_FINE_REC : LOOP_REC)
-               : k == 1 ? (loopSovraincide ? LOOP_FINE_DUB : LOOP_DUB)
-               : k == 2 ? LOOP_SUONA : LOOP_FERMA;
+  switch (k) {
+    case 0:                                // REC/DUB, come il tasto del pannello
+      if (loopRegistra)         looperAccoda(LOOP_FINE_REC);
+      else if (loopSovraincide) looperAccoda(LOOP_FINE_DUB);
+      else if (loopPresente)    looperAccoda(LOOP_DUB);
+      else                      looperAccoda(LOOP_REC);
+      break;
+    case 1:                                // annulla / ripeti
+      if (!loopPresente) { avvisa("niente da annullare"); return; }
+      looperAccoda(loopRipetibile ? LOOP_RIPETI : LOOP_ANNULLA);
+      break;
+    case 2:
+      looperAccoda(LOOP_SUONA);
+      break;
+    default:                               // ferma: prima si chiude quello che registra
+      if (loopRegistra)         looperAccoda(LOOP_FINE_REC, LOOP_FERMA);
+      else if (loopSovraincide) looperAccoda(LOOP_FINE_DUB, LOOP_FERMA);
+      else                      looperAccoda(LOOP_FERMA);
+      break;
+  }
 }
 
 /** FS5 tenuto tre secondi: dentro o fuori dal looper. */
@@ -1470,8 +1513,8 @@ static void cambiaLooper() {
   if (!looper && ampliScelto == AMPLI_NEO) { avvisa("il NEO non ha looper"); return; }
   looper = !looper;
   inCoda = -1;
-  looperInCoda = -1;
-  if (looper) looperChiedi = true;         // com'e' messo adesso: lo dice l'ampli
+  looperQuanti = looperFatti = 0;
+  if (looper) looperChiedi = true;        // com'e' messo adesso: lo dice l'ampli
   avvisa(looper ? "modalita' looper" : "modalita' preset");
   Serial.printf("looper %s\n", looper ? "acceso" : "spento");
   aggiornaLed();
@@ -2144,7 +2187,7 @@ void loop() {
     nomeSuona[0] = 0;
     // Del looper non sappiamo piu' niente: lo richiede al prossimo aggancio.
     loopRegistra = loopSovraincide = loopSuona = loopPresente = false;
-    looperInCoda = -1;
+    looperQuanti = looperFatti = 0;
     looperChiedi = true;
     aggiornaLed();
     schermoSporco = true;
@@ -2237,7 +2280,7 @@ void loop() {
       if (tenutoDa == 0) tenutoDa = millis() | 1;
       else if (!fatto && millis() - tenutoDa > 2000) {
         fatto = true;
-        if (chScrittura) looperInCoda = LOOP_CANCELLA;
+        if (chScrittura) looperAccoda(LOOP_CANCELLA);
       }
     } else {
       tenutoDa = 0;
@@ -2268,9 +2311,9 @@ void loop() {
       looperChiedi = false;
       manda(frame, costruisci(0x02, 0x75, nullptr, 0, frame));
     }
-    if (looperInCoda >= 0) {
-      const uint8_t c = (uint8_t)looperInCoda;
-      looperInCoda = -1;
+    if (looperFatti < looperQuanti && (int32_t)(millis() - looperProssimo) >= 0) {
+      const uint8_t c = looperSequenza[looperFatti++];
+      looperProssimo = millis() + LOOP_PAUSA_MS;
       manda(frame, costruisci(0x01, 0x75, &c, 1, frame));
     }
   }
