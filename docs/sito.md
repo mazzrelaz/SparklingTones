@@ -21,6 +21,16 @@ verificato, https compreso.
 `media/LEGGIMI.md` dice quali servono e come registrarli. Se l'utente dice «il video», è
 quello. **Capitolo in stand by** per sua richiesta, il 27 agosto 2026.
 
+**5 ottobre 2026: il video del pedale c'è, ed è su YouTube** (Short `xbub9KMWcM8`), nella
+sezione del pedale di tutte e due le lingue. **Non è un embed**: è una copertina servita dal
+sito (`media/pedale.jpg`, un fotogramma di `Sparkpedal.mov` a 1:00, ritagliato) col tasto
+play, che apre YouTube. Un iframe di YouTube caricherebbe Google e i suoi cookie all'apertura
+della pagina, e la privacy promette il contrario: **verificato, la pagina fa 6 richieste e
+nessuna fuori dal sito**. I blocchi `<video>` commentati restano lì, per le clip dell'app.
+Lo stesso giorno: **lo Spark NEO** nel sito (titolo, guida, un avviso con cosa è provato e
+cosa no, pedale, protocollo), e il pedale non più «schedina nuda» ma «costruito e suona».
+L'inglese l'ha chiesto l'utente insieme all'italiano: rifatto a mano sugli stessi punti.
+
 Non fatto perché è la facciata pubblica e la decide lui: il `README.md` dell'app punta
 ancora solo a `github.io`, senza il link al sito. La domanda gli è stata fatta e non ha
 risposto.

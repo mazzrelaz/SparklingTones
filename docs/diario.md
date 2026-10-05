@@ -7,6 +7,26 @@ riprende» pesava da sola 13 KB.
 
 Le voci sono in ordine dal più recente al più vecchio.
 
+## 5 ottobre 2026, pomeriggio — il doppiaggio del video del pedale, e il sito
+
+- **Il video del pedale in inglese**, girato dall'utente. Il primo tentativo (audio originale
+  al 12% sotto la voce, poi a zero tranne la chitarra) **non andava: lo stacco audio era
+  «orrendo»**. Rifatto come vuole lui: **lui gira senza parlare sopra la chitarra, io gli do
+  solo la voce** (WAV 48 kHz lungo quanto il video, più le frasi separate col tempo nel nome),
+  e monta lui in Resolve.
+- **Trascrizione con Whisper** (`onnx-community/whisper-large-v3-turbo`, q8, in locale,
+  ~4 min per 6 min di audio). Le frasi si piazzano dagli inviluppi di volume, non dai tempi
+  di Whisper, che sono approssimativi.
+- **Errore mio, segnalato dall'utente («mancano molte parti»)**: Whisper aveva preso tutto
+  (verificato ritrascrivendo a pezzi), **ero io ad aver riassunto e raggruppato**. La regola:
+  traduzione fedele, un pezzo per ogni respiro dell'originale, e Michael deve parlare
+  quanto lui (171 s contro 172).
+- **La versione italiana sintetica è scartata dall'utente** (né Nicola né Sara). Per farla:
+  kokoro-js parla solo inglese, ma le voci `if_sara`/`im_nicola` ci sono e la pronuncia
+  la fa `@echogarden/espeak-ng-emscripten` (espeak completo, GPL, solo strumento locale):
+  testo → IPA (`synthesize_ipa`, togliere `_` e i `(en)…(it)`) → `generate_from_ids`.
+- Gli strumenti di questo pomeriggio stanno nello scratchpad, non nel repository.
+
 ## 5 ottobre 2026 — il video dimostrativo
 
 **`node tools/video-demo/registra.js <cartella> [it|en]`** fa un MP4 verticale 1080×1920 di
