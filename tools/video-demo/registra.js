@@ -6,7 +6,8 @@
 // voce.json sta nella cartella di uscita e dice il file audio, quanti secondi
 // tagliarne in testa, e quando parte ogni pezzo nel video:
 //   { "file": "voce.mp3", "taglio": 4.5, "tempi": { "connetti": 3.5, … },
-//     "finale": 134.5, "fine": 141.5 }
+//     "finale": 134.5, "fine": 141.5, "silenzi": [[142.0, 144.5]] }
+// «silenzi» sono tratti dell'audio da zittire (rumori), in secondi del file.
 // Ogni didascalia con un tempo aspetta il suo pezzo prima di partire; il
 // montaggio mette l'audio nell'MP4.
 //
@@ -389,8 +390,8 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await scorri(-(await cdp.js('scrollY')), 700);
     await dici('live');
     await tocca(await centro("document.getElementById('btnVista')"), 1000);
-    for (const s of ['A2', 'B1', 'A4']) {
-      await tocca(await conTesto('.pad', s), 1100);
+    for (const s of ['A2', 'B1']) {
+      await tocca(await conTesto('.pad', s), 1000);
     }
     await dici('banco');
     await tocca(await conTesto('#banchi .banco', T.bancoPronto), 1000);
@@ -438,7 +439,7 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await cdp.manda('Page.stopScreencast');
     await dorme(300);
 
-    const linea = { inizio, fine, outro, voce: VOCE && { file: VOCE.file, taglio: VOCE.taglio },
+    const linea = { inizio, fine, outro, voce: VOCE && { file: VOCE.file, taglio: VOCE.taglio, silenzi: VOCE.silenzi || [] },
                     fotogrammi, didascalie, cartelli, testi: T, largo: LARGO * DPR, alto: ALTO * DPR };
     fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
     console.log(`registrati ${fotogrammi.length} fotogrammi in ${(fine - inizio).toFixed(1)} s`);

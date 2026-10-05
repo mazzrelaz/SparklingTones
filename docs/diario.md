@@ -31,6 +31,14 @@ con Chrome DevTools (il WebSocket di Node 24), fotogrammi dallo screencast, poi
   lo stesso copione va nelle due lingue. Le scritte troppo larghe il montaggio le stringe.
   Il testo per la voce inglese è `testo-voce.en.md`, coi nomi veri dei tasti inglesi
   («Tweak», «Send»…). Video inglese senza voce: 2:09.
+- **I due video con la voce, finiti**: italiano 2:19, inglese 2:39, sul Desktop dell'utente.
+  Il suono basso dopo l'ultima frase italiana era **un rumore** (detto dall'utente): si zittisce
+  con `"silenzi": [[da, a]]` in `voce.json`, secondi del file audio, e il montaggio ci mette
+  un volume a zero. Nell'audio inglese un clic a 1,8 s, zittito allo stesso modo.
+- **La registrazione va a orologio: col computer carico le scene rallentano** e la voce resta
+  indietro (un giro con Audacity aperto e un'installazione in corso: 161 s invece di 139). Si
+  vede subito dai tempi delle didascalie in `linea.json`; si rifà.
+- **Nella vista live i tocchi sono due, non tre**: la voce inglese dura lì 6 s e la scena 9.
 - **Il pedale, aggiunto lo stesso giorno su richiesta dell'utente** («anche se non si vede»):
   il copione crea il banco «Prove» nella vista live, mostra un cartello sul pedale e manda il
   banco con il pannello «Pedale». Il pedale finto sta in `ampli-finto.js` e risponde al

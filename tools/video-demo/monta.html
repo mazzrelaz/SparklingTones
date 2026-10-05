@@ -190,8 +190,20 @@ function avvia(linea, tipo, estensione, voce) {
     if (voce) {
       const sorgente = voce.ctx.createBufferSource();
       sorgente.buffer = voce.buf;
-      sorgente.connect(voce.uscita);
-      sorgente.start(0, voce.taglio);
+      // I rumori si zittiscono con un volume a zero, in tempi del file audio.
+      const volume = voce.ctx.createGain();
+      const t0a = voce.ctx.currentTime + 0.05;
+      for (const [da, a] of linea.voce.silenzi || []) {
+        const x = t0a + da - voce.taglio, y = t0a + a - voce.taglio;
+        if (y <= t0a) continue;
+        volume.gain.setValueAtTime(1, Math.max(t0a, x - 0.05));
+        volume.gain.linearRampToValueAtTime(0, Math.max(t0a, x));
+        volume.gain.setValueAtTime(0, y);
+        volume.gain.linearRampToValueAtTime(1, y + 0.05);
+      }
+      sorgente.connect(volume);
+      volume.connect(voce.uscita);
+      sorgente.start(t0a, voce.taglio);
     }
     const t0 = performance.now();
     const giro = setInterval(() => {
