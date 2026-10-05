@@ -21,8 +21,9 @@ verificato, https compreso.
 `media/LEGGIMI.md` dice quali servono e come registrarli. Se l'utente dice «il video», è
 quello. **Capitolo in stand by** per sua richiesta, il 27 agosto 2026.
 
-**5 ottobre 2026: il video del pedale c'è, ed è su YouTube** (Short `xbub9KMWcM8`), nella
-sezione del pedale di tutte e due le lingue. **Non è un embed**: è una copertina servita dal
+**5 ottobre 2026: due video su YouTube.** Il pedale (`zt7lX5W87WA`) nella sezione del pedale; l'app
+(lo Short `xbub9KMWcM8`, copertina verticale `media/app.jpg` dall'editor) in «Cosa fa». Al primo giro
+ho messo lo Short sul pedale: **lo Short è il video dell'app**, l'utente l'ha corretto. Tutte e due le lingue. **Non è un embed**: è una copertina servita dal
 sito (`media/pedale.jpg`, un fotogramma di `Sparkpedal.mov` a 1:00, ritagliato) col tasto
 play, che apre YouTube. Un iframe di YouTube caricherebbe Google e i suoi cookie all'apertura
 della pagina, e la privacy promette il contrario: **verificato, la pagina fa 6 richieste e
