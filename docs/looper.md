@@ -489,3 +489,13 @@ FS3 riparte.
 132 s e 152 s). Nella 1.7 un `0d` aveva fatto tornare `07` `08` al giro dopo. Da provare:
 FS2 **dopo** aver chiuso la sovraincisione con FS1; se è quello, FS2 durante la
 sovraincisione manda prima `0c`.
+
+### Come conta Ignitron — letto nel sorgente il 6 ottobre 2026
+
+`sparkLooperRec()`: col click acceso manda `02`, poi **conta da sé** una battuta col suo
+timer (`SparkLooperControl`, intervallo `60000 / bpm` dalle impostazioni lette con
+`0x0276`) e alla seconda battuta manda `04`. Cioè **il conteggio fatto in casa**, lo
+stesso piano nostro, con in più un `02` che a noi l'ampli ignora (misurato in agosto).
+Niente nel README né nelle issue dice che il click dell'ampli suoni: probabile che il
+conteggio di Ignitron sia **solo sul suo display**. In più ha una «config mode» (battute,
+straight/shuffle, click acceso/spento, tap tempo) che scrive `0x0176`.
