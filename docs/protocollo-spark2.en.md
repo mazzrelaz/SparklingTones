@@ -531,3 +531,46 @@ bytes — is in `docs/looper.md`, «Come si conclude»; the conclusion is that *
 and it's the `0x0170` key, and it isn't a door we open**. **Don't add probes on the bytes.**
 The only thing left would be **to ask Ignitron**, which sends COUNTIN without any key: if it
 works for them, the conclusion falls.
+
+## Spark NEO — 2 October 2026
+
+The user has a Spark NEO (headphones with the amp inside). Measured with `tools/neo-sonda.html`,
+captures `captures/2026-10-02-neo-sonda-lettura.json` and `…-caricamento.json`:
+
+- **It's found with the usual filter** (service `0xFFC0`): the BLE name is «Spark NEO Control»,
+  `0x0311` answers «Spark NEO», firmware `0x032f` = `ce 01 10 01 3c` → 1.16.1.60.
+- **4 slots, 0–3.** `0x0201` on slots 4–7 answers a single short `0x0301`, `00 n 00`, and
+  nothing else: the read times out (4 s each).
+- Presets are read and decoded by our decoder without errors; the models in the user's four
+  presets are all in `MODELLI`.
+- **Notifications don't go over 20 bytes** (the Spark 2 reaches 39), **but 39-byte writes go
+  through**: a whole preset in 16 chunks of 25, same seq, writes not split → 16 acks, read back
+  from the live `0x0201`, **heard changing in the headphones**. Then `0x0138` on 0 goes back to
+  slot 1. So the pedal's path (`0x0101` on `0x7f` + `0x0138` with `0x7f`) works here too.
+- The chunk acks are `0x0501` on the intermediate ones and `0x0401` on the last: the opposite
+  of what was noted for the Spark 2. The transport accepts both, no effect.
+- A `0x0371` arrives by itself (`10 01 00 00 cd 0e c7 cd 07 e5 1a`), unknown. `cd 0e c7` = 3783:
+  maybe the battery in mV. **Hypothesis, not verified.**
+- **Not tried**: writing to a slot, `0x0104`/`0x0115` (knobs, on/off), bpm (`0x0376`),
+  Hendrix. Looper: according to Ignitron the NEO doesn't have one (confirmed by the user on 5 October).
+- According to Ignitron (not measured) the NEO accepts 128-byte chunks and 173-byte writes like
+  the Spark 40: not needed, ours work.
+
+### Spark NEO, 4 October 2026: why banks are slow
+
+- **The NEO digests one piece every ~90 ms.** From the pedal: a `0x0138`→ack round trip takes
+  ~100 ms even at a 7.5 ms interval (Spark 2: 26 ms); at 30–50 ms it goes up to 155, so it does
+  accept the interval. A bank preset (15–17 pieces of 25) = 1.0–1.1 s with the pedal, 1.9 s
+  from the phone.
+- **Pieces back to back without waiting for the ack** (pedal, `z`, 30 ms): 1.3–1.4 s, worse;
+  the acks keep arriving for almost a second after the last piece.
+- **128-byte pieces like Ignitron** (`neo-sonda`, Test C, writes split at 20): 4 pieces, the NEO
+  **accepts them**, preset read back correct and heard changing. 1346 ms, of which ~700 waiting
+  for the ack of the last piece that never came (3/4): the actual transfer ~650 ms against
+  1860. Capture `captures/2026-10-04-neo-sonda-pezzi-grandi.json`. **On the Spark 2, 128-byte
+  pieces disconnect**: a bank in big pieces is for the NEO only.
+- **From the pedal, same presets** (`Pink Floyd`): 25-byte pieces → 1036/1147 ms (15/17
+  pieces), 128-byte pieces → 506/590 ms (3/4), pressing the footswitches 635–766 ms. Each big
+  piece ~170 ms against 65–70: **~40 ms per piece + ~1 ms per byte**, so it doesn't go below
+  half a second (a preset is ~420 bytes). The user: «much better, even if we're not at the
+  Spark's level». Path A chosen: on the NEO the pedal re-splits by itself (firmware 1.4).

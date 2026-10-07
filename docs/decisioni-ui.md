@@ -1037,3 +1037,8 @@ proprio «DG - Shine On  clean» coi due spazi: togliendo quella copia il posto 
 svuotato senza avviso. Adesso ogni riga di «Doppioni» dice «nei banchi: …» e la conferma
 avverte che quel posto resterà vuoto. (Per l'appunto dell'utente: i banchi sono già in
 «Esporta la libreria» e in Dropbox, cinque nel suo file, tutti i posti riconosciuti.)
+
+**L'inglese aggiornato il 7 ottobre 2026** (chiesto dall'utente): le 36 frasi nuove dell'app
+(Doppioni, nomi già in libreria, connessione persa, «Seleziona CHx») in `src/lingua-en.js`,
+`tools/lingua.html` a 538 su 538; e in `docs/protocollo-spark2.en.md` la sezione sul NEO del 2
+e del 4 ottobre. README e sito erano già allineati.

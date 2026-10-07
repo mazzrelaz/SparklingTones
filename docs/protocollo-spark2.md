@@ -543,7 +543,7 @@ L'utente ha uno Spark NEO (cuffie con l'ampli dentro). Misurato con `tools/neo-s
 - Arriva da solo un `0x0371` (`10 01 00 00 cd 0e c7 cd 07 e5 1a`), ignoto. `cd 0e c7` = 3783:
   forse la batteria in mV. **Ipotesi, non verificata.**
 - **Non provati**: scrittura in uno slot, `0x0104`/`0x0115` (manopole, acceso/spento), bpm
-  (`0x0376`), Hendrix. Looper: secondo Ignitron il NEO non ce l'ha.
+  (`0x0376`), Hendrix. Looper: secondo Ignitron il NEO non ce l'ha (confermato dall'utente il 5 ottobre).
 - Secondo Ignitron (non misurato) il NEO accetta chunk da 128 e write da 173 come lo Spark
   40: non serve, i nostri vanno bene.
 

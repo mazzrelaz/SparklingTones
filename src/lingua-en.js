@@ -1015,4 +1015,77 @@ window.LINGUA_EN = {
     "the wah is gone",
   "Tipo":
     "Type",
+  // 7 ottobre 2026: Doppioni, nomi gia' in libreria, connessione persa, Seleziona CHx
+  "Doppioni":
+    "Duplicates",
+  "I preset che in libreria hanno <strong>lo stesso nome</strong>, uno sotto l'altro: quando sono entrati, se stanno sull'ampli, e se suonano uguale. Scegli tu quali togliere.":
+    "Presets in the library with <strong>the same name</strong>, one below the other: when they came in, whether they are on the amp, and whether they sound the same. You choose which to remove.",
+  "Cerca i doppioni":
+    "Find duplicates",
+  "Stesso nome, uno per riga. <strong>Stessa lettera, stesso suono</strong>: due preset con la lettera A suonano identici, uno con la B è un'altra versione. Tag, note e banchi sono di ciascuno: guarda prima di togliere.":
+    "Same name, one per row. <strong>Same letter, same sound</strong>: two presets marked A sound identical, one marked B is another version. Tags, notes and banks belong to each one: look before you remove.",
+  "collegati da {0} s":
+    "connected for {0} s",
+  "l'ampli ha parlato l'ultima volta {0} s fa":
+    "the amp last spoke {0} s ago",
+  "ultimo invio {0} s fa":
+    "last send {0} s ago",
+  "pagina in secondo piano o schermo spento":
+    "page in the background or screen off",
+  "connessione chiusa dall'app":
+    "connection closed by the app",
+  "connessione persa alle {0}: {1}":
+    "connection lost at {0}: {1}",
+  "nessun dato":
+    "no data",
+  "{0}: ne aspettavo {1}, mancano i pezzi {2} (dopo {3} ms)":
+    "{0}: expected {1}, pieces {2} missing (after {3} ms)",
+  "mando {0} all'ampli…":
+    "sending {0} to the amp…",
+  "chiedo all'ampli cosa ha davanti…":
+    "asking the amp what it has loaded…",
+  "{0}: errore — {1}":
+    "{0}: error — {1}",
+  "chiesto {0}: l'ampli {1}, e dice di avere davanti {2}":
+    "asked for {0}: the amp {1}, and says it has {2} loaded",
+  "ha confermato":
+    "confirmed",
+  "non ha confermato":
+    "did not confirm",
+  "il preset mandato dall'app":
+    "the preset sent from the app",
+  "«{0}» c'è già in libreria: non lo copio. Sull'ampli il suono è diverso, in libreria resta il tuo.":
+    "«{0}» is already in the library: not copying it. On the amp the sound is different; the library keeps yours.",
+  "«{0}» c'è già in libreria: non lo copio.":
+    "«{0}» is already in the library: not copying it.",
+  "Nessun doppione: ogni nome compare una volta sola.":
+    "No duplicates: every name appears only once.",
+  "«{0}», {1} volte":
+    "«{0}», {1} times",
+  "stessa lettera, stesso suono":
+    "same letter, same sound",
+  "(catena vuota)":
+    "(empty chain)",
+  "entrato il {0}":
+    "added on {0}",
+  "sull'ampli in {0}":
+    "on the amp in {0}",
+  "{0} tag":
+    "{0} tags",
+  "con note":
+    "with notes",
+  "con famiglia":
+    "with family",
+  "nei banchi: {0}":
+    "in banks: {0}",
+  " Sta sull'ampli in {0}: l'ampli non viene toccato, e alla prossima lettura quello slot andrà a uno degli altri con lo stesso nome.":
+    " It is on the amp in {0}: the amp is not touched, and at the next read that slot will go to one of the others with the same name.",
+  "<strong>Sta nei banchi {0}</strong>: quel posto resterà vuoto, e lo riempi tu con uno degli altri.":
+    "<strong>It is in banks {0}</strong>: that spot will be left empty, and you fill it with one of the others.",
+  "eliminare un doppione":
+    "delete a duplicate",
+  "Eliminare <strong>{0}</strong>, entrato il {1}? Gli altri con lo stesso nome restano.":
+    "Delete <strong>{0}</strong>, added on {1}? The others with the same name stay.",
+  "doppione eliminato: «{0}» del {1}":
+    "duplicate deleted: «{0}» from {1}",
 };
