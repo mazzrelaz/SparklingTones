@@ -627,3 +627,13 @@ parte e il file si cancella, senza chiudere la porta.
 `0x11` era fissa in `setup()`, ma **all'utente il display sembrava tutto più scuro: tolta nella 2.10**, il display è di nuovo quello originale. Le regolazioni restano solo come comandi di prova dal seriale. Le bande restano: per toglierle davvero
 resterebbe solo meno pixel accesi a sinistra (la riga attiva senza negativo), da decidere
 con l'utente.
+
+### Il LED del tempo — 7 ottobre 2026 (2.11)
+
+Deciso dall'utente: un RGB a catodo comune **col solo rosso**, resistenza da **330 Ω** come
+il rosso della piastrina LED, su **D1** della XIAO (D3 resta per il buzzer). **Lampeggia
+solo in modalità looper, al bpm scelto**: lampo da 200 ms sull'«uno» di ogni battuta, da 70
+ms sugli altri tempi; i tempi si contano dal conteggio, dalla registrazione o dal giro che
+suona, e a loop vuoto dall'ultimo cambio di tempo (`tempoDa`). Firmware caricato, **LED non
+ancora cablato**: prima la foto della XIAO dal lato di D0/D1, il posto sul pannello (foro da
+5 mm) e la gamba del rosso trovata col tester in prova diodi.

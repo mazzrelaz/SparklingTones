@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.10";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro
+static const char* VERSIONE = "2.11";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -332,6 +332,13 @@ static volatile uint8_t lungImpostazioni = 0;
 
 /* Il tap tempo su FS5 (chiesto il 7 ottobre 2026): a loop vuoto, la media
  * degli ultimi tre intervalli; oltre due secondi di pausa si ricomincia. */
+/* Il LED del tempo (7 ottobre 2026): un RGB a catodo comune col solo rosso,
+ * resistenza da 330 ohm, su D1. Lo accende il loop. */
+static const uint8_t  PIN_LED_TEMPO  = D1;
+static const uint32_t LAMPO_UNO_MS   = 200;     // l'«uno» della battuta
+static const uint32_t LAMPO_TEMPO_MS = 70;      // gli altri tempi
+static uint32_t tempoDa = 0;                    // a loop vuoto i tempi si contano da qui
+
 static uint32_t tapUltimo = 0;
 static uint32_t tapIntervalli[3];
 static uint8_t  tapQuanti = 0;
@@ -1831,6 +1838,7 @@ static void looperTap() {
   if (bpm < 40) bpm = 40;
   if (bpm > 250) bpm = 250;
   loopBpm = (uint16_t)bpm;
+  tempoDa = ora;                           // il LED del tempo si rimette sul colpo
   impostazioniDaMandare = true;
   schermoSporco = true;
 }
@@ -1864,7 +1872,7 @@ static void cambiaLooper() {
   looper = !looper;
   inCoda = -1;
   looperQuanti = looperFatti = 0;
-  if (looper) looperChiedi = true;        // com'e' messo adesso: lo dice l'ampli
+  if (looper) { looperChiedi = true; tempoDa = millis(); }       // com'e' messo adesso: lo dice l'ampli
   avvisa(looper ? "modalita' looper" : "modalita' preset");
   Serial.printf("looper %s\n", looper ? "acceso" : "spento");
   aggiornaLed();
@@ -2457,6 +2465,8 @@ void setup() {
   delay(600);
   Serial.println(F("\nprova-ble — pedale Spark 2 / Spark NEO"));
   pinMode(PIN_TASTO, INPUT_PULLUP);
+  pinMode(PIN_LED_TEMPO, OUTPUT);          // il LED del tempo, spento finche' non c'e' il looper
+  digitalWrite(PIN_LED_TEMPO, LOW);
   avviaEspansore();
   schermoPresente = schermo.begin();
   if (schermoPresente) {
@@ -2645,8 +2655,28 @@ void loop() {
   }
   if (impostazioniNuove) {
     impostazioniNuove = false;
+    tempoDa = millis();                    // il LED del tempo riparte dall'«uno»
     Serial.printf("looper: %u bpm, click %s\n", loopBpm, loopClick ? "acceso" : "spento");
     if (looper) schermoSporco = true;
+  }
+  /* Il LED del tempo, su D1: **solo nel looper, al bpm scelto** (deciso
+   * dall'utente il 7 ottobre). Lampo lungo sull'«uno» di ogni battuta, corto
+   * sugli altri tempi. I tempi si contano dall'inizio di quello che sta
+   * succedendo: il conteggio, la registrazione, il giro che suona; a loop vuoto
+   * o fermo, dall'ultimo cambio di tempo. */
+  {
+    bool acceso = false;
+    if (looper && loopBpm) {
+      const uint32_t tempo = 60000UL / loopBpm;
+      uint32_t da = tempoDa;
+      if (contaTempo)                                          da = contaDa;
+      else if (loopRegistra)                                   da = registraDa;
+      else if ((loopSuona || loopSovraincide) && inizioGiro)   da = inizioGiro;
+      const uint32_t passato = millis() - da;
+      acceso = passato % tempo < ((passato / tempo) % 4 == 0 ? LAMPO_UNO_MS : LAMPO_TEMPO_MS);
+    }
+    static bool prima = false;
+    if (acceso != prima) { prima = acceso; digitalWrite(PIN_LED_TEMPO, acceso ? HIGH : LOW); }
   }
   /* Il conteggio: quattro tempi da 60000/bpm ms dalla pressione, poi 0x04 con
    * LOOP_ANTICIPO_MS di anticipo. Il display si ridisegna solo al cambio di
