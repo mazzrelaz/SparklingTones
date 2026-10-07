@@ -637,3 +637,10 @@ ms sugli altri tempi; i tempi si contano dal conteggio, dalla registrazione o da
 suona, e a loop vuoto dall'ultimo cambio di tempo (`tempoDa`). Firmware caricato, **LED non
 ancora cablato**: prima la foto della XIAO dal lato di D0/D1, il posto sul pannello (foro da
 5 mm) e la gamba del rosso trovata col tester in prova diodi.
+
+**2.12** (7 ottobre 2026): il LED montato dall'utente **«s'incantava su un beat»**. Il
+ridisegno del display tiene il loop fermo 30-40 ms proprio all'inizio di ogni tempo (l'anello
+cambia blocco). Adesso il LED ha un **compito FreeRTOS suo** (`compitoLedTempo`, priorità 2
+sul core 1, ogni millisecondo), che legge solo variabili. In più alla fine della registrazione
+il giro non si rimette due volte (`07` poi `08`, ~25 ms di salto). E, deciso dall'utente,
+**lampi tutti uguali e corti** (70 ms), senza l'«uno» più lungo.

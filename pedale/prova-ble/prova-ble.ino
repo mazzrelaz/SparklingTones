@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.11";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1
+static const char* VERSIONE = "2.12";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -335,8 +335,7 @@ static volatile uint8_t lungImpostazioni = 0;
 /* Il LED del tempo (7 ottobre 2026): un RGB a catodo comune col solo rosso,
  * resistenza da 330 ohm, su D1. Lo accende il loop. */
 static const uint8_t  PIN_LED_TEMPO  = D1;
-static const uint32_t LAMPO_UNO_MS   = 200;     // l'«uno» della battuta
-static const uint32_t LAMPO_TEMPO_MS = 70;      // gli altri tempi
+static const uint32_t LAMPO_TEMPO_MS = 70;      // un lampo corto a ogni tempo, tutti uguali
 static uint32_t tempoDa = 0;                    // a loop vuoto i tempi si contano da qui
 
 static uint32_t tapUltimo = 0;
@@ -1734,7 +1733,8 @@ static void looperEvento(uint8_t v, bool mandato = false) {
     case LOOP_FINE_REC: case LOOP_REC_FATTA:
       if (loopRegistra) {
         durataLoop = millis() - registraDa;  // il giro, misurato
-        inizioGiro = millis();               // e riparte subito a suonare
+        inizioGiro = millis();               // e riparte subito a suonare:
+        loopSuona = true;                    // l'08 che segue non rimette il giro
       }
       loopRegistra = false; loopPresente = true; break;
     case LOOP_SUONA:
@@ -2456,6 +2456,34 @@ static void avviaPonte() {
 
 }
 
+/* Il LED del tempo, su D1: **solo nel looper, al bpm scelto** (deciso
+ * dall'utente il 7 ottobre). Un lampo corto a ogni tempo, tutti uguali
+ * (l'utente non vuole l'«uno» piu' lungo). I tempi si contano dall'inizio di quello che sta
+ * succedendo: il conteggio, la registrazione, il giro che suona; a loop vuoto
+ * o fermo, dall'ultimo cambio di tempo.
+ *
+ * **Un compito suo, non il loop**: ogni ridisegno del display tiene il loop
+ * fermo 30-40 ms, proprio all'inizio di ogni tempo (l'anello cambia blocco),
+ * e il LED «s'incantava su un beat» (l'utente, 7 ottobre). Qui gira ogni
+ * millisecondo con priorita' piu' alta del loop, e legge solo variabili. */
+static void compitoLedTempo(void*) {
+  bool prima = false;
+  for (;;) {
+    bool acceso = false;
+    if (looper && loopBpm) {
+      const uint32_t tempo = 60000UL / loopBpm;
+      uint32_t da = tempoDa;
+      if (contaTempo)                                          da = contaDa;
+      else if (loopRegistra)                                   da = registraDa;
+      else if ((loopSuona || loopSovraincide) && inizioGiro)   da = inizioGiro;
+      const uint32_t passato = millis() - da;
+      acceso = passato % tempo < LAMPO_TEMPO_MS;
+    }
+    if (acceso != prima) { prima = acceso; digitalWrite(PIN_LED_TEMPO, acceso ? HIGH : LOW); }
+    vTaskDelay(1);
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   /* Senza questa, se al PC nessuno legge la porta ogni stampa resta appesa
@@ -2467,6 +2495,7 @@ void setup() {
   pinMode(PIN_TASTO, INPUT_PULLUP);
   pinMode(PIN_LED_TEMPO, OUTPUT);          // il LED del tempo, spento finche' non c'e' il looper
   digitalWrite(PIN_LED_TEMPO, LOW);
+  xTaskCreatePinnedToCore(compitoLedTempo, "ledTempo", 2048, nullptr, 2, nullptr, 1);
   avviaEspansore();
   schermoPresente = schermo.begin();
   if (schermoPresente) {
@@ -2658,25 +2687,6 @@ void loop() {
     tempoDa = millis();                    // il LED del tempo riparte dall'«uno»
     Serial.printf("looper: %u bpm, click %s\n", loopBpm, loopClick ? "acceso" : "spento");
     if (looper) schermoSporco = true;
-  }
-  /* Il LED del tempo, su D1: **solo nel looper, al bpm scelto** (deciso
-   * dall'utente il 7 ottobre). Lampo lungo sull'«uno» di ogni battuta, corto
-   * sugli altri tempi. I tempi si contano dall'inizio di quello che sta
-   * succedendo: il conteggio, la registrazione, il giro che suona; a loop vuoto
-   * o fermo, dall'ultimo cambio di tempo. */
-  {
-    bool acceso = false;
-    if (looper && loopBpm) {
-      const uint32_t tempo = 60000UL / loopBpm;
-      uint32_t da = tempoDa;
-      if (contaTempo)                                          da = contaDa;
-      else if (loopRegistra)                                   da = registraDa;
-      else if ((loopSuona || loopSovraincide) && inizioGiro)   da = inizioGiro;
-      const uint32_t passato = millis() - da;
-      acceso = passato % tempo < ((passato / tempo) % 4 == 0 ? LAMPO_UNO_MS : LAMPO_TEMPO_MS);
-    }
-    static bool prima = false;
-    if (acceso != prima) { prima = acceso; digitalWrite(PIN_LED_TEMPO, acceso ? HIGH : LOW); }
   }
   /* Il conteggio: quattro tempi da 60000/bpm ms dalla pressione, poi 0x04 con
    * LOOP_ANTICIPO_MS di anticipo. Il display si ridisegna solo al cambio di
