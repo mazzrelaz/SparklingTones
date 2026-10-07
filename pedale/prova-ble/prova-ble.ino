@@ -775,8 +775,40 @@ static void disegnaCerchio() {
 
 
 
+/* Le schermate di prova del display, dal seriale ('W'): tutto acceso, meta'
+ * sopra, meta' a sinistra, le bande, poi di nuovo normale. Per guardare le
+ * bande che l'utente vede sull'anello pieno (7 ottobre 2026): su questi OLED
+ * una riga si spegne un po' quanti piu' pixel ha accesi, quindi l'anello
+ * prende le bande delle scritte che gli stanno accanto. «Bande»: a destra un
+ * blocco pieno come l'anello, a sinistra quattro strisce da 16 righe con 0,
+ * 84, 40 e 0 pixel accesi per riga.
+ *
+ * E tre regolazioni del pannello, per provarle a occhio ('K' luminosita',
+ * 'P' precarica 0xD9, 'V' VCOMH 0xDB): ognuna gira fra pochi valori e dice
+ * quale ha messo. Non si ricordano allo spegnimento. */
+static uint8_t provaSchermo = 0;
+static const uint8_t N_PROVE = 5;
+static const uint8_t LUCI[] = { 255, 160, 96, 48, 16 };
+static const uint8_t PRECARICHE[] = { 0x22, 0xf1, 0x11, 0x44, 0x82 };
+static const uint8_t VCOMH[] = { 0x34, 0x20, 0x30, 0x3c, 0x40 };
+static uint8_t luce = 0, precarica = 0, vcomh = 0;
+
 static void disegnaSchermo() {
   if (!schermoPresente) return;
+  if (provaSchermo) {
+    schermo.clearBuffer();
+    schermo.setDrawColor(1);
+    if (provaSchermo == 1) schermo.drawBox(0, 0, 128, 64);
+    if (provaSchermo == 2) schermo.drawBox(0, 0, 128, 32);
+    if (provaSchermo == 3) schermo.drawBox(0, 0, 64, 64);
+    if (provaSchermo == 4) {
+      schermo.drawBox(86, 0, 42, 64);      // il blocco come l'anello
+      schermo.drawBox(0, 16, 84, 16);      // 84 pixel per riga
+      schermo.drawBox(0, 32, 40, 16);      // 40 pixel per riga
+    }
+    schermo.sendBuffer();
+    return;
+  }
   schermo.clearBuffer();
   if (modo == MODO_MIDI) {
     schermo.setFontMode(1);
@@ -2002,7 +2034,9 @@ static void elenco() {
     "  s     chiedi intervallo lento (30 ms)\n"
     "  u     tensione della batteria\n"
     "  x     molla l'ampli (cosi' l'app nel browser lo trova)\n"
-    "  r     riprendi l'ampli\n"));
+    "  r     riprendi l'ampli\n"
+    "  W     prova del display: tutto acceso, meta' sopra, meta' a sinistra, bande, normale\n"
+    "  K P V luminosita', precarica, VCOMH del display (a giro)\n"));
 }
 
 /* ======================================================================
@@ -2766,6 +2800,16 @@ void loop() {
     else if (c == 'u') Serial.printf("batteria: %u mV letti, %u mV mediati, %u tacche%s\n",
                                      mvGrezzo, mvBatteria, tacche(mvBatteria),
                                      mvBatteria ? "" : "  (partitore assente?)");
+    else if (c == 'K') { luce = (uint8_t)((luce + 1) % sizeof(LUCI)); schermo.setContrast(LUCI[luce]);
+                         Serial.printf("display: luminosita' %u\n", LUCI[luce]); }
+    else if (c == 'P') { precarica = (uint8_t)((precarica + 1) % sizeof(PRECARICHE));
+                         schermo.sendF("ca", 0xd9, PRECARICHE[precarica]);
+                         Serial.printf("display: precarica 0x%02x\n", PRECARICHE[precarica]); }
+    else if (c == 'V') { vcomh = (uint8_t)((vcomh + 1) % sizeof(VCOMH));
+                         schermo.sendF("ca", 0xdb, VCOMH[vcomh]);
+                         Serial.printf("display: VCOMH 0x%02x\n", VCOMH[vcomh]); }
+    else if (c == 'W') { provaSchermo = (uint8_t)((provaSchermo + 1) % N_PROVE); schermoSporco = true;
+                         Serial.printf("prova del display: %u\n", provaSchermo); }
     else if (c == '?') elenco();
   }
   // 2 ms, non 10: una battuta secca su un tattile puo' durare pochi

@@ -6,8 +6,12 @@ param([string]$Porta = 'COM3', [int]$Secondi = 900, [string]$Fuori = "$env:TEMP\
 # aprono tutte e due alte, e in chiusura si abbassa PRIMA il DTR (0,1: torna a
 # riposo) e poi l'RTS. MAI chiudere uccidendo il processo: si crea il file
 # «basta» in $env:TEMP, e lo script esce da solo.
+#
+# Per mandare comandi al pedale senza chiudere la porta: si scrive il testo nel
+# file «manda.txt» in $env:TEMP; lo script lo spedisce e lo cancella.
 $basta = Join-Path $env:TEMP 'basta'
-Remove-Item $basta -ErrorAction SilentlyContinue
+$manda = Join-Path $env:TEMP 'manda.txt'
+Remove-Item $basta, $manda -ErrorAction SilentlyContinue
 $p = New-Object System.IO.Ports.SerialPort $Porta, 115200
 $p.DtrEnable = $true
 $p.RtsEnable = $true
@@ -20,6 +24,12 @@ Start-Sleep -Milliseconds 300
 $p.Write("u")      # la batteria: una riga di risposta dice che la seriale funziona
 try {
   while (((Get-Date) - $t0).TotalSeconds -lt $Secondi -and -not (Test-Path $basta)) {
+    if (Test-Path $manda) {
+      $testo = [System.IO.File]::ReadAllText($manda).Trim()
+      Remove-Item $manda
+      $p.Write($testo)
+      $w.WriteLine(('{0,8:F3}  >> {1}' -f ((Get-Date) - $t0).TotalSeconds, $testo))
+    }
     try {
       $riga = $p.ReadLine()
       $w.WriteLine(('{0,8:F3}  {1}' -f ((Get-Date) - $t0).TotalSeconds, $riga.TrimEnd()))

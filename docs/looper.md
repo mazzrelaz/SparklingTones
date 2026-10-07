@@ -601,3 +601,21 @@ solo per il conteggio a loop vuoto — quindi mai sopra l'ampli, e il volume non
 L'utente ha scelto un KY-006 (Amazon, quattro pezzi). Da fare quando arriva: foto dei due
 lati e resistenza misurata col tester fra S e − (piezo = altissima, diretto sul
 piedino; magnetico = 16-42 Ω, serve una resistenza in serie o un transistor).
+
+### Le bande sull'anello pieno — 7 ottobre 2026
+
+L'utente vede l'anello pieno «a bande» orizzontali. Non sono le fessure fra i pixel: a
+schermo tutto acceso non si vedono. **Causa confermata** con la schermata di prova «bande»
+(`W` quattro volte dal seriale: blocco pieno a destra, a sinistra strisce da 0, 84, 40, 0
+pixel per riga): il blocco si divide alle altezze delle strisce, più scuro accanto alla
+striscia piena. Su questo OLED **una riga si spegne un po' quanti più pixel ha accesi**,
+quindi l'anello prende le bande delle scritte accanto, soprattutto della riga in negativo
+(84 pixel).
+
+Da provare con l'utente, rimandato da lui: le regolazioni del pannello dal seriale (`K`
+luminosità 255/160/96/48/16, `P` precarica `0xD9`, `V` VCOMH `0xDB`, a giro, non
+ricordate); oppure segnare la riga attiva con meno pixel (cornice o freccia invece del
+negativo) — ma il negativo l'aveva approvato lui a settembre, decide lui.
+
+`tools/ascolta-pedale.ps1` adesso manda anche comandi: il testo in `%TEMP%\manda.txt`
+parte e il file si cancella, senza chiudere la porta.
