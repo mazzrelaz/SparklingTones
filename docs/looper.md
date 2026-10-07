@@ -510,3 +510,28 @@ sovraincisione manda `0c` e poi `0d`** (chiude e annulla). Da provare quest'ulti
 Il looper sul pedale, a questo punto: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4
 ferma, FS4 tenuto cancella — **tutti verificati sul pedale**. Manca il conteggio fatto in
 casa (come Ignitron: «Come conta Ignitron», sopra).
+
+### Conteggio, tap, cerchio — 7 ottobre 2026 (2.0–2.2)
+
+- **2.0, il conteggio fatto in casa**: FS1 a loop vuoto col click acceso conta quattro tempi
+  (LED rossi uno per tempo) e manda `04` 40 ms prima dell'«uno». Bpm, battute, libero e click
+  dal `0x0376` (risposta a `0x0276`, e **arriva da solo a ogni cambio di preset**: il preset
+  porta il suo bpm).
+- **2.1, tap tempo su FS5** (a loop vuoto; tenuto 3 s esce ancora). **Verificato dal
+  registro**: a ogni `0x0176` l'ampli dà l'ack, manda `0x0363` col bpm nuovo e un
+  `0x031a`; **non** rimanda `0x0376`. E registra al tempo battuto: a 72 bpm 13,4 s, a 114
+  bpm 8,5 s, quattro battute esatte. Il LED di FS1 lampeggia a tempo mentre registra.
+- **2.2, il cerchio come il Simple Looper dell'app ufficiale** (descritto dall'utente da un
+  video): una fetta per battuta, un cursore che gira; pieno mentre registra, vuoto col
+  cursore mentre suona, puntinato mentre sovraincide. Si ridisegna solo il suo riquadro
+  (`updateDisplayArea`, ~8 ms) dieci volte al secondo. **«Libero» è il freeIndicator**, non
+  il click spento (correzione della 2.1).
+
+**Il Simple Looper dell'app** (video dell'utente): battute 1, 2, 4, 8, 12, 16 o libero;
+impostazioni bloccate con un loop registrato; una battuta di conteggio a cerchio vuoto col
+cursore; alla fine delle battute suona da solo; un tocco mentre suona sovraincide, giro
+dopo giro, finché non si ritocca; **durante la sovraincisione «Stop» è spento** (noi invece
+FS4 chiude e ferma); cestino con conferma.
+
+**Da verificare**: che `0x0377` vada da 0 a 1 (il registro stampa il massimo a ogni giro);
+conteggio, lampo e cerchio a occhio.

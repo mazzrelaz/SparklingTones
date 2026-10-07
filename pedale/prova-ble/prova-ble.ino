@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.9";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione
+static const char* VERSIONE = "2.2";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -308,6 +308,54 @@ static uint8_t metaPrimaDiFS5 = 0;             // FS5 cambia meta' alla pression
 static volatile uint8_t eventiLooper[8];
 static volatile uint8_t eventiScritti = 0, eventiLetti = 0;
 
+/* --- Il conteggio fatto in casa (7 ottobre 2026) ------------------------------
+ *
+ * Il click dell'ampli da noi non parte (0x02 ignorato, docs/looper.md), quindi
+ * conta il pedale, come fa Ignitron: FS1 a loop vuoto **col click acceso**
+ * accende i quattro LED uno per tempo al bpm dell'ampli, e un attimo prima
+ * dell'«uno» manda 0x04. Bpm e click vengono dalle impostazioni del looper,
+ * 0x0376: risposta a 0x0276, e arrivano da sole quando si batte il TAP.
+ * Formato misurato il 13 agosto: `cc 85 04 04 c2 c3 c2 3c` = bpm 133, count,
+ * battute, freeIndicator falso, click vero, un flag, la durata. Col click
+ * spento (lunghezza libera) si registra subito, come prima. */
+static volatile uint16_t loopBpm   = 0;          // 0 = impostazioni non ancora lette
+static volatile bool     loopClick = false;
+static volatile bool     impostazioniNuove = false;
+static uint8_t  contaTempo = 0;                  // 0 = non conta; 1..4 il tempo di adesso
+static uint32_t contaDa    = 0;
+static const uint32_t LOOP_ANTICIPO_MS = 40;     // 0x04 -> registrazione: ~35 ms (registro del 5 ottobre)
+static volatile uint8_t loopBattute = 4;         // quante battute registra l'ampli col click
+/* L'ultimo 0x0376 com'e' arrivato: il tap tempo lo rimanda cambiando il solo
+ * bpm, mai da una costante (l'ultimo campo cambia forma, docs/protocollo). */
+static uint8_t          impostazioni[24];
+static volatile uint8_t lungImpostazioni = 0;
+
+/* Il tap tempo su FS5 (chiesto il 7 ottobre 2026): a loop vuoto, la media
+ * degli ultimi tre intervalli; oltre due secondi di pausa si ricomincia. */
+static uint32_t tapUltimo = 0;
+static uint32_t tapIntervalli[3];
+static uint8_t  tapQuanti = 0;
+static uint16_t tapBpm = 0;                      // 0 = niente da mandare
+
+/* Il cerchio sul display, come il Simple Looper dell'app ufficiale (video
+ * dell'utente, 7 ottobre 2026): **una fetta per battuta** (1, 2, 4, 8, 12, 16,
+ * dal 0x0376) e **un cursore che gira a tempo**. Nel conteggio il cursore fa
+ * un giro in una battuta, sulle quattro fette dei tempi; mentre registra il
+ * cerchio si riempie dietro di lui; mentre suona resta vuoto e gira il
+ * cursore; mentre sovraincide e' tutto puntinato. La posizione mentre suona la
+ * da' l'ampli con 0x0377 (float, cinque al secondo, **da 0 a 1: da
+ * verificare**, si stampa il massimo di ogni giro), e fra un valore e l'altro
+ * la facciamo avanzare noi con la durata del giro misurata. Il riquadro del
+ * cerchio si ridisegna da solo, ~8 ms invece dei 32 dello schermo intero. */
+static volatile bool     loopLibero = false;     // freeIndicator: lunghezza libera, «libero» nell'app
+static volatile float    posLoop    = -1;        // da 0x0377; -1 = non arrivata
+static volatile uint32_t posLoopDa  = 0;
+static volatile float    massimoGiro = 0;        // dove arrivava prima di ricominciare
+static volatile bool     giroFinito = false;
+static uint32_t          registraDa = 0;
+static uint32_t          durataLoop = 0;         // misurata: dal 0x04 al 0x05/0x07
+static const uint32_t   LAMPO_MS = 120;          // il lampo del LED sul tempo, mentre registra
+
 /* Lo stesso MIDI anche via Bluetooth, per l'iPad (BIAS FX), chiesto il 24
  * settembre 2026. Su Windows il BLE-MIDI non arriva ai programmi (prova del 29
  * agosto), quindi l'USB resta la via del PC e il Bluetooth si aggiunge, non
@@ -462,7 +510,16 @@ static void aggiornaLed() {
   /* Nel looper: rosso su FS1 mentre registra o sovraincide, verde su FS3 mentre
    * il loop suona, verde su FS4 da fermo col loop pronto. */
   if (looper) {
-    if (loopRegistra || loopSovraincide) maschera |= (uint8_t)(1 << LINEA_ROSSO[0]);
+    if (contaTempo) {                      // il conteggio: un LED rosso per tempo
+      mcpScrivi(MCP_OLATB, (uint8_t)(1 << LINEA_ROSSO[contaTempo - 1]));
+      return;
+    }
+    // Mentre registra col click il rosso di FS1 lampeggia sul tempo (chiesto il
+    // 7 ottobre): acceso per i primi LAMPO_MS di ogni tempo, contati dal 0x04.
+    const bool lampo = loopRegistra && loopClick && loopBpm
+                       && (millis() - registraDa) % (60000UL / loopBpm) < LAMPO_MS;
+    const bool fisso = loopSovraincide || (loopRegistra && !(loopClick && loopBpm));
+    if (lampo || fisso) maschera |= (uint8_t)(1 << LINEA_ROSSO[0]);
     if (loopSuona && !loopRegistra)      maschera |= (uint8_t)(1 << LINEA_VERDE[2]);
     if (loopPresente && !loopSuona && !loopRegistra)    maschera |= (uint8_t)(1 << LINEA_VERDE[3]);
     mcpScrivi(MCP_OLATB, maschera);
@@ -602,6 +659,87 @@ static void disegnaMidi(const char* avviso) {
   schermo.sendBuffer();
 }
 
+/** Quanto dura un giro, in ms: misurato alla registrazione, o dalle battute
+ *  al bpm; 0 se non si sa (lunghezza libera e niente misura). */
+static uint32_t giroMs() {
+  if (durataLoop) return durataLoop;
+  if (!loopLibero && loopBpm) return 240000UL / loopBpm * loopBattute;   // battute da quattro tempi
+  return 0;
+}
+
+/** Dove sta il loop adesso, da 0 a 1, o -1: l'ultimo 0x0377 fatto avanzare
+ *  col tempo passato (al massimo un quarto di giro, se l'ampli tace). */
+static float posizioneAdesso() {
+  const float p = posLoop;
+  if (p < 0) return -1;
+  const uint32_t giro = giroMs();
+  float avanti = giro ? (float)(millis() - posLoopDa) / giro : 0;
+  if (avanti > 0.25f) avanti = 0.25f;
+  const float q = p + avanti;
+  return q - floorf(q);
+}
+
+/** Il cerchio del looper, a destra delle righe (x 85-127, y 16-63). Pulisce
+ *  il suo riquadro, cosi' si puo' ridisegnare da solo. */
+static void disegnaCerchio() {
+  const int cx = 106, cy = 39, r = 21;
+  schermo.setDrawColor(0);
+  schermo.drawBox(85, 16, 43, 48);
+  schermo.setDrawColor(1);
+
+  uint8_t fette = loopBattute;
+  float riempi = 0, cursore = -1;
+  bool puntini = false;
+  if (contaTempo) {
+    fette = 4;                             // i quattro tempi della battuta di conteggio
+    cursore = (float)(millis() - contaDa) / (4 * (60000UL / loopBpm));
+  } else if (loopRegistra) {
+    const uint32_t giro = (!loopLibero && loopBpm) ? 240000UL / loopBpm * loopBattute : 0;
+    if (giro) riempi = (float)(millis() - registraDa) / giro;
+  } else if (loopSovraincide) {
+    riempi = 1; puntini = true;
+    cursore = posizioneAdesso();
+  } else if (loopSuona) {
+    cursore = posizioneAdesso();
+  }
+  if (riempi > 1) riempi = 1;
+  if (cursore >= 1) cursore = 0.999f;
+
+  // Il pieno: punto per punto, l'angolo in senso orario da mezzogiorno.
+  if (riempi > 0) {
+    for (int y = -r; y <= r; y++)
+      for (int x = -r; x <= r; x++) {
+        if (x * x + y * y > r * r) continue;
+        if (puntini && ((x + y) & 1)) continue;
+        float a = atan2f((float)x, (float)-y) / (2 * PI);
+        if (a < 0) a += 1;
+        if (a <= riempi) schermo.drawPixel(cx + x, cy + y);
+      }
+  }
+  // Le fette: raggi dal terzo esterno al bordo, in XOR (si vedono anche sul pieno).
+  schermo.setDrawColor(2);
+  for (uint8_t k = 0; k < fette; k++) {
+    const float a = 2 * PI * k / fette;
+    schermo.drawLine(cx + (int)roundf(r * 0.45f * sinf(a)), cy - (int)roundf(r * 0.45f * cosf(a)),
+                     cx + (int)roundf((r - 1) * sinf(a)), cy - (int)roundf((r - 1) * cosf(a)));
+  }
+  schermo.setDrawColor(1);
+  schermo.drawCircle(cx, cy, r);
+  // Il cursore: dal centro al bordo, con un pallino in punta.
+  if (cursore >= 0) {
+    const float a = 2 * PI * cursore;
+    const int px = cx + (int)roundf(r * sinf(a)), py = cy - (int)roundf(r * cosf(a));
+    schermo.drawLine(cx, cy, px, py);
+    schermo.drawDisc(px, py, 2);
+  }
+}
+
+/** Solo il riquadro del cerchio verso il display: tile 10-15, righe 2-7. */
+static void aggiornaCerchio() {
+  disegnaCerchio();
+  schermo.updateDisplayArea(10, 2, 6, 6);
+}
+
 static void disegnaSchermo() {
   if (!schermoPresente) return;
   schermo.clearBuffer();
@@ -627,7 +765,10 @@ static void disegnaSchermo() {
     snprintf(testa, sizeof(testa), "ponte %lu:%02lu",
              (unsigned long)(restano / 60), (unsigned long)(restano % 60));
   } else if (looper) {
-    snprintf(testa, sizeof(testa), "%s", loopPresente || loopRegistra ? "Looper" : "Looper - vuoto");
+    // Il bpm, e «libero» quando la lunghezza non e' fissata in battute.
+    if (!loopBpm)        snprintf(testa, sizeof(testa), "Looper");
+    else if (loopLibero) snprintf(testa, sizeof(testa), "Looper  libero");
+    else                 snprintf(testa, sizeof(testa), "Looper  %u bpm", (unsigned)loopBpm);
   } else {
     snprintf(testa, sizeof(testa), "%s", bancoAttivo.valido ? bancoAttivo.nome : "Amp Preset");
   }
@@ -694,15 +835,19 @@ static void disegnaSchermo() {
    * quello che l'ampli sta facendo, con la stessa regola dei LED. */
   if (looper) {
     // La prima riga dice cosa fa FS1 adesso, come il tasto REC/DUB del pannello.
-    const char* rec = loopRegistra ? "Rec: chiudi" : loopSovraincide ? "Dub: chiudi"
+    // Le righe stanno nei primi 84 pixel, undici caratteri: a destra il cerchio.
+    char conta[10];
+    snprintf(conta, sizeof(conta), "Conta  %u", contaTempo);
+    const char* rec = contaTempo ? conta : loopRegistra ? "Rec: chiudi" : loopSovraincide ? "Dub: chiudi"
                     : loopPresente ? "Sovraincidi" : "Registra";
-    const char* voci[4] = { rec, loopRipetibile ? "Ripeti" : "Annulla", "Suona", "Ferma / Cancella" };
-    const bool accesi[4] = { loopRegistra || loopSovraincide, false,
+    const char* voci[4] = { rec, loopRipetibile ? "Ripeti" : "Annulla", "Suona", "Ferma/Canc" };
+    const bool accesi[4] = { contaTempo || loopRegistra || loopSovraincide, false,
                              loopSuona && !loopRegistra,
                              loopPresente && !loopSuona && !loopRegistra };
+    disegnaCerchio();
     for (uint8_t i = 0; i < 4; i++) {
       const int y = 15 + i * 12;
-      if (accesi[i]) { schermo.setDrawColor(1); schermo.drawBox(0, y, 128, 12); }
+      if (accesi[i]) { schermo.setDrawColor(1); schermo.drawBox(0, y, 84, 12); }
       schermo.setDrawColor(accesi[i] ? 0 : 1);
       char etichetta[2] = { (char)('1' + i), 0 };
       schermo.setFont(u8g2_font_6x13B_tf);
@@ -830,8 +975,49 @@ static void messaggioIntero(const uint8_t* m, size_t n) {
       eventiScritti++;
     }
   }
+  // Le impostazioni del looper (0x0376): bpm e click, per il conteggio.
+  if (n >= 8 && m[4] == 0x03 && m[5] == 0x76) {
+    uint8_t d[24];
+    const size_t nd = spacchetta(m + 6, n - 7, d, sizeof(d));
+    size_t i = 0;
+    uint32_t v[3];                         // bpm, count, battute
+    bool ok = true;
+    for (uint8_t k = 0; k < 3 && ok; k++) {
+      if (i >= nd) { ok = false; break; }
+      const uint8_t b = d[i++];
+      if (b < 0x80) v[k] = b;
+      else if (b == 0xcc && i + 1 <= nd) { v[k] = d[i]; i += 1; }
+      else if (b == 0xcd && i + 2 <= nd) { v[k] = (uint32_t)(d[i] << 8 | d[i + 1]); i += 2; }
+      else ok = false;
+    }
+    // poi due booleani: freeIndicator e click (c2 falso, c3 vero)
+    if (ok && i + 2 <= nd && (d[i] & 0xfe) == 0xc2 && (d[i + 1] & 0xfe) == 0xc2
+        && v[0] >= 30 && v[0] <= 300) {
+      loopBpm = (uint16_t)v[0];
+      loopLibero = d[i] == 0xc3;
+      loopClick = d[i + 1] == 0xc3;
+      if (v[2] >= 1 && v[2] <= 16) loopBattute = (uint8_t)v[2];
+      memcpy(impostazioni, d, nd);
+      lungImpostazioni = (uint8_t)nd;
+      impostazioniNuove = true;
+    }
+  }
+  // La posizione nel loop (0x0377): un float 0xca.
+  if (n >= 8 && m[4] == 0x03 && m[5] == 0x77) {
+    uint8_t d[8];
+    if (spacchetta(m + 6, n - 7, d, sizeof(d)) >= 5 && d[0] == 0xca) {
+      const uint32_t b = (uint32_t)d[1] << 24 | (uint32_t)d[2] << 16 | (uint32_t)d[3] << 8 | d[4];
+      float f;
+      memcpy(&f, &b, 4);
+      static float prima = 0;
+      if (f < prima - 0.2f) { massimoGiro = prima; giroFinito = true; }
+      prima = f;
+      posLoop = f;
+      posLoopDa = millis();
+    }
+    return;                                // cinque al secondo: niente seriale
+  }
   if (silenzioso) return;
-  if (n >= 6 && m[4] == 0x03 && m[5] == 0x77) return;   // la posizione nel loop, cinque al secondo
   Serial.print(F("  RX "));
   if (n >= 6) {
     Serial.printf("0x%02x%02x  ", m[4], m[5]);
@@ -1460,16 +1646,21 @@ static void midiPremuto(uint8_t k) {
 static void looperEvento(uint8_t v, bool mandato = false) {
   switch (v) {
     case LOOP_CONTA: case LOOP_REC:
+      // da qui contano il cerchio e il lampeggio; la conferma dell'ampli
+      // arriva ~35 ms dopo il comando e lo rimette a punto
+      registraDa = millis(); durataLoop = 0; posLoop = -1;
       loopRegistra = true; loopSovraincide = false; loopSuona = false; loopRipetibile = false; break;
     case LOOP_ANNULLA:
       loopRipetibile = true; break;
     case LOOP_RIPETI:
       loopRipetibile = false; break;
     case LOOP_FINE_REC: case LOOP_REC_FATTA:
+      if (loopRegistra) durataLoop = millis() - registraDa;   // il giro, misurato
       loopRegistra = false; loopPresente = true; break;
     case LOOP_SUONA:
       loopRegistra = false; loopSuona = true; loopPresente = true; break;
     case LOOP_FERMA:
+      posLoop = -1;
       loopRegistra = loopSovraincide = loopSuona = false; break;
     case LOOP_DUB:
       loopSovraincide = true; loopPresente = true; loopRipetibile = false; break;
@@ -1477,6 +1668,8 @@ static void looperEvento(uint8_t v, bool mandato = false) {
       loopSovraincide = false; break;
     case LOOP_CANCELLA: case LOOP_VUOTO:
       if (looper && loopPresente) avvisa("loop cancellato");
+      posLoop = -1;
+      durataLoop = 0;
       loopRegistra = loopSovraincide = loopSuona = loopPresente = loopRipetibile = false; break;
     default:
       Serial.printf("looper: stato 0x%02x sconosciuto\n", v);
@@ -1492,11 +1685,23 @@ static void looperEvento(uint8_t v, bool mandato = false) {
  *  come la manda Ignitron e come la racconta il pannello. */
 static void looperPremuto(uint8_t k) {
   if (!chScrittura) return;                // lo schermo dice gia' che lo Spark non c'e'
+  if (contaTempo) {                        // qualunque tasto durante il conteggio lo annulla
+    contaTempo = 0;
+    avvisa("conteggio annullato");
+    aggiornaLed();
+    return;
+  }
   switch (k) {
     case 0:                                // REC/DUB, come il tasto del pannello
       if (loopRegistra)         looperAccoda(LOOP_FINE_REC);
       else if (loopSovraincide) looperAccoda(LOOP_FINE_DUB);
       else if (loopPresente)    looperAccoda(LOOP_DUB, LOOP_SUONA);
+      else if (loopClick && loopBpm) {     // il conteggio: lo porta avanti il loop
+        contaDa = millis();
+        contaTempo = 1;
+        aggiornaLed();
+        schermoSporco = true;
+      }
       else                      looperAccoda(LOOP_REC);
       break;
     case 1:                                // annulla / ripeti
@@ -1516,6 +1721,30 @@ static void looperPremuto(uint8_t k) {
       else                      looperAccoda(LOOP_FERMA);
       break;
   }
+}
+
+/** FS5 nel looper: il tap tempo. Solo a loop vuoto: un loop gia' registrato
+ *  ha il suo tempo, e cambiarglielo sotto non sappiamo cosa faccia. Il bpm
+ *  nuovo si vede subito in alto; all'ampli lo manda il loop (0x0176). */
+static void looperTap() {
+  if (!chScrittura) return;
+  if (loopPresente || loopRegistra || contaTempo) { avvisa("tempo: a loop vuoto"); return; }
+  if (!lungImpostazioni) { avvisa("tempo non ancora letto"); return; }
+  const uint32_t ora = millis();
+  const uint32_t passo = ora - tapUltimo;
+  tapUltimo = ora;
+  if (passo > 2000) { tapQuanti = 0; return; }   // il primo colpo di una serie
+  tapIntervalli[tapQuanti % 3] = passo;
+  tapQuanti++;
+  const uint8_t q = tapQuanti < 3 ? tapQuanti : 3;
+  uint32_t somma = 0;
+  for (uint8_t i = 0; i < q; i++) somma += tapIntervalli[i];
+  uint32_t bpm = (60000UL * q + somma / 2) / somma;
+  if (bpm < 40) bpm = 40;
+  if (bpm > 250) bpm = 250;
+  tapBpm = (uint16_t)bpm;
+  loopBpm = tapBpm;
+  schermoSporco = true;
 }
 
 /** FS5 tenuto tre secondi: dentro o fuori dal looper. */
@@ -1613,7 +1842,7 @@ static void leggiTasto() {
     // FS5 tenuto tre secondi entra nel looper (lo guarda il loop): la meta'
     // cambiata alla pressione allora si rimette com'era.
     if (k == FS5) {
-      if (looper) avvisa("tieni FS5: esci");
+      if (looper) looperTap();             // tenuto tre secondi, invece, esce
       else { metaPrimaDiFS5 = metaMostrata; cambiaMeta(); }
       continue;
     }
@@ -2301,6 +2530,52 @@ void loop() {
     looperEvento(eventiLooper[eventiLetti & 7]);
     eventiLetti++;
   }
+  if (impostazioniNuove) {
+    impostazioniNuove = false;
+    Serial.printf("looper: %u bpm, click %s\n", loopBpm, loopClick ? "acceso" : "spento");
+    if (looper) schermoSporco = true;
+  }
+  /* Il conteggio: quattro tempi da 60000/bpm ms dalla pressione, poi 0x04 con
+   * LOOP_ANTICIPO_MS di anticipo. Il display si ridisegna solo al cambio di
+   * tempo, lontano dall'invio. */
+  // Il lampo del LED a ogni tempo della registrazione, col click.
+  if (looper && loopRegistra && loopClick && loopBpm) {
+    static bool lampoPrima = false;
+    const bool lampo = (millis() - registraDa) % (60000UL / loopBpm) < LAMPO_MS;
+    if (lampo != lampoPrima) { lampoPrima = lampo; aggiornaLed(); }
+  }
+  if (giroFinito) {
+    giroFinito = false;
+    Serial.printf("looper: giro finito, posizione massima %.3f, giro misurato %lu ms\n",
+                  massimoGiro, (unsigned long)durataLoop);
+  }
+  // Il cerchio che gira: dieci volte al secondo, solo il suo riquadro. Mai
+  // nell'ultimo tratto del conteggio, perche' il 0x04 non tardi.
+  if (looper && schermoPresente && chScrittura && !inTrasferimento && !schermoSporco
+      && (contaTempo || loopRegistra || loopSuona || loopSovraincide)
+      && (int32_t)(millis() - avvioFino) >= 0) {
+    static uint32_t ultimoCerchio = 0;
+    const bool vicinoAllUno = contaTempo
+        && millis() - contaDa + LOOP_ANTICIPO_MS + 40 >= 4 * (60000UL / loopBpm);
+    if (millis() - ultimoCerchio >= 100 && !vicinoAllUno) {
+      ultimoCerchio = millis();
+      aggiornaCerchio();
+    }
+  }
+  if (contaTempo) {
+    const uint32_t tempo = 60000UL / loopBpm;
+    const uint32_t passato = millis() - contaDa;
+    if (!looper || !chScrittura) {
+      contaTempo = 0;
+    } else if (passato + LOOP_ANTICIPO_MS >= 4 * tempo) {
+      contaTempo = 0;
+      looperAccoda(LOOP_REC);
+      looperProssimo = millis();           // parte in questo giro, senza pausa
+    } else {
+      const uint8_t t = (uint8_t)(passato / tempo + 1);
+      if (t != contaTempo && t <= 4) { contaTempo = t; aggiornaLed(); schermoSporco = true; }
+    }
+  }
   if ((bool)USB != usbMontato) { usbMontato = (bool)USB; if (modo == MODO_MIDI) schermoSporco = true; }
 
   // La richiesta resta in coda **finche' non c'e' l'ampli**, invece di essere
@@ -2319,7 +2594,22 @@ void loop() {
     uint8_t frame[16];
     if (looperChiedi) {
       looperChiedi = false;
-      manda(frame, costruisci(0x02, 0x75, nullptr, 0, frame));
+      manda(frame, costruisci(0x02, 0x75, nullptr, 0, frame));   // lo stato
+      manda(frame, costruisci(0x02, 0x76, nullptr, 0, frame));   // bpm e click
+    }
+    /* Il tap tempo: l'ultimo 0x0376 con il solo bpm cambiato, **senza** 0x00
+     * in coda (col byte in piu' il delay parte all'infinito, 28 agosto). */
+    if (tapBpm && lungImpostazioni) {
+      uint8_t p[26];
+      size_t np = 0;
+      const uint8_t vecchio = impostazioni[0] == 0xcc ? 2 : 1;
+      if (tapBpm > 127) p[np++] = 0xcc;
+      p[np++] = (uint8_t)tapBpm;
+      for (uint8_t i = vecchio; i < lungImpostazioni && np < sizeof(p); i++) p[np++] = impostazioni[i];
+      Serial.printf("tap: %u bpm\n", tapBpm);
+      tapBpm = 0;
+      uint8_t lungo[40];
+      manda(lungo, costruisci(0x01, 0x76, p, np, lungo));
     }
     if (looperFatti < looperQuanti && (int32_t)(millis() - looperProssimo) >= 0) {
       const uint8_t c = looperSequenza[looperFatti++];
