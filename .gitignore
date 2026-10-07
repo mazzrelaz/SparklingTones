@@ -12,3 +12,6 @@ pcb/*-backups/
 pcb/*.kicad_prl
 pcb/fp-info-cache
 pcb/~*.lck
+
+# Arduino: i binari compilati che arduino-cli lascia nella cartella dello sketch
+pedale/*/build/
