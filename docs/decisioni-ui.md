@@ -992,3 +992,25 @@ una **levetta della taglia di un pomello** (SVG 58 px, stessa fila): pista verti
 in alto e illuminato col colore del blocco quando segue il tempo, in basso e grigio quando no;
 sotto, il nome e ON/OFF al posto del numero. Si cambia toccandola (o con spazio/invio).
 **Verificato dall'utente sull'ampli che l'interruttore funziona** (acceso segue i bpm).
+
+## I doppioni — 7 ottobre 2026
+
+**Da dove venivano** (analisi della libreria esportata dall'utente, 101 preset, 6 nomi
+ripetuti in 13 record, tutti con UUID diversi): l'importazione del backup dell'app ufficiale
+del 24 settembre (86 preset in un minuto, con UUID diversi da quelli letti dall'ampli ad
+agosto; «We Will Rock You» era già doppio nel backup), la prima lettura del NEO il 2 ottobre
+(i suoi CH1–CH4 hanno UUID propri) e una lettura dall'ampli del 7 ottobre. `importFromAmp`
+riconosceva solo l'UUID, quindi ogni UUID nuovo era un preset nuovo.
+
+**Le decisioni dell'utente**: la lettura dall'ampli resta automatica, ma **un nome che c'è
+già non entra una seconda volta** (`_omonimo`: lo slot va al preset che c'è, il suo suono non
+si tocca, il log lo dice e dice se sull'ampli suona diverso; «Importa preset attuale» propone
+di aggiornare il suono dell'omonimo). Per quelli vecchi, **«Doppioni» in Altro**: un riquadro
+per nome, una riga per preset con la catena, quando è entrato, slot, tag/note/famiglia, e una
+lettera per il suono (stessa lettera, stessa catena con gli stessi valori); ogni riga ha il
+suo «Elimina» con conferma. Niente si toglie da solo.
+
+**Notato e non ancora corretto**: l'unione Dropbox (`importBackup` senza `replace`) fa `put`
+su ogni preset che arriva, quindi segna come appena modificati anche quelli uguali, e una
+lapide più vecchia di quell'unione perde: un preset cancellato altrove può tornare. Da
+correggere confrontando prima di scrivere.

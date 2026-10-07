@@ -542,6 +542,19 @@
 
   /* La pagina delle informazioni si legge, quindi righe più larghe del solito
      e testo un filo più grande: è l'unica schermata dell'app fatta di parole. */
+  /* I doppioni: un riquadro per nome, una riga per preset. */
+  .gruppo-doppioni { border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+                     margin:0 0 12px; }
+  .gruppo-doppioni h4 { margin:0 0 6px; font-size:0.9rem; color:var(--text); }
+  .riga-doppione { display:flex; align-items:center; gap:10px; padding:8px 0;
+                   border-top:1px solid var(--line); }
+  .riga-doppione:first-of-type { border-top:none; }
+  .riga-doppione .lettera { flex:none; width:26px; height:26px; border-radius:50%;
+                            display:flex; align-items:center; justify-content:center;
+                            font-weight:700; font-size:0.8rem; background:#24262b; color:var(--text); }
+  .riga-doppione .dati { flex:1; min-width:0; font-size:0.78rem; color:var(--dim); line-height:1.45; }
+  .riga-doppione .dati .catena { color:var(--text); }
+  .riga-doppione button { flex:none; }
   .about { max-width:70ch; font-size:0.86rem; line-height:1.65; color:var(--dim); }
   .about p { margin:0 0 10px; }
   .about strong { color:var(--text); }
@@ -1237,6 +1250,15 @@
     </div>
   </div>
 
+  <!-- I doppioni: preset con lo stesso nome, da guardare e scegliere. -->
+  <div class="sezione-pannello" style="margin-top:22px">
+    <h3>Doppioni</h3>
+    <p class="spiega">I preset che in libreria hanno <strong>lo stesso nome</strong>, uno sotto
+      l'altro: quando sono entrati, se stanno sull'ampli, e se suonano uguale. Scegli tu
+      quali togliere.</p>
+    <button id="btnDoppioni" class="piccolo">Cerca i doppioni</button>
+  </div>
+
   <!-- Fare piazza pulita: la libreria si svuota, l'ampli resta com'è. -->
   <div class="sezione-pannello" style="margin-top:22px">
     <h3>Fare piazza pulita</h3>
@@ -1249,6 +1271,22 @@
   <div style="margin-top:20px">
     <button id="btnAbout" class="piccolo">Informazioni, licenze e responsabilità</button>
   </div>
+</div>
+
+<!-- i doppioni della libreria -->
+<div class="pannello" id="pannelloDoppioni">
+  <div class="barra-alta">
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloDoppioni">Fatto</button>
+  </div>
+  <div class="sezione-pannello">
+    <h3>Doppioni</h3>
+    <p class="spiega">Stesso nome, uno per riga. <strong>Stessa lettera, stesso suono</strong>:
+      due preset con la lettera A suonano identici, uno con la B è un'altra versione.
+      Tag, note e banchi sono di ciascuno: guarda prima di togliere.</p>
+    <div id="listaDoppioni"></div>
+  </div>
+  <div class="stato-pannello" hidden></div>
 </div>
 
 <!-- informazioni, licenze, responsabilità -->

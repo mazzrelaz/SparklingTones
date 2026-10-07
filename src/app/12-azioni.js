@@ -324,3 +324,112 @@ async function importaBackupUfficiale(file, buffer) {
   }
 }
 
+/* ====================================================================
+   Doppioni
+   ==================================================================== */
+
+/*
+ * I preset con lo stesso nome (spazi ai bordi e maiuscole non contano), da
+ * guardare e scegliere a mano: chiesto dall'utente il 7 ottobre 2026, dopo che
+ * il backup dell'app ufficiale, il NEO e i salvataggi sull'ampli li avevano
+ * fatti entrare con UUID diversi. Da allora un nome che c'è già non entra più
+ * dall'ampli (`importFromAmp`); questi sono quelli rimasti da prima.
+ *
+ * Niente si toglie da solo: per ogni preset quando è entrato, se sta
+ * sull'ampli, tag e note, e una lettera per il suono — stessa lettera, stessa
+ * catena con gli stessi valori.
+ */
+$('btnDoppioni').addEventListener('click', () => {
+  apriPannello('pannelloDoppioni');
+  disegnaDoppioni();
+});
+
+function gruppiDoppioni() {
+  const perNome = new Map();
+  for (const record of tutti) {
+    const chiave = String(record.name || '').trim().toLowerCase();
+    if (!chiave) continue;
+    if (!perNome.has(chiave)) perNome.set(chiave, []);
+    perNome.get(chiave).push(record);
+  }
+  return [...perNome.values()]
+    .filter(g => g.length > 1)
+    .map(g => g.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)))
+    .sort((a, b) => (a[0].name || '').localeCompare(b[0].name || '', 'it', { sensitivity: 'base' }));
+}
+
+function disegnaDoppioni() {
+  const lista = $('listaDoppioni');
+  lista.innerHTML = '';
+  const gruppi = gruppiDoppioni();
+  if (!gruppi.length) {
+    const vuoto = document.createElement('p');
+    vuoto.className = 'spiega';
+    vuoto.textContent = tr('Nessun doppione: ogni nome compare una volta sola.');
+    lista.appendChild(vuoto);
+    return;
+  }
+  const quando = t => t ? new Date(t).toLocaleString(Lingua.attuale,
+    { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+  const suono = r => JSON.stringify([r.effects || [], r.bpm]);
+
+  for (const gruppo of gruppi) {
+    const box = document.createElement('div');
+    box.className = 'gruppo-doppioni';
+    const titolo = document.createElement('h4');
+    titolo.textContent = tr`«${gruppo[0].name.trim()}», ${gruppo.length} volte`;
+    box.appendChild(titolo);
+
+    const lettere = new Map();       // suono -> lettera, nell'ordine in cui compaiono
+    for (const record of gruppo) {
+      if (!lettere.has(suono(record))) lettere.set(suono(record), String.fromCharCode(65 + lettere.size));
+      const riga = document.createElement('div');
+      riga.className = 'riga-doppione';
+
+      const lettera = document.createElement('span');
+      lettera.className = 'lettera';
+      lettera.textContent = lettere.get(suono(record));
+      lettera.title = tr('stessa lettera, stesso suono');
+
+      const dati = document.createElement('div');
+      dati.className = 'dati';
+      const catena = document.createElement('div');
+      catena.className = 'catena';
+      catena.textContent = (record.effects || []).filter(e => e.enabled)
+        .map(e => SparkEffetti.nome(e.name)).join(' · ') || tr('(catena vuota)');
+      const sotto = document.createElement('div');
+      const pezzi = [tr('entrato il {0}', quando(record.createdAt))];
+      if (residente(record)) pezzi.push(tr('sull\'ampli in {0}', etichetteSlot(record)));
+      if ((record.tags || []).length) pezzi.push(tr('{0} tag', record.tags.length));
+      if (record.notes) pezzi.push(tr('con note'));
+      if (record.famiglia) pezzi.push(tr('con famiglia'));
+      sotto.textContent = pezzi.join(' · ');
+      dati.append(catena, sotto);
+
+      const togli = document.createElement('button');
+      togli.className = 'pericolo piccolo';
+      togli.textContent = tr('Elimina');
+      togli.addEventListener('click', async () => {
+        const sullAmpli = residente(record)
+          ? tr(' Sta sull\'ampli in {0}: l\'ampli non viene toccato, e alla prossima lettura ' +
+               'quello slot andrà a uno degli altri con lo stesso nome.', etichetteSlot(record))
+          : '';
+        if (!await conferma(tr('eliminare un doppione'),
+          tr('Eliminare <strong>{0}</strong>, entrato il {1}? Gli altri con lo stesso nome restano.',
+             testoConNome(record.name), quando(record.createdAt)) + sullAmpli,
+          { ok: tr('Elimina'), pericolo: true })) return;
+        await store.remove(record.id);
+        logLine(tr`doppione eliminato: «${record.name}» del ${quando(record.createdAt)}`);
+        if (vista.aperto && String(vista.aperto).startsWith(record.id + ':')) vista.aperto = null;
+        await ricarica();
+        disegnaPreset();
+        disegnaLive();
+        disegnaDoppioni();
+      });
+
+      riga.append(lettera, dati, togli);
+      box.appendChild(riga);
+    }
+    lista.appendChild(box);
+  }
+}
