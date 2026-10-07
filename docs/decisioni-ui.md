@@ -1020,3 +1020,13 @@ correggere confrontando prima di scrivere.
 quindi a vista erano uguali. Adesso `PresetStore.chiaveNome` (spazi ai bordi, spazi ripetuti e
 maiuscole non contano) vale per «Doppioni», per `_omonimo` e per `stessoNome` dei banchi. Nella
 libreria dell'utente i gruppi diventano 7. Un test in più (store 151).
+
+## La connessione che cade da sola — 7 ottobre 2026 (strumentata, causa da trovare)
+
+L'utente: l'app perde il Bluetooth dall'ampli da sola (pedale spento, app attiva), notato
+oggi. Il trasporto prima cambiava solo la scritta in alto e **nel registro non scriveva
+niente**. Dalla v88 a ogni caduta scrive l'ora, da quanto si era collegati, quando l'ampli ha
+parlato l'ultima volta, l'ultimo invio, e se la pagina era in secondo piano o lo schermo
+spento; «connessione chiusa dall'app» quando la chiude l'app stessa. Prossimo passo: lo
+screenshot del registro alla prossima caduta. Da valutare dopo: il ricollegamento automatico
+(`device.gatt.connect()` non vuole un nuovo tocco), ma attenti al pedale che si prende l'ampli.

@@ -83,6 +83,25 @@ window.SparkTransport = (function () {
         optionalServices: [SERVICE_UUID],
       });
       this.device.addEventListener('gattserverdisconnected', () => {
+        /* Quando cade si scrive nel registro come e quando: prima diceva solo
+           «Disconnesso» in alto, e il registro non ne sapeva niente. L'utente
+           l'ha visto cadere da solo il 7 ottobre 2026 (app attiva, pedale
+           spento): per capire da cosa dipende servono questi numeri. */
+        const ora = Date.now();
+        const sec = t => (t ? Math.round((ora - t) / 1000) : null);
+        const pezzi = [];
+        if (this._connessoDa) pezzi.push(tr`collegati da ${sec(this._connessoDa)} s`);
+        if (this._ultimoRx) pezzi.push(tr`l'ampli ha parlato l'ultima volta ${sec(this._ultimoRx)} s fa`);
+        if (this._ultimoTx) pezzi.push(tr`ultimo invio ${sec(this._ultimoTx)} s fa`);
+        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+          pezzi.push(tr('pagina in secondo piano o schermo spento'));
+        }
+        this.onLog(this._chiusoDaNoi
+          ? tr('connessione chiusa dall\'app')
+          : tr('connessione persa alle {0}: {1}', new Date(ora).toLocaleTimeString(),
+               pezzi.join(', ') || tr('nessun dato')));
+        this._chiusoDaNoi = false;
+        this._connessoDa = this._ultimoRx = this._ultimoTx = 0;
         this.writeChar = this.notifyChar = null;
         this.assembler.reset();
         this._failAllWaiters(tr('connessione persa'));
@@ -100,13 +119,15 @@ window.SparkTransport = (function () {
         this.assembler.feed(new Uint8Array(e.target.value.buffer));
       });
 
+      this._connessoDa = Date.now();
+      this._chiusoDaNoi = false;
       this.onStatus('connected', this.device.name || 'Spark');
       this.onLog(tr`connesso a ${this.device.name}`);
       return this.device.name;
     },
 
     async disconnect() {
-      if (this.connected) this.device.gatt.disconnect();
+      if (this.connected) { this._chiusoDaNoi = true; this.device.gatt.disconnect(); }
     },
 
     /* ---------------------------------------------------------------- */
@@ -140,6 +161,7 @@ window.SparkTransport = (function () {
 
       this.sendChain = this.sendChain.then(async () => {
         await this.writeChar.writeValueWithoutResponse(bytes);
+        this._ultimoTx = Date.now();
         this.onLog(`TX 0x${hex(command.cmd)}${hex(command.sub)} seq=0x${hex(seq)} ${bytes.length}B`);
         await sleep(SEND_GAP_MS);
       }).catch(err => {
@@ -173,6 +195,7 @@ window.SparkTransport = (function () {
         for (let i = 0; i < bytes.length; i += passo) {
           await this.writeChar.writeValueWithoutResponse(bytes.subarray(i, i + passo));
         }
+        this._ultimoTx = Date.now();
         const pezzi = Math.ceil(bytes.length / passo);
         this.onLog(`TX 0x${hex(command.cmd)}${hex(command.sub)} seq=0x${hex(seq)} ` +
                    `${bytes.length}B in ${pezzi} scritture da ${passo}`);
@@ -219,6 +242,7 @@ window.SparkTransport = (function () {
 
     _handleMessage(msg) {
       this.rxTotali++;
+      this._ultimoRx = Date.now();
       this._trackState(msg);
       // una copia: un waiter può rimuoversi mentre iteriamo
       for (const waiter of this.waiters.slice()) {
