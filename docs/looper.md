@@ -619,3 +619,11 @@ negativo) — ma il negativo l'aveva approvato lui a settembre, decide lui.
 
 `tools/ascolta-pedale.ps1` adesso manda anche comandi: il testo in `%TEMP%\manda.txt`
 parte e il file si cancella, senza chiudere la porta.
+
+**Le regolazioni provate** (con l'utente, a occhio sulla schermata delle bande): la
+**luminosità** non cambia le bande, e anche da 255 a 16 il display si scurisce poco; la
+**precarica** a `0x11` (la più corta) le rende **leggermente meno evidenti**, `0xF1` niente;
+**VCOMH** fra `0x20` e `0x40`, poche o nessuna differenza. Dalla **2.9** la precarica a
+`0x11` è fissa in `setup()`; il resto com'era. Le bande restano: per toglierle davvero
+resterebbe solo meno pixel accesi a sinistra (la riga attiva senza negativo), da decidere
+con l'utente.
