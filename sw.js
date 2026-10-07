@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v81';
+const VERSIONE = 'v82';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -34,6 +34,22 @@ const GUSCIO = [
   './src/spark-backup.js',
   './src/pwa.js',
   './src/snake-pedali.js',
+  // lo script dell'app, diviso in pezzi il 7 ottobre 2026 (prima stava in index.html)
+  './src/app/01-avvio.js',
+  './src/app/02-stato.js',
+  './src/app/03-viste.js',
+  './src/app/04-log.js',
+  './src/app/05-pannelli.js',
+  './src/app/06-vista-preset.js',
+  './src/app/07-vista-live.js',
+  './src/app/08-invio.js',
+  './src/app/09-editor.js',
+  './src/app/10-editor-disegno.js',
+  './src/app/11-categorie.js',
+  './src/app/12-azioni.js',
+  './src/app/13-dropbox.js',
+  './src/app/14-pedale.js',
+  './src/app/15-partenza.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',

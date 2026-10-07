@@ -36,7 +36,8 @@ settimane**: si rimisura con `wc -c CLAUDE.md`, e sopra i 30 KB si sfoltisce.
 ## Struttura
 
 ```
-index.html                        tutta l'app: sezione Preset e sezione Live, stesso documento
+index.html                        HTML e <style> dell'app: sezione Preset e sezione Live, stesso documento
+src/app/01-…15-*.js               lo script dell'app, in fila (fino al 7 ottobre 2026 stava in index.html)
 live.html                         rimando a index.html#live
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
 src/spark-protocol.js             encoder/decoder puro, senza I/O — il cuore del progetto
@@ -62,8 +63,11 @@ captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte g
 **`tools/explorer.html` è CONGELATO** (copia propria del protocollo, single-file per il
 telefono): le modifiche vanno in `src/`.
 
-**`index.html` è 265 KB, ~75.000 token: mai leggerlo intero.** `grep -n '^/\* ==='` dà
-l'indice del JavaScript, poi `sed -n 'a,bp'` sulla sola sezione.
+**Lo script dell'app sta in `src/app/`, un file per sezione** (diviso il 7 ottobre 2026; backup:
+tag `prima-della-divisione`), caricati in fila da `index.html` come script classici: const,
+let e funzioni si vedono fra un file e l'altro, ma **il codice che gira al caricamento usa solo
+quello dei file prima**. Un file nuovo va anche nel guscio di `sw.js`. `index.html` (90 KB,
+HTML e il solo `<style>`) e `10-editor-disegno.js` (~1.600 righe) non si leggono interi.
 
 Niente build, tutto da `file://`: i moduli sono classic script (`window.Spark`, …), perché gli
 ES module lì sono bloccati. **IndexedDB di `file://` e di https sono due origini diverse**: la
@@ -370,7 +374,7 @@ riprende l'8 ottobre, coi connettori JST-PH. Restano: il display
 (il quadratino in negativo va ancora guardato), **il looper (2.6, 7 ottobre 2026: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click**: un KY-006 ordinato (foto e resistenza col tester prima di collegarlo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
-Sull'app (guscio `v77` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v82` in `sw.js`; **`src/app/` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.

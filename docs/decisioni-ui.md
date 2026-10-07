@@ -960,3 +960,19 @@ Da «Dove si riprende — 24 settembre 2026»:
 **tutto, app e sito** (`sparklingtones.com`, repo a parte), con **l'opzione per scegliere
 la lingua**. Il piano già scritto è in `docs/decisioni-ui.md`, «La decisione sull'inglese»:
 leggerlo prima di cominciare. «Italiano nella UI» nelle Convenzioni va aggiornato allora.
+
+## Lo script dell'app diviso in file — 7 ottobre 2026
+
+Chiesto dall'utente dopo una «pagella» tecnica in cui `index.html` (270 KB, 5.770 righe, lo
+script in linea da solo 4.300) era il punto debole. Lo script è andato in `src/app/`, quindici
+file nell'ordine delle sezioni di sempre (`01-avvio.js` … `15-partenza.js`), **senza cambiare
+una riga di codice**: i pezzi rifanno lo script originale carattere per carattere, e ognuno ha
+in testa il suo `'use strict'`. Script classici, non moduli (da `file://` i moduli sono
+bloccati): const, let e funzioni restano visibili fra i file.
+
+**L'unico rischio** era il sollevamento delle funzioni: in un file solo una funzione si può
+chiamare prima della riga in cui è scritta, divisi no. Controllato con un'analisi del codice
+(acorn): nessun pezzo, al caricamento, usa funzioni o `var` di un pezzo successivo. Poi
+provata nel browser: niente errori, libreria, scheda, editor senza ampli, vista live, menu,
+Categorie, Altro, StompSnake; `tools/lingua.html` trova ancora tutte le 510 frasi. Guscio
+`v82` coi file nuovi. Backup: tag `prima-della-divisione`.
