@@ -986,3 +986,9 @@ sempre `1` o `0`). Adesso `interruttori: [indice]` nella tabella di `spark-effet
 `cellaInterruttore()` nell'editor: un tasto acceso/spento nel riquadro della tendina del tipo
 di riverbero; acceso manda 1, spento 0, un valore letto conta acceso da 0,5 in su come gli
 altri interruttori dell'ampli. Provato nel browser senza ampli; **sull'ampli da provare**.
+
+**Poi la levetta** (stesso giorno): il tasto acceso/spento all'utente non piaceva. Adesso è
+una **levetta della taglia di un pomello** (SVG 58 px, stessa fila): pista verticale, pallino
+in alto e illuminato col colore del blocco quando segue il tempo, in basso e grigio quando no;
+sotto, il nome e ON/OFF al posto del numero. Si cambia toccandola (o con spazio/invio).
+**Verificato dall'utente sull'ampli che l'interruttore funziona** (acceso segue i bpm).

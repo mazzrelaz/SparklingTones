@@ -818,23 +818,53 @@ function cella(effetto, param) {
  * dell'ampli.
  */
 function cellaInterruttore(effetto, param) {
+  // Una levetta della taglia di un pomello, nella stessa fila (l'utente, 7
+  // ottobre 2026: il tasto di prima «fa cagare»): una pista verticale col
+  // pallino in alto e illuminato quando segue il tempo, in basso e grigio
+  // quando no. Sotto, come ai pomelli, il nome e ON/OFF al posto del numero.
   const box = document.createElement('div');
-  box.className = 'pomello scelta';
-  const tasto = document.createElement('button');
-  tasto.type = 'button';
+  box.className = 'pomello leva';
+  box.setAttribute('role', 'switch');
+  box.tabIndex = 0;
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  const pista = document.createElementNS(ns, 'rect');
+  pista.setAttribute('class', 'pista-leva');
+  pista.setAttribute('x', 33); pista.setAttribute('y', 8);
+  pista.setAttribute('width', 34); pista.setAttribute('height', 84);
+  pista.setAttribute('rx', 17);
+  const pallino = document.createElementNS(ns, 'circle');
+  pallino.setAttribute('class', 'pallino');
+  pallino.setAttribute('cx', 50); pallino.setAttribute('r', 12);
+  svg.append(pista, pallino);
+
+  const valore = document.createElement('div');
+  valore.className = 'val';
+  box.append(svg, etichettaDi(effetto, param, manopoleVere(effetto).length), valore);
+
   const disegna = () => {
     const acceso = param.value >= 0.5;
-    tasto.className = 'interruttore-param' + (acceso ? ' acceso' : '');
-    tasto.textContent = acceso ? tr('acceso') : tr('spento');
+    box.classList.toggle('acceso', acceso);
+    box.setAttribute('aria-checked', acceso ? 'true' : 'false');
+    pallino.setAttribute('cy', acceso ? 29 : 71);
+    valore.textContent = acceso ? 'ON' : 'OFF';
   };
-  tasto.addEventListener('click', () => {
+  const scatta = () => {
     param.value = param.value >= 0.5 ? 0 : 1;
     disegna();
     aggiornaBarrette();
     mandaParametro(effetto.name, param.index, param.value);
+  };
+  box.addEventListener('click', evento => {
+    if (evento.target.classList.contains('nome')) return;   // lì si battezza
+    scatta();
+  });
+  box.addEventListener('keydown', evento => {
+    if (evento.key === ' ' || evento.key === 'Enter') { evento.preventDefault(); scatta(); }
   });
   disegna();
-  box.append(tasto, etichettaDi(effetto, param, manopoleVere(effetto).length));
   return box;
 }
 
