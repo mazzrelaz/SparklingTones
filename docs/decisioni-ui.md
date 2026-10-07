@@ -1042,3 +1042,15 @@ avverte che quel posto resterà vuoto. (Per l'appunto dell'utente: i banchi sono
 (Doppioni, nomi già in libreria, connessione persa, «Seleziona CHx») in `src/lingua-en.js`,
 `tools/lingua.html` a 538 su 538; e in `docs/protocollo-spark2.en.md` la sezione sul NEO del 2
 e del 4 ottobre. README e sito erano già allineati.
+
+## Il bollo «Spark LIVE» — 7 ottobre 2026
+
+L'utente si è ritrovato «Vocal - Lead» e «Vocal - Echo» e ha pensato che li avesse messi
+qualcun altro collegato all'ampli. No: sono entrati il 24 settembre alle 17:33:49 col backup
+dell'app ufficiale, che porta tutta la libreria del cloud Positive Grid e non solo quella dello
+Spark 2. Sono preset dello **Spark LIVE**: `Comp76`, `Preamp73`, `VocalDrive`, `VocalEcho`,
+`VocalChorus`, del suo canale del microfono. Non partono comunque (`controllaPreset` li ferma).
+Chiesto dall'utente: segnarli. Adesso `SparkEffetti.liveNellaCatena` (i due nomi più tutto
+quello che comincia con `Vocal`) e `bolloLive()` mettono un bollo azzurro «Spark LIVE» accanto
+al nome, sulle righe e sugli slot, col titolo che dice quali effetti. Azzurro e senza pallino:
+è un'informazione, non un avviso come JH.

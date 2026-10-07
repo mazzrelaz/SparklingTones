@@ -164,6 +164,8 @@ function schedaSlot(record, slot) {
   // spazio, e il nome sotto sta su due righe e non ne ha da cedere.
   const bollo = bolloHendrix(record);
   if (bollo) alto.appendChild(bollo);
+  const live = bolloLive(record);
+  if (live) alto.appendChild(live);
   card.appendChild(alto);
 
   // Nella scheda ci stanno la posizione e il nome, e basta: l'ampli e il drive
@@ -292,6 +294,24 @@ function bolloHendrix(record) {
   return bollo;
 }
 
+/**
+ * Il bollo «Spark LIVE» dei preset fatti per lo Spark LIVE, o null: hanno
+ * effetti del canale del microfono che lo Spark 2 e il NEO non hanno, e
+ * arrivano col backup dell'app ufficiale (chiesto dall'utente il 7 ottobre
+ * 2026). Non si possono mandare all'ampli: il bollo lo dice prima di provarci.
+ */
+function bolloLive(record) {
+  const dentro = SparkEffetti.liveNellaCatena(record && record.effects);
+  if (dentro.length === 0) return null;
+  const bollo = document.createElement('span');
+  bollo.className = 'bollo-live';
+  bollo.textContent = 'Spark LIVE';
+  bollo.title = tr('Preset per lo Spark LIVE: {0} esistono solo sul suo canale del microfono. ' +
+    'Sullo Spark 2 e sul NEO non si può mandare.',
+    [...new Set(dentro)].map(n => SparkEffetti.nome(n)).join(' · '));
+  return bollo;
+}
+
 function rigaPreset(record, slot) {
   const riga = document.createElement('div');
   riga.className = 'row';
@@ -312,6 +332,8 @@ function rigaPreset(record, slot) {
   head.appendChild(naming);
   const bollo = bolloHendrix(record);
   if (bollo) head.appendChild(bollo);
+  const live = bolloLive(record);
+  if (live) head.appendChild(live);
   if (slot !== null) head.appendChild(etichettaSlot(slot));
 
   // Provare un preset è l'azione che si fa più spesso, e stava sepolta nel

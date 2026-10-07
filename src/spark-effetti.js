@@ -583,8 +583,27 @@ window.SparkEffetti = (function () {
     return (effetti || []).map(e => e && e.name).filter(eHendrix);
   }
 
+  /**
+   * **I modelli dello Spark LIVE** (e dell'EDGE): quelli del canale del
+   * microfono, che sullo Spark 2 e sul NEO non esistono. Arrivano col backup
+   * dell'app ufficiale, che porta tutta la libreria del cloud e non solo quella
+   * di quest'ampli: «Vocal - Lead» e «Vocal - Echo» dell'utente (7 ottobre
+   * 2026) hanno `Comp76`, `Preamp73`, `VocalDrive`, `VocalEcho`,
+   * `VocalChorus`. `Comp76` e `Preamp73` li avevamo già visti fuori
+   * dall'elenco dello Spark 2 (vedi MODELLI); i `Vocal…` si riconoscono dal
+   * nome. Mandarli non si può comunque (`controllaPreset` li ferma): il
+   * bollo lo dice prima.
+   */
+  const MODELLI_LIVE = ['Comp76', 'Preamp73'];
+  const eLive = id => typeof id === 'string' && (MODELLI_LIVE.includes(id) || id.startsWith('Vocal'));
+
+  /** I modelli dello Spark LIVE presenti in una catena di effetti. */
+  function liveNellaCatena(effetti) {
+    return (effetti || []).map(e => e && e.name).filter(eLive);
+  }
+
   return { TABELLA, MODELLI, AMPLI, GRUPPI_AMPLI, nome, manopola, extra, nomeExtra,
            affidabile, ampliReale, ampliGruppo, aCursori, quanteManopole,
            quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi, interruttore,
-           eHendrix, hendrixNellaCatena, GRUPPO_HENDRIX };
+           eHendrix, hendrixNellaCatena, GRUPPO_HENDRIX, eLive, liveNellaCatena };
 })();

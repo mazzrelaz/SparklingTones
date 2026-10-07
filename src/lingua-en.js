@@ -1088,4 +1088,6 @@ window.LINGUA_EN = {
     "Delete <strong>{0}</strong>, added on {1}? The others with the same name stay.",
   "doppione eliminato: «{0}» del {1}":
     "duplicate deleted: «{0}» from {1}",
+  "Preset per lo Spark LIVE: {0} esistono solo sul suo canale del microfono. Sullo Spark 2 e sul NEO non si può mandare.":
+    "A preset for the Spark LIVE: {0} only exist on its microphone channel. It can't be sent to the Spark 2 or the NEO.",
 };
