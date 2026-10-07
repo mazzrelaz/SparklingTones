@@ -209,3 +209,12 @@ scritto «finito»):
 
 **Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare
 il firmware il cavo va infilato **dentro**, direttamente nella XIAO.
+
+**Il firmware è diviso in file dal 7 ottobre 2026** (backup prima: tag git
+`prima-della-divisione` e `C:\Users\massi\spark-backup-2026-10-07.zip`). `prova-ble.ino` tiene
+gli `#include` e le variabili di tutto il pedale; poi `01-tasti-led.ino` … `11-avvio.ino`, che
+Arduino mette in fila nell'ordine del nome e compila come un file solo. **Verificato**: stesso
+binario al byte, a parte le 64 di impronte (SHA dell'ELF nel descrittore e hash finale). Le
+regole: una funzione si chiama da ogni file, **una variabile solo dai file che vengono dopo**
+quello che la dichiara; un file nuovo si numera dove deve stare. L'elenco è nella testa di
+`prova-ble.ino`. Compilare e caricare non cambiano: si dà la cartella.

@@ -49,7 +49,7 @@ src/pedale-ponte.js               sponda app del ponte BLE verso il pedale
 src/pwa.js / src/snake-pedali.js  service worker; StompSnake
 src/lingua.js                     le lingue: tr() e la traduzione dell'HTML all'avvio
 src/lingua-en.js                  l'inglese — NON si legge (vedi «L'inglese»)
-pedale/prova-ble/                 firmware del pedale (banchi.h, preset_frames.h)
+pedale/prova-ble/                 firmware del pedale: prova-ble.ino (include e variabili) + 01-…11-*.ino in fila, banchi.h
 pedale/prova-espansore/           pulsanti e LED: mappatura guidata e prova a mano
 pedale/prova-usb|display|midi/    altri sketch di prova
 pcb/                              scheda in KiCad, ACCANTONATA: non si tocca e non si propone
