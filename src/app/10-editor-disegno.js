@@ -804,8 +804,38 @@ function cella(effetto, param) {
   // Certi parametri scelgono fra cose invece di scorrere — il tipo di
   // riverbero è l'unico che conosciamo. Con un pomello azzeccare la posizione
   // sarebbe un terno al lotto, quindi lì ci va un elenco.
+  if (SparkEffetti.interruttore(effetto.name, param.index)) return cellaInterruttore(effetto, param);
   const quante = SparkEffetti.posizioni(effetto.name, param.index);
   return quante ? cellaScelta(effetto, param, quante) : pomello(effetto, param);
+}
+
+/**
+ * Un parametro che è un acceso/spento: il «BPM» dei delay e del Tremolator,
+ * che segue il tempo o no. Nell'app ufficiale è un interruttore e nei preset
+ * veri vale solo 0 o 1; un pomello da 0 a 10 faceva credere a valori in mezzo
+ * che non esistono (l'utente, 7 ottobre 2026). Acceso manda 1, spento 0; un
+ * valore letto si considera acceso da 0,5 in su, come gli altri interruttori
+ * dell'ampli.
+ */
+function cellaInterruttore(effetto, param) {
+  const box = document.createElement('div');
+  box.className = 'pomello scelta';
+  const tasto = document.createElement('button');
+  tasto.type = 'button';
+  const disegna = () => {
+    const acceso = param.value >= 0.5;
+    tasto.className = 'interruttore-param' + (acceso ? ' acceso' : '');
+    tasto.textContent = acceso ? tr('acceso') : tr('spento');
+  };
+  tasto.addEventListener('click', () => {
+    param.value = param.value >= 0.5 ? 0 : 1;
+    disegna();
+    aggiornaBarrette();
+    mandaParametro(effetto.name, param.index, param.value);
+  });
+  disegna();
+  box.append(tasto, etichettaDi(effetto, param, manopoleVere(effetto).length));
+  return box;
 }
 
 /**

@@ -976,3 +976,13 @@ chiamare prima della riga in cui è scritta, divisi no. Controllato con un'anali
 provata nel browser: niente errori, libreria, scheda, editor senza ampli, vista live, menu,
 Categorie, Altro, StompSnake; `tools/lingua.html` trova ancora tutte le 510 frasi. Guscio
 `v82` coi file nuovi. Backup: tag `prima-della-divisione`.
+
+## Il «BPM» dei delay è un interruttore — 7 ottobre 2026
+
+Segnalato dall'utente: negli effetti a tempo (i sei delay e il Tremolator) l'app ufficiale ha
+un **acceso/spento** «BPM» — acceso segue il tempo, spento no — e noi un pomello da 0 a 10.
+Nei preset veri quel parametro vale **solo 0 o 1** (catture del 10 agosto e del 2 ottobre:
+sempre `1` o `0`). Adesso `interruttori: [indice]` nella tabella di `spark-effetti.js` e
+`cellaInterruttore()` nell'editor: un tasto acceso/spento nel riquadro della tendina del tipo
+di riverbero; acceso manda 1, spento 0, un valore letto conta acceso da 0,5 in su come gli
+altri interruttori dell'ampli. Provato nel browser senza ampli; **sull'ampli da provare**.

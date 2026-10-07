@@ -923,6 +923,16 @@
                                    margin-bottom:5px; }
   .pomello.scelta .tendina-finta:hover { border-color:var(--cat); background:#0e1014; }
   .pomello.scelta .tendina-finta .freccia { color:var(--cat); }
+  /* Il «BPM» di delay e Tremolator: un acceso/spento come nell'app ufficiale,
+     della stessa taglia della tendina qui sopra. Acceso prende il colore del
+     blocco e il suo alone, spento resta grigio. */
+  .pomello.scelta .interruttore-param { width:100%; background:#0e1014; color:var(--dim);
+                                        border:1px solid #2a2f37; border-radius:8px;
+                                        padding:7px 6px; font-size:0.72rem; font-family:inherit;
+                                        font-weight:400; margin-bottom:5px; cursor:pointer; }
+  .pomello.scelta .interruttore-param.acceso { color:var(--cat); border-color:var(--cat);
+                                               text-shadow:0 0 8px var(--cat);
+                                               box-shadow:0 0 12px -2px var(--cat); }
   /* Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
   .bolla { position:fixed; z-index:60; font-family:var(--strumento); transform:translate(-50%,-150%);
            background:var(--text); color:#101216; font-weight:700; font-size:1.2rem;

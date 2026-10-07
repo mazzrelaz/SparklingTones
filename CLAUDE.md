@@ -226,6 +226,8 @@ lo stesso, quando serve.
 - **`MODELLI` è verificato contro l'app ufficiale** (26 agosto 2026). **Un nome nuovo si
   verifica allo stesso modo** (elenco ufficiale o preset uscito dall'ampli); una voce nuova
   dell'elenco non è per forza un modello nuovo (l'«Auto Wah» è `JH.Vox846`).
+- **Il «BPM» di delay e Tremolator è un interruttore** (`interruttori` nella tabella, 7 ottobre
+  2026): nei preset veri vale solo 0 o 1, come nell'app ufficiale; acceso manda 1, spento 0.
 - Gli Hendrix stanno in fondo a ogni tendina, sotto «Jimi Hendrix Pack»
   (`SparkEffetti.GRUPPO_HENDRIX`).
 

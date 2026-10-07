@@ -49,6 +49,12 @@ window.SparkEffetti = (function () {
    *            renderebbe quasi impossibile da azzeccare, quindi la UI ci
    *            mette un elenco. Le posizioni valgono 0, 0.1, 0.2 … com'è nei
    *            preset veri.
+   * interruttori = [indici] dei parametri che sono un acceso/spento e non
+   *            una manopola: il «BPM» dei delay e del Tremolator, che segue il
+   *            tempo o no. Nell'app ufficiale è un interruttore, e nei preset
+   *            veri vale solo 0 o 1 (catture del 10 agosto e del 2 ottobre
+   *            2026); qui era un pomello da 0 a 10 (segnalato dall'utente il 7
+   *            ottobre 2026).
    */
   const TABELLA = {
     /* ---- Noise gate ----
@@ -214,7 +220,7 @@ window.SparkEffetti = (function () {
     'UniVibe': { nome: 'UniVibe', manopole: ['Speed', 'Chorus / Vibrato', 'Intensity'] },
     'Cloner': { nome: 'Cloner Chorus', manopole: ['Rate', 'Depth'] },
     'MiniVibe': { nome: 'Classic Vibe', manopole: ['Speed', 'Intensity'] },
-    'Tremolator': { nome: 'Tremolator', manopole: ['Depth', 'Speed', 'BPM'] },
+    'Tremolator': { nome: 'Tremolator', manopole: ['Depth', 'Speed', 'BPM'], interruttori: [2] },
     'TremoloSquare': { nome: 'Tremolo Square', manopole: ['Speed', 'Depth', 'Level'] },
     'MuTron': { nome: 'MuTron III',
       manopole: ['Mode', 'Peak', 'Depth', 'Range', 'Position'] },
@@ -231,17 +237,17 @@ window.SparkEffetti = (function () {
 
     /* ---- Delay ---- */
     'DelayMono': { nome: 'Digital Delay',
-      manopole: ['E.Level', 'F.Back', 'D.Time', 'Mode', 'BPM'] },
+      manopole: ['E.Level', 'F.Back', 'D.Time', 'Mode', 'BPM'], interruttori: [4] },
     'DelayEchoFilt': { nome: 'Echo Filt',
-      manopole: ['Delay', 'Feedback', 'Level', 'Tone', 'BPM'] },
+      manopole: ['Delay', 'Feedback', 'Level', 'Tone', 'BPM'], interruttori: [4] },
     'VintageDelay': { nome: 'Vintage Delay',
-      manopole: ['Repeat Rate', 'Intensity', 'Echo', 'BPM'] },
+      manopole: ['Repeat Rate', 'Intensity', 'Echo', 'BPM'], interruttori: [3] },
     'DelayReverse': { nome: 'Reverse Delay',
-      manopole: ['Mix', 'Decay', 'Filter', 'Time', 'BPM'] },
+      manopole: ['Mix', 'Decay', 'Filter', 'Time', 'BPM'], interruttori: [4] },
     'DelayMultiHead': { nome: 'Multi Head',
-      manopole: ['Repeat Rate', 'Intensity', 'Echo Vol', 'Mode Selector', 'BPM'] },
+      manopole: ['Repeat Rate', 'Intensity', 'Echo Vol', 'Mode Selector', 'BPM'], interruttori: [4] },
     'DelayRe201': { nome: 'Echo Tape',
-      manopole: ['Sustain', 'Volume', 'Tone', 'Short -> Long', 'BPM'] },
+      manopole: ['Sustain', 'Volume', 'Tone', 'Short -> Long', 'BPM'], interruttori: [4] },
 
     /* ---- Riverbero ----
        Soundshed spezza il riverbero in nove voci `bias.reverb.N`, una per tipo
@@ -508,6 +514,12 @@ window.SparkEffetti = (function () {
     return Array.isArray(scelte) ? scelte : null;
   }
 
+  /** Questo parametro è un acceso/spento (`interruttori` nella tabella)? */
+  function interruttore(id, indice) {
+    const voce = TABELLA[id];
+    return !!(voce && voce.interruttori && voce.interruttori.includes(indice));
+  }
+
   /** Il valore della posizione n: un decimo per volta, com'è nei preset veri. */
   function valorePosizione(n) {
     return n / 10;
@@ -573,6 +585,6 @@ window.SparkEffetti = (function () {
 
   return { TABELLA, MODELLI, AMPLI, GRUPPI_AMPLI, nome, manopola, extra, nomeExtra,
            affidabile, ampliReale, ampliGruppo, aCursori, quanteManopole,
-           quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi,
+           quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi, interruttore,
            eHendrix, hendrixNellaCatena, GRUPPO_HENDRIX };
 })();
