@@ -648,3 +648,9 @@ il giro non si rimette due volte (`07` poi `08`, ~25 ms di salto). E, deciso dal
 **2.13**: il LED del tempo su D1 va bene (l'utente, 7 ottobre). Tolto il lampeggio del rosso
 di FS1 durante la registrazione, che col LED del tempo non serve più: FS1 è **rosso fisso**
 mentre registra o sovraincide. I quattro LED in sequenza del conteggio restano.
+
+**Fine giornata, 7 ottobre 2026**: per l'utente il looper sul pedale «sembra funzionare
+tutto» (2.13). Il LED del tempo è collegato in prova ma **non ancora fissato**: il posto lo
+decide insieme al buzzer KY-006, che arriva l'8 ottobre, perché lo spazio dentro la scatola
+è poco. Da lì: foto, resistenza del buzzer col tester, cablaggio di tutti e due (LED su D1,
+buzzer su D3), e il click del conteggio nel firmware.
