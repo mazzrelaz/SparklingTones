@@ -56,7 +56,7 @@ pedale/prova-usb|display|midi/    altri sketch di prova
 pcb/                              scheda in KiCad, ACCANTONATA: non si tocca e non si propone
 tools/                            simulatore, generatori, sonde, serve.ps1, script scatola
 tools/video-demo/                 video dimostrativo: ampli e pedale finti, regia, MP4 a 30 fps, voce (Kokoro)
-test/*.html                       protocol 147, transport 64, store 143, backup 41, dropbox 38
+test/*.html                       protocol 147, transport 64, store 150, backup 41, dropbox 38
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
 ```
 
@@ -122,6 +122,9 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
 
 - **La libreria non perde mai il lavoro dell'utente**: `importFromAmp` riconosce per UUID e
   riscrive solo la parte sonora; tag, note, famiglia e ordine restano. Coperto da test.
+- **Un nome che c'è già non entra due volte** (7 ottobre 2026, chiesto dall'utente): un preset
+  letto con un UUID nuovo ma lo stesso nome di uno in libreria non si copia; lo slot va a quello
+  che c'è, il suo suono non si tocca (`_omonimo`, test). I doppioni vecchi: «Doppioni» in Altro.
 - **Preset e Live stanno nello stesso file e non si separano**: la connessione BLE vive nel
   documento. Si scambiano con una classe sul `body`, guidata dall'hash (`#live`/`#preset`),
   così l'indietro di Android torna ai preset. Verificato sull'hardware.

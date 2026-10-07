@@ -476,6 +476,10 @@ window.PresetStore = (function () {
      * vengono aggiornati solo nella parte sonora: tag, note, preferiti e
      * ordine restano quelli dell'utente.
      *
+     * **Un preset con lo stesso nome di uno in libreria non entra** (7 ottobre
+     * 2026): lo slot va a quello che c'è già e il suo suono resta; torna in
+     * `omonimi`. Con `opzioni.aggiornaOmonimi` invece se ne aggiorna il suono.
+     *
      * `opzioni.slotVuoti`: slot che quest'ampli non ha (lo Spark NEO ne ha 4).
      * Valgono come osservati e vuoti, così chi li teneva su un altro ampli li
      * perde invece di restare in cima come se fosse qui; il record resta.
@@ -483,28 +487,63 @@ window.PresetStore = (function () {
      */
     async importFromAmp(presets, opzioni) {
       let added = 0, updated = 0;
+      const omonimi = [];               // non copiati: c'era gia' un preset con quel nome
       const visti = new Map();          // slot letto → uuid che ci sta
       for (const s of (opzioni && opzioni.slotVuoti) || []) visti.set(s, null);
+      const conSlot = p => p.slot !== null && p.slot !== undefined;
 
       for (const preset of presets) {
-        if (preset.slot !== null && preset.slot !== undefined) {
-          visti.set(preset.slot, preset.uuid);
-        }
         const existing = preset.uuid ? await this.byUuid(preset.uuid) : null;
         if (existing) {
+          if (conSlot(preset)) visti.set(preset.slot, existing.uuid);
           for (const field of SOUND_FIELDS) {
             if (preset[field] !== undefined) existing[field] = preset[field];
           }
           await this.put(existing);
           updated++;
-        } else {
-          await this.add(Object.assign({}, preset, { slots: [], slot: undefined }));
-          added++;
+          continue;
         }
+        /* **Un nome che c'è già non entra una seconda volta** (chiesto
+           dall'utente il 7 ottobre 2026). Lo stesso preset arriva con un UUID
+           diverso dal backup dell'app ufficiale, dal NEO o da un salvataggio
+           sull'ampli, e ogni lettura ne faceva un doppione. Lo slot va al
+           preset che c'è già, il suo suono non si tocca; con piu' omonimi, a
+           quello che teneva gia' lo slot, se no al piu' recente. */
+        const omonimo = await this._omonimo(preset.name, conSlot(preset) ? preset.slot : null);
+        if (omonimo) {
+          if (conSlot(preset)) visti.set(preset.slot, omonimo.uuid);
+          if (opzioni && opzioni.aggiornaOmonimi) {
+            // chiesto apposta («Importa preset attuale», con la conferma)
+            for (const field of SOUND_FIELDS) {
+              if (preset[field] !== undefined) omonimo[field] = preset[field];
+            }
+            await this.put(omonimo);
+            updated++;
+          } else {
+            omonimi.push({ nome: preset.name, record: omonimo,
+                           suonoDiverso: !stessoSuono(omonimo, preset) });
+          }
+          continue;
+        }
+        if (conSlot(preset)) visti.set(preset.slot, preset.uuid);
+        await this.add(Object.assign({}, preset, { slots: [], slot: undefined }));
+        added++;
       }
 
       await this._sistemaSlot(visti);
-      return { added, updated };
+      return { added, updated, omonimi };
+    },
+
+    /** Il preset in libreria con quel nome (spazi ai bordi e maiuscole non
+     *  contano), o null. Con piu' omonimi: quello che tiene gia' `slot`, se
+     *  no il piu' recente. */
+    async _omonimo(nome, slot) {
+      if (!String(nome || '').trim()) return null;
+      const stessi = (await this.all()).filter(r => stessoNome(r.name, nome));
+      if (!stessi.length) return null;
+      const suo = slot === null ? null
+        : stessi.find(r => normalizzaSlots(r).slots.includes(slot));
+      return suo || stessi.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0];
     },
 
     /**
@@ -1049,6 +1088,11 @@ window.PresetStore = (function () {
   /** Due nomi di banco uguali a meno di spazi e maiuscole. */
   function stessoNome(a, b) {
     return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+  }
+
+  /** Due preset suonano uguale: stessa catena con gli stessi valori, stesso bpm. */
+  function stessoSuono(a, b) {
+    return JSON.stringify([a.effects || [], a.bpm]) === JSON.stringify([b.effects || [], b.bpm]);
   }
 
   /** Tag ripuliti: senza spazi ai bordi, senza vuoti, senza duplicati. */

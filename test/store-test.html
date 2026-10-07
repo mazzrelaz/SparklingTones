@@ -162,7 +162,7 @@ const DB_NAME = 'spark-test-' + Date.now();
   await store.setFamiglia(idA, 'clean');
 
   const esito = await store.importFromAmp([modificato, nuovo]);
-  check('import: uno aggiunto, uno aggiornato', esito, { added: 1, updated: 1 });
+  check('import: uno aggiunto, uno aggiornato', [esito.added, esito.updated], [1, 1]);
   check('la famiglia scelta a mano sopravvive all\'import',
         (await store.get(idA)).famiglia, 'clean');
   check('la libreria è cresciuta di uno', await store.count(), 4);
@@ -177,7 +177,7 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('lo slot sull\'ampli viene registrato, come lista', dopo.slots, [0]);
 
   const ancora = await store.importFromAmp([modificato, nuovo]);
-  check('reimportare gli stessi preset non ne aggiunge altri', ancora, { added: 0, updated: 2 });
+  check('reimportare gli stessi preset non ne aggiunge altri', [ancora.added, ancora.updated], [0, 2]);
 
   /* ------------------------------------------------------------------ */
   group('scaletta');
@@ -690,6 +690,31 @@ const DB_NAME = 'spark-test-' + Date.now();
   piena.close();
   await PresetStore.deleteDatabase(DB_VUOTA);
 
+
+  /* ------------------------------------------------------------------ */
+  group('un nome che c\'è già non entra due volte');
+
+  // Il caso vero (7 ottobre 2026): lo stesso preset con un UUID diverso — dal
+  // backup dell'app ufficiale, dal NEO, da un salvataggio sull'ampli — ogni
+  // lettura ne faceva un doppione.
+  const idOrig = await store.add(makePreset('uuid-om', 'DG - Echoes', ['Twin']));
+  const quantiPrima = await store.count();
+  const dallAmpli = Object.assign(makePreset('uuid-om-ampli', ' dg - echoes ', ['Plexi']), { slot: 7 });
+  const esitoOm = await store.importFromAmp([dallAmpli]);
+  check('lo stesso nome con un UUID nuovo non si copia',
+        [esitoOm.added, esitoOm.omonimi.length, await store.count()], [0, 1, quantiPrima]);
+  check('lo slot va al preset che c\'era', (await store.get(idOrig)).slots, [7]);
+  check('il suo suono non si tocca', (await store.get(idOrig)).effects.map(e => e.name), ['Twin']);
+  check('e si dice che sull\'ampli suona diverso', esitoOm.omonimi[0].suonoDiverso, true);
+  const riletto = await store.importFromAmp([dallAmpli]);
+  check('rileggere non lo copia nemmeno la seconda volta',
+        [riletto.added, await store.count()], [0, quantiPrima]);
+  const conAggiorna = await store.importFromAmp([dallAmpli], { aggiornaOmonimi: true });
+  check('con aggiornaOmonimi se ne aggiorna il suono',
+        [conAggiorna.updated, (await store.get(idOrig)).effects.map(e => e.name)], [1, ['Plexi']]);
+  const altroNome = Object.assign(makePreset('uuid-nuovo-davvero', 'Un nome nuovo', ['Twin']), { slot: 7 });
+  const esitoNuovo = await store.importFromAmp([altroNome]);
+  check('un nome nuovo entra come sempre', [esitoNuovo.added, await store.count()], [1, quantiPrima + 1]);
 
   /* ------------------------------------------------------------------ */
   group('errori');

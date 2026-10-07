@@ -92,8 +92,16 @@ async function leggiDallAmpli() {
     });
     const slotVuoti = [];
     for (let s = profilo.slot; s < 8; s++) slotVuoti.push(s);
-    const { added, updated } = await store.importFromAmp(presets, { slotVuoti });
+    const { added, updated, omonimi } = await store.importFromAmp(presets, { slotVuoti });
     logLine(tr`letti ${presets.length} preset dall'ampli: ${added} nuovi, ${updated} aggiornati`);
+    // Un nome che c'è già non entra due volte: si dice quali, e se l'ampli ha
+    // un suono diverso da quello in libreria (che non si tocca).
+    for (const o of omonimi) {
+      logLine(o.suonoDiverso
+        ? tr('«{0}» c\'è già in libreria: non lo copio. Sull\'ampli il suono è diverso, ' +
+             'in libreria resta il tuo.', o.nome)
+        : tr('«{0}» c\'è già in libreria: non lo copio.', o.nome));
+    }
   } catch (err) {
     logLine(tr('lettura interrotta: {0}', err.message));
   }
@@ -131,7 +139,9 @@ $('btnLive').addEventListener('click', async () => {
     const catena = corrente.effects.filter(e => e.enabled).map(e => e.name).join(' · ');
     logLine(tr`suono corrente: «${corrente.name}» — ${catena}`);
 
-    const esistente = corrente.uuid ? await store.byUuid(corrente.uuid) : null;
+    // Lo stesso preset, o uno con lo stesso nome: un nome non entra due volte.
+    const esistente = (corrente.uuid ? await store.byUuid(corrente.uuid) : null) ||
+                      await store._omonimo(corrente.name, null);
     const domanda = esistente
       ? tr('<strong>{0}</strong> è già in libreria. ' +
         'Aggiornarne il suono con quello che l\'ampli sta suonando adesso? ' +
@@ -140,7 +150,7 @@ $('btnLive').addEventListener('click', async () => {
         'come preset nuovo?', testoConNome(corrente.name));
     if (await conferma(esistente ? tr('aggiornare il suono') : tr('salvare in libreria'), domanda,
                        { ok: esistente ? tr('Aggiorna il suono') : tr('Salva in libreria') })) {
-      const { added } = await store.importFromAmp([corrente]);
+      const { added } = await store.importFromAmp([corrente], { aggiornaOmonimi: true });
       logLine(added ? tr`«${corrente.name}» aggiunto alla libreria`
                     : tr`«${corrente.name}» aggiornato in libreria`);
       await ricarica();
