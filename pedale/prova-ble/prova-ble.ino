@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.6";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge
+static const char* VERSIONE = "2.7";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -1700,6 +1700,10 @@ static void looperEvento(uint8_t v, bool mandato = false) {
       if (!loopSuona && !loopRegistra) inizioGiro = millis();   // da fermo riparte dall'inizio
       loopRegistra = false; loopSuona = true; loopPresente = true; break;
     case LOOP_FERMA:
+      // detto dall'ampli (anche come risposta a 0x0275, appena collegati), fermo
+      // vuol dire che un loop c'e': senza, i tasti banco cambiavano le battute
+      // sotto un loop registrato e l'ampli si impallava (7 ottobre)
+      if (!mandato) loopPresente = true;
       posLoop = -1;
       loopRegistra = loopSovraincide = loopSuona = false; break;
     case LOOP_DUB:
@@ -1765,12 +1769,20 @@ static void looperPremuto(uint8_t k) {
   }
 }
 
+/** Il loop e' vuoto davvero: niente registrato, niente in corso, e l'ampli
+ *  non sta mandando la posizione (0x0377 arriva solo con un loop che suona).
+ *  Battute e tempo si cambiano solo cosi', come nell'app: con un loop
+ *  registrato l'ampli si impalla (segnalato dall'utente il 7 ottobre). */
+static bool loopVuoto() {
+  return !loopPresente && !loopRegistra && !loopSovraincide && !contaTempo && posLoop < 0;
+}
+
 /** FS5 nel looper: il tap tempo. Solo a loop vuoto: un loop gia' registrato
  *  ha il suo tempo, e cambiarglielo sotto non sappiamo cosa faccia. Il bpm
  *  nuovo si vede subito in alto; all'ampli lo manda il loop (0x0176). */
 static void looperTap() {
   if (!chScrittura) return;
-  if (loopPresente || loopRegistra || contaTempo) { avvisa("tempo: a loop vuoto"); return; }
+  if (!loopVuoto()) { avvisa("tempo: a loop vuoto"); return; }
   if (!lungImpostazioni) { avvisa("tempo non ancora letto"); return; }
   const uint32_t ora = millis();
   const uint32_t passo = ora - tapUltimo;
@@ -1793,7 +1805,7 @@ static void looperTap() {
  *  loop vuoto, come nell'app: con un loop registrato non si cambiano. */
 static void looperBattute(int8_t passo) {
   if (!chScrittura) return;
-  if (loopPresente || loopRegistra || contaTempo) { avvisa("battute: a loop vuoto"); return; }
+  if (!loopVuoto()) { avvisa("battute: a loop vuoto"); return; }
   if (!lungImpostazioni) { avvisa("impostazioni non lette"); return; }
   int8_t i = N_BATTUTE;                    // «libero»
   if (!loopLibero) {

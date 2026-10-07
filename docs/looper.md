@@ -579,3 +579,10 @@ L'anello (2.4–2.5): spicchi staccati da uno spazio, vuoti col solo bordo inter
 esterno, pieni fin dove è arrivato il loop (a scacchi in sovraincisione); al centro ●
 registra, ◉ sovraincide, ▶ suona, ■ fermo, ○ vuoto. Provato prima in una simulazione del
 display nel browser, con la stessa formula.
+
+**2.7 — battute e tempo solo a loop vuoto davvero** (7 ottobre 2026). L'utente: cambiare le
+battute con un loop registrato **impalla l'ampli**. Il pedale lo rifiutava già, ma credeva
+il loop vuoto in un caso: **ricollegato con un loop fermo** (dopo ogni caricamento del
+firmware), l'ampli risponde «fermo» e il pedale non ne deduceva che il loop c'è. Adesso
+`loopVuoto()`: niente registrato o in corso, e niente `0x0377` in arrivo; e un `09` detto
+dall'ampli segna il loop presente. Vale per tasti banco e tap.
