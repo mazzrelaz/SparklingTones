@@ -1030,3 +1030,10 @@ parlato l'ultima volta, l'ultimo invio, e se la pagina era in secondo piano o lo
 spento; «connessione chiusa dall'app» quando la chiude l'app stessa. Prossimo passo: lo
 screenshot del registro alla prossima caduta. Da valutare dopo: il ricollegamento automatico
 (`device.gatt.connect()` non vuole un nuovo tocco), ma attenti al pedale che si prende l'ampli.
+
+**I banchi nei doppioni** (stesso giorno): i banchi tengono i preset per identità (UUID nel
+backup, id in app), non per nome. Nel backup dell'utente il primo posto di «Pink Floyd» è
+proprio «DG - Shine On  clean» coi due spazi: togliendo quella copia il posto si sarebbe
+svuotato senza avviso. Adesso ogni riga di «Doppioni» dice «nei banchi: …» e la conferma
+avverte che quel posto resterà vuoto. (Per l'appunto dell'utente: i banchi sono già in
+«Esporta la libreria» e in Dropbox, cinque nel suo file, tutti i posti riconosciuti.)

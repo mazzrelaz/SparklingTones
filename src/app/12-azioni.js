@@ -404,6 +404,10 @@ function disegnaDoppioni() {
       if ((record.tags || []).length) pezzi.push(tr('{0} tag', record.tags.length));
       if (record.notes) pezzi.push(tr('con note'));
       if (record.famiglia) pezzi.push(tr('con famiglia'));
+      // I banchi tengono i preset per identità, non per nome: togliere la
+      // copia che sta in un banco ne svuota il posto (7 ottobre 2026).
+      const neiBanchi = banchi.filter(b => (b.posti || []).includes(record.id)).map(b => b.nome);
+      if (neiBanchi.length) pezzi.push(tr('nei banchi: {0}', neiBanchi.join(', ')));
       sotto.textContent = pezzi.join(' · ');
       dati.append(catena, sotto);
 
@@ -415,9 +419,14 @@ function disegnaDoppioni() {
           ? tr(' Sta sull\'ampli in {0}: l\'ampli non viene toccato, e alla prossima lettura ' +
                'quello slot andrà a uno degli altri con lo stesso nome.', etichetteSlot(record))
           : '';
+        const banchiSuoi = banchi.filter(b => (b.posti || []).includes(record.id)).map(b => b.nome);
+        const neiBanchiTesto = banchiSuoi.length
+          ? ' ' + tr('<strong>Sta nei banchi {0}</strong>: quel posto resterà vuoto, e lo ' +
+                     'riempi tu con uno degli altri.', testoConNome(banchiSuoi.join(', ')))
+          : '';
         if (!await conferma(tr('eliminare un doppione'),
           tr('Eliminare <strong>{0}</strong>, entrato il {1}? Gli altri con lo stesso nome restano.',
-             testoConNome(record.name), quando(record.createdAt)) + sullAmpli,
+             testoConNome(record.name), quando(record.createdAt)) + sullAmpli + neiBanchiTesto,
           { ok: tr('Elimina'), pericolo: true })) return;
         await store.remove(record.id);
         logLine(tr`doppione eliminato: «${record.name}» del ${quando(record.createdAt)}`);
