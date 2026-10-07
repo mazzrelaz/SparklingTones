@@ -499,3 +499,14 @@ stesso piano nostro, con in più un `02` che a noi l'ampli ignora (misurato in a
 Niente nel README né nelle issue dice che il click dell'ampli suoni: probabile che il
 conteggio di Ignitron sia **solo sul suo display**. In più ha una «config mode» (battute,
 straight/shuffle, click acceso/spento, tap tempo) che scrive `0x0176`.
+
+### FS2 e la 1.9 — 7 ottobre 2026
+
+Registro `captures/2026-10-07-pedale-looper-annulla.txt`: **a sovraincisione chiusa `0d`
+annulla e `0e` ripete** (verificato dall'utente a orecchio), anche qui con l'ack e senza
+`0x0375`. Verificata anche la cancellazione: `0a` → `0x0375 00`. La 1.9: **FS2 durante la
+sovraincisione manda `0c` e poi `0d`** (chiude e annulla). Da provare quest'ultima.
+
+Il looper sul pedale, a questo punto: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4
+ferma, FS4 tenuto cancella — **tutti verificati sul pedale**. Manca il conteggio fatto in
+casa (come Ignitron: «Come conta Ignitron», sopra).

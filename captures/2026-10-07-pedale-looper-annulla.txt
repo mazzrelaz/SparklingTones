@@ -1,0 +1,59 @@
+   0,551  slot 0: "DG - Shine On  clean" ??? 712 ms
+   0,568    TX f0 01 03 01 02 01 00 00 01 f7
+   1,221  slot 1: "DG - LEAD 90's" ??? 667 ms
+   1,221    TX f0 01 04 02 02 01 00 00 02 f7
+   1,973  slot 2: "PF comfortably numb" ??? 743 ms
+   1,973    TX f0 01 05 03 02 01 00 00 03 f7
+   2,690  slot 3: "prova" ??? 720 ms
+   2,690    TX f0 01 06 04 02 01 00 00 04 f7
+   3,361  slot 4: "Hey Jimi Solo" ??? 667 ms
+   3,361    TX f0 01 07 05 02 01 00 00 05 f7
+   4,022  slot 5: "Sweet Memory" ??? 668 ms
+   4,022    TX f0 01 08 06 02 01 00 00 06 f7
+   4,723  slot 6: "Clean Tube" ??? 705 ms
+   4,723    TX f0 01 09 07 02 01 00 00 07 f7
+   5,354  slot 7: "SV - For the Love of God" ??? 630 ms
+   5,376  batteria: 4002 mV letti, 3992 mV mediati, 3 tacche
+  23,349  meta' B mostrata; suona ancora (niente)
+  26,358  looper acceso
+  26,358    TX f0 01 0a 00 02 75 f7
+  26,392    RX 0x0375  f0 01 0a 00 03 75 00 00 f7
+  26,402  looper: 0x00 (dall'ampli)
+  34,301    TX f0 01 0b 04 01 75 00 04 f7
+  34,301  looper: 0x04 (mandato)
+  34,322    RX 0x0475  f0 01 0b 00 04 75 f7
+  34,357    RX 0x0375  f0 01 40 04 03 75 00 04 f7
+  34,357  looper: 0x04 (dall'ampli)
+  42,338    RX 0x0375  f0 01 41 07 03 75 00 07 f7
+  42,355    RX 0x0375  f0 01 42 08 03 75 00 08 f7
+  42,371  looper: 0x08 (dall'ampli)
+  55,890    TX f0 01 0c 0b 01 75 00 0b f7
+  55,890  looper: 0x0b (mandato)
+  55,924    RX 0x0475  f0 01 0c 00 04 75 f7
+  56,190    TX f0 01 0d 08 01 75 00 08 f7
+  56,190  looper: 0x08 (mandato)
+  56,223    RX 0x0475  f0 01 0d 00 04 75 f7
+  56,265    RX 0x0375  f0 01 49 08 03 75 00 08 f7
+  64,263    TX f0 01 0e 0c 01 75 00 0c f7
+  64,263  looper: 0x0c (mandato)
+  64,278    RX 0x0475  f0 01 0e 00 04 75 f7
+  83,045    TX f0 01 0f 0d 01 75 00 0d f7
+  83,045  looper: 0x0d (mandato)
+  83,078    RX 0x0475  f0 01 0f 00 04 75 f7
+  93,704    TX f0 01 10 0e 01 75 00 0e f7
+  93,704  looper: 0x0e (mandato)
+  93,724    RX 0x0475  f0 01 10 00 04 75 f7
+  98,160    TX f0 01 11 0d 01 75 00 0d f7
+  98,160  looper: 0x0d (mandato)
+  98,177    RX 0x0475  f0 01 11 00 04 75 f7
+ 106,956    TX f0 01 12 09 01 75 00 09 f7
+ 106,956  looper: 0x09 (mandato)
+ 106,990    RX 0x0475  f0 01 12 00 04 75 f7
+ 111,230    TX f0 01 13 09 01 75 00 09 f7
+ 111,230  looper: 0x09 (mandato)
+ 111,263    RX 0x0475  f0 01 13 00 04 75 f7
+ 113,241    TX f0 01 14 0a 01 75 00 0a f7
+ 113,242  looper: 0x0a (mandato)
+ 113,273    RX 0x0475  f0 01 14 00 04 75 f7
+ 114,571    RX 0x0375  f0 01 48 00 03 75 00 00 f7
+ 114,572  looper: 0x00 (dall'ampli)

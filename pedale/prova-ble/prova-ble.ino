@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "1.8";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale
+static const char* VERSIONE = "1.9";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -282,7 +282,7 @@ static bool    usbMontato  = false;
  * suo pannello, e alla domanda 0x0275; ma non tutto (0x0b e 0x09 mandati da
  * noi no), quindi ogni comando che parte lo segniamo anche noi (looperEvento). Il conteggio col click
  * non si comanda (docs/looper.md): 0x04 registra subito. 0x0d/0x0e (annulla,
- * ripeti) vengono da Ignitron e non sono ancora provati. */
+ * ripeti) vengono da Ignitron: verificati il 7 ottobre, a sovraincisione chiusa. */
 static bool looper = false;
 static const uint8_t LOOP_CONTA = 0x02, LOOP_REC = 0x04, LOOP_FINE_REC = 0x05,
                      LOOP_REC_FATTA = 0x07, LOOP_SUONA = 0x08, LOOP_FERMA = 0x09,
@@ -1501,7 +1501,11 @@ static void looperPremuto(uint8_t k) {
       break;
     case 1:                                // annulla / ripeti
       if (!loopPresente) { avvisa("niente da annullare"); return; }
-      looperAccoda(loopRipetibile ? LOOP_RIPETI : LOOP_ANNULLA);
+      // Durante una sovraincisione 0x0d l'ampli lo ignora (registro del 5
+      // ottobre); a sovraincisione chiusa annulla e ripete (7 ottobre). Quindi
+      // prima si chiude, poi si annulla.
+      if (loopSovraincide) looperAccoda(LOOP_FINE_DUB, LOOP_ANNULLA);
+      else                 looperAccoda(loopRipetibile ? LOOP_RIPETI : LOOP_ANNULLA);
       break;
     case 2:
       looperAccoda(LOOP_SUONA);
