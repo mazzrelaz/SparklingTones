@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.9";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display
+static const char* VERSIONE = "2.10";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -791,7 +791,7 @@ static const uint8_t N_PROVE = 5;
 static const uint8_t LUCI[] = { 255, 160, 96, 48, 16 };
 static const uint8_t PRECARICHE[] = { 0x22, 0xf1, 0x11, 0x44, 0x82 };
 static const uint8_t VCOMH[] = { 0x34, 0x20, 0x30, 0x3c, 0x40 };
-static uint8_t luce = 0, precarica = 2, vcomh = 0;    // la precarica parte da 0x11, come in setup()
+static uint8_t luce = 0, precarica = 0, vcomh = 0;
 
 static void disegnaSchermo() {
   if (!schermoPresente) return;
@@ -2461,10 +2461,6 @@ void setup() {
   schermoPresente = schermo.begin();
   if (schermoPresente) {
     schermo.setContrast(255);
-    // Precarica corta (0xD9 = 0x11): le bande sulle zone piene un po' meno
-    // evidenti, a occhio dell'utente il 7 ottobre. Luminosita' e VCOMH non
-    // cambiavano niente, e restano quelli di sempre.
-    schermo.sendF("ca", 0xd9, 0x11);
     Wire.setClock(400000);   // u8g2 dopo begin() si rimette la sua velocita'
     Serial.println(F("display a 0x3c: pronto"));
     disegnaAvvio();

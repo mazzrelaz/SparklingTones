@@ -623,7 +623,7 @@ parte e il file si cancella, senza chiudere la porta.
 **Le regolazioni provate** (con l'utente, a occhio sulla schermata delle bande): la
 **luminosità** non cambia le bande, e anche da 255 a 16 il display si scurisce poco; la
 **precarica** a `0x11` (la più corta) le rende **leggermente meno evidenti**, `0xF1` niente;
-**VCOMH** fra `0x20` e `0x40`, poche o nessuna differenza. Dalla **2.9** la precarica a
-`0x11` è fissa in `setup()`; il resto com'era. Le bande restano: per toglierle davvero
+**VCOMH** fra `0x20` e `0x40`, poche o nessuna differenza. Nella **2.9** la precarica a
+`0x11` era fissa in `setup()`, ma **all'utente il display sembrava tutto più scuro: tolta nella 2.10**, il display è di nuovo quello originale. Le regolazioni restano solo come comandi di prova dal seriale. Le bande restano: per toglierle davvero
 resterebbe solo meno pixel accesi a sinistra (la riga attiva senza negativo), da decidere
 con l'utente.
