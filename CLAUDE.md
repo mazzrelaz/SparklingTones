@@ -367,7 +367,7 @@ pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester
 (bq25185, power path), il 7 ottobre**: piano dalle foto in `docs/pedale-lavoro.md` (cella su
 BATT, interruttore e morsetto su LOAD, il resto non si tocca; prima la prova d'ingombro). Si
 riprende l'8 ottobre, coi connettori JST-PH. Restano: il display
-(il quadratino in negativo va ancora guardato), **il looper (2.2, 7 ottobre 2026: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, verificati; conteggio, tap su FS5 e cerchio come l'app da provare a occhio; `docs/looper.md` in fondo)**, e un LED dedicato al tempo (su D1, si aspetta la foto). **La modalità
+(il quadratino in negativo va ancora guardato), **il looper (2.6, 7 ottobre 2026: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; `docs/looper.md` in fondo)**; il LED dedicato al tempo l'utente lo rimanda. **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
 Sull'app (guscio `v77` in `sw.js`; **`index.html` non ha suite**, le mie prove sono contro un
