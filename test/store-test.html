@@ -712,6 +712,9 @@ const DB_NAME = 'spark-test-' + Date.now();
   const conAggiorna = await store.importFromAmp([dallAmpli], { aggiornaOmonimi: true });
   check('con aggiornaOmonimi se ne aggiorna il suono',
         [conAggiorna.updated, (await store.get(idOrig)).effects.map(e => e.name)], [1, ['Plexi']]);
+  const conDueSpazi = Object.assign(makePreset('uuid-due-spazi', 'DG  -  Echoes', ['Twin']), { slot: 7 });
+  const esitoSpazi = await store.importFromAmp([conDueSpazi]);
+  check('gli spazi ripetuti nel nome non contano', [esitoSpazi.added, await store.count()], [0, quantiPrima]);
   const altroNome = Object.assign(makePreset('uuid-nuovo-davvero', 'Un nome nuovo', ['Twin']), { slot: 7 });
   const esitoNuovo = await store.importFromAmp([altroNome]);
   check('un nome nuovo entra come sempre', [esitoNuovo.added, await store.count()], [1, quantiPrima + 1]);

@@ -329,7 +329,8 @@ async function importaBackupUfficiale(file, buffer) {
    ==================================================================== */
 
 /*
- * I preset con lo stesso nome (spazi ai bordi e maiuscole non contano), da
+ * I preset con lo stesso nome (spazi ai bordi, spazi ripetuti e maiuscole non
+ * contano: `PresetStore.chiaveNome`), da
  * guardare e scegliere a mano: chiesto dall'utente il 7 ottobre 2026, dopo che
  * il backup dell'app ufficiale, il NEO e i salvataggi sull'ampli li avevano
  * fatti entrare con UUID diversi. Da allora un nome che c'è già non entra più
@@ -347,7 +348,7 @@ $('btnDoppioni').addEventListener('click', () => {
 function gruppiDoppioni() {
   const perNome = new Map();
   for (const record of tutti) {
-    const chiave = String(record.name || '').trim().toLowerCase();
+    const chiave = PresetStore.chiaveNome(record.name);   // spazi ripetuti e maiuscole non contano
     if (!chiave) continue;
     if (!perNome.has(chiave)) perNome.set(chiave, []);
     perNome.get(chiave).push(record);
@@ -377,7 +378,7 @@ function disegnaDoppioni() {
     const box = document.createElement('div');
     box.className = 'gruppo-doppioni';
     const titolo = document.createElement('h4');
-    titolo.textContent = tr`«${gruppo[0].name.trim()}», ${gruppo.length} volte`;
+    titolo.textContent = tr`«${gruppo[0].name.trim().replace(/\s+/g, ' ')}», ${gruppo.length} volte`;
     box.appendChild(titolo);
 
     const lettere = new Map();       // suono -> lettera, nell'ordine in cui compaiono

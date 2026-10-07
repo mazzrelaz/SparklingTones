@@ -1086,8 +1086,16 @@ window.PresetStore = (function () {
   }
 
   /** Due nomi di banco uguali a meno di spazi e maiuscole. */
+  /** Due nomi uguali per chi li legge: spazi ai bordi, spazi ripetuti e
+   *  maiuscole non contano. Gli spazi ripetuti sullo schermo non si vedono
+   *  (l'HTML li fa uno), e «Shine On  clean» con due spazi sembrava uguale a
+   *  quello con uno ma non lo era (libreria dell'utente, 7 ottobre 2026). */
+  function chiaveNome(nome) {
+    return String(nome || '').trim().replace(/\s+/g, ' ').toLowerCase();
+  }
+
   function stessoNome(a, b) {
-    return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+    return chiaveNome(a) === chiaveNome(b);
   }
 
   /** Due preset suonano uguale: stessa catena con gli stessi valori, stesso bpm. */
@@ -1125,6 +1133,7 @@ window.PresetStore = (function () {
     return promisify(indexedDB.deleteDatabase(dbName));
   };
 
+  PresetStore.chiaveNome      = chiaveNome;
   PresetStore.SOUND_FIELDS    = SOUND_FIELDS;
   PresetStore.USER_FIELDS     = USER_FIELDS;
   PresetStore.POSTI_PER_BANCO = POSTI_PER_BANCO;

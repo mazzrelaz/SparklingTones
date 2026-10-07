@@ -1014,3 +1014,9 @@ suo «Elimina» con conferma. Niente si toglie da solo.
 su ogni preset che arriva, quindi segna come appena modificati anche quelli uguali, e una
 lapide più vecchia di quell'unione perde: un preset cancellato altrove può tornare. Da
 correggere confrontando prima di scrivere.
+
+**Gli spazi ripetuti** (stesso giorno): «DG - Shine On clean» due volte in libreria e non in
+«Doppioni». In uno dei due fra «On» e «clean» ci sono **due spazi**: l'HTML li mostra come uno,
+quindi a vista erano uguali. Adesso `PresetStore.chiaveNome` (spazi ai bordi, spazi ripetuti e
+maiuscole non contano) vale per «Doppioni», per `_omonimo` e per `stessoNome` dei banchi. Nella
+libreria dell'utente i gruppi diventano 7. Un test in più (store 151).
