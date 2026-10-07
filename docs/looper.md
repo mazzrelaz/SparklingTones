@@ -535,3 +535,19 @@ FS4 chiude e ferma); cestino con conferma.
 
 **Da verificare**: che `0x0377` vada da 0 a 1 (il registro stampa il massimo a ogni giro);
 conteggio, lampo e cerchio a occhio.
+
+### 2.3 — le battute dai tasti banco, il cerchio a blocchi (7 ottobre 2026)
+
+Correzione dell'utente sulla 2.2: le 16 fette erano l'impostazione rimasta sull'ampli dal
+suo video (il registro: `0x0376` con battute `0x10`), ma **le battute vanno scelte dal
+pedale**, e **il cerchio avanza a blocchi, non a riempimento continuo**. (Il video non mi è
+mai arrivato: solo la sua descrizione scritta.) Quindi:
+
+- **tasti banco nel looper, a loop vuoto**: sinistro meno battute, destro più, fra 1, 2, 4,
+  8, 12, 16 e «libero» (freeIndicator); l'avviso dice quante. Si mandano con `0x0176`
+  costruito dall'ultimo `0x0376` (bpm, count, **battute**, **libero**, poi il resto tale e
+  quale; se la forma non è quella attesa non parte niente). Lo stesso invio fa il tap.
+  **Le battute scritte da noi: da verificare** (la durata della registrazione lo dirà).
+- **il cerchio**: uno spicchio per battuta; a ogni tempo si colora subito il suo blocco
+  (un quarto di spicchio); nel conteggio quattro quarti, uno per tempo; mentre suona il
+  cursore salta di tempo in tempo.

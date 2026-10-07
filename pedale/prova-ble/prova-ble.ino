@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.2";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app
+static const char* VERSIONE = "2.3";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -335,7 +335,13 @@ static volatile uint8_t lungImpostazioni = 0;
 static uint32_t tapUltimo = 0;
 static uint32_t tapIntervalli[3];
 static uint8_t  tapQuanti = 0;
-static uint16_t tapBpm = 0;                      // 0 = niente da mandare
+/* Bpm, battute e «libero» cambiati dal pedale: li manda il loop con 0x0176. */
+static bool impostazioniDaMandare = false;
+
+/* Le battute del loop, scelte coi tasti banco a loop vuoto (chieste il 7
+ * ottobre 2026): le stesse dell'app ufficiale, e in fondo «libero». */
+static const uint8_t BATTUTE[] = { 1, 2, 4, 8, 12, 16 };
+static const uint8_t N_BATTUTE = sizeof(BATTUTE);
 
 /* Il cerchio sul display, come il Simple Looper dell'app ufficiale (video
  * dell'utente, 7 ottobre 2026): **una fetta per battuta** (1, 2, 4, 8, 12, 16,
@@ -690,17 +696,19 @@ static void disegnaCerchio() {
   uint8_t fette = loopBattute;
   float riempi = 0, cursore = -1;
   bool puntini = false;
+  /* A blocchi, come l'app: a ogni tempo si colora subito il suo pezzo (un
+   * quarto di spicchio, con uno spicchio per battuta), e il cursore salta da
+   * un tempo all'altro. Nel conteggio la battuta e' una sola: quattro quarti. */
+  const uint16_t tempi = (!loopLibero && loopBpm) ? loopBattute * 4 : 0;
   if (contaTempo) {
-    fette = 4;                             // i quattro tempi della battuta di conteggio
-    cursore = (float)(millis() - contaDa) / (4 * (60000UL / loopBpm));
+    fette = 4;
+    riempi = contaTempo / 4.0f;
   } else if (loopRegistra) {
-    const uint32_t giro = (!loopLibero && loopBpm) ? 240000UL / loopBpm * loopBattute : 0;
-    if (giro) riempi = (float)(millis() - registraDa) / giro;
-  } else if (loopSovraincide) {
-    riempi = 1; puntini = true;
+    if (tempi) riempi = (float)((millis() - registraDa) / (60000UL / loopBpm) + 1) / tempi;
+  } else if (loopSovraincide || loopSuona) {
     cursore = posizioneAdesso();
-  } else if (loopSuona) {
-    cursore = posizioneAdesso();
+    if (cursore >= 0 && tempi) cursore = floorf(cursore * tempi) / tempi;
+    if (loopSovraincide) { riempi = 1; puntini = true; }
   }
   if (riempi > 1) riempi = 1;
   if (cursore >= 1) cursore = 0.999f;
@@ -1742,9 +1750,32 @@ static void looperTap() {
   uint32_t bpm = (60000UL * q + somma / 2) / somma;
   if (bpm < 40) bpm = 40;
   if (bpm > 250) bpm = 250;
-  tapBpm = (uint16_t)bpm;
-  loopBpm = tapBpm;
+  loopBpm = (uint16_t)bpm;
+  impostazioniDaMandare = true;
   schermoSporco = true;
+}
+
+/** I tasti banco nel looper: meno o piu' battute, fino a «libero». Solo a
+ *  loop vuoto, come nell'app: con un loop registrato non si cambiano. */
+static void looperBattute(int8_t passo) {
+  if (!chScrittura) return;
+  if (loopPresente || loopRegistra || contaTempo) { avvisa("battute: a loop vuoto"); return; }
+  if (!lungImpostazioni) { avvisa("impostazioni non lette"); return; }
+  int8_t i = N_BATTUTE;                    // «libero»
+  if (!loopLibero) {
+    i = 0;
+    while (i < N_BATTUTE - 1 && BATTUTE[i] < loopBattute) i++;
+  }
+  i += passo;
+  if (i < 0) i = 0;
+  if (i > N_BATTUTE) i = N_BATTUTE;
+  loopLibero = i == N_BATTUTE;
+  if (!loopLibero) loopBattute = BATTUTE[i];
+  char t[20];
+  if (loopLibero) snprintf(t, sizeof(t), "lunghezza libera");
+  else snprintf(t, sizeof(t), "%u battut%c", loopBattute, loopBattute == 1 ? 'a' : 'e');
+  avvisa(t);
+  impostazioniDaMandare = true;
 }
 
 /** FS5 tenuto tre secondi: dentro o fuori dal looper. */
@@ -1852,7 +1883,7 @@ static void leggiTasto() {
       const uint8_t altro = (k == BANCO_SX) ? BANCO_DX : BANCO_SX;
       if (!(ingressi & (uint8_t)(1 << LINEA_PULSANTE[altro]))) continue;
       if (!chScrittura && !sganciato) { scegliAmpli(k == BANCO_DX ? AMPLI_NEO : AMPLI_SPARK2); continue; }
-      if (looper) { avvisa("tieni FS5: esci"); continue; }
+      if (looper) { looperBattute(k == BANCO_DX ? +1 : -1); continue; }
       cambiaBanco(k == BANCO_DX ? +1 : -1);
       continue;
     }
@@ -2597,19 +2628,32 @@ void loop() {
       manda(frame, costruisci(0x02, 0x75, nullptr, 0, frame));   // lo stato
       manda(frame, costruisci(0x02, 0x76, nullptr, 0, frame));   // bpm e click
     }
-    /* Il tap tempo: l'ultimo 0x0376 con il solo bpm cambiato, **senza** 0x00
-     * in coda (col byte in piu' il delay parte all'infinito, 28 agosto). */
-    if (tapBpm && lungImpostazioni) {
-      uint8_t p[26];
-      size_t np = 0;
-      const uint8_t vecchio = impostazioni[0] == 0xcc ? 2 : 1;
-      if (tapBpm > 127) p[np++] = 0xcc;
-      p[np++] = (uint8_t)tapBpm;
-      for (uint8_t i = vecchio; i < lungImpostazioni && np < sizeof(p); i++) p[np++] = impostazioni[i];
-      Serial.printf("tap: %u bpm\n", tapBpm);
-      tapBpm = 0;
-      uint8_t lungo[40];
-      manda(lungo, costruisci(0x01, 0x76, p, np, lungo));
+    /* Tap e battute: l'ultimo 0x0376 con bpm, battute e «libero» rimessi,
+     * il resto tale e quale; **senza** 0x00 in coda (col byte in piu' il delay
+     * parte all'infinito, 28 agosto). Se la forma non e' quella attesa non si
+     * manda niente: un payload storto muove cose che non c'entrano. */
+    if (impostazioniDaMandare && lungImpostazioni) {
+      impostazioniDaMandare = false;
+      const uint8_t i = impostazioni[0] == 0xcc ? 2 : 1;          // dopo il bpm
+      if (i + 3 <= lungImpostazioni && impostazioni[i] < 0x80 && impostazioni[i + 1] < 0x80
+          && (impostazioni[i + 2] & 0xfe) == 0xc2) {
+        uint8_t p[26];
+        size_t np = 0;
+        if (loopBpm > 127) p[np++] = 0xcc;
+        p[np++] = (uint8_t)loopBpm;
+        p[np++] = impostazioni[i];                                   // count, com'era
+        p[np++] = loopBattute;
+        p[np++] = loopLibero ? 0xc3 : 0xc2;
+        for (uint8_t k = i + 3; k < lungImpostazioni && np < sizeof(p); k++) p[np++] = impostazioni[k];
+        Serial.printf("impostazioni: %u bpm, %u battute%s\n", loopBpm, loopBattute,
+                      loopLibero ? ", libero" : "");
+        memcpy(impostazioni, p, np);       // l'ampli non le rimanda: le teniamo noi
+        lungImpostazioni = (uint8_t)np;
+        uint8_t lungo[40];
+        manda(lungo, costruisci(0x01, 0x76, p, np, lungo));
+      } else {
+        Serial.println(F("impostazioni del looper in una forma che non conosco: non mando"));
+      }
     }
     if (looperFatti < looperQuanti && (int32_t)(millis() - looperProssimo) >= 0) {
       const uint8_t c = looperSequenza[looperFatti++];
