@@ -363,7 +363,7 @@ il suo backup su Dropbox nel 2027**: non tocca il nostro sync, solo da dove si p
 l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pull --rebase`**
 (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 24 settembre 2026
+## Dove si riprende — 7 ottobre 2026
 
 **L'inglese è fatto** (24 settembre 2026): app e sito, con la scelta della lingua, pubblicati.
 Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta indietro
@@ -377,7 +377,7 @@ pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester
 (bq25185, power path), il 7 ottobre**: piano dalle foto in `docs/pedale-lavoro.md` (cella su
 BATT, interruttore e morsetto su LOAD, il resto non si tocca; prima la prova d'ingombro). Si
 riprende l'8 ottobre, coi connettori JST-PH. Restano: il display
-(il quadratino in negativo va ancora guardato), **il looper (2.6, 7 ottobre 2026: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click**: un KY-006 ordinato (foto e resistenza col tester prima di collegarlo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
+(il quadratino in negativo va ancora guardato), **il looper (firmware 2.13, 7 ottobre 2026; il firmware è diviso in file: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click**: un KY-006 ordinato (foto e resistenza col tester prima di collegarlo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
 Sull'app (guscio `v89` in `sw.js`; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
