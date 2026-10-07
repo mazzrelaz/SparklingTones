@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.3";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi
+static const char* VERSIONE = "2.6";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -344,11 +344,10 @@ static const uint8_t BATTUTE[] = { 1, 2, 4, 8, 12, 16 };
 static const uint8_t N_BATTUTE = sizeof(BATTUTE);
 
 /* Il cerchio sul display, come il Simple Looper dell'app ufficiale (video
- * dell'utente, 7 ottobre 2026): **una fetta per battuta** (1, 2, 4, 8, 12, 16,
- * dal 0x0376) e **un cursore che gira a tempo**. Nel conteggio il cursore fa
- * un giro in una battuta, sulle quattro fette dei tempi; mentre registra il
- * cerchio si riempie dietro di lui; mentre suona resta vuoto e gira il
- * cursore; mentre sovraincide e' tutto puntinato. La posizione mentre suona la
+ * dell'utente, 7 ottobre 2026): un anello con **uno spicchio per battuta**
+ * (1, 2, 4, 8, 12, 16, dal 0x0376) che **si riempie a blocchi, un tempo alla
+ * volta**, dalla posizione nel loop, in ogni stato; al centro l'icona dello
+ * stato, o il numero alla rovescia del conteggio (disegnaCerchio). La posizione mentre suona la
  * da' l'ampli con 0x0377 (float, cinque al secondo, **da 0 a 1: da
  * verificare**, si stampa il massimo di ogni giro), e fra un valore e l'altro
  * la facciamo avanzare noi con la durata del giro misurata. Il riquadro del
@@ -357,6 +356,7 @@ static volatile bool     loopLibero = false;     // freeIndicator: lunghezza lib
 static volatile float    posLoop    = -1;        // da 0x0377; -1 = non arrivata
 static volatile uint32_t posLoopDa  = 0;
 static volatile float    massimoGiro = 0;        // dove arrivava prima di ricominciare
+static volatile uint32_t inizioGiro = 0;         // millis dell'inizio del giro che sta suonando
 static volatile bool     giroFinito = false;
 static uint32_t          registraDa = 0;
 static uint32_t          durataLoop = 0;         // misurata: dal 0x04 al 0x05/0x07
@@ -676,6 +676,11 @@ static uint32_t giroMs() {
 /** Dove sta il loop adesso, da 0 a 1, o -1: l'ultimo 0x0377 fatto avanzare
  *  col tempo passato (al massimo un quarto di giro, se l'ampli tace). */
 static float posizioneAdesso() {
+  /* Col giro misurato si conta col nostro orologio: 0x0377 **non va da 0 a 1**
+   * (registro del 7 ottobre: a fine giro 0,927), quindi dall'ampli si prende
+   * solo il momento in cui il loop ricomincia (inizioGiro, rimesso a ogni giro). */
+  if (durataLoop && inizioGiro)
+    return (float)((millis() - inizioGiro) % durataLoop) / durataLoop;
   const float p = posLoop;
   if (p < 0) return -1;
   const uint32_t giro = giroMs();
@@ -694,51 +699,71 @@ static void disegnaCerchio() {
   schermo.setDrawColor(1);
 
   uint8_t fette = loopBattute;
-  float riempi = 0, cursore = -1;
+  float riempi = 0;
   bool puntini = false;
-  /* A blocchi, come l'app: a ogni tempo si colora subito il suo pezzo (un
-   * quarto di spicchio, con uno spicchio per battuta), e il cursore salta da
-   * un tempo all'altro. Nel conteggio la battuta e' una sola: quattro quarti. */
+  /* Come l'app (video dell'utente, 7 ottobre): uno spicchio per battuta, e in
+   * ogni stato il cerchio **si riempie a blocchi dalla posizione nel loop**, un
+   * tempo alla volta, ricominciando da vuoto a ogni giro: pieno mentre registra
+   * o suona, puntinato mentre sovraincide (nell'app: rosso, azzurro,
+   * arancione). Nel conteggio una battuta sola, quattro quarti, e al centro il
+   * numero alla rovescia 4, 3, 2, 1. */
   const uint16_t tempi = (!loopLibero && loopBpm) ? loopBattute * 4 : 0;
+  uint8_t numero = 0;
   if (contaTempo) {
     fette = 4;
     riempi = contaTempo / 4.0f;
+    numero = (uint8_t)(5 - contaTempo);
   } else if (loopRegistra) {
     if (tempi) riempi = (float)((millis() - registraDa) / (60000UL / loopBpm) + 1) / tempi;
   } else if (loopSovraincide || loopSuona) {
-    cursore = posizioneAdesso();
-    if (cursore >= 0 && tempi) cursore = floorf(cursore * tempi) / tempi;
-    if (loopSovraincide) { riempi = 1; puntini = true; }
+    const float p = posizioneAdesso();
+    if (p >= 0) riempi = tempi ? (floorf(p * tempi) + 1) / tempi : p;
+    puntini = loopSovraincide;
   }
   if (riempi > 1) riempi = 1;
-  if (cursore >= 1) cursore = 0.999f;
 
-  // Il pieno: punto per punto, l'angolo in senso orario da mezzogiorno.
-  if (riempi > 0) {
-    for (int y = -r; y <= r; y++)
-      for (int x = -r; x <= r; x++) {
-        if (x * x + y * y > r * r) continue;
-        if (puntini && ((x + y) & 1)) continue;
-        float a = atan2f((float)x, (float)-y) / (2 * PI);
-        if (a < 0) a += 1;
-        if (a <= riempi) schermo.drawPixel(cx + x, cy + y);
-      }
+  /* L'anello, come l'app: spicchi staccati da un piccolo spazio, vuoti col
+   * solo contorno, pieni fin dove e' arrivato il loop (a scacchi mentre
+   * sovraincide). Punto per punto: raggio e angolo in senso orario da
+   * mezzogiorno. «r» e' il bordo esterno, RI quello interno. */
+  const float RI = 13.5f;
+  for (int y = -r; y <= r; y++)
+    for (int x = -r; x <= r; x++) {
+      const float d = sqrtf((float)(x * x + y * y));
+      if (d < RI - 0.5f || d > r + 0.5f) continue;
+      float a = atan2f((float)x, (float)-y) / (2 * PI);
+      if (a < 0) a += 1;
+      const float s = a * fette - floorf(a * fette);                 // dentro lo spicchio, 0..1
+      const float arco = (s < 0.5f ? s : 1 - s) * 2 * PI * d / fette; // pixel dal bordo dello spicchio
+      if (fette > 1 && arco < 1.0f) continue;                          // lo spazio fra gli spicchi
+      bool acceso;
+      if (a <= riempi) acceso = !puntini || ((x + y) & 1) == 0;
+      else acceso = d < RI + 0.5f || d > r - 0.5f;                   // vuoto: i due bordi
+      if (acceso) schermo.drawPixel(cx + x, cy + y);
+    }
+
+  // Al centro, se non conta: l'icona dello stato, come il tasto dell'app.
+  if (!numero) {
+    if (loopRegistra) {
+      schermo.drawDisc(cx, cy, 5);                                   // ● registra
+    } else if (loopSovraincide) {
+      schermo.drawCircle(cx, cy, 6);                                 // ◉ sovraincide
+      schermo.drawDisc(cx, cy, 3);
+    } else if (loopSuona) {
+      schermo.drawTriangle(cx - 3, cy - 5, cx - 3, cy + 5, cx + 5, cy);   // ▶ suona
+    } else if (loopPresente) {
+      schermo.drawBox(cx - 4, cy - 4, 9, 9);                         // ■ fermo, loop pronto
+    } else {
+      schermo.drawCircle(cx, cy, 5);                                 // ○ vuoto
+    }
   }
-  // Le fette: raggi dal terzo esterno al bordo, in XOR (si vedono anche sul pieno).
-  schermo.setDrawColor(2);
-  for (uint8_t k = 0; k < fette; k++) {
-    const float a = 2 * PI * k / fette;
-    schermo.drawLine(cx + (int)roundf(r * 0.45f * sinf(a)), cy - (int)roundf(r * 0.45f * cosf(a)),
-                     cx + (int)roundf((r - 1) * sinf(a)), cy - (int)roundf((r - 1) * cosf(a)));
-  }
-  schermo.setDrawColor(1);
-  schermo.drawCircle(cx, cy, r);
-  // Il cursore: dal centro al bordo, con un pallino in punta.
-  if (cursore >= 0) {
-    const float a = 2 * PI * cursore;
-    const int px = cx + (int)roundf(r * sinf(a)), py = cy - (int)roundf(r * cosf(a));
-    schermo.drawLine(cx, cy, px, py);
-    schermo.drawDisc(px, py, 2);
+  // Il numero del conteggio al centro, in XOR: si legge sul pieno e sul vuoto.
+  if (numero) {
+    char t[2] = { (char)('0' + numero), 0 };
+    schermo.setFont(u8g2_font_helvB14_tn);
+    schermo.setDrawColor(2);
+    schermo.drawStr(cx - schermo.getStrWidth(t) / 2, cy + 7, t);
+    schermo.setDrawColor(1);
   }
 }
 
@@ -1018,7 +1043,10 @@ static void messaggioIntero(const uint8_t* m, size_t n) {
       float f;
       memcpy(&f, &b, 4);
       static float prima = 0;
-      if (f < prima - 0.2f) { massimoGiro = prima; giroFinito = true; }
+      if (f < prima - 0.2f) {              // il loop e' ricominciato
+        massimoGiro = prima; giroFinito = true;
+        inizioGiro = millis() - (durataLoop ? (uint32_t)(f / 0.927f * durataLoop) : 0);
+      }
       prima = f;
       posLoop = f;
       posLoopDa = millis();
@@ -1663,9 +1691,13 @@ static void looperEvento(uint8_t v, bool mandato = false) {
     case LOOP_RIPETI:
       loopRipetibile = false; break;
     case LOOP_FINE_REC: case LOOP_REC_FATTA:
-      if (loopRegistra) durataLoop = millis() - registraDa;   // il giro, misurato
+      if (loopRegistra) {
+        durataLoop = millis() - registraDa;  // il giro, misurato
+        inizioGiro = millis();               // e riparte subito a suonare
+      }
       loopRegistra = false; loopPresente = true; break;
     case LOOP_SUONA:
+      if (!loopSuona && !loopRegistra) inizioGiro = millis();   // da fermo riparte dall'inizio
       loopRegistra = false; loopSuona = true; loopPresente = true; break;
     case LOOP_FERMA:
       posLoop = -1;
@@ -1689,8 +1721,8 @@ static void looperEvento(uint8_t v, bool mandato = false) {
 
 /** Un footswitch nel looper. Il comando non parte da qui: lo manda il loop,
  *  cosi' non si infila mai in mezzo a un preset che sta passando. Dopo 0x05
- *  l'ampli manda da solo 0x07 e 0x08; la sovraincisione e' 0x0b piu' 0x08,
- *  come la manda Ignitron e come la racconta il pannello. */
+ *  l'ampli manda da solo 0x07 e 0x08; la sovraincisione e' 0x0b da solo,
+ *  come l'app ufficiale (Ignitron ci mette dietro 0x08, che riavvolge il loop). */
 static void looperPremuto(uint8_t k) {
   if (!chScrittura) return;                // lo schermo dice gia' che lo Spark non c'e'
   if (contaTempo) {                        // qualunque tasto durante il conteggio lo annulla
@@ -1703,7 +1735,9 @@ static void looperPremuto(uint8_t k) {
     case 0:                                // REC/DUB, come il tasto del pannello
       if (loopRegistra)         looperAccoda(LOOP_FINE_REC);
       else if (loopSovraincide) looperAccoda(LOOP_FINE_DUB);
-      else if (loopPresente)    looperAccoda(LOOP_DUB, LOOP_SUONA);
+      // solo 0x0b, come l'app: un 0x08 dietro fa ripartire il loop da capo
+      // (segnalato dall'utente il 7 ottobre); da fermo l'ampli riparte da se'.
+      else if (loopPresente)    looperAccoda(LOOP_DUB);
       else if (loopClick && loopBpm) {     // il conteggio: lo porta avanti il loop
         contaDa = millis();
         contaTempo = 1;

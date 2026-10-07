@@ -551,3 +551,31 @@ mai arrivato: solo la sua descrizione scritta.) Quindi:
 - **il cerchio**: uno spicchio per battuta; a ogni tempo si colora subito il suo blocco
   (un quarto di spicchio); nel conteggio quattro quarti, uno per tempo; mentre suona il
   cursore salta di tempo in tempo.
+
+### 2.4–2.6 — il video dell'utente, l'anello, la sovraincisione (7 ottobre 2026)
+
+**Il video del Simple Looper** (registrazione dello schermo, 193 s) l'ho guardato estraendo
+un fotogramma al secondo nel browser integrato e trascrivendo l'audio con Whisper
+(`@huggingface/transformers` in una cartella temporanea, non nel repository). Cosa mostra:
+un anello con **uno spicchio per battuta**, che si riempie **un tempo alla volta** dalla
+posizione nel loop, **in ogni stato** (rosso registra, azzurro suona, arancione
+sovraincide), ricominciando da vuoto a ogni giro; il tempo corrente in bianco; nel
+conteggio, al centro, il numero **alla rovescia 4, 3, 2, 1**; la sovraincisione **non
+riavvolge**, il riempimento continua da dove era. Nell'audio l'utente chiede di segnare
+ogni quarto, di poter scegliere le battute, e un cerchio «più carino»; il massimo di
+registrazione sembra 60 s (l'ultimo campo del `0x0376`, `cd ea 60` = 60000).
+
+**Misurato dal registro** (`captures/2026-10-07-pedale-looper-battute.txt`):
+- **le battute scritte dal pedale funzionano**: 4 battute a 89 bpm → 10,82 s di
+  registrazione, esatte;
+- **`0x0377` non va da 0 a 1**: a fine giro l'ultimo valore è 0,927. Dalla 2.5 il giro lo
+  conta il pedale (`inizioGiro`, `durataLoop` misurata dal `04` al `07`), e dall'ampli
+  prende solo il momento in cui il loop ricomincia;
+- **`0b` + `08` riavvolge il loop** (segnalato dall'utente): l'`08` di Ignitron fa
+  ripartire da capo. Dalla 2.6 si manda solo `0b`, come l'app; da fermo l'ampli riparte da
+  sé. Nella 1.7 «sovraincidi non fa nulla» era il secondo `0b` mandato al posto di `0c`.
+
+L'anello (2.4–2.5): spicchi staccati da uno spazio, vuoti col solo bordo interno ed
+esterno, pieni fin dove è arrivato il loop (a scacchi in sovraincisione); al centro ●
+registra, ◉ sovraincide, ▶ suona, ■ fermo, ○ vuoto. Provato prima in una simulazione del
+display nel browser, con la stessa formula.
