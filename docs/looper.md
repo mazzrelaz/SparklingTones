@@ -568,7 +568,7 @@ registrazione sembra 60 s (l'ultimo campo del `0x0376`, `cd ea 60` = 60000).
 **Misurato dal registro** (`captures/2026-10-07-pedale-looper-battute.txt`):
 - **le battute scritte dal pedale funzionano**: 4 battute a 89 bpm → 10,82 s di
   registrazione, esatte;
-- **`0x0377` non va da 0 a 1**: a fine giro l'ultimo valore è 0,927. Dalla 2.5 il giro lo
+- ~~`0x0377` non va da 0 a 1: a fine giro 0,927~~ — **sbagliato**: quel giro era stato riavvolto dall'`08` dietro al `0b`. Nel registro della 2.7 i giri naturali finiscono a **0,983–0,986**: va da 0 a 1. Dalla 2.5 il giro lo
   conta il pedale (`inizioGiro`, `durataLoop` misurata dal `04` al `07`), e dall'ampli
   prende solo il momento in cui il loop ricomincia;
 - **`0b` + `08` riavvolge il loop** (segnalato dall'utente): l'`08` di Ignitron fa
@@ -586,3 +586,18 @@ il loop vuoto in un caso: **ricollegato con un loop fermo** (dopo ogni caricamen
 firmware), l'ampli risponde «fermo» e il pedale non ne deduceva che il loop c'è. Adesso
 `loopVuoto()`: niente registrato o in corso, e niente `0x0377` in arrivo; e un `09` detto
 dall'ampli segna il loop presente. Vale per tasti banco e tap.
+
+**2.8 — niente aggiornamento parziale del display** (7 ottobre 2026). Nel video dell'utente
+(3 s, fotogrammi ogni 0,25 s) ogni tanto un triangolo storto sporcava le righe 2-4:
+`updateDisplayArea` del solo riquadro del cerchio, dieci volte al secondo, a volte
+scriveva nel punto sbagliato del display (sospetto: comandi persi sul bus I²C, i cui
+pull-up non sono verificati). Adesso lo schermo intero si ridisegna solo quando l'anello
+cambia blocco, cioè all'inizio di ogni tempo: il modo che ha sempre funzionato. Il
+registro della 2.7 conferma anche che la sovraincisione non riavvolge più (giri esatti da
+10,77 s attraverso `0b` e `0c`).
+
+**Il click del pedale** (proposto dall'utente): un buzzer passivo su un piedino libero,
+solo per il conteggio a loop vuoto — quindi mai sopra l'ampli, e il volume non conta.
+L'utente ha scelto un KY-006 (Amazon, quattro pezzi). Da fare quando arriva: foto dei due
+lati e resistenza misurata col tester fra S e − (piezo = altissima, diretto sul
+piedino; magnetico = 16-42 Ω, serve una resistenza in serie o un transistor).

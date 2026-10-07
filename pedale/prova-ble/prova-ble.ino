@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.7";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero
+static const char* VERSIONE = "2.8";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -348,10 +348,10 @@ static const uint8_t N_BATTUTE = sizeof(BATTUTE);
  * (1, 2, 4, 8, 12, 16, dal 0x0376) che **si riempie a blocchi, un tempo alla
  * volta**, dalla posizione nel loop, in ogni stato; al centro l'icona dello
  * stato, o il numero alla rovescia del conteggio (disegnaCerchio). La posizione mentre suona la
- * da' l'ampli con 0x0377 (float, cinque al secondo, **da 0 a 1: da
- * verificare**, si stampa il massimo di ogni giro), e fra un valore e l'altro
- * la facciamo avanzare noi con la durata del giro misurata. Il riquadro del
- * cerchio si ridisegna da solo, ~8 ms invece dei 32 dello schermo intero. */
+ * da' l'ampli con 0x0377 (float, cinque al secondo, da 0 a 1: verificato il 7
+ * ottobre, si stampa il massimo di ogni giro), e fra un valore e l'altro
+ * la facciamo avanzare noi con la durata del giro misurata. Lo schermo si
+ * ridisegna a ogni blocco nuovo (vedi il loop). */
 static volatile bool     loopLibero = false;     // freeIndicator: lunghezza libera, «libero» nell'app
 static volatile float    posLoop    = -1;        // da 0x0377; -1 = non arrivata
 static volatile uint32_t posLoopDa  = 0;
@@ -676,9 +676,10 @@ static uint32_t giroMs() {
 /** Dove sta il loop adesso, da 0 a 1, o -1: l'ultimo 0x0377 fatto avanzare
  *  col tempo passato (al massimo un quarto di giro, se l'ampli tace). */
 static float posizioneAdesso() {
-  /* Col giro misurato si conta col nostro orologio: 0x0377 **non va da 0 a 1**
-   * (registro del 7 ottobre: a fine giro 0,927), quindi dall'ampli si prende
-   * solo il momento in cui il loop ricomincia (inizioGiro, rimesso a ogni giro). */
+  /* Col giro misurato si conta col nostro orologio, che va liscio fra un
+   * 0x0377 e l'altro (arrivano cinque al secondo); dall'ampli si prende il
+   * momento in cui il loop ricomincia (inizioGiro, rimesso a ogni giro).
+   * 0x0377 va da 0 a 1: a fine giro 0,983-0,986 (registro del 7 ottobre). */
   if (durataLoop && inizioGiro)
     return (float)((millis() - inizioGiro) % durataLoop) / durataLoop;
   const float p = posLoop;
@@ -692,15 +693,13 @@ static float posizioneAdesso() {
 
 /** Il cerchio del looper, a destra delle righe (x 85-127, y 16-63). Pulisce
  *  il suo riquadro, cosi' si puo' ridisegnare da solo. */
-static void disegnaCerchio() {
-  const int cx = 106, cy = 39, r = 21;
-  schermo.setDrawColor(0);
-  schermo.drawBox(85, 16, 43, 48);
-  schermo.setDrawColor(1);
-
-  uint8_t fette = loopBattute;
+/** Quanto e' pieno l'anello adesso (0..1), in quanti spicchi, puntinato o no,
+ *  e il numero del conteggio (0 = niente). Serve al disegno e al loop, che
+ *  ridisegna lo schermo solo quando cambia. */
+static float riempimentoCerchio(uint8_t& fette, bool& puntini, uint8_t& numero) {
+  fette = loopBattute;
   float riempi = 0;
-  bool puntini = false;
+  puntini = false;
   /* Come l'app (video dell'utente, 7 ottobre): uno spicchio per battuta, e in
    * ogni stato il cerchio **si riempie a blocchi dalla posizione nel loop**, un
    * tempo alla volta, ricominciando da vuoto a ogni giro: pieno mentre registra
@@ -708,7 +707,7 @@ static void disegnaCerchio() {
    * arancione). Nel conteggio una battuta sola, quattro quarti, e al centro il
    * numero alla rovescia 4, 3, 2, 1. */
   const uint16_t tempi = (!loopLibero && loopBpm) ? loopBattute * 4 : 0;
-  uint8_t numero = 0;
+  numero = 0;
   if (contaTempo) {
     fette = 4;
     riempi = contaTempo / 4.0f;
@@ -720,7 +719,14 @@ static void disegnaCerchio() {
     if (p >= 0) riempi = tempi ? (floorf(p * tempi) + 1) / tempi : p;
     puntini = loopSovraincide;
   }
-  if (riempi > 1) riempi = 1;
+  return riempi > 1 ? 1 : riempi;
+}
+
+static void disegnaCerchio() {
+  const int cx = 106, cy = 39, r = 21;
+  uint8_t fette, numero;
+  bool puntini;
+  const float riempi = riempimentoCerchio(fette, puntini, numero);
 
   /* L'anello, come l'app: spicchi staccati da un piccolo spazio, vuoti col
    * solo contorno, pieni fin dove e' arrivato il loop (a scacchi mentre
@@ -767,11 +773,7 @@ static void disegnaCerchio() {
   }
 }
 
-/** Solo il riquadro del cerchio verso il display: tile 10-15, righe 2-7. */
-static void aggiornaCerchio() {
-  disegnaCerchio();
-  schermo.updateDisplayArea(10, 2, 6, 6);
-}
+
 
 static void disegnaSchermo() {
   if (!schermoPresente) return;
@@ -1045,7 +1047,7 @@ static void messaggioIntero(const uint8_t* m, size_t n) {
       static float prima = 0;
       if (f < prima - 0.2f) {              // il loop e' ricominciato
         massimoGiro = prima; giroFinito = true;
-        inizioGiro = millis() - (durataLoop ? (uint32_t)(f / 0.927f * durataLoop) : 0);
+        inizioGiro = millis() - (durataLoop ? (uint32_t)(f * durataLoop) : 0);
       }
       prima = f;
       posLoop = f;
@@ -2626,18 +2628,18 @@ void loop() {
     Serial.printf("looper: giro finito, posizione massima %.3f, giro misurato %lu ms\n",
                   massimoGiro, (unsigned long)durataLoop);
   }
-  // Il cerchio che gira: dieci volte al secondo, solo il suo riquadro. Mai
-  // nell'ultimo tratto del conteggio, perche' il 0x04 non tardi.
-  if (looper && schermoPresente && chScrittura && !inTrasferimento && !schermoSporco
-      && (contaTempo || loopRegistra || loopSuona || loopSovraincide)
-      && (int32_t)(millis() - avvioFino) >= 0) {
-    static uint32_t ultimoCerchio = 0;
-    const bool vicinoAllUno = contaTempo
-        && millis() - contaDa + LOOP_ANTICIPO_MS + 40 >= 4 * (60000UL / loopBpm);
-    if (millis() - ultimoCerchio >= 100 && !vicinoAllUno) {
-      ultimoCerchio = millis();
-      aggiornaCerchio();
-    }
+  /* L'anello avanza a blocchi, un tempo alla volta: lo schermo intero si
+   * ridisegna quando cambia il blocco (all'inizio di ogni tempo, lontano dal
+   * 0x04 del conteggio, che parte alla fine del quarto). L'aggiornamento del
+   * solo riquadro (updateDisplayArea, 2.2-2.7) ogni tanto scriveva nel punto
+   * sbagliato del display: video dell'utente, 7 ottobre. */
+  if (looper && chScrittura) {
+    static int32_t chiavePrima = -1;
+    uint8_t fette, numero;
+    bool puntini;
+    const float riempi = riempimentoCerchio(fette, puntini, numero);
+    const int32_t chiave = (int32_t)lroundf(riempi * 4096) + numero * 8192 + (puntini ? 65536 : 0);
+    if (chiave != chiavePrima) { chiavePrima = chiave; schermoSporco = true; }
   }
   if (contaTempo) {
     const uint32_t tempo = 60000UL / loopBpm;
