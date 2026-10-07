@@ -107,9 +107,22 @@ XIAO anche senza cella).
   «perfette» per l'utente). **L'utente ordina un Adafruit 6091, bq25185** (Kamami, su Allegro,
   38,90 zł): USB-C, 1 A di serie (ponticelli 500/250), **power path** (si suona mentre carica,
   fine carica affidabile), LED carica/errore/alimentazione, uscita LOAD fino a 4,5 V, 32 × 26 mm.
-  **Cablaggio da rifare quando arriva**: cella solo sul BAT del modulo; il pedale da LOAD
-  attraverso l'interruttore (dove, sulla XIAO: da decidere col pezzo in mano, il 5V o il BAT);
-  il partitore su D0 deve misurare la cella, non LOAD. Si chiedono le foto dei due lati.
+  **Arrivato il 7 ottobre 2026; il piano deciso dalle foto** (dei due lati, del vecchio montato,
+  dell'interruttore e del morsetto): oggi i quattro fili stanno sul vecchio, due rossi su B+
+  (portacella e interruttore) e due neri su B− (portacella e morsetto) — da confermare quando
+  li stacca, segnando «INT» e «MORS». Sul nuovo: **BATT ⊕/⊖ = portacella, LOAD ⊕ = «INT»,
+  LOAD ⊖ = «MORS»**, DCIN vuoto, ponticelli sul retro intatti (1 A, 4,2 V). Interruttore,
+  morsetto, BAT della XIAO e partitore **non si toccano**: il partitore ora misura LOAD, cioè
+  la cella a USB staccato e **~4,5 V con l'USB attaccato** (icona piena: normale; in futuro il
+  firmware potrebbe leggerci «in carica»). **L'utente usa le prese JST-PH** invece dei buchi:
+  ordinato il kit QWORK PH 2,0 (Amazon, 19,29 zł, con cavetti già crimpati); la sua pinza è la
+  **DxCRIMP D2032** (0,03–0,5 mm², va bene per i PH). Sulle prese **+ a sinistra, − a destra**
+  con l'USB in alto, dalla serigrafia e non dai colori dei cavetti. **Prima di tutto la prova
+  d'ingombro**: il nuovo è 32 mm sul lato USB contro ~17, e fra il listello a sinistra e il
+  footswitch a destra potrebbe non starci. Prove dopo: LOAD a interruttore spento 3,6–4,2 V
+  senza il meno; acceso senza USB parte; USB-C anche C→C → LED CHRG e il pedale suona; corrente
+  in serie sul nero della cella ~0,9–1 A a cella non piena. **Si riprende l'8 ottobre**, quando
+  arrivano i connettori.
 - **Indicatore di batteria: fatto il 4 ottobre 2026 (firmware 1.5).** Partitore saldato
   dall'utente: due 100 kΩ in due cavetti, dal + del morsetto verde (vite in basso, i rossi) e
   dal − (vite in alto, nero e marrone) a **D0**, il primo piedino in basso a sinistra con la

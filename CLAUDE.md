@@ -363,9 +363,10 @@ finché l'utente non dice di aggiornarlo.
 `prova-ble` **1.5** (4 ottobre 2026): Spark 2 e NEO, Amp Preset letto dall'ampli, NEO a
 pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester).
 **Consumo misurato: 0,15 A, ~17 ore.** **La ricarica non va**: il modulo montato carica a
-0,09 A anche con R3 a 1,19 kΩ, caricatore e saldature esclusi. **Ordinato un Adafruit 6091
-(bq25185, power path)**: quando arriva, cablaggio nuovo spiegato filo per filo dalle foto
-(`docs/pedale-lavoro.md`). Restano: il display
+0,09 A anche con R3 a 1,19 kΩ, caricatore e saldature esclusi. **Arrivato l'Adafruit 6091
+(bq25185, power path), il 7 ottobre**: piano dalle foto in `docs/pedale-lavoro.md` (cella su
+BATT, interruttore e morsetto su LOAD, il resto non si tocca; prima la prova d'ingombro). Si
+riprende l'8 ottobre, coi connettori JST-PH. Restano: il display
 (il quadratino in negativo va ancora guardato), **il looper (1.8, 5 ottobre 2026: funziona sul pedale — FS1 REC/DUB, FS3 suona, FS4 ferma; resta FS2 «annulla» che non fa niente, `docs/looper.md` in fondo)**, poi il conteggio fatto in casa. **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
