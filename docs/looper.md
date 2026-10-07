@@ -644,3 +644,7 @@ cambia blocco). Adesso il LED ha un **compito FreeRTOS suo** (`compitoLedTempo`,
 sul core 1, ogni millisecondo), che legge solo variabili. In più alla fine della registrazione
 il giro non si rimette due volte (`07` poi `08`, ~25 ms di salto). E, deciso dall'utente,
 **lampi tutti uguali e corti** (70 ms), senza l'«uno» più lungo.
+
+**2.13**: il LED del tempo su D1 va bene (l'utente, 7 ottobre). Tolto il lampeggio del rosso
+di FS1 durante la registrazione, che col LED del tempo non serve più: FS1 è **rosso fisso**
+mentre registra o sovraincide. I quattro LED in sequenza del conteggio restano.

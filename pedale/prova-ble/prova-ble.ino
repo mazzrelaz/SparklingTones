@@ -52,7 +52,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.12";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo
+static const char* VERSIONE = "2.13";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -366,7 +366,6 @@ static volatile uint32_t inizioGiro = 0;         // millis dell'inizio del giro 
 static volatile bool     giroFinito = false;
 static uint32_t          registraDa = 0;
 static uint32_t          durataLoop = 0;         // misurata: dal 0x04 al 0x05/0x07
-static const uint32_t   LAMPO_MS = 120;          // il lampo del LED sul tempo, mentre registra
 
 /* Lo stesso MIDI anche via Bluetooth, per l'iPad (BIAS FX), chiesto il 24
  * settembre 2026. Su Windows il BLE-MIDI non arriva ai programmi (prova del 29
@@ -526,12 +525,9 @@ static void aggiornaLed() {
       mcpScrivi(MCP_OLATB, (uint8_t)(1 << LINEA_ROSSO[contaTempo - 1]));
       return;
     }
-    // Mentre registra col click il rosso di FS1 lampeggia sul tempo (chiesto il
-    // 7 ottobre): acceso per i primi LAMPO_MS di ogni tempo, contati dal 0x04.
-    const bool lampo = loopRegistra && loopClick && loopBpm
-                       && (millis() - registraDa) % (60000UL / loopBpm) < LAMPO_MS;
-    const bool fisso = loopSovraincide || (loopRegistra && !(loopClick && loopBpm));
-    if (lampo || fisso) maschera |= (uint8_t)(1 << LINEA_ROSSO[0]);
+    // Rosso fisso su FS1 mentre registra o sovraincide: il tempo lo batte il
+    // LED suo su D1, e il lampeggio qui l'utente l'ha tolto (7 ottobre).
+    if (loopRegistra || loopSovraincide) maschera |= (uint8_t)(1 << LINEA_ROSSO[0]);
     if (loopSuona && !loopRegistra)      maschera |= (uint8_t)(1 << LINEA_VERDE[2]);
     if (loopPresente && !loopSuona && !loopRegistra)    maschera |= (uint8_t)(1 << LINEA_VERDE[3]);
     mcpScrivi(MCP_OLATB, maschera);
@@ -2691,12 +2687,6 @@ void loop() {
   /* Il conteggio: quattro tempi da 60000/bpm ms dalla pressione, poi 0x04 con
    * LOOP_ANTICIPO_MS di anticipo. Il display si ridisegna solo al cambio di
    * tempo, lontano dall'invio. */
-  // Il lampo del LED a ogni tempo della registrazione, col click.
-  if (looper && loopRegistra && loopClick && loopBpm) {
-    static bool lampoPrima = false;
-    const bool lampo = (millis() - registraDa) % (60000UL / loopBpm) < LAMPO_MS;
-    if (lampo != lampoPrima) { lampoPrima = lampo; aggiornaLed(); }
-  }
   if (giroFinito) {
     giroFinito = false;
     Serial.printf("looper: giro finito, posizione massima %.3f, giro misurato %lu ms\n",
