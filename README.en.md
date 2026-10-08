@@ -5,7 +5,8 @@
 A personal app to control and organise the presets of a **Positive Grid Spark 2** over
 Bluetooth, from the browser. Plus an ESP32 pedal that does the same with your foot.
 
-**→ [mazzrelaz.github.io/SparklingTones](https://mazzrelaz.github.io/SparklingTones/?lang=en)**
+**→ [mazzrelaz.github.io/SparklingTones](https://mazzrelaz.github.io/SparklingTones/?lang=en)** · [user guide](https://mazzrelaz.github.io/SparklingTones/guida.en.html)
+(also inside the app: ⋯ menu → Guide)
 
 > **Personal project, on pause.** It was born to solve a problem of mine and it works
 > on my amp. The Spark 2 protocol isn't documented anywhere: here it was reconstructed

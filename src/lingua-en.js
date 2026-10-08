@@ -35,6 +35,10 @@ window.LINGUA_EN = {
     "Edit",
   "Pedale":
     "Pedal",
+  "Guida":
+    "Guide",
+  "Guida all'uso":
+    "User guide",
   "Fai una pausa":
     "Take a break",
   "cerca un preset…":

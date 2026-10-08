@@ -39,10 +39,13 @@ $('btnSnake').addEventListener('click', () => SnakePedali.apri());
 // l'editor: chi lo riapre vuole girare, non rileggere.
 // La guida si carica la prima volta che la si apre, non all'avvio: sono
 // pagine che servono di rado, e l'app deve partire svelta. Poi resta lì, e
-// riaprendola si ritrova il punto dove si era arrivati.
+// riaprendola si ritrova il punto dove si era arrivati. La lingua è quella
+// dell'app: l'inglese ha la sua pagina, tradotta per intero.
 $('btnGuida').addEventListener('click', () => {
   const cornice = $('corniceGuida');
-  if (!cornice.getAttribute('src')) cornice.src = 'guida.html';
+  if (!cornice.getAttribute('src')) {
+    cornice.src = Lingua.attuale === 'en' ? 'guida.en.html' : 'guida.html';
+  }
   apriPannello('pannelloGuida');
 });
 
