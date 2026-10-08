@@ -1054,3 +1054,26 @@ Chiesto dall'utente: segnarli. Adesso `SparkEffetti.liveNellaCatena` (i due nomi
 quello che comincia con `Vocal`) e `bolloLive()` mettono un bollo azzurro «Spark LIVE» accanto
 al nome, sulle righe e sugli slot, col titolo che dice quali effetti. Azzurro e senza pallino:
 è un'informazione, non un avviso come JH.
+
+## La guida all'uso — 8 ottobre 2026
+
+Chiesta dall'utente: «bella e grafica, consultabile dall'app stessa»; il pedale a parte,
+con una guida sua (costruzione e uso) quando sarà finito.
+
+- **Una pagina a sé, `guida.html`**, e non un pannello scritto dentro `index.html`: si
+  legge anche da fuori (dal sito, da un link nel README), e `index.html` è già grande.
+- **Dentro l'app sta in un `<iframe>`** nel pannello `pannelloGuida`, voce «Guida» del menu
+  ⋯ in tutte e due le viste. Aprirla al posto di `index.html` farebbe cadere la connessione
+  Bluetooth, che vive nel documento. La cornice si carica al primo tocco, non all'avvio.
+- **L'indice non tocca l'hash**: dentro l'iframe ogni ancora sarebbe un passo di cronologia
+  in più, e l'indietro di Android sfoglierebbe la guida invece di tornare all'app. Si scorre
+  da script (`scrollIntoView`). Verificato: la cronologia resta uguale.
+- **Le schermate sono disegnate in HTML e CSS**, coi colori dell'app, non fotografate: niente
+  da scaricare, stanno nella cache offline, si correggono a mano. Il prezzo è che vanno
+  ritoccate quando una schermata cambia. I numerini gialli sui disegni corrispondono agli
+  elenchi accanto; le loro posizioni sono in pixel, controllate a 375 px di larghezza.
+- **Solo italiano**: la pagina non passa da `tr`. Con l'app in inglese la voce di menu dice
+  «Guida» e la guida resta in italiano, finché l'utente non chiede l'inglese.
+- Per guardarla a misura di telefono senza il riquadro (che taglia gli screenshot quando si
+  emula il telefono): una pagina su `localhost` con tre `iframe` da 375 px che scorrono
+  ciascuno a un capitolo, fotografata con Edge headless.
