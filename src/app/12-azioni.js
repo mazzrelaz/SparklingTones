@@ -37,6 +37,15 @@ $('btnSnake').addEventListener('click', () => SnakePedali.apri());
 // La guida dell'editor serve una volta sola, poi è un muro di testo fra te e
 // le manopole. Sta dietro il «?» in cima, e si chiude da sé riaprendo
 // l'editor: chi lo riapre vuole girare, non rileggere.
+// La guida si carica la prima volta che la si apre, non all'avvio: sono
+// pagine che servono di rado, e l'app deve partire svelta. Poi resta lì, e
+// riaprendola si ritrova il punto dove si era arrivati.
+$('btnGuida').addEventListener('click', () => {
+  const cornice = $('corniceGuida');
+  if (!cornice.getAttribute('src')) cornice.src = 'guida.html';
+  apriPannello('pannelloGuida');
+});
+
 $('btnAiutoEditor').addEventListener('click', () => {
   const guida = $('aiutoEditor');
   guida.hidden = !guida.hidden;

@@ -529,6 +529,11 @@
                       calc(14px + env(safe-area-inset-bottom))
                       calc(14px + env(safe-area-inset-left)); }
   .pannello.aperto { display:block; }
+  /* La guida scorre dentro la sua cornice, non nel pannello: la barra col
+     «Fatto» resta in vista e la cornice prende tutto il resto. */
+  #pannelloGuida.aperto { display:flex; flex-direction:column; padding-bottom:0; }
+  #corniceGuida { flex:1; border:0; border-top:1px solid var(--line);
+                  margin:0 -14px; width:calc(100% + 28px); background:#000; }
   .pannello h2 { font-size:1rem; margin:0 0 4px; font-family:var(--strumento);
                  letter-spacing:-0.01em; }
   .pannello .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px;
@@ -1119,6 +1124,9 @@
         <!-- La goliardata sta qui e non dentro «Altro»: è un passatempo fra
              una canzone e l'altra, e a un passatempo non ci si arriva
              passando da un pannello di manutenzione. -->
+        <!-- La guida c'è in tutte e due le viste: chi la cerca suonando non deve
+             prima tornare ai preset. -->
+        <button id="btnGuida">Guida</button>
         <button id="btnSnake" class="solo-preset">Fai una pausa</button>
       </div>
     </div>
@@ -1457,6 +1465,18 @@
     <button id="btnSvuotaPosto" class="piccolo">Svuota il posto</button>
   </div>
   <div id="elencoScegli"></div>
+</div>
+
+<!-- La guida all'uso: è la pagina guida.html, dentro una cornice. Una pagina a
+     sé perché si legge anche da fuori; dentro una cornice e non aperta al posto
+     di questa, perché lasciare index.html farebbe cadere la connessione. -->
+<div class="pannello" id="pannelloGuida">
+  <div class="barra-alta">
+    <h2>Guida</h2>
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloGuida">Fatto</button>
+  </div>
+  <iframe id="corniceGuida" title="Guida all'uso"></iframe>
 </div>
 
 <!-- il pedale ESP32: gli otto slot che tiene in memoria, e l'invio di un banco.

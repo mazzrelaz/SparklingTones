@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>SparklingTones — Guida</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<!--
+  La guida all'uso dell'app (8 ottobre 2026, chiesta dall'utente).
+
+  Una pagina a sé, e non un pannello scritto dentro index.html, per due motivi:
+  si legge anche da sola (dal sito, da un link), e index.html è già grande.
+  L'app la apre in un <iframe> dentro un suo pannello: navigare via da
+  index.html farebbe cadere la connessione Bluetooth, che vive nel documento.
+
+  Per lo stesso motivo l'indice non cambia l'hash: dentro l'iframe ogni
+  ancora aggiungerebbe un passo alla cronologia, e l'indietro di Android
+  sfoglierebbe la guida invece di tornare all'app. Si scorre da script.
+
+  I disegni delle schermate sono HTML e CSS, non fotografie: pesano niente,
+  stanno nella cache offline, e coi colori dell'app (quelli di :root lì).
+  Se una schermata cambia, si cambia il disegno qui.
+
+  Solo italiano: l'inglese dell'app passa da `tr`, questa pagina no (la regola
+  sull'inglese è in CLAUDE.md).
+-->
+<style>
+  @font-face { font-family:'Inter'; src:url('fonts/inter-latin.woff2') format('woff2');
+               font-weight:100 900; font-display:swap; }
+  @font-face { font-family:'Space Grotesk'; src:url('fonts/space-grotesk-latin.woff2') format('woff2');
+               font-weight:300 700; font-display:swap; }
+
+  :root {
+    --bg:#000; --panel:#121316; --panel2:#0c0d10; --line:#26282e; --line-soft:#1b1d21;
+    --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
+    --accent:#e30613; --green:#7fe08a; --gold:#f0c040; --rosso:#ff8080; --blu:#3aa0ff;
+    --led-a:#ff4d5e; --led-b:#4ee06a;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --strumento:'Space Grotesk','Inter',-apple-system,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:var(--font);
+         font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+         overflow-x:hidden; }
+  a { color:var(--blu); }
+  strong { color:#fff; font-weight:650; }
+  em { color:#d6d8de; }
+  kbd, .tasto { font-family:var(--strumento); font-size:0.82em; font-weight:700;
+                background:#1a1c21; border:1px solid #33363e; border-bottom-width:2px;
+                border-radius:6px; padding:1px 7px; white-space:nowrap; color:#fff; }
+  .tasto.rosso { background:var(--accent); border-color:#ff3b47; }
+  .tasto.verde { background:#1d5a2a; border-color:#3fbf5a; }
+  .tasto.oro { color:var(--gold); border-color:#6b5a1e; }
+  .tasto.blu { color:var(--blu); border-color:#1f4d7a; }
+  .tasto.pericolo { color:var(--rosso); border-color:#5a2a2e; }
+
+  /* ---- testata ---------------------------------------------------------- */
+
+  .testata { position:relative; padding:56px 20px 40px; text-align:center; overflow:hidden;
+             border-bottom:1px solid var(--line-soft); }
+  .testata::before { content:''; position:absolute; inset:-40% -20% auto; height:120%;
+                     background:radial-gradient(closest-side, rgba(227,6,19,0.32), transparent 70%);
+                     pointer-events:none; }
+  .testata > * { position:relative; }
+  .testata img { height:38px; width:auto; display:block; margin:0 auto 22px; }
+  .testata h1 { font-family:var(--strumento); font-size:clamp(2rem, 7vw, 3.2rem); line-height:1.05;
+                margin:0 0 12px; letter-spacing:-0.03em; }
+  .testata h1 span { color:var(--accent); }
+  .testata p { color:var(--dim); max-width:560px; margin:0 auto; font-size:1.02rem; }
+  .apri-app { display:inline-block; margin-top:20px; padding:9px 18px; border-radius:999px;
+              background:var(--accent); color:#fff; font-weight:700; text-decoration:none;
+              font-family:var(--strumento); }
+  .apri-app[hidden] { display:none; }
+
+  /* tre passi */
+  .tre-passi { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; max-width:760px;
+               margin:34px auto 0; text-align:left; }
+  .passo-grande { background:linear-gradient(180deg, #16181c, #0d0e11); border:1px solid var(--line);
+                  border-radius:16px; padding:16px 16px 14px; }
+  .passo-grande .num { font-family:var(--strumento); font-weight:700; font-size:0.78rem;
+                       color:var(--accent); letter-spacing:0.08em; }
+  .passo-grande h3 { font-family:var(--strumento); margin:4px 0 4px; font-size:1.1rem; }
+  .passo-grande p { margin:0; font-size:0.86rem; color:var(--dim); }
+  .passo-grande .ico { font-size:1.6rem; line-height:1; display:block; margin-bottom:8px; }
+  @media (max-width:620px) { .tre-passi { grid-template-columns:1fr; } }
+
+  /* ---- indice ----------------------------------------------------------- */
+
+  nav.indice { position:sticky; top:0; z-index:5; background:rgba(0,0,0,0.88);
+               backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+               border-bottom:1px solid var(--line-soft); }
+  nav.indice .scorre { display:flex; gap:6px; overflow-x:auto; padding:10px 16px;
+                       scrollbar-width:none; max-width:980px; margin:0 auto; }
+  nav.indice .scorre::-webkit-scrollbar { display:none; }
+  nav.indice a { flex:none; color:var(--dim); text-decoration:none; font-size:0.82rem;
+                 font-family:var(--strumento); font-weight:600; padding:6px 12px;
+                 border-radius:999px; border:1px solid var(--line); background:#0d0e11;
+                 transition:color .15s, border-color .15s, background .15s; }
+  nav.indice a:hover { color:var(--text); border-color:#3a3d45; }
+  nav.indice a.qui { color:#fff; background:var(--accent); border-color:var(--accent); }
+
+  /* ---- capitoli --------------------------------------------------------- */
+
+  main { max-width:980px; margin:0 auto; padding:0 16px 80px; }
+  section.cap { padding:56px 0 8px; scroll-margin-top:56px; }
+  .cap-testa { display:flex; align-items:center; gap:14px; margin-bottom:6px; }
+  .cap-num { flex:none; width:44px; height:44px; border-radius:12px; display:grid; place-items:center;
+             font-family:var(--strumento); font-weight:700; font-size:1.15rem; color:#fff;
+             background:var(--c, var(--accent));
+             box-shadow:0 0 22px color-mix(in srgb, var(--c, var(--accent)) 45%, transparent); }
+  .cap h2 { font-family:var(--strumento); font-size:clamp(1.45rem, 4.4vw, 2rem); margin:0;
+            letter-spacing:-0.02em; line-height:1.15; }
+  .cap .sotto { color:var(--dim); margin:4px 0 22px 58px; font-size:0.98rem; }
+  @media (max-width:560px) { .cap .sotto { margin-left:0; } }
+  .cap h3 { font-family:var(--strumento); font-size:1.12rem; margin:30px 0 6px; }
+  .cap p { margin:0 0 12px; }
+  .cap ol, .cap ul { margin:0 0 14px; padding-left:22px; }
+  .cap li { margin-bottom:6px; }
+  .cap li::marker { color:var(--faint); font-family:var(--strumento); font-weight:700; }
+
+  .due { display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
+  .due > * { min-width:0; }
+  @media (max-width:760px) { .due { grid-template-columns:1fr; gap:10px; } }
+
+  /* riquadri: consiglio, attenzione */
+  .nota { border-radius:14px; padding:14px 16px 14px 48px; margin:16px 0; position:relative;
+          background:#0d1420; border:1px solid #1f3550; font-size:0.94rem; }
+  .nota::before { content:'💡'; position:absolute; left:15px; top:13px; font-size:1.15rem; }
+  .nota.att { background:#1a0d0f; border-color:#4a1e24; }
+  .nota.att::before { content:'⚠️'; }
+  .nota p:last-child { margin-bottom:0; }
+
+  /* ---- disegni delle schermate ----------------------------------------- */
+
+  figure.schermo { margin:8px 0 18px; }
+  .telefono { position:relative; background:var(--bg); border:1px solid #2c2f36;
+              border-radius:26px; padding:14px 12px 16px; max-width:360px; margin:0 auto;
+              box-shadow:0 0 0 6px #0b0c0e, 0 0 0 7px #24262c, 0 24px 60px rgba(0,0,0,0.7),
+                         0 0 80px rgba(227,6,19,0.08); }
+  .telefono.largo { max-width:none; }
+  figcaption { color:var(--faint); font-size:0.8rem; text-align:center; margin-top:14px; }
+  /* i numeri sopra i disegni, e gli stessi numeri nella spiegazione */
+  .pin { position:absolute; z-index:3; width:22px; height:22px; border-radius:50%;
+         background:var(--gold); color:#000; font:700 0.74rem/22px var(--strumento);
+         text-align:center; box-shadow:0 0 0 3px rgba(0,0,0,0.85), 0 0 14px rgba(240,192,64,0.6); }
+  .rel { position:relative; }
+  ol.pin-elenco { list-style:none; padding:0; counter-reset:p; }
+  ol.pin-elenco > li { counter-increment:p; position:relative; padding-left:34px; margin-bottom:10px; }
+  ol.pin-elenco > li::before { content:counter(p); position:absolute; left:0; top:1px; width:22px;
+                               height:22px; border-radius:50%; background:var(--gold); color:#000;
+                               font:700 0.74rem/22px var(--strumento); text-align:center; }
+
+  /* barra dell'app */
+  .m-barra { display:flex; align-items:center; gap:8px; }
+  .m-logo { height:18px; width:auto; margin-right:auto; }
+  .m-tasto { font:700 0.72rem var(--strumento); border-radius:10px; padding:8px 10px;
+             border:1px solid #33363e; background:#16181c; color:#fff; white-space:nowrap; }
+  .m-tasto.conn { background:var(--accent); border-color:var(--accent); letter-spacing:0.04em; }
+  .m-tasto.conn.ok { background:#123d1c; border-color:#2f9a46; color:var(--green); }
+  .m-tasto.vista { background:none; border-color:var(--accent); color:#ff5a64; }
+  .m-cerca { display:flex; gap:8px; margin-top:10px; }
+  .m-cerca .campo { flex:1; border:1px solid var(--line); background:#0d0e11; border-radius:10px;
+                    padding:8px 10px; color:var(--faint); font-size:0.8rem; }
+  .m-cerca .ordina { border:1px solid var(--line); background:#0d0e11; border-radius:10px;
+                     padding:8px 10px; font:700 0.76rem var(--strumento); }
+  .m-pastiglie { display:flex; gap:6px; margin-top:9px; flex-wrap:wrap; }
+  .m-pastiglia { font-size:0.72rem; padding:3px 10px; border-radius:999px; border:1px solid var(--line);
+                 color:var(--dim); background:#0d0e11; }
+  .m-pastiglia.attiva { background:#fff; color:#000; border-color:#fff; font-weight:600; }
+  .m-pastiglia i { font-style:normal; color:var(--faint); margin-left:5px; }
+  .m-sez { font:700 0.66rem var(--strumento); letter-spacing:0.12em; color:var(--dim);
+           text-transform:uppercase; margin:14px 0 6px; }
+  .m-sez b { color:var(--faint); margin-left:6px; }
+
+  /* gli otto slot */
+  .m-slots { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .m-colonna { display:flex; flex-direction:column; gap:6px; }
+  .m-banco { font:700 0.6rem var(--strumento); letter-spacing:0.1em; }
+  .m-banco.a { color:var(--rosso); } .m-banco.b { color:var(--green); }
+  .m-slot { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:7px 9px 8px;
+            min-height:52px; }
+  .m-slot .alto { display:flex; align-items:center; gap:5px; font-size:0.6rem; color:var(--faint); }
+  .m-slot .nome { font:700 0.76rem/1.25 var(--strumento); margin-top:3px; color:#fff; }
+  .m-slot.aperto { border-color:#5a5f68; background:#191b20; }
+  .led { width:7px; height:7px; border-radius:50%; display:inline-block; flex:none; }
+  .led.a { background:var(--led-a); box-shadow:0 0 6px var(--led-a); }
+  .led.b { background:var(--led-b); box-shadow:0 0 6px var(--led-b); }
+  .bollo-jh { margin-left:auto; font:700 0.56rem var(--strumento); color:#ff5a64; border:1px solid #6a2228;
+              border-radius:5px; padding:0 4px; display:inline-flex; align-items:center; gap:3px; }
+  .bollo-jh::before { content:''; width:5px; height:5px; border-radius:50%; background:#ff3b47; }
+  .bollo-live { margin-left:auto; font:700 0.56rem var(--strumento); color:#7fd1ff; border:1px solid #1f4d7a;
+                border-radius:5px; padding:0 4px; }
+
+  /* righe della libreria */
+  .m-riga { display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line);
+            border-left:3px solid var(--fam, var(--line)); border-radius:10px; padding:9px 10px;
+            margin-bottom:6px; font:700 0.86rem var(--strumento); }
+  .m-riga .n { flex:1; }
+  .m-play { width:26px; height:26px; border-radius:50%; border:1px solid #2f9a46; color:var(--green);
+            display:grid; place-items:center; font-size:0.62rem; background:#0f1d13; flex:none; }
+
+  /* scheda aperta */
+  .m-scheda { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; }
+  .m-scheda .titolo { font:700 0.95rem var(--strumento); display:flex; align-items:center;
+                      justify-content:space-between; padding-bottom:9px; border-bottom:1px solid var(--line-soft); }
+  .m-eti { font-size:0.6rem; color:var(--dim); letter-spacing:0.08em; text-transform:uppercase; margin:10px 0 4px; }
+  .m-input { border:1px solid var(--line); border-radius:8px; background:#0d0e11; padding:7px 9px; font-size:0.8rem; }
+  .m-input.note { color:var(--faint); min-height:40px; }
+  .m-scelte { display:flex; flex-wrap:wrap; gap:5px; }
+  .m-scelta { font-size:0.7rem; padding:3px 10px; border-radius:999px; background:#1c1e23; color:#cfd2d8; }
+  .m-scelta.fam.dentro { background:var(--fam); color:#000; font-weight:700; }
+  .m-scelta.dentro { background:#2a2d33; color:#fff; }
+  .m-azioni { display:grid; grid-template-columns:repeat(4, 1fr); gap:5px; margin-top:12px; }
+  .m-azioni.coppia { grid-template-columns:1fr 1fr; margin-top:6px; }
+  .m-az { font:700 0.68rem var(--strumento); text-align:center; padding:8px 4px; border-radius:9px;
+          border:1px solid #33363e; background:#16181c; white-space:nowrap; overflow:hidden; }
+  .m-az.primary { background:var(--accent); border-color:var(--accent); }
+  .m-az.pericolo { color:var(--rosso); border-color:#5a2a2e; background:#1a0d0f; }
+  .m-az.oro { color:var(--gold); border-color:#6b5a1e; box-shadow:0 0 12px rgba(240,192,64,0.18); }
+  .m-az.blu { color:var(--blu); border-color:#1f4d7a; box-shadow:0 0 12px rgba(58,160,255,0.18); }
+  .m-az.tendina { text-align:left; color:#cfd2d8; font-weight:600; background:#0d0e11; }
+
+  /* vista live */
+  .m-banchi { display:flex; gap:6px; margin:12px 0 10px; flex-wrap:wrap; }
+  .m-bancotab { font-size:0.74rem; font-weight:600; padding:5px 12px; border-radius:999px; background:#1c1e23; color:#cfd2d8; }
+  .m-bancotab.attivo { background:var(--accent); color:#fff; }
+  .m-bancotab.piu { background:none; border:1px dashed #3a3d45; color:var(--faint); }
+  .m-pads { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:repeat(4, 74px);
+            grid-auto-flow:column; gap:8px; }
+  .m-pad { position:relative; background:#16181c; border:1px solid #2a2e35; border-radius:14px;
+           padding:10px 12px; display:flex; flex-direction:column; justify-content:center; }
+  .m-pad .ledpad { position:absolute; top:9px; left:10px; width:9px; height:9px; border-radius:50%;
+                   background:color-mix(in srgb, var(--led, #34c759) 42%, #0b0d10);
+                   border:1px solid color-mix(in srgb, var(--led, #34c759) 58%, #1a1d22); }
+  .m-pad.attivo .ledpad { background:var(--led); box-shadow:0 0 8px var(--led), 0 0 18px var(--led); }
+  .m-pad .np { position:absolute; top:6px; right:10px; font:700 0.66rem var(--strumento); color:var(--faint); }
+  .m-pad .nm { font:700 0.86rem/1.2 var(--strumento); }
+  .m-pad .sb { font:700 0.62rem var(--strumento); color:var(--dim); margin-top:2px; }
+  .m-pad.attivo { border-color:var(--blu); box-shadow:0 0 0 1px var(--blu), 0 0 22px rgba(58,160,255,0.35);
+                  background:#0f1a26; }
+  .m-pad.vuoto { background:none; border-style:dashed; color:var(--faint); }
+  .m-pad.vuoto .ledpad { --led:#6b7280; }
+  .m-pad .carica { position:absolute; left:0; bottom:0; height:3px; width:60%; border-radius:0 3px 3px 14px;
+                   background:var(--blu); }
+  .m-pad .presa { position:absolute; right:8px; bottom:7px; font-size:0.8rem; color:var(--gold); }
+
+  /* editor */
+  .m-insegna { margin:14px auto 4px; width:max-content; max-width:100%; padding:8px 18px; border-radius:12px;
+               border:2px solid #fff; font:700 1.15rem var(--strumento); color:#fff;
+               box-shadow:0 0 14px rgba(255,255,255,0.55), inset 0 0 10px rgba(255,255,255,0.18); }
+  .m-modo { text-align:center; font:700 0.6rem var(--strumento); letter-spacing:0.12em; color:var(--gold); }
+  .m-tempo { display:flex; align-items:center; justify-content:center; gap:8px; margin:12px 0; }
+  .m-tempo .eti { font:700 0.6rem var(--strumento); letter-spacing:0.1em; color:var(--dim); }
+  .m-tempo .bpm { font:700 1.35rem var(--strumento); color:var(--gold); }
+  .m-tempo .bpm small { font-size:0.55rem; color:var(--dim); margin-left:2px; }
+  .m-tempo .p { width:26px; height:24px; border-radius:7px; background:#1c1e23; display:grid; place-items:center;
+                font-weight:700; font-size:0.8rem; }
+  .m-tempo .tap { padding:4px 10px; border-radius:7px; background:#1c1e23; font:700 0.66rem var(--strumento); }
+  .m-catena { display:flex; gap:0; overflow:hidden; align-items:center; padding:4px 0 10px; }
+  .m-tassello { flex:none; width:86px; border:1px solid #2a2e35; border-radius:10px; background:#0c0d10;
+                padding:6px 7px 7px; position:relative; }
+  .m-tassello .cat { font:700 0.5rem var(--strumento); letter-spacing:0.06em; color:var(--cat); text-transform:uppercase; }
+  .m-tassello .mod { font:600 0.68rem var(--strumento); margin-top:1px; white-space:nowrap; overflow:hidden; }
+  .m-tassello .acceso { position:absolute; top:6px; right:6px; width:6px; height:6px; border-radius:50%;
+                        background:var(--cat); box-shadow:0 0 6px var(--cat); }
+  .m-tassello.spento { opacity:0.5; }
+  .m-tassello.spento .acceso { background:#3a3d45; box-shadow:none; }
+  .m-tassello .barre { display:flex; gap:2px; align-items:flex-end; height:12px; margin-top:6px; }
+  .m-tassello .barre i { flex:1; background:var(--cat); border-radius:1px; }
+  .m-tassello.fuoco { border:2px solid var(--cat); box-shadow:0 0 16px color-mix(in srgb, var(--cat) 45%, transparent); }
+  .m-filo { flex:none; width:8px; height:1px; background:#3a3d45; }
+  .m-blocco { border:1px solid var(--line); border-radius:14px; background:#0e0f12; padding:10px; }
+  .m-blocco .riga1 { display:flex; align-items:center; justify-content:space-between; }
+  .m-blocco .freccia { width:24px; height:24px; border-radius:7px; border:1px solid #33363e; display:grid;
+                       place-items:center; font-size:0.7rem; color:var(--dim); }
+  .m-blocco .catn { font:700 0.62rem var(--strumento); letter-spacing:0.1em; color:var(--cat); }
+  .m-modello { margin:8px auto; width:max-content; max-width:100%; border:1px solid #33363e; border-radius:9px;
+               padding:6px 12px; font:700 0.78rem var(--strumento); }
+  .m-modello::after { content:' ▾'; color:var(--cat); }
+  .m-inter { border:1px solid var(--cat); border-radius:9px; text-align:center; padding:6px;
+             font:700 0.72rem var(--strumento); color:var(--cat);
+             background:color-mix(in srgb, var(--cat) 12%, transparent); }
+  .m-manopole { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 14px; margin-top:10px; }
+  .manopola { width:74px; text-align:center; }
+  .manopola svg { width:56px; height:56px; overflow:visible; display:block; margin:0 auto; }
+  .manopola .nm { font-size:0.68rem; font-style:italic; color:var(--dim); }
+  .manopola .nm.tuo { font-style:normal; color:#fff; }
+  .manopola .vl { font:700 0.78rem var(--strumento); color:var(--cat); }
+
+  /* catena a colori (legenda) */
+  .legenda-catena { display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px; margin:14px 0 18px; }
+  .legenda-catena div { border:1px solid var(--line); border-left:4px solid var(--cat); border-radius:10px;
+                        padding:7px 10px; background:#0c0d10; font-size:0.82rem; }
+  .legenda-catena b { display:block; font:700 0.7rem var(--strumento); color:var(--cat); letter-spacing:0.06em;
+                      text-transform:uppercase; }
+
+  /* confronto a due colonne */
+  .confronto { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0; }
+  .confronto > div { border-radius:14px; padding:14px 16px; border:1px solid var(--line); background:var(--panel); }
+  .confronto h4 { margin:0 0 6px; font-family:var(--strumento); font-size:1rem; }
+  .confronto p { font-size:0.9rem; margin:0 0 6px; color:#cfd2d8; }
+  .confronto .si { color:var(--green); } .confronto .no { color:var(--rosso); }
+  @media (max-width:600px) { .confronto { grid-template-columns:1fr; } }
+
+  /* famiglie */
+  .famiglie { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 16px; }
+  .famiglie span { padding:5px 14px; border-radius:999px; font:700 0.82rem var(--strumento); color:#000;
+                   background:var(--fam); box-shadow:0 0 14px color-mix(in srgb, var(--fam) 45%, transparent); }
+
+  /* passi numerati grandi */
+  ol.passi { list-style:none; padding:0; counter-reset:s; margin:14px 0 18px; }
+  ol.passi > li { counter-increment:s; position:relative; padding:2px 0 14px 46px; margin:0;
+                  border-left:2px solid var(--line); margin-left:15px; padding-left:30px; }
+  ol.passi > li:last-child { border-left-color:transparent; padding-bottom:0; }
+  ol.passi > li::before { content:counter(s); position:absolute; left:-16px; top:0; width:30px; height:30px;
+                          border-radius:50%; background:#16181c; border:2px solid var(--accent);
+                          font:700 0.85rem/26px var(--strumento); text-align:center; color:#fff; }
+
+  /* domande */
+  details.faq { border:1px solid var(--line); border-radius:12px; background:var(--panel); margin-bottom:8px; }
+  details.faq summary { cursor:pointer; padding:13px 44px 13px 16px; font-weight:650; list-style:none; position:relative; }
+  details.faq summary::-webkit-details-marker { display:none; }
+  details.faq summary::after { content:'+'; position:absolute; right:16px; top:9px; font:400 1.4rem var(--strumento);
+                               color:var(--dim); transition:transform .2s; }
+  details.faq[open] summary::after { transform:rotate(45deg); color:var(--accent); }
+  details.faq .dentro { padding:0 16px 12px; color:#cfd2d8; font-size:0.94rem; }
+
+  footer { border-top:1px solid var(--line-soft); color:var(--faint); text-align:center; font-size:0.8rem;
+           padding:28px 16px 40px; }
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <img src="icons/logo.svg" alt="SparklingTones" onerror="this.remove()">
+  <h1>Guida <span>all'uso</span></h1>
+  <p>Come collegare l'ampli, tenere in ordine i preset, suonarli dal vivo e girare le
+    manopole dal telefono. Una pagina sola, da leggere in dieci minuti.</p>
+  <a class="apri-app" id="apriApp" href="index.html" hidden>Apri l'app →</a>
+
+  <div class="tre-passi">
+    <div class="passo-grande">
+      <span class="ico">🔌</span>
+      <span class="num">PASSO 1</span>
+      <h3>Collega</h3>
+      <p>Un tocco su <b>Connetti</b>: l'app trova l'ampli e legge gli otto preset che ha dentro.</p>
+    </div>
+    <div class="passo-grande">
+      <span class="ico">🗂️</span>
+      <span class="num">PASSO 2</span>
+      <h3>Organizza</h3>
+      <p>Tutti i preset che vuoi, con nome, colore, categorie e note. Nessun limite di otto.</p>
+    </div>
+    <div class="passo-grande">
+      <span class="ico">🎸</span>
+      <span class="num">PASSO 3</span>
+      <h3>Suona</h3>
+      <p>La vista <b>Live</b>: otto pulsantoni grandi, e il suono cambia mentre suoni.</p>
+    </div>
+  </div>
+</header>
+
+<nav class="indice" aria-label="indice">
+  <div class="scorre">
+    <a href="#inizio">Prima di cominciare</a>
+    <a href="#collegare">Collegare</a>
+    <a href="#preset">I preset</a>
+    <a href="#scheda">La scheda</a>
+    <a href="#ordine">Mettere in ordine</a>
+    <a href="#live">Live</a>
+    <a href="#editor">Regolare il suono</a>
+    <a href="#sicuro">Al sicuro</a>
+    <a href="#bolli">JH e Spark LIVE</a>
+    <a href="#neo">Spark NEO</a>
+    <a href="#problemi">Se qualcosa non va</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ===================================================================== -->
+<section class="cap" id="inizio">
+  <div class="cap-testa"><span class="cap-num">1</span><h2>Prima di cominciare</h2></div>
+  <p class="sotto">Cosa serve, e come metterla sul telefono.</p>
+
+  <div class="due">
+    <div>
+      <h3>Cosa serve</h3>
+      <ul>
+        <li>Un amplificatore <strong>Spark 2</strong> (va anche lo <strong>Spark NEO</strong>, vedi più giù).</li>
+        <li><strong>Chrome, Edge o Opera</strong>, su un telefono Android o su un computer: sono i browser
+          che sanno parlare col Bluetooth.</li>
+        <li>Niente account, niente iscrizioni: la libreria sta dentro il browser che usi.</li>
+      </ul>
+      <div class="nota att">
+        <p><strong>Su iPhone e iPad l'ampli non si collega</strong>, con nessun browser: Apple non
+          permette il Bluetooth alle pagine web. La libreria però funziona tutta — sfogliare,
+          cercare, organizzare, importare, esportare.</p>
+      </div>
+    </div>
+    <div>
+      <h3>Metterla sul telefono</h3>
+      <ol class="passi">
+        <li>Apri l'app in Chrome sul telefono.</li>
+        <li>Se compare la striscia <span class="tasto rosso">Installa</span>, toccala. Altrimenti: menu
+          di Chrome <kbd>⋮</kbd> → <em>Aggiungi a schermata Home</em> / <em>Installa app</em>.</li>
+        <li>Da lì in poi si apre come un'app vera, a tutto schermo, e <strong>funziona anche senza
+          rete</strong>: a un concerto il Wi-Fi non serve.</li>
+      </ol>
+      <div class="nota">
+        <p>Quando esce una versione nuova, l'app te lo dice da sola con una striscia in basso.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="collegare">
+  <div class="cap-testa"><span class="cap-num">2</span><h2>Collegare l'ampli</h2></div>
+  <p class="sotto">Un tocco, e l'app sa cosa c'è dentro l'amplificatore.</p>
+
+  <div class="due">
+    <figure class="schermo">
+      <div class="telefono rel">
+        <span class="pin" style="left:4px;top:-8px">1</span>
+        <span class="pin" style="left:150px;top:-8px">2</span>
+        <span class="pin" style="left:232px;top:-8px">3</span>
+        <span class="pin" style="right:6px;top:-8px">4</span>
+        <div class="m-barra">
+          <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
+          <span class="m-tasto conn">CONNETTI</span>
+          <span class="m-tasto vista">Live →</span>
+          <span class="m-tasto">⋯</span>
+        </div>
+        <div class="m-cerca"><span class="campo">cerca un preset…</span><span class="ordina">nome ▾</span></div>
+      </div>
+      <figcaption>La barra in alto, sempre a portata di pollice</figcaption>
+    </figure>
+    <div>
+      <ol class="pin-elenco">
+        <li><strong>Il marchio</strong>: da qualunque punto dell'app, un tocco qui riporta ai preset.</li>
+        <li><strong>Connetti</strong>: rosso quando l'ampli manca, <span style="color:var(--green)">verde</span>
+          quando c'è.</li>
+        <li><strong>Live →</strong> passa alla vista per suonare; da lì, <strong>← Preset</strong> torna qui.
+          Anche il tasto indietro di Android torna ai preset.</li>
+        <li><strong>Il menu ⋯</strong>: tutte le altre azioni, compresa questa guida.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>Come si collega</h3>
+  <ol class="passi">
+    <li>Accendi l'ampli e il Bluetooth del telefono.</li>
+    <li>Tocca <span class="tasto rosso">CONNETTI</span>. Il browser apre una finestrella con gli apparecchi
+      vicini: scegli <strong>Spark 2</strong> e conferma.</li>
+    <li>Il tasto diventa verde, e l'app <strong>legge da sola gli otto preset</strong> dell'ampli.
+      Nel registro in fondo alla pagina vedi i nomi arrivare uno per uno.</li>
+  </ol>
+  <div class="nota att">
+    <p><strong>Un padrone alla volta.</strong> Se l'ampli è collegato all'app ufficiale di Positive Grid
+      (o al pedale), qui non compare. Chiudi l'altra app, o spegni e riaccendi l'ampli, e riprova.</p>
+  </div>
+  <div class="nota">
+    <p>Il registro in fondo alla schermata dei preset racconta tutto quello che succede: cosa è
+      partito, cosa ha risposto l'ampli, cosa non è andato. È il primo posto dove guardare.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="preset">
+  <div class="cap-testa"><span class="cap-num">3</span><h2>La schermata dei preset</h2></div>
+  <p class="sotto">Sopra quello che c'è nell'ampli, sotto tutto il resto.</p>
+
+  <div class="due">
+    <figure class="schermo">
+      <div class="telefono rel">
+        <span class="pin" style="left:-8px;top:40px">1</span>
+        <span class="pin" style="left:-8px;top:291px">2</span>
+        <span class="pin" style="left:-8px;top:379px">3</span>
+        <span class="pin" style="right:-8px;top:327px">4</span>
+        <div class="m-sez" style="margin-top:0">Preset hardware</div>
+        <div class="m-slots">
+          <div class="m-colonna">
+            <span class="m-banco a">BANCO A</span>
+            <div class="m-slot"><div class="alto"><span class="led a"></span>A1</div><div class="nome">Shine On clean</div></div>
+            <div class="m-slot"><div class="alto"><span class="led a"></span>A2</div><div class="nome">Echoes</div></div>
+            <div class="m-slot"><div class="alto"><span class="led a"></span>A3</div><div class="nome">Crunch Marshall</div></div>
+            <div class="m-slot"><div class="alto"><span class="led a"></span>A4</div><div class="nome">Poles Apart</div></div>
+          </div>
+          <div class="m-colonna">
+            <span class="m-banco b">BANCO B</span>
+            <div class="m-slot"><div class="alto"><span class="led b"></span>B1</div><div class="nome">Nylon Reverb</div></div>
+            <div class="m-slot"><div class="alto"><span class="led b"></span>B2</div><div class="nome">Europa</div></div>
+            <div class="m-slot"><div class="alto"><span class="led b"></span>B3</div><div class="nome">Clean Tube</div></div>
+            <div class="m-slot"><div class="alto"><span class="led b"></span>B4<span class="bollo-jh">JH</span></div><div class="nome">Hey Jimi Solo</div></div>
+          </div>
+        </div>
+        <div class="m-sez">In libreria <b>4</b></div>
+        <div class="m-riga" style="--fam:#0a84ff"><span class="n">Blues di casa</span><span class="m-play">▶</span></div>
+        <div class="m-riga" style="--fam:#ff3b30"><span class="n">Lead Gilmour</span><span class="m-play">▶</span></div>
+        <div class="m-riga"><span class="n">Funk pulito</span><span class="m-play">▶</span></div>
+        <div class="m-riga" style="--fam:#ffd21e"><span class="n">Folk 12 corde</span><span class="m-play">▶</span></div>
+      </div>
+      <figcaption>Gli otto slot disposti come sull'ampli, e la libreria sotto</figcaption>
+    </figure>
+    <div>
+      <ol class="pin-elenco">
+        <li><strong>Preset hardware</strong>: gli otto preset salvati nell'ampli. <strong>Banco A rosso,
+          banco B verde</strong>, come i LED sull'apparecchio. Uno slot che l'app non ha ancora letto
+          si vede tratteggiato e dice <em>non ancora letto</em>.</li>
+        <li><strong>In libreria</strong>: tutti gli altri preset che hai, senza limite. Un preset sta
+          sopra <em>oppure</em> sotto, mai in tutti e due i posti.</li>
+        <li><strong>La riga colorata a sinistra</strong> è la famiglia di suono (blu clean, rosso drive…):
+          si riconosce senza leggere.</li>
+        <li><strong>▶</strong> fa suonare subito quel preset sull'ampli, <strong>senza toccare nessuno
+          slot</strong>. È il modo più rapido per provarne uno.</li>
+      </ol>
+      <p>Tocca il nome di un preset — sopra o sotto — per aprirne la <a href="#scheda">scheda</a>.</p>
+      <div class="nota">
+        <p>Se scrivi un preset nuovo in uno slot, quello che c'era <strong>non si perde</strong>: scende in
+          libreria con i suoi tag e le sue note.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Cercare e ordinare</h3>
+  <div class="due">
+    <figure class="schermo">
+      <div class="telefono">
+        <div class="m-cerca" style="margin-top:0"><span class="campo">gilmour delay</span><span class="ordina">nome ▾</span></div>
+        <div class="m-pastiglie">
+          <span class="m-pastiglia">tutte</span>
+          <span class="m-pastiglia attiva">Pink Floyd<i>6</i></span>
+          <span class="m-pastiglia">blues<i>4</i></span>
+          <span class="m-pastiglia">prove<i>2</i></span>
+        </div>
+      </div>
+    </figure>
+    <div>
+      <ul>
+        <li><strong>La ricerca</strong> guarda nome, note, categorie e anche gli effetti: «gilmour delay»
+          trova i preset che hanno tutte e due le parole da qualche parte.</li>
+        <li><strong>La tendina accanto</strong> ordina per nome, per aggiunti di recente, per modificati
+          di recente, o per famiglia di suono.</li>
+        <li><strong>Le pastiglie</strong> sotto filtrano per categoria; il numero dice quanti preset ci sono.
+          Compaiono appena crei la prima categoria.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="scheda">
+  <div class="cap-testa"><span class="cap-num">4</span><h2>La scheda di un preset</h2></div>
+  <p class="sotto">Tutto quello che si fa con un preset sta qui dentro.</p>
+
+  <div class="due">
+    <figure class="schermo">
+      <div class="telefono rel">
+        <span class="pin" style="left:-8px;top:327px">1</span>
+        <span class="pin" style="left:-8px;top:365px">2</span>
+        <span class="pin" style="left:-8px;top:403px">3</span>
+        <div class="m-scheda">
+          <div class="titolo">Blues di casa <span class="m-play">▶</span></div>
+          <div class="m-eti">Nome</div>
+          <div class="m-input">Blues di casa</div>
+          <div class="m-eti">Famiglia di suono</div>
+          <div class="m-scelte">
+            <span class="m-scelta fam dentro" style="--fam:#0a84ff">Clean</span>
+            <span class="m-scelta">Drive</span><span class="m-scelta">Acoustic</span><span class="m-scelta">Bass</span>
+          </div>
+          <div class="m-eti">Categorie</div>
+          <div class="m-scelte">
+            <span class="m-scelta dentro">✓ blues</span><span class="m-scelta">＋ Pink Floyd</span>
+            <span class="m-scelta">＋ nuova…</span>
+          </div>
+          <div class="m-eti">Note</div>
+          <div class="m-input note">capotasto al 3, volume a metà</div>
+          <div class="m-azioni">
+            <span class="m-az primary">Attiva</span><span class="m-az">Regola</span>
+            <span class="m-az">Duplica</span><span class="m-az pericolo">Elimina</span>
+          </div>
+          <div class="m-azioni coppia">
+            <span class="m-az oro">Invia a preset HW</span><span class="m-az tendina">A1 — LED rosso ▾</span>
+          </div>
+          <div class="m-azioni coppia">
+            <span class="m-az blu">Metti nel banco</span><span class="m-az tendina">Concerto ▾</span>
+          </div>
+        </div>
+      </div>
+      <figcaption>Nome, famiglia, categorie, note — e le azioni</figcaption>
+    </figure>
+    <div>
+      <ol class="pin-elenco">
+        <li><strong>Attiva · Regola · Duplica · Elimina</strong>.
+          <em>Attiva</em> fa suonare il preset (come ▶). <em>Regola</em> apre le
+          <a href="#editor">manopole</a>. <em>Duplica</em> ne fa una copia da modificare — è il modo
+          giusto di creare un preset nuovo. <em>Elimina</em> lo toglie dalla libreria (chiede prima,
+          e l'ampli non viene toccato).</li>
+        <li><strong>Invia a preset HW</strong> lo <strong>scrive</strong> nello slot scelto nella tendina
+          accanto: da lì in poi è nell'ampli, anche a telefono spento.</li>
+        <li><strong>Metti nel banco</strong> lo aggiunge al primo posto libero di un
+          <a href="#live">banco live</a>. Non tocca l'ampli. Compare quando hai almeno un banco.</li>
+      </ol>
+      <p>Aprendo uno degli otto slot in alto c'è anche <strong>Seleziona A1</strong> (o lo slot che è):
+        dice all'ampli di passare a quello slot, senza scrivere niente.</p>
+      <p>Il nome si cambia scrivendo nel campo. Attenzione: sull'ampli resta il nome vecchio finché
+        non riscrivi il preset in uno slot.</p>
+    </div>
+  </div>
+
+  <div class="confronto">
+    <div>
+      <h4>▶ / Attiva — <span class="si">provare</span></h4>
+      <p>Il preset suona, ma <strong>nessuno slot cambia</strong>. Il LED dell'ampli lampeggia: vuol dire
+        che sta suonando un preset arrivato dal telefono.</p>
+      <p>Spento l'ampli, torna tutto com'era. Usalo quanto vuoi.</p>
+    </div>
+    <div>
+      <h4>Invia a preset HW — <span class="no">scrivere</span></h4>
+      <p>Il preset va <strong>dentro l'ampli</strong>, nello slot scelto, e sostituisce quello che c'era.
+        L'app chiede conferma e ti dice chi stai sovrascrivendo.</p>
+      <p>Il vecchio non è perso: resta in libreria e ricompare nella lista sotto.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="ordine">
+  <div class="cap-testa"><span class="cap-num">5</span><h2>Mettere in ordine</h2></div>
+  <p class="sotto">Due modi diversi di raggruppare, e tutti i modi di far entrare i preset.</p>
+
+  <div class="due">
+    <div>
+      <h3>Famiglia di suono — <em>che tipo</em> di suono è</h3>
+      <div class="famiglie">
+        <span style="--fam:#0a84ff">Clean</span><span style="--fam:#ff3b30">Drive</span>
+        <span style="--fam:#ffd21e">Acoustic</span><span style="--fam:#bf5af2">Bass</span>
+      </div>
+      <p><strong>Una sola per preset</strong>, scelta nella scheda. Il suo colore compare sulla riga in
+        libreria, sull'insegna dell'editor e sul LED dei pulsantoni live. Un preset senza famiglia
+        resta senza colore. I colori li cambi tu: <kbd>⋯</kbd> → <strong>Categorie</strong>, tocca il
+        colore.</p>
+    </div>
+    <div>
+      <h3>Categorie — <em>lo stile</em>, o il pezzo</h3>
+      <div class="m-pastiglie" style="margin:12px 0 16px">
+        <span class="m-pastiglia attiva">Pink Floyd<i>6</i></span><span class="m-pastiglia">jazz<i>3</i></span>
+        <span class="m-pastiglia">prove<i>2</i></span><span class="m-pastiglia">matrimonio<i>9</i></span>
+      </div>
+      <p><strong>Quante ne vuoi per preset.</strong> Si creano dalla scheda (<em>＋ nuova…</em>) o da
+        <kbd>⋯</kbd> → <strong>Categorie</strong>, e diventano le pastiglie per filtrare la libreria.
+        Eliminare una categoria la toglie dai preset; i preset restano.</p>
+    </div>
+  </div>
+
+  <h3>Come entrano i preset in libreria</h3>
+  <div class="confronto">
+    <div>
+      <h4>📡 Leggi dall'ampli</h4>
+      <p>Menu <kbd>⋯</kbd>. Rilegge gli otto slot. Succede già da solo a ogni collegamento.</p>
+    </div>
+    <div>
+      <h4>🎛️ Importa preset attuale</h4>
+      <p>Menu <kbd>⋯</kbd>. Prende il suono che l'ampli sta facendo <em>adesso</em> — anche se l'hai
+        cambiato girando le manopole vere — e lo salva in libreria.</p>
+    </div>
+    <div>
+      <h4>📦 Importa un file</h4>
+      <p><kbd>⋯</kbd> → <strong>Altro</strong>. Il <code>preset_backup.zip</code> dell'app ufficiale, un preset
+        singolo esportato da lì, o un backup di quest'app.</p>
+    </div>
+    <div>
+      <h4>📄 Duplica</h4>
+      <p>Dalla scheda di un preset: una copia da storcere a piacere, che parte da un suono che
+        funziona.</p>
+    </div>
+  </div>
+  <div class="nota">
+    <p><strong>Il tuo lavoro non si perde.</strong> Se un preset che hai già rientra (stesso preset
+      riletto dall'ampli, o reimportato), se ne aggiorna solo il suono: nome in libreria, famiglia,
+      categorie e note restano i tuoi. E un preset con lo stesso nome di uno che c'è già non entra
+      due volte.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="live" style="--c:var(--blu)">
+  <div class="cap-testa"><span class="cap-num">6</span><h2>Suonare dal vivo</h2></div>
+  <p class="sotto">La vista Live: pulsanti grandi, da toccare senza guardare troppo.</p>
+
+  <div class="due">
+    <figure class="schermo">
+      <div class="telefono rel">
+        <span class="pin" style="left:-8px;top:68px">1</span>
+        <span class="pin" style="left:-8px;top:213px">2</span>
+        <span class="pin" style="right:-8px;top:141px">3</span>
+        <span class="pin" style="right:-8px;top:248px">4</span>
+        <div class="m-barra">
+          <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
+          <span class="m-tasto conn ok">SPARK 2</span>
+          <span class="m-tasto vista">← Preset</span>
+          <span class="m-tasto">⋯</span>
+        </div>
+        <div class="m-banchi">
+          <span class="m-bancotab">Ampli</span><span class="m-bancotab attivo">Concerto</span>
+          <span class="m-bancotab">Prove</span><span class="m-bancotab piu">＋ banco</span>
+        </div>
+        <div class="m-pads">
+          <div class="m-pad" style="--led:#0a84ff"><span class="ledpad"></span><span class="np">1</span><span class="nm">Shine On clean</span><span class="sb">A1</span></div>
+          <div class="m-pad attivo" style="--led:#ff3b30"><span class="ledpad"></span><span class="np">2</span><span class="nm">Lead Gilmour</span></div>
+          <div class="m-pad" style="--led:#0a84ff"><span class="ledpad"></span><span class="np">3</span><span class="nm">Blues di casa</span></div>
+          <div class="m-pad" style="--led:#ffd21e"><span class="ledpad"></span><span class="np">4</span><span class="nm">Folk 12 corde</span></div>
+          <div class="m-pad"><span class="ledpad"></span><span class="np">5</span><span class="nm">Echoes</span><span class="sb">A2</span></div>
+          <div class="m-pad" style="--led:#ff3b30"><span class="ledpad"></span><span class="np">6</span><span class="nm">Crunch</span><span class="carica"></span></div>
+          <div class="m-pad vuoto"><span class="ledpad"></span><span class="np">7</span><span class="nm">vuoto</span></div>
+          <div class="m-pad vuoto"><span class="ledpad"></span><span class="np">8</span><span class="nm">vuoto</span></div>
+        </div>
+      </div>
+      <figcaption>Un banco da otto: quattro per piede, a sinistra e a destra</figcaption>
+    </figure>
+    <div>
+      <ol class="pin-elenco">
+        <li><strong>I banchi.</strong> <em>Ampli</em> sono gli otto slot dell'ampli, sempre aggiornato.
+          Gli altri sono i tuoi: <em>＋ banco</em> ne crea uno nuovo, con otto posti.</li>
+        <li><strong>Il pulsantone acceso</strong> (azzurro) è il preset che sta suonando. Il pallino in
+          alto ha il colore della sua famiglia (verde se non ne ha una), e si accende su quello che
+          suona.</li>
+        <li><strong>La sigla sotto il nome</strong> (A1, A2…) vuol dire che quel preset è già
+          nell'ampli: parte <strong>all'istante</strong>.</li>
+        <li><strong>Senza sigla</strong> il preset viene trasmesso per intero: ci mette circa un
+          secondo, e la barretta in fondo al pulsante mostra l'avanzamento.</li>
+      </ol>
+      <div class="nota">
+        <p>Per i passaggi dove non puoi aspettare nemmeno un secondo, metti quei preset negli slot
+          dell'ampli con <strong>Invia a preset HW</strong>: da lì partono istantanei, anche dai tuoi
+          banchi.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Comporre un banco</h3>
+  <div class="due">
+    <ol class="passi">
+      <li>Scegli il banco in alto, poi <kbd>⋯</kbd> → <strong>Modifica</strong>.</li>
+      <li><strong>Tocca un posto</strong> per scegliere il preset da metterci (c'è la ricerca, e
+        <em>Svuota il posto</em> per liberarlo).</li>
+      <li>Per spostare: tocca la presa <span style="color:var(--gold)">⇅</span> di un pulsante, poi il
+        posto dove lo vuoi. I due si scambiano.</li>
+      <li>Per rinominarlo o eliminarlo: in modifica, tocca il <strong>nome del banco</strong>.</li>
+      <li><kbd>⋯</kbd> → <strong>Fatto</strong> per tornare a suonare.</li>
+    </ol>
+    <figure class="schermo">
+      <div class="telefono">
+        <div class="m-pads" style="grid-template-rows:repeat(2, 74px)">
+          <div class="m-pad" style="--led:#0a84ff;border-color:#6b5a1e"><span class="ledpad"></span><span class="np">1</span><span class="nm">Shine On clean</span><span class="presa">⇅</span></div>
+          <div class="m-pad vuoto" style="border-color:#6b5a1e"><span class="ledpad"></span><span class="np">2</span><span class="nm" style="font-size:0.74rem">tocca per scegliere</span></div>
+          <div class="m-pad" style="--led:#ff3b30;border-color:var(--gold);box-shadow:0 0 16px rgba(240,192,64,0.35)"><span class="ledpad"></span><span class="np">3</span><span class="nm">Lead Gilmour</span><span class="presa">⇅</span></div>
+          <div class="m-pad" style="--led:#ffd21e;border-color:#6b5a1e"><span class="ledpad"></span><span class="np">4</span><span class="nm">Folk 12 corde</span><span class="presa">⇅</span></div>
+        </div>
+      </div>
+      <figcaption>In modifica: un tocco sceglie, ⇅ sposta</figcaption>
+    </figure>
+  </div>
+  <div class="nota">
+    <p><strong>I tuoi banchi non scrivono mai sull'ampli</strong>: riordinali quanto vuoi, gli slot
+      restano come sono. Il banco <em>Ampli</em> invece non si modifica da qui: rispecchia gli slot, e
+      per cambiarlo si scrive un preset in uno slot dalla schermata dei preset.</p>
+  </div>
+  <p style="color:var(--dim);font-size:0.9rem">Nel menu della vista Live c'è anche <strong>Pedale</strong>:
+    serve al pedale SparklingTones, che avrà una guida sua.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="editor" style="--c:#ffd21e">
+  <div class="cap-testa"><span class="cap-num" style="color:#000">7</span><h2>Regolare il suono</h2></div>
+  <p class="sotto">Le manopole sul telefono, e l'ampli che risponde mentre suoni.</p>
+
+  <div class="due">
+    <figure class="schermo">
+      <div class="telefono rel" style="--cat:#ffd21e">
+        <span class="pin" style="left:-8px;top:77px">1</span>
+        <span class="pin" style="left:-8px;top:124px">2</span>
+        <span class="pin" style="left:-8px;top:186px">3</span>
+        <span class="pin" style="left:-8px;top:272px">4</span>
+        <span class="pin" style="left:-8px;top:318px">5</span>
+        <span class="pin" style="right:-8px;top:400px">6</span>
+        <div class="m-barra">
+          <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
+          <span class="m-tasto">Salva</span>
+          <span class="m-tasto conn">Fatto</span>
+          <span class="m-tasto">⋯</span>
+        </div>
+        <div class="m-insegna" style="border-color:#0a84ff;box-shadow:0 0 14px rgba(10,132,255,0.7), inset 0 0 10px rgba(10,132,255,0.25)">Blues di casa</div>
+        <div class="m-tempo">
+          <span class="eti">TEMPO</span><span class="p">−</span>
+          <span class="bpm">96<small>bpm</small></span><span class="p">+</span><span class="tap">TAP</span>
+        </div>
+        <div class="m-catena">
+          <div class="m-tassello" style="--cat:#ff3040"><span class="acceso"></span><div class="cat">Drive</div><div class="mod">Tube Drive</div><div class="barre"><i style="height:60%"></i><i style="height:40%"></i><i style="height:70%"></i><i style="height:20%"></i></div></div>
+          <span class="m-filo"></span>
+          <div class="m-tassello fuoco" style="--cat:#ffd21e"><span class="acceso"></span><div class="cat">Ampli</div><div class="mod">SwitchAxe</div><div class="barre"><i style="height:50%"></i><i style="height:60%"></i><i style="height:44%"></i><i style="height:50%"></i><i style="height:80%"></i></div></div>
+          <span class="m-filo"></span>
+          <div class="m-tassello spento" style="--cat:#17e39b"><span class="acceso"></span><div class="cat">Modulaz.</div><div class="mod">Chorus</div><div class="barre"><i style="height:30%"></i><i style="height:60%"></i><i style="height:40%"></i></div></div>
+          <span class="m-filo"></span>
+          <div class="m-tassello" style="--cat:#3aa0ff"><span class="acceso"></span><div class="cat">Delay</div><div class="mod">Digital</div></div>
+        </div>
+        <div class="m-blocco">
+          <div class="riga1"><span class="freccia">‹</span><span class="catn">AMPLI</span><span class="freccia">›</span></div>
+          <div class="m-modello">SwitchAxe — H&amp;K Switch Blade</div>
+          <div class="m-inter">acceso</div>
+          <div class="m-manopole">
+            <div class="manopola" data-v="0.5"><span class="nm">Gain</span><div class="vl">5.0</div></div>
+            <div class="manopola" data-v="0.6"><span class="nm">Bass</span><div class="vl">6.0</div></div>
+            <div class="manopola" data-v="0.44"><span class="nm">Middle</span><div class="vl">4.4</div></div>
+            <div class="manopola" data-v="0.5"><span class="nm">Treble</span><div class="vl">5.0</div></div>
+            <div class="manopola" data-v="0.79"><span class="nm tuo">Volume</span><div class="vl">7.9</div></div>
+          </div>
+        </div>
+      </div>
+      <figcaption>L'editor: la catena in fila, e il blocco scelto sotto</figcaption>
+    </figure>
+    <div>
+      <ol class="pin-elenco">
+        <li><strong>L'insegna</strong> col nome del preset, del colore della sua famiglia. Se sotto c'è
+          scritto <span style="color:var(--gold)">OFFLINE</span>, stai regolando senza ampli (vedi sotto).</li>
+        <li><strong>Il tempo</strong> del preset, quello che seguono delay e modulazioni:
+          <kbd>−</kbd> <kbd>+</kbd> per un bpm alla volta, oppure <strong>TAP</strong> battuto a tempo —
+          due tocchi bastano, e il tasto lampeggia a tempo.</li>
+        <li><strong>La catena</strong>: i sette blocchi nell'ordine del segnale, ognuno col suo colore.
+          Il pallino acceso dice se il blocco è attivo; quelli spenti sono sbiaditi. Scorre di lato:
+          tocca un blocco per aprirlo.</li>
+        <li><strong>‹ ›</strong> passano al blocco prima o dopo senza tornare sulla catena. Il
+          <strong>nome del modello</strong> è una tendina: da lì si cambia ampli, pedale o tipo di riverbero.</li>
+        <li><strong>acceso / spento</strong>: accende o esclude il blocco.</li>
+        <li><strong>Le manopole</strong>: si girano <strong>trascinando in su o in giù</strong>, non in
+          cerchio. Valori da 0 a 10, come quelle vere.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>I sette blocchi, sempre negli stessi colori</h3>
+  <div class="legenda-catena">
+    <div style="--cat:#00d9ff"><b>Noise gate</b>toglie il fruscio</div>
+    <div style="--cat:#c04bff"><b>Comp / Wah</b>compressore o wah</div>
+    <div style="--cat:#ff3040"><b>Drive</b>overdrive, distorsione, fuzz</div>
+    <div style="--cat:#ffd21e"><b>Ampli</b>il modello di amplificatore</div>
+    <div style="--cat:#17e39b"><b>Modulazione</b>chorus, phaser, tremolo…</div>
+    <div style="--cat:#3aa0ff"><b>Delay</b>l'eco</div>
+    <div style="--cat:#8b6bff"><b>Riverbero</b>la stanza</div>
+  </div>
+
+  <h3>Come funziona davvero</h3>
+  <div class="due">
+    <div>
+      <ul>
+        <li><strong>Si sente subito.</strong> Con <strong>Regola</strong> l'app manda il preset all'ampli
+          e rilegge dall'ampli lo stato vero: quello che giri, lo senti mentre suoni.</li>
+        <li><strong>Non si salva niente finché non premi <span class="tasto">Salva</span>.</strong> Salva
+          scrive nella libreria, sopra quel preset. Se vuoi tenere anche l'originale,
+          <strong>Duplica prima</strong> e regola la copia.</li>
+        <li><strong>Lo slot dell'ampli non cambia</strong> salvando: per mettere la versione nuova
+          nell'ampli, dalla scheda usa <strong>Invia a preset HW</strong>.</li>
+        <li>Se esci con <span class="tasto conn" style="background:var(--accent)">Fatto</span> e hai
+          modifiche non salvate, l'app chiede: <em>Salva ed esci</em>, <em>Esci senza salvare</em> o
+          <em>Torna all'editor</em>.</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li><strong>Senza ampli</strong> l'editor si apre lo stesso, sulla copia in libreria: non si
+          sente niente, ma puoi guardare la catena, cambiare modelli e manopole, e salvare. Comodo dal
+          divano.</li>
+        <li><strong>I nomi delle manopole in corsivo</strong> sono proposte prese da un catalogo:
+          l'ampli non li manda. <strong>Tocca il nome per cambiarlo</strong>: vale per quel modello in
+          tutti i preset. Quelli in chiaro li hai battezzati tu.</li>
+        <li>Nel menu <kbd>⋯</kbd> dell'editor: <strong>Rileggi dall'ampli</strong> (se hai girato le
+          manopole vere sull'apparecchio) e <strong>Come funziona</strong>, il promemoria breve.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="nota att">
+    <p>Gira le manopole con calma: se arrivano troppi comandi tutti insieme, l'ampli si può piantare e
+      va spento e riacceso. La libreria non ne risente.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="sicuro" style="--c:#17a85a">
+  <div class="cap-testa"><span class="cap-num">8</span><h2>Mettere al sicuro, e portarla altrove</h2></div>
+  <p class="sotto">La libreria vive nel browser di questo apparecchio. Ecco come non perderla.</p>
+
+  <div class="nota att">
+    <p><strong>Ogni apparecchio ha la sua libreria.</strong> Telefono e computer non si parlano da soli,
+      e nemmeno due browser sullo stesso computer. Per avere gli stessi preset ovunque: esporta e
+      importa, oppure Dropbox.</p>
+  </div>
+
+  <div class="confronto">
+    <div>
+      <h4>💾 Esporta / Importa</h4>
+      <p><kbd>⋯</kbd> → <strong>Altro</strong> → <strong>Esporta la libreria</strong> scarica un file
+        <code>.json</code> con tutto: preset, famiglie, categorie, note, banchi.</p>
+      <p>Sull'altro apparecchio: <strong>Importa un file</strong> e scegli quel file. L'app chiede
+        conferma prima di unirlo.</p>
+    </div>
+    <div>
+      <h4>☁️ Dropbox</h4>
+      <p>La stessa libreria su telefono e computer, con due tasti: <strong>Manda su Dropbox</strong> e
+        <strong>Prendi da Dropbox</strong>. Mai in automatico.</p>
+      <p>Quello che arriva si <strong>fonde</strong> con quello che hai: aggiorna, aggiunge, e toglie i
+        preset cancellati sull'altro apparecchio — a meno che tu non li abbia toccati dopo.</p>
+    </div>
+  </div>
+
+  <h3>Collegare Dropbox (una volta per apparecchio)</h3>
+  <ol class="passi">
+    <li>Su <code>dropbox.com/developers</code>: <em>Create app</em> → <em>Scoped access</em> →
+      <em>App folder</em>, con un nome a piacere.</li>
+    <li>Nella scheda <em>Permissions</em> spunta <code>files.content.write</code> e
+      <code>files.content.read</code>, e salva.</li>
+    <li>Nella scheda <em>Settings</em> copia la <strong>App key</strong> (l'app secret non serve).</li>
+    <li>Nell'app: <kbd>⋯</kbd> → <strong>Altro</strong> → incolla la chiave → <span class="tasto rosso">Collega</span>.</li>
+    <li>Si apre Dropbox: autorizza, copia il codice che ti mostra, incollalo nell'app e premi
+      <strong>Fatto</strong>. Se la pagina non si apre da sola, c'è il link <em>aprila da qui</em>.</li>
+  </ol>
+
+  <h3>Le altre cose in «Altro»</h3>
+  <ul>
+    <li><strong>Lingua · Language</strong>: italiano o inglese.</li>
+    <li><strong>Cerca i doppioni</strong>: i preset con lo stesso nome, uno sotto l'altro, con una
+      lettera che dice chi suona uguale a chi. Scegli tu quali togliere.</li>
+    <li><strong>Elimina tutti i preset</strong>: svuota la libreria <strong>tranne gli otto
+      dell'ampli</strong>. L'ampli non viene toccato.</li>
+  </ul>
+  <div class="nota">
+    <p>Il <code>preset_backup.zip</code> dell'app ufficiale sta nella cartella di Positive Grid sul tuo
+      Dropbox. Positive Grid ha annunciato la fine di quel backup nel 2027: <strong>copialo in un posto
+      tuo</strong> finché c'è, e importalo qui.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="bolli" style="--c:#c02030">
+  <div class="cap-testa"><span class="cap-num">9</span><h2>I bolli JH e Spark LIVE</h2></div>
+  <p class="sotto">Due avvisi piccoli, che compaiono prima di scegliere un preset.</p>
+
+  <div class="confronto">
+    <div>
+      <h4><span class="bollo-jh" style="font-size:0.8rem;padding:1px 7px;margin-right:6px">JH</span> Jimi Hendrix</h4>
+      <p>Il preset usa un effetto del pacchetto <strong>Jimi Hendrix</strong>, a pagamento.</p>
+      <p>Funziona, ma solo <strong>dopo che l'app ufficiale di Positive Grid si è collegata all'ampli
+        almeno una volta da quando è acceso</strong>: è lei che lo sblocca. Prima, quell'effetto resta
+        muto senza dare nessun errore.</p>
+    </div>
+    <div>
+      <h4><span class="bollo-live" style="font-size:0.8rem;padding:1px 7px;margin-right:6px">Spark LIVE</span> un altro ampli</h4>
+      <p>Il preset è fatto per lo <strong>Spark LIVE</strong>: arriva col backup dell'app ufficiale, ma
+        usa effetti del canale del microfono che lo Spark 2 e il NEO non hanno.</p>
+      <p>Resta in libreria, ma <strong>non si può mandare</strong> a questo ampli.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="neo" style="--c:#5a5f68">
+  <div class="cap-testa"><span class="cap-num">10</span><h2>Con lo Spark NEO</h2></div>
+  <p class="sotto">Funziona tutto allo stesso modo, con quattro posti invece di otto.</p>
+
+  <div class="due">
+    <ul>
+      <li>Il NEO ha <strong>quattro slot, CH1–CH4</strong>, e nessun LED: in alto ne vedi quattro, due
+        per riga.</li>
+      <li>L'app capisce da sola quale ampli hai collegato, e si ricorda l'ultimo anche quando è spento.</li>
+      <li>Gli slot mostrati sono sempre quelli <strong>dell'ultimo ampli collegato</strong>: passando
+        dallo Spark 2 al NEO, i preset di B1–B4 scendono in libreria.</li>
+    </ul>
+    <figure class="schermo">
+      <div class="telefono">
+        <span class="m-banco" style="color:var(--dim)">SPARK NEO</span>
+        <div class="m-slots" style="margin-top:6px">
+          <div class="m-slot"><div class="alto">CH1</div><div class="nome">Shine On clean</div></div>
+          <div class="m-slot"><div class="alto">CH2</div><div class="nome">Echoes</div></div>
+          <div class="m-slot"><div class="alto">CH3</div><div class="nome">Crunch Marshall</div></div>
+          <div class="m-slot"><div class="alto">CH4</div><div class="nome">Poles Apart</div></div>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="problemi" style="--c:#3a3d45">
+  <div class="cap-testa"><span class="cap-num">?</span><h2>Se qualcosa non va</h2></div>
+  <p class="sotto">Le domande che capitano davvero. Prima di tutto, guarda il registro in fondo ai preset.</p>
+
+  <details class="faq">
+    <summary>Tocco Connetti ma l'ampli non compare nell'elenco</summary>
+    <div class="dentro">
+      <ol>
+        <li>L'ampli è già collegato a qualcun altro? L'app ufficiale di Positive Grid o il pedale se lo
+          tengono: chiudili.</li>
+        <li>Bluetooth del telefono acceso? Su alcuni Android Chrome chiede anche il permesso per i dispositivi vicini o la posizione: concedilo.</li>
+        <li>Sei su Chrome, Edge o Opera? Firefox e Safari non hanno il Bluetooth per le pagine web.</li>
+        <li>Ancora niente: spegni e riaccendi l'ampli.</li>
+      </ol>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>L'ampli non risponde più</summary>
+    <div class="dentro">
+      <p>Può capitare, soprattutto girando molte manopole in fretta. Stacca la corrente dell'ampli,
+        riattaccala, e ricollegati. La libreria non perde niente.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Un preset JH suona senza il suo effetto</summary>
+    <div class="dentro">
+      <p>È il pacchetto Hendrix che non è sbloccato: apri l'app ufficiale e falla collegare all'ampli
+        una volta, poi chiudila e torna qui. Lo sblocco dura finché l'ampli resta acceso. Vedi
+        <a href="#bolli">i bolli</a>.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Sul computer non ho i preset che ho sul telefono</summary>
+    <div class="dentro">
+      <p>Ogni apparecchio, e ogni browser, ha la sua libreria. Portala con <strong>Esporta / Importa</strong>
+        o tienile allineate con <strong>Dropbox</strong>: vedi <a href="#sicuro">Mettere al sicuro</a>.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Ho importato un preset ma non è comparso</summary>
+    <div class="dentro">
+      <p>Se in libreria c'è già un preset con lo stesso nome (spazi e maiuscole non contano), non entra
+        una seconda volta: il registro lo dice. Rinomina quello che hai, o importa di nuovo.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Ho girato le manopole vere sull'ampli: come le tengo?</summary>
+    <div class="dentro">
+      <p><kbd>⋯</kbd> → <strong>Importa preset attuale</strong>: prende il suono che l'ampli sta facendo
+        adesso e lo salva in libreria (o aggiorna quello che c'è, se è lo stesso preset).</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Un pulsantone della vista Live è spento e non risponde</summary>
+    <div class="dentro">
+      <p>I pulsanti si accendono solo con l'ampli collegato, e restano fermi per un momento mentre
+        l'app legge gli slot subito dopo il collegamento, o mentre un altro preset sta ancora
+        partendo.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Ho bisogno di una pausa</summary>
+    <div class="dentro">
+      <p><kbd>⋯</kbd> → <strong>Fai una pausa</strong>. 🐍</p>
+    </div>
+  </details>
+</section>
+
+</main>
+
+<footer>
+  SparklingTones — progetto indipendente, senza rapporti con Positive Grid.<br>
+  Licenze e responsabilità: <kbd>⋯</kbd> → Altro → <em>Informazioni, licenze e responsabilità</em>.
+</footer>
+
+<script>
+'use strict';
+(function () {
+  const dentroApp = window.self !== window.top;
+
+  // Letta da sola (dal sito, da un link) la guida porta all'app; dentro l'app
+  // c'è già il «Fatto» del pannello.
+  if (!dentroApp) document.getElementById('apriApp').hidden = false;
+
+  // L'indice scorre senza toccare l'hash: dentro l'iframe ogni ancora sarebbe
+  // un passo di cronologia, e l'indietro di Android sfoglierebbe la guida.
+  document.addEventListener('click', evento => {
+    const a = evento.target.closest('a[href^="#"]');
+    if (!a) return;
+    const dove = document.getElementById(a.getAttribute('href').slice(1));
+    if (!dove) return;
+    evento.preventDefault();
+    dove.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // Il capitolo che si sta leggendo si accende nell'indice.
+  const voci = [...document.querySelectorAll('nav.indice a')];
+  const capitoli = voci.map(a => document.getElementById(a.getAttribute('href').slice(1)));
+  const accendi = () => {
+    let qui = 0;
+    capitoli.forEach((c, i) => { if (c.getBoundingClientRect().top < 140) qui = i; });
+    voci.forEach((a, i) => a.classList.toggle('qui', i === qui && window.scrollY > 200));
+    const voce = voci[qui];
+    const fila = voce.parentElement;
+    if (voce.offsetLeft < fila.scrollLeft || voce.offsetLeft + voce.offsetWidth > fila.scrollLeft + fila.clientWidth) {
+      fila.scrollLeft = voce.offsetLeft - 16;
+    }
+  };
+  window.addEventListener('scroll', accendi, { passive: true });
+  accendi();
+
+  // Le manopole disegnate: lo stesso arco di 270 gradi dell'editor vero.
+  const R = 22, C = 2 * Math.PI * R, GIRO = C * 0.75;
+  document.querySelectorAll('.manopola[data-v]').forEach(m => {
+    const v = parseFloat(m.dataset.v);
+    const angolo = 135 + 270 * v;
+    const rad = angolo * Math.PI / 180;
+    const x = 28 + Math.cos(rad) * 13, y = 28 + Math.sin(rad) * 13;
+    const x2 = 28 + Math.cos(rad) * 21, y2 = 28 + Math.sin(rad) * 21;
+    const svg =
+      '<svg viewBox="0 0 56 56" aria-hidden="true">' +
+      '<circle cx="28" cy="28" r="17" fill="#15171b" stroke="#2a2d33"/>' +
+      `<circle cx="28" cy="28" r="${R}" fill="none" stroke="#24262c" stroke-width="4" stroke-linecap="round"` +
+      ` stroke-dasharray="${GIRO} ${C}" transform="rotate(135 28 28)"/>` +
+      `<circle cx="28" cy="28" r="${R}" fill="none" stroke="var(--cat)" stroke-width="4" stroke-linecap="round"` +
+      ` stroke-dasharray="${GIRO * v} ${C}" transform="rotate(135 28 28)"` +
+      ' style="filter:drop-shadow(0 0 4px var(--cat))"/>' +
+      `<line x1="${x}" y1="${y}" x2="${x2}" y2="${y2}" stroke="var(--cat)" stroke-width="3" stroke-linecap="round"/>` +
+      '</svg>';
+    m.insertAdjacentHTML('afterbegin', svg);
+  });
+})();
+</script>
+</body>
+</html>

@@ -14,13 +14,14 @@
  */
 'use strict';
 
-const VERSIONE = 'v91';
+const VERSIONE = 'v92';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
 const GUSCIO = [
   './',
   './index.html',
+  './guida.html',
   './live.html',
   './manifest.webmanifest',
   './src/lingua.js',
