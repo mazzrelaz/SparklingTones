@@ -1072,8 +1072,18 @@ con una guida sua (costruzione e uso) quando sarà finito.
   da scaricare, stanno nella cache offline, si correggono a mano. Il prezzo è che vanno
   ritoccate quando una schermata cambia. I numerini gialli sui disegni corrispondono agli
   elenchi accanto; le loro posizioni sono in pixel, controllate a 375 px di larghezza.
-- **Solo italiano**: la pagina non passa da `tr`. Con l'app in inglese la voce di menu dice
-  «Guida» e la guida resta in italiano, finché l'utente non chiede l'inglese.
+- **L'inglese è una pagina sua, `guida.en.html`** (fatta lo stesso giorno, chiesta
+  dall'utente), non un passaggio da `tr`: una guida è testo lungo, e tradotta a frasi
+  sciolte non si leggerebbe. Grafica e script stanno in `guida.css` e `guida.js`,
+  comuni, così le due non si scostano. L'app apre quella di `Lingua.attuale`; la voce
+  di menu e il titolo del pannello sono in `lingua-en.js` («Guide», «User guide»). I
+  nomi dei pulsanti nella guida inglese sono quelli di `lingua-en.js` (Play, Tweak,
+  Copy, Send to HW preset…), inglese britannico come l'app. **Si cambia la guida
+  italiana; l'inglese resta indietro** finché l'utente non chiede di aggiornarlo,
+  come il resto dell'inglese.
+- Letta da sola, la guida mostra «Apri l'app» e il passaggio all'altra lingua; dentro
+  l'app no (c'è il «Fatto», e la lingua è quella dell'app). L'inglese apre l'app con
+  `?lang=en`.
 - Per guardarla a misura di telefono senza il riquadro (che taglia gli screenshot quando si
   emula il telefono): una pagina su `localhost` con tre `iframe` da 375 px che scorrono
   ciascuno a un capitolo, fotografata con Edge headless.

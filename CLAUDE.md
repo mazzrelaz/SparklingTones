@@ -39,7 +39,7 @@ settimane**: si rimisura con `wc -c CLAUDE.md`, e sopra i 30 KB si sfoltisce.
 index.html                        HTML e <style> dell'app: sezione Preset e sezione Live, stesso documento
 src/app/01-…15-*.js               lo script dell'app, in fila (fino al 7 ottobre 2026 stava in index.html)
 live.html                         rimando a index.html#live
-guida.html                        guida all'uso, solo italiano; l'app la apre in un iframe (⋯ → Guida)
+guida.html / guida.en.html        guida all'uso (grafica in guida.css e guida.js, comuni); l'app apre in un iframe quella della sua lingua (⋯ → Guida)
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
 src/spark-protocol.js             encoder/decoder puro, senza I/O — il cuore del progetto
 src/spark-transport.js            BLE: coda di invio, attesa risposte, lettura preset
@@ -381,7 +381,7 @@ riprende l'8 ottobre, coi connettori JST-PH. Restano: il display
 (il quadratino in negativo va ancora guardato), **il looper (firmware 2.13, 7 ottobre 2026; il firmware è diviso in file: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click**: un KY-006 ordinato (foto e resistenza col tester prima di collegarlo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
-Sull'app (guscio `v92` in `sw.js`; **guida all'uso in `guida.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v93` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
