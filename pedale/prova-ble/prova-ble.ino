@@ -75,7 +75,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.17";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese
+static const char* VERSIONE = "2.18";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo
 
 /* La lingua delle scritte del display (9 ottobre 2026, chiesta dall'utente per chi
  * costruisce il pedale fuori dall'Italia): 0 italiano, 1 inglese. Si sceglie qui,
@@ -401,6 +401,14 @@ static const uint8_t N_BATTUTE = sizeof(BATTUTE);
  * la facciamo avanzare noi con la durata del giro misurata. Lo schermo si
  * ridisegna a ogni blocco nuovo (vedi il loop). */
 static volatile bool     loopLibero = false;     // freeIndicator: lunghezza libera, «libero» nell'app
+/* Il tempo del preset, tenuto da parte mentre un loop c'e' (2.18, 9 ottobre 2026).
+ * Cambiando preset, o rientrando nel looper, l'ampli manda il 0x0376 del preset
+ * (l'utente: registrato a 100 bpm, dopo un cambio di preset il pedale diceva 120),
+ * ma il loop registrato resta col suo tempo. Finche' il loop c'e', bpm, battute
+ * e «libero» restano i suoi; questi entrano quando il loop si cancella. */
+static volatile uint16_t ampliBpm     = 0;       // 0 = niente in attesa
+static volatile uint8_t  ampliBattute = 0;
+static volatile bool     ampliLibero  = false;
 static volatile float    posLoop    = -1;        // da 0x0377; -1 = non arrivata
 static volatile uint32_t posLoopDa  = 0;
 static volatile float    massimoGiro = 0;        // dove arrivava prima di ricominciare

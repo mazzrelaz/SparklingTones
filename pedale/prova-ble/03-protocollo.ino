@@ -107,10 +107,19 @@ static void messaggioIntero(const uint8_t* m, size_t n) {
     // poi due booleani: freeIndicator e click (c2 falso, c3 vero)
     if (ok && i + 2 <= nd && (d[i] & 0xfe) == 0xc2 && (d[i + 1] & 0xfe) == 0xc2
         && v[0] >= 30 && v[0] <= 300) {
-      loopBpm = (uint16_t)v[0];
-      loopLibero = d[i] == 0xc3;
       loopClick = d[i + 1] == 0xc3;
-      if (v[2] >= 1 && v[2] <= 16) loopBattute = (uint8_t)v[2];
+      if (loopVuoto()) {
+        loopBpm = (uint16_t)v[0];
+        loopLibero = d[i] == 0xc3;
+        if (v[2] >= 1 && v[2] <= 16) loopBattute = (uint8_t)v[2];
+        ampliBpm = 0;
+      } else {
+        // un loop c'e' (cambio di preset, o rientro nel looper): resta col suo
+        // tempo, e quello del preset aspetta che il loop si cancelli
+        ampliBpm = (uint16_t)v[0];
+        ampliLibero = d[i] == 0xc3;
+        ampliBattute = (v[2] >= 1 && v[2] <= 16) ? (uint8_t)v[2] : 0;
+      }
       memcpy(impostazioni, d, nd);
       lungImpostazioni = (uint8_t)nd;
       impostazioniNuove = true;

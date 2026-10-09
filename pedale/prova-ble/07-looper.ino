@@ -46,7 +46,15 @@ static void looperEvento(uint8_t v, bool mandato = false) {
       if (looper && loopPresente) avvisa(TESTO("loop cancellato", "loop cleared"));
       posLoop = -1;
       durataLoop = 0;
-      loopRegistra = loopSovraincide = loopSuona = loopPresente = loopRipetibile = false; break;
+      loopRegistra = loopSovraincide = loopSuona = loopPresente = loopRipetibile = false;
+      if (ampliBpm) {                        // il tempo del preset, tenuto da parte
+        loopBpm = ampliBpm;
+        loopLibero = ampliLibero;
+        if (ampliBattute) loopBattute = ampliBattute;
+        ampliBpm = 0;
+        impostazioniNuove = true;
+      }
+      break;
     default:
       Serial.printf("looper: stato 0x%02x sconosciuto\n", v);
       return;

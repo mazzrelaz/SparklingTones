@@ -678,3 +678,7 @@ già tutta la tensione); il volume lo alzano il fissaggio per il bordo sopra un 
 disco fra due piedini in opposizione (non fatto). Per cercare il posto del disco c'è stata
 una versione di prova mai committata (`PROVA_CLIC`: il conteggio in ciclo a 120 bpm,
 dentro `compitoLedTempo`); **il posto l'ha trovato l'utente**, e sulla XIAO è tornata la 2.16.
+
+### Il loop registrato tiene il suo tempo — 9 ottobre 2026 (2.18)
+
+Dall'utente: nel looper a 100 bpm, prima traccia registrata, fuori dal looper per cambiare preset, e al rientro il pedale diceva **120 bpm** (sempre 120), mentre loop e anello restavano a 100. **La causa**: l'ampli manda il `0x0376` del preset nuovo a ogni cambio di preset, e il pedale lo chiede di nuovo (`0x0276`) rientrando nel looper; il parser rimetteva bpm, battute e «libero» anche con un loop registrato. **La 2.18**: se il loop non è vuoto (`loopVuoto()`) quei tre valori vanno in `ampliBpm`, `ampliBattute`, `ampliLibero` e il loop tiene i suoi; alla cancellazione del loop (`0a`/`00`) entrano quelli del preset. Il click si aggiorna sempre. **Caricata sul pedale, da provare dall'utente** (non ho verificato col suo giro: compilata e caricata).
