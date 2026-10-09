@@ -75,7 +75,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.14";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3
+static const char* VERSIONE = "2.15";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz
 
 /* Quale ampli cerca il pedale, scelto dall'utente coi tasti banco (4 ottobre
  * 2026): sinistro lo Spark 2, destro lo Spark NEO. Si ricorda allo spegnimento.
@@ -361,15 +361,16 @@ static const uint8_t  PIN_LED_TEMPO  = D1;
 static const uint32_t LAMPO_TEMPO_MS = 70;      // un lampo corto a ogni tempo, tutti uguali
 static uint32_t tempoDa = 0;                    // a loop vuoto i tempi si contano da qui
 
-/* Il click del conteggio (9 ottobre 2026): un KY-006 su D3. **Venduto come
- * piezo, e' magnetico**: 15,1 ohm misurati fra S e -, quindi una resistenza
- * da 330 ohm in serie (~10 mA: diretto sul piedino ne tirerebbe ~200). Vuole
- * un'onda quadra, non un livello: la fa il LEDC. Suona **solo nei quattro tempi
- * del conteggio**, a loop vuoto, mai sopra l'ampli; l'«uno» piu' acuto. */
+/* Il click del conteggio (9 ottobre 2026): un **disco piezo da 35 mm** su D3,
+ * con 330 ohm in serie. Il KY-006 di prima era magnetico (15,1 ohm), e coi
+ * ~10 mA del piedino si sentiva appena. Onda quadra dal LEDC, **alla risonanza
+ * del disco** (2,8 kHz per un 35 mm: li' e' piu' forte), quindi l'«uno» si
+ * distingue dalla durata e non dal tono. Suona **solo nei quattro tempi del
+ * conteggio**, a loop vuoto, mai sopra l'ampli. */
 static const uint8_t  PIN_CLIC      = D3;
-static const uint32_t CLIC_MS       = 40;
-static const uint32_t CLIC_UNO_HZ   = 2700;     // vicino alla risonanza: il piu' forte
-static const uint32_t CLIC_ALTRI_HZ = 1800;
+static const uint32_t CLIC_HZ       = 2800;
+static const uint32_t CLIC_UNO_MS   = 90;
+static const uint32_t CLIC_ALTRI_MS = 45;
 
 static uint32_t tapUltimo = 0;
 static uint32_t tapIntervalli[3];

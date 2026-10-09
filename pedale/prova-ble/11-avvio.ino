@@ -25,7 +25,7 @@ static void compitoLedTempo(void*) {
     if (contaTempo && loopBpm) {
       const uint32_t tempo = 60000UL / loopBpm;
       const uint32_t passato = millis() - contaDa;
-      if (passato % tempo < CLIC_MS) clic = passato < tempo ? CLIC_UNO_HZ : CLIC_ALTRI_HZ;
+      if (passato % tempo < (passato < tempo ? CLIC_UNO_MS : CLIC_ALTRI_MS)) clic = CLIC_HZ;
     }
     if (clic != clicPrima) { clicPrima = clic; ledcWriteTone(PIN_CLIC, clic); }
 
@@ -55,7 +55,7 @@ void setup() {
   pinMode(PIN_TASTO, INPUT_PULLUP);
   pinMode(PIN_LED_TEMPO, OUTPUT);          // il LED del tempo, spento finche' non c'e' il looper
   digitalWrite(PIN_LED_TEMPO, LOW);
-  ledcAttach(PIN_CLIC, CLIC_UNO_HZ, 8);    // il click del conteggio, muto finche' non conta
+  ledcAttach(PIN_CLIC, CLIC_HZ, 8);    // il click del conteggio, muto finche' non conta
   ledcWriteTone(PIN_CLIC, 0);
   xTaskCreatePinnedToCore(compitoLedTempo, "ledTempo", 2048, nullptr, 2, nullptr, 1);
   avviaEspansore();
