@@ -373,11 +373,11 @@ finché l'utente non dice di aggiornarlo.
 **Pedale** (tutto in `docs/pedale-lavoro.md`, «Dove si riprende col pedale»): sulla XIAO c'è
 `prova-ble` **1.5** (4 ottobre 2026): Spark 2 e NEO, Amp Preset letto dall'ampli, NEO a
 pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester).
-**Consumo misurato: 0,15 A, ~17 ore.** **La ricarica non va**: il modulo montato carica a
-0,09 A anche con R3 a 1,19 kΩ, caricatore e saldature esclusi. **Arrivato l'Adafruit 6091
-(bq25185, power path), il 7 ottobre**: piano dalle foto in `docs/pedale-lavoro.md` (cella su
-BATT, interruttore e morsetto su LOAD, il resto non si tocca; prima la prova d'ingombro). Si
-riprende l'8 ottobre, coi connettori JST-PH. Restano: il display
+**Consumo misurato: 0,15 A, ~17 ore.** **Caricatore nuovo montato il 9 ottobre 2026**:
+Adafruit 6091 (bq25185, power path), cella su BATT, interruttore e morsetto su LOAD, spine
+JST-PH; carica e il pedale suona mentre carica (verificato). Tolto il LED PWR, che si beveva
+2,1 mA a pedale spento (misurato; dopo, 0). **Corrente di carica di serie incerta (500 mA o 1
+A)**: da misurare a cella sotto 3,9 V (`docs/pedale-lavoro.md`). Restano: il display
 (il quadratino in negativo va ancora guardato), **il looper (firmware 2.13, 7 ottobre 2026; il firmware è diviso in file: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click**: un KY-006 ordinato (foto e resistenza col tester prima di collegarlo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 

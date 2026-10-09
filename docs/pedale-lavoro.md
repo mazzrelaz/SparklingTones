@@ -105,7 +105,7 @@ XIAO anche senza cella).
   **Aggiornamento, stesso giorno**: anche R3 del modulo montato è 1,19 kΩ, e con un altro
   caricatore resta 0,09 A: causa non trovata (non R3, non caricatore, non portacella; saldature
   «perfette» per l'utente). **L'utente ordina un Adafruit 6091, bq25185** (Kamami, su Allegro,
-  38,90 zł): USB-C, 1 A di serie (ponticelli 500/250), **power path** (si suona mentre carica,
+  38,90 zł): USB-C, 1 A di serie secondo la pagina (ma vedi sotto), **power path** (si suona mentre carica,
   fine carica affidabile), LED carica/errore/alimentazione, uscita LOAD fino a 4,5 V, 32 × 26 mm.
   **Arrivato il 7 ottobre 2026; il piano deciso dalle foto** (dei due lati, del vecchio montato,
   dell'interruttore e del morsetto): oggi i quattro fili stanno sul vecchio, due rossi su B+
@@ -121,8 +121,20 @@ XIAO anche senza cella).
   d'ingombro**: il nuovo è 32 mm sul lato USB contro ~17, e fra il listello a sinistra e il
   footswitch a destra potrebbe non starci. Prove dopo: LOAD a interruttore spento 3,6–4,2 V
   senza il meno; acceso senza USB parte; USB-C anche C→C → LED CHRG e il pedale suona; corrente
-  in serie sul nero della cella ~0,9–1 A a cella non piena. **Si riprende l'8 ottobre**, quando
-  arrivano i connettori.
+  in serie sul nero della cella ~0,9–1 A a cella non piena.
+  **Montato il 9 ottobre 2026**, su un supporto di compensato tagliato dall'utente (cornice a U,
+  aria sotto la scheda, lato aperto verso le JST, quattro viti); spine JST-PH sulle prese, come
+  da piano. **Verificato**: LOAD a interruttore spento 4,17 V; il pedale si accende; con l'USB
+  si accendono PWR e CHRG. **Il LED PWR sta su LOAD e resta acceso anche a pedale spento**:
+  misurati **2,1 mA** dalla cella (tester sui 200 mA, foglietto di carta fra il − della cella e
+  la molla, rosso sulla molla) = ~50 giorni da carica piena a vuoto. **Tolto il LED** a leva
+  col cacciavite: rimisurato **0** sui 200 mA. **La corrente di carica di serie è incerta**: la
+  pagina del prodotto dice 1 A, la guida di Adafruit (marzo 2026) 500 mA, e il retro della
+  scheda ha le piazzole «1 Amp» e «250mA», che danno ragione alla guida. Più un **timer di 6
+  ore** non modificabile. Si misura **a cella sotto 3,9 V** (a 4,17 è in tensione costante e
+  legge poco): tester sui 10 A al posto del nero della cella. Se è 500 mA e l'utente vuole 1 A:
+  tagliare il ponticello IS sul davanti, chiudere «1 Amp» sul retro. **Per ora lasciato così,
+  scelta dell'utente.**
 - **Indicatore di batteria: fatto il 4 ottobre 2026 (firmware 1.5).** Partitore saldato
   dall'utente: due 100 kΩ in due cavetti, dal + del morsetto verde (vite in basso, i rossi) e
   dal − (vite in alto, nero e marrone) a **D0**, il primo piedino in basso a sinistra con la
