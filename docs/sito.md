@@ -70,6 +70,10 @@ dire riscrivere la radice e forzare il push sopra i commit di GitHub: l'utente h
 lasciar stare.
 
 
+**9 ottobre 2026: il pedale finito, nelle due lingue.** La sezione del pedale non dice più «in lavorazione» (occhiello «Da costruire» / «Build it yourself»): quattro schede (preset col piede, looper, pedaliera MIDI, batteria con le ~17 ore misurate), due foto del pedale vero copiate in `media/` (`pedale-banco.jpg`, `pedale-looper.jpg`, dalle `foto/pedale/` dell'app: servite dal sito, quindi niente richieste fuori), e il pulsante alla guida del pedale nella lingua della pagina. Tabella dei tempi e video restano. Verificato: nessuna richiesta fuori dal sito.
+
+**Provare il sito in locale**: «sito-locale» in `.claude/launch.json` (porta 8098), cioè `tools/serve.ps1 -Radice ../sparklingtones-sito -Porta 8098`. Un `file://` fuori dalla cartella del progetto il riquadro lo mostra solo come istantanea.
+
 ## Estratti da CLAUDE.md, 17 settembre 2026 — versione lunga
 
 Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato accorciato lì. È copiato parola per parola: vale come stato di quel giorno, non come verità di oggi.

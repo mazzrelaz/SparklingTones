@@ -4,8 +4,30 @@
     {
       "name": "spark-locale",
       "runtimeExecutable": "powershell",
-      "runtimeArgs": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "tools/serve.ps1"],
+      "runtimeArgs": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/serve.ps1"
+      ],
       "port": 8099
+    },
+    {
+      "name": "sito-locale",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tools/serve.ps1",
+        "-Radice",
+        "../sparklingtones-sito",
+        "-Porta",
+        "8098"
+      ],
+      "port": 8098
     }
   ]
 }

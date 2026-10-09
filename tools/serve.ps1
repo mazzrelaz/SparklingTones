@@ -6,9 +6,14 @@
 #   poi apri http://localhost:8099/
 #
 # Si ferma con Ctrl+C, oppure chiedendo http://localhost:8099/__stop.
+#
+# Con -Radice e -Porta serve un'altra cartella: il sito sparklingtones.com sta
+# in ..\sparklingtones-sito, e in .claude/launch.json c'è «sito-locale» (8098).
 
-$root = Split-Path -Parent $PSScriptRoot
-$prefix = 'http://localhost:8099/'
+param([string]$Radice = '', [int]$Porta = 8099)
+
+$root = if ($Radice) { (Resolve-Path $Radice).Path } else { Split-Path -Parent $PSScriptRoot }
+$prefix = "http://localhost:$Porta/"
 
 $mime = @{
   '.html' = 'text/html; charset=utf-8'
@@ -16,6 +21,7 @@ $mime = @{
   '.json' = 'application/json; charset=utf-8'
   '.webmanifest' = 'application/manifest+json; charset=utf-8'
   '.png'  = 'image/png'
+  '.jpg'  = 'image/jpeg'
   # Senza questi due il browser li prende per file da scaricare: il logo non
   # compare e i caratteri tornano a quelli di sistema, e sembra un difetto
   # dell'app mentre è solo questo server.
@@ -35,7 +41,7 @@ Write-Output "in ascolto su $prefix"
 while ($listener.IsListening) {
   $ctx = $listener.GetContext()
   $rel = [System.Uri]::UnescapeDataString($ctx.Request.Url.AbsolutePath).TrimStart('/')
-  if ($rel -eq '' ) { $rel = 'index.html' }
+  if ($rel -eq '' -or $rel.EndsWith('/')) { $rel += 'index.html' }
   if ($rel -eq '__stop') { $ctx.Response.StatusCode = 200; $ctx.Response.Close(); break }
   $file = Join-Path $root ($rel -replace '/', '\')
 
