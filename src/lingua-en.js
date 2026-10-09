@@ -1094,4 +1094,42 @@ window.LINGUA_EN = {
     "duplicate deleted: «{0}» from {1}",
   "Preset per lo Spark LIVE: {0} esistono solo sul suo canale del microfono. Sullo Spark 2 e sul NEO non si può mandare.":
     "A preset for the Spark LIVE: {0} only exist on its microphone channel. It can't be sent to the Spark 2 or the NEO.",
+  "Segnala un problema":
+    "Report a problem",
+  "Scrivi cosa stavi facendo, cosa è successo e cosa ti aspettavi. Il messaggio parte dalla <strong>tua</strong> posta: l'app non manda niente da sola.":
+    "Write what you were doing, what happened and what you expected. The message goes out from <strong>your</strong> email: the app sends nothing by itself.",
+  "Cosa è successo…":
+    "What happened…",
+  "Copia il testo":
+    "Copy the text",
+  "Manda per email":
+    "Send by email",
+  "Cosa si aggiunge al messaggio":
+    "What gets added to the message",
+  "Serve a capire dove cercare: versione dell'app, browser, ampli e le ultime righe del registro. Niente della tua libreria.":
+    "It helps to know where to look: app version, browser, amp and the last lines of the log. Nothing from your library.",
+  "mai collegato":
+    "never connected",
+  "collegato":
+    "connected",
+  "Ultime righe del registro:":
+    "Last lines of the log:",
+  "Manca la descrizione":
+    "The description is missing",
+  "Scrivi in due righe cosa è successo.":
+    "Write in a couple of lines what happened.",
+  "(Il messaggio è lungo: l'ho copiato, incollalo qui.)":
+    "(The message is long: it's been copied, paste it here.)",
+  "(Il messaggio è troppo lungo per la posta: torna nell'app, premi «Copia il testo» e incollalo qui.)":
+    "(The message is too long for email: go back to the app, press «Copy the text» and paste it here.)",
+  "Il messaggio è lungo: è negli appunti. Si apre la tua posta, incollalo e premi invia.":
+    "The message is long: it is on the clipboard. Your email opens: paste it and press send.",
+  "Si apre la tua posta col messaggio già scritto: controlla e premi invia. Se non si apre niente, usa «Copia il testo» e mandalo a {0}.":
+    "Your email opens with the message already written: check it and press send. If nothing opens, use «Copy the text» and send it to {0}.",
+  "A: {0}":
+    "To: {0}",
+  "Oggetto: {0}":
+    "Subject: {0}",
+  "non riesco a copiare":
+    "can't copy",
 };
