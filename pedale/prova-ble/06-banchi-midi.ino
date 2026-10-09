@@ -12,7 +12,7 @@
 static void cambiaMeta() {
   if (quantiPosti() <= 4) {              // l'Amp Preset del NEO: quattro, una meta' sola
     metaMostrata = 0;
-    avvisa("4 preset, una meta'");
+    avvisa(TESTO("4 preset, una meta'", "4 presets, one half"));
     return;
   }
   metaMostrata = metaMostrata ? 0 : 1;
@@ -46,7 +46,7 @@ static void cambiaBanco(int8_t passo) {
   const uint8_t quanti = elencoBanchi(elenco);
   if (quanti < 2) {
     Serial.println(F("c'e' solo il banco dell'ampli"));
-    avvisa("un solo banco");
+    avvisa(TESTO("un solo banco", "only one bank"));
     return;
   }
 
@@ -61,7 +61,7 @@ static void cambiaBanco(int8_t passo) {
     BancoCaricato nuovo = {};
     if (!bancoCarica((uint8_t)s, nuovo)) {
       Serial.printf("il banco nello slot %d non si legge\n", s);
-      avvisa("banco illeggibile");
+      avvisa(TESTO("banco illeggibile", "bank unreadable"));
       return;
     }
     bancoLibera(bancoAttivo);
@@ -118,7 +118,7 @@ static void midiPremuto(uint8_t k) {
     paginaMidi = paginaMidi ? 0 : 1;
     Serial.printf("MIDI: pagina %s\n", paginaMidi ? "stomp" : "preset");
   } else if (k == BANCO_SX || k == BANCO_DX) {
-    if (paginaMidi == 1) { avvisa("i gruppi sono dei preset"); return; }
+    if (paginaMidi == 1) { avvisa(TESTO("i gruppi sono dei preset", "preset page only")); return; }
     // Otto preset, chiesto dall'utente il 24 settembre: il tasto banco sinistro
     // mostra 1-4, il destro 5-8. Diretti, non a giro: si sa sempre dove si va.
     gruppoMidi = k == BANCO_DX ? 1 : 0;

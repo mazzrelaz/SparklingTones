@@ -116,7 +116,8 @@ headless (poi si cerca `id="summary"`):
 
 **ESP32**: compilare, caricare (`prova-ble` vuole il giro a 1200 baud) e le trappole della
 XIAO stanno in **`docs/pedale-lavoro.md`**. **Il firmware lo compilo e lo carico io, senza
-chiedere.**
+chiedere.** **Lingua del display**: `#define INGLESE` in `prova-ble.ino` (0 italiano, 1 inglese;
+2.17, 9 ottobre 2026); ogni scritta nuova del display passa da `TESTO(it, en)`.
 
 ## Le regole dell'app
 

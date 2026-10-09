@@ -738,7 +738,8 @@
       It's for checking the wiring: that's the next chapter.</li>
     <li><strong>The real pedal</strong>: open <span class="m">pedale/prova-ble/prova-ble.ino</span> (it brings along the other files in the folder)
       and change two settings: <em>USB Mode</em> <strong>USB-OTG (TinyUSB)</strong> and <em>USB CDC On Boot</em> <strong>Enabled</strong>.
-      Same port, <em>Upload</em>. On restart the display shows the logo and the version for four seconds.
+      <strong>For English screens</strong>, change the line <span class="m">#define INGLESE 0</span> near the top of the file
+      to <span class="m">#define INGLESE 1</span> (out of the box they're in Italian). Same port, <em>Upload</em>. On restart the display shows the logo and the version for four seconds.
       <span class="se">With any other «USB Mode» the pedal won't compile, on purpose: without TinyUSB there's no MIDI mode.</span></li>
   </ol>
 
@@ -794,7 +795,7 @@
   <div class="cap-testa"><span class="cap-num">10</span><h2>Playing</h2></div>
   <p class="sotto">Switch on the Spark, switch on the pedal. It does the rest.</p>
 
-  <p style="color:var(--dim);font-size:0.9rem">The pedal's own screens are in Italian; this guide translates them where it matters.</p>
+  <p style="color:var(--dim);font-size:0.9rem">The drawings and photos show the pedal's Italian screens, with translations where it matters. With <span class="m">INGLESE 1</span> (chapter 8) the pedal shows them in English.</p>
 
   <div class="oled-fila">
     <figure class="oled">

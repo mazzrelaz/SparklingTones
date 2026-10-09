@@ -20,13 +20,13 @@ static void cambiaModo() {
     dentro = 0;
     nomeSuona[0] = 0;
     annuncia();                            // l'iPad ora ci trova
-    avvisa("modalita' MIDI");
+    avvisa(TESTO("modalita' MIDI", "MIDI mode"));
   } else {
     momentoSgancio = millis();
     ultimoTentativo = 0;
     if (midiCentrale && serverPonte) serverPonte->disconnect(connApp);
     annuncia();
-    avvisa("modalita' Spark");
+    avvisa(TESTO("modalita' Spark", "Spark mode"));
   }
   Serial.printf("modalita' %s\n", modo == MODO_MIDI ? "MIDI" : "Spark");
   aggiornaLed();

@@ -43,7 +43,7 @@ static void looperEvento(uint8_t v, bool mandato = false) {
     case LOOP_FINE_DUB:
       loopSovraincide = false; break;
     case LOOP_CANCELLA: case LOOP_VUOTO:
-      if (looper && loopPresente) avvisa("loop cancellato");
+      if (looper && loopPresente) avvisa(TESTO("loop cancellato", "loop cleared"));
       posLoop = -1;
       durataLoop = 0;
       loopRegistra = loopSovraincide = loopSuona = loopPresente = loopRipetibile = false; break;
@@ -63,7 +63,7 @@ static void looperPremuto(uint8_t k) {
   if (!chScrittura) return;                // lo schermo dice gia' che lo Spark non c'e'
   if (contaTempo) {                        // qualunque tasto durante il conteggio lo annulla
     contaTempo = 0;
-    avvisa("conteggio annullato");
+    avvisa(TESTO("conteggio annullato", "count cancelled"));
     aggiornaLed();
     return;
   }
@@ -83,7 +83,7 @@ static void looperPremuto(uint8_t k) {
       else                      looperAccoda(LOOP_REC);
       break;
     case 1:                                // annulla / ripeti
-      if (!loopPresente) { avvisa("niente da annullare"); return; }
+      if (!loopPresente) { avvisa(TESTO("niente da annullare", "nothing to undo")); return; }
       // Durante una sovraincisione 0x0d l'ampli lo ignora (registro del 5
       // ottobre); a sovraincisione chiusa annulla e ripete (7 ottobre). Quindi
       // prima si chiude, poi si annulla.
@@ -114,8 +114,8 @@ static bool loopVuoto() {
  *  nuovo si vede subito in alto; all'ampli lo manda il loop (0x0176). */
 static void looperTap() {
   if (!chScrittura) return;
-  if (!loopVuoto()) { avvisa("tempo: a loop vuoto"); return; }
-  if (!lungImpostazioni) { avvisa("tempo non ancora letto"); return; }
+  if (!loopVuoto()) { avvisa(TESTO("tempo: a loop vuoto", "tempo: loop empty")); return; }
+  if (!lungImpostazioni) { avvisa(TESTO("tempo non ancora letto", "tempo not read yet")); return; }
   const uint32_t ora = millis();
   const uint32_t passo = ora - tapUltimo;
   tapUltimo = ora;
@@ -138,8 +138,8 @@ static void looperTap() {
  *  loop vuoto, come nell'app: con un loop registrato non si cambiano. */
 static void looperBattute(int8_t passo) {
   if (!chScrittura) return;
-  if (!loopVuoto()) { avvisa("battute: a loop vuoto"); return; }
-  if (!lungImpostazioni) { avvisa("impostazioni non lette"); return; }
+  if (!loopVuoto()) { avvisa(TESTO("battute: a loop vuoto", "bars: loop empty")); return; }
+  if (!lungImpostazioni) { avvisa(TESTO("impostazioni non lette", "settings not read")); return; }
   int8_t i = N_BATTUTE;                    // «libero»
   if (!loopLibero) {
     i = 0;
@@ -151,7 +151,8 @@ static void looperBattute(int8_t passo) {
   loopLibero = i == N_BATTUTE;
   if (!loopLibero) loopBattute = BATTUTE[i];
   char t[20];
-  if (loopLibero) snprintf(t, sizeof(t), "lunghezza libera");
+  if (loopLibero) snprintf(t, sizeof(t), "%s", TESTO("lunghezza libera", "free length"));
+  else if (INGLESE) snprintf(t, sizeof(t), "%u bar%s", loopBattute, loopBattute == 1 ? "" : "s");
   else snprintf(t, sizeof(t), "%u battut%c", loopBattute, loopBattute == 1 ? 'a' : 'e');
   avvisa(t);
   impostazioniDaMandare = true;
@@ -159,12 +160,12 @@ static void looperBattute(int8_t passo) {
 
 /** FS5 tenuto tre secondi: dentro o fuori dal looper. */
 static void cambiaLooper() {
-  if (!looper && ampliScelto == AMPLI_NEO) { avvisa("il NEO non ha looper"); return; }
+  if (!looper && ampliScelto == AMPLI_NEO) { avvisa(TESTO("il NEO non ha looper", "NEO has no looper")); return; }
   looper = !looper;
   inCoda = -1;
   looperQuanti = looperFatti = 0;
   if (looper) { looperChiedi = true; tempoDa = millis(); }       // com'e' messo adesso: lo dice l'ampli
-  avvisa(looper ? "modalita' looper" : "modalita' preset");
+  avvisa(looper ? TESTO("modalita' looper", "looper mode") : TESTO("modalita' preset", "preset mode"));
   Serial.printf("looper %s\n", looper ? "acceso" : "spento");
   aggiornaLed();
   schermoSporco = true;

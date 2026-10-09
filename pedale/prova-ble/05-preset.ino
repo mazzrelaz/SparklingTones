@@ -92,7 +92,7 @@ static void leggiAmpli() {
       Serial.println(F("non e' l'ampli scelto: lo mollo"));
       snprintf(escluso, sizeof(escluso), "%s", client->getPeerAddress().toString().c_str());
       esclusoFino = millis() + 60000;
-      avvisa(neo ? "e' il NEO" : "e' lo Spark 2");
+      avvisa(neo ? TESTO("e' il NEO", "it's the NEO") : TESTO("e' lo Spark 2", "it's the Spark 2"));
       client->disconnect();
       silenzioso = false;
       return;

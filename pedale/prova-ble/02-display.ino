@@ -73,7 +73,7 @@ static void leggiBatteria() {
   if (mvGrezzo < 2800 || mvGrezzo > 4600) mvBatteria = 0;
   else mvBatteria = prima ? (uint16_t)((prima * 7u + mvGrezzo) / 8u) : mvGrezzo;
   if ((prima == 0) != (mvBatteria == 0) || tacche(prima) != tacche(mvBatteria)) schermoSporco = true;
-  if (prima >= 3500 && mvBatteria && mvBatteria < 3500) avvisa("batteria scarica");
+  if (prima >= 3500 && mvBatteria && mvBatteria < 3500) avvisa(TESTO("batteria scarica", "battery low"));
 }
 
 /** L'icona, a sinistra del quadratino: 15x8 piu' il polo. */
@@ -291,16 +291,16 @@ static void disegnaSchermo() {
   if (avvisoTesto[0] && (int32_t)(avvisoFino - millis()) > 0) {
     snprintf(testa, sizeof(testa), "%s", avvisoTesto);
   } else if (inScelta() && !chScrittura) {
-    snprintf(testa, sizeof(testa), "Quale ampli?");
+    snprintf(testa, sizeof(testa), "%s", TESTO("Quale ampli?", "Which amp?"));
   } else if (pontefino) {
     const uint32_t restano = (int32_t)(pontefino - millis()) > 0
                              ? (pontefino - millis()) / 1000 : 0;
-    snprintf(testa, sizeof(testa), "ponte %lu:%02lu",
+    snprintf(testa, sizeof(testa), TESTO("ponte %lu:%02lu", "bridge %lu:%02lu"),
              (unsigned long)(restano / 60), (unsigned long)(restano % 60));
   } else if (looper) {
     // Il bpm, e «libero» quando la lunghezza non e' fissata in battute.
     if (!loopBpm)        snprintf(testa, sizeof(testa), "Looper");
-    else if (loopLibero) snprintf(testa, sizeof(testa), "Looper  libero");
+    else if (loopLibero) snprintf(testa, sizeof(testa), "%s", TESTO("Looper  libero", "Looper  free"));
     else                 snprintf(testa, sizeof(testa), "Looper  %u bpm", (unsigned)loopBpm);
   } else {
     snprintf(testa, sizeof(testa), "%s", bancoAttivo.valido ? bancoAttivo.nome : "Amp Preset");
@@ -329,7 +329,7 @@ static void disegnaSchermo() {
    * 24 settembre): i puntini che si muovono dicono che sta cercando. */
   if (!chScrittura && sganciato) {
     schermo.setFont(u8g2_font_6x13B_tf);
-    const char* riga1 = "Spark all'app";
+    const char* riga1 = TESTO("Spark all'app", "Spark to the app");
     schermo.drawStr((128 - schermo.getStrWidth(riga1)) / 2, 33, riga1);
     schermo.sendBuffer();
     return;
@@ -349,11 +349,11 @@ static void disegnaSchermo() {
     }
     if (inScelta()) {
       schermo.setFont(u8g2_font_6x13_tf);
-      const char* riga2 = "tasti banco: scegli";
+      const char* riga2 = TESTO("tasti banco: scegli", "bank keys: choose");
       schermo.drawStr((128 - schermo.getStrWidth(riga2)) / 2, 52, riga2);
     } else {
       schermo.setFont(u8g2_font_6x13_tf);
-      const char* riga2 = "lo sto cercando";
+      const char* riga2 = TESTO("lo sto cercando", "searching");
       const int largo = schermo.getStrWidth(riga2) + 18;   // i puntini hanno il loro posto fisso
       const int x = (128 - largo) / 2;
       schermo.drawStr(x, 52, riga2);
@@ -370,10 +370,12 @@ static void disegnaSchermo() {
     // La prima riga dice cosa fa FS1 adesso, come il tasto REC/DUB del pannello.
     // Le righe stanno nei primi 84 pixel, undici caratteri: a destra il cerchio.
     char conta[10];
-    snprintf(conta, sizeof(conta), "Conta  %u", contaTempo);
-    const char* rec = contaTempo ? conta : loopRegistra ? "Rec: chiudi" : loopSovraincide ? "Dub: chiudi"
-                    : loopPresente ? "Sovraincidi" : "Registra";
-    const char* voci[4] = { rec, loopRipetibile ? "Ripeti" : "Annulla", "Suona", "Ferma/Canc" };
+    snprintf(conta, sizeof(conta), TESTO("Conta  %u", "Count  %u"), contaTempo);
+    const char* rec = contaTempo ? conta : loopRegistra ? TESTO("Rec: chiudi", "Rec: close")
+                    : loopSovraincide ? TESTO("Dub: chiudi", "Dub: close")
+                    : loopPresente ? TESTO("Sovraincidi", "Overdub") : TESTO("Registra", "Record");
+    const char* voci[4] = { rec, loopRipetibile ? TESTO("Ripeti", "Redo") : TESTO("Annulla", "Undo"),
+                            TESTO("Suona", "Play"), TESTO("Ferma/Canc", "Stop/Clear") };
     const bool accesi[4] = { contaTempo || loopRegistra || loopSovraincide, false,
                              loopSuona && !loopRegistra,
                              loopPresente && !loopSuona && !loopRegistra };

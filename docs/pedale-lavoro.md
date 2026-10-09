@@ -236,3 +236,5 @@ binario al byte, a parte le 64 di impronte (SHA dell'ELF nel descrittore e hash 
 regole: una funzione si chiama da ogni file, **una variabile solo dai file che vengono dopo**
 quello che la dichiara; un file nuovo si numera dove deve stare. L'elenco è nella testa di
 `prova-ble.ino`. Compilare e caricare non cambiano: si dà la cartella.
+
+**Le scritte del display in due lingue: la 2.17, 9 ottobre 2026** (chiesta dall'utente per chi costruisce il pedale). `#define INGLESE` in cima a `prova-ble.ino`, 0 di serie; ogni scritta del display passa da `TESTO("…", "…")`, che sceglie il compilatore. Il seriale e i messaggi del ponte restano in italiano; `prova-espansore` anche. **Compilata nelle due lingue, non ancora caricata** (il pedale non era collegato), e l'inglese non è mai stato visto sul display: le scritte lunghe in alto si tagliano a 96 pixel, come già quelle italiane.
