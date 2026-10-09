@@ -654,3 +654,17 @@ tutto» (2.13). Il LED del tempo è collegato in prova ma **non ancora fissato**
 decide insieme al buzzer KY-006, che arriva l'8 ottobre, perché lo spazio dentro la scatola
 è poco. Da lì: foto, resistenza del buzzer col tester, cablaggio di tutti e due (LED su D1,
 buzzer su D3), e il click del conteggio nel firmware.
+
+### Il click del conteggio — 9 ottobre 2026 (2.14)
+
+Il KY-006 **è magnetico, non piezo** come diceva l'annuncio: **15,1 Ω** misurati fra S e −.
+Collegato dall'utente con **330 Ω in serie** (S → 330 Ω → D3, − → GND, il piedino centrale
+libero). La 2.14 lo suona dal compito del LED del tempo: **solo nei quattro tempi del
+conteggio**, 40 ms a tempo, l'«uno» a 2700 Hz e gli altri a 1800 (`ledcWriteTone`, LEDC).
+**Verificato: si sente, ma troppo piano** — con 10 mA, e il piedino non ne dà più di una
+ventina. Per il volume vero servirebbe un transistor NPN con resistenza di base e **diodo**
+sulla bobina, e l'utente il diodo non ce l'ha. **Scelta dell'utente: un disco piezo** al
+posto del buzzer, sugli stessi fili e con la stessa 330 Ω (al piezo non toglie volume). Da
+fare quando è collegato: la frequenza di risonanza dal diametro del disco; consigliato di
+fissarlo solo per il bordo sopra un vuoto. Se è ancora poco: il disco fra due piedini in
+opposizione (LEDC invertito), doppia tensione.
