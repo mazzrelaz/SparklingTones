@@ -49,6 +49,95 @@ $('btnGuida').addEventListener('click', () => {
   apriPannello('pannelloGuida');
 });
 
+/* ====================================================================
+   Segnala un problema (9 ottobre 2026, chiesto dall'utente)
+   ==================================================================== */
+// Niente server e niente servizi di terzi: il messaggio parte dalla posta di
+// chi scrive (mailto), con in coda quello che serve a capire — versione,
+// browser, ampli, le ultime righe del registro — e che si vede prima di
+// mandarlo. L'indirizzo l'ha scelto l'utente.
+const INDIRIZZO_SEGNALAZIONI = 'mazzbackup@gmail.com';
+const OGGETTO_SEGNALAZIONE = 'SparklingTones: segnalazione';
+// Un indirizzo mailto lungo certi programmi di posta lo tagliano o lo
+// rifiutano: oltre questo si tolgono le righe del registro più vecchie.
+const MAILTO_MASSIMO = 1800;
+
+async function datiSegnalazione(righeRegistro) {
+  let versione = '?';
+  try {
+    const guscio = (await caches.keys()).find(k => k.startsWith('spark-'));
+    if (guscio) versione = guscio.slice('spark-'.length);
+  } catch (err) { /* da file:// la cache non c'è */ }
+  const ampli = modelloAmpli.nome || tr('mai collegato');
+  return [
+    'App: ' + versione + ' (' + Lingua.attuale + ')',
+    'Ampli: ' + ampli + (spark.connected ? ' — ' + tr('collegato') : ''),
+    'Browser: ' + navigator.userAgent,
+    '',
+    tr('Ultime righe del registro:'),
+    ...(righeRegistro > 0 ? registroLungo.slice(-righeRegistro) : []),   // slice(-0) le darebbe tutte
+  ].join('\n');
+}
+
+async function testoSegnalazione(righeRegistro) {
+  return $('testoSegnala').value.trim() + '\n\n-- \n' + await datiSegnalazione(righeRegistro);
+}
+
+$('btnSegnala').addEventListener('click', async () => {
+  $('notaSegnala').textContent = '';
+  $('anteprimaSegnala').textContent = await datiSegnalazione(25);
+  apriPannello('pannelloSegnala');
+});
+
+$('btnMandaSegnala').addEventListener('click', async () => {
+  if (!$('testoSegnala').value.trim()) {
+    await avvisa(tr('Manca la descrizione'), tr('Scrivi in due righe cosa è successo.'));
+    return;
+  }
+  let righe = 25, url;
+  do {
+    url = 'mailto:' + INDIRIZZO_SEGNALAZIONI +
+          '?subject=' + encodeURIComponent(OGGETTO_SEGNALAZIONE) +
+          '&body=' + encodeURIComponent(await testoSegnalazione(righe));
+  } while (url.length > MAILTO_MASSIMO && righe-- > 0);
+  // Troppo lungo anche senza registro: il testo intero va negli appunti, e la
+  // mail si apre con l'invito a incollarlo.
+  let copiato = false;
+  if (url.length > MAILTO_MASSIMO) {
+    try {
+      await navigator.clipboard.writeText(await testoSegnalazione(25));
+      copiato = true;
+    } catch (err) { /* resta «Copia il testo» */ }
+    url = 'mailto:' + INDIRIZZO_SEGNALAZIONI +
+          '?subject=' + encodeURIComponent(OGGETTO_SEGNALAZIONE) +
+          '&body=' + encodeURIComponent(copiato
+            ? tr('(Il messaggio è lungo: l\'ho copiato, incollalo qui.)')
+            : tr('(Il messaggio è troppo lungo per la posta: torna nell\'app, premi «Copia il testo» e incollalo qui.)'));
+  }
+  // Un link cliccato e non un cambio di pagina: la pagina resta, e con lei
+  // la connessione all'ampli.
+  const a = document.createElement('a');
+  a.href = url;
+  a.click();
+  $('notaSegnala').textContent = copiato
+    ? tr('Il messaggio è lungo: è negli appunti. Si apre la tua posta, incollalo e premi invia.')
+    : tr('Si apre la tua posta col messaggio già scritto: controlla e premi invia. Se non si apre niente, usa «Copia il testo» e mandalo a {0}.', INDIRIZZO_SEGNALAZIONI);
+});
+
+$('btnCopiaSegnala').addEventListener('click', async () => {
+  const tasto = $('btnCopiaSegnala');
+  const prima = tasto.textContent;
+  const testo = tr('A: {0}', INDIRIZZO_SEGNALAZIONI) + '\n' +
+                tr('Oggetto: {0}', OGGETTO_SEGNALAZIONE) + '\n\n' + await testoSegnalazione(25);
+  try {
+    await navigator.clipboard.writeText(testo);
+    tasto.textContent = tr('copiato');
+  } catch (err) {
+    tasto.textContent = tr('non riesco a copiare');
+  }
+  setTimeout(() => { tasto.textContent = prima; }, 2000);
+});
+
 $('btnAiutoEditor').addEventListener('click', () => {
   const guida = $('aiutoEditor');
   guida.hidden = !guida.hidden;

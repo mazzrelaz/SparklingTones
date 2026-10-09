@@ -189,6 +189,12 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
 - **Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**;
   `pulisciStatoPannelli()` le nasconde e chi ci scrive la rimostra (`statoDelPannello`).
 
+### Segnala un problema (9 ottobre 2026)
+
+⋯ → «Segnala un problema»: **mailto a `mazzbackup@gmail.com`** (scelta dell'utente: solo email,
+niente GitHub, niente server), col testo dell'utente più versione, browser, ampli e le ultime 25
+righe di `registroLungo` (`04-log.js`), mostrate prima. Oltre 1800 caratteri il registro si accorcia.
+
 ### Niente finestre né tendine del sistema
 
 **Mai `confirm()`, `alert()`, `prompt()` o `<select>`.** Al loro posto, tutte asincrone:

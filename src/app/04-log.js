@@ -16,9 +16,16 @@
 const righeLog = [];
 let logProvvisorio = false;
 
+/* Le ultime righe con l'ora, per «Segnala un problema» (9 ottobre 2026): a
+ * schermo ne restano otto, a chi cerca un difetto ne servono di più. Le righe
+ * di avanzamento no: si sostituiscono a vicenda e non dicono niente dopo. */
+const registroLungo = [];
+
 function logLine(msg, risposta) {
   if (logProvvisorio) righeLog.pop();
   logProvvisorio = false;
+  registroLungo.push(new Date().toTimeString().slice(0, 8) + '  ' + msg);
+  if (registroLungo.length > 40) registroLungo.shift();
   righeLog.push(msg);
   if (righeLog.length > 8) righeLog.shift();
   $('log').textContent = righeLog.join('\n');

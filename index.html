@@ -534,6 +534,10 @@
   #pannelloGuida.aperto { display:flex; flex-direction:column; padding-bottom:0; }
   #corniceGuida { flex:1; border:0; border-top:1px solid var(--line);
                   margin:0 -14px; width:calc(100% + 28px); background:#000; }
+  /* Segnala un problema: quello che l'app aggiunge, piccolo e leggibile prima di mandarlo. */
+  #anteprimaSegnala { white-space:pre-wrap; word-break:break-word; font-size:0.72rem; line-height:1.45;
+                      color:var(--dim); background:#0c0d10; border:1px solid var(--line);
+                      border-radius:8px; padding:10px; margin:6px 0 0; max-height:32vh; overflow:auto; }
   .pannello h2 { font-size:1rem; margin:0 0 4px; font-family:var(--strumento);
                  letter-spacing:-0.01em; }
   .pannello .barra-alta { display:flex; align-items:center; gap:10px; margin-bottom:12px;
@@ -1127,6 +1131,7 @@
         <!-- La guida c'è in tutte e due le viste: chi la cerca suonando non deve
              prima tornare ai preset. -->
         <button id="btnGuida">Guida</button>
+        <button id="btnSegnala">Segnala un problema</button>
         <button id="btnSnake" class="solo-preset">Fai una pausa</button>
       </div>
     </div>
@@ -1477,6 +1482,33 @@
     <button class="primary" data-chiudi="pannelloGuida">Fatto</button>
   </div>
   <iframe id="corniceGuida" title="Guida all'uso"></iframe>
+</div>
+
+<!-- Segnala un problema (9 ottobre 2026): niente server, il messaggio parte
+     dalla posta di chi scrive. Quello che l'app ci aggiunge si vede prima. -->
+<div class="pannello" id="pannelloSegnala">
+  <div class="barra-alta">
+    <h2>Segnala un problema</h2>
+    <span style="flex:1"></span>
+    <button class="primary" data-chiudi="pannelloSegnala">Fatto</button>
+  </div>
+  <div class="sezione-pannello">
+    <p class="spiega">Scrivi cosa stavi facendo, cosa è successo e cosa ti aspettavi. Il messaggio
+      parte dalla <strong>tua</strong> posta: l'app non manda niente da sola.</p>
+    <textarea id="testoSegnala" rows="6" placeholder="Cosa è successo…"></textarea>
+    <div class="barra-alta" style="margin-top:10px">
+      <button id="btnCopiaSegnala" class="piccolo">Copia il testo</button>
+      <span style="flex:1"></span>
+      <button id="btnMandaSegnala" class="primary">Manda per email</button>
+    </div>
+    <p class="spiega" id="notaSegnala"></p>
+  </div>
+  <div class="sezione-pannello">
+    <h3>Cosa si aggiunge al messaggio</h3>
+    <p class="spiega">Serve a capire dove cercare: versione dell'app, browser, ampli e le ultime
+      righe del registro. Niente della tua libreria.</p>
+    <pre id="anteprimaSegnala"></pre>
+  </div>
 </div>
 
 <!-- il pedale ESP32: gli otto slot che tiene in memoria, e l'invio di un banco.
