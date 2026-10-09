@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v95';
+const VERSIONE = 'v96';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -24,6 +24,7 @@ const GUSCIO = [
   './guida.html',
   './guida.en.html',
   './guida-pedale.html',
+  './guida-pedale.en.html',
   './guida.css',
   './guida.js',
   './live.html',

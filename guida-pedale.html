@@ -67,6 +67,8 @@
   .foto-due { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:12px 0 8px; }
   .foto-due figure.foto { margin:0 0 8px; }
   @media (max-width:620px) { .foto-due { grid-template-columns:1fr; } }
+  .cap pre { overflow-x:auto; background:#1a1c21; border:1px solid #33363e; border-radius:8px; padding:10px 12px; margin:8px 0 4px; }
+  .cap pre code { background:none; padding:0; font-size:0.85rem; }
   ol.passi { list-style:none; padding:0; counter-reset:p; margin:10px 0 18px; }
   ol.passi > li { counter-increment:p; position:relative; padding-left:40px; margin-bottom:14px; }
   ol.passi > li::before { content:counter(p); position:absolute; left:0; top:0; width:27px; height:27px;
@@ -87,6 +89,7 @@
   <a class="torna" href="guida.html">← La guida dell'app</a>
   <div class="fuori" hidden>
     <a class="apri-app" href="index.html">Apri l'app →</a>
+    <a class="altra-lingua" href="guida-pedale.en.html" lang="en">English</a>
   </div>
 
   <div class="tre-passi">
@@ -100,7 +103,7 @@
       <span class="ico">💾</span>
       <span class="num">PASSO 2</span>
       <h3>Carica il firmware</h3>
-      <p>Dall'Arduino IDE, col cavo USB nella XIAO. Prima la prova dei cablaggi, poi il pedale vero.</p>
+      <p>Dall'Arduino IDE, col cavo USB. Prima la prova dei cablaggi, poi il pedale vero.</p>
     </div>
     <div class="passo-grande">
       <span class="ico">🎸</span>
@@ -485,7 +488,7 @@
   </div>
 
   <ol class="passi">
-    <li><strong>Le piste.</strong> Su una millefori (quella del prototipo è circa 7 × 9 cm) fai due file
+    <li><strong>Le piste.</strong> Su una millefori fai due file
       di stagno nudo da un lato all'altro: <strong>pista 3V3 in alto, pista GND in basso</strong>.
       Un filo nudo steso sui fori e saldato ogni due o tre va bene.
       <span class="se">Le due piste non devono toccarsi mai: sarebbe un corto sull'alimentazione.</span></li>
@@ -770,28 +773,32 @@
     <li><strong>La libreria del display</strong>: in <em>Strumenti → Gestisci librerie</em> cerca <strong>U8g2</strong> (di olikraus) e installala.</li>
     <li><strong>Scarica il progetto</strong> da <a href="https://github.com/mazzrelaz/SparklingTones">github.com/mazzrelaz/SparklingTones</a>
       (<em>Code → Download ZIP</em>) e scompattalo fuori dalla cartella Documenti.</li>
-    <li><strong>Prima la prova</strong>: apri <span class="m">pedale/prova-espansore/prova-espansore.ino</span> e caricalo come al passo 6.
+    <li><strong>Prima la prova</strong>: apri <span class="m">pedale/prova-espansore/prova-espansore.ino</span>. Nel menu <em>Strumenti</em>:
+      <em>Scheda</em> <strong>XIAO_ESP32S3</strong>, <em>USB Mode</em> <strong>Hardware CDC and JTAG</strong> (quella di partenza),
+      e la <em>Porta</em> che compare quando colleghi la XIAO al computer. Poi la freccia <em>Carica</em>.
       Serve a controllare i cablaggi: è il capitolo dopo.</li>
-    <li><strong>Le impostazioni</strong>, nel menu <em>Strumenti</em>:
-      <ul style="margin-top:6px">
-        <li><em>Scheda</em>: <strong>XIAO_ESP32S3</strong>;</li>
-        <li><em>USB Mode</em>: <strong>USB-OTG (TinyUSB)</strong>;</li>
-        <li><em>USB CDC On Boot</em>: <strong>Enabled</strong>;</li>
-        <li><em>Porta</em>: quella che compare quando colleghi il pedale al computer.</li>
-      </ul>
-      Poi la freccia <em>Carica</em>.
+    <li><strong>Il pedale vero</strong>: apri <span class="m">pedale/prova-ble/prova-ble.ino</span> (si porta dietro gli altri file della cartella)
+      e cambia due impostazioni: <em>USB Mode</em> <strong>USB-OTG (TinyUSB)</strong> e <em>USB CDC On Boot</em> <strong>Enabled</strong>.
+      Stessa porta, <em>Carica</em>. Al riavvio il display mostra il logo e la versione per quattro secondi.
       <span class="se">Con un'altra «USB Mode» il pedale non compila, ed è voluto: senza TinyUSB la modalità MIDI non c'è.</span></li>
-    <li><strong>Il pedale vero</strong>: apri <span class="m">pedale/prova-ble/prova-ble.ino</span> (si porta dietro gli altri file della cartella) e caricalo.
-      Al riavvio il display mostra il logo e la versione per quattro secondi.</li>
   </ol>
 
   <figure class="foto"><img src="foto/pedale/avvio.jpg" alt="La schermata di avvio del pedale: logo SparklingTones, nome dell'autore e versione v2.16" loading="lazy" width="1600" height="901"><figcaption>La schermata di avvio, con la versione del firmware.</figcaption></figure>
 
+  <h3>Le volte dopo</h3>
+  <p>Col firmware del pedale la presa USB diventa la pedaliera MIDI, e l'Arduino IDE non riesce più a
+    caricare da solo. Prima di ogni caricamento si rimette la XIAO in ascolto, <strong>senza toccare
+    tastini</strong>: si apre la sua porta a 1200 baud e la si richiude.</p>
+  <ol class="passi">
+    <li>Collega il pedale e guarda in <em>Strumenti → Porta</em> il numero della sua porta (ad esempio <span class="m">COM3</span>).</li>
+    <li>In PowerShell, con quel numero:
+      <pre><code>$p = New-Object System.IO.Ports.SerialPort 'COM3',1200; $p.Open(); $p.Close()</code></pre>
+      <span class="se">Un errore «dispositivo inesistente» è normale: la porta sparisce perché la XIAO si riavvia.</span></li>
+    <li>Compare una porta nuova (nel prototipo <span class="m">COM13</span>): sceglila in <em>Strumenti → Porta</em> e premi <em>Carica</em>.</li>
+  </ol>
   <div class="nota">
-    <p><strong>Se il caricamento non trova la porta</strong>: stacca il cavo, tieni premuto il tastino <strong>B</strong> della XIAO
-      (accanto alla presa), infila il cavo, rilascia, scegli la porta che compare e carica. Finito, premi il tastino
-      <strong>R</strong>. Succede soprattutto dal secondo caricamento in poi, perché col firmware del pedale la presa USB
-      diventa la pedaliera MIDI.</p>
+    <p><strong>Finché non carichi, il pedale resta fermo</strong>: aspetta il firmware.
+      Se cambi idea, stacca il cavo e spegni e riaccendi il pedale.</p>
   </div>
 </section>
 
@@ -1031,7 +1038,7 @@
       <tr><td>Un LED non si accende, o se ne accende un altro</td><td>Rifai la mappatura guidata (capitolo 9): una risposta «niente» è un filo staccato o un LED girato.</td></tr>
       <tr><td>Un chip scalda</td><td>Spegni. Quasi sempre è <strong>flussante</strong> rimasto fra i piedini: puliscilo con alcool isopropilico.</td></tr>
       <tr><td>Il display ronza nell'ampli</td><td>Una goccia di colla a caldo sulla bobina <span class="m">4R7</span> sul retro del display.</td></tr>
-      <tr><td>Dopo un caricamento il pedale è fermo, display spento</td><td>È rimasto in modalità di caricamento: stacca e riattacca il cavo, o premi <strong>R</strong> sulla XIAO.</td></tr>
+      <tr><td>Dopo un caricamento il pedale non risponde</td><td>È rimasto in attesa del firmware: carica di nuovo, oppure stacca il cavo e spegni e riaccendi il pedale.</td></tr>
       <tr><td>La batteria non sembra caricare</td><td>Si carica dalla presa del <strong>caricatore</strong>, non da quella della XIAO. Il LED CHRG del caricatore deve accendersi.</td></tr>
       <tr><td>L'icona della batteria è sempre piena</td><td>C'è un cavo USB attaccato: staccalo per leggere la cella. Se resta piena, controlla il partitore su D0.</td></tr>
     </tbody>
