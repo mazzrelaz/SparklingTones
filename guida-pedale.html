@@ -253,6 +253,7 @@
       <tr><td><strong>Connettori JST-XH</strong> (passo 2,50)</td><td class="n">un kit</td><td>da 4 e da 5 poli, con la pinza per crimparli. I Dupont si allentano: nel prototipo ha fatto staccare la massa di un LED.</td></tr>
       <tr><td><strong>Connettori JST-PH</strong> (passo 2,0), 2 poli</td><td class="n">2</td><td>quelli che entrano nelle prese del caricatore.</td></tr>
       <tr><td>Filo a trefoli sottile, tre colori</td><td class="n">qualche metro</td><td>rosso per il positivo, nero per la massa, un altro per i segnali.</td></tr>
+      <tr><td><strong>Prolunga USB-C</strong> maschio-femmina, 20 cm</td><td class="n">1</td><td>porta fuori la presa della XIAO, per il firmware e il MIDI via USB. Una prolunga semplice: il codino da pannello provato prima non portava i dati.</td></tr>
       <tr><td>Termorestringente, colla a caldo, distanziali M2–M2,5</td><td class="n">—</td><td>per isolare le resistenze, fermare i fili, sollevare le schede dal legno.</td></tr>
 
       <tr class="gruppo"><td colspan="3">Scatola</td></tr>
@@ -481,7 +482,7 @@
       Un filo nudo steso sui fori e saldato ogni due o tre va bene.
       <span class="se">Le due piste non devono toccarsi mai: sarebbe un corto sull'alimentazione.</span></li>
     <li><strong>Gli zoccoli della XIAO</strong>, in alto a sinistra, con la presa USB verso il bordo:
-      il cavo ci deve arrivare a scatola aperta. Gli zoccoli permettono di sfilarla per cambiarla.</li>
+      lì si attacca la prolunga che porta la presa fuori dalla scatola. Gli zoccoli permettono di sfilarla per cambiarla.</li>
     <li><strong>L'espansore</strong> a destra della XIAO, e il <strong>condensatore</strong> saldato fra il suo
       piedino di alimentazione (<span class="m">V+</span> o <span class="m">VDD</span>) e la massa, più vicino possibile.
       Il condensatore ceramico non ha verso.</li>
@@ -741,9 +742,9 @@
     <li><strong>Il vetrino</strong>: mai colla cianoacrilica, che appanna il plexi. Il laser a diodo il plexi non lo taglia, lo fonde: si riga e si spezza.</li>
     <li><strong>Il display</strong> a volte <strong>ronza</strong> (lo si sente nel suono, vicino all'ampli): la causa è la bobina
       con scritto <span class="m">4R7</span> sul suo retro. Una goccia di colla a caldo sopra la bobina lo calma.</li>
-    <li><strong>La presa della XIAO</strong>: il codino da pannello del prototipo porta la corrente ma non i dati, quindi
-      il firmware si carica a scatola aperta, col cavo nella XIAO. Se vuoi usare il MIDI via USB a scatola chiusa,
-      serve un codino che porti i dati (USB 3.1, cablato completo).</li>
+    <li><strong>La presa della XIAO</strong>: si porta fuori con una <strong>semplice prolunga USB-C</strong>
+      da 20 cm, maschio nella XIAO e femmina verso la sponda: così firmware e MIDI via USB passano a scatola chiusa.
+      Il codino da pannello provato prima portava la corrente ma non i dati.</li>
   </ul>
 </section>
 
@@ -766,7 +767,7 @@
         <li><em>Scheda</em>: <strong>XIAO_ESP32S3</strong>;</li>
         <li><em>USB Mode</em>: <strong>USB-OTG (TinyUSB)</strong>;</li>
         <li><em>USB CDC On Boot</em>: <strong>Enabled</strong>;</li>
-        <li><em>Porta</em>: quella che compare quando infili il cavo nella XIAO.</li>
+        <li><em>Porta</em>: quella che compare quando colleghi il pedale al computer.</li>
       </ul>
       Poi la freccia <em>Carica</em>.
       <span class="se">Con un'altra «USB Mode» il pedale non compila, ed è voluto: senza TinyUSB la modalità MIDI non c'è.</span></li>

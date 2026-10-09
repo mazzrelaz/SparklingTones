@@ -224,7 +224,9 @@ scritto «finito»):
 **La seriale del pedale si legge con `tools/ascolta-pedale.ps1`** (DTR e RTS alti, chiusura col file `basta`, mai uccidendo il processo: altrimenti download mode, e si ricarica su COM13). Il perché in `docs/looper.md`, «La 1.8».
 
 **Il codino da pannello della XIAO non porta i dati** (misurato il 23 settembre): per caricare
-il firmware il cavo va infilato **dentro**, direttamente nella XIAO.
+il firmware il cavo va infilato **dentro**, direttamente nella XIAO. **Sostituito poi con una
+semplice prolunga USB-C da 20 cm** (detto dall'utente il 9 ottobre 2026), che risolve: firmware
+e MIDI via USB passano da fuori.
 
 **Il firmware è diviso in file dal 7 ottobre 2026** (backup prima: tag git
 `prima-della-divisione` e `C:\Users\massi\spark-backup-2026-10-07.zip`). `prova-ble.ino` tiene
