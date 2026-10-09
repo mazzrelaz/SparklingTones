@@ -15,9 +15,6 @@
 <link rel="stylesheet" href="guida.css">
 <style>
   /* Quello che la guida dell'app non ha: tabelle, schemi in SVG, il display. */
-  .torna { display:inline-block; margin-top:18px; color:var(--dim); font-size:0.9rem;
-           font-family:var(--strumento); font-weight:600; text-decoration:none; }
-  .torna:hover { color:var(--text); }
   .tab { overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--panel);
          margin:10px 0 18px; }
   .tab table { border-collapse:collapse; width:100%; min-width:520px; font-size:0.92rem; }
@@ -72,11 +69,14 @@
 
 <header class="testata">
   <img src="icons/logo.svg" alt="SparklingTones" onerror="this.remove()">
+  <nav class="sezioni" aria-label="guide sections">
+    <a class="sezione" href="guida.en.html"><span class="ico">📱</span><b>App</b><span>presets, Live, knobs</span></a>
+    <span class="sezione qui" aria-current="page"><span class="ico">🎛️</span><b>Pedal</b><span>build it and use it</span></span>
+  </nav>
   <h1>The <span>pedal</span></h1>
   <p>How to build the SparklingTones pedal — the parts, the diagrams, the assembly, the
     firmware — and how to use it: five footswitches that change the Spark's presets without a phone,
     a display that tells you what's playing, and the looper.</p>
-  <a class="torna" href="guida.en.html">← The app guide</a>
   <div class="fuori" hidden>
     <a class="apri-app" href="index.html">Open the app →</a>
     <a class="altra-lingua" href="guida-pedale.html" lang="it">Italiano</a>

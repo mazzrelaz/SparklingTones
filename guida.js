@@ -10,6 +10,14 @@
 
   // L'indice scorre senza toccare l'hash: dentro l'iframe ogni ancora sarebbe
   // un passo di cronologia, e l'indietro di Android sfoglierebbe la guida.
+  // App e Pedale sono due pagine: si passa dall'una all'altra senza aggiungere un
+  // passo alla cronologia, cosi' l'indietro di Android torna all'app e non alla
+  // sezione di prima.
+  document.querySelectorAll('a.sezione').forEach(a => a.addEventListener('click', evento => {
+    evento.preventDefault();
+    location.replace(a.href);
+  }));
+
   document.addEventListener('click', evento => {
     const a = evento.target.closest('a[href^="#"]');
     if (!a) return;

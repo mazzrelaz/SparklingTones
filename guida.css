@@ -305,3 +305,15 @@ details.faq .dentro { padding:0 16px 12px; color:#cfd2d8; font-size:0.94rem; }
 
 footer { border-top:1px solid var(--line-soft); color:var(--faint); text-align:center; font-size:0.8rem;
          padding:28px 16px 40px; }
+
+/* ---- le due sezioni della guida, App e Pedale, in cima a ogni pagina ---- */
+.sezioni { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:520px; margin:0 auto 30px; }
+.sezione { display:flex; flex-direction:column; align-items:center; gap:2px; padding:18px 10px 16px;
+           border-radius:18px; border:1px solid var(--line); text-decoration:none; color:var(--text);
+           background:linear-gradient(180deg, #16181c, #0d0e11); }
+.sezione:hover { border-color:#3a3d45; }
+.sezione .ico { font-size:1.9rem; line-height:1; margin-bottom:6px; }
+.sezione b { font-family:var(--strumento); font-size:1.35rem; letter-spacing:-0.01em; }
+.sezione > span:last-child { color:var(--dim); font-size:0.8rem; }
+.sezione.qui { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 0 28px rgba(227,6,19,0.35);
+               background:linear-gradient(180deg, #2a0d10, #120607); }
