@@ -48,7 +48,7 @@ port A** (l'interrupt), **LED sul port B**.
 **I nomi dei pezzi sono fissi** (chiesto dall'utente): **basetta**, **XIAO**, **espansore**,
 **pista** (GND, 3V3), **pettine**/connettore, **linea** (`PA0`…`PB7`), **pannello**,
 **scatola**, **cavo**, **piastrina LED**, **footswitch** (5), **tasti banco** (2), **pulsanti**
-(7). Vietati: coperchio, top, rotaia, striscia, modulo; «bus» solo per l'I²C. Pagina delle
+(7). Vietati: coperchio, top, rotaia, striscia, modulo; «bus» solo per l'I²C. **La guida pubblica del pedale è `guida-pedale.html`** (9 ottobre 2026): pezzi, schemi, montaggio, firmware, uso; **se cambiano cablaggio, comandi o pezzi, si cambia anche lì**. Pagina delle
 istruzioni: `https://claude.ai/code/artifact/b1b451ca-2804-41a6-810f-b2b4a92d7acd`
 (si aggiorna passando quell'url).
 

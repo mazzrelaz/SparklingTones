@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>SparklingTones — Il pedale</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<!--
+  La guida del pedale (9 ottobre 2026, chiesta dall'utente): i pezzi, gli schemi,
+  il montaggio e l'uso. Pagina gemella di guida.html, con la stessa grafica
+  (guida.css) e lo stesso comportamento (guida.js: indice che scorre senza
+  toccare l'hash, «Apri l'app» solo fuori dall'app). La guida dell'app ci
+  arriva con un link, nel capitolo Live.
+
+  Da dove vengono i dati, perché non si scrivono a mente:
+  - la mappa di pulsanti e LED è quella del firmware (LINEA_PULSANTE,
+    LINEA_ROSSO, LINEA_VERDE in pedale/prova-ble/prova-ble.ino), presa dalla
+    mappatura guidata del 18 settembre 2026;
+  - ferramenta, alimentazione e scatola: docs/pedale-lavoro.md;
+  - i comandi: il firmware 2.16 (08-tasti.ino, 11-avvio.ino, 07-looper.ino).
+  Se cambia il firmware o il cablaggio, si cambia anche qui. Solo italiano:
+  l'inglese si fa quando l'utente lo chiede (CLAUDE.md, «L'inglese»).
+-->
+<link rel="stylesheet" href="guida.css">
+<style>
+  /* Quello che la guida dell'app non ha: tabelle, schemi in SVG, il display. */
+  .torna { display:inline-block; margin-top:18px; color:var(--dim); font-size:0.9rem;
+           font-family:var(--strumento); font-weight:600; text-decoration:none; }
+  .torna:hover { color:var(--text); }
+  .tab { overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--panel);
+         margin:10px 0 18px; }
+  .tab table { border-collapse:collapse; width:100%; min-width:520px; font-size:0.92rem; }
+  .tab th, .tab td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line-soft);
+                     vertical-align:top; }
+  .tab thead th { font-family:var(--strumento); font-size:0.74rem; letter-spacing:0.08em;
+                  text-transform:uppercase; color:var(--dim); background:var(--panel2); font-weight:700; }
+  .tab tbody tr:last-child td { border-bottom:none; }
+  .tab tr.gruppo td { background:var(--panel2); color:var(--gold); font-family:var(--strumento);
+                      font-weight:700; font-size:0.8rem; letter-spacing:0.06em; text-transform:uppercase; }
+  .tab td.q { font-family:var(--strumento); font-weight:700; white-space:nowrap; }
+  .tab td.n { white-space:nowrap; }
+  code, .m { font-family:ui-monospace,'Cascadia Mono',Consolas,monospace; font-size:0.88em;
+             color:#fff; background:#1a1c21; border-radius:4px; padding:0 4px; }
+  figure.schema { margin:12px 0 22px; background:var(--panel2); border:1px solid var(--line);
+                  border-radius:14px; padding:14px; overflow-x:auto; }
+  figure.schema svg { display:block; width:100%; height:auto; min-width:640px; }
+  figure.schema.stretto svg { min-width:300px; max-width:420px; margin:0 auto; }
+  figure.schema.medio svg { min-width:480px; max-width:620px; margin:0 auto; }
+  figure.schema text { font-family:'Inter',-apple-system,'Segoe UI',sans-serif; fill:var(--text); }
+  figure.schema .t-dim { fill:var(--dim); }
+  figure.schema .t-mono { font-family:ui-monospace,'Cascadia Mono',Consolas,monospace; }
+  .legenda { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 18px; margin-top:12px;
+             font-size:0.8rem; color:var(--dim); }
+  .legenda span { display:inline-flex; align-items:center; gap:6px; }
+  .legenda i { width:22px; height:3px; border-radius:2px; display:inline-block; }
+  /* il display del pedale, disegnato in SVG a 2× */
+  .oled-fila { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:18px;
+               margin:12px 0 18px; }
+  .oled { margin:0; }
+  .oled svg { display:block; width:100%; max-width:300px; margin:0 auto; border-radius:6px;
+              box-shadow:0 0 0 6px #111215, 0 0 0 7px #2a2d33; }
+  .oled svg text { font-family:ui-monospace,'Cascadia Mono',Consolas,monospace; }
+  ol.passi { list-style:none; padding:0; counter-reset:p; margin:10px 0 18px; }
+  ol.passi > li { counter-increment:p; position:relative; padding-left:40px; margin-bottom:14px; }
+  ol.passi > li::before { content:counter(p); position:absolute; left:0; top:0; width:27px; height:27px;
+                          border-radius:50%; display:grid; place-items:center; background:#1a1c21;
+                          border:1px solid #33363e; font-family:var(--strumento); font-weight:700;
+                          font-size:0.82rem; color:#fff; }
+  ol.passi > li .se { display:block; color:var(--dim); font-size:0.9rem; margin-top:3px; }
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <img src="icons/logo.svg" alt="SparklingTones" onerror="this.remove()">
+  <h1>Il <span>pedale</span></h1>
+  <p>Come si costruisce il pedale SparklingTones — i pezzi, gli schemi, il montaggio, il
+    firmware — e come si usa: cinque footswitch che cambiano i preset dello Spark senza telefono,
+    un display che dice cosa suona, e il looper.</p>
+  <a class="torna" href="guida.html">← La guida dell'app</a>
+  <div class="fuori" hidden>
+    <a class="apri-app" href="index.html">Apri l'app →</a>
+  </div>
+
+  <div class="tre-passi">
+    <div class="passo-grande">
+      <span class="ico">🔧</span>
+      <span class="num">PASSO 1</span>
+      <h3>Costruisci</h3>
+      <p>Una basetta millefori, sette pulsanti, quattro LED, un display e una cella 18650, in una scatola di legno.</p>
+    </div>
+    <div class="passo-grande">
+      <span class="ico">💾</span>
+      <span class="num">PASSO 2</span>
+      <h3>Carica il firmware</h3>
+      <p>Dall'Arduino IDE, col cavo USB nella XIAO. Prima la prova dei cablaggi, poi il pedale vero.</p>
+    </div>
+    <div class="passo-grande">
+      <span class="ico">🎸</span>
+      <span class="num">PASSO 3</span>
+      <h3>Suona</h3>
+      <p>Il pedale trova lo Spark da solo. I banchi li prepari nell'app e li mandi al pedale.</p>
+    </div>
+  </div>
+</header>
+
+<nav class="indice" aria-label="indice">
+  <div class="scorre">
+    <a href="#cose">Cos'è</a>
+    <a href="#pezzi">I pezzi</a>
+    <a href="#schema">Lo schema</a>
+    <a href="#basetta">La basetta</a>
+    <a href="#pulsanti">Pulsanti e LED</a>
+    <a href="#corrente">Alimentazione</a>
+    <a href="#scatola">La scatola</a>
+    <a href="#firmware">Il firmware</a>
+    <a href="#prova">La prova</a>
+    <a href="#suonare">Suonare</a>
+    <a href="#banchi">Banchi dall'app</a>
+    <a href="#looper">Il looper</a>
+    <a href="#midi">MIDI</a>
+    <a href="#problemi">Se qualcosa non va</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ===================================================================== -->
+<section class="cap" id="cose">
+  <div class="cap-testa"><span class="cap-num">1</span><h2>Cos'è</h2></div>
+  <p class="sotto">La vista Live dell'app, staccata dal telefono e messa sotto il piede.</p>
+
+  <p>Il pedale si collega <strong>da solo, in Bluetooth</strong>, allo Spark 2 o allo Spark NEO.
+    Il telefono serve solo per preparare i banchi e mandarglieli; poi lo lasci in tasca.</p>
+
+  <figure class="schema">
+    <svg viewBox="0 0 720 300" role="img" aria-label="Il pannello del pedale visto da sopra: display e tasti banco in alto, quattro LED, cinque footswitch.">
+      <rect x="10" y="10" width="700" height="280" rx="18" fill="#1a120c" stroke="#5a3a22" stroke-width="3"/>
+      <rect x="30" y="28" width="660" height="244" rx="10" fill="#2a2016" stroke="#3d2d1e"/>
+      <!-- display -->
+      <rect x="250" y="44" width="220" height="92" rx="6" fill="#050505" stroke="#444"/>
+      <text x="262" y="66" font-size="12" font-weight="700">Amp Preset</text>
+      <rect x="448" y="54" width="12" height="12" fill="#e8e8ea"/>
+      <line x1="262" y1="74" x2="460" y2="74" stroke="#e8e8ea"/>
+      <text x="262" y="92" font-size="11">A1 Pulito</text>
+      <rect x="258" y="98" width="206" height="15" fill="#e8e8ea"/>
+      <text x="262" y="110" font-size="11" fill="#000" style="fill:#000">A2 Crunch</text>
+      <text x="262" y="127" font-size="11">A3 Lead</text>
+      <text x="360" y="155" font-size="12" class="t-dim" text-anchor="middle">display</text>
+      <!-- tasti banco -->
+      <circle cx="200" cy="90" r="13" fill="#222" stroke="#888" stroke-width="2"/>
+      <circle cx="520" cy="90" r="13" fill="#222" stroke="#888" stroke-width="2"/>
+      <text x="200" y="125" font-size="12" class="t-dim" text-anchor="middle">banco SX</text>
+      <text x="520" y="125" font-size="12" class="t-dim" text-anchor="middle">banco DX</text>
+      <!-- LED del tempo -->
+      <circle cx="610" cy="90" r="7" fill="#3a1010" stroke="#ff4d5e" stroke-width="2"/>
+      <text x="610" y="125" font-size="12" class="t-dim" text-anchor="middle">tempo</text>
+      <!-- LED -->
+      <g>
+        <circle cx="60"  cy="186" r="7" fill="#3a1010" stroke="#555"/>
+        <circle cx="200" cy="186" r="8" fill="#ff4d5e" style="filter:drop-shadow(0 0 6px #ff4d5e)"/>
+        <circle cx="340" cy="186" r="7" fill="#3a1010" stroke="#555"/>
+        <circle cx="480" cy="186" r="7" fill="#3a1010" stroke="#555"/>
+      </g>
+      <!-- footswitch: interassi 70 + 70 + 70 + 90 -->
+      <g fill="#9a9ea6" stroke="#d0d3d8" stroke-width="2">
+        <circle cx="60"  cy="236" r="20"/><circle cx="200" cy="236" r="20"/>
+        <circle cx="340" cy="236" r="20"/><circle cx="480" cy="236" r="20"/>
+        <circle cx="660" cy="236" r="20"/>
+      </g>
+      <g font-size="13" font-weight="700" text-anchor="middle" style="fill:#000">
+        <text x="60" y="241" style="fill:#000">1</text><text x="200" y="241" style="fill:#000">2</text>
+        <text x="340" y="241" style="fill:#000">3</text><text x="480" y="241" style="fill:#000">4</text>
+        <text x="660" y="241" style="fill:#000">5</text>
+      </g>
+      <text x="570" y="268" font-size="11" class="t-dim" text-anchor="middle">90 mm: il quinto si trova col piede</text>
+    </svg>
+    <figcaption>Il pannello, non in scala: la disposizione di display e tasti è quella di massima, le misure vere stanno in «La scatola».</figcaption>
+  </figure>
+
+  <ul>
+    <li><strong>Footswitch 1–4</strong>: i quattro preset della metà mostrata (A1–A4 o B1–B4).</li>
+    <li><strong>Footswitch 5</strong>: mostra l'altra metà <em>senza cambiare suono</em>; tenuto 3 secondi apre il looper.</li>
+    <li><strong>Tasti banco</strong>: il banco prima e quello dopo. «Amp Preset» sono gli slot dell'ampli; gli altri li mandi dall'app.</li>
+    <li><strong>LED sopra i footswitch</strong>: dicono cosa suona, rosso per la metà A e verde per la B.</li>
+    <li><strong>LED del tempo</strong> e <strong>click</strong>: battono il tempo del looper e contano prima di registrare.</li>
+    <li><strong>Modalità MIDI</strong>: lo stesso pedale comanda un programma sul computer o sull'iPad.</li>
+  </ul>
+
+  <h3>I nomi dei pezzi</h3>
+  <p>In tutta la guida ogni pezzo ha un nome solo:</p>
+  <div class="tab"><table>
+    <thead><tr><th>nome</th><th>cos'è</th></tr></thead>
+    <tbody>
+      <tr><td class="q">basetta</td><td>la millefori con sopra XIAO ed espansore</td></tr>
+      <tr><td class="q">XIAO</td><td>la schedina col microcontrollore e la presa USB-C (Seeed XIAO ESP32-S3)</td></tr>
+      <tr><td class="q">espansore</td><td>la schedina col chip MCP23017, quella con le sigle <span class="m">PA</span> e <span class="m">PB</span>: legge i pulsanti e accende i LED</td></tr>
+      <tr><td class="q">pista</td><td>una fila di stagno nudo lungo la basetta: <strong>pista 3V3</strong> e <strong>pista GND</strong> (la massa)</td></tr>
+      <tr><td class="q">pettine / connettore</td><td>la fila di piedini saldata sulla basetta, dove si infila un cavo</td></tr>
+      <tr><td class="q">linea</td><td>un piedino dell'espansore: <span class="m">PA0</span>…<span class="m">PA7</span>, <span class="m">PB0</span>…<span class="m">PB7</span></td></tr>
+      <tr><td class="q">pannello</td><td>la faccia di sopra della scatola, quella che si pesta</td></tr>
+      <tr><td class="q">scatola</td><td>il contenitore di legno</td></tr>
+      <tr><td class="q">cavo</td><td>un fascio di fili dalla basetta al pannello</td></tr>
+      <tr><td class="q">piastrina LED</td><td>la striscia di millefori coi quattro LED e le loro resistenze, dietro il pannello</td></tr>
+      <tr><td class="q">footswitch</td><td>i cinque interruttori da piede</td></tr>
+      <tr><td class="q">tasti banco</td><td>i due pulsantini da mano</td></tr>
+      <tr><td class="q">pulsanti</td><td>footswitch e tasti banco insieme: sette</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="nota att">
+    <p><strong>Serve saper saldare.</strong> Il resto la guida lo spiega passo per passo, ma
+      saldare un filo su una piazzola e usare un tester (tensione e prova diodi) li dà per
+      saputi.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="pezzi" style="--c:var(--blu)">
+  <div class="cap-testa"><span class="cap-num">2</span><h2>I pezzi</h2></div>
+  <p class="sotto">Tutto quello che c'è dentro il prototipo. Delle resistenze e dei connettori prendine più del necessario: costano meno della spedizione.</p>
+
+  <div class="tab"><table>
+    <thead><tr><th>pezzo</th><th>quanti</th><th>a cosa serve, e cosa guardare quando lo compri</th></tr></thead>
+    <tbody>
+      <tr class="gruppo"><td colspan="3">Elettronica</td></tr>
+      <tr><td><strong>Seeed XIAO ESP32-S3</strong></td><td class="n">1</td><td>il cervello. Proprio la <strong>S3</strong>: è l'unica XIAO che fa da pedaliera MIDI sull'USB. Con la sua <strong>antenna adesiva u.FL</strong> (è nella confezione): senza, il Bluetooth non arriva allo Spark.</td></tr>
+      <tr><td><strong>Display OLED 2,42" 128×64</strong></td><td class="n">1</td><td>controller SSD1309, <strong>I²C a 4 piedini</strong> (VDD, GND, SCL, SDA), indirizzo <span class="m">0x3C</span>. Ne esistono a 7 piedini (SPI): non vanno bene.</td></tr>
+      <tr><td><strong>Espansore MCP23017</strong></td><td class="n">1</td><td>nel prototipo il KAmod I2C-IOexp16. Sedici linee: sette per i pulsanti, otto per i LED.</td></tr>
+      <tr><td>Condensatore ceramico <strong>47–100 nF</strong></td><td class="n">1</td><td>fra alimentazione e massa dell'espansore, vicino al chip: toglie i disturbi.</td></tr>
+      <tr><td>Resistenze <strong>4,7 kΩ</strong></td><td class="n">2, di riserva</td><td>solo se il display non parte (vedi «Se qualcosa non va»).</td></tr>
+
+      <tr class="gruppo"><td colspan="3">Pulsanti e luci</td></tr>
+      <tr><td><strong>Footswitch momentanei</strong></td><td class="n">5</td><td>a pressione, che <strong>non restano agganciati</strong> (momentanei, «soft touch»), un contatto solo (SPST), filetto da 12 mm. Ne bastano due terminali.</td></tr>
+      <tr><td><strong>Pulsantini da pannello</strong> momentanei</td><td class="n">2</td><td>i tasti banco.</td></tr>
+      <tr><td><strong>LED RGB 5 mm a catodo comune</strong></td><td class="n">5</td><td>quattro sopra i footswitch (rosso e verde, il blu non si usa) e uno per il tempo (solo il rosso). <strong>Catodo comune</strong>, non anodo comune.</td></tr>
+      <tr><td>Resistenze <strong>330 Ω</strong></td><td class="n">6</td><td>quattro sul rosso dei LED, una sul LED del tempo, una sul click.</td></tr>
+      <tr><td>Resistenze <strong>560 Ω</strong></td><td class="n">4</td><td>sul verde dei LED: più alta del rosso apposta, perché il verde a parità di corrente sembra molto più luminoso.</td></tr>
+      <tr><td><strong>Disco piezo</strong> da 35 mm</td><td class="n">1</td><td>il click del conteggio del looper. Un disco nudo, non un «buzzer»: quelli magnetici dalla XIAO suonano a malapena.</td></tr>
+
+      <tr class="gruppo"><td colspan="3">Alimentazione</td></tr>
+      <tr><td><strong>Cella 18650 protetta</strong></td><td class="n">1</td><td>nel prototipo XTAR 18650 da 3300 mAh, «Protected». Diffida delle celle sopra i 3600 mAh dichiarati: non esistono.</td></tr>
+      <tr><td><strong>Portacella</strong> 1×18650 con fili</td><td class="n">1</td><td>le celle protette sono lunghe ~69 mm: prendine uno che le accetti.</td></tr>
+      <tr><td><strong>Caricatore Adafruit 6091</strong> (bq25185)</td><td class="n">1</td><td>carica la cella dalla sua presa USB-C, e il pedale <strong>suona anche mentre carica</strong>.</td></tr>
+      <tr><td><strong>Interruttore a levetta</strong> SPST, con dado</td><td class="n">1</td><td>l'acceso/spento. Metallico e robusto; va sul fianco, non sul pannello.</td></tr>
+      <tr><td><strong>Morsetto a vite</strong> a 2 poli</td><td class="n">1</td><td>il punto da cui partono i fili della batteria verso la XIAO e verso il partitore.</td></tr>
+      <tr><td>Resistenze <strong>100 kΩ</strong></td><td class="n">2</td><td>il partitore che fa leggere al pedale la carica della cella. Devono essere <strong>uguali</strong>.</td></tr>
+
+      <tr class="gruppo"><td colspan="3">Minuteria</td></tr>
+      <tr><td><strong>Millefori</strong> passo 2,54 mm</td><td class="n">1 + 1</td><td>una per la basetta, una striscia per la piastrina LED.</td></tr>
+      <tr><td><strong>Zoccoli femmina</strong> 2,54 mm, 7 fori</td><td class="n">2</td><td>per infilarci la XIAO invece di saldarla.</td></tr>
+      <tr><td><strong>Connettori JST-XH</strong> (passo 2,50)</td><td class="n">un kit</td><td>da 4 e da 5 poli, con la pinza per crimparli. I Dupont si allentano: nel prototipo ha fatto staccare la massa di un LED.</td></tr>
+      <tr><td><strong>Connettori JST-PH</strong> (passo 2,0), 2 poli</td><td class="n">2</td><td>quelli che entrano nelle prese del caricatore.</td></tr>
+      <tr><td>Filo a trefoli sottile, tre colori</td><td class="n">qualche metro</td><td>rosso per il positivo, nero per la massa, un altro per i segnali.</td></tr>
+      <tr><td>Termorestringente, colla a caldo, distanziali M2–M2,5</td><td class="n">—</td><td>per isolare le resistenze, fermare i fili, sollevare le schede dal legno.</td></tr>
+
+      <tr class="gruppo"><td colspan="3">Scatola</td></tr>
+      <tr><td>Listelli di <strong>mogano</strong> da 10 mm</td><td class="n">—</td><td>le sponde.</td></tr>
+      <tr><td>Tavolette di <strong>rovere</strong> da 5 mm</td><td class="n">—</td><td>pannello e fondo.</td></tr>
+      <tr><td><strong>Plexiglas fumé</strong> da 3 mm</td><td class="n">10 × 10 cm</td><td>il vetrino sopra il display.</td></tr>
+
+      <tr class="gruppo"><td colspan="3">Attrezzi</td></tr>
+      <tr><td colspan="3">Saldatore e stagno, tester (tensione, corrente, prova diodi), pinza crimpatrice per JST (nel prototipo una DxCRIMP D2032), alcool isopropilico per pulire il flussante, un cavo USB-C <strong>che porta i dati</strong>.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="schema" style="--c:#17a85a">
+  <div class="cap-testa"><span class="cap-num">3</span><h2>Lo schema</h2></div>
+  <p class="sotto">Ogni filo e dove finisce. I capitoli dopo lo costruiscono un pezzo alla volta.</p>
+
+  <figure class="schema">
+    <svg viewBox="0 0 890 500" role="img" aria-label="Schema generale: batteria e caricatore a sinistra, XIAO al centro, display ed espansore a destra, LED del tempo e click in basso.">
+      <defs>
+        <marker id="freccia" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <polygon points="0,1 8,4 0,7" fill="#3aa0ff"/>
+        </marker>
+      </defs>
+      <!-- simbolo di massa riusato -->
+      <!-- cella -->
+      <rect x="20" y="20" width="150" height="62" rx="8" fill="#16181c" stroke="#555"/>
+      <text x="95" y="44" font-size="14" font-weight="700" text-anchor="middle">Cella 18650</text>
+      <text x="95" y="62" font-size="11" class="t-dim" text-anchor="middle">protetta, 3,0–4,2 V</text>
+      <text x="60" y="78" font-size="12" text-anchor="middle" style="fill:#c8ccd4">−</text>
+      <text x="130" y="78" font-size="12" text-anchor="middle" style="fill:#ff6a6a">+</text>
+      <line x1="60" y1="82" x2="60" y2="150" stroke="#c8ccd4" stroke-width="3"/>
+      <line x1="130" y1="82" x2="130" y2="150" stroke="#ff5a5a" stroke-width="3"/>
+
+      <!-- caricatore -->
+      <rect x="20" y="150" width="150" height="130" rx="8" fill="#16181c" stroke="#555"/>
+      <text x="95" y="230" font-size="14" font-weight="700" text-anchor="middle">Caricatore</text>
+      <text x="95" y="247" font-size="11" class="t-dim" text-anchor="middle">Adafruit 6091</text>
+      <text x="95" y="268" font-size="11" class="t-dim" text-anchor="middle">USB-C: si carica qui</text>
+      <text x="60" y="168" font-size="10" text-anchor="middle" class="t-mono">BATT−</text>
+      <text x="130" y="168" font-size="10" text-anchor="middle" class="t-mono">BATT+</text>
+      <text x="162" y="196" font-size="10" text-anchor="end" class="t-mono">LOAD−</text>
+      <text x="162" y="241" font-size="10" text-anchor="end" class="t-mono">LOAD+</text>
+
+      <!-- LOAD− al morsetto e alla XIAO -->
+      <line x1="170" y1="200" x2="330" y2="200" stroke="#c8ccd4" stroke-width="3"/>
+      <!-- LOAD+ all'interruttore, al morsetto, alla XIAO -->
+      <line x1="170" y1="245" x2="196" y2="245" stroke="#ff5a5a" stroke-width="3"/>
+      <circle cx="199" cy="245" r="3.5" fill="none" stroke="#ff5a5a" stroke-width="2"/>
+      <line x1="201" y1="243" x2="222" y2="231" stroke="#ff5a5a" stroke-width="2.5"/>
+      <circle cx="226" cy="245" r="3.5" fill="none" stroke="#ff5a5a" stroke-width="2"/>
+      <text x="204" y="224" font-size="11" text-anchor="middle" class="t-dim">interruttore</text>
+      <line x1="229" y1="245" x2="330" y2="245" stroke="#ff5a5a" stroke-width="3"/>
+      <rect x="244" y="186" width="34" height="74" rx="4" fill="none" stroke="#7fe08a" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="261" y="181" font-size="10" text-anchor="middle" style="fill:#7fe08a">morsetto</text>
+
+      <!-- partitore -->
+      <circle cx="300" cy="245" r="4" fill="#ff5a5a"/>
+      <line x1="300" y1="245" x2="300" y2="262" stroke="#ff5a5a" stroke-width="2"/>
+      <rect x="292" y="262" width="16" height="30" rx="2" fill="#16181c" stroke="#f0c040" stroke-width="1.6"/>
+      <text x="286" y="282" font-size="10" text-anchor="end" style="fill:#f0c040">100 kΩ</text>
+      <line x1="300" y1="292" x2="300" y2="322" stroke="#f0c040" stroke-width="2"/>
+      <circle cx="300" cy="312" r="4" fill="#f0c040"/>
+      <line x1="300" y1="312" x2="330" y2="312" stroke="#f0c040" stroke-width="2.5"/>
+      <rect x="292" y="322" width="16" height="30" rx="2" fill="#16181c" stroke="#f0c040" stroke-width="1.6"/>
+      <text x="286" y="342" font-size="10" text-anchor="end" style="fill:#f0c040">100 kΩ</text>
+      <line x1="300" y1="352" x2="300" y2="366" stroke="#c8ccd4" stroke-width="2"/>
+      <g stroke="#c8ccd4" stroke-width="2.5"><line x1="290" y1="366" x2="310" y2="366"/><line x1="294" y1="371" x2="306" y2="371"/><line x1="298" y1="376" x2="302" y2="376"/></g>
+
+      <!-- XIAO -->
+      <rect x="330" y="160" width="160" height="300" rx="10" fill="#1d2026" stroke="#8a8f98" stroke-width="1.5"/>
+      <text x="410" y="182" font-size="14" font-weight="700" text-anchor="middle">XIAO ESP32-S3</text>
+      <text x="410" y="452" font-size="10" text-anchor="middle" class="t-dim">+ antenna u.FL</text>
+      <g font-size="11" class="t-mono">
+        <text x="338" y="204">BAT−</text>
+        <text x="338" y="249">BAT+</text>
+        <text x="338" y="316">D0</text>
+        <text x="338" y="404">D1</text>
+        <text x="338" y="444">D3</text>
+        <text x="482" y="204" text-anchor="end">3V3</text>
+        <text x="482" y="234" text-anchor="end">GND</text>
+        <text x="482" y="294" text-anchor="end">D4 SDA</text>
+        <text x="482" y="334" text-anchor="end">D5 SCL</text>
+      </g>
+      <text x="366" y="222" font-size="9" class="t-dim">(sul retro)</text>
+
+      <!-- LED del tempo su D1 -->
+      <line x1="330" y1="400" x2="282" y2="400" stroke="#ff8080" stroke-width="2.5"/>
+      <rect x="242" y="392" width="40" height="16" rx="2" fill="#16181c" stroke="#ff8080" stroke-width="1.6"/>
+      <text x="262" y="388" font-size="10" text-anchor="middle" style="fill:#ff8080">330 Ω</text>
+      <line x1="242" y1="400" x2="214" y2="400" stroke="#ff8080" stroke-width="2.5"/>
+      <polygon points="214,390 214,410 196,400" fill="#ff4d5e"/>
+      <line x1="195" y1="390" x2="195" y2="410" stroke="#ff4d5e" stroke-width="2.5"/>
+      <line x1="195" y1="400" x2="150" y2="400" stroke="#c8ccd4" stroke-width="2.5"/>
+      <line x1="150" y1="400" x2="150" y2="414" stroke="#c8ccd4" stroke-width="2.5"/>
+      <g stroke="#c8ccd4" stroke-width="2.5"><line x1="140" y1="414" x2="160" y2="414"/><line x1="144" y1="419" x2="156" y2="419"/><line x1="148" y1="424" x2="152" y2="424"/></g>
+      <text x="110" y="382" font-size="11">LED del tempo <tspan class="t-dim" font-size="9">(solo il rosso)</tspan></text>
+
+      <!-- click su D3 -->
+      <line x1="330" y1="440" x2="282" y2="440" stroke="#d6a0ff" stroke-width="2.5"/>
+      <rect x="242" y="432" width="40" height="16" rx="2" fill="#16181c" stroke="#d6a0ff" stroke-width="1.6"/>
+      <text x="262" y="466" font-size="10" text-anchor="middle" style="fill:#d6a0ff">330 Ω</text>
+      <line x1="242" y1="440" x2="222" y2="440" stroke="#d6a0ff" stroke-width="2.5"/>
+      <circle cx="206" cy="440" r="15" fill="#2a2416" stroke="#f0c040" stroke-width="2"/>
+      <circle cx="206" cy="440" r="7" fill="#d8d8d8"/>
+      <line x1="191" y1="440" x2="80" y2="440" stroke="#c8ccd4" stroke-width="2.5"/>
+      <line x1="80" y1="440" x2="80" y2="454" stroke="#c8ccd4" stroke-width="2.5"/>
+      <g stroke="#c8ccd4" stroke-width="2.5"><line x1="70" y1="454" x2="90" y2="454"/><line x1="74" y1="459" x2="86" y2="459"/><line x1="78" y1="464" x2="82" y2="464"/></g>
+      <text x="150" y="478" font-size="11" text-anchor="middle">click (disco piezo)</text>
+
+      <!-- 3V3 e GND verso le piste -->
+      <line x1="490" y1="200" x2="502" y2="200" stroke="#ff5a5a" stroke-width="3"/>
+      <text x="506" y="204" font-size="11" style="fill:#ff8080">→ pista 3V3</text>
+      <line x1="490" y1="230" x2="502" y2="230" stroke="#c8ccd4" stroke-width="3"/>
+      <text x="506" y="234" font-size="11" style="fill:#c8ccd4">→ pista GND</text>
+
+      <!-- bus I2C: SDA (D4) a x=580, SCL (D5) a x=610, con i salti dove si incrociano -->
+      <path d="M490 290 H592 V190 H650" fill="none" stroke="#3aa0ff" stroke-width="2.5"/>
+      <path d="M592 290 V345 H616 a6 6 0 0 1 12 0 H650" fill="none" stroke="#3aa0ff" stroke-width="2.5"/>
+      <circle cx="592" cy="290" r="4" fill="#3aa0ff"/>
+      <path d="M490 330 H586 a6 6 0 0 1 12 0 H622 V220 H650" fill="none" stroke="#5fd0e0" stroke-width="2.5"/>
+      <path d="M622 330 V375 H650" fill="none" stroke="#5fd0e0" stroke-width="2.5"/>
+      <circle cx="622" cy="330" r="4" fill="#5fd0e0"/>
+
+      <!-- display -->
+      <rect x="650" y="150" width="225" height="100" rx="8" fill="#16181c" stroke="#555"/>
+      <text x="762" y="170" font-size="13" font-weight="700" text-anchor="middle">Display OLED</text>
+      <g font-size="11" class="t-mono">
+        <text x="658" y="194">SDA</text><text x="658" y="224">SCL</text>
+      </g>
+      <text x="868" y="194" font-size="11" text-anchor="end" style="fill:#ff8080">VDD → 3V3</text>
+      <text x="868" y="214" font-size="11" text-anchor="end" style="fill:#c8ccd4">GND → GND</text>
+      <text x="868" y="240" font-size="10" text-anchor="end" class="t-dim">indirizzo 0x3C</text>
+
+      <!-- espansore -->
+      <rect x="650" y="300" width="225" height="170" rx="8" fill="#16181c" stroke="#555"/>
+      <text x="762" y="320" font-size="13" font-weight="700" text-anchor="middle">Espansore MCP23017</text>
+      <g font-size="11" class="t-mono">
+        <text x="658" y="349">SDA</text><text x="658" y="379">SCL</text>
+      </g>
+      <text x="868" y="345" font-size="11" text-anchor="end" style="fill:#ff8080">V+, RST → 3V3</text>
+      <text x="868" y="363" font-size="11" text-anchor="end" style="fill:#c8ccd4">GND, A0–A2 → GND</text>
+      <text x="868" y="381" font-size="10" text-anchor="end" class="t-dim">47–100 nF fra V+ e GND</text>
+      <text x="700" y="414" font-size="11" style="fill:#f0c040">PA → 7 pulsanti</text>
+      <text x="700" y="434" font-size="11" style="fill:#7fe08a">PB → 4 LED</text>
+      <text x="700" y="456" font-size="10" class="t-dim">indirizzo 0x20 · capitolo 5</text>
+    </svg>
+    <div class="legenda">
+      <span><i style="background:#ff5a5a"></i> positivo</span>
+      <span><i style="background:#c8ccd4"></i> massa (−, GND)</span>
+      <span><i style="background:#3aa0ff"></i> SDA</span>
+      <span><i style="background:#5fd0e0"></i> SCL</span>
+      <span><i style="background:#f0c040"></i> lettura della batteria</span>
+    </div>
+    <figcaption>Le tre righe che finiscono nel simbolo ⏚ vanno alla massa. Dove due fili si scavalcano con un archetto, non si toccano.</figcaption>
+  </figure>
+
+  <h3>La XIAO, piedino per piedino</h3>
+  <div class="due">
+    <figure class="schema stretto">
+      <svg viewBox="0 0 320 330" role="img" aria-label="La XIAO vista da sopra con la presa USB in alto: a sinistra D0–D6, a destra 5V, GND, 3V3, D10–D7.">
+        <rect x="100" y="40" width="120" height="250" rx="12" fill="#1d2026" stroke="#8a8f98" stroke-width="1.5"/>
+        <rect x="138" y="26" width="44" height="24" rx="5" fill="#2a2d33" stroke="#8a8f98"/>
+        <text x="160" y="18" font-size="11" class="t-dim" text-anchor="middle">USB-C</text>
+        <text x="160" y="170" font-size="12" font-weight="700" text-anchor="middle">XIAO</text>
+        <text x="160" y="186" font-size="10" class="t-dim" text-anchor="middle">vista da sopra</text>
+        <g font-size="12" class="t-mono">
+          <!-- sinistra: D0..D6 -->
+          <rect x="100" y="62" width="12" height="12" fill="#f0c040"/><text x="92" y="73" text-anchor="end">D0 batteria</text>
+          <rect x="100" y="94" width="12" height="12" fill="#ff8080"/><text x="92" y="105" text-anchor="end">D1 LED tempo</text>
+          <rect x="100" y="126" width="12" height="12" fill="#3a3d45"/><text x="92" y="137" text-anchor="end" class="t-dim">D2</text>
+          <rect x="100" y="158" width="12" height="12" fill="#d6a0ff"/><text x="92" y="169" text-anchor="end">D3 click</text>
+          <rect x="100" y="190" width="12" height="12" fill="#3aa0ff"/><text x="92" y="201" text-anchor="end">D4 SDA</text>
+          <rect x="100" y="222" width="12" height="12" fill="#5fd0e0"/><text x="92" y="233" text-anchor="end">D5 SCL</text>
+          <rect x="100" y="254" width="12" height="12" fill="#3a3d45"/><text x="92" y="265" text-anchor="end" class="t-dim">D6</text>
+          <!-- destra: 5V GND 3V3 D10 D9 D8 D7 -->
+          <rect x="208" y="62" width="12" height="12" fill="#3a3d45"/><text x="228" y="73" class="t-dim">5V</text>
+          <rect x="208" y="94" width="12" height="12" fill="#c8ccd4"/><text x="228" y="105">GND</text>
+          <rect x="208" y="126" width="12" height="12" fill="#ff5a5a"/><text x="228" y="137">3V3</text>
+          <rect x="208" y="158" width="12" height="12" fill="#3a3d45"/><text x="228" y="169" class="t-dim">D10</text>
+          <rect x="208" y="190" width="12" height="12" fill="#3a3d45"/><text x="228" y="201" class="t-dim">D9</text>
+          <rect x="208" y="222" width="12" height="12" fill="#3a3d45"/><text x="228" y="233" class="t-dim">D8</text>
+          <rect x="208" y="254" width="12" height="12" fill="#3a3d45"/><text x="228" y="265" class="t-dim">D7</text>
+        </g>
+        <text x="160" y="318" font-size="11" class="t-dim" text-anchor="middle">BAT+ e BAT− sono piazzole sul retro</text>
+      </svg>
+      <figcaption>I piedini colorati sono usati; i grigi restano liberi.</figcaption>
+    </figure>
+    <div>
+      <div class="tab"><table style="min-width:0">
+        <thead><tr><th>piedino</th><th>dove va</th></tr></thead>
+        <tbody>
+          <tr><td class="q">3V3</td><td>pista 3V3 (un filo solo)</td></tr>
+          <tr><td class="q">GND</td><td>pista GND (un filo solo)</td></tr>
+          <tr><td class="q">D4</td><td>SDA del display e dell'espansore</td></tr>
+          <tr><td class="q">D5</td><td>SCL del display e dell'espansore</td></tr>
+          <tr><td class="q">D0</td><td>il centro del partitore della batteria</td></tr>
+          <tr><td class="q">D1</td><td>330 Ω, poi il rosso del LED del tempo</td></tr>
+          <tr><td class="q">D3</td><td>330 Ω, poi il disco piezo</td></tr>
+          <tr><td class="q">BAT+ / BAT−</td><td>il morsetto: + e − della batteria, dopo l'interruttore</td></tr>
+          <tr><td class="q">5V</td><td>niente</td></tr>
+          <tr><td class="q">D6 · D7</td><td>liberi apposta: sono la seriale di riserva</td></tr>
+          <tr><td class="q">D2 · D8–D10</td><td>liberi</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="basetta" style="--c:#ffd21e">
+  <div class="cap-testa"><span class="cap-num" style="color:#000">4</span><h2>La basetta</h2></div>
+  <p class="sotto">XIAO, espansore, le due piste e i connettori dove si attaccano i cavi del pannello.</p>
+
+  <div class="nota">
+    <p><strong>La regola che decide tutto: massa e 3,3 V non sono fili, sono piste.</strong> Dalla XIAO
+      parte un filo solo verso ciascuna pista, e tutto il resto si attacca alle piste. Portare
+      tutto al piedino della XIAO fa un grappolo di fili su un punto solo, brutto da saldare e
+      difficile da controllare.</p>
+  </div>
+
+  <ol class="passi">
+    <li><strong>Le piste.</strong> Su una millefori (quella del prototipo è circa 7 × 9 cm) fai due file
+      di stagno nudo da un lato all'altro: <strong>pista 3V3 in alto, pista GND in basso</strong>.
+      Un filo nudo steso sui fori e saldato ogni due o tre va bene.
+      <span class="se">Le due piste non devono toccarsi mai: sarebbe un corto sull'alimentazione.</span></li>
+    <li><strong>Gli zoccoli della XIAO</strong>, in alto a sinistra, con la presa USB verso il bordo:
+      il cavo ci deve arrivare a scatola aperta. Gli zoccoli permettono di sfilarla per cambiarla.</li>
+    <li><strong>L'espansore</strong> a destra della XIAO, e il <strong>condensatore</strong> saldato fra il suo
+      piedino di alimentazione (<span class="m">V+</span> o <span class="m">VDD</span>) e la massa, più vicino possibile.
+      Il condensatore ceramico non ha verso.</li>
+    <li><strong>Alimentazione e indirizzo dell'espansore.</strong> <span class="m">V+</span> e <span class="m">RST</span>
+      alla pista 3V3; <span class="m">GND</span>, <span class="m">A0</span>, <span class="m">A1</span> e
+      <span class="m">A2</span> alla pista GND.
+      <span class="se">Se <span class="m">RST</span> resta per aria il chip sta in reset e non risponde. Se gli A
+      non vanno a massa, l'indirizzo non è 0x20 e il firmware non trova l'espansore.</span></li>
+    <li><strong>XIAO alle piste e al bus.</strong> <span class="m">3V3</span> alla pista 3V3, <span class="m">GND</span>
+      alla pista GND. <span class="m">D4</span> a <span class="m">SDA</span> dell'espansore e al connettore del display;
+      <span class="m">D5</span> a <span class="m">SCL</span>, uguale.
+      <span class="se">SDA e SCL scambiati: niente si rompe, ma display ed espansore restano muti.</span></li>
+    <li><strong>I connettori JST-XH.</strong> Ognuno ha il suo filo di massa, preso dalla pista GND accanto:
+      <ul style="margin-top:6px">
+        <li><strong>display</strong>, 4 poli: VDD (pista 3V3), GND, SDA (D4), SCL (D5);</li>
+        <li><strong>footswitch</strong>, 5 poli: G, FS1, FS2, FS3, FS4;</li>
+        <li><strong>footswitch 5 e tasti banco</strong>, 4 poli: G, FS5, banco SX, banco DX;</li>
+        <li><strong>LED 1 e 2</strong>, 5 poli: G e quattro linee <span class="m">PB4…PB7</span>;</li>
+        <li><strong>LED 3 e 4</strong>, 5 poli: G e quattro linee <span class="m">PB0…PB3</span>;</li>
+        <li><strong>LED del tempo e click</strong>: due fili da D1 e D3 più la massa (anche un 3 poli).</li>
+      </ul>
+      Quali linee vanno a quale pulsante e a quale LED è nella tabella del capitolo dopo.</li>
+    <li><strong>Pulisci il flussante</strong> con alcool isopropilico e uno spazzolino, <strong>prima</strong> di dare corrente.
+      <span class="se">Nel prototipo il residuo di flussante sotto l'espansore lo faceva scaldare: sembrava un chip guasto.</span></li>
+  </ol>
+
+  <div class="nota att">
+    <p><strong>I due connettori dei LED sono uguali</strong>: stesso numero di poli, e a scatola chiusa
+      non si vedono. Scambiati, i LED di sinistra si accendono al posto di quelli di destra, e sembra
+      un difetto del firmware. Segnali: un pallino di colore su uno dei due, o meglio un piedino tolto
+      dal pettine e il foro corrispondente tappato nella spina.</p>
+  </div>
+
+  <h3>Il display</h3>
+  <ol class="passi">
+    <li><strong>Guarda il retro del display.</strong> C'è una serie di piazzole con scritte (anche in cinese);
+      quella segnata <strong>D2</strong> deve essere <strong>chiusa</strong>, cioè le sue due metà unite da una goccia di stagno
+      o da una resistenza da 0 Ω.
+      <span class="se">Aperta, il display non risponde al bus e resta nero. Sull'esemplare del prototipo era già chiusa di fabbrica.</span></li>
+    <li>Collegalo al suo connettore con quattro fili: VDD, GND, SCL, SDA, seguendo le scritte del display, non i colori dei fili.</li>
+  </ol>
+
+  <h3>L'antenna</h3>
+  <p>Il foglietto adesivo della XIAO si attacca al connettorino u.FL premendo in verticale finché scatta.
+    <strong>Una volta sola</strong>: quel connettore regge pochi innesti. Il foglietto si incolla dentro la scatola,
+    <strong>lontano dal metallo</strong> (footswitch, cella). Il legno non ferma il segnale.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="pulsanti" style="--c:#c02030">
+  <div class="cap-testa"><span class="cap-num">5</span><h2>Pulsanti e LED</h2></div>
+  <p class="sotto">Uno legge e l'altro comanda: il port A dell'espansore ascolta i pulsanti, il port B accende i LED.</p>
+
+  <div class="due">
+    <figure class="schema stretto">
+      <svg viewBox="0 0 380 210" role="img" aria-label="Un pulsante: dalla linea PA al pulsante, e dal pulsante alla massa.">
+        <rect x="10" y="20" width="110" height="160" rx="8" fill="#1d2026" stroke="#8a8f98"/>
+        <text x="65" y="44" font-size="12" font-weight="700" text-anchor="middle">espansore</text>
+        <text x="65" y="60" font-size="10" class="t-dim" text-anchor="middle">port A</text>
+        <text x="65" y="112" font-size="10" class="t-dim" text-anchor="middle">pull-up</text>
+        <text x="65" y="125" font-size="10" class="t-dim" text-anchor="middle">interno</text>
+        <line x1="120" y1="100" x2="200" y2="100" stroke="#f0c040" stroke-width="2.5"/>
+        <text x="160" y="92" font-size="11" text-anchor="middle" class="t-mono" style="fill:#f0c040">PA4</text>
+        <circle cx="205" cy="100" r="4.5" fill="none" stroke="#e8e8ea" stroke-width="2"/>
+        <circle cx="265" cy="100" r="4.5" fill="none" stroke="#e8e8ea" stroke-width="2"/>
+        <line x1="208" y1="97" x2="262" y2="80" stroke="#e8e8ea" stroke-width="2.2"/>
+        <text x="235" y="132" font-size="11" text-anchor="middle">footswitch 1</text>
+        <text x="235" y="147" font-size="10" text-anchor="middle" class="t-dim">due terminali, nessun verso</text>
+        <line x1="270" y1="100" x2="330" y2="100" stroke="#c8ccd4" stroke-width="2.5"/>
+        <line x1="330" y1="100" x2="330" y2="150" stroke="#c8ccd4" stroke-width="2.5"/>
+        <g stroke="#c8ccd4" stroke-width="2.5"><line x1="316" y1="150" x2="344" y2="150"/><line x1="321" y1="157" x2="339" y2="157"/><line x1="326" y1="164" x2="334" y2="164"/></g>
+        <text x="330" y="186" font-size="10" text-anchor="middle" class="t-dim">G del connettore</text>
+      </svg>
+      <figcaption>× 7. Nessuna resistenza: la tiene dentro il chip. Premuto, la linea va a massa.</figcaption>
+    </figure>
+
+    <figure class="schema stretto">
+      <svg viewBox="0 0 380 210" role="img" aria-label="Un LED bicolore: la linea del rosso con 330 ohm all'anodo rosso, quella del verde con 560 ohm all'anodo verde, il catodo comune alla massa.">
+        <rect x="10" y="20" width="110" height="160" rx="8" fill="#1d2026" stroke="#8a8f98"/>
+        <text x="65" y="44" font-size="12" font-weight="700" text-anchor="middle">espansore</text>
+        <text x="65" y="60" font-size="10" class="t-dim" text-anchor="middle">port B</text>
+        <line x1="120" y1="80" x2="160" y2="80" stroke="#ff6a6a" stroke-width="2.5"/>
+        <text x="140" y="72" font-size="11" text-anchor="middle" class="t-mono" style="fill:#ff6a6a">PB5</text>
+        <rect x="160" y="70" width="42" height="20" rx="3" fill="#16181c" stroke="#ff6a6a" stroke-width="1.6"/>
+        <text x="181" y="84" font-size="10" text-anchor="middle" style="fill:#ff6a6a">330 Ω</text>
+        <line x1="202" y1="80" x2="236" y2="80" stroke="#ff6a6a" stroke-width="2.5"/>
+        <polygon points="236,69 236,91 258,80" fill="#ff4d5e"/>
+        <line x1="259" y1="68" x2="259" y2="92" stroke="#ff4d5e" stroke-width="2.5"/>
+        <line x1="259" y1="80" x2="310" y2="80" stroke="#c8ccd4" stroke-width="2.5"/>
+        <line x1="120" y1="135" x2="160" y2="135" stroke="#4ee06a" stroke-width="2.5"/>
+        <text x="140" y="127" font-size="11" text-anchor="middle" class="t-mono" style="fill:#4ee06a">PB4</text>
+        <rect x="160" y="125" width="42" height="20" rx="3" fill="#16181c" stroke="#4ee06a" stroke-width="1.6"/>
+        <text x="181" y="139" font-size="10" text-anchor="middle" style="fill:#4ee06a">560 Ω</text>
+        <line x1="202" y1="135" x2="236" y2="135" stroke="#4ee06a" stroke-width="2.5"/>
+        <polygon points="236,124 236,146 258,135" fill="#4ee06a"/>
+        <line x1="259" y1="123" x2="259" y2="147" stroke="#4ee06a" stroke-width="2.5"/>
+        <line x1="259" y1="135" x2="310" y2="135" stroke="#c8ccd4" stroke-width="2.5"/>
+        <line x1="310" y1="80" x2="310" y2="160" stroke="#c8ccd4" stroke-width="2.5"/>
+        <circle cx="310" cy="135" r="4" fill="#c8ccd4"/>
+        <g stroke="#c8ccd4" stroke-width="2.5"><line x1="296" y1="160" x2="324" y2="160"/><line x1="301" y1="167" x2="319" y2="167"/><line x1="306" y1="174" x2="314" y2="174"/></g>
+        <text x="350" y="112" font-size="10" text-anchor="middle" class="t-dim">catodo</text>
+        <text x="350" y="125" font-size="10" text-anchor="middle" class="t-dim">comune</text>
+        <text x="246" y="196" font-size="10" text-anchor="middle" class="t-dim">LED 1: due colori nello stesso LED</text>
+      </svg>
+      <figcaption>× 4. Una resistenza per colore, sull'anodo: mai una sola sul catodo.</figcaption>
+    </figure>
+  </div>
+
+  <h3>Quale linea va dove</h3>
+  <p>È la mappa che il firmware si aspetta. Se cabli diversamente non succede niente di male: la
+    mappatura guidata del capitolo «La prova» ti dice la tua, e la si scrive nel firmware.</p>
+  <div class="tab"><table>
+    <thead><tr><th>pulsante</th><th>FS1</th><th>FS2</th><th>FS3</th><th>FS4</th><th>FS5</th><th>banco SX</th><th>banco DX</th></tr></thead>
+    <tbody><tr><td class="q">linea</td><td class="m">PA4</td><td class="m">PA5</td><td class="m">PA6</td><td class="m">PA3</td><td class="m">PA7</td><td class="m">PA1</td><td class="m">PA0</td></tr></tbody>
+  </table></div>
+  <div class="tab"><table>
+    <thead><tr><th>LED</th><th>1 (sopra FS1)</th><th>2 (sopra FS2)</th><th>3 (sopra FS3)</th><th>4 (sopra FS4)</th></tr></thead>
+    <tbody>
+      <tr><td class="q" style="color:#ff6a6a">rosso · 330 Ω</td><td class="m">PB5</td><td class="m">PB7</td><td class="m">PB1</td><td class="m">PB3</td></tr>
+      <tr><td class="q" style="color:#4ee06a">verde · 560 Ω</td><td class="m">PB4</td><td class="m">PB6</td><td class="m">PB0</td><td class="m">PB2</td></tr>
+    </tbody>
+  </table></div>
+  <p style="color:var(--dim);font-size:0.9rem"><span class="m">PA2</span> resta libera.</p>
+
+  <h3>I footswitch e i tasti banco</h3>
+  <ol class="passi">
+    <li>Ogni footswitch ha (almeno) due terminali: <strong>uno alla sua linea, l'altro alla massa</strong>. Il verso non conta.</li>
+    <li>La massa corre <strong>a catena</strong>: un filo dal <span class="m">G</span> del connettore al primo footswitch, da lì al secondo, e così via. Lo stesso per i tasti banco.</li>
+    <li>Ogni filo di linea va al suo polo del connettore, come in tabella. Segna sul connettore quale polo è quale.</li>
+  </ol>
+
+  <h3>La piastrina LED</h3>
+  <ol class="passi">
+    <li><strong>Trova le gambe di ogni LED col tester</strong> in prova diodi: puntale nero sulla gamba più lunga
+      (il catodo comune), il rosso su una delle altre. Il LED si accende debolmente del suo colore.
+      Di solito l'ordine è rosso, catodo, verde, blu, ma va controllato. <strong>Il blu non si usa</strong>: taglialo corto.
+      <span class="se">Un LED messo al contrario non si accende, ma a questa tensione non si rompe: lo si gira.</span></li>
+    <li>Monta i quattro LED su una striscia di millefori, alla distanza dei footswitch (70 mm).</li>
+    <li>Sulla gamba del <strong>rosso</strong> una resistenza da <strong>330 Ω</strong>, sulla gamba del <strong>verde</strong> una da
+      <strong>560 Ω</strong>; i catodi tutti insieme alla massa del connettore. Ogni resistenza sotto il suo termorestringente.</li>
+    <li>Il cavo dalla piastrina alla basetta tienilo <strong>lontano dal metallo dei footswitch</strong>: quei fili non hanno protezione.</li>
+    <li>La colla a caldo per fermare i fili va messa <strong>dopo</strong> aver visto accendersi tutti e quattro i LED.</li>
+  </ol>
+
+  <h3>Il LED del tempo e il click</h3>
+  <ol class="passi">
+    <li><strong>LED del tempo</strong>: un altro LED RGB, di cui si usa <strong>solo il rosso</strong>.
+      <span class="m">D1</span> → resistenza da 330 Ω → gamba del rosso; catodo alla massa. Va in un foro da 5 mm del pannello.</li>
+    <li><strong>Click</strong>: il disco piezo ha due fili, e il verso non conta.
+      <span class="m">D3</span> → resistenza da 330 Ω → un filo del disco; l'altro filo alla massa.</li>
+    <li>Il disco suona di più se è <strong>fissato solo per il bordo, sopra un vuoto</strong>: incollato di piatto sul legno si sente appena.
+      Il click suona solo nel conteggio del looper, mai sopra l'ampli: non serve forte.</li>
+  </ol>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="corrente" style="--c:#f08a24">
+  <div class="cap-testa"><span class="cap-num">6</span><h2>Alimentazione</h2></div>
+  <p class="sotto">Cella, caricatore, interruttore e morsetto: la parte che fa danni se si sbaglia il verso.</p>
+
+  <div class="nota att">
+    <p><strong>Mai saldare sulla cella, e cella fuori dal portacella mentre si salda.</strong> E prima di
+      collegare la XIAO, misura col tester che il + e il − arrivino dove devono: <strong>al contrario la XIAO
+      si brucia</strong>.</p>
+  </div>
+
+  <figure class="schema medio">
+    <svg viewBox="0 0 600 250" role="img" aria-label="Cella al caricatore su BATT; da LOAD il positivo passa dall'interruttore e arriva al morsetto, il negativo va diretto al morsetto; dal morsetto alla XIAO e al partitore.">
+      <rect x="10" y="20" width="110" height="60" rx="8" fill="#16181c" stroke="#555"/>
+      <text x="65" y="46" font-size="13" font-weight="700" text-anchor="middle">Cella</text>
+      <text x="65" y="64" font-size="10" class="t-dim" text-anchor="middle">nel portacella</text>
+      <rect x="160" y="20" width="130" height="140" rx="8" fill="#16181c" stroke="#555"/>
+      <text x="225" y="95" font-size="13" font-weight="700" text-anchor="middle">Caricatore</text>
+      <text x="225" y="112" font-size="10" class="t-dim" text-anchor="middle">USB-C in alto</text>
+      <text x="172" y="44" font-size="10" class="t-mono">BATT</text>
+      <text x="172" y="140" font-size="10" class="t-mono">LOAD</text>
+      <line x1="120" y1="40" x2="160" y2="40" stroke="#ff5a5a" stroke-width="3"/>
+      <line x1="120" y1="60" x2="160" y2="60" stroke="#c8ccd4" stroke-width="3"/>
+      <text x="140" y="34" font-size="11" text-anchor="middle" style="fill:#ff8080">+</text>
+      <text x="140" y="76" font-size="11" text-anchor="middle" style="fill:#c8ccd4">−</text>
+      <!-- LOAD -->
+      <line x1="290" y1="125" x2="330" y2="125" stroke="#ff5a5a" stroke-width="3"/>
+      <circle cx="333" cy="125" r="3.5" fill="none" stroke="#ff5a5a" stroke-width="2"/>
+      <line x1="335" y1="123" x2="356" y2="111" stroke="#ff5a5a" stroke-width="2.5"/>
+      <circle cx="360" cy="125" r="3.5" fill="none" stroke="#ff5a5a" stroke-width="2"/>
+      <text x="346" y="102" font-size="10" text-anchor="middle" class="t-dim">interruttore</text>
+      <line x1="363" y1="125" x2="420" y2="125" stroke="#ff5a5a" stroke-width="3"/>
+      <line x1="290" y1="150" x2="420" y2="150" stroke="#c8ccd4" stroke-width="3"/>
+      <rect x="420" y="112" width="40" height="52" rx="4" fill="#16181c" stroke="#7fe08a" stroke-width="1.5"/>
+      <text x="440" y="180" font-size="10" text-anchor="middle" style="fill:#7fe08a">morsetto</text>
+      <text x="440" y="130" font-size="12" text-anchor="middle" style="fill:#ff8080">+</text>
+      <text x="440" y="156" font-size="12" text-anchor="middle" style="fill:#c8ccd4">−</text>
+      <line x1="460" y1="125" x2="590" y2="125" stroke="#ff5a5a" stroke-width="3"/>
+      <line x1="460" y1="150" x2="590" y2="150" stroke="#c8ccd4" stroke-width="3"/>
+      <text x="585" y="118" font-size="11" text-anchor="end" style="fill:#ff8080">XIAO BAT+</text>
+      <text x="585" y="168" font-size="11" text-anchor="end" style="fill:#c8ccd4">XIAO BAT−</text>
+      <!-- partitore -->
+      <line x1="490" y1="125" x2="490" y2="200" stroke="#f0c040" stroke-width="2" stroke-dasharray="4 3"/>
+      <line x1="520" y1="150" x2="520" y2="200" stroke="#f0c040" stroke-width="2" stroke-dasharray="4 3"/>
+      <circle cx="490" cy="125" r="3.5" fill="#ff5a5a"/>
+      <circle cx="520" cy="150" r="3.5" fill="#c8ccd4"/>
+      <text x="505" y="218" font-size="11" text-anchor="middle" style="fill:#f0c040">100 kΩ + 100 kΩ → D0</text>
+      <text x="225" y="190" font-size="10" text-anchor="middle" class="t-dim">sulle prese: + a sinistra, − a destra</text>
+      <text x="225" y="204" font-size="10" text-anchor="middle" class="t-dim">(con la USB-C in alto)</text>
+    </svg>
+    <figcaption>L'interruttore sta sul positivo, dopo il caricatore: così il caricatore carica anche a pedale spento.</figcaption>
+  </figure>
+
+  <ol class="passi">
+    <li><strong>Portacella → BATT del caricatore</strong>, con una spina JST-PH. Il verso lo dice la serigrafia
+      della scheda, <strong>non i colori dei cavetti</strong> (quelli già crimpati a volte sono invertiti):
+      con la USB-C in alto, <strong>+ a sinistra e − a destra</strong>.</li>
+    <li><strong>LOAD +</strong> va a un terminale dell'<strong>interruttore</strong>; dall'altro terminale un filo al <strong>+ del morsetto</strong>.</li>
+    <li><strong>LOAD −</strong> va diretto al <strong>− del morsetto</strong>.</li>
+    <li><strong>Prova.</strong> Cella dentro, interruttore acceso, tester in tensione sulle due viti del morsetto:
+      fra 3,6 e 4,2 V, e positivo dove deve essere. Poi spegni e togli la cella.</li>
+    <li><strong>Morsetto → XIAO.</strong> Il + alla piazzola <strong>BAT+</strong> sul retro della XIAO, il − alla <strong>BAT−</strong>
+      (le scritte sono sulla scheda).</li>
+    <li><strong>Il partitore</strong>: una resistenza da 100 kΩ dal + del morsetto a <span class="m">D0</span>, un'altra dal −
+      del morsetto a <span class="m">D0</span>. Nel prototipo stanno in due cavetti, sotto il termorestringente.
+      Sta dopo l'interruttore: a pedale spento non consuma niente.
+      <span class="se">Senza, il pedale funziona lo stesso, ma l'icona della batteria non dice il vero.</span></li>
+    <li><strong>Il LED «PWR» del caricatore</strong> resta acceso anche a pedale spento e scarica la cella in un mese e mezzo
+      (2,1 mA misurati). Nel prototipo è stato tolto, sollevandolo con la punta di un cacciavite. Gli altri LED servono.</li>
+  </ol>
+
+  <div class="nota">
+    <p><strong>Si carica dalla presa del caricatore</strong>, con qualunque caricatore USB-C, anche suonando.
+      La presa della XIAO carica solo a 50 mA: serve per il firmware, non per la cella.
+      Il caricatore di serie carica a 500 mA o 1 A (la documentazione non è d'accordo con sé stessa),
+      con un limite di 6 ore: una notte basta.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="scatola" style="--c:#8a5a2b">
+  <div class="cap-testa"><span class="cap-num">7</span><h2>La scatola</h2></div>
+  <p class="sotto">Legno, perché ai 2,4 GHz del Bluetooth è trasparente.</p>
+
+  <div class="tab"><table>
+    <thead><tr><th>cosa</th><th>misura</th><th>perché</th></tr></thead>
+    <tbody>
+      <tr><td>esterno</td><td class="n">360 × 120 × 35 mm</td><td>dentro restano 25 mm, e un footswitch ne occupa 20</td></tr>
+      <tr><td>pannello utile</td><td class="n">340 × 100 mm</td><td></td></tr>
+      <tr><td>interassi dei footswitch</td><td class="n">70 + 70 + 70 + 90</td><td>i 90 fra il quarto e il quinto servono a trovare il quinto col piede, senza guardare. Prima di forare, provali col tuo piede</td></tr>
+      <tr><td>sponde</td><td class="n">mogano 10 mm</td><td>con rinforzi fra un footswitch e l'altro che arrivano alle sponde</td></tr>
+      <tr><td>pannello e fondo</td><td class="n">rovere 5 mm</td><td>incassati, la fibra lungo la fila dei footswitch</td></tr>
+      <tr><td>prese USB-C da pannello</td><td class="n">fino a 8 mm</td><td>la sponda da 10 va svasata da dentro attorno al foro</td></tr>
+      <tr><td>vetrino del display</td><td class="n">plexi fumé 3 mm</td><td>incollato <strong>sotto</strong> il pannello, con la finestra smussata a 45°</td></tr>
+    </tbody>
+  </table></div>
+
+  <ul>
+    <li><strong>L'interruttore sul fianco</strong>, mai sul pannello: al primo pestone si spezza.</li>
+    <li><strong>Il caricatore dietro la sponda</strong>, con la sua presa USB-C affacciata a un foro, e fissato bene
+      (nel prototipo su un supporto di compensato, con quattro viti): gli strattoni del cavo arrivano alle sue saldature.</li>
+    <li><strong>Il vetrino</strong>: mai colla cianoacrilica, che appanna il plexi. Il laser a diodo il plexi non lo taglia, lo fonde: si riga e si spezza.</li>
+    <li><strong>Il display</strong> a volte <strong>ronza</strong> (lo si sente nel suono, vicino all'ampli): la causa è la bobina
+      con scritto <span class="m">4R7</span> sul suo retro. Una goccia di colla a caldo sopra la bobina lo calma.</li>
+    <li><strong>La presa della XIAO</strong>: il codino da pannello del prototipo porta la corrente ma non i dati, quindi
+      il firmware si carica a scatola aperta, col cavo nella XIAO. Se vuoi usare il MIDI via USB a scatola chiusa,
+      serve un codino che porti i dati (USB 3.1, cablato completo).</li>
+  </ul>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="firmware" style="--c:#5a5f68">
+  <div class="cap-testa"><span class="cap-num">8</span><h2>Il firmware</h2></div>
+  <p class="sotto">Si carica una volta; i banchi poi arrivano dall'app senza cavo.</p>
+
+  <ol class="passi">
+    <li><strong>Installa l'Arduino IDE 2</strong> da arduino.cc.</li>
+    <li><strong>Il pacchetto delle schede</strong>: in <em>Strumenti → Scheda → Gestore schede</em> cerca <strong>esp32</strong>
+      (di Espressif Systems) e installalo. Il pedale è provato con la versione 3.3.</li>
+    <li><strong>La libreria del display</strong>: in <em>Strumenti → Gestisci librerie</em> cerca <strong>U8g2</strong> (di olikraus) e installala.</li>
+    <li><strong>Scarica il progetto</strong> da <a href="https://github.com/mazzrelaz/SparklingTones">github.com/mazzrelaz/SparklingTones</a>
+      (<em>Code → Download ZIP</em>) e scompattalo fuori dalla cartella Documenti.</li>
+    <li><strong>Prima la prova</strong>: apri <span class="m">pedale/prova-espansore/prova-espansore.ino</span> e caricalo come al passo 6.
+      Serve a controllare i cablaggi: è il capitolo dopo.</li>
+    <li><strong>Le impostazioni</strong>, nel menu <em>Strumenti</em>:
+      <ul style="margin-top:6px">
+        <li><em>Scheda</em>: <strong>XIAO_ESP32S3</strong>;</li>
+        <li><em>USB Mode</em>: <strong>USB-OTG (TinyUSB)</strong>;</li>
+        <li><em>USB CDC On Boot</em>: <strong>Enabled</strong>;</li>
+        <li><em>Porta</em>: quella che compare quando infili il cavo nella XIAO.</li>
+      </ul>
+      Poi la freccia <em>Carica</em>.
+      <span class="se">Con un'altra «USB Mode» il pedale non compila, ed è voluto: senza TinyUSB la modalità MIDI non c'è.</span></li>
+    <li><strong>Il pedale vero</strong>: apri <span class="m">pedale/prova-ble/prova-ble.ino</span> (si porta dietro gli altri file della cartella) e caricalo.
+      Al riavvio il display mostra il logo e la versione per quattro secondi.</li>
+  </ol>
+
+  <div class="nota">
+    <p><strong>Se il caricamento non trova la porta</strong>: stacca il cavo, tieni premuto il tastino <strong>B</strong> della XIAO
+      (accanto alla presa), infila il cavo, rilascia, scegli la porta che compare e carica. Finito, premi il tastino
+      <strong>R</strong>. Succede soprattutto dal secondo caricamento in poi, perché col firmware del pedale la presa USB
+      diventa la pedaliera MIDI.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="prova" style="--c:#17a85a">
+  <div class="cap-testa"><span class="cap-num">9</span><h2>La prova</h2></div>
+  <p class="sotto">Prima di chiudere la scatola: ogni pulsante e ogni LED sulla linea giusta.</p>
+
+  <p>Con <span class="m">prova-espansore</span> caricato:</p>
+  <ol class="passi">
+    <li><strong>Tieni premuti due pulsanti qualsiasi per un secondo e mezzo</strong>: parte la mappatura guidata.</li>
+    <li><strong>I pulsanti</strong>: il display chiede di premerli uno alla volta, in ordine — footswitch da 1 a 5 da sinistra,
+      poi tasto banco sinistro e destro.</li>
+    <li><strong>I LED</strong>: il display accende una linea alla volta e chiede cosa si è acceso. Rispondi col footswitch sotto il LED
+      acceso (col <strong>quinto</strong> se non si è acceso niente), poi col colore: tasto banco <strong>sinistro rosso</strong>,
+      <strong>destro verde</strong>.</li>
+    <li><strong>Alla fine il display mostra le due tabelle</strong> e resta fermo: confrontale con quelle del capitolo 5.
+      Se sono uguali, il cablaggio è giusto.
+      <span class="se">Una linea a cui hai risposto «niente» è un filo staccato o un LED girato. Un pulsante che non risponde, dopo 30 secondi viene saltato.</span></li>
+    <li><strong>La prova a mano</strong>: subito dopo, i quattro LED si accendono nel colore del banco, il footswitch premuto lascia acceso solo il suo,
+      il quinto cambia colore.</li>
+  </ol>
+  <div class="nota">
+    <p><strong>Se le tabelle sono diverse</strong> non serve rifare i fili: si scrivono le tue nelle tre righe
+      <span class="m">LINEA_PULSANTE</span>, <span class="m">LINEA_ROSSO</span> e <span class="m">LINEA_VERDE</span>
+      all'inizio di <span class="m">prova-ble.ino</span>, prima di caricarlo. I numeri sono quelli delle linee:
+      <span class="m">PA4</span> si scrive 4, <span class="m">PB5</span> si scrive 5.</p>
+  </div>
+  <p>Poi si carica <span class="m">prova-ble</span>, e il pedale è pronto.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="suonare" style="--c:var(--accent)">
+  <div class="cap-testa"><span class="cap-num">10</span><h2>Suonare</h2></div>
+  <p class="sotto">Accendi lo Spark, accendi il pedale. Il resto lo fa lui.</p>
+
+  <div class="oled-fila">
+    <figure class="oled">
+      <svg viewBox="0 0 256 128" role="img" aria-label="Il display mentre suona: in alto il nome del banco, la batteria e il quadratino dello Spark collegato; sotto quattro preset, il secondo in negativo.">
+        <rect width="256" height="128" fill="#000"/>
+        <text x="2" y="17" font-size="16" font-weight="700" fill="#cfe8ff" style="font-family:Arial,sans-serif">Amp Preset</text>
+        <rect x="200" y="4" width="22" height="12" fill="none" stroke="#cfe8ff" stroke-width="2"/>
+        <rect x="222" y="7" width="3" height="6" fill="#cfe8ff"/>
+        <rect x="203" y="7" width="4" height="6" fill="#cfe8ff"/><rect x="208" y="7" width="4" height="6" fill="#cfe8ff"/><rect x="213" y="7" width="4" height="6" fill="#cfe8ff"/>
+        <rect x="236" y="0" width="20" height="20" fill="#cfe8ff"/>
+        <text x="241" y="16" font-size="15" fill="#000" font-weight="700">S</text>
+        <line x1="0" y1="25" x2="256" y2="25" stroke="#cfe8ff" stroke-width="2"/>
+        <g font-size="19" fill="#cfe8ff">
+          <text x="2" y="50"><tspan font-weight="700">A1</tspan>  Pulito</text>
+          <rect x="0" y="54" width="256" height="24" fill="#cfe8ff"/>
+          <text x="2" y="74" fill="#000"><tspan font-weight="700">A2</tspan>  Crunch</text>
+          <text x="2" y="98"><tspan font-weight="700">A3</tspan>  Lead</text>
+          <text x="2" y="122"><tspan font-weight="700">A4</tspan>  Ambient</text>
+        </g>
+      </svg>
+      <figcaption>Suona A2. In alto: il banco, la batteria, e la S piena = Spark 2 collegato (N per il NEO).</figcaption>
+    </figure>
+    <figure class="oled">
+      <svg viewBox="0 0 256 128" role="img" aria-label="Il display senza ampli: due caselle Spark 2 e NEO, e la scritta lo sto cercando.">
+        <rect width="256" height="128" fill="#000"/>
+        <text x="2" y="17" font-size="16" font-weight="700" fill="#cfe8ff" style="font-family:Arial,sans-serif">Amp Preset</text>
+        <rect x="236" y="0" width="20" height="20" fill="none" stroke="#cfe8ff" stroke-width="2"/>
+        <line x1="0" y1="25" x2="256" y2="25" stroke="#cfe8ff" stroke-width="2"/>
+        <rect x="0" y="34" width="124" height="36" fill="#cfe8ff"/>
+        <text x="62" y="59" font-size="19" font-weight="700" text-anchor="middle" fill="#000">Spark 2</text>
+        <rect x="133" y="35" width="122" height="34" fill="none" stroke="#cfe8ff" stroke-width="2"/>
+        <text x="194" y="59" font-size="19" font-weight="700" text-anchor="middle" fill="#cfe8ff">NEO</text>
+        <text x="118" y="104" font-size="18" text-anchor="middle" fill="#cfe8ff">lo sto cercando</text>
+        <rect x="214" y="100" width="4" height="4" fill="#cfe8ff"/><rect x="226" y="100" width="4" height="4" fill="#cfe8ff"/>
+      </svg>
+      <figcaption>Senza ampli: i tasti banco scelgono quale cercare. I puntini dicono che sta cercando.</figcaption>
+    </figure>
+  </div>
+
+  <ol class="passi">
+    <li><strong>Accendi lo Spark</strong>, e assicurati che <strong>nessun telefono ci sia collegato</strong> (né l'app ufficiale né questa):
+      lo Spark accetta un collegamento solo.</li>
+    <li><strong>Accendi il pedale</strong> con l'interruttore sul fianco. Quattro secondi di logo, poi cerca l'ampli.</li>
+    <li><strong>La prima volta scegli l'ampli</strong>: tasto banco <strong>sinistro Spark 2</strong>, <strong>destro NEO</strong>. Il pedale se lo ricorda.</li>
+    <li>Quando il quadratino in alto a destra si riempie, <strong>suona</strong>.</li>
+  </ol>
+
+  <h3>Cosa fa ogni comando</h3>
+  <div class="tab"><table>
+    <thead><tr><th>comando</th><th>cosa fa</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tasto">FS1</span>…<span class="tasto">FS4</span></td><td>suona il preset di quella riga. La riga va in negativo, e il LED sopra si accende: <strong style="color:var(--led-a)">rosso</strong> se è la metà A, <strong style="color:var(--led-b)">verde</strong> se è la B.</td></tr>
+      <tr><td><span class="tasto">FS5</span></td><td>mostra l'altra metà del banco (A1–A4 ↔ B1–B4) <strong>senza cambiare suono</strong>. Se la metà mostrata non è quella che suona, i LED sono spenti.</td></tr>
+      <tr><td><span class="tasto">banco SX</span> <span class="tasto">banco DX</span></td><td>il banco prima e quello dopo. Il nome compare in alto; il banco nuovo parte dalla metà A. Allo spegnimento il pedale ricorda dov'eri.</td></tr>
+      <tr><td><span class="tasto">FS5</span> tenuto 3 s</td><td>entra nel looper, ed esce (solo Spark 2).</td></tr>
+      <tr><td><span class="tasto">banco SX</span> + <span class="tasto">banco DX</span> tenuti 1,5 s</td><td>apre il ponte verso l'app per due minuti: serve a mandare i banchi.</td></tr>
+      <tr><td><span class="tasto">FS1</span> + <span class="tasto">FS4</span> tenuti 1,5 s</td><td>passa alla modalità MIDI, e torna.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>I banchi</h3>
+  <ul>
+    <li><strong>«Amp Preset»</strong> sono i preset salvati nello Spark (A1–B4 sullo Spark 2, CH1–CH4 sul NEO). Il pedale li legge
+      a ogni collegamento e li suona selezionando lo slot: il cambio è istantaneo.</li>
+    <li><strong>Gli altri banchi</strong> li prepari nell'app e li mandi al pedale (capitolo dopo). Ne tiene <strong>otto</strong>, anche a corrente staccata.
+      Un loro preset arriva allo Spark in mezzo secondo, un secondo al massimo.</li>
+    <li><strong>Il pedale non scrive mai sugli slot dell'ampli</strong>: i preset dei banchi suonano «al volo». Mentre ne suona uno, la spia dello
+      Spark lampeggia: è normale.</li>
+    <li>Sul <strong>NEO</strong> c'è una metà sola: quattro posti, CH1–CH4.</li>
+  </ul>
+
+  <h3>La batteria</h3>
+  <p>L'icona in alto ha quattro tacche. Sotto i 3,5 V lampeggia e il display scrive <em>batteria scarica</em>. Una carica dura
+    <strong>circa 17 ore</strong> di pedale acceso (misurate). Con un cavo USB attaccato l'icona si vede piena: è il cavo, non la cella.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="banchi" style="--c:var(--blu)">
+  <div class="cap-testa"><span class="cap-num">11</span><h2>Mandare i banchi dall'app</h2></div>
+  <p class="sotto">I banchi della vista Live, copiati nel pedale.</p>
+
+  <ol class="passi">
+    <li><strong>Sul pedale</strong>, tieni premuti insieme i due tasti banco per un secondo e mezzo. In alto compare
+      <em>ponte 1:59</em>, che conta alla rovescia: hai due minuti.
+      <span class="se">Finché il ponte è chiuso il pedale non si fa trovare: così nessuno passando gli fa mollare l'ampli.</span></li>
+    <li><strong>Nell'app</strong>, vista <strong>Live</strong> → menu <span class="tasto">⋯</span> → <strong>Pedale</strong> → <span class="tasto blu">Cerca il pedale</span>,
+      e scegli <strong>SparkPedale</strong>.</li>
+    <li><strong>Scegli il banco</strong> e il <strong>posto</strong> nel pedale (1–8), poi <span class="tasto blu">Invia</span>. Un banco passa in un paio di secondi.</li>
+    <li>In <strong>Cosa c'è nel pedale</strong> puoi spostare e togliere banchi; non succede niente finché non premi <span class="tasto blu">Aggiorna il pedale</span>.</li>
+    <li><span class="tasto">Stacca</span>, o chiudi il pannello: il pedale si riprende lo Spark da solo.</li>
+  </ol>
+  <div class="nota">
+    <p><strong>Mentre l'app è collegata al pedale, il pedale non suona</strong>: ha lasciato lo Spark (il display scrive <em>Spark all'app</em>).
+      È voluto: lo Spark ha un padrone alla volta.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="looper" style="--c:#ff8a3a">
+  <div class="cap-testa"><span class="cap-num">12</span><h2>Il looper</h2></div>
+  <p class="sotto">Il looper dello Spark 2, comandato coi piedi. Il NEO il looper non ce l'ha.</p>
+
+  <div class="due">
+    <figure class="oled">
+      <svg viewBox="0 0 256 128" role="img" aria-label="Il display nel looper: Looper 90 bpm in alto, quattro righe Registra, Annulla, Suona, Ferma/Canc, e a destra l'anello delle battute.">
+        <rect width="256" height="128" fill="#000"/>
+        <text x="2" y="17" font-size="16" font-weight="700" fill="#cfe8ff" style="font-family:Arial,sans-serif">Looper  90 bpm</text>
+        <rect x="236" y="0" width="20" height="20" fill="#cfe8ff"/>
+        <text x="241" y="16" font-size="15" fill="#000" font-weight="700">S</text>
+        <line x1="0" y1="25" x2="256" y2="25" stroke="#cfe8ff" stroke-width="2"/>
+        <g font-size="19" fill="#cfe8ff">
+          <text x="2" y="50"><tspan font-weight="700">1</tspan>  Sovraincidi</text>
+          <text x="2" y="74"><tspan font-weight="700">2</tspan>  Annulla</text>
+          <rect x="0" y="78" width="168" height="24" fill="#cfe8ff"/>
+          <text x="2" y="98" fill="#000"><tspan font-weight="700">3</tspan>  Suona</text>
+          <text x="2" y="122"><tspan font-weight="700">4</tspan>  Ferma/Canc</text>
+        </g>
+        <g fill="none" stroke="#cfe8ff" stroke-width="2">
+          <circle cx="214" cy="78" r="36"/><circle cx="214" cy="78" r="22"/>
+        </g>
+        <path d="M214 42 A36 36 0 0 1 250 78 L236 78 A22 22 0 0 0 214 56 Z" fill="#cfe8ff"/>
+        <path d="M250 78 A36 36 0 0 1 214 114 L214 100 A22 22 0 0 0 236 78 Z" fill="#cfe8ff" opacity="0.5"/>
+        <polygon points="208,70 208,86 222,78" fill="#cfe8ff"/>
+      </svg>
+      <figcaption>Il loop suona: riga 3 in negativo, l'anello si riempie una battuta alla volta.</figcaption>
+    </figure>
+    <div>
+      <div class="tab"><table style="min-width:0">
+        <thead><tr><th>comando</th><th>cosa fa</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tasto">FS1</span></td><td><strong>registra</strong>; ripremuto chiude e suona. A loop pronto <strong>sovraincide</strong>; ripremuto chiude.</td></tr>
+          <tr><td><span class="tasto">FS2</span></td><td><strong>annulla</strong> l'ultima sovraincisione, poi <strong>ripeti</strong>.</td></tr>
+          <tr><td><span class="tasto">FS3</span></td><td><strong>suona</strong>.</td></tr>
+          <tr><td><span class="tasto">FS4</span></td><td><strong>ferma</strong>; tenuto 2 s <strong>cancella</strong> il loop.</td></tr>
+          <tr><td><span class="tasto">FS5</span></td><td><strong>tap tempo</strong>, a loop vuoto; tenuto 3 s esce dal looper.</td></tr>
+          <tr><td><span class="tasto">banco SX</span> <span class="tasto">banco DX</span></td><td>quante <strong>battute</strong>: 1, 2, 4, 8, 12, 16 o libero. A loop vuoto.</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <ul>
+    <li><strong>I LED</strong>: rosso sopra FS1 mentre registra o sovraincide, verde sopra FS3 mentre suona, verde sopra FS4 col loop fermo e pronto.</li>
+    <li><strong>Il LED del tempo</strong> lampeggia a ogni tempo, al bpm del preset (o a quello battuto con FS5).</li>
+    <li><strong>Il conteggio</strong>: se nello Spark il click del looper è acceso, FS1 a loop vuoto conta quattro tempi prima di registrare —
+      un LED rosso per tempo, da sinistra, e il click del disco piezo — e la registrazione parte esatta sull'«uno».</li>
+    <li><strong>L'anello</strong> a destra del display ha uno spicchio per battuta, e si riempie un tempo alla volta. Al centro: ● registra,
+      ◉ sovraincide, ▶ suona, ■ fermo, ○ vuoto.</li>
+    <li><strong>Battute e tempo si cambiano solo a loop vuoto</strong>: con un loop registrato lo Spark si pianta, e il pedale lo rifiuta.</li>
+  </ul>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="midi" style="--c:#7a5af0">
+  <div class="cap-testa"><span class="cap-num">13</span><h2>Modalità MIDI</h2></div>
+  <p class="sotto">Lo stesso pedale per un programma sul computer (AmpliTube, ad esempio) o sull'iPad (BIAS FX).</p>
+
+  <p><span class="tasto">FS1</span> + <span class="tasto">FS4</span> tenuti un secondo e mezzo: il pedale passa in MIDI, lascia lo Spark,
+    e in alto a destra compare una <strong>M</strong>. Stessa combinazione per tornare. Il pedale ricorda in quale modalità era.</p>
+
+  <div class="tab"><table>
+    <thead><tr><th>pagina</th><th>footswitch 1–4</th><th>LED</th></tr></thead>
+    <tbody>
+      <tr><td class="q">preset</td><td>Program Change, canale 1. Tasto banco <strong>sinistro</strong>: preset 1–4; <strong>destro</strong>: 5–8</td><td>rosso (1–4) o verde (5–8) sull'ultimo mandato</td></tr>
+      <tr><td class="q">stomp</td><td>Control Change 80, 81, 82, 83, acceso/spento a ogni pressione</td><td>verde su ogni effetto acceso</td></tr>
+    </tbody>
+  </table></div>
+  <p><span class="tasto">FS5</span> passa da una pagina all'altra.</p>
+
+  <ul>
+    <li><strong>Dal computer, col cavo USB</strong>: il pedale compare come <strong>SparkPedale MIDI</strong>. Serve un cavo che porti i dati fino alla XIAO.
+      Su Windows è l'unica via: Windows il MIDI via Bluetooth non lo passa ai programmi.</li>
+    <li><strong>Dall'iPad, in Bluetooth</strong>: BIAS FX non ha un menu per collegarlo; si collega da <strong>GarageBand</strong>
+      (ingranaggio → Avanzate → Dispositivi MIDI Bluetooth) o da midimittr, e resta collegato per tutto l'iPad.</li>
+  </ul>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="problemi" style="--c:#3a3d45">
+  <div class="cap-testa"><span class="cap-num">?</span><h2>Se qualcosa non va</h2></div>
+  <p class="sotto">Le cose successe davvero al prototipo, e cosa le ha risolte.</p>
+
+  <div class="tab"><table>
+    <thead><tr><th>cosa succede</th><th>cosa fare</th></tr></thead>
+    <tbody>
+      <tr><td>I footswitch non fanno niente</td><td>Primo sospetto: <strong>l'app è ancora collegata al pedale</strong>. Stacca dal pannello Pedale, o chiudi l'app.</td></tr>
+      <tr><td>Non trova lo Spark</td><td>Lo Spark è collegato a un telefono? Chiudi l'app. È scelto l'ampli giusto (S o N)? Spegni e riaccendi lo Spark.</td></tr>
+      <tr><td>Ogni tanto non si collega</td><td>L'<strong>antenna</strong>: il connettorino u.FL si è sfilato, o il foglietto è vicino al metallo. Senza antenna il segnale crolla.</td></tr>
+      <tr><td>Display nero</td><td>La piazzola <strong>D2</strong> sul retro del display è chiusa? SDA e SCL sono scambiati? Se è tutto giusto: due resistenze da 4,7 kΩ, una da SDA alla pista 3V3 e una da SCL alla pista 3V3.</td></tr>
+      <tr><td>Un LED non si accende, o se ne accende un altro</td><td>Rifai la mappatura guidata (capitolo 9): una risposta «niente» è un filo staccato o un LED girato.</td></tr>
+      <tr><td>Un chip scalda</td><td>Spegni. Quasi sempre è <strong>flussante</strong> rimasto fra i piedini: puliscilo con alcool isopropilico.</td></tr>
+      <tr><td>Il display ronza nell'ampli</td><td>Una goccia di colla a caldo sulla bobina <span class="m">4R7</span> sul retro del display.</td></tr>
+      <tr><td>Dopo un caricamento il pedale è fermo, display spento</td><td>È rimasto in modalità di caricamento: stacca e riattacca il cavo, o premi <strong>R</strong> sulla XIAO.</td></tr>
+      <tr><td>La batteria non sembra caricare</td><td>Si carica dalla presa del <strong>caricatore</strong>, non da quella della XIAO. Il LED CHRG del caricatore deve accendersi.</td></tr>
+      <tr><td>L'icona della batteria è sempre piena</td><td>C'è un cavo USB attaccato: staccalo per leggere la cella. Se resta piena, controlla il partitore su D0.</td></tr>
+    </tbody>
+  </table></div>
+
+  <p style="color:var(--dim);font-size:0.9rem;margin-top:24px">Il pedale è un progetto personale, costruito e provato su un esemplare
+    solo. Il codice e la storia di ogni scelta sono su <a href="https://github.com/mazzrelaz/SparklingTones">GitHub</a>.
+    <a href="guida.html">← La guida dell'app</a></p>
+</section>
+
+</main>
+
+<script src="guida.js"></script>
+</body>
+</html>

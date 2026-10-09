@@ -40,6 +40,7 @@ index.html                        HTML e <style> dell'app: sezione Preset e sezi
 src/app/01-…15-*.js               lo script dell'app, in fila (fino al 7 ottobre 2026 stava in index.html)
 live.html                         rimando a index.html#live
 guida.html / guida.en.html        guida all'uso (grafica in guida.css e guida.js, comuni); l'app apre in un iframe quella della sua lingua (⋯ → Guida)
+guida-pedale.html                 guida del pedale (pezzi, schemi, montaggio, uso), solo italiano; ci si arriva dal capitolo Live di guida.html
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
 src/spark-protocol.js             encoder/decoder puro, senza I/O — il cuore del progetto
 src/spark-transport.js            BLE: coda di invio, attesa risposte, lettura preset
