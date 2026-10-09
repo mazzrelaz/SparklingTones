@@ -143,6 +143,10 @@ XIAO anche senza cella).
   4,04 (taratura non serve). Icona a sinistra del quadratino, quattro tacche (>= 4,05 / 3,85
   / 3,70 / 3,50), sotto 3,50 lampeggia e avvisa; 'u' dal seriale. **Col cavo USB attaccato
   la XIAO carica a 50 mA e la tensione sale**: le tacche giuste si vedono a cavo staccato.
+- **Il ronzio del display** (la bobina **L2**, «4R7», del convertitore sul retro: ,
+  «Il ronzio è il display»): **una goccia di colla a caldo sulla bobina, il 9 ottobre 2026 —
+  «molto meglio»** per l'utente. Se torna: staccare il display dal legno con uno spessore
+  morbido; poi la frequenza interna del display () dal seriale.
 - **Pull-up I²C dell'espansore non verificati**: se il bus non parte, due 4,7 kΩ.
 - **Il laser dell'utente non taglia il plexi** (fonde): il plexi si riga e si spezza. **Nei suoi
   DXF i fori sono nominali, il kerf li allarga di ~3 decimi**: mai concludere dal DXF che un
