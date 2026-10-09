@@ -668,3 +668,13 @@ posto del buzzer, sugli stessi fili e con la stessa 330 Ω (al piezo non toglie 
 fare quando è collegato: la frequenza di risonanza dal diametro del disco; consigliato di
 fissarlo solo per il bordo sopra un vuoto. Se è ancora poco: il disco fra due piedini in
 opposizione (LEDC invertito), doppia tensione.
+
+**Il disco piezo, stesso giorno**: un disco da **35 mm** sugli stessi fili, con la stessa
+330 Ω («già meglio» del KY-006). La **2.15** metteva il click alla risonanza del disco
+(2,8 kHz, l'«uno» più lungo invece che più acuto): **all'utente piaceva di più quello di
+prima**, e la **2.16** torna ai due toni della 2.14 (2700/1800 Hz, 40 ms). Volume «poco ma
+accettabile». Abbassare la resistenza col piezo non serve (RC di pochi µs: il disco prende
+già tutta la tensione); il volume lo alzano il fissaggio per il bordo sopra un vuoto, o il
+disco fra due piedini in opposizione (non fatto). Per cercare il posto del disco c'è stata
+una versione di prova mai committata (`PROVA_CLIC`: il conteggio in ciclo a 120 bpm,
+dentro `compitoLedTempo`); **il posto l'ha trovato l'utente**, e sulla XIAO è tornata la 2.16.
