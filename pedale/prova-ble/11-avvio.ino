@@ -16,7 +16,19 @@
  * millisecondo con priorita' piu' alta del loop, e legge solo variabili. */
 static void compitoLedTempo(void*) {
   bool prima = false;
+  uint32_t clicPrima = 0;
   for (;;) {
+    /* Il click del conteggio: qui e non nel loop per lo stesso motivo del LED.
+     * Il tempo (e quindi l'«uno») si ricava da contaDa, non da contaTempo, che
+     * il loop aggiorna in ritardo quando ridisegna. */
+    uint32_t clic = 0;
+    if (contaTempo && loopBpm) {
+      const uint32_t tempo = 60000UL / loopBpm;
+      const uint32_t passato = millis() - contaDa;
+      if (passato % tempo < CLIC_MS) clic = passato < tempo ? CLIC_UNO_HZ : CLIC_ALTRI_HZ;
+    }
+    if (clic != clicPrima) { clicPrima = clic; ledcWriteTone(PIN_CLIC, clic); }
+
     bool acceso = false;
     if (looper && loopBpm) {
       const uint32_t tempo = 60000UL / loopBpm;
@@ -43,6 +55,8 @@ void setup() {
   pinMode(PIN_TASTO, INPUT_PULLUP);
   pinMode(PIN_LED_TEMPO, OUTPUT);          // il LED del tempo, spento finche' non c'e' il looper
   digitalWrite(PIN_LED_TEMPO, LOW);
+  ledcAttach(PIN_CLIC, CLIC_UNO_HZ, 8);    // il click del conteggio, muto finche' non conta
+  ledcWriteTone(PIN_CLIC, 0);
   xTaskCreatePinnedToCore(compitoLedTempo, "ledTempo", 2048, nullptr, 2, nullptr, 1);
   avviaEspansore();
   schermoPresente = schermo.begin();
