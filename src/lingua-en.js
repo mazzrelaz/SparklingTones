@@ -1132,4 +1132,6 @@ window.LINGUA_EN = {
     "Subject: {0}",
   "non riesco a copiare":
     "can't copy",
+  "☕ Offrimi un caffè":
+    "☕ Buy me a coffee",
 };

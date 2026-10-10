@@ -138,6 +138,14 @@ $('btnCopiaSegnala').addEventListener('click', async () => {
   setTimeout(() => { tasto.textContent = prima; }, 2000);
 });
 
+// Le donazioni (10 ottobre 2026): la pagina dell'utente su Buy Me a Coffee, in
+// una scheda nuova. Non un cambio di pagina: lasciare index.html farebbe
+// cadere la connessione all'ampli.
+const PAGINA_CAFFE = 'https://buymeacoffee.com/mazzgear';
+$('btnCaffe').addEventListener('click', () => {
+  window.open(PAGINA_CAFFE, '_blank', 'noopener');
+});
+
 $('btnAiutoEditor').addEventListener('click', () => {
   const guida = $('aiutoEditor');
   guida.hidden = !guida.hidden;

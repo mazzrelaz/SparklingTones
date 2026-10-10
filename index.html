@@ -160,6 +160,9 @@
                     border:none; border-radius:8px; padding:11px 12px; }
   .tendina button:hover:not(:disabled) { background:#1c1f25; }
   .tendina button:disabled { background:none; }
+  /* Il caffè (10 ottobre 2026): in fondo al menu, staccato e in oro, perché si veda. */
+  .tendina button.voce-caffe { color:var(--gold); font-weight:700; margin-top:6px;
+                               border-top:1px solid var(--line); border-radius:0 0 8px 8px; }
 
   /* Il tasto della connessione: fa da spia e da interruttore insieme. Rosso
      pieno quando l'ampli non c'è — è l'unica cosa da fare in quel momento — e
@@ -1133,6 +1136,9 @@
         <button id="btnGuida">Guida</button>
         <button id="btnSegnala">Segnala un problema</button>
         <button id="btnSnake" class="solo-preset">Fai una pausa</button>
+        <!-- Le donazioni: si apre la pagina di Buy Me a Coffee in una scheda nuova,
+             cosi' questa resta aperta e l'ampli collegato. -->
+        <button id="btnCaffe" class="voce-caffe">☕ Offrimi un caffè</button>
       </div>
     </div>
   </div>

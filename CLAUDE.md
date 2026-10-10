@@ -194,6 +194,7 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
 ⋯ → «Segnala un problema»: **mailto a `mazzbackup@gmail.com`** (scelta dell'utente: solo email,
 niente GitHub, niente server), col testo dell'utente più versione, browser, ampli e le ultime 25
 righe di `registroLungo` (`04-log.js`), mostrate prima. Oltre 1800 caratteri il registro si accorcia.
+**Donazioni** (10 ottobre 2026): ultima voce del menu ⋯, in oro, «☕ Offrimi un caffè» → `buymeacoffee.com/mazzgear` in una scheda nuova (`window.open`: lasciare la pagina farebbe cadere l'ampli). Anche sul sito.
 
 ### Niente finestre né tendine del sistema
 
