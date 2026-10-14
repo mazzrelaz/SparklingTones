@@ -689,6 +689,15 @@ L'utente: usando il looper a battute libere qualcosa ha mandato in palla l'ampli
 registro (`captures/2026-10-14-pedale-looper-libero.txt`) e riprovato: **non si è ripetuto**.
 Il registro è pulito: tap a 136–140 bpm in «libero», `04`, `05` → l'ampli risponde `07` `08`,
 giri da 10,9 s tutti uguali, sovraincisioni `0b`/`0c`, annulla `0d`, ferma e cancella. Nel
-firmware niente cambia in «libero» oltre al byte del freeIndicator. Sospetto non escluso:
-il massimo di 60 s (l'ultimo campo del `0x0376`), che in «libero» è l'unico limite. Se
-ricapita: registro acceso, e chiedere momento, sintomo e lunghezza della registrazione.
+firmware niente cambia in «libero» oltre al byte del freeIndicator.
+
+**«Libero» non toglie il limite delle battute (misurato lo stesso giorno, stesso registro).**
+L'utente: in «libero» la registrazione si chiude da sola molto prima di un minuto. Nel
+registro: `0x0176` con battute `0x10` e freeIndicator acceso (il pedale arriva a «libero» da
+16 e lascia 16 nel campo), `04` a 615,108 s, e l'ampli chiude **da solo** con `07` `08` a
+642,580 s: **27,47 s = 16 battute a 140 bpm** (27,43). Quindi il massimo in «libero» è
+battute × tempo, non 60 s: **i miei «60 s» dall'ultimo campo del `0x0376` erano una
+lettura, ed è caduta** (in questo preset quel campo vale `3c`, prima `cd ea 60`). Da
+sapere: se l'app ufficiale in «libero» fa lo stesso (prova a cronometro), prima di
+toccare il campo delle battute; un valore oltre 16 non è mai stato mandato.
+Se ricapita l'impallata: registro acceso, e chiedere momento, sintomo e lunghezza della registrazione.

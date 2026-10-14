@@ -245,3 +245,79 @@
  539,656    TX f0 01 15 09 01 75 00 09 f7
  539,670  looper: 0x09 (mandato)
  539,687    RX 0x0475  f0 01 15 00 04 75 f7
+ 541,670    TX f0 01 16 0a 01 75 00 0a f7
+ 541,671  looper: 0x0a (mandato)
+ 541,683    RX 0x0475  f0 01 16 00 04 75 f7
+ 542,000    RX 0x0376  f0 01 46 4c 03 76 73 4c 0c 04 04 42 43 42 00 3c f7
+ 542,000  looper: 140 bpm, click acceso
+ 543,305    RX 0x0375  f0 01 47 00 03 75 00 00 f7
+ 543,305  looper: 0x00 (dall'ampli)
+ 603,106    TX f0 01 17 04 01 75 00 04 f7
+ 603,107  looper: 0x04 (mandato)
+ 603,117    RX 0x0475  f0 01 17 00 04 75 f7
+ 603,147    RX 0x0375  f0 01 48 04 03 75 00 04 f7
+ 603,153  looper: 0x04 (dall'ampli)
+ 605,793    TX f0 01 18 05 01 75 00 05 f7
+ 605,794  looper: 0x05 (mandato)
+ 605,816    RX 0x0475  f0 01 18 00 04 75 f7
+ 605,848    RX 0x0375  f0 01 49 07 03 75 00 07 f7
+ 605,871    RX 0x0375  f0 01 4a 08 03 75 00 08 f7
+ 605,886  looper: 0x07 (dall'ampli)
+ 605,887  looper: 0x08 (dall'ampli)
+ 605,926  looper: giro finito, posizione massima 0.636, giro misurato 2641 ms
+ 606,126    TX f0 01 19 09 01 75 00 09 f7
+ 606,128  looper: 0x09 (mandato)
+ 606,155    RX 0x0475  f0 01 19 00 04 75 f7
+ 606,414    TX f0 01 1a 09 01 75 00 09 f7
+ 606,427  looper: 0x09 (mandato)
+ 606,455    RX 0x0475  f0 01 1a 00 04 75 f7
+ 608,353    TX f0 01 1b 0a 01 75 00 0a f7
+ 608,353  looper: 0x0a (mandato)
+ 608,369    RX 0x0475  f0 01 1b 00 04 75 f7
+ 609,221  impostazioni: 140 bpm, 8 battute
+ 609,221    TX f0 01 1c 40 01 76 73 4c 0c 04 08 42 43 42 00 3c f7
+ 609,238    RX 0x0476  f0 01 1c 00 04 76 f7
+ 609,692  impostazioni: 140 bpm, 12 battute
+ 609,693    TX f0 01 1d 44 01 76 73 4c 0c 04 0c 42 43 42 00 3c f7
+ 609,706    RX 0x0476  f0 01 1d 00 04 76 f7
+ 609,880    RX 0x0375  f0 01 4d 00 03 75 00 00 f7
+ 609,880  looper: 0x00 (dall'ampli)
+ 610,229  impostazioni: 140 bpm, 16 battute
+ 610,230    TX f0 01 1e 58 01 76 73 4c 0c 04 10 42 43 42 00 3c f7
+ 610,253    RX 0x0476  f0 01 1e 00 04 76 f7
+ 610,755  impostazioni: 140 bpm, 16 battute, libero
+ 610,755    TX f0 01 1f 59 01 76 73 4c 0c 04 10 43 43 42 00 3c f7
+ 610,771    RX 0x0476  f0 01 1f 00 04 76 f7
+ 615,108    TX f0 01 20 04 01 75 00 04 f7
+ 615,108  looper: 0x04 (mandato)
+ 615,139    RX 0x0475  f0 01 20 00 04 75 f7
+ 615,170    RX 0x0375  f0 01 4e 04 03 75 00 04 f7
+ 615,190  looper: 0x04 (dall'ampli)
+ 642,580    RX 0x0375  f0 01 4f 07 03 75 00 07 f7
+ 642,580  looper: 0x07 (dall'ampli)
+ 642,611    RX 0x0375  f0 01 50 08 03 75 00 08 f7
+ 642,627  looper: 0x08 (dall'ampli)
+ 651,199    TX f0 01 21 0b 01 75 00 0b f7
+ 651,200  looper: 0x0b (mandato)
+ 651,225    RX 0x0475  f0 01 21 00 04 75 f7
+ 657,410    TX f0 01 22 0c 01 75 00 0c f7
+ 657,410  looper: 0x0c (mandato)
+ 657,439    RX 0x0475  f0 01 22 00 04 75 f7
+ 660,655    TX f0 01 23 08 01 75 00 08 f7
+ 660,656  looper: 0x08 (mandato)
+ 660,683    RX 0x0475  f0 01 23 00 04 75 f7
+ 660,713    RX 0x0375  f0 01 6c 08 03 75 00 08 f7
+ 660,747  looper: 0x08 (dall'ampli)
+ 660,747  looper: giro finito, posizione massima 0.656, giro misurato 27381 ms
+ 688,311  looper: giro finito, posizione massima 0.999, giro misurato 27381 ms
+ 705,213    TX f0 01 24 09 01 75 00 09 f7
+ 705,213  looper: 0x09 (mandato)
+ 705,227    RX 0x0475  f0 01 24 00 04 75 f7
+ 705,917    TX f0 01 25 09 01 75 00 09 f7
+ 705,917  looper: 0x09 (mandato)
+ 705,944    RX 0x0475  f0 01 25 00 04 75 f7
+ 707,919    TX f0 01 26 0a 01 75 00 0a f7
+ 707,919  looper: 0x0a (mandato)
+ 707,935    RX 0x0475  f0 01 26 00 04 75 f7
+ 709,466    RX 0x0375  f0 01 4c 00 03 75 00 00 f7
+ 709,469  looper: 0x00 (dall'ampli)
