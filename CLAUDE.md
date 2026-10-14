@@ -91,8 +91,14 @@ libreria non passa dall'una all'altra, si esporta in JSON.
   ripetitive si scrive uno script nello scratchpad, che deve **conservare le CRLF** dei file.
 - **`sed -i` di Git Bash converte le CRLF in LF**: con `core.autocrlf=true` il diff resta
   pulito, ma lo si controlla.
-- **Per le suite su `localhost`** c'è `spark-locale` in `.claude/launch.json` (il riquadro
-  del browser); il risultato si legge da `#summary` e dai `.fail`.
+- **Per le suite su `localhost`** c'è `spark-locale` nel `.claude/launch.json` di `Progetti
+  Claude` (la cartella sopra: il riquadro del browser lo cerca lì); il risultato si legge da
+  `#summary` e dai `.fail`.
+- **Le bozze** (la grafica si mostra prima di pubblicarla): `git worktree` nello scratchpad,
+  servito con `serve.ps1 -Radice <cartella> -Porta 8097`; altra origine, quindi preset finti, e
+  **il service worker va tolto a ogni ricarica** o serve i file vecchi. **Il riquadro del browser
+  non apre la scelta dei dispositivi Bluetooth** (la annulla da solo): il pedale e l'ampli veri si
+  provano solo dall'app pubblicata.
 
 **Dopo ogni modifica a `src/`, le suite in `test/` devono restare verdi.** Girano con Edge
 headless (poi si cerca `id="summary"`):
@@ -376,7 +382,17 @@ il suo backup su Dropbox nel 2027**: non tocca il nostro sync, solo da dove si p
 l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pull --rebase`**
 (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 7 ottobre 2026
+## Dove si riprende — 14 ottobre 2026 (sera)
+
+**Domani, prima di tutto**: le prove dell'utente sul telefono, col pedale e l'ampli veri, di
+quello pubblicato oggi — interfaccia nuova, sfondo grigio, barra a quattro voci, pagina del Pedale,
+e soprattutto **i banchi da aggiornare** (firmware 2.22 già sulla XIAO; mai provato col pedale
+vero). Se un banco risulta «cambiato» senza esserlo: farsi incollare «Copia il log del pedale».
+**Domanda aperta**: togliere «Fatto» e il titolo anche dalle altre pagine (guida, impostazioni,
+categorie, doppioni)? Chiesta, nessuna risposta. I progetti stanno in
+`C:\Users\massi\Progetti Claude` (spostati il 14 ottobre; copia giornaliera alle 13 in
+`Desktop\Cloud Backup\Progetti Claude`, che è sincronizzata con Google Drive).
+
 
 **L'inglese è fatto** (24 settembre 2026): app e sito, con la scelta della lingua, pubblicati.
 Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta indietro
@@ -389,18 +405,10 @@ la versione lunga di questo paragrafo in `docs/diario.md` (estratto del 14 ottob
 **La modalità MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non
 riapre lui.**
 
-**Interfaccia nuova (14 ottobre 2026, dalle bozze scelte dall'utente)**: barra in basso
-Preset · Live · Altro (il menu, che sale dal basso), bollino dell'ampli al posto di «CONNETTI»
-(pannellino: Rileggi, Importa il suono, Scollega), slot in griglia da quattro, ricerca sotto
-gli slot con filtri anche per famiglia, scheda del preset in un foglio dal basso
-(`disegnaFoglio`, `#velo`) con le note chiuse. Perché e cosa è cambiato dalle bozze:
-`docs/decisioni-ui.md`, «L'interfaccia nuova». **Da verificare sul telefono con l'ampli.**
-**La sera (pubblicate dopo la bozza)**: sfondo grigio #101010 a scelta (barra #1c1c1c), barra su
-tutte le pagine, **Pedale come quarta voce della barra** (non più nel menu), pagina Pedale rifatta,
-menu Altro uguale ovunque, lista preset solo nome con banda, «HW PRESET»; `docs/decisioni-ui.md`,
-«Le bozze della sera».
-**`guida.en.html` è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare
-l'inglese.
+**L'interfaccia di oggi** (14 ottobre 2026: barra in basso Preset · Live · Pedale · Altro su tutte
+le pagine, bollino dell'ampli, scheda del preset dal basso, sfondo grigio a scelta, banchi da
+aggiornare sul pedale): `docs/decisioni-ui.md`, le tre sezioni del 14 ottobre. **`guida.en.html`
+è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare l'inglese.
 
 Sull'app (guscio `v107` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
 ampli finto):

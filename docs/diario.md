@@ -637,3 +637,23 @@ JST-PH; carica e il pedale suona mentre carica (verificato). Tolto il LED PWR, c
 A)**: da misurare a cella sotto 3,9 V (`docs/pedale-lavoro.md`). Restano: il display
 (il quadratino in negativo va ancora guardato), **il looper (firmware 2.13, 7 ottobre 2026; il firmware è diviso in file: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; 2.19–2.21, 14 ottobre, verificate: «libero» fino a 60 s come l'app, click per tutta la prima registrazione; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click** (2.16, su D3): un disco piezo da 35 mm con 330 Ω, «poco ma accettabile», posto trovato dall'utente (il KY-006 era magnetico) (`docs/looper.md` in fondo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
+
+
+### Estratto da CLAUDE.md, 14 ottobre 2026 (fine giornata) — copiato parola per parola
+
+Da «Dove si riprende», sfoltito perché il file aveva passato i 30 KB; il racconto intero sta in
+`docs/decisioni-ui.md` («L'interfaccia nuova», «Le bozze della sera», «I banchi da aggiornare
+sul pedale»):
+
+**Interfaccia nuova (14 ottobre 2026, dalle bozze scelte dall'utente)**: barra in basso
+Preset · Live · Altro (il menu, che sale dal basso), bollino dell'ampli al posto di «CONNETTI»
+(pannellino: Rileggi, Importa il suono, Scollega), slot in griglia da quattro, ricerca sotto
+gli slot con filtri anche per famiglia, scheda del preset in un foglio dal basso
+(`disegnaFoglio`, `#velo`) con le note chiuse. Perché e cosa è cambiato dalle bozze:
+`docs/decisioni-ui.md`, «L'interfaccia nuova». **Da verificare sul telefono con l'ampli.**
+**La sera (pubblicate dopo la bozza)**: sfondo grigio #101010 a scelta (barra #1c1c1c), barra su
+tutte le pagine, **Pedale come quarta voce della barra** (non più nel menu), pagina Pedale rifatta,
+menu Altro uguale ovunque, lista preset solo nome con banda, «HW PRESET»; `docs/decisioni-ui.md`,
+«Le bozze della sera».
+**`guida.en.html` è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare
+l'inglese.
