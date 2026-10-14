@@ -723,3 +723,15 @@ pedale. **La 2.19** (14 ottobre 2026): in «libero» il pedale manda `bpm / 4` b
 di quelle di prima (anche dopo un tap); il campo resta sotto `0x80` fino a 511 bpm. Le battute
 lette dal `0x0376` sopra 16 non entrano in `loopBattute`, che resta quella scelta coi tasti.
 **Verificata dall'utente col registro lo stesso giorno**: 80 bpm, «libero» → il pedale manda 20 battute, e l'ampli chiude da solo dopo **60,08 s** (`04` a 157,356, `08` a 217,439; `captures/2026-10-14-pedale-looper-libero-219.txt`).
+
+### 2.20 — il cerchio in «libero» e il click per tutta la registrazione (14 ottobre 2026)
+
+Chiesti dall'utente. **Il cerchio in «libero»** restava vuoto per tutta la prima
+registrazione (senza battute fisse `tempi` era 0). Adesso in «libero» è un anello solo,
+senza spicchi (spicchi da 16 su un loop di lunghezza qualunque non volevano dire niente,
+e i 20–60 delle battute vere non ci stanno), e mentre registra si riempie un tempo alla
+volta verso il massimo, `bpm / 4` battute: pieno = l'ampli chiude da solo. **Il click**
+non si ferma più all'«uno»: continua per tutta la prima registrazione, a ogni lunghezza,
+«libero» compreso, col tono alto sull'«uno» di ogni battuta, contato da `registraDa` come
+il LED del tempo; solo col click acceso nel `0x0376`, e non in sovraincisione.
+**Compilata e caricata; da provare dall'utente.**

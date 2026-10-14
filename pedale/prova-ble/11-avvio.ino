@@ -26,6 +26,13 @@ static void compitoLedTempo(void*) {
       const uint32_t tempo = 60000UL / loopBpm;
       const uint32_t passato = millis() - contaDa;
       if (passato % tempo < CLIC_MS) clic = passato < tempo ? CLIC_UNO_HZ : CLIC_ALTRI_HZ;
+    } else if (loopRegistra && loopClick && loopBpm) {
+      /* E continua per tutta la prima registrazione, a ogni lunghezza, «libero»
+       * compreso (chiesto dall'utente il 14 ottobre 2026), col tono alto
+       * sull'«uno» di ogni battuta; non durante la sovraincisione. */
+      const uint32_t tempo = 60000UL / loopBpm;
+      const uint32_t passato = millis() - registraDa;
+      if (passato % tempo < CLIC_MS) clic = (passato / tempo) % 4 == 0 ? CLIC_UNO_HZ : CLIC_ALTRI_HZ;
     }
     if (clic != clicPrima) { clicPrima = clic; ledcWriteTone(PIN_CLIC, clic); }
 

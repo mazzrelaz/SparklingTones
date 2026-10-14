@@ -173,13 +173,20 @@ static float riempimentoCerchio(uint8_t& fette, bool& puntini, uint8_t& numero) 
    * arancione). Nel conteggio una battuta sola, quattro quarti, e al centro il
    * numero alla rovescia 4, 3, 2, 1. */
   const uint16_t tempi = (!loopLibero && loopBpm) ? loopBattute * 4 : 0;
+  /* In «libero» gli spicchi non vogliono dire niente: un anello solo. Mentre
+   * registra si riempie un tempo alla volta verso il massimo, le battute che
+   * stanno in 60 s (bpm / 4, come le manda il pedale dalla 2.19): pieno =
+   * l'ampli chiude da solo. Prima (fino alla 2.19) restava vuoto. */
+  const uint16_t tempiLibero = (loopLibero && loopBpm) ? (loopBpm / 4) * 4 : 0;
+  if (loopLibero) fette = 1;
   numero = 0;
   if (contaTempo) {
     fette = 4;
     riempi = contaTempo / 4.0f;
     numero = (uint8_t)(5 - contaTempo);
   } else if (loopRegistra) {
-    if (tempi) riempi = (float)((millis() - registraDa) / (60000UL / loopBpm) + 1) / tempi;
+    const uint16_t t = tempi ? tempi : tempiLibero;
+    if (t) riempi = (float)((millis() - registraDa) / (60000UL / loopBpm) + 1) / t;
   } else if (loopSovraincide || loopSuona) {
     const float p = posizioneAdesso();
     if (p >= 0) riempi = tempi ? (floorf(p * tempi) + 1) / tempi : p;
