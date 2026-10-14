@@ -1161,3 +1161,40 @@ inglese, che non si tocca finché l'utente non lo dice). La striscia «versione 
 
 **Verificato**: nel riquadro del browser a 375 px, contro un ampli finto e preset finti.
 **Non ancora** sul telefono con l'ampli vero.
+
+
+## Le bozze della sera — 14 ottobre 2026
+
+Tutte guardate prima sulla bozza (ramo locale `bozza-sfondo-grigio`, servito su
+`localhost:8097`), e pubblicate insieme quando l'utente ha detto «ok intanto pubblica». Da qui
+la regola: **la grafica prima si mostra, poi si pubblica** (CLAUDE.md, Convenzioni).
+
+- **Sfondo grigio, a scelta.** Il primo grigio (#262624, caldo «come Claude») era troppo chiaro.
+  L'utente ha mandato due campioni: **fondo #101010** e **barra in basso #1c1c1c**. Le superfici
+  stanno appena sopra il fondo (#1a1a1a). In «Impostazioni e backup» c'è **Sfondo: Grigio · Nero**
+  (`localStorage` `sfondo`, di serie grigio); uno script in testa a `index.html` mette la classe
+  `grigio` su `<html>` prima che la pagina si disegni. I grigi scuri scritti a mano nello stile
+  sono diventati variabili coi valori di prima (`--incavo`, `--foglio`, `--rialzo`, `--spento`,
+  `--bordo-forte`, `--traccia`, `--pad`): il nero è rimasto identico. La guida resta nera.
+- **La barra in basso su tutte le pagine**: i pannelli si fermano sopra la barra; toccare la barra
+  chiude il pannello col suo «Fatto» (`chiudiPannelloAperto`), e l'editor con lavoro non salvato
+  chiede prima. Il menu «Altro» si apre anche sopra un pannello (velo con classe `sopra`).
+- **Quattro voci: Preset · Live · Pedale · Altro.** Il Pedale non sta più nel menu: è una scheda,
+  si apre da tutte e due le viste, non ha né titolo né «Fatto» (se ne esce toccando un'altra
+  voce). La voce accesa la decide `segnaSchede()`, chiamata anche da apriPannello/chiudiPannelli.
+  L'icona è un pedale largo con due footswitch e due LED (la prima sembrava una cassa).
+- **La pagina del Pedale nello stile dei preset** («sembrano pulsanti buttati lì a caso»): una
+  carta col pedale, il suo stato e un tasto solo (Cerca o Stacca); il suggerimento sul ponte; la
+  spiegazione lunga chiusa in «Come funziona»; «MANDA UN BANCO» e «NEL PEDALE» coi titoletti piccoli;
+  ogni banco una riga col tondo ▶ e un ⋯ (Sposta su, Sposta giù, Togli); Annulla e Aggiorna solo
+  con spostamenti in sospeso; «Copia il log del pedale» in fondo.
+- **Il menu «Altro» uguale in tutte le viste.** «Modifica» dei banchi live è passato nella vista
+  Live, in fondo alla riga dei banchi.
+- **La lista dei preset torna solo il nome, con la banda della famiglia a sinistra**: la riga
+  piccola con famiglia e categorie (dalle bozze del mattino) non è piaciuta. La banda è una
+  lineetta arrotondata, più corta della riga, perché le righe non hanno più il riquadro.
+- **«HW PRESET»**, piccolo e in maiuscolo, al posto di «Sull'ampli»; via la legenda «A rosso ·
+  B verde» («ridicola»): bastano le sigle colorate.
+
+**Aperta**: togliere «Fatto» e il titolo anche dalle altre pagine (guida, impostazioni,
+categorie, doppioni)? Chiesto all'utente, nessuna risposta ancora.

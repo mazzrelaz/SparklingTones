@@ -14,10 +14,12 @@ function apriPannello(id) {
   chiudiPannelli();
   pulisciStatoPannelli();
   $(id).classList.add('aperto');
+  segnaSchede();
 }
 
 function chiudiPannelli() {
   document.querySelectorAll('.pannello.aperto').forEach(p => p.classList.remove('aperto'));
+  segnaSchede();
 }
 
 document.querySelectorAll('[data-chiudi]').forEach(b => {

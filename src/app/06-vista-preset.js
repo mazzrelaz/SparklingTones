@@ -39,8 +39,6 @@ function disegnaPreset() {
   const ampli = $('listaAmpli');
   ampli.innerHTML = '';
   let mostratiSuAmpli = 0;
-  // Il NEO non ha banchi né LED, e senza caselle la legenda non spiega niente.
-  $('legendaAmpli').hidden = !modelloAmpli.banchi || (suAmpli.every(r => !r) && !spark.connected);
 
   const griglia = document.createElement('div');
   griglia.className = 'pannello-ampli';
@@ -270,27 +268,16 @@ function nomePastiglia(effetto, posizione) {
 }
 
 /**
- * La riga piccola sotto il nome: il pallino e il nome della famiglia di suono,
- * poi le categorie. O null, se il preset non ha né l'una né le altre. Chi non
- * ha famiglia resta senza pallino: un colore inventato qui si legge senza
- * pensarci, ed è peggio di nessun colore.
+ * Il colore della famiglia di suono, se ce l'ha: la banda a sinistra della riga.
+ * Chi non ce l'ha resta senza: un colore inventato qui si legge senza pensarci,
+ * ed è peggio di nessun colore.
  */
-function sottoRiga(record) {
-  const famiglia = record.famiglia && famiglie.find(f => f.id === record.famiglia);
-  const cat = (record.tags || []).join(', ');
-  if (!famiglia && !cat) return null;
-  const riga = document.createElement('div');
-  riga.className = 'sotto-riga';
-  if (famiglia) {
-    const pallino = document.createElement('span');
-    pallino.className = 'pallino-fam';
-    pallino.style.setProperty('--famiglia', famiglia.colore);
-    riga.appendChild(pallino);
-  }
-  const testo = document.createElement('span');
-  testo.textContent = [famiglia && famiglia.nome, cat].filter(Boolean).join(' · ');
-  riga.appendChild(testo);
-  return riga;
+function coloraFamiglia(elemento, record) {
+  const scelta = record && record.famiglia &&
+                 famiglie.find(f => f.id === record.famiglia);
+  if (!scelta) return;
+  elemento.classList.add('con-famiglia');
+  elemento.style.setProperty('--famiglia', scelta.colore);
 }
 
 /**
@@ -365,19 +352,18 @@ function rigaPreset(record, slot) {
   const riga = document.createElement('div');
   riga.className = 'row';
   riga.dataset.id = record.id;
+  coloraFamiglia(riga, record);
 
   const head = document.createElement('div');
   head.className = 'head';
 
-  // Il nome, e sotto famiglia e categorie: vedi il commento nel CSS di `.sotto-riga`.
+  // Solo il nome, per scelta: vedi il commento nel CSS di `.con-famiglia`.
   const naming = document.createElement('div');
   naming.className = 'naming';
   const nome = document.createElement('div');
   nome.className = 'name';
   nome.textContent = record.name || tr('(senza nome)');
   naming.appendChild(nome);
-  const sotto = sottoRiga(record);
-  if (sotto) naming.appendChild(sotto);
 
   head.appendChild(naming);
   const bollo = bolloHendrix(record);

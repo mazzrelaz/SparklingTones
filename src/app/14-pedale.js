@@ -44,10 +44,13 @@ function logPedale(msg) {
 
 function statoPedale(su, testo) {
   const el = $('statoPedale');
-  el.className = 'status ' + (su ? 'on' : 'off');
-  el.textContent = testo;
+  el.className = 'stato-pedale ' + (su ? 'on' : 'off');
+  el.textContent = su ? tr('collegato: {0}', testo) : testo;
+  // Nella carta c'è solo il tasto che serve adesso: Cerca o Stacca.
+  $('btnPedaleConnetti').hidden = su;
   $('btnPedaleConnetti').disabled = su;
-  $('btnPedaleStacca').disabled = !su;
+  $('btnPedaleStacca').hidden = !su;
+  $('suggerimentoPedale').hidden = su;
   aggiornaInvioPedale();
 }
 
@@ -106,6 +109,12 @@ function aggiornaInvioPedale() {
   $('btnMandaAlPedale').disabled = !(pedale.comando && banco && quanti > 0);
 }
 
+/**
+ * Le righe di «Nel pedale», come quelle della libreria: il numero, il nome del
+ * banco con quanti preset ha, il tondo ▶ che lo fa suonare subito e un ⋯ con
+ * spostare e togliere. Prima ogni riga aveva cinque tastini (↑ ↓ Suona Togli),
+ * e la pagina sembrava una pulsantiera (14 ottobre 2026).
+ */
 function disegnaSlotsPedale() {
   const cont = $('slotsPedale');
   cont.innerHTML = '';
@@ -113,57 +122,61 @@ function disegnaSlotsPedale() {
   for (let s = 0; s < PedalePonte.POSTI; s++) {
     const v = pedale.locale[s];
     const riga = document.createElement('div');
-    riga.className = 'slot-pedale' + (v ? '' : ' vuoto');
+    riga.className = 'riga-pedale' + (v ? '' : ' vuoto');
 
     const n = document.createElement('span');
-    n.className = 'n';
+    n.className = 'numero';
     n.textContent = s + 1;
 
-    const nome = document.createElement('span');
-    nome.className = 'nome';
+    const naming = document.createElement('div');
+    naming.className = 'naming';
+    const nome = document.createElement('div');
+    nome.className = 'name';
     nome.textContent = v ? v.nome : tr('vuoto');
-
-    riga.append(n, nome);
+    naming.appendChild(nome);
+    riga.append(n, naming);
 
     if (v) {
-      const quanti = document.createElement('span');
+      const quanti = document.createElement('div');
       quanti.className = 'quanti';
       quanti.textContent = tr`${v.pieni} preset`;
-      riga.appendChild(quanti);
+      naming.appendChild(quanti);
 
-      // Le frecce e l'eliminazione lavorano **solo sulla copia locale**: si
-      // sistema tutto con calma e si applica una volta sola. In tempo reale
-      // ogni spostamento era un giro completo, e riordinarne tre ne costava
-      // sei — oltre a rendere ogni singolo comando un'occasione di errore.
-      for (const [segno, verso] of [['↑', -1], ['↓', +1]]) {
-        const f = document.createElement('button');
-        f.textContent = segno;
-        const dove = s + verso;
-        f.disabled = dove < 0 || dove >= PedalePonte.POSTI;
-        f.addEventListener('click', () => {
-          const t = pedale.locale[s];
-          pedale.locale[s] = pedale.locale[dove];
-          pedale.locale[dove] = t;
-          disegnaSlotsPedale();
-        });
-        riga.appendChild(f);
-      }
-
+      // Suonare è immediato: non è una modifica da applicare, è un ordine di
+      // suonare adesso. Con spostamenti in sospeso no: lo slot non è più quello.
       const suona = document.createElement('button');
-      suona.textContent = tr('Suona');
-      // Questo invece è immediato: non è una modifica da applicare, è un
-      // ordine di suonare adesso.
+      suona.className = 'via' + (pedale.comando && !daApplicare() ? ' pronto' : '');
+      suona.innerHTML = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z"/></svg>';
       suona.disabled = daApplicare();
       suona.title = suona.disabled ? tr('prima aggiorna il pedale') : tr('fai suonare questo banco');
+      suona.setAttribute('aria-label', tr('suona'));
       suona.addEventListener('click', () => comandoPedale(PedalePonte.CMD.USA, s));
 
-      const canc = document.createElement('button');
-      canc.textContent = tr('Togli');
-      canc.addEventListener('click', () => {
-        pedale.locale[s] = null;
-        disegnaSlotsPedale();
+      // Spostare e togliere lavorano **solo sulla copia locale**: si sistema
+      // tutto con calma e si applica una volta sola. In tempo reale ogni
+      // spostamento era un giro completo, e riordinarne tre ne costava sei —
+      // oltre a rendere ogni singolo comando un'occasione di errore.
+      const altro = document.createElement('button');
+      altro.className = 'altro-pedale';
+      altro.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="4" cy="10" r="1.8"/><circle cx="10" cy="10" r="1.8"/><circle cx="16" cy="10" r="1.8"/></svg>';
+      altro.setAttribute('aria-label', tr('altre azioni'));
+      altro.addEventListener('click', () => {
+        const voci = [
+          { valore: -1, testo: tr('Sposta su'), spento: s === 0 },
+          { valore: +1, testo: tr('Sposta giù'), spento: s === PedalePonte.POSTI - 1 },
+          { valore: 0,  testo: tr('Togli dal pedale') },
+        ];
+        apriElenco(tr('banco {0} del pedale — {1}', s + 1, v.nome), voci, null, verso => {
+          if (verso === 0) pedale.locale[s] = null;
+          else {
+            const dove = s + verso, t = pedale.locale[s];
+            pedale.locale[s] = pedale.locale[dove];
+            pedale.locale[dove] = t;
+          }
+          disegnaSlotsPedale();
+        });
       });
-      riga.append(suona, canc);
+      riga.append(suona, altro);
     }
     cont.appendChild(riga);
   }
@@ -185,6 +198,8 @@ function aggiornaTastiModifiche() {
   $('btnAnnullaPedale').disabled = !cambiato;
   $('notaModifichePedale').textContent = cambiato
     ? tr('Ci sono spostamenti non ancora applicati al pedale.') : '';
+  // La riga coi due tasti c'è solo quando c'è qualcosa da applicare.
+  $('modifichePedale').hidden = !cambiato;
 }
 
 /** Riparte dalla disposizione vera del pedale, buttando le modifiche locali. */
@@ -365,7 +380,16 @@ $('btnCopiaLogPedale').addEventListener('click', async () => {
   setTimeout(() => { tasto.textContent = prima; }, 2000);
 });
 
-$('btnPedale').addEventListener('click', () => {
+// Il Pedale è una scheda della barra in basso (14 ottobre 2026): si apre da
+// tutte e due le viste, sopra quella che c'è, e se ne esce toccando un'altra
+// scheda. Toccarla quando è già aperta non fa niente.
+$('tabPedale').addEventListener('click', () => {
+  if ($('pannelloPedale').classList.contains('aperto')) return;
+  if (!chiudiPannelloAperto()) return;   // l'editor con lavoro non salvato chiede prima
+  apriPaginaPedale();
+});
+
+function apriPaginaPedale() {
   if (!tendinaSlotPedale) {
     const posti = Array.from({ length: PedalePonte.POSTI },
                              (_, i) => ({ valore: i, testo: `slot ${i + 1}` }));
@@ -375,12 +399,18 @@ $('btnPedale').addEventListener('click', () => {
   riempiSceltaBanco();
   aggiornaInvioPedale();
   disegnaSlotsPedale();
-  if (!$('statoPannelloPedale').textContent)
-    logPedale(tr('prima apri il ponte sul pedale: tieni premuti insieme i due tasti banco ' +
-              'per un secondo e mezzo. Resta aperto due minuti, e il display lo dice'));
+  // Il suggerimento sul ponte adesso sta nella carta del pedale, fisso: il
+  // registro qui sotto resta per quello che succede davvero.
   apriPannello('pannelloPedale');
-});
+}
 $('btnPedaleConnetti').addEventListener('click', collegaPedale);
+// «Come funziona» sta chiuso, come le note di un preset: si legge una volta.
+$('btnComePedale').addEventListener('click', () => {
+  const aperto = $('comePedale').hidden;
+  $('comePedale').hidden = !aperto;
+  $('btnComePedale').setAttribute('aria-expanded', aperto ? 'true' : 'false');
+  $('btnComePedale').querySelector('.freccia-note').style.transform = aperto ? 'rotate(180deg)' : '';
+});
 $('btnPedaleStacca').addEventListener('click', () => {
   if (pedale.device && pedale.device.gatt.connected) pedale.device.gatt.disconnect();
 });

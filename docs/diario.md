@@ -621,3 +621,19 @@ Da «Dove si riprende», sfoltito per far posto all'interfaccia nuova:
    pezzo, tetto a 4×): **verificato sul NEO il 4 ottobre**, letti tutti e quattro. Ancora da provare:
    «Invia a preset HW» sul NEO, Hendrix, il pedale (cerca chiunque annunci `0xFFC0`: col
    NEO acceso e lo Spark 2 spento dovrebbe agganciarlo).
+
+
+### Estratto da CLAUDE.md, 14 ottobre 2026 (sera) — copiato parola per parola
+
+Da «Dove si riprende», sfoltito perché il file aveva passato i 30 KB:
+
+**Pedale** (tutto in `docs/pedale-lavoro.md`, «Dove si riprende col pedale»): sulla XIAO c'è
+`prova-ble` **1.5** (4 ottobre 2026): Spark 2 e NEO, Amp Preset letto dall'ampli, NEO a
+pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester).
+**Consumo misurato: 0,15 A, ~17 ore.** **Caricatore nuovo montato il 9 ottobre 2026**:
+Adafruit 6091 (bq25185, power path), cella su BATT, interruttore e morsetto su LOAD, spine
+JST-PH; carica e il pedale suona mentre carica (verificato). Tolto il LED PWR, che si beveva
+2,1 mA a pedale spento (misurato; dopo, 0). **Corrente di carica di serie incerta (500 mA o 1
+A)**: da misurare a cella sotto 3,9 V (`docs/pedale-lavoro.md`). Restano: il display
+(il quadratino in negativo va ancora guardato), **il looper (firmware 2.13, 7 ottobre 2026; il firmware è diviso in file: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; 2.19–2.21, 14 ottobre, verificate: «libero» fino a 60 s come l'app, click per tutta la prima registrazione; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click** (2.16, su D3): un disco piezo da 35 mm con 330 Ω, «poco ma accettabile», posto trovato dall'utente (il KY-006 era magnetico) (`docs/looper.md` in fondo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
+MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**

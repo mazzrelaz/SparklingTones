@@ -380,16 +380,12 @@ l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pu
 Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta indietro
 finché l'utente non dice di aggiornarlo.
 
-**Pedale** (tutto in `docs/pedale-lavoro.md`, «Dove si riprende col pedale»): sulla XIAO c'è
-`prova-ble` **1.5** (4 ottobre 2026): Spark 2 e NEO, Amp Preset letto dall'ampli, NEO a
-pezzi grandi, **indicatore di batteria** (partitore su D0, verificato col tester).
-**Consumo misurato: 0,15 A, ~17 ore.** **Caricatore nuovo montato il 9 ottobre 2026**:
-Adafruit 6091 (bq25185, power path), cella su BATT, interruttore e morsetto su LOAD, spine
-JST-PH; carica e il pedale suona mentre carica (verificato). Tolto il LED PWR, che si beveva
-2,1 mA a pedale spento (misurato; dopo, 0). **Corrente di carica di serie incerta (500 mA o 1
-A)**: da misurare a cella sotto 3,9 V (`docs/pedale-lavoro.md`). Restano: il display
-(il quadratino in negativo va ancora guardato), **il looper (firmware 2.13, 7 ottobre 2026; il firmware è diviso in file: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; 2.19–2.21, 14 ottobre, verificate: «libero» fino a 60 s come l'app, click per tutta la prima registrazione; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click** (2.16, su D3): un disco piezo da 35 mm con 330 Ω, «poco ma accettabile», posto trovato dall'utente (il KY-006 era magnetico) (`docs/looper.md` in fondo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
-MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
+**Pedale**: sulla XIAO c'è `prova-ble` (1.5 e poi il looper fino a 2.21, verificate); caricatore
+Adafruit 6091 montato e verificato; restano display, looper, LED del tempo, click, bande
+sull'anello. Tutto in `docs/pedale-lavoro.md` («Dove si riprende col pedale») e `docs/looper.md`;
+la versione lunga di questo paragrafo in `docs/diario.md` (estratto del 14 ottobre, sera).
+**La modalità MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non
+riapre lui.**
 
 **Interfaccia nuova (14 ottobre 2026, dalle bozze scelte dall'utente)**: barra in basso
 Preset · Live · Altro (il menu, che sale dal basso), bollino dell'ampli al posto di «CONNETTI»
@@ -397,10 +393,14 @@ Preset · Live · Altro (il menu, che sale dal basso), bollino dell'ampli al pos
 gli slot con filtri anche per famiglia, scheda del preset in un foglio dal basso
 (`disegnaFoglio`, `#velo`) con le note chiuse. Perché e cosa è cambiato dalle bozze:
 `docs/decisioni-ui.md`, «L'interfaccia nuova». **Da verificare sul telefono con l'ampli.**
+**La sera (pubblicate dopo la bozza)**: sfondo grigio #101010 a scelta (barra #1c1c1c), barra su
+tutte le pagine, **Pedale come quarta voce della barra** (non più nel menu), pagina Pedale rifatta,
+menu Altro uguale ovunque, lista preset solo nome con banda, «HW PRESET»; `docs/decisioni-ui.md`,
+«Le bozze della sera».
 **`guida.en.html` è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare
 l'inglese.
 
-Sull'app (guscio `v105` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v106` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.

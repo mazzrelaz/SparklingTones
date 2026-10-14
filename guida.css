@@ -336,8 +336,11 @@ footer { border-top:1px solid var(--line-soft); color:var(--faint); text-align:c
 .m-barra-sotto span::after { content:''; width:14px; height:2px; border-radius:2px; margin-top:2px; }
 .m-barra-sotto span.scelta { color:#fff; }
 .m-barra-sotto span.scelta::after { background:var(--accent); }
-.m-sez2 { display:flex; justify-content:space-between; font:600 0.68rem var(--strumento);
-          color:var(--dim); margin:12px 0 6px; }
+.m-sez2 { display:flex; justify-content:space-between; font:600 0.56rem var(--strumento);
+          letter-spacing:0.08em; color:var(--dim); margin:12px 0 6px; }
+.m-riga2.banda { position:relative; padding-left:12px; }
+.m-riga2.banda::before { content:''; position:absolute; left:0; top:9px; bottom:9px; width:3px;
+                         border-radius:2px; background:var(--fam); }
 .m-sez2 .a { color:var(--rosso); }
 .m-sez2 .b { color:var(--green); }
 .m-slots4 { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:4px; }

@@ -29,6 +29,26 @@ for (const tasto of document.querySelectorAll('#sceltaLingua [data-lingua]')) {
   });
 }
 
+// Lo sfondo, grigio o nero (14 ottobre 2026). Cambia subito, senza ricaricare:
+// è solo una classe su <html>. Sta in localStorage perché vale per questo
+// apparecchio, come la lingua; lo script in testa alla pagina lo rimette
+// all'apertura prima che si disegni.
+function scegliSfondo(sfondo) {
+  document.documentElement.classList.toggle('grigio', sfondo === 'grigio');
+  document.querySelector('meta[name=theme-color]')
+    .setAttribute('content', sfondo === 'grigio' ? '#101010' : '#000000');
+  for (const tasto of document.querySelectorAll('#sceltaSfondo [data-sfondo]')) {
+    tasto.classList.toggle('primary', tasto.dataset.sfondo === sfondo);
+  }
+}
+for (const tasto of document.querySelectorAll('#sceltaSfondo [data-sfondo]')) {
+  tasto.addEventListener('click', () => {
+    scegliSfondo(tasto.dataset.sfondo);
+    try { localStorage.setItem('sfondo', tasto.dataset.sfondo); } catch (e) { /* resta per questa volta */ }
+  });
+}
+scegliSfondo(document.documentElement.classList.contains('grigio') ? 'grigio' : 'nero');
+
 // La goliardata, fra una canzone e l'altra. Si apre **sopra** «Altro» invece
 // che al posto suo — `apriPannello` chiuderebbe tutto — così «Fatto» riporta
 // dov'era. Il gioco non tocca niente: né la radio, né la libreria.

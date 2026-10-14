@@ -18,8 +18,7 @@ const inLive = () => location.hash === '#live';
 async function applicaVista() {
   const live_ = inLive();
   document.body.classList.toggle('vista-live', live_);
-  $('tabPreset').classList.toggle('scelta', !live_);
-  $('tabLive').classList.toggle('scelta', live_);
+  segnaSchede();
   if (!live_) chiudiPannelli();
   // La scheda di un preset è della vista Preset: andando in Live si chiude.
   if (live_) vista.aperto = null;
@@ -33,12 +32,45 @@ window.addEventListener('hashchange', () => { applicaVista(); });
 // Le due schede della barra in basso. Toccare quella in cui si è già chiude la
 // scheda aperta e riporta in cima: è dove ci si aspetta di tornare, come nelle
 // app del telefono.
+/**
+ * Quale scheda della barra è accesa: il Pedale quando la sua pagina è aperta,
+ * altrimenti la vista in cui si è. La chiamano anche apriPannello e
+ * chiudiPannelli, perché il Pedale è una pagina come le altre.
+ */
+function segnaSchede() {
+  const pedaleAperto = $('pannelloPedale').classList.contains('aperto');
+  $('tabPedale').classList.toggle('scelta', pedaleAperto);
+  $('tabPreset').classList.toggle('scelta', !pedaleAperto && !inLive());
+  $('tabLive').classList.toggle('scelta', !pedaleAperto && inLive());
+}
+
 $('tabPreset').addEventListener('click', () => {
+  const cera = !!document.querySelector('.pannello.aperto');
+  if (!chiudiPannelloAperto()) return;
   if (inLive()) { location.hash = 'preset'; return; }
+  if (cera) return;                      // il primo tocco chiude il pannello e basta
   if (vista.aperto) { vista.aperto = null; disegnaPreset(); }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
-$('tabLive').addEventListener('click', () => { location.hash = 'live'; });
+$('tabLive').addEventListener('click', () => {
+  if (!chiudiPannelloAperto()) return;
+  location.hash = 'live';
+});
+
+/**
+ * La barra in basso sta anche sopra i pannelli (guida, impostazioni, editor…):
+ * toccandola, prima si chiude il pannello aperto col suo stesso «Fatto», così
+ * l'editor con lavoro non salvato chiede — e allora ci si ferma lì, finché non
+ * si risponde. Torna true se non resta aperto niente.
+ */
+function chiudiPannelloAperto() {
+  const aperto = document.querySelector('.pannello.aperto');
+  if (!aperto) return true;
+  const fatto = aperto.querySelector('[data-chiudi]');
+  if (fatto) fatto.click();
+  else chiudiPannelli();
+  return !document.querySelector('.pannello.aperto');
+}
 
 /**
  * Un menu che si apre da un tasto: «Altro» della barra in basso, il bollino
@@ -97,6 +129,7 @@ function collegaMenu(idTasto, idTendina, { puoAprire = () => true } = {}) {
  */
 function aggiornaVelo() {
   $('velo').hidden = $('menuAltro').hidden && $('foglioPreset').hidden;
+  $('velo').classList.toggle('sopra', !$('menuAltro').hidden);
 }
 $('velo').addEventListener('click', () => {
   if (!$('foglioPreset').hidden) { vista.aperto = null; disegnaPreset(); }

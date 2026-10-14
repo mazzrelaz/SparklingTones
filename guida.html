@@ -131,8 +131,8 @@
       <div class="telefono rel">
         <span class="pin" style="left:4px;top:-8px">1</span>
         <span class="pin" style="right:6px;top:-8px">2</span>
-        <span class="pin" style="left:109px;top:140px">3</span>
-        <span class="pin" style="left:289px;top:140px">4</span>
+        <span class="pin" style="left:124px;top:140px">3</span>
+        <span class="pin" style="left:304px;top:140px">4</span>
         <div class="m-barra">
           <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
           <span class="m-bollino">Collega</span>
@@ -140,7 +140,7 @@
         <div class="m-campo"><b>⌕</b><span class="testo">cerca fra 24 preset</span><b>≡</b></div>
         <div style="height:46px"></div>
         <div class="m-barra-sotto">
-          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>···</b>Altro</span>
+          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>⊙⊙</b>Pedale</span><span><b>···</b>Altro</span>
         </div>
       </div>
       <figcaption>In alto il bollino dell'ampli, in basso la barra</figcaption>
@@ -152,8 +152,9 @@
           l'ampli manca; quando c'è, ne mostra il nome col pallino <span style="color:var(--green)">verde</span>.
           Toccalo per <strong>rileggere gli slot</strong>, <strong>importare il suono che sta
           suonando</strong> o <strong>scollegarti</strong>.</li>
-        <li><strong>Preset e Live</strong>, nella barra in basso: le due viste dell'app. Anche il tasto
-          indietro di Android torna ai preset.</li>
+        <li><strong>Preset, Live e Pedale</strong>, nella barra in basso, che c'è su tutte le pagine:
+          da una pagina si esce toccando un'altra voce. Anche il tasto indietro di Android torna ai
+          preset.</li>
         <li><strong>Altro</strong>: il menu con tutto il resto, compresa questa guida.</li>
       </ol>
     </div>
@@ -193,7 +194,7 @@
           <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
           <span class="m-bollino ok">Spark 2</span>
         </div>
-        <div class="m-sez2"><span>Sull'ampli</span><span><span class="a">A</span> rosso · <span class="b">B</span> verde</span></div>
+        <div class="m-sez2"><span>HW PRESET</span></div>
         <div class="m-slots4">
           <div class="m-slot4"><div class="s a">A1</div><div class="nome">Shine On clean</div></div>
           <div class="m-slot4"><div class="s a">A2</div><div class="nome">Echoes</div></div>
@@ -211,25 +212,25 @@
           <span class="m-pastiglia" style="--fam:#ff3b30"><span class="pf"></span>Drive</span>
           <span class="m-pastiglia">blues<i>4</i></span>
         </div>
-        <div class="m-riga2" style="--fam:#0a84ff"><span class="n">Blues di casa<small><i></i>Clean · blues</small></span><span class="m-tondo">▶</span></div>
-        <div class="m-riga2" style="--fam:#ff3b30"><span class="n">Lead Gilmour<small><i></i>Drive · Pink Floyd</small></span><span class="m-tondo">▶</span></div>
+        <div class="m-riga2 banda" style="--fam:#0a84ff"><span class="n">Blues di casa</span><span class="m-tondo">▶</span></div>
+        <div class="m-riga2 banda" style="--fam:#ff3b30"><span class="n">Lead Gilmour</span><span class="m-tondo">▶</span></div>
         <div class="m-riga2"><span class="n">Funk pulito</span><span class="m-tondo">▶</span></div>
         <div class="m-barra-sotto">
-          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>···</b>Altro</span>
+          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>⊙⊙</b>Pedale</span><span><b>···</b>Altro</span>
         </div>
       </div>
       <figcaption>Gli slot dell'ampli, la ricerca, e la libreria sotto</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
-        <li><strong>Sull'ampli</strong>: gli otto preset salvati nell'ampli, quattro per riga. <strong>Banco
+        <li><strong>HW PRESET</strong>: gli otto preset salvati nell'ampli, quattro per riga. <strong>Banco
           A sopra, in rosso; banco B sotto, in verde</strong>, come i LED sull'apparecchio. Uno slot che
           l'app non ha ancora letto dice <em>non letto</em>; se l'ampli non l'hai mai collegato, al
           posto degli slot c'è <span class="tasto pericolo">Collega</span>.</li>
         <li><strong>La ricerca e i filtri</strong>: vedi qui sotto.</li>
         <li><strong>La libreria</strong>: tutti gli altri preset che hai, senza limite. Un preset sta
-          sopra <em>oppure</em> sotto, mai in tutti e due i posti. Sotto il nome, il pallino della
-          <strong>famiglia di suono</strong> (blu clean, rosso drive…) e le categorie.</li>
+          sopra <em>oppure</em> sotto, mai in tutti e due i posti. La banda colorata a sinistra è
+          la <strong>famiglia di suono</strong> (blu clean, rosso drive…): si riconosce senza leggere.</li>
         <li><strong>▶</strong> fa suonare subito quel preset sull'ampli, <strong>senza toccare nessuno
           slot</strong>. È il modo più rapido per provarne uno.</li>
       </ol>
@@ -306,7 +307,7 @@
           <div class="m-note">Note<span class="ant">capotasto al 3, volume a metà</span>⌄</div>
         </div>
         <div class="m-barra-sotto" style="margin-top:0">
-          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>···</b>Altro</span>
+          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>⊙⊙</b>Pedale</span><span><b>···</b>Altro</span>
         </div>
       </div>
       <figcaption>La scheda sale dal basso; la barra resta sotto</figcaption>
@@ -427,7 +428,7 @@
         </div>
         <div class="m-banchi">
           <span class="m-bancotab">Ampli</span><span class="m-bancotab attivo">Concerto</span>
-          <span class="m-bancotab">Prove</span><span class="m-bancotab piu">＋ banco</span>
+          <span class="m-bancotab">Prove</span><span class="m-bancotab piu">＋ banco</span><span class="m-bancotab piu">✎ Modifica</span>
         </div>
         <div class="m-pads">
           <div class="m-pad" style="--led:#0a84ff"><span class="ledpad"></span><span class="np">1</span><span class="nm">Shine On clean</span><span class="sb">A1</span></div>
@@ -440,7 +441,7 @@
           <div class="m-pad vuoto"><span class="ledpad"></span><span class="np">8</span><span class="nm">vuoto</span></div>
         </div>
         <div class="m-barra-sotto">
-          <span><b>☰</b>Preset</span><span class="scelta"><b>▦</b>Live</span><span><b>···</b>Altro</span>
+          <span><b>☰</b>Preset</span><span class="scelta"><b>▦</b>Live</span><span><b>⊙⊙</b>Pedale</span><span><b>···</b>Altro</span>
         </div>
       </div>
       <figcaption>Un banco da otto: quattro per piede, a sinistra e a destra</figcaption>
@@ -468,13 +469,13 @@
   <h3>Comporre un banco</h3>
   <div class="due">
     <ol class="passi">
-      <li>Scegli il banco in alto, poi <kbd>Altro</kbd> → <strong>Modifica</strong>.</li>
+      <li>Scegli il banco in alto, poi tocca <strong>✎ Modifica</strong>, in fondo alla riga dei banchi.</li>
       <li><strong>Tocca un posto</strong> per scegliere il preset da metterci (c'è la ricerca, e
         <em>Svuota il posto</em> per liberarlo).</li>
       <li>Per spostare: tocca la presa <span style="color:var(--gold)">⇅</span> di un pulsante, poi il
         posto dove lo vuoi. I due si scambiano.</li>
       <li>Per rinominarlo o eliminarlo: in modifica, tocca il <strong>nome del banco</strong>.</li>
-      <li><kbd>Altro</kbd> → <strong>Fatto</strong> per tornare a suonare.</li>
+      <li>Tocca <strong>Fatto</strong>, lo stesso tasto, per tornare a suonare.</li>
     </ol>
     <figure class="schermo">
       <div class="telefono">
@@ -494,7 +495,7 @@
       per cambiarlo si scrive un preset in uno slot dalla schermata dei preset.</p>
   </div>
   <div class="nota">
-    <p>Nel menu <kbd>Altro</kbd> della vista Live c'è anche <strong>Pedale</strong>: serve al pedale SparklingTones, la
+    <p>Nella barra in basso c'è anche <strong>Pedale</strong>: serve al pedale SparklingTones, la
       vista Live staccata dal telefono e messa sotto il piede. Come si costruisce e come si usa:
       <a href="guida-pedale.html"><strong>la guida del pedale →</strong></a></p>
   </div>
@@ -657,6 +658,7 @@
   <h3>Le altre cose in «Impostazioni e backup»</h3>
   <ul>
     <li><strong>Lingua · Language</strong>: italiano o inglese.</li>
+    <li><strong>Sfondo</strong>: grigio scuro o nero. Vale per l'apparecchio su cui lo scegli.</li>
     <li><strong>Cerca i doppioni</strong>, in due modi. <strong>Per suono</strong>: i preset con le
       stesse impostazioni (effetti, manopole, tempo), qualunque nome abbiano. <strong>Per nome</strong>:
       quelli con lo stesso nome, con una lettera che dice chi suona uguale a chi. Scegli tu quali togliere. Ci si arriva anche da <kbd>Altro</kbd> → <strong>Doppioni</strong>.</li>
