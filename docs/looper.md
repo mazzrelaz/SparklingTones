@@ -722,4 +722,4 @@ con un secondo tempo (arrotondamento, e sopra 127 battute il valore va su `0xcc`
 pedale. **La 2.19** (14 ottobre 2026): in «libero» il pedale manda `bpm / 4` battute invece
 di quelle di prima (anche dopo un tap); il campo resta sotto `0x80` fino a 511 bpm. Le battute
 lette dal `0x0376` sopra 16 non entrano in `loopBattute`, che resta quella scelta coi tasti.
-**Compilata e caricata; da provare a 80 bpm: deve chiudere a 60 s.**
+**Verificata dall'utente col registro lo stesso giorno**: 80 bpm, «libero» → il pedale manda 20 battute, e l'ampli chiude da solo dopo **60,08 s** (`04` a 157,356, `08` a 217,439; `captures/2026-10-14-pedale-looper-libero-219.txt`).
