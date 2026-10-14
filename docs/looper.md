@@ -714,3 +714,12 @@ stesso registro**: entrando nel looper subito dopo l'app ufficiale, il `0x0376` 
 (20 battute × 4 tempi a 80 bpm = 60 s), e l'ampli le accetta anche se 20 non è fra 1…16. Il
 pedale invece lascia 16. Regola probabile: battute = bpm × 60 / 240 = bpm / 4; da confermare
 con un secondo tempo (arrotondamento, e sopra 127 battute il valore va su `0xcc`).
+
+**Il secondo tempo: 141 bpm → 35 battute** (`captures/2026-10-14-pedale-looper-libero-141.txt`,
+`0x0376` = `cc 8d 04 23 c3 c3 c2 cd ea 60`): 35 × 4 tempi a 141 = 59,6 s. Regola: **battute
+= bpm / 4 per difetto**, cioè quante stanno in 60 s (per eccesso sarebbero 36 = 61,3 s). I
+«27 s a 140» dell'app ufficiale non tornano con questa regola: probabilmente misurati col
+pedale. **La 2.19** (14 ottobre 2026): in «libero» il pedale manda `bpm / 4` battute invece
+di quelle di prima (anche dopo un tap); il campo resta sotto `0x80` fino a 511 bpm. Le battute
+lette dal `0x0376` sopra 16 non entrano in `loopBattute`, che resta quella scelta coi tasti.
+**Compilata e caricata; da provare a 80 bpm: deve chiudere a 60 s.**

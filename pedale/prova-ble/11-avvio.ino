@@ -320,10 +320,15 @@ void loop() {
         if (loopBpm > 127) p[np++] = 0xcc;
         p[np++] = (uint8_t)loopBpm;
         p[np++] = impostazioni[i];                                   // count, com'era
-        p[np++] = loopBattute;
+        /* In «libero» le battute non restano quelle di prima: come l'app ufficiale
+         * se ne mandano tante quante stanno in 60 s, bpm / 4 per difetto (letto dal
+         * 0x0376 lasciato dall'app, 14 ottobre 2026: 20 a 80 bpm, 35 a 141). Con 16
+         * l'ampli chiudeva la registrazione libera a 16 battute: 48 s a 80 bpm. */
+        const uint8_t battute = loopLibero ? (uint8_t)max(1, loopBpm / 4) : loopBattute;
+        p[np++] = battute;
         p[np++] = loopLibero ? 0xc3 : 0xc2;
         for (uint8_t k = i + 3; k < lungImpostazioni && np < sizeof(p); k++) p[np++] = impostazioni[k];
-        Serial.printf("impostazioni: %u bpm, %u battute%s\n", loopBpm, loopBattute,
+        Serial.printf("impostazioni: %u bpm, %u battute%s\n", loopBpm, battute,
                       loopLibero ? ", libero" : "");
         memcpy(impostazioni, p, np);       // l'ampli non le rimanda: le teniamo noi
         lungImpostazioni = (uint8_t)np;

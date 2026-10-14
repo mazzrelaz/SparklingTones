@@ -1,0 +1,10 @@
+   0,343  batteria: 4000 mV letti, 3994 mV mediati, 3 tacche
+  23,796  looper spento
+  29,279  meta' B mostrata; suona ancora (niente)
+  32,276  looper acceso
+  32,276    TX f0 01 0c 00 02 75 f7
+  32,276    TX f0 01 0d 00 02 76 f7
+  32,317    RX 0x0375  f0 01 0c 00 03 75 00 00 f7
+  32,325  looper: 0x00 (dall'ampli)
+  32,325    RX 0x0376  f0 01 0d 13 03 76 73 4c 0d 04 23 43 43 42 03 4d 6a 60 f7
+  32,373  looper: 141 bpm, click acceso
