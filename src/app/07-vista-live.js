@@ -120,7 +120,8 @@ function disegnaLive() {
     griglia.appendChild(pad);
   });
 
-  $('btnModifica').textContent = live.modifica ? tr('Fatto') : tr('Modifica');
+  // Solo la scritta: nel menu «Altro» il tasto ha anche la sua icona.
+  $('testoModifica').textContent = live.modifica ? tr('Fatto') : tr('Modifica');
   $('btnModifica').className = 'solo-live' + (live.modifica ? ' primary' : '');
 }
 

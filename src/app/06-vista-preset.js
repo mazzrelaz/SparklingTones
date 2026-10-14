@@ -95,8 +95,8 @@ function disegnaPreset() {
     const vuoto = document.createElement('div');
     vuoto.className = 'vuoto-sezione';
     vuoto.textContent = altri.length === 0
-      ? tr('Nessun preset oltre a quelli sull\'ampli. Connetti e premi «Leggi dall\'ampli», ' +
-        'oppure importa un backup da «Altro».')
+      ? tr('Nessun preset oltre a quelli sull\'ampli. Collega l\'ampli e i suoi si leggono da soli, ' +
+        'oppure importa un backup da «Altro» → «Impostazioni e backup».')
       : tr('Nessun preset corrisponde alla ricerca.');
     libreria.appendChild(vuoto);
   }

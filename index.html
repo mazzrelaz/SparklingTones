@@ -134,57 +134,102 @@
                          color:#4d525b; text-shadow:none; box-shadow:none; }
   button.neon.blu { --neon:var(--blu); }
   button.neon.oro { --neon:#ffd21e; }
-  /* Il passaggio fra le due viste è l'unico tasto che cambia pagina, e va
-     trovato col pollice senza guardare: più grande degli altri e chiuso in una
-     cornice rossa sottile, che lo stacca dai pannelli senza farne un pulsante
-     pieno — quello è già «Connetti». Ci sta, da quando la riga ha un pulsante
-     in meno. */
-  #btnVista { background:none; color:var(--accent); border:1px solid var(--accent);
-              font-size:0.95rem; padding:10px 18px; border-radius:11px;
-              box-shadow:0 0 14px -8px var(--accent); }
-  #btnVista:hover { background:rgba(227,6,19,0.12); border-color:var(--accent); }
+  /* La barra in basso (14 ottobre 2026): Preset, Live e Altro, dove arriva il
+     pollice. Sta sopra la pagina e sotto i pannelli a tutto schermo, che
+     hanno il loro «Fatto». Il corpo della pagina le lascia il suo spazio in
+     fondo, così l'ultima riga della libreria non ci finisce sotto. */
+  :root { --barra-sotto:62px; }
+  body { box-sizing:border-box;
+         padding-bottom:calc(var(--barra-sotto) + env(safe-area-inset-bottom)); }
+  #barraSotto { position:fixed; left:0; right:0; bottom:0; z-index:8; display:flex;
+                justify-content:center; background:var(--bg);
+                border-top:1px solid var(--line-soft);
+                padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom)
+                        env(safe-area-inset-left); }
+  #barraSotto button { flex:1; max-width:180px; height:var(--barra-sotto);
+                       display:flex; flex-direction:column; align-items:center;
+                       justify-content:center; gap:3px; background:none; border:none;
+                       border-radius:0; padding:0; color:var(--faint); font-size:0.72rem; }
+  #barraSotto button:hover { background:none; color:var(--dim); }
+  #barraSotto button.scelta, #barraSotto button.aperto { color:var(--text); }
+  /* La lineetta rossa sotto la scheda scelta. C'è anche sotto le altre, solo
+     trasparente: così le tre voci restano alla stessa altezza. */
+  #barraSotto button::after { content:''; width:18px; height:3px; border-radius:2px; }
+  #barraSotto button.scelta::after { background:var(--accent); }
+  #barraSotto svg { width:22px; height:22px; fill:none; stroke:currentColor;
+                    stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  #tabAltro svg { stroke-width:3.4; }
 
-  /* Il menu delle altre azioni. La tendina esce da sotto il suo tasto e si
-     appoggia al bordo destro, che è il lato da cui la si apre col pollice.
-     Il contenitore è `relative` perché la tendina non deve spostare niente
-     aprendosi: sopra sta la barra, sotto la ricerca, e se si facesse spazio
-     la pagina ballerebbe a ogni tocco. */
-  .menu-wrap { position:relative; }
-  #btnMenu { font-size:1.1rem; line-height:1; padding:9px 13px; }
-  #btnMenu.aperto { border-color:#3d434c; background:#1c1f25; }
-  .tendina { position:absolute; top:calc(100% + 7px); right:0; z-index:20;
-             min-width:200px; background:#101216; border:1px solid var(--line);
-             border-radius:12px; padding:6px;
-             box-shadow:0 14px 34px rgba(0,0,0,0.65); }
-  .tendina button { display:block; width:100%; text-align:left; background:none;
-                    border:none; border-radius:8px; padding:11px 12px; }
+  /* Il menu «Altro» sale dal basso e si ferma sopra la barra, che resta
+     scoperta. L'ombra enorme fa da velo sul resto della pagina; sta sotto la
+     barra (z-index 7 contro 8), quindi la barra non si oscura. */
+  .foglio-menu { position:fixed; left:50%; transform:translateX(-50%);
+                 width:min(100%, 520px); box-sizing:border-box;
+                 bottom:calc(var(--barra-sotto) + env(safe-area-inset-bottom)); z-index:7;
+                 max-height:calc(100% - var(--barra-sotto) - 40px); overflow-y:auto;
+                 background:#16181c; border-radius:20px 20px 0 0; padding:10px 8px;
+                 box-shadow:0 0 0 100vmax rgba(0,0,0,0.6); }
+  .foglio-menu[hidden] { display:none; }
+  .foglio-menu .gruppo-menu { font-family:var(--strumento); font-size:0.72rem;
+                              font-weight:600; color:var(--faint); padding:10px 14px 4px; }
+  .foglio-menu hr { border:0; border-top:1px solid var(--line); margin:6px 14px; }
+  .foglio-menu button, .tendina button { display:flex; align-items:center; gap:14px;
+                    width:100%; text-align:left; background:none; border:none;
+                    border-radius:10px; padding:12px 14px; font-family:var(--font);
+                    font-size:0.95rem; font-weight:500; color:var(--text); }
+  .foglio-menu button:hover:not(:disabled),
   .tendina button:hover:not(:disabled) { background:#1c1f25; }
   .tendina button:disabled { background:none; }
-  /* Il caffè (10 ottobre 2026): in fondo al menu, staccato e in oro, perché si veda. */
-  .tendina button.voce-caffe { color:var(--gold); font-weight:700; margin-top:6px;
-                               border-top:1px solid var(--line); border-radius:0 0 8px 8px; }
+  .foglio-menu svg, .tendina svg { width:19px; height:19px; flex:none; fill:none;
+                    stroke:var(--dim); stroke-width:1.8; stroke-linecap:round;
+                    stroke-linejoin:round; }
+  /* Il caffè (10 ottobre 2026): in fondo al menu, in oro, perché si veda. */
+  .foglio-menu button.voce-caffe { color:var(--gold); font-weight:700; }
+  .foglio-menu button.voce-caffe svg { stroke:var(--gold); }
+  /* «Fatto» della modifica dei banchi live: si deve vedere che sei lì dentro. */
+  .foglio-menu button.primary { color:var(--accent); font-weight:700; }
+  .foglio-menu button.primary svg { stroke:var(--accent); }
+  .tendina button.voce-pericolo, .tendina button.voce-pericolo svg { color:var(--rosso);
+                                                                     stroke:var(--rosso); }
 
-  /* Il tasto della connessione: fa da spia e da interruttore insieme. Rosso
-     pieno quando l'ampli non c'è — è l'unica cosa da fare in quel momento — e
-     verde quando c'è, dove non è più premibile ma resta acceso come il LED di
-     un apparecchio. Il giallo è l'attesa. Maiuscolo tutti e tre: si legge di
-     sguardo, da un metro e mezzo, come le scritte sul frontale. */
-  #status { text-transform:uppercase; letter-spacing:0.06em; font-size:0.78rem; }
-  #status.off { background:var(--accent); border-color:var(--accent); color:#fff;
-                box-shadow:0 0 16px -5px var(--accent); }
-  #status.off:hover { background:#f5121f; border-color:#f5121f; }
-  /* Rosso e spento insieme vuol dire una cosa sola: questo browser non ha il
-     Bluetooth. Lì il tasto deve sembrare quello che è, cioè non premibile. */
-  #status.off:disabled { background:#131519; border-color:var(--line-soft);
-                         color:#4d525b; box-shadow:none; cursor:not-allowed; }
-  #status.wait, #status.wait:disabled { background:#3a3520; border-color:#5c5227;
-                                        color:#f0d060; box-shadow:none; }
-  /* Da connesso il tasto è spento ma non deve *sembrare* spento: `:disabled`
-     lo sbiadirebbe come un comando non disponibile, mentre qui vuol dire che
-     la cosa è a posto. Per questo il verde va ripetuto sulla variante spenta. */
-  #status.on, #status.on:disabled { background:#12301a; border-color:var(--green);
-                                    color:var(--green); cursor:default;
-                                    box-shadow:0 0 16px -6px var(--green); }
+  /* Il pannellino del bollino dell'ampli, e il menu dell'editor: escono da sotto
+     il loro tasto e si appoggiano al bordo destro, che è il lato da cui li si
+     apre col pollice. Il contenitore è `relative` perché aprendosi non devono
+     spostare niente. */
+  .menu-wrap { position:relative; }
+  .tendina { position:absolute; top:calc(100% + 7px); right:0; z-index:20;
+             min-width:200px; background:#16181c; border:1px solid var(--line);
+             border-radius:14px; padding:6px;
+             box-shadow:0 14px 34px rgba(0,0,0,0.65); }
+  #foglioAmpli { min-width:270px; }
+  .testa-ampli { display:flex; align-items:center; gap:12px; padding:10px 14px 12px;
+                 margin-bottom:4px; border-bottom:1px solid var(--line); }
+  .pallino-ampli { width:10px; height:10px; border-radius:50%; flex:none;
+                   background:var(--green); box-shadow:0 0 8px var(--green); }
+  .nome-ampli { font-family:var(--strumento); font-weight:700; font-size:1rem; }
+  .sotto-ampli { font-size:0.78rem; color:var(--green); margin-top:1px; }
+
+  /* Il bollino dell'ampli: fa da spia e da interruttore insieme. Senza ampli è
+     un contorno rosso che dice «Collega»; con l'ampli porta il suo nome e il
+     pallino verde acceso come il LED di un apparecchio, e toccandolo apre il
+     pannellino qui sopra. Il giallo è l'attesa. */
+  #status { display:flex; align-items:center; gap:8px; border-radius:999px;
+            padding:8px 14px; font-size:0.84rem; background:none; white-space:nowrap; }
+  #status::before { content:''; width:8px; height:8px; border-radius:50%; flex:none;
+                    box-sizing:border-box; }
+  #status.off { border-color:var(--accent); color:var(--accent); }
+  #status.off::before { border:1.5px solid currentColor; }
+  #status.off:hover { background:rgba(227,6,19,0.12); border-color:var(--accent); }
+  /* Spento vuol dire una cosa sola: questo browser non ha il Bluetooth. Lì il
+     tasto deve sembrare quello che è, cioè non premibile. */
+  #status.off:disabled { background:none; border-color:var(--line-soft);
+                         color:#4d525b; cursor:not-allowed; }
+  #status.wait, #status.wait:disabled { background:none; border-color:#5c5227;
+                                        color:#f0d060; }
+  #status.wait::before { background:currentColor; }
+  #status.on { border-color:#2c4a30; color:var(--text); }
+  #status.on::before { background:var(--green); box-shadow:0 0 8px var(--green); }
+  #status.on:hover, #status.on.aperto { border-color:var(--green); background:#0f1a11; }
 
   input[type=text], input[type=search], select, textarea {
     background:#0e1014; border:1px solid var(--line); color:var(--text);
@@ -214,7 +259,7 @@
 
   /* ---- vista preset -------------------------------------------------- */
 
-  #vistaPreset { padding:14px 16px 60px; max-width:900px; margin:0 auto; }
+  #vistaPreset { padding:14px 16px 24px; max-width:900px; margin:0 auto; }
   body.vista-live #vistaPreset { display:none; }
 
   .sezione { margin-bottom:22px; }
@@ -518,7 +563,7 @@
   .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
                 background:var(--accent); transition:width 0.12s linear; }
 
-  #logLive { flex:none; padding:6px 12px calc(6px + env(safe-area-inset-bottom));
+  #logLive { flex:none; padding:6px 12px;
              font-family:Consolas,monospace; font-size:0.72rem; color:var(--faint);
              border-top:1px solid var(--line); min-height:1.6em;
              white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1075,19 +1120,14 @@
        l'unica cosa della riga che non serve a fare niente. */
     .logo { height:20px; max-width:45vw; flex:0 1 auto; min-width:0;
             object-fit:contain; object-position:left center; }
-    /* Sul telefono la barra deve stare su **una riga sola**: marchio, stato,
-       menu e passaggio all'altra vista. Ci sta per pochi pixel, quindi tutto
-       si stringe un po' — e nessuno di questi quattro può andare a capo, o
-       torna il difetto che si stava sistemando. */
+    /* Sul telefono la barra in alto sta su **una riga sola**: marchio e
+       bollino dell'ampli. */
     .titlebar { gap:8px; flex-wrap:nowrap; }
-    #status { font-size:0.72rem; padding:8px 10px; letter-spacing:0.04em; }
     /* Anche la barra dell'editor sta su una riga sola: se va a capo, il tasto
        del menu finisce a sinistra e la tendina, che si appoggia al bordo
        destro del suo tasto, uscirebbe dallo schermo. */
     .solo-largo { display:none; }
     #pannelloEditor > .barra-alta { flex-wrap:nowrap; gap:8px; }
-    #btnMenu { padding:8px 11px; font-size:1rem; }
-    #btnVista { font-size:0.86rem; padding:8px 12px; }
   }
 </style>
 </head>
@@ -1098,54 +1138,38 @@
     <!-- Il marchio lo mette l'utente: basta salvare il file in `icons/logo.svg`
          (o `.png`) e compare qui, senza toccare il codice. Finché il file non
          c'è, l'immagine si toglie da sola invece di lasciare l'icona rotta. -->
-    <!-- Il nome della vista non c'è: lo dicono già il pulsante che porta
-         all'altra e quello che si ha davanti. Al suo posto solo il marchio,
-         che sta in ogni schermata dell'app. -->
+    <!-- Il nome della vista non c'è: lo dicono già la barra in basso e quello
+         che si ha davanti. Al suo posto solo il marchio, che sta in ogni
+         schermata dell'app. -->
     <img class="logo" src="icons/logo.svg" alt="SparklingTones" title="torna ai preset"
          onerror="if (this.dataset.provato) { this.remove(); }
                   else { this.dataset.provato = '1'; this.src = 'icons/logo.png'; }">
-    <!-- Lo stato della connessione **è** il pulsante che connette: due cose che
-         dicevano la stessa cosa una accanto all'altra («non connesso» e
-         «Connetti») adesso sono una sola, rossa quando manca l'ampli e verde
-         quando c'è. Il nome vero dell'amplificatore finisce nel titolo. -->
-    <button id="status" class="stato-conn off">CONNETTI</button>
-    <!-- Le altre azioni stanno dietro un tasto solo. Non sono pulsanti nuovi:
-         sono gli stessi di prima, spostati qui dentro, quindi tengono i loro
-         id, i loro comportamenti e il loro acceso/spento. In barra restano tre
-         cose — se sei connesso, il menu, e il passaggio all'altra vista — e
-         così l'intestazione non va più a capo in un ordine diverso a ogni
-         cambio di stato. -->
-    <button id="btnVista">Live →</button>
-    <!-- Il menu è l'ultimo a destra, dove arriva il pollice: prima le due cose
-         che si usano suonando — se sei connesso, e il passaggio all'altra
-         vista — e in fondo tutto il resto. -->
+    <!-- Il bollino dell'ampli (14 ottobre 2026, al posto di «CONNETTI»): lo
+         stato della connessione **è** il pulsante. Senza ampli dice «Collega» e
+         collega; con l'ampli ne mostra il nome col pallino verde, e toccandolo
+         si apre il pannellino delle cose che si fanno con l'ampli — rileggere
+         gli slot, prendere il suono che sta suonando, scollegarsi. Il passaggio
+         fra le viste e il resto del menu stanno nella barra in basso. -->
     <div class="menu-wrap">
-      <button id="btnMenu" aria-haspopup="true" aria-expanded="false"
-              title="le altre azioni">⋯</button>
-      <div id="menuAltro" class="tendina" hidden>
-        <!-- Le due letture stanno in cima e vicine: una prende gli otto slot,
-             l'altra il suono che sta suonando adesso. Nessuna delle due si
-             spegne da disconnessi — un pulsante spento dentro una tendina non
-             riceve nemmeno il clic, quindi la tendina non si chiude e sembra
-             che l'app ti ignori. Spiegano loro perché non possono. -->
-        <button id="btnRead" class="solo-preset">Leggi dall'ampli</button>
-        <button id="btnLive" class="solo-preset"
-                title="prende in libreria il suono che l&#39;ampli sta facendo adesso; l&#39;ampli non viene toccato">Importa preset attuale</button>
-        <button id="btnCategorie" class="solo-preset">Categorie</button>
-        <button id="btnAltro" class="solo-preset">Altro</button>
-        <button id="btnModifica" class="solo-live">Modifica</button>
-        <button id="btnPedale" class="solo-live">Pedale</button>
-        <!-- La goliardata sta qui e non dentro «Altro»: è un passatempo fra
-             una canzone e l'altra, e a un passatempo non ci si arriva
-             passando da un pannello di manutenzione. -->
-        <!-- La guida c'è in tutte e due le viste: chi la cerca suonando non deve
-             prima tornare ai preset. -->
-        <button id="btnGuida">Guida</button>
-        <button id="btnSegnala">Segnala un problema</button>
-        <button id="btnSnake" class="solo-preset">Fai una pausa</button>
-        <!-- Le donazioni: si apre la pagina di Buy Me a Coffee in una scheda nuova,
-             cosi' questa resta aperta e l'ampli collegato. -->
-        <button id="btnCaffe" class="voce-caffe">☕ Offrimi un caffè</button>
+      <button id="status" class="stato-conn off" aria-haspopup="true"
+              aria-expanded="false">Collega</button>
+      <div id="foglioAmpli" class="tendina" hidden>
+        <div class="testa-ampli">
+          <span class="pallino-ampli"></span>
+          <div>
+            <div class="nome-ampli" id="nomeAmpli"></div>
+            <div class="sotto-ampli">collegato</div>
+          </div>
+        </div>
+        <!-- Nessuna delle due letture si spegne: un pulsante spento dentro una
+             tendina non riceve nemmeno il clic, e sembra che l'app ti ignori. -->
+        <button id="btnRead">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3v4h-4"/></svg>Rileggi gli slot</button>
+        <button id="btnLive"
+                title="prende in libreria il suono che l&#39;ampli sta facendo adesso; l&#39;ampli non viene toccato">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4M4 17h12"/></svg>Importa il suono che sta suonando</button>
+        <button id="btnScollega" class="voce-pericolo">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4.5A7 7 0 1 0 13 4.5M10 2v7"/></svg>Scollega</button>
       </div>
     </div>
   </div>
@@ -1176,6 +1200,52 @@
   <div id="pads"></div>
   <div id="logLive"></div>
 </div>
+
+<!-- Il menu «Altro» e la barra in basso (14 ottobre 2026). Preset e Live sono
+     due schede della barra, dove arriva il pollice, e «Altro» apre il menu che
+     prima stava dietro il «⋯» in alto. Il menu sale dal basso, appena sopra la
+     barra, e la barra resta lì: si cambia vista anche col menu aperto. Dentro
+     ci sono i pulsanti di sempre, coi loro id e i loro listener. -->
+<div id="menuAltro" class="foglio-menu" hidden>
+  <div class="gruppo-menu solo-preset">Libreria</div>
+  <button id="btnCategorie" class="solo-preset">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h6l1.5 2H17v10H3z"/></svg>Categorie</button>
+  <button id="btnAltro" class="solo-preset">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 13V3M6 7l4-4 4 4M4 13v4h12v-4"/></svg>Impostazioni e backup</button>
+  <button id="btnMenuDoppioni" class="solo-preset">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="6" y="6" width="11" height="11" rx="2"/><path d="M3 13V4a1 1 0 0 1 1-1h9"/></svg>Doppioni</button>
+  <div class="gruppo-menu solo-live">Live</div>
+  <button id="btnModifica" class="solo-live">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></svg><span id="testoModifica">Modifica</span></button>
+  <button id="btnPedale" class="solo-live">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="3" width="12" height="14" rx="2"/><circle cx="10" cy="12" r="2"/></svg>Pedale</button>
+  <div class="gruppo-menu">Aiuto</div>
+  <!-- La guida c'è in tutte e due le viste: chi la cerca suonando non deve
+       prima tornare ai preset. -->
+  <button id="btnGuida">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M7.8 7.8a2.3 2.3 0 1 1 3.2 2.1c-.6.3-1 .8-1 1.4v.4M10 14.4v.2"/></svg>Guida</button>
+  <button id="btnSegnala">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14v9H8l-4 3v-3H3z"/></svg>Segnala un problema</button>
+  <hr>
+  <!-- La goliardata sta qui e non dentro «Impostazioni e backup»: è un
+       passatempo fra una canzone e l'altra, e a un passatempo non ci si arriva
+       passando da un pannello di manutenzione. -->
+  <button id="btnSnake" class="solo-preset">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="6" width="15" height="9" rx="4.5"/><path d="M7 10.5h.01M13 10.5h.01"/></svg>Fai una pausa</button>
+  <!-- Le donazioni: si apre la pagina di Buy Me a Coffee in una scheda nuova,
+       cosi' questa resta aperta e l'ampli collegato. -->
+  <button id="btnCaffe" class="voce-caffe">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8h11v4a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM14 9h1.5a2 2 0 0 1 0 4H14M6 2.5v2.5M9 2.5v2.5"/></svg>Offrimi un caffè</button>
+</div>
+
+<nav id="barraSotto">
+  <button id="tabPreset">
+    <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M4 6h14M4 11h14M4 16h14"/></svg>Preset</button>
+  <button id="tabLive">
+    <svg viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="12" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="12" width="7" height="7" rx="1.5"/><rect x="12" y="12" width="7" height="7" rx="1.5"/></svg>Live</button>
+  <button id="tabAltro" aria-haspopup="true" aria-expanded="false">
+    <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M5 11h.01M11 11h.01M17 11h.01"/></svg>Altro</button>
+</nav>
 
 <!-- come si organizza la libreria: le famiglie di suono e le categorie -->
 <div class="pannello" id="pannelloCategorie">
@@ -1239,7 +1309,8 @@
     <code>preset_backup.zip</code> dell'app ufficiale e <strong>un preset singolo</strong>
     esportato da lì. Se ce l'hai già, se ne aggiorna il suono: tag, note e famiglia
     restano. Un suono che l'ampli sta già facendo non ha bisogno di nessun file:
-    si prende con <strong>«Importa preset attuale»</strong>, nel menu «⋯».</p>
+    si prende con <strong>«Importa il suono che sta suonando»</strong>, toccando il
+    bollino dell'ampli in alto.</p>
 
   <!-- Dropbox: la stessa libreria sul computer e sul telefono. -->
   <div class="sezione-pannello" style="margin-top:22px">

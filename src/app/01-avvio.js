@@ -21,23 +21,28 @@ Lingua.traduciPagina();
 const $ = id => document.getElementById(id);
 
 const store = new PresetStore();
+/** Il nome dell'ampli collegato, come lo annuncia lui («Spark 2», «Spark NEO»). */
+const nomeAmpliOra = () => (spark.connected && spark.state.name) || tr('collegato');
+
 const spark = new SparkTransport({
   onStatus: (state, label) => {
     const el = $('status');
     const acceso = state === 'connected';
     el.className = 'stato-conn ' + (acceso ? 'on' : state === 'connecting' ? 'wait' : 'off');
-    // Da connesso il pulsante dice «CONNESSO» e non il nome dell'ampli: il nome
-    // è lungo, cambia la larghezza della barra, e a chi suona non dice niente
-    // che non sappia già. Resta nel titolo, per chi ha due amplificatori.
-    el.textContent = acceso ? tr('CONNESSO') : state === 'connecting' ? label : tr('CONNETTI');
-    el.title = acceso ? (spark.state.name || tr('connesso'))
+    // Da connesso il bollino porta il nome dell'ampli (14 ottobre 2026): la
+    // barra in alto adesso ha posto, e con due ampli dice quale. Il nome vero
+    // arriva con `identify()`, poco dopo: fino ad allora dice «collegato».
+    el.textContent = acceso ? nomeAmpliOra() : state === 'connecting' ? label : tr('Collega');
+    el.title = acceso ? tr('tocca per rileggere gli slot, importare il suono o scollegarti')
                       : tr('collega l\'amplificatore via Bluetooth');
-    el.disabled = acceso || state === 'connecting';
-    // «Leggi dall'ampli» e «Importa preset attuale» **non si spengono qui**:
-    // stanno nella tendina «⋯», e un pulsante spento non riceve il clic —
-    // quindi la tendina resterebbe aperta senza che succeda niente, che è
-    // esattamente come si vede un'app rotta. Da disconnessi rispondono, e
-    // dicono che manca la connessione.
+    $('nomeAmpli').textContent = nomeAmpliOra();
+    // Da connesso il bollino si tocca: apre il pannellino dell'ampli. Se l'ampli
+    // cade col pannellino aperto, il pannellino se ne va con lui.
+    el.disabled = state === 'connecting';
+    if (!acceso) {
+      $('foglioAmpli').hidden = true;
+      el.setAttribute('aria-expanded', 'false');
+    }
     disegnaPreset();
     disegnaLive();
   },

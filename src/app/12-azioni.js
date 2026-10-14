@@ -152,11 +152,12 @@ $('btnAiutoEditor').addEventListener('click', () => {
 });
 
 $('status').addEventListener('click', async () => {
-  if ($('status').disabled) return;          // connesso: la spia non riconnette
+  // Connesso, il tocco apre il pannellino dell'ampli (`collegaMenu`).
+  if ($('status').disabled || spark.connected) return;
   try {
     await spark.connect();
     await spark.identify();
-    $('status').title = spark.state.name || tr('connesso');
+    $('status').textContent = $('nomeAmpli').textContent = nomeAmpliOra();
     // Il nome dice quanti slot ha (Spark 2 otto, NEO quattro), e resta per
     // quando l'ampli è spento: gli slot in libreria sono i suoi.
     if (spark.state.name) await store.setSetting('ultimoAmpli', spark.state.name);
@@ -171,13 +172,14 @@ $('status').addEventListener('click', async () => {
 });
 
 $('btnRead').addEventListener('click', () => leggiDallAmpli());
+$('btnScollega').addEventListener('click', () => spark.disconnect());
 
 /**
  * La riga che spiega un pulsante premuto senza ampli. Una sola, perché il
  * motivo è sempre lo stesso e cambia solo cosa si stava per fare.
  */
 const senzaAmpli = cosa =>
-  tr`per ${cosa} serve l'amplificatore: premi CONNETTI in alto e riprova.`;
+  tr`per ${cosa} serve l'amplificatore: tocca «Collega» in alto e riprova.`;
 
 /**
  * Legge gli otto slot e li riversa in libreria.
@@ -229,10 +231,11 @@ async function leggiDallAmpli() {
  * `readLiveState` non torna nessuno slot, e va bene così: quel suono sta nel
  * buffer, non in uno degli otto.
  *
- * **Sta nella tendina «⋯» e non nel pannello «Altro»** (28 agosto 2026,
- * chiesto dall'utente): là dentro è una voce di manutenzione fra esportazioni
- * e Dropbox, mentre questa è la strada più corta per portarsi in libreria un
- * suono dell'app ufficiale, e si usa con l'ampli acceso davanti.
+ * **Sta a un tocco e non nel pannello «Altro»** (28 agosto 2026, chiesto
+ * dall'utente): là dentro è una voce di manutenzione fra esportazioni e
+ * Dropbox, mentre questa è la strada più corta per portarsi in libreria un
+ * suono dell'app ufficiale, e si usa con l'ampli acceso davanti. Dal 14
+ * ottobre 2026 sta nel pannellino del bollino dell'ampli.
  *
  * Se quell'UUID è già in libreria non se ne fa un doppione: si aggiorna la
  * parte sonora e basta, che è la regola di `importFromAmp` — tag, note,
@@ -460,6 +463,8 @@ $('btnDoppioni').addEventListener('click', () => {
   apriPannello('pannelloDoppioni');
   disegnaDoppioni();
 });
+// La stessa cosa dal menu «Altro», senza passare da «Impostazioni e backup».
+$('btnMenuDoppioni').addEventListener('click', () => $('btnDoppioni').click());
 
 for (const tasto of document.querySelectorAll('#modoDoppioni button')) {
   tasto.addEventListener('click', () => {
