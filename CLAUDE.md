@@ -396,10 +396,12 @@ Preset · Live · Altro (il menu, che sale dal basso), bollino dell'ampli al pos
 gli slot con filtri anche per famiglia, scheda del preset in un foglio dal basso
 (`disegnaFoglio`, `#velo`) con le note chiuse. Perché e cosa è cambiato dalle bozze:
 `docs/decisioni-ui.md`, «L'interfaccia nuova». **Da verificare sul telefono con l'ampli.**
+**Sfondo grigio** (14 ottobre, scelta in «Impostazioni e backup», grigio di serie): variabili
+`--incavo`, `--foglio`, `--rialzo`… e `html.grigio`; `docs/decisioni-ui.md`, «Lo sfondo grigio».
 **`guida.en.html` è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare
 l'inglese.
 
-Sull'app (guscio `v103` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v104` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
