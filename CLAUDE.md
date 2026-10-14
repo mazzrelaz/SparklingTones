@@ -390,7 +390,7 @@ e soprattutto **i banchi da aggiornare** (firmware 2.22 già sulla XIAO; mai pro
 vero). Se un banco risulta «cambiato» senza esserlo: farsi incollare «Copia il log del pedale».
 **Domanda aperta**: togliere «Fatto» e il titolo anche dalle altre pagine (guida, impostazioni,
 categorie, doppioni)? Chiesta, nessuna risposta. I progetti stanno in
-`C:\Users\massi\Progetti Claude` (spostati il 14 ottobre; copia giornaliera alle 13 in
+`C:\Users\massi\Progetti Claude` (spostati il 14 ottobre; copia ogni ora in
 `Desktop\Cloud Backup\Progetti Claude`, che è sincronizzata con Google Drive).
 
 
