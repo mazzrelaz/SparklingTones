@@ -44,7 +44,6 @@ function disegnaPreset() {
 
   const griglia = document.createElement('div');
   griglia.className = 'pannello-ampli';
-  let apertoSlot = null;
 
   // Mai letto niente e niente ampli: al posto di otto caselle vuote, l'invito
   // a collegarlo. Gli slot letti l'ultima volta invece restano, anche senza
@@ -59,17 +58,10 @@ function disegnaPreset() {
       if (!record && filtroAttivo()) continue;
       mostratiSuAmpli++;
       griglia.appendChild(schedaSlot(record, slot));
-      if (record && vista.aperto === record.id + ':' + slot) apertoSlot = { record, slot };
     }
     ampli.appendChild(griglia);
   }
 
-  if (apertoSlot) {
-    const sotto = document.createElement('div');
-    sotto.className = 'row aperta-sotto';
-    sotto.appendChild(dettaglio(apertoSlot.record, apertoSlot.slot));
-    ampli.appendChild(sotto);
-  }
   $('sezAmpli').style.display = mostratiSuAmpli === 0 && filtroAttivo() ? 'none' : '';
 
   const libreria = $('listaLibreria');
@@ -97,6 +89,19 @@ function disegnaPreset() {
       : tr('Nessun preset corrisponde alla ricerca.');
     libreria.appendChild(vuoto);
   }
+
+  // La scheda aperta sta nel foglio che sale dal basso, anche se il filtro
+  // l'ha tolta dall'elenco: si chiude dalla ✕. Se il preset non c'è più
+  // (eliminato, o lo slot riletto con un altro), il foglio si chiude da sé.
+  let apertoRecord = null, apertoSlot = null;
+  if (vista.aperto) {
+    const [id, s] = vista.aperto.split(':');
+    apertoSlot = s === 'null' ? null : Number(s);
+    const record = apertoSlot === null ? tutti.find(r => String(r.id) === id) : suAmpli[apertoSlot];
+    if (record && String(record.id) === id) apertoRecord = record;
+    else vista.aperto = null;
+  }
+  disegnaFoglio(apertoRecord, apertoSlot);
 }
 
 /**
@@ -404,149 +409,136 @@ function rigaPreset(record, slot) {
   });
   riga.appendChild(head);
 
-  if (vista.aperto === chiave) riga.appendChild(dettaglio(record, slot));
   return riga;
+}
+
+/**
+ * La scheda di un preset, nel foglio che sale dal basso (14 ottobre 2026, dalle
+ * bozze scelte dall'utente). In cima chi è — famiglia, slot, bolli, nome — e le
+ * due cose che si fanno di più, **Suona** e **Regola**, grandi. Sotto, piccole,
+ * le altre: Duplica, Metti in uno slot, nel banco live, Elimina. Poi come lo si
+ * organizza: famiglia e categorie. Le note stanno chiuse e si aprono toccandole.
+ */
+const ICONE_SCHEDA = {
+  suona:    '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z"/></svg>',
+  regola:   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3v14M10 3v14M15 3v14"/><circle cx="5" cy="12" r="2"/><circle cx="10" cy="7" r="2"/><circle cx="15" cy="13" r="2"/></svg>',
+  seleziona:'<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2.5"/></svg>',
+  duplica:  '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="6" y="6" width="11" height="11" rx="2"/><path d="M3 13V4a1 1 0 0 1 1-1h9"/></svg>',
+  slot:     '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4"/><rect x="3" y="14" width="14" height="3" rx="1"/></svg>',
+  banco:    '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><path d="M14 11v6M11 14h6"/></svg>',
+  elimina:  '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h12M8 6V4h4v2M6 6l1 11h6l1-11"/></svg>',
+  chiudi:   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>',
+  matita:   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></svg>',
+  note:     '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h7l3 3v11H5z"/><path d="M8 10h5M8 13h4"/></svg>',
+  giu:      '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg>',
+  su:       '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg>',
+};
+
+/** Un pulsante della scheda: icona e scritta. */
+function tastoScheda(icona, testo, classe = '') {
+  const b = document.createElement('button');
+  b.type = 'button';
+  if (classe) b.className = classe;
+  b.innerHTML = ICONE_SCHEDA[icona];
+  const t = document.createElement('span');
+  t.textContent = testo;
+  b.appendChild(t);
+  return b;
 }
 
 function dettaglio(record, slot) {
   const det = document.createElement('div');
-  det.className = 'detail';
+  det.className = 'scheda';
+  const chiave = record.id + ':' + slot;
 
-  /* nome ---------------------------------------------------------- */
+  /* chi è --------------------------------------------------------- */
+  const testa = document.createElement('div');
+  testa.className = 'scheda-testa';
+  const famiglia = record.famiglia && famiglie.find(f => f.id === record.famiglia);
+  if (famiglia) {
+    const pallino = document.createElement('span');
+    pallino.className = 'pallino-fam';
+    pallino.style.setProperty('--famiglia', famiglia.colore);
+    testa.append(pallino, famiglia.nome);
+  }
+  if (slot !== null) testa.appendChild(etichettaSlot(slot));
+  const bollo = bolloHendrix(record);
+  if (bollo) testa.appendChild(bollo);
+  const live = bolloLive(record);
+  if (live) testa.appendChild(live);
+  const chiudi = document.createElement('button');
+  chiudi.type = 'button';
+  chiudi.className = 'chiudi';
+  chiudi.innerHTML = ICONE_SCHEDA.chiudi;
+  chiudi.setAttribute('aria-label', tr('chiudi'));
+  chiudi.addEventListener('click', () => { vista.aperto = null; disegnaPreset(); });
+  testa.appendChild(chiudi);
+
+  // Il nome si cambia dalla matita, non da un campo sempre aperto: si rinomina
+  // di rado, e un campo di testo in cima alla scheda la faceva sembrare un modulo.
   const boxNome = document.createElement('div');
-  boxNome.innerHTML = '<label>' + tr('nome') + '</label>';
-  const campoNome = document.createElement('input');
-  campoNome.type = 'text';
-  campoNome.value = record.name || '';
-  campoNome.addEventListener('change', async () => {
-    const nuovo = campoNome.value.trim();
-    if (!nuovo || nuovo === record.name) { campoNome.value = record.name; return; }
+  boxNome.className = 'scheda-nome';
+  const titolo = document.createElement('h2');
+  titolo.textContent = record.name || tr('(senza nome)');
+  const rinomina = document.createElement('button');
+  rinomina.type = 'button';
+  rinomina.innerHTML = ICONE_SCHEDA.matita;
+  rinomina.setAttribute('aria-label', tr('rinomina'));
+  rinomina.title = tr('rinomina');
+  rinomina.addEventListener('click', async () => {
+    const scritto = await chiediTesto(tr('rinomina'), tr('Il nuovo nome del preset.'),
+      record.name || '', { ok: tr('Rinomina') });
+    const nuovo = scritto && scritto.trim();
+    if (!nuovo || nuovo === record.name) return;
     await store.setName(record.id, nuovo);
     logLine(tr('rinominato in «{0}». Sull\'ampli il nome resta quello vecchio ' +
             'finché non lo riscrivi in uno slot.', nuovo));
     await ricarica();
     disegnaPreset();
   });
-  boxNome.appendChild(campoNome);
+  boxNome.append(titolo, rinomina);
 
-  // Le schede di libreria hanno già la catena sotto il nome, e ripeterla qui
-  // sarebbe leggerla due volte. I posti del pannello dell'ampli invece no —
-  // lì c'è solo ampli e drive — quindi la catena intera va mostrata una volta.
-  if (slot !== null) boxNome.appendChild(pastiglieCatena(record));
+  // La catena a pastiglie, una volta sola: nelle righe di libreria non c'è.
+  det.append(testa, boxNome, pastiglieCatena(record));
 
-  /* famiglia di suono ---------------------------------------------- */
-  // Un asse a sé, che con le categorie non c'entra: quelle sono lo stile
-  // (Pink Floyd, jazz, il pezzo), questa è *che tipo di suono è*. Una sola,
-  // scelta a mano, e si può togliere — chi non ce l'ha resta senza colore.
-  const boxFam = document.createElement('div');
-  boxFam.innerHTML = '<label>' + tr('famiglia di suono') + '</label>';
-  const scelteFam = document.createElement('div');
-  scelteFam.className = 'scelte';
+  /* le due grandi ------------------------------------------------- */
+  const grandi = document.createElement('div');
+  grandi.className = 'scheda-grandi';
 
-  for (const famiglia of famiglie) {
-    const s = document.createElement('span');
-    const sua = record.famiglia === famiglia.id;
-    s.className = 'scelta famiglia' + (sua ? ' dentro' : '');
-    s.style.setProperty('--famiglia', famiglia.colore);
-    s.textContent = famiglia.nome;
-    s.addEventListener('click', async () => {
-      await store.setFamiglia(record.id, sua ? null : famiglia.id);
-      await ricarica();
-      disegnaPreset();
-    });
-    scelteFam.appendChild(s);
-  }
-  boxFam.appendChild(scelteFam);
-  if (!record.famiglia) {
-    const nota = document.createElement('div');
-    nota.className = 'nota-famiglia';
-    nota.textContent = tr('senza famiglia: resta senza colore.');
-    boxFam.appendChild(nota);
-  }
+  // Caricare nel suono corrente non tocca nulla di salvato: è il modo
+  // sicuro di provare un preset che sull'ampli non c'è.
+  const prova = tastoScheda('suona', tr('Suona'), 'primary');
+  prova.title = tr('manda il preset all\'ampli senza sovrascrivere nessuno slot');
+  prova.disabled = !spark.connected;
+  prova.addEventListener('click', () => mandaPreset(record, null));
 
-  /* categorie ----------------------------------------------------- */
-  const boxCat = document.createElement('div');
-  boxCat.innerHTML = '<label>' + tr('categorie') + '</label>';
-  const scelte = document.createElement('div');
-  scelte.className = 'scelte';
-  const sue = new Set((record.tags || []).map(t => t.toLowerCase()));
+  const regola = tastoScheda('regola', tr('Regola'));
+  // Senza ampli si apre lo stesso, sulla copia in libreria: non si sente
+  // niente, ma si guarda la catena e si salva. È il caso del divano.
+  regola.title = spark.connected
+    ? tr('manda il preset all\'ampli e apri le manopole')
+    : tr('apri le manopole sulla copia in libreria: senza ampli non si sente, ma si salva');
+  regola.addEventListener('click', () => apriEditor(record));
+  grandi.append(prova, regola);
+  det.appendChild(grandi);
 
-  for (const { nome } of categorie) {
-    const s = document.createElement('span');
-    s.className = 'scelta' + (sue.has(nome.toLowerCase()) ? ' dentro' : '');
-    s.textContent = (sue.has(nome.toLowerCase()) ? '✓ ' : '＋ ') + nome;
-    s.addEventListener('click', async () => {
-      if (sue.has(nome.toLowerCase())) await store.removeTag(record.id, nome);
-      else                             await store.addTag(record.id, nome);
-      await ricarica();
-      disegnaPreset();
-    });
-    scelte.appendChild(s);
-  }
-
-  const nuova = document.createElement('span');
-  nuova.className = 'scelta';
-  nuova.textContent = tr('＋ nuova…');
-  nuova.addEventListener('click', async () => {
-    const nome = await chiediTesto(tr('nuova categoria'),
-      tr('Come si chiama? La userai per filtrare la libreria dalle pastiglie in alto.'),
-      '', { ok: tr('Crea e assegna'), invito: tr('blues, prove, casa…') });
-    if (!nome) return;
-    await store.addCategory(nome);
-    await store.addTag(record.id, nome.trim());
-    await ricarica();
-    disegnaPreset();
-  });
-  scelte.appendChild(nuova);
-  boxCat.appendChild(scelte);
-
-  /* note ---------------------------------------------------------- */
-  const boxNote = document.createElement('div');
-  boxNote.innerHTML = '<label>' + tr('note') + '</label>';
-  const note = document.createElement('textarea');
-  note.value = record.notes || '';
-  note.placeholder = tr('come suona, quando usarlo, cosa cambiare…');
-  note.addEventListener('change', async () => {
-    await store.setNotes(record.id, note.value);
-    await ricarica();
-  });
-  boxNote.appendChild(note);
-
-  // Niente «catena effetti» qui sotto: la catena sta già sotto il nome, in
-  // cima alla scheda, e ripeterla due volte nello stesso riquadro non
-  // aggiunge niente — la si legge una volta sola.
-
-  /* azioni -------------------------------------------------------- */
-  const azioni = document.createElement('div');
-  azioni.className = 'azioni-blocchi';
-  const riga = (extra = '') => {
-    const r = document.createElement('div');
-    r.className = 'azioni-riga' + (extra ? ' ' + extra : '');
-    azioni.appendChild(r);
-    return r;
-  };
-  // Le quattro azioni che si fanno sul preset — provarlo, regolarlo,
-  // copiarlo, buttarlo — stanno su **una riga sola e larghe uguali**, chiesto
-  // dall'utente il 26 agosto 2026: prima erano sparse su tre righe e la scheda
-  // sembrava un elenco di cose scollegate. Sotto, le due che vogliono un
-  // «dove» hanno la loro griglia, così i pulsanti e le tendine si incolonnano.
-  const rigaSuono = riga('quattro');
+  /* le altre, piccole --------------------------------------------- */
+  const piccole = document.createElement('div');
+  piccole.className = 'scheda-piccole';
 
   let avvisoAltriSlot = null;
   if (slot !== null) {
     const altri = slotsDi(record).filter(s => s !== slot);
     if (altri.length) {
       avvisoAltriSlot = document.createElement('div');
-      avvisoAltriSlot.style.cssText = 'color:var(--dim);font-size:0.76rem';
+      avvisoAltriSlot.className = 'nota-altri-slot';
       avvisoAltriSlot.textContent = tr('Lo stesso preset sta anche in {0}.',
         altri.map(s => postoAmpli(s).label).join(', '));
     }
 
-    // Sta in una riga sua, sopra le quattro: non è un'azione sul preset ma
-    // sull'ampli — gli dice quale slot mettere davanti — e compare solo
-    // aprendo uno degli otto posti hardware.
-    const attiva = document.createElement('button');
-    attiva.textContent = tr('Seleziona {0}', postoAmpli(slot).label);
+    // Solo aprendo uno dei posti dell'ampli: non è un'azione sul preset ma
+    // sull'ampli — gli dice quale slot mettere davanti, senza scrivere nulla.
+    const attiva = tastoScheda('seleziona', tr('Seleziona {0}', postoAmpli(slot).label));
     attiva.title = tr('seleziona lo slot sull\'ampli, senza scrivere nulla');
     attiva.disabled = !spark.connected;
     attiva.addEventListener('click', async () => {
@@ -574,111 +566,12 @@ function dettaglio(record, slot) {
                : davanti === Spark.SOFTWARE_PRESET ? tr('il preset mandato dall\'app')
                : nomeSlot(davanti)));
     });
-    azioni.insertBefore(riga('sola'), rigaSuono).appendChild(attiva);
-  }
-
-  // Caricare nel suono corrente non tocca nulla di salvato: è il modo
-  // sicuro di provare un preset che sull'ampli non c'è.
-  const prova = document.createElement('button');
-  prova.className = 'primary';
-  prova.textContent = tr('Attiva');
-  prova.title = tr('manda il preset all\'ampli senza sovrascrivere nessuno slot');
-  prova.disabled = !spark.connected;
-  prova.addEventListener('click', () => mandaPreset(record, null));
-  rigaSuono.appendChild(prova);
-
-  const regola = document.createElement('button');
-  regola.textContent = tr('Regola');
-  // Senza ampli si apre lo stesso, sulla copia in libreria: non si sente
-  // niente, ma si guarda la catena e si salva. È il caso del divano.
-  regola.title = spark.connected
-    ? tr('manda il preset all\'ampli e apri le manopole')
-    : tr('apri le manopole sulla copia in libreria: senza ampli non si sente, ma si salva');
-  regola.addEventListener('click', () => apriEditor(record));
-  rigaSuono.appendChild(regola);
-
-  // Gli otto posti dell'ampli, col LED che si vede sul pannello: la sigla da
-  // sola (A1, B3) dice poco a chi guarda l'apparecchio invece dello schermo.
-  const posti = [];
-  for (let i = 0; i < modelloAmpli.slot; i++) {
-    const posizione = postoAmpli(i);
-    posti.push({ valore: i,
-                 testo: posizione.color
-                   ? tr`${posizione.label} — LED ${nomeColore(posizione.color)} ${posizione.position}`
-                   : posizione.label });
-  }
-  const scelta = tendinaFinta(tr('dove scriverlo sull\'ampli'), posti,
-                              slot !== null ? slot : 0);
-
-  const scrivi = document.createElement('button');
-  scrivi.className = 'neon oro';
-  scrivi.textContent = tr('Invia a preset HW');
-  scrivi.title = tr('sovrascrive il preset presente in quello slot');
-  scrivi.disabled = !spark.connected;
-  scrivi.addEventListener('click', async () => {
-    const dove = scelta.valore;
-    const chiCera = suAmpli[dove];
-    const avviso =
-      tr('Scrivere <strong>{0}</strong> in {1} sull\'ampli?', testoConNome(record.name), nomeSlot(dove)) +
-      ' ' +
-      (chiCera && chiCera.id !== record.id
-        ? tr('Sovrascrive «{0}», che è già lì — ma la sua copia ' +
-          'in libreria resta al sicuro, e ricompare nella lista qui sotto.', testoConNome(chiCera.name))
-        : tr('La copia in libreria resta comunque al sicuro.'));
-    if (!await conferma(tr('scrivere sull\'ampli'), avviso, { ok: tr('Scrivi {0}', nomeSlot(dove)) })) return;
-    mandaPreset(record, dove);
-  });
-  const rigaSlot = riga('coppia');
-  rigaSlot.append(scrivi, scelta);      // prima cosa fa, poi dove
-
-  /* Mettere un preset in un banco live senza passare dalla vista Live.
-     Chiesto dall'utente il 14 agosto 2026: si sta già guardando il preset, e
-     doverlo ricordare, cambiare vista e ritrovarlo lì dentro è un giro inutile.
-     Va nel **primo posto libero** del banco scelto: quale dei quattro tasti sia
-     è una cosa che si decide col piede davanti, non da qui, e nella vista Live
-     si sposta. Non tocca l'ampli — i banchi inventati non ci scrivono mai. */
-  if (banchi.length) {
-    const quali = banchi.map(b => {
-      const liberi = b.posti.filter(p => p === null).length;
-      return { valore: b.id,
-               testo: b.nome + (liberi ? tr` — ${liberi} posti liberi` : tr(' — pieno')) };
-    });
-    const banco = tendinaFinta(tr('in quale banco live'), quali, banchi[0].id);
-
-    const metti = document.createElement('button');
-    metti.className = 'neon blu';
-    metti.textContent = tr('Metti nel banco');
-    metti.title = tr('aggiunge il preset al banco live, senza toccare l\'ampli');
-    metti.addEventListener('click', async () => {
-      const id = banco.valore;
-      const scelto = banchi.find(b => b.id === id);
-      if (!scelto) return;
-
-      const giaLi = scelto.posti.indexOf(record.id);
-      if (giaLi !== -1) {
-        logLine(tr`«${record.name}» era già in «${scelto.nome}», al posto ${giaLi + 1}`);
-        return;
-      }
-      const libero = scelto.posti.indexOf(null);
-      if (libero === -1) {
-        await avvisa(tr('banco pieno'),
-          tr('<strong>{0}</strong> ha tutti e otto i posti ' +
-          'occupati. Liberane uno dalla vista Live, oppure scegli un altro banco.', testoConNome(scelto.nome)));
-        return;
-      }
-      await store.setBankSlot(id, libero, record.id);
-      logLine(tr`«${record.name}» → «${scelto.nome}», posto ${libero + 1}`);
-      await ricarica();
-      disegnaPreset();
-      disegnaLive();
-    });
-    riga('coppia').append(metti, banco);   // prima cosa fa, poi dove
+    piccole.appendChild(attiva);
   }
 
   // Duplicare è il modo vero di fare un preset nuovo: si parte da un suono
   // che funziona. Non serve l'ampli, quindi il pulsante c'è sempre.
-  const duplica = document.createElement('button');
-  duplica.textContent = tr('Duplica');
+  const duplica = tastoScheda('duplica', tr('Duplica'));
   duplica.title = tr('ne fa una copia in libreria, da storcere a piacere');
   duplica.addEventListener('click', async () => {
     const copiaId = await store.duplicate(record.id);
@@ -689,11 +582,82 @@ function dettaglio(record, slot) {
     disegnaPreset();
     disegnaLive();
   });
-  rigaSuono.appendChild(duplica);
+  piccole.appendChild(duplica);
 
-  const elimina = document.createElement('button');
-  elimina.className = 'pericolo';
-  elimina.textContent = tr('Elimina');
+  // Scriverlo in uno slot: prima si sceglie dove, dall'elenco degli slot col
+  // LED che si vede sul pannello — la sigla da sola (A1, B3) dice poco a chi
+  // guarda l'apparecchio invece dello schermo — poi si conferma.
+  const scrivi = tastoScheda('slot', tr('Metti in uno slot'));
+  scrivi.title = tr('sovrascrive il preset presente in quello slot');
+  scrivi.disabled = !spark.connected;
+  scrivi.addEventListener('click', () => {
+    const posti = [];
+    for (let i = 0; i < modelloAmpli.slot; i++) {
+      const posizione = postoAmpli(i);
+      const chi = suAmpli[i];
+      posti.push({ valore: i,
+                   testo: (posizione.color
+                     ? tr`${posizione.label} — LED ${nomeColore(posizione.color)} ${posizione.position}`
+                     : posizione.label) + (chi ? ' · ' + (chi.name || '') : '') });
+    }
+    apriElenco(tr('dove scriverlo sull\'ampli'), posti, slot !== null ? slot : null, async dove => {
+      const chiCera = suAmpli[dove];
+      const avviso =
+        tr('Scrivere <strong>{0}</strong> in {1} sull\'ampli?', testoConNome(record.name), nomeSlot(dove)) +
+        ' ' +
+        (chiCera && chiCera.id !== record.id
+          ? tr('Sovrascrive «{0}», che è già lì — ma la sua copia ' +
+            'in libreria resta al sicuro, e ricompare nella lista qui sotto.', testoConNome(chiCera.name))
+          : tr('La copia in libreria resta comunque al sicuro.'));
+      if (!await conferma(tr('scrivere sull\'ampli'), avviso, { ok: tr('Scrivi {0}', nomeSlot(dove)) })) return;
+      mandaPreset(record, dove);
+    });
+  });
+  piccole.appendChild(scrivi);
+
+  /* Mettere un preset in un banco live senza passare dalla vista Live.
+     Chiesto dall'utente il 14 agosto 2026: si sta già guardando il preset, e
+     doverlo ricordare, cambiare vista e ritrovarlo lì dentro è un giro inutile.
+     Va nel **primo posto libero** del banco scelto: quale dei quattro tasti sia
+     è una cosa che si decide col piede davanti, non da qui, e nella vista Live
+     si sposta. Non tocca l'ampli — i banchi inventati non ci scrivono mai. */
+  if (banchi.length) {
+    const metti = tastoScheda('banco', tr('Nel banco live'));
+    metti.title = tr('aggiunge il preset al banco live, senza toccare l\'ampli');
+    metti.addEventListener('click', () => {
+      const quali = banchi.map(b => {
+        const liberi = b.posti.filter(p => p === null).length;
+        return { valore: b.id,
+                 testo: b.nome + (liberi ? tr` — ${liberi} posti liberi` : tr(' — pieno')) };
+      });
+      apriElenco(tr('in quale banco live'), quali, null, async id => {
+        const scelto = banchi.find(b => b.id === id);
+        if (!scelto) return;
+
+        const giaLi = scelto.posti.indexOf(record.id);
+        if (giaLi !== -1) {
+          logLine(tr`«${record.name}» era già in «${scelto.nome}», al posto ${giaLi + 1}`);
+          return;
+        }
+        const libero = scelto.posti.indexOf(null);
+        if (libero === -1) {
+          await avvisa(tr('banco pieno'),
+            tr('<strong>{0}</strong> ha tutti e otto i posti ' +
+            'occupati. Liberane uno dalla vista Live, oppure scegli un altro banco.', testoConNome(scelto.nome)));
+          return;
+        }
+        await store.setBankSlot(id, libero, record.id);
+        logLine(tr`«${record.name}» → «${scelto.nome}», posto ${libero + 1}`);
+        await ricarica();
+        disegnaPreset();
+        disegnaLive();
+      });
+    });
+    piccole.appendChild(metti);
+  }
+
+  // Ultima: resta quella che non si torna indietro, e la conferma è lì per quello.
+  const elimina = tastoScheda('elimina', tr('Elimina'), 'pericolo');
   elimina.addEventListener('click', async () => {
     if (!await conferma(tr('eliminare dalla libreria'),
       tr('Eliminare <strong>{0}</strong> dalla libreria? ' +
@@ -706,17 +670,135 @@ function dettaglio(record, slot) {
     disegnaPreset();
     disegnaLive();
   });
-  // Ultima delle quattro: resta quella che non si torna indietro, e la
-  // conferma è lì per quello.
-  rigaSuono.appendChild(elimina);
+  piccole.appendChild(elimina);
+  det.appendChild(piccole);
+  if (avvisoAltriSlot) det.appendChild(avvisoAltriSlot);
+
+  const sep = document.createElement('div');
+  sep.className = 'scheda-sep';
+  det.appendChild(sep);
+
+  /* famiglia di suono ---------------------------------------------- */
+  // Un asse a sé, che con le categorie non c'entra: quelle sono lo stile
+  // (Pink Floyd, jazz, il pezzo), questa è *che tipo di suono è*. Una sola,
+  // scelta a mano, e si può togliere — chi non ce l'ha resta senza colore.
+  const etiFam = document.createElement('div');
+  etiFam.className = 'scheda-eti';
+  etiFam.textContent = tr('Famiglia');
+  const scelteFam = document.createElement('div');
+  scelteFam.className = 'scelte';
+  for (const fam of famiglie) {
+    const s = document.createElement('span');
+    const sua = record.famiglia === fam.id;
+    s.className = 'scelta famiglia' + (sua ? ' dentro' : '');
+    s.style.setProperty('--famiglia', fam.colore);
+    s.textContent = fam.nome;
+    s.addEventListener('click', async () => {
+      await store.setFamiglia(record.id, sua ? null : fam.id);
+      await ricarica();
+      disegnaPreset();
+    });
+    scelteFam.appendChild(s);
+  }
+  det.append(etiFam, scelteFam);
+
+  /* categorie ----------------------------------------------------- */
+  const etiCat = document.createElement('div');
+  etiCat.className = 'scheda-eti';
+  etiCat.textContent = tr('Categorie');
+  const scelte = document.createElement('div');
+  scelte.className = 'scelte';
+  const sue = new Set((record.tags || []).map(t => t.toLowerCase()));
+  for (const { nome } of categorie) {
+    const s = document.createElement('span');
+    s.className = 'scelta' + (sue.has(nome.toLowerCase()) ? ' dentro' : '');
+    s.textContent = (sue.has(nome.toLowerCase()) ? '✓ ' : '') + nome;
+    s.addEventListener('click', async () => {
+      if (sue.has(nome.toLowerCase())) await store.removeTag(record.id, nome);
+      else                             await store.addTag(record.id, nome);
+      await ricarica();
+      disegnaPreset();
+    });
+    scelte.appendChild(s);
+  }
+  const nuova = document.createElement('span');
+  nuova.className = 'scelta nuova';
+  nuova.textContent = tr('＋ nuova…');
+  nuova.addEventListener('click', async () => {
+    const nome = await chiediTesto(tr('nuova categoria'),
+      tr('Come si chiama? La userai per filtrare la libreria dalle pastiglie sopra l\'elenco.'),
+      '', { ok: tr('Crea e assegna'), invito: tr('blues, prove, casa…') });
+    if (!nome) return;
+    await store.addCategory(nome);
+    await store.addTag(record.id, nome.trim());
+    await ricarica();
+    disegnaPreset();
+  });
+  scelte.appendChild(nuova);
+  det.append(etiCat, scelte);
+
+  /* note ---------------------------------------------------------- */
+  // Chiuse, scelta dell'utente sulle bozze: si leggono poco, e aperte si
+  // prendevano mezza scheda. La riga dice se ce n'è e come cominciano.
+  const aperte = vista.noteAperte === chiave;
+  const rigaNote = document.createElement('button');
+  rigaNote.type = 'button';
+  rigaNote.className = 'riga-note';
+  rigaNote.setAttribute('aria-expanded', aperte ? 'true' : 'false');
+  rigaNote.innerHTML = ICONE_SCHEDA.note;
+  const etiNote = document.createElement('span');
+  etiNote.textContent = tr('Note');
+  const anteprima = document.createElement('span');
+  anteprima.className = 'anteprima';
+  anteprima.textContent = aperte ? '' : (record.notes || '').trim().split('\n')[0];
+  rigaNote.append(etiNote, anteprima);
+  rigaNote.insertAdjacentHTML('beforeend', aperte ? ICONE_SCHEDA.su : ICONE_SCHEDA.giu);
+  rigaNote.addEventListener('click', () => {
+    vista.noteAperte = aperte ? null : chiave;
+    disegnaPreset();
+    if (!aperte) {
+      const campo = $('foglioPreset').querySelector('textarea');
+      if (campo) campo.focus();
+    }
+  });
+  det.appendChild(rigaNote);
+
+  if (aperte) {
+    const note = document.createElement('textarea');
+    note.value = record.notes || '';
+    note.placeholder = tr('come suona, quando usarlo, cosa cambiare…');
+    note.setAttribute('aria-label', tr('note'));
+    note.addEventListener('change', async () => {
+      await store.setNotes(record.id, note.value);
+      await ricarica();
+    });
+    det.appendChild(note);
+  }
 
   // Niente riga di identificativi in fondo: c'erano l'UUID e i BPM, tolti su
   // richiesta il 14 agosto 2026. L'UUID serve al codice per riconoscere un
   // preset fra un import e l'altro, non a chi guarda una scheda, e i BPM sono
   // nel preset e non si cambiano da lì.
-  det.append(boxNome, boxFam, boxCat, boxNote, azioni);
-  if (avvisoAltriSlot) det.appendChild(avvisoAltriSlot);
   return det;
+}
+
+/**
+ * Il foglio della scheda: si riempie col preset aperto, o si chiude. A ogni
+ * ridisegno si rifà da capo, ma resta al punto dove lo si era fatto scorrere.
+ */
+function disegnaFoglio(record, slot) {
+  const foglio = $('foglioPreset');
+  if (!record) {
+    foglio.hidden = true;
+    foglio.innerHTML = '';
+  } else {
+    const scorso = foglio.hidden ? 0 : foglio.scrollTop;
+    foglio.innerHTML = '';
+    foglio.appendChild(dettaglio(record, slot));
+    foglio.hidden = false;
+    foglio.scrollTop = scorso;
+  }
+  aggiornaVelo();
 }
 
 /** Nome dello slot come lo mostra l'ampli: "B2 (slot 5)". */

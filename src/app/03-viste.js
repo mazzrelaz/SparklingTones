@@ -21,6 +21,8 @@ async function applicaVista() {
   $('tabPreset').classList.toggle('scelta', !live_);
   $('tabLive').classList.toggle('scelta', live_);
   if (!live_) chiudiPannelli();
+  // La scheda di un preset è della vista Preset: andando in Live si chiude.
+  if (live_) vista.aperto = null;
 
   await ricarica();
   disegnaPreset();
@@ -51,6 +53,7 @@ function collegaMenu(idTasto, idTendina, { puoAprire = () => true } = {}) {
     tendina.hidden = !aperto;
     tasto.setAttribute('aria-expanded', aperto ? 'true' : 'false');
     tasto.classList.toggle('aperto', aperto);
+    aggiornaVelo();
     // La tendina si appoggia al bordo destro del suo tasto, che è giusto
     // finché il tasto sta a destra. Se un giorno finisse a sinistra — una
     // barra che va a capo basta — uscirebbe dallo schermo: qui si misura e
@@ -85,6 +88,27 @@ function collegaMenu(idTasto, idTendina, { puoAprire = () => true } = {}) {
   // per un istante quelle della vista che si sta lasciando.
   window.addEventListener('hashchange', () => apri(false));
 }
+/**
+ * Il velo dietro i fogli che salgono dal basso — il menu «Altro» e la scheda
+ * di un preset — c'è finché ne resta aperto uno. Toccarlo chiude: il menu lo
+ * chiude `collegaMenu` (è un tocco fuori), la scheda qui.
+ */
+function aggiornaVelo() {
+  $('velo').hidden = $('menuAltro').hidden && $('foglioPreset').hidden;
+}
+$('velo').addEventListener('click', () => {
+  if (!$('foglioPreset').hidden) { vista.aperto = null; disegnaPreset(); }
+});
+// Esc chiude la scheda, se non c'è sopra un elenco o una domanda: quelli si
+// chiudono da sé con lo stesso tasto, e uno alla volta.
+document.addEventListener('keydown', evento => {
+  if (evento.key !== 'Escape' || $('foglioPreset').hidden) return;
+  if (document.querySelector('.velo-elenco') || document.querySelector('.pannello.aperto')) return;
+  if (!$('menuAltro').hidden) return;
+  vista.aperto = null;
+  disegnaPreset();
+});
+
 collegaMenu('tabAltro', 'menuAltro');
 collegaMenu('status', 'foglioAmpli', { puoAprire: () => spark.connected });
 collegaMenu('btnMenuEditor', 'menuEditor');

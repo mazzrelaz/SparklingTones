@@ -161,14 +161,12 @@
   #tabAltro svg { stroke-width:3.4; }
 
   /* Il menu «Altro» sale dal basso e si ferma sopra la barra, che resta
-     scoperta. L'ombra enorme fa da velo sul resto della pagina; sta sotto la
-     barra (z-index 7 contro 8), quindi la barra non si oscura. */
+     scoperta; dietro, il velo (vedi la scheda di un preset). */
   .foglio-menu { position:fixed; left:50%; transform:translateX(-50%);
                  width:min(100%, 520px); box-sizing:border-box;
                  bottom:calc(var(--barra-sotto) + env(safe-area-inset-bottom)); z-index:7;
                  max-height:calc(100% - var(--barra-sotto) - 40px); overflow-y:auto;
-                 background:#16181c; border-radius:20px 20px 0 0; padding:10px 8px;
-                 box-shadow:0 0 0 100vmax rgba(0,0,0,0.6); }
+                 background:#16181c; border-radius:20px 20px 0 0; padding:10px 8px; }
   .foglio-menu[hidden] { display:none; }
   .foglio-menu .gruppo-menu { font-family:var(--strumento); font-size:0.72rem;
                               font-weight:600; color:var(--faint); padding:10px 14px 4px; }
@@ -358,7 +356,6 @@
                 border:1px solid #2a3a50; border-radius:5px; padding:1px 5px; margin-left:6px; }
   .slotcard .bollo-live { margin-left:auto; }
 
-  .aperta-sotto { margin-top:8px; }
 
   /* ---- famiglia di suono ---------------------------------------------
      Quattro sole famiglie, un colore per una, e chi non ne ha resta senza:
@@ -414,44 +411,78 @@
   .tag:hover { background:#2e323a; color:var(--text); }
   .tag.attiva { background:var(--accent); color:#fff; }
 
-  .detail { border-top:1px solid var(--line-soft); padding:12px; display:grid; gap:12px; }
-  .detail label { display:block; font-size:0.72rem; color:var(--dim);
-                  text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
-  .detail input[type=text] { width:100%; }
-  /* La catena su una riga sola: i nomi, e basta. */
   .azioni { display:flex; gap:8px; flex-wrap:wrap; }
 
-  /* ---- le azioni del dettaglio: una riga per cosa che si fa -------------
-     Erano tutte in un `flex-wrap` unico, e mandando a capo dove capitava la
-     tendina finiva staccata dal tasto a cui appartiene: si leggeva «Attiva,
-     Regola, tendina» e poi «Invia a preset HW» da solo, che non vuol dire
-     niente. Adesso ogni riga è un'azione, e **il tasto viene prima della sua
-     tendina**: si legge cosa si sta per fare e poi dove. */
-  /* Tutte le righe di azioni larghe uguali: la misura è quella della coppia
-     «pulsante + tendina», e le altre si fermano lì. Su uno schermo largo,
-     senza questo, i quattro pulsanti si stiravano a mezzo metro l'uno mentre
-     le righe sotto restavano corte, ed era il blocco a sembrare storto. */
-  .azioni-blocchi { display:flex; flex-direction:column; gap:8px;
-                    max-width:calc(170px + 8px + 340px); }
-  .azioni-riga { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  .azioni-riga select,
-  .azioni-riga .tendina-finta { flex:1; min-width:0; max-width:340px; }
-  /* Le quattro azioni sul preset: una riga sola, quattro colonne uguali. In
-     `flex` andavano a capo dove capitava e ogni pulsante era largo quanto la
-     sua parola, il che le faceva sembrare quattro cose scollegate. */
-  .azioni-riga.quattro { display:grid; grid-template-columns:repeat(4, 1fr);
-                         gap:8px; align-items:stretch; }
-  .azioni-riga.quattro button { padding-left:6px; padding-right:6px;
-                                min-width:0; overflow:hidden;
-                                text-overflow:ellipsis; white-space:nowrap; }
-  /* «Invia a preset HW» e «Metti nel banco» sono due righe che fanno la stessa
-     cosa — un'azione più un «dove» — quindi devono incolonnarsi: stessa
-     griglia per tutt'e due, così i pulsanti finiscono larghi uguali e le
-     tendine partono dalla stessa riga verticale. */
-  .azioni-riga.coppia { display:grid; grid-template-columns:170px minmax(0, 340px);
-                        gap:8px; align-items:center; justify-content:start; }
-  .azioni-riga.coppia select,
-  .azioni-riga.coppia .tendina-finta { flex:none; max-width:none; width:100%; }
+  /* ---- il velo e la scheda di un preset (14 ottobre 2026) --------------
+     La scheda sale dal basso e si ferma sopra la barra, che resta scoperta e
+     non si oscura: il velo sta sotto la barra (6 contro 8) e sotto i fogli
+     (7). Su uno schermo largo il foglio non si stira oltre una colonna. */
+  .velo-foglio { position:fixed; inset:0; z-index:6; background:rgba(0,0,0,0.6); }
+  .velo-foglio[hidden] { display:none; }
+  body.vista-live .foglio-preset { display:none; }
+  .foglio-preset { position:fixed; left:50%; transform:translateX(-50%);
+                   width:min(100%, 620px); box-sizing:border-box; z-index:7;
+                   bottom:calc(var(--barra-sotto) + env(safe-area-inset-bottom));
+                   max-height:calc(100% - var(--barra-sotto) - env(safe-area-inset-bottom) - 56px);
+                   overflow-y:auto; overscroll-behavior:contain;
+                   background:var(--panel); border-radius:22px 22px 0 0;
+                   padding:10px 18px 18px; }
+  .foglio-preset[hidden] { display:none; }
+  .foglio-preset::before { content:''; display:block; width:40px; height:5px;
+                           border-radius:3px; background:#3a3d44; margin:0 auto 12px; }
+  .scheda-testa { display:flex; align-items:center; gap:8px; min-height:40px;
+                  font-size:0.84rem; color:var(--dim); }
+  .scheda-testa .chiudi { margin-left:auto; width:40px; height:40px; flex:none;
+                          border-radius:50%; padding:0; border:none; background:#1f2126;
+                          display:flex; align-items:center; justify-content:center; }
+  .scheda-nome { display:flex; align-items:center; gap:4px; margin-top:2px; }
+  .scheda-nome h2 { margin:0; font-family:var(--strumento); font-size:1.65rem;
+                    line-height:1.15; font-weight:700; overflow-wrap:anywhere; }
+  .scheda-nome button { width:40px; height:40px; flex:none; padding:0; border:none;
+                        background:none; color:var(--faint); display:flex;
+                        align-items:center; justify-content:center; }
+  .scheda-nome button:hover { background:none; color:var(--text); }
+  .scheda .chips { margin-top:6px; }
+  .scheda svg { width:18px; height:18px; flex:none; fill:none; stroke:currentColor;
+                stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .scheda-grandi { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+  .scheda-grandi button { height:54px; border-radius:14px; font-size:1.05rem; font-weight:700;
+                          display:flex; align-items:center; justify-content:center; gap:10px; }
+  .scheda-grandi button:not(.primary) { background:none; border-color:#3a3d44; }
+  .scheda-grandi button.primary svg { width:15px; height:15px; fill:currentColor; stroke:none; }
+  .scheda-piccole { display:grid; grid-template-columns:repeat(auto-fit, minmax(74px, 1fr));
+                    gap:8px; margin-top:10px; }
+  .scheda-piccole button { min-height:64px; border-radius:12px; border:none;
+                           background:#1f2126; color:#c8cad0; padding:6px 4px;
+                           display:flex; flex-direction:column; align-items:center;
+                           justify-content:center; gap:6px; font-size:0.72rem;
+                           line-height:1.15; text-align:center; }
+  .scheda-piccole button:hover:not(:disabled) { background:#262930; }
+  .scheda-piccole button.pericolo { color:var(--rosso); }
+  .scheda-piccole button:disabled { background:#16181c; color:#4d525b; }
+  .nota-altri-slot { color:var(--dim); font-size:0.78rem; margin-top:10px; }
+  .scheda-sep { height:1px; background:var(--line); margin:20px 0 16px; }
+  .scheda-eti { font-family:var(--strumento); font-size:0.8rem; font-weight:600;
+                color:var(--dim); margin-bottom:8px; }
+  .scheda .scelte { gap:8px; margin-bottom:16px; }
+  .scheda .scelta { height:34px; box-sizing:border-box; display:inline-flex;
+                    align-items:center; gap:7px; padding:0 13px; border-radius:999px;
+                    border:1px solid var(--line); background:none; color:#c8cad0;
+                    font-family:var(--strumento); font-size:0.8rem; font-weight:600; }
+  .scheda .scelta.dentro { background:#1f2126; border-color:#1f2126; color:var(--text); }
+  .scheda .scelta.nuova { color:var(--dim); }
+  .scheda .scelta.famiglia::before { content:''; width:8px; height:8px; border-radius:50%;
+                                     background:var(--famiglia); }
+  .scheda .scelta.famiglia.dentro { background:color-mix(in srgb, var(--famiglia) 14%, transparent);
+                                    border-color:var(--famiglia); color:var(--text); }
+  .riga-note { display:flex; align-items:center; gap:10px; width:100%; height:50px;
+               padding:0; border:none; border-top:1px solid var(--line); border-radius:0;
+               background:none; color:var(--dim); font-size:0.8rem; text-align:left; }
+  .riga-note:hover { background:none; color:var(--text); }
+  .riga-note .anteprima { flex:1; min-width:0; font-family:var(--font); font-weight:400;
+                          color:var(--faint); white-space:nowrap; overflow:hidden;
+                          text-overflow:ellipsis; }
+  .scheda textarea { margin-top:2px; min-height:88px; }
   .scelte { display:flex; gap:6px; flex-wrap:wrap; }
   .scelta { background:#1e2025; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
             border-radius:12px; cursor:pointer; border:1px solid transparent; }
@@ -1204,6 +1235,12 @@
      prima stava dietro il «⋯» in alto. Il menu sale dal basso, appena sopra la
      barra, e la barra resta lì: si cambia vista anche col menu aperto. Dentro
      ci sono i pulsanti di sempre, coi loro id e i loro listener. -->
+<!-- Il velo dietro i fogli che salgono dal basso: oscura la pagina e prende
+     il tocco fuori, che chiude il foglio invece di finire sulla riga sotto. -->
+<div id="velo" class="velo-foglio" hidden></div>
+<!-- La scheda del preset aperto (14 ottobre 2026): sale dal basso e si ferma
+     sopra la barra, che resta scoperta. La riempie `disegnaFoglio()`. -->
+<div id="foglioPreset" class="foglio-preset" hidden></div>
 <div id="menuAltro" class="foglio-menu" hidden>
   <div class="gruppo-menu solo-preset">Libreria</div>
   <button id="btnCategorie" class="solo-preset">

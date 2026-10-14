@@ -24,7 +24,8 @@ let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic, bass
 // Niente preferiti: tolti su richiesta dell'utente. Il campo `favorite` resta
 // nei record e nello store — cancellarlo butterebbe via delle scelte già
 // fatte — ma non si vede e non filtra più niente.
-const vista = { cerca: '', categoria: '', famiglia: '', aperto: null, ordine: 'nome' };
+const vista = { cerca: '', categoria: '', famiglia: '', aperto: null, noteAperte: null,
+                ordine: 'nome' };
 const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false,
                 sposta: null };   // il posto che si sta spostando, in modifica
 
