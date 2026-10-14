@@ -17,6 +17,8 @@
 static void compitoLedTempo(void*) {
   bool prima = false;
   uint32_t clicPrima = 0;
+  int32_t  tempoRec = -1;                 // il tempo della registrazione gia' cliccato
+  uint32_t clicRecDa = 0, toneRec = 0;
   for (;;) {
     /* Il click del conteggio: qui e non nel loop per lo stesso motivo del LED.
      * Il tempo (e quindi l'«uno») si ricava da contaDa, non da contaTempo, che
@@ -29,11 +31,21 @@ static void compitoLedTempo(void*) {
     } else if (loopRegistra && loopClick && loopBpm) {
       /* E continua per tutta la prima registrazione, a ogni lunghezza, «libero»
        * compreso (chiesto dall'utente il 14 ottobre 2026), col tono alto
-       * sull'«uno» di ogni battuta; non durante la sovraincisione. */
+       * sull'«uno» di ogni battuta; non durante la sovraincisione.
+       * **Un click per tempo, contato dal numero del tempo** e non dal resto:
+       * la conferma dell'ampli (~35 ms dopo il nostro 0x04) rimette registraDa,
+       * e col resto l'«uno» suonava due volte, «titic» (l'utente, 2.20). */
       const uint32_t tempo = 60000UL / loopBpm;
-      const uint32_t passato = millis() - registraDa;
-      if (passato % tempo < CLIC_MS) clic = (passato / tempo) % 4 == 0 ? CLIC_UNO_HZ : CLIC_ALTRI_HZ;
+      const int32_t  passato = (int32_t)(millis() - registraDa);
+      const int32_t  n = passato > 0 ? passato / (int32_t)tempo : 0;
+      if (n != tempoRec) {
+        tempoRec = n;
+        clicRecDa = millis();
+        toneRec = n % 4 == 0 ? CLIC_UNO_HZ : CLIC_ALTRI_HZ;
+      }
+      if (millis() - clicRecDa < CLIC_MS) clic = toneRec;
     }
+    if (!loopRegistra) tempoRec = -1;
     if (clic != clicPrima) { clicPrima = clic; ledcWriteTone(PIN_CLIC, clic); }
 
     bool acceso = false;

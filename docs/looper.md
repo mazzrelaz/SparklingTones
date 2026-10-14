@@ -735,3 +735,10 @@ non si ferma più all'«uno»: continua per tutta la prima registrazione, a ogni
 «libero» compreso, col tono alto sull'«uno» di ogni battuta, contato da `registraDa` come
 il LED del tempo; solo col click acceso nel `0x0376`, e non in sovraincisione.
 **Compilata e caricata; da provare dall'utente.**
+
+**2.21 — niente doppio click sull'«uno»** (14 ottobre 2026). L'utente: alla partenza della
+registrazione, dopo i quattro del conteggio, un doppio click, «titic». Il click della
+registrazione era contato dal resto di `millis() - registraDa`, e `registraDa` si rimette
+due volte: al nostro `04` (40 ms prima dell'«uno») e alla conferma dell'ampli ~35 ms dopo.
+Adesso un click per tempo, deciso dal **numero** del tempo: la rimessa a punto non ne fa
+partire un altro. **Compilata e caricata; da provare dall'utente.**
