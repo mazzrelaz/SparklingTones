@@ -682,3 +682,13 @@ dentro `compitoLedTempo`); **il posto l'ha trovato l'utente**, e sulla XIAO è t
 ### Il loop registrato tiene il suo tempo — 9 ottobre 2026 (2.18)
 
 Dall'utente: nel looper a 100 bpm, prima traccia registrata, fuori dal looper per cambiare preset, e al rientro il pedale diceva **120 bpm** (sempre 120), mentre loop e anello restavano a 100. **La causa**: l'ampli manda il `0x0376` del preset nuovo a ogni cambio di preset, e il pedale lo chiede di nuovo (`0x0276`) rientrando nel looper; il parser rimetteva bpm, battute e «libero» anche con un loop registrato. **La 2.18**: se il loop non è vuoto (`loopVuoto()`) quei tre valori vanno in `ampliBpm`, `ampliBattute`, `ampliLibero` e il loop tiene i suoi; alla cancellazione del loop (`0a`/`00`) entrano quelli del preset. Il click si aggiorna sempre. **Caricata sul pedale, da provare dall'utente** (non ho verificato col suo giro: compilata e caricata).
+
+### Un'impallata in «libero», non ripetuta — 14 ottobre 2026
+
+L'utente: usando il looper a battute libere qualcosa ha mandato in palla l'ampli. Acceso il
+registro (`captures/2026-10-14-pedale-looper-libero.txt`) e riprovato: **non si è ripetuto**.
+Il registro è pulito: tap a 136–140 bpm in «libero», `04`, `05` → l'ampli risponde `07` `08`,
+giri da 10,9 s tutti uguali, sovraincisioni `0b`/`0c`, annulla `0d`, ferma e cancella. Nel
+firmware niente cambia in «libero» oltre al byte del freeIndicator. Sospetto non escluso:
+il massimo di 60 s (l'ultimo campo del `0x0376`), che in «libero» è l'unico limite. Se
+ricapita: registro acceso, e chiedere momento, sintomo e lunghezza della registrazione.
