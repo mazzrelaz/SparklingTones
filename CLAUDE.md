@@ -100,7 +100,7 @@ headless (poi si cerca `id="summary"`):
 ```
 & 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --headless=new --disable-gpu `
   --no-first-run --user-data-dir="$env:TEMP\claude\edge-prof" --virtual-time-budget=20000 `
-  --dump-dom 'file:///C:/Users/massi/spark/test/protocol-test.html'
+  --dump-dom 'file:///C:/Users/massi/Progetti%20Claude/spark/test/protocol-test.html'
 ```
 
 - **`store-test` e `backup-test` no**: si passa da `localhost` (`tools/serve.ps1`), come per
@@ -368,7 +368,7 @@ dopo resta). L'app key la registra l'utente, una volta per apparecchio. **Positi
 il suo backup su Dropbox nel 2027**: non tocca il nostro sync, solo da dove si prende
 `preset_backup.zip`. Tutto in `docs/dropbox.md`.
 
-**`sparklingtones.com`** sta in `C:\Users\massi\sparklingtones-sito`
+**`sparklingtones.com`** sta in `C:\Users\massi\Progetti Claude\sparklingtones-sito`
 (`mazzrelaz/sparklingtones-sito`). **L'app non si sposta lì**: il dominio custom vale per
 l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pull --rebase`**
 (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.

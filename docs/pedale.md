@@ -1937,7 +1937,7 @@ codifica senza avere l'hardware a portata.
 ```
 & 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --headless=new --disable-gpu `
   --no-first-run --user-data-dir="$env:TEMP\claude\edge-prof" --virtual-time-budget=20000 `
-  --dump-dom 'file:///C:/Users/massi/spark/test/protocol-test.html'
+  --dump-dom 'file:///C:/Users/massi/Progetti%20Claude/spark/test/protocol-test.html'
 ```
 
 Poi si cerca `id="summary"`. Funziona per protocol e transport. **Su `store-test.html` e
@@ -2633,7 +2633,7 @@ Girano anche senza browser, con Edge headless:
 ```
 & 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --headless=new --disable-gpu `
   --no-first-run --user-data-dir="$env:TEMP\claude\edge-prof" --virtual-time-budget=20000 `
-  --dump-dom 'file:///C:/Users/massi/spark/test/protocol-test.html'
+  --dump-dom 'file:///C:/Users/massi/Progetti%20Claude/spark/test/protocol-test.html'
 ```
 
 Poi si cerca `id="summary"`. **Su `store-test.html` e `backup-test.html` no**: col tempo

@@ -5,7 +5,7 @@ Spostato qui da `CLAUDE.md` il 2 settembre 2026: in memoria di lavoro resta un r
 ## Il sito di presentazione — fuori da questo repo
 
 Dal **27 agosto 2026** c'è una vetrina su **`sparklingtones.com`**, e **non sta qui**:
-`C:\Users\massi\sparklingtones-sito`, repo `mazzrelaz/sparklingtones-sito`. Un solo
+`C:\Users\massi\Progetti Claude\sparklingtones-sito`, repo `mazzrelaz/sparklingtones-sito`. Un solo
 `index.html`, font e logo copiati dall'app, nessuna dipendenza.
 
 **L'app non si è spostata**, e la ragione è la trappola da ricordare: **un dominio custom
@@ -82,7 +82,7 @@ Quello che segue stava in `CLAUDE.md` fino al 17 settembre 2026 ed è stato acco
 
 ## Il sito di presentazione — fuori da questo repo
 
-`sparklingtones.com` sta in `C:\Users\massi\sparklingtones-sito`, repo
+`sparklingtones.com` sta in `C:\Users\massi\Progetti Claude\sparklingtones-sito`, repo
 `mazzrelaz/sparklingtones-sito`: un solo `index.html`, nessuna dipendenza. **L'app non si
 sposta lì**, e la ragione è la trappola: un dominio custom su GitHub Pages vale per **l'intero
 repo**, quindi porterebbe via anche la PWA installata sul telefono e l'IndexedDB della
