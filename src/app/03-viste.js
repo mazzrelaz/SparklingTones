@@ -30,11 +30,13 @@ async function applicaVista() {
 }
 
 window.addEventListener('hashchange', () => { applicaVista(); });
-// Le due schede della barra in basso. Toccare quella in cui si è già riporta
-// in cima: è dove ci si aspetta di tornare, come nelle app del telefono.
+// Le due schede della barra in basso. Toccare quella in cui si è già chiude la
+// scheda aperta e riporta in cima: è dove ci si aspetta di tornare, come nelle
+// app del telefono.
 $('tabPreset').addEventListener('click', () => {
-  if (inLive()) location.hash = 'preset';
-  else window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (inLive()) { location.hash = 'preset'; return; }
+  if (vista.aperto) { vista.aperto = null; disegnaPreset(); }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 $('tabLive').addEventListener('click', () => { location.hash = 'live'; });
 

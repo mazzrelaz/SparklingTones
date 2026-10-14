@@ -317,3 +317,80 @@ footer { border-top:1px solid var(--line-soft); color:var(--faint); text-align:c
 .sezione > span:last-child { color:var(--dim); font-size:0.8rem; }
 .sezione.qui { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent), 0 0 28px rgba(227,6,19,0.35);
                background:linear-gradient(180deg, #2a0d10, #120607); }
+
+/* ---- le schermate dal 14 ottobre 2026 ---------------------------------
+   Il bollino dell'ampli, la barra in basso, gli slot da quattro, la ricerca
+   con l'icona, le righe senza riquadro e la scheda che sale dal basso. Le
+   classi di prima restano: le usa ancora la guida inglese. */
+.m-bollino { display:inline-flex; align-items:center; gap:6px; font:600 0.72rem var(--strumento);
+             border:1px solid var(--accent); color:#ff5a64; border-radius:999px; padding:6px 11px; }
+.m-bollino::before { content:''; width:7px; height:7px; border-radius:50%; flex:none;
+                     border:1.5px solid currentColor; }
+.m-bollino.ok { border-color:#2c4a30; color:#fff; }
+.m-bollino.ok::before { border:none; background:var(--green); box-shadow:0 0 6px var(--green); }
+.m-barra-sotto { display:flex; border-top:1px solid var(--line-soft); margin:14px -12px -16px;
+                 padding:7px 0 9px; border-radius:0 0 26px 26px; }
+.m-barra-sotto span { flex:1; display:flex; flex-direction:column; align-items:center; gap:1px;
+                      font:600 0.6rem var(--strumento); color:var(--faint); }
+.m-barra-sotto b { font-size:0.95rem; line-height:1.1; font-weight:400; }
+.m-barra-sotto span::after { content:''; width:14px; height:2px; border-radius:2px; margin-top:2px; }
+.m-barra-sotto span.scelta { color:#fff; }
+.m-barra-sotto span.scelta::after { background:var(--accent); }
+.m-sez2 { display:flex; justify-content:space-between; font:600 0.68rem var(--strumento);
+          color:var(--dim); margin:12px 0 6px; }
+.m-sez2 .a { color:var(--rosso); }
+.m-sez2 .b { color:var(--green); }
+.m-slots4 { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:4px; }
+.m-slot4 { background:var(--panel); border:1px solid transparent; border-radius:8px;
+           padding:5px 6px; height:46px; overflow:hidden; }
+.m-slot4 .s { display:flex; align-items:center; gap:3px; font:700 0.54rem Consolas, monospace; }
+.m-slot4 .s.a { color:var(--rosso); }
+.m-slot4 .s.b { color:var(--green); }
+.m-slot4 .s .bollo-jh { padding:0 2px; font-size:0.46rem; }
+.m-slot4 .nome { font:600 0.62rem/1.2 var(--strumento); color:#fff; margin-top:2px; overflow:hidden;
+                 display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.m-slot4.aperto { border-color:var(--accent); }
+.m-campo { display:flex; align-items:center; gap:8px; background:var(--panel); border-radius:10px;
+           padding:9px 10px; margin-top:12px; font-size:0.76rem; color:var(--faint); }
+.m-campo .testo { flex:1; }
+.m-campo .testo.scritto { color:#fff; }
+.m-campo b { color:var(--dim); font-weight:400; }
+.m-pastiglia .pf { display:inline-block; width:6px; height:6px; border-radius:50%;
+                   background:var(--fam); margin-right:5px; vertical-align:1px; }
+.m-riga2 { display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--line-soft);
+           padding:8px 2px; }
+.m-riga2 .n { flex:1; min-width:0; font:600 0.84rem var(--strumento); }
+.m-riga2 .n small { display:flex; align-items:center; gap:5px; margin-top:1px;
+                    font:400 0.64rem var(--font); color:var(--dim); }
+.m-riga2 .n small i { width:6px; height:6px; border-radius:50%; background:var(--fam); flex:none; }
+.m-tondo { width:28px; height:28px; border-radius:50%; border:1px solid #3d434c; color:#fff;
+           display:grid; place-items:center; font-size:0.55rem; flex:none; }
+.m-velo { opacity:0.35; }
+.m-foglio { background:var(--panel); border-radius:16px 16px 0 0; padding:8px 12px 12px;
+            margin:0 -12px; }
+.m-foglio::before { content:''; display:block; width:30px; height:4px; border-radius:2px;
+                    background:#3a3d44; margin:0 auto 8px; }
+.m-foglio .testa { display:flex; align-items:center; gap:6px; font-size:0.66rem; color:var(--dim); }
+.m-foglio .testa i { width:6px; height:6px; border-radius:50%; background:var(--fam); }
+.m-foglio .testa .x { margin-left:auto; width:22px; height:22px; border-radius:50%; background:#1f2126;
+                      display:grid; place-items:center; font-size:0.6rem; color:#fff; }
+.m-foglio .nome { font:700 1.1rem var(--strumento); margin-top:1px; color:#fff; }
+.m-foglio .nome small { color:var(--faint); font-size:0.7rem; margin-left:6px; }
+.m-grandi { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px; }
+.m-grandi span { text-align:center; font:700 0.76rem var(--strumento); padding:10px 4px;
+                 border-radius:10px; border:1px solid #3a3d44; }
+.m-grandi span.primary { background:var(--accent); border-color:var(--accent); }
+.m-piccole { display:grid; grid-template-columns:repeat(4, 1fr); gap:5px; margin-top:6px; }
+.m-piccole span { text-align:center; font:600 0.56rem/1.2 var(--strumento); padding:9px 2px;
+                  border-radius:8px; background:#1f2126; color:#cfd2d8; }
+.m-piccole span.pericolo { color:var(--rosso); }
+.m-righina { height:1px; background:var(--line); margin:12px 0 2px; }
+.m-foglio .m-eti { text-transform:none; letter-spacing:0; font:600 0.64rem var(--strumento); }
+.m-scelta.fam2 { border:1px solid var(--line); background:none; }
+.m-scelta.fam2::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%;
+                         background:var(--fam); margin-right:5px; vertical-align:1px; }
+.m-scelta.fam2.dentro { border-color:var(--fam); background:#16213a; color:#fff; }
+.m-note { display:flex; align-items:center; gap:6px; border-top:1px solid var(--line);
+          padding-top:8px; margin-top:12px; font:600 0.66rem var(--strumento); color:var(--dim); }
+.m-note .ant { flex:1; min-width:0; font:400 0.62rem var(--font); color:var(--faint);
+               white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

@@ -130,27 +130,31 @@
     <figure class="schermo">
       <div class="telefono rel">
         <span class="pin" style="left:4px;top:-8px">1</span>
-        <span class="pin" style="left:150px;top:-8px">2</span>
-        <span class="pin" style="left:232px;top:-8px">3</span>
-        <span class="pin" style="right:6px;top:-8px">4</span>
+        <span class="pin" style="right:6px;top:-8px">2</span>
+        <span class="pin" style="left:109px;top:140px">3</span>
+        <span class="pin" style="left:289px;top:140px">4</span>
         <div class="m-barra">
           <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
-          <span class="m-tasto conn">CONNETTI</span>
-          <span class="m-tasto vista">Live →</span>
-          <span class="m-tasto">⋯</span>
+          <span class="m-bollino">Collega</span>
         </div>
-        <div class="m-cerca"><span class="campo">cerca un preset…</span><span class="ordina">nome ▾</span></div>
+        <div class="m-campo"><b>⌕</b><span class="testo">cerca fra 24 preset</span><b>≡</b></div>
+        <div style="height:46px"></div>
+        <div class="m-barra-sotto">
+          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>···</b>Altro</span>
+        </div>
       </div>
-      <figcaption>La barra in alto, sempre a portata di pollice</figcaption>
+      <figcaption>In alto il bollino dell'ampli, in basso la barra</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
         <li><strong>Il marchio</strong>: da qualunque punto dell'app, un tocco qui riporta ai preset.</li>
-        <li><strong>Connetti</strong>: rosso quando l'ampli manca, <span style="color:var(--green)">verde</span>
-          quando c'è.</li>
-        <li><strong>Live →</strong> passa alla vista per suonare; da lì, <strong>← Preset</strong> torna qui.
-          Anche il tasto indietro di Android torna ai preset.</li>
-        <li><strong>Il menu ⋯</strong>: tutte le altre azioni, compresa questa guida.</li>
+        <li><strong>Il bollino dell'ampli</strong>: dice <span style="color:#ff5a64">Collega</span> quando
+          l'ampli manca; quando c'è, ne mostra il nome col pallino <span style="color:var(--green)">verde</span>.
+          Toccalo per <strong>rileggere gli slot</strong>, <strong>importare il suono che sta
+          suonando</strong> o <strong>scollegarti</strong>.</li>
+        <li><strong>Preset e Live</strong>, nella barra in basso: le due viste dell'app. Anche il tasto
+          indietro di Android torna ai preset.</li>
+        <li><strong>Altro</strong>: il menu con tutto il resto, compresa questa guida.</li>
       </ol>
     </div>
   </div>
@@ -158,10 +162,10 @@
   <h3>Come si collega</h3>
   <ol class="passi">
     <li>Accendi l'ampli e il Bluetooth del telefono.</li>
-    <li>Tocca <span class="tasto rosso">CONNETTI</span>. Il browser apre una finestrella con gli apparecchi
-      vicini: scegli <strong>Spark 2</strong> e conferma.</li>
-    <li>Il tasto diventa verde, e l'app <strong>legge da sola gli otto preset</strong> dell'ampli.
-      Nel registro in fondo alla pagina vedi i nomi arrivare uno per uno.</li>
+    <li>Tocca <span class="tasto pericolo">Collega</span>. Il browser apre una finestrella con gli
+      apparecchi vicini: scegli <strong>Spark 2</strong> e conferma.</li>
+    <li>Il bollino diventa verde col nome dell'ampli, e l'app <strong>legge da sola i preset</strong>
+      dell'ampli. Nel registro in fondo alla pagina vedi i nomi arrivare uno per uno.</li>
   </ol>
   <div class="nota att">
     <p><strong>Un padrone alla volta.</strong> Se l'ampli è collegato all'app ufficiale di Positive Grid
@@ -181,48 +185,55 @@
   <div class="due">
     <figure class="schermo">
       <div class="telefono rel">
-        <span class="pin" style="left:-8px;top:40px">1</span>
-        <span class="pin" style="left:-8px;top:291px">2</span>
-        <span class="pin" style="left:-8px;top:379px">3</span>
-        <span class="pin" style="right:-8px;top:327px">4</span>
-        <div class="m-sez" style="margin-top:0">Preset hardware</div>
-        <div class="m-slots">
-          <div class="m-colonna">
-            <span class="m-banco a">BANCO A</span>
-            <div class="m-slot"><div class="alto"><span class="led a"></span>A1</div><div class="nome">Shine On clean</div></div>
-            <div class="m-slot"><div class="alto"><span class="led a"></span>A2</div><div class="nome">Echoes</div></div>
-            <div class="m-slot"><div class="alto"><span class="led a"></span>A3</div><div class="nome">Crunch Marshall</div></div>
-            <div class="m-slot"><div class="alto"><span class="led a"></span>A4</div><div class="nome">Poles Apart</div></div>
-          </div>
-          <div class="m-colonna">
-            <span class="m-banco b">BANCO B</span>
-            <div class="m-slot"><div class="alto"><span class="led b"></span>B1</div><div class="nome">Nylon Reverb</div></div>
-            <div class="m-slot"><div class="alto"><span class="led b"></span>B2</div><div class="nome">Europa</div></div>
-            <div class="m-slot"><div class="alto"><span class="led b"></span>B3</div><div class="nome">Clean Tube</div></div>
-            <div class="m-slot"><div class="alto"><span class="led b"></span>B4<span class="bollo-jh">JH</span></div><div class="nome">Hey Jimi Solo</div></div>
-          </div>
+        <span class="pin" style="left:-8px;top:113px">1</span>
+        <span class="pin" style="left:-8px;top:191px">2</span>
+        <span class="pin" style="left:-8px;top:259px">3</span>
+        <span class="pin" style="right:-8px;top:269px">4</span>
+        <div class="m-barra">
+          <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
+          <span class="m-bollino ok">Spark 2</span>
         </div>
-        <div class="m-sez">In libreria <b>4</b></div>
-        <div class="m-riga" style="--fam:#0a84ff"><span class="n">Blues di casa</span><span class="m-play">▶</span></div>
-        <div class="m-riga" style="--fam:#ff3b30"><span class="n">Lead Gilmour</span><span class="m-play">▶</span></div>
-        <div class="m-riga"><span class="n">Funk pulito</span><span class="m-play">▶</span></div>
-        <div class="m-riga" style="--fam:#ffd21e"><span class="n">Folk 12 corde</span><span class="m-play">▶</span></div>
+        <div class="m-sez2"><span>Sull'ampli</span><span><span class="a">A</span> rosso · <span class="b">B</span> verde</span></div>
+        <div class="m-slots4">
+          <div class="m-slot4"><div class="s a">A1</div><div class="nome">Shine On clean</div></div>
+          <div class="m-slot4"><div class="s a">A2</div><div class="nome">Echoes</div></div>
+          <div class="m-slot4"><div class="s a">A3</div><div class="nome">Crunch Marshall</div></div>
+          <div class="m-slot4"><div class="s a">A4</div><div class="nome">Poles Apart</div></div>
+          <div class="m-slot4"><div class="s b">B1</div><div class="nome">Nylon Reverb</div></div>
+          <div class="m-slot4"><div class="s b">B2</div><div class="nome">Europa</div></div>
+          <div class="m-slot4"><div class="s b">B3</div><div class="nome">Clean Tube</div></div>
+          <div class="m-slot4"><div class="s b">B4<span class="bollo-jh">JH</span></div><div class="nome">Hey Jimi Solo</div></div>
+        </div>
+        <div class="m-campo"><b>⌕</b><span class="testo">cerca fra 4 preset</span><b>≡</b></div>
+        <div class="m-pastiglie">
+          <span class="m-pastiglia attiva">tutti</span>
+          <span class="m-pastiglia" style="--fam:#0a84ff"><span class="pf"></span>Clean</span>
+          <span class="m-pastiglia" style="--fam:#ff3b30"><span class="pf"></span>Drive</span>
+          <span class="m-pastiglia">blues<i>4</i></span>
+        </div>
+        <div class="m-riga2" style="--fam:#0a84ff"><span class="n">Blues di casa<small><i></i>Clean · blues</small></span><span class="m-tondo">▶</span></div>
+        <div class="m-riga2" style="--fam:#ff3b30"><span class="n">Lead Gilmour<small><i></i>Drive · Pink Floyd</small></span><span class="m-tondo">▶</span></div>
+        <div class="m-riga2"><span class="n">Funk pulito</span><span class="m-tondo">▶</span></div>
+        <div class="m-barra-sotto">
+          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>···</b>Altro</span>
+        </div>
       </div>
-      <figcaption>Gli otto slot disposti come sull'ampli, e la libreria sotto</figcaption>
+      <figcaption>Gli slot dell'ampli, la ricerca, e la libreria sotto</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
-        <li><strong>Preset hardware</strong>: gli otto preset salvati nell'ampli. <strong>Banco A rosso,
-          banco B verde</strong>, come i LED sull'apparecchio. Uno slot che l'app non ha ancora letto
-          si vede tratteggiato e dice <em>non ancora letto</em>.</li>
-        <li><strong>In libreria</strong>: tutti gli altri preset che hai, senza limite. Un preset sta
-          sopra <em>oppure</em> sotto, mai in tutti e due i posti.</li>
-        <li><strong>La riga colorata a sinistra</strong> è la famiglia di suono (blu clean, rosso drive…):
-          si riconosce senza leggere.</li>
+        <li><strong>Sull'ampli</strong>: gli otto preset salvati nell'ampli, quattro per riga. <strong>Banco
+          A sopra, in rosso; banco B sotto, in verde</strong>, come i LED sull'apparecchio. Uno slot che
+          l'app non ha ancora letto dice <em>non letto</em>; se l'ampli non l'hai mai collegato, al
+          posto degli slot c'è <span class="tasto pericolo">Collega</span>.</li>
+        <li><strong>La ricerca e i filtri</strong>: vedi qui sotto.</li>
+        <li><strong>La libreria</strong>: tutti gli altri preset che hai, senza limite. Un preset sta
+          sopra <em>oppure</em> sotto, mai in tutti e due i posti. Sotto il nome, il pallino della
+          <strong>famiglia di suono</strong> (blu clean, rosso drive…) e le categorie.</li>
         <li><strong>▶</strong> fa suonare subito quel preset sull'ampli, <strong>senza toccare nessuno
           slot</strong>. È il modo più rapido per provarne uno.</li>
       </ol>
-      <p>Tocca il nome di un preset — sopra o sotto — per aprirne la <a href="#scheda">scheda</a>.</p>
+      <p>Tocca un preset — sopra o sotto — per aprirne la <a href="#scheda">scheda</a>.</p>
       <div class="nota">
         <p>Se scrivi un preset nuovo in uno slot, quello che c'era <strong>non si perde</strong>: scende in
           libreria con i suoi tag e le sue note.</p>
@@ -234,11 +245,11 @@
   <div class="due">
     <figure class="schermo">
       <div class="telefono">
-        <div class="m-cerca" style="margin-top:0"><span class="campo">gilmour delay</span><span class="ordina">nome ▾</span></div>
+        <div class="m-campo" style="margin-top:0"><b>⌕</b><span class="testo scritto">gilmour delay</span><b>≡</b></div>
         <div class="m-pastiglie">
-          <span class="m-pastiglia">tutte</span>
+          <span class="m-pastiglia">tutti</span>
+          <span class="m-pastiglia attiva" style="--fam:#ff3b30"><span class="pf"></span>Drive</span>
           <span class="m-pastiglia attiva">Pink Floyd<i>6</i></span>
-          <span class="m-pastiglia">blues<i>4</i></span>
           <span class="m-pastiglia">prove<i>2</i></span>
         </div>
       </div>
@@ -247,10 +258,11 @@
       <ul>
         <li><strong>La ricerca</strong> guarda nome, note, categorie e anche gli effetti: «gilmour delay»
           trova i preset che hanno tutte e due le parole da qualche parte.</li>
-        <li><strong>La tendina accanto</strong> ordina per nome, per aggiunti di recente, per modificati
-          di recente, o per famiglia di suono.</li>
-        <li><strong>Le pastiglie</strong> sotto filtrano per categoria; il numero dice quanti preset ci sono.
-          Compaiono appena crei la prima categoria.</li>
+        <li><strong>L'icona in fondo alla casella</strong> ordina per nome, per aggiunti di recente, per
+          modificati di recente, o per famiglia di suono.</li>
+        <li><strong>Le pastiglie</strong> sotto filtrano per <strong>famiglia di suono</strong> (quelle col
+          pallino) e per <strong>categoria</strong>; il numero dice quanti preset ci sono. Una famiglia e
+          una categoria insieme si sommano: «Drive» e «Pink Floyd» sono i drive dei Pink Floyd.</li>
       </ul>
     </div>
   </div>
@@ -264,67 +276,72 @@
   <div class="due">
     <figure class="schermo">
       <div class="telefono rel">
-        <span class="pin" style="left:-8px;top:327px">1</span>
-        <span class="pin" style="left:-8px;top:365px">2</span>
-        <span class="pin" style="left:-8px;top:403px">3</span>
-        <div class="m-scheda">
-          <div class="titolo">Blues di casa <span class="m-play">▶</span></div>
-          <div class="m-eti">Nome</div>
-          <div class="m-input">Blues di casa</div>
-          <div class="m-eti">Famiglia di suono</div>
+        <span class="pin" style="left:-8px;top:144px">1</span>
+        <span class="pin" style="left:-8px;top:183px">2</span>
+        <span class="pin" style="left:-8px;top:228px">3</span>
+        <span class="pin" style="left:-8px;top:339px">4</span>
+        <div class="m-velo">
+          <div class="m-riga2"><span class="n">Lead Gilmour</span><span class="m-tondo">▶</span></div>
+        </div>
+        <div class="m-foglio" style="--fam:#0a84ff">
+          <div class="testa"><i></i>Clean<span class="x">✕</span></div>
+          <div class="nome">Blues di casa<small>✎</small></div>
+          <div class="m-grandi"><span class="primary">▶ Suona</span><span>Regola</span></div>
+          <div class="m-piccole">
+            <span>Duplica</span><span>Metti in uno slot</span><span>Nel banco live</span><span class="pericolo">Elimina</span>
+          </div>
+          <div class="m-righina"></div>
+          <div class="m-eti">Famiglia</div>
           <div class="m-scelte">
-            <span class="m-scelta fam dentro" style="--fam:#0a84ff">Clean</span>
-            <span class="m-scelta">Drive</span><span class="m-scelta">Acoustic</span><span class="m-scelta">Bass</span>
+            <span class="m-scelta fam2 dentro" style="--fam:#0a84ff">Clean</span>
+            <span class="m-scelta fam2" style="--fam:#ff3b30">Drive</span>
+            <span class="m-scelta fam2" style="--fam:#ffd21e">Acoustic</span>
+            <span class="m-scelta fam2" style="--fam:#bf5af2">Bass</span>
           </div>
           <div class="m-eti">Categorie</div>
           <div class="m-scelte">
-            <span class="m-scelta dentro">✓ blues</span><span class="m-scelta">＋ Pink Floyd</span>
+            <span class="m-scelta dentro">✓ blues</span><span class="m-scelta">Pink Floyd</span>
             <span class="m-scelta">＋ nuova…</span>
           </div>
-          <div class="m-eti">Note</div>
-          <div class="m-input note">capotasto al 3, volume a metà</div>
-          <div class="m-azioni">
-            <span class="m-az primary">Attiva</span><span class="m-az">Regola</span>
-            <span class="m-az">Duplica</span><span class="m-az pericolo">Elimina</span>
-          </div>
-          <div class="m-azioni coppia">
-            <span class="m-az oro">Invia a preset HW</span><span class="m-az tendina">A1 — LED rosso ▾</span>
-          </div>
-          <div class="m-azioni coppia">
-            <span class="m-az blu">Metti nel banco</span><span class="m-az tendina">Concerto ▾</span>
-          </div>
+          <div class="m-note">Note<span class="ant">capotasto al 3, volume a metà</span>⌄</div>
+        </div>
+        <div class="m-barra-sotto" style="margin-top:0">
+          <span class="scelta"><b>☰</b>Preset</span><span><b>▦</b>Live</span><span><b>···</b>Altro</span>
         </div>
       </div>
-      <figcaption>Nome, famiglia, categorie, note — e le azioni</figcaption>
+      <figcaption>La scheda sale dal basso; la barra resta sotto</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
-        <li><strong>Attiva · Regola · Duplica · Elimina</strong>.
-          <em>Attiva</em> fa suonare il preset (come ▶). <em>Regola</em> apre le
-          <a href="#editor">manopole</a>. <em>Duplica</em> ne fa una copia da modificare — è il modo
-          giusto di creare un preset nuovo. <em>Elimina</em> lo toglie dalla libreria (chiede prima,
-          e l'ampli non viene toccato).</li>
-        <li><strong>Invia a preset HW</strong> lo <strong>scrive</strong> nello slot scelto nella tendina
-          accanto: da lì in poi è nell'ampli, anche a telefono spento.</li>
-        <li><strong>Metti nel banco</strong> lo aggiunge al primo posto libero di un
-          <a href="#live">banco live</a>. Non tocca l'ampli. Compare quando hai almeno un banco.</li>
+        <li><strong>Suona · Regola</strong>, le due che si usano di più. <em>Suona</em> fa suonare il
+          preset (come ▶). <em>Regola</em> apre le <a href="#editor">manopole</a>.</li>
+        <li><strong>Le altre azioni.</strong> <em>Duplica</em> ne fa una copia da modificare — è il modo
+          giusto di creare un preset nuovo. <em>Metti in uno slot</em> lo <strong>scrive</strong>
+          nell'ampli: scegli lo slot dall'elenco, e da lì in poi è nell'ampli, anche a telefono spento.
+          <em>Nel banco live</em> lo aggiunge al primo posto libero di un <a href="#live">banco
+          live</a>, senza toccare l'ampli (compare quando hai almeno un banco). <em>Elimina</em> lo
+          toglie dalla libreria (chiede prima, e l'ampli non viene toccato).</li>
+        <li><strong>Famiglia e categorie</strong>: un tocco le mette, un altro le toglie.</li>
+        <li><strong>Le note</strong> stanno chiuse, e la riga ne mostra l'inizio: toccala per aprirle e
+          scrivere.</li>
       </ol>
-      <p>Aprendo uno degli otto slot in alto c'è anche <strong>Seleziona A1</strong> (o lo slot che è):
+      <p>Aprendo uno degli slot in alto c'è anche <strong>Seleziona A1</strong> (o lo slot che è):
         dice all'ampli di passare a quello slot, senza scrivere niente.</p>
-      <p>Il nome si cambia scrivendo nel campo. Attenzione: sull'ampli resta il nome vecchio finché
+      <p>Il nome si cambia dalla matita ✎ accanto. Attenzione: sull'ampli resta il nome vecchio finché
         non riscrivi il preset in uno slot.</p>
+      <p>La scheda si chiude con la ✕, toccando fuori, o con un altro tocco su Preset.</p>
     </div>
   </div>
 
   <div class="confronto">
     <div>
-      <h4>▶ / Attiva — <span class="si">provare</span></h4>
+      <h4>▶ / Suona — <span class="si">provare</span></h4>
       <p>Il preset suona, ma <strong>nessuno slot cambia</strong>. Il LED dell'ampli lampeggia: vuol dire
         che sta suonando un preset arrivato dal telefono.</p>
       <p>Spento l'ampli, torna tutto com'era. Usalo quanto vuoi.</p>
     </div>
     <div>
-      <h4>Invia a preset HW — <span class="no">scrivere</span></h4>
+      <h4>Metti in uno slot — <span class="no">scrivere</span></h4>
       <p>Il preset va <strong>dentro l'ampli</strong>, nello slot scelto, e sostituisce quello che c'era.
         L'app chiede conferma e ti dice chi stai sovrascrivendo.</p>
       <p>Il vecchio non è perso: resta in libreria e ricompare nella lista sotto.</p>
@@ -344,9 +361,9 @@
         <span style="--fam:#0a84ff">Clean</span><span style="--fam:#ff3b30">Drive</span>
         <span style="--fam:#ffd21e">Acoustic</span><span style="--fam:#bf5af2">Bass</span>
       </div>
-      <p><strong>Una sola per preset</strong>, scelta nella scheda. Il suo colore compare sulla riga in
+      <p><strong>Una sola per preset</strong>, scelta nella scheda. Il suo colore compare sotto il nome in
         libreria, sull'insegna dell'editor e sul LED dei pulsantoni live. Un preset senza famiglia
-        resta senza colore. I colori li cambi tu: <kbd>⋯</kbd> → <strong>Categorie</strong>, tocca il
+        resta senza colore. I colori li cambi tu: <kbd>Altro</kbd> → <strong>Categorie</strong>, tocca il
         colore.</p>
     </div>
     <div>
@@ -356,7 +373,7 @@
         <span class="m-pastiglia">prove<i>2</i></span><span class="m-pastiglia">matrimonio<i>9</i></span>
       </div>
       <p><strong>Quante ne vuoi per preset.</strong> Si creano dalla scheda (<em>＋ nuova…</em>) o da
-        <kbd>⋯</kbd> → <strong>Categorie</strong>, e diventano le pastiglie per filtrare la libreria.
+        <kbd>Altro</kbd> → <strong>Categorie</strong>, e diventano le pastiglie per filtrare la libreria.
         Eliminare una categoria la toglie dai preset; i preset restano.</p>
     </div>
   </div>
@@ -364,17 +381,18 @@
   <h3>Come entrano i preset in libreria</h3>
   <div class="confronto">
     <div>
-      <h4>📡 Leggi dall'ampli</h4>
-      <p>Menu <kbd>⋯</kbd>. Rilegge gli otto slot. Succede già da solo a ogni collegamento.</p>
+      <h4>📡 Rileggi gli slot</h4>
+      <p>Tocca il bollino dell'ampli, in alto. Rilegge gli slot. Succede già da solo a ogni
+        collegamento.</p>
     </div>
     <div>
-      <h4>🎛️ Importa preset attuale</h4>
-      <p>Menu <kbd>⋯</kbd>. Prende il suono che l'ampli sta facendo <em>adesso</em> — anche se l'hai
+      <h4>🎛️ Importa il suono che sta suonando</h4>
+      <p>Dal bollino dell'ampli, in alto. Prende il suono che l'ampli sta facendo <em>adesso</em> — anche se l'hai
         cambiato girando le manopole vere — e lo salva in libreria.</p>
     </div>
     <div>
       <h4>📦 Importa un file</h4>
-      <p><kbd>⋯</kbd> → <strong>Altro</strong>. Il <code>preset_backup.zip</code> dell'app ufficiale, un preset
+      <p><kbd>Altro</kbd> → <strong>Impostazioni e backup</strong>. Il <code>preset_backup.zip</code> dell'app ufficiale, un preset
         singolo esportato da lì, o un backup di quest'app.</p>
     </div>
     <div>
@@ -405,9 +423,7 @@
         <span class="pin" style="right:-8px;top:248px">4</span>
         <div class="m-barra">
           <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
-          <span class="m-tasto conn ok">SPARK 2</span>
-          <span class="m-tasto vista">← Preset</span>
-          <span class="m-tasto">⋯</span>
+          <span class="m-bollino ok">Spark 2</span>
         </div>
         <div class="m-banchi">
           <span class="m-bancotab">Ampli</span><span class="m-bancotab attivo">Concerto</span>
@@ -422,6 +438,9 @@
           <div class="m-pad" style="--led:#ff3b30"><span class="ledpad"></span><span class="np">6</span><span class="nm">Crunch</span><span class="carica"></span></div>
           <div class="m-pad vuoto"><span class="ledpad"></span><span class="np">7</span><span class="nm">vuoto</span></div>
           <div class="m-pad vuoto"><span class="ledpad"></span><span class="np">8</span><span class="nm">vuoto</span></div>
+        </div>
+        <div class="m-barra-sotto">
+          <span><b>☰</b>Preset</span><span class="scelta"><b>▦</b>Live</span><span><b>···</b>Altro</span>
         </div>
       </div>
       <figcaption>Un banco da otto: quattro per piede, a sinistra e a destra</figcaption>
@@ -440,7 +459,7 @@
       </ol>
       <div class="nota">
         <p>Per i passaggi dove non puoi aspettare nemmeno un secondo, metti quei preset negli slot
-          dell'ampli con <strong>Invia a preset HW</strong>: da lì partono istantanei, anche dai tuoi
+          dell'ampli con <strong>Metti in uno slot</strong>: da lì partono istantanei, anche dai tuoi
           banchi.</p>
       </div>
     </div>
@@ -449,13 +468,13 @@
   <h3>Comporre un banco</h3>
   <div class="due">
     <ol class="passi">
-      <li>Scegli il banco in alto, poi <kbd>⋯</kbd> → <strong>Modifica</strong>.</li>
+      <li>Scegli il banco in alto, poi <kbd>Altro</kbd> → <strong>Modifica</strong>.</li>
       <li><strong>Tocca un posto</strong> per scegliere il preset da metterci (c'è la ricerca, e
         <em>Svuota il posto</em> per liberarlo).</li>
       <li>Per spostare: tocca la presa <span style="color:var(--gold)">⇅</span> di un pulsante, poi il
         posto dove lo vuoi. I due si scambiano.</li>
       <li>Per rinominarlo o eliminarlo: in modifica, tocca il <strong>nome del banco</strong>.</li>
-      <li><kbd>⋯</kbd> → <strong>Fatto</strong> per tornare a suonare.</li>
+      <li><kbd>Altro</kbd> → <strong>Fatto</strong> per tornare a suonare.</li>
     </ol>
     <figure class="schermo">
       <div class="telefono">
@@ -475,7 +494,7 @@
       per cambiarlo si scrive un preset in uno slot dalla schermata dei preset.</p>
   </div>
   <div class="nota">
-    <p>Nel menu della vista Live c'è anche <strong>Pedale</strong>: serve al pedale SparklingTones, la
+    <p>Nel menu <kbd>Altro</kbd> della vista Live c'è anche <strong>Pedale</strong>: serve al pedale SparklingTones, la
       vista Live staccata dal telefono e messa sotto il piede. Come si costruisce e come si usa:
       <a href="guida-pedale.html"><strong>la guida del pedale →</strong></a></p>
   </div>
@@ -570,7 +589,7 @@
           scrive nella libreria, sopra quel preset. Se vuoi tenere anche l'originale,
           <strong>Duplica prima</strong> e regola la copia.</li>
         <li><strong>Lo slot dell'ampli non cambia</strong> salvando: per mettere la versione nuova
-          nell'ampli, dalla scheda usa <strong>Invia a preset HW</strong>.</li>
+          nell'ampli, dalla scheda usa <strong>Metti in uno slot</strong>.</li>
         <li>Se esci con <span class="tasto conn" style="background:var(--accent)">Fatto</span> e hai
           modifiche non salvate, l'app chiede: <em>Salva ed esci</em>, <em>Esci senza salvare</em> o
           <em>Torna all'editor</em>.</li>
@@ -609,7 +628,7 @@
   <div class="confronto">
     <div>
       <h4>💾 Esporta / Importa</h4>
-      <p><kbd>⋯</kbd> → <strong>Altro</strong> → <strong>Esporta la libreria</strong> scarica un file
+      <p><kbd>Altro</kbd> → <strong>Impostazioni e backup</strong> → <strong>Esporta la libreria</strong> scarica un file
         <code>.json</code> con tutto: preset, famiglie, categorie, note, banchi.</p>
       <p>Sull'altro apparecchio: <strong>Importa un file</strong> e scegli quel file. L'app chiede
         conferma prima di unirlo.</p>
@@ -630,17 +649,17 @@
     <li>Nella scheda <em>Permissions</em> spunta <code>files.content.write</code> e
       <code>files.content.read</code>, e salva.</li>
     <li>Nella scheda <em>Settings</em> copia la <strong>App key</strong> (l'app secret non serve).</li>
-    <li>Nell'app: <kbd>⋯</kbd> → <strong>Altro</strong> → incolla la chiave → <span class="tasto rosso">Collega</span>.</li>
+    <li>Nell'app: <kbd>Altro</kbd> → <strong>Impostazioni e backup</strong> → incolla la chiave → <span class="tasto rosso">Collega</span>.</li>
     <li>Si apre Dropbox: autorizza, copia il codice che ti mostra, incollalo nell'app e premi
       <strong>Fatto</strong>. Se la pagina non si apre da sola, c'è il link <em>aprila da qui</em>.</li>
   </ol>
 
-  <h3>Le altre cose in «Altro»</h3>
+  <h3>Le altre cose in «Impostazioni e backup»</h3>
   <ul>
     <li><strong>Lingua · Language</strong>: italiano o inglese.</li>
     <li><strong>Cerca i doppioni</strong>, in due modi. <strong>Per suono</strong>: i preset con le
       stesse impostazioni (effetti, manopole, tempo), qualunque nome abbiano. <strong>Per nome</strong>:
-      quelli con lo stesso nome, con una lettera che dice chi suona uguale a chi. Scegli tu quali togliere.</li>
+      quelli con lo stesso nome, con una lettera che dice chi suona uguale a chi. Scegli tu quali togliere. Ci si arriva anche da <kbd>Altro</kbd> → <strong>Doppioni</strong>.</li>
     <li><strong>Elimina tutti i preset</strong>: svuota la libreria <strong>tranne gli otto
       dell'ampli</strong>. L'ampli non viene toccato.</li>
   </ul>
@@ -749,7 +768,7 @@
   <details class="faq">
     <summary>Ho girato le manopole vere sull'ampli: come le tengo?</summary>
     <div class="dentro">
-      <p><kbd>⋯</kbd> → <strong>Importa preset attuale</strong>: prende il suono che l'ampli sta facendo
+      <p>Tocca il bollino dell'ampli, in alto → <strong>Importa il suono che sta suonando</strong>: prende il suono che l'ampli sta facendo
         adesso e lo salva in libreria (o aggiorna quello che c'è, se è lo stesso preset).</p>
     </div>
   </details>
@@ -764,11 +783,11 @@
   <details class="faq">
     <summary>Ho bisogno di una pausa</summary>
     <div class="dentro">
-      <p><kbd>⋯</kbd> → <strong>Fai una pausa</strong>. 🐍</p>
+      <p><kbd>Altro</kbd> → <strong>Fai una pausa</strong>. 🐍</p>
     </div>
   </details>
   <div class="nota">
-    <p><strong>Non trovi la risposta, o hai trovato un errore?</strong> <kbd>⋯</kbd> → <strong>Segnala un
+    <p><strong>Non trovi la risposta, o hai trovato un errore?</strong> <kbd>Altro</kbd> → <strong>Segnala un
       problema</strong>: scrivi cosa è successo e il messaggio parte dalla tua posta, con in coda la
       versione dell'app e le ultime righe del registro, che aiutano a capire.</p>
   </div>
@@ -778,7 +797,7 @@
 
 <footer>
   SparklingTones — progetto indipendente, senza rapporti con Positive Grid.<br>
-  Licenze e responsabilità: <kbd>⋯</kbd> → Altro → <em>Informazioni, licenze e responsabilità</em>.
+  Licenze e responsabilità: <kbd>Altro</kbd> → Impostazioni e backup → <em>Informazioni, licenze e responsabilità</em>.
 </footer>
 
 <script src="guida.js"></script>

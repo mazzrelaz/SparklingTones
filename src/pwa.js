@@ -38,7 +38,8 @@
       const stile = document.createElement('style');
       stile.id = 'pwa-stile';
       stile.textContent = `
-        .pwa-barra { position:fixed; left:12px; right:12px; bottom:12px; z-index:100;
+        .pwa-barra { position:fixed; left:12px; right:12px; z-index:100;
+          bottom:calc(12px + var(--barra-sotto, 0px) + env(safe-area-inset-bottom));
           display:flex; align-items:center; gap:10px; max-width:520px; margin:0 auto;
           background:#1e2126; border:1px solid #34383f; border-radius:12px;
           padding:10px 12px; font-size:0.85rem; color:#e8e8ea;
