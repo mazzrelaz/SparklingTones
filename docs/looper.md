@@ -701,5 +701,7 @@ lettura, ed è caduta** (in questo preset quel campo vale `3c`, prima `cd ea 60`
 sapere: se l'app ufficiale in «libero» fa lo stesso (prova a cronometro), prima di
 toccare il campo delle battute; un valore oltre 16 non è mai stato mandato.
 **Risposto dall'utente, a cronometro: l'app ufficiale in «libero» a 140 bpm chiude dopo ~27 s**,
-come il pedale. È l'ampli: «libero» vuol dire chiudere quando si vuole, entro le 16 battute.
+come il pedale. **Ma a 80 bpm, sempre nell'app, ~60 s**, e 16 battute a 80 sarebbero 48 s:
+le due misure non stanno nella stessa regola. Aperto: da rifare a cronometro e col
+registro del pedale a 80 bpm.
 Se ricapita l'impallata: registro acceso, e chiedere momento, sintomo e lunghezza della registrazione.
