@@ -6,18 +6,6 @@
 <title>SparklingTones</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
-<script>
-  // Lo sfondo scelto, nero o grigio, va messo prima che la pagina si disegni:
-  // altrimenti a ogni apertura lampeggia l'altro. Senza una scelta: grigio.
-  (function () {
-    var sfondo = 'grigio';
-    try { sfondo = localStorage.getItem('sfondo') || 'grigio'; } catch (e) {}
-    if (sfondo === 'grigio') {
-      document.documentElement.classList.add('grigio');
-      document.querySelector('meta[name=theme-color]').setAttribute('content', '#262624');
-    }
-  })();
-</script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -48,12 +36,6 @@
   :root {
     --bg:#000000; --panel:#121316; --line:#26282e; --line-soft:#1b1d21;
     --text:#e8e8ea; --dim:#8a8f98; --faint:#5a5f68;
-    /* I grigi delle superfici (14 ottobre 2026): prima erano scritti a mano regola per
-       regola, adesso stanno qui, così lo sfondo grigio li ridefinisce tutti insieme.
-       incavo = campi e caselle più scuri del fondo; foglio = menu, fogli, tendine;
-       rialzo = pastiglie e passaggio del dito; spento = pulsanti disabilitati. */
-    --incavo:#0e1014; --foglio:#16181c; --rialzo:#1f2126; --spento:#131519;
-    --bordo-forte:#3d434c; --traccia:#262b33;
     /* Il rosso è quello del logo (#e30613), non uno scelto a parte: sulla
        stessa barra il marchio e il pulsante «Connetti» si toccano, e due
        rossi diversi si vedono. */
@@ -81,22 +63,6 @@
     height:100%; overflow:hidden; display:flex; flex-direction:column;
     -webkit-user-select:none; user-select:none;
   }
-
-  /* Lo sfondo grigio (14 ottobre 2026, chiesto dall'utente «come l'interfaccia di
-     Claude»): un grigio caldo al posto del nero, nelle due viste. Le superfici
-     diventano più chiare del fondo invece che più scure: un riquadro si stacca
-     salendo. Si sceglie in «Impostazioni e backup»; la classe la mette lo script in
-     testa alla pagina. Il secondo selettore batte le variabili di body.vista-live. */
-  html.grigio, html.grigio body.vista-live {
-    --bg:#262624; --panel:#30302e; --line:#3e3e3a; --line-soft:#34342f;
-    --text:#f2f1ec; --dim:#a9a8a1; --faint:#7e7d76;
-    --incavo:#1f1e1d; --foglio:#30302e; --rialzo:#3b3b38; --spento:#2b2b29;
-    --bordo-forte:#5a5a54; --traccia:#45453f;
-  }
-  /* Sul grigio i pulsantoni live salgono invece di scavare: un incavo più scuro
-     del fondo, otto volte sullo schermo, sembrava una griglia di buchi. */
-  html.grigio { --pad:#30302e; }
-  html.grigio .pad.attivo { background:color-mix(in srgb, var(--blu) 14%, var(--panel)); }
 
   body.vista-live .solo-preset { display:none; }
   body:not(.vista-live) .solo-live { display:none; }
@@ -130,15 +96,15 @@
      un bordo sottile che li stacca dal nero, e l'angolo un po' più tondo. Il
      carattere è quello «strumento»: un pulsante si guarda, non si legge. */
   button { font-family:var(--strumento); font-size:0.84rem; font-weight:600;
-           letter-spacing:0.01em; cursor:pointer; background:var(--foglio);
+           letter-spacing:0.01em; cursor:pointer; background:#16181d;
            border:1px solid var(--line); color:var(--text);
            padding:9px 14px; border-radius:10px;
            transition:border-color .12s ease, background .12s ease; }
-  button:hover { border-color:var(--bordo-forte); background:var(--rialzo); }
+  button:hover { border-color:#3d434c; background:#1c1f25; }
   button.primary { background:var(--accent); border-color:var(--accent); color:#fff;
                    box-shadow:0 0 16px -5px var(--accent); }
   button.primary:hover { background:#f5121f; border-color:#f5121f; }
-  button:disabled { background:var(--spento); border-color:var(--line-soft);
+  button:disabled { background:#131519; border-color:var(--line-soft);
                     color:#4d525b; cursor:not-allowed; box-shadow:none; }
   button.icon { background:none; border-color:transparent; padding:5px 7px;
                 font-size:1rem; line-height:1; color:var(--faint); }
@@ -155,16 +121,16 @@
      I colori non sono scelti a caso: sono due della catena (`COLORI_CATENA`),
      l'azzurro e il giallo, così l'app resta con una tavolozza sola. */
   button.neon { --neon:var(--accent);
-                background:color-mix(in srgb, var(--neon) 10%, var(--incavo));
+                background:color-mix(in srgb, var(--neon) 10%, #0e1014);
                 border-color:var(--neon); color:var(--neon);
                 text-shadow:0 0 8px var(--neon);
                 box-shadow:0 0 0 1px var(--neon) inset, 0 0 13px -3px var(--neon); }
-  button.neon:hover { background:color-mix(in srgb, var(--neon) 18%, var(--incavo));
+  button.neon:hover { background:color-mix(in srgb, var(--neon) 18%, #0e1014);
                       border-color:var(--neon);
                       box-shadow:0 0 0 1px var(--neon) inset, 0 0 20px -3px var(--neon); }
   /* Spento vuol dire spento: senza ampli il tasto non deve restare acceso, o
      l'alone prometterebbe una cosa che non si può fare. */
-  button.neon:disabled { background:var(--spento); border-color:var(--line-soft);
+  button.neon:disabled { background:#131519; border-color:var(--line-soft);
                          color:#4d525b; text-shadow:none; box-shadow:none; }
   button.neon.blu { --neon:var(--blu); }
   button.neon.oro { --neon:#ffd21e; }
@@ -200,7 +166,7 @@
                  width:min(100%, 520px); box-sizing:border-box;
                  bottom:calc(var(--barra-sotto) + env(safe-area-inset-bottom)); z-index:7;
                  max-height:calc(100% - var(--barra-sotto) - 40px); overflow-y:auto;
-                 background:var(--foglio); border-radius:20px 20px 0 0; padding:10px 8px; }
+                 background:#16181c; border-radius:20px 20px 0 0; padding:10px 8px; }
   .foglio-menu[hidden] { display:none; }
   .foglio-menu .gruppo-menu { font-family:var(--strumento); font-size:0.72rem;
                               font-weight:600; color:var(--faint); padding:10px 14px 4px; }
@@ -210,7 +176,7 @@
                     border-radius:10px; padding:12px 14px; font-family:var(--font);
                     font-size:0.95rem; font-weight:500; color:var(--text); }
   .foglio-menu button:hover:not(:disabled),
-  .tendina button:hover:not(:disabled) { background:var(--rialzo); }
+  .tendina button:hover:not(:disabled) { background:#1c1f25; }
   .tendina button:disabled { background:none; }
   .foglio-menu svg, .tendina svg { width:19px; height:19px; flex:none; fill:none;
                     stroke:var(--dim); stroke-width:1.8; stroke-linecap:round;
@@ -230,7 +196,7 @@
      spostare niente. */
   .menu-wrap { position:relative; }
   .tendina { position:absolute; top:calc(100% + 7px); right:0; z-index:20;
-             min-width:200px; background:var(--foglio); border:1px solid var(--line);
+             min-width:200px; background:#16181c; border:1px solid var(--line);
              border-radius:14px; padding:6px;
              box-shadow:0 14px 34px rgba(0,0,0,0.65); }
   #foglioAmpli { min-width:270px; }
@@ -264,10 +230,10 @@
   #status.on:hover, #status.on.aperto { border-color:var(--green); background:#0f1a11; }
 
   input[type=text], input[type=search], select, textarea {
-    background:var(--incavo); border:1px solid var(--line); color:var(--text);
+    background:#0e1014; border:1px solid var(--line); color:var(--text);
     padding:10px 12px; border-radius:10px; font:inherit; font-size:0.85rem;
   }
-  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--bordo-forte); }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:#4a515c; }
   textarea { width:100%; resize:vertical; min-height:60px; }
 
   /* ---- ricerca ------------------------------------------------------- */
@@ -278,7 +244,7 @@
   .campo-cerca { display:flex; align-items:center; gap:10px; height:46px;
                  box-sizing:border-box; background:var(--panel);
                  border:1px solid transparent; border-radius:12px; padding:0 3px 0 14px; }
-  .campo-cerca:focus-within { border-color:var(--bordo-forte); }
+  .campo-cerca:focus-within { border-color:#4a515c; }
   .campo-cerca > svg { width:17px; height:17px; flex:none; fill:none; stroke:var(--dim);
                        stroke-width:2; stroke-linecap:round; }
   .campo-cerca input { flex:1; min-width:0; height:100%; background:none; border:none;
@@ -300,7 +266,7 @@
                box-sizing:border-box; padding:0 13px; border:1px solid var(--line);
                border-radius:999px; color:#c8cad0; font-family:var(--strumento);
                font-size:0.8rem; font-weight:600; cursor:pointer; white-space:nowrap; }
-  .pastiglia:hover { border-color:var(--bordo-forte); color:var(--text); }
+  .pastiglia:hover { border-color:#3d434c; color:var(--text); }
   .pastiglia.attiva { background:var(--text); border-color:var(--text); color:#000; }
   .pallino-fam { width:8px; height:8px; border-radius:50%; flex:none;
                  background:var(--famiglia); }
@@ -407,7 +373,7 @@
 
   /* La catena a pastiglie: nomi leggibili, e i blocchi spenti si vedono spenti. */
   .chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
-  .chip { background:var(--rialzo); color:#b6bbc3; font-size:0.7rem; padding:2px 8px;
+  .chip { background:#1e2025; color:#b6bbc3; font-size:0.7rem; padding:2px 8px;
           border-radius:9px; white-space:nowrap; }
   .chip.spento { color:var(--faint); background:none; border:1px solid var(--line);
                  text-decoration:line-through; }
@@ -418,7 +384,7 @@
          display:flex; align-items:center; justify-content:center;
          background:none; border:1px solid var(--line); color:var(--faint); }
   .via svg { width:13px; height:13px; fill:currentColor; margin-left:2px; }
-  .via.pronto { color:var(--text); border-color:var(--bordo-forte); }
+  .via.pronto { color:var(--text); border-color:#3d434c; }
   .via.pronto:hover { background:none; color:var(--accent); border-color:var(--accent); }
   .via:disabled { background:none; border-color:var(--line-soft); }
   .naming { flex:1; min-width:0; }
@@ -463,11 +429,11 @@
                    padding:10px 18px 18px; }
   .foglio-preset[hidden] { display:none; }
   .foglio-preset::before { content:''; display:block; width:40px; height:5px;
-                           border-radius:3px; background:var(--bordo-forte); margin:0 auto 12px; }
+                           border-radius:3px; background:#3a3d44; margin:0 auto 12px; }
   .scheda-testa { display:flex; align-items:center; gap:8px; min-height:40px;
                   font-size:0.84rem; color:var(--dim); }
   .scheda-testa .chiudi { margin-left:auto; width:40px; height:40px; flex:none;
-                          border-radius:50%; padding:0; border:none; background:var(--rialzo);
+                          border-radius:50%; padding:0; border:none; background:#1f2126;
                           display:flex; align-items:center; justify-content:center; }
   .scheda-nome { display:flex; align-items:center; gap:4px; margin-top:2px; }
   .scheda-nome h2 { margin:0; font-family:var(--strumento); font-size:1.65rem;
@@ -482,18 +448,18 @@
   .scheda-grandi { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
   .scheda-grandi button { height:54px; border-radius:14px; font-size:1.05rem; font-weight:700;
                           display:flex; align-items:center; justify-content:center; gap:10px; }
-  .scheda-grandi button:not(.primary) { background:none; border-color:var(--bordo-forte); }
+  .scheda-grandi button:not(.primary) { background:none; border-color:#3a3d44; }
   .scheda-grandi button.primary svg { width:15px; height:15px; fill:currentColor; stroke:none; }
   .scheda-piccole { display:grid; grid-template-columns:repeat(auto-fit, minmax(74px, 1fr));
                     gap:8px; margin-top:10px; }
   .scheda-piccole button { min-height:64px; border-radius:12px; border:none;
-                           background:var(--rialzo); color:#c8cad0; padding:6px 4px;
+                           background:#1f2126; color:#c8cad0; padding:6px 4px;
                            display:flex; flex-direction:column; align-items:center;
                            justify-content:center; gap:6px; font-size:0.72rem;
                            line-height:1.15; text-align:center; }
   .scheda-piccole button:hover:not(:disabled) { background:#262930; }
   .scheda-piccole button.pericolo { color:var(--rosso); }
-  .scheda-piccole button:disabled { background:var(--foglio); color:#4d525b; }
+  .scheda-piccole button:disabled { background:#16181c; color:#4d525b; }
   .nota-altri-slot { color:var(--dim); font-size:0.78rem; margin-top:10px; }
   .scheda-sep { height:1px; background:var(--line); margin:20px 0 16px; }
   .scheda-eti { font-family:var(--strumento); font-size:0.8rem; font-weight:600;
@@ -503,7 +469,7 @@
                     align-items:center; gap:7px; padding:0 13px; border-radius:999px;
                     border:1px solid var(--line); background:none; color:#c8cad0;
                     font-family:var(--strumento); font-size:0.8rem; font-weight:600; }
-  .scheda .scelta.dentro { background:var(--rialzo); border-color:var(--rialzo); color:var(--text); }
+  .scheda .scelta.dentro { background:#1f2126; border-color:#1f2126; color:var(--text); }
   .scheda .scelta.nuova { color:var(--dim); }
   .scheda .scelta.famiglia::before { content:''; width:8px; height:8px; border-radius:50%;
                                      background:var(--famiglia); }
@@ -518,7 +484,7 @@
                           text-overflow:ellipsis; }
   .scheda textarea { margin-top:2px; min-height:88px; }
   .scelte { display:flex; gap:6px; flex-wrap:wrap; }
-  .scelta { background:var(--rialzo); color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
+  .scelta { background:#1e2025; color:#b6bbc3; font-size:0.75rem; padding:4px 10px;
             border-radius:12px; cursor:pointer; border:1px solid transparent; }
   .scelta.dentro { background:#2f3a2f; color:var(--green); border-color:#3d5540; }
 
@@ -538,7 +504,7 @@
                     calc(12px + env(safe-area-inset-left));
             scrollbar-width:none; }
   #banchi::-webkit-scrollbar { display:none; }
-  .banco { flex:none; background:var(--rialzo); color:#b6bbc3; font-size:0.8rem; font-weight:600;
+  .banco { flex:none; background:#1e2025; color:#b6bbc3; font-size:0.8rem; font-weight:600;
            padding:6px 13px; border-radius:14px; cursor:pointer; white-space:nowrap; }
   .banco.attivo { background:var(--accent); color:#fff; }
   .banco.aggiungi { color:var(--faint); }
@@ -558,7 +524,7 @@
      scuro della pagina, un bordo sottile, e quando sono accesi l'alone del
      neon invece di un semplice cambio di colore. Il carattere è quello
      «strumento»: da un metro e mezzo, in piedi, si guarda — non si legge. */
-  .pad { position:relative; background:var(--pad, var(--incavo)); border:1px solid var(--line);
+  .pad { position:relative; background:#0e1014; border:1px solid var(--line);
          border-radius:14px; padding:12px 14px; text-align:left; overflow:hidden;
          display:flex; flex-direction:column; justify-content:center; gap:4px;
          font-family:var(--strumento); font-size:1.05rem; font-weight:700;
@@ -617,7 +583,7 @@
   .presa { position:absolute; left:6px; bottom:6px; width:30px; height:30px;
            display:flex; align-items:center; justify-content:center;
            border-radius:8px; font-size:0.95rem; font-weight:700;
-           color:var(--dim); background:var(--rialzo); border:1px solid var(--line); }
+           color:var(--dim); background:#1e2025; border:1px solid var(--line); }
   .presa.viva { color:#000; background:var(--gold); border-color:var(--gold); }
   .pad.inMano { border-color:var(--gold); border-style:solid; background:#241f16; }
   .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
@@ -661,7 +627,7 @@
   .sezione-pannello h3 { font-size:0.76rem; color:var(--dim); text-transform:uppercase;
                          letter-spacing:0.06em; margin:0 0 6px; font-weight:700; }
   .famiglia-voce input[type=color] { width:34px; height:26px; padding:2px; flex:none;
-                                     background:var(--foglio); border:1px solid var(--line);
+                                     background:#17181c; border:1px solid var(--line);
                                      border-radius:7px; cursor:pointer; }
   .famiglia-voce .nome { flex:1; min-width:0; font-size:0.9rem; }
 
@@ -683,7 +649,7 @@
   .riga-doppione:first-of-type { border-top:none; }
   .riga-doppione .lettera { flex:none; width:26px; height:26px; border-radius:50%;
                             display:flex; align-items:center; justify-content:center;
-                            font-weight:700; font-size:0.8rem; background:var(--rialzo); color:var(--text); }
+                            font-weight:700; font-size:0.8rem; background:#24262b; color:var(--text); }
   .riga-doppione .dati { flex:1; min-width:0; font-size:0.78rem; color:var(--dim); line-height:1.45; }
   .riga-doppione .dati .catena { color:var(--text); }
   .riga-doppione button { flex:none; }
@@ -737,7 +703,7 @@
      Il titolo va per id e non per classe: `.pannello h2` è più specifico di una
      classe e vinceva lui, quindi la misura scritta qui non si vedeva. */
   #riquadroPreset { width:fit-content; max-width:100%; margin:0 auto 12px;
-                    padding:12px 26px; border-radius:16px; background:var(--incavo);
+                    padding:12px 26px; border-radius:16px; background:#0e1014;
                     border:1px solid var(--fam, #ffffff);
                     box-shadow:0 0 0 1px var(--fam, #ffffff) inset,
                                0 0 12px -2px var(--fam, #ffffff),
@@ -843,7 +809,7 @@
   }
   .striscia::-webkit-scrollbar { height:0; }
   .tassello { position:relative; flex:0 0 106px; scroll-snap-align:center;
-              background:var(--incavo); border:1px solid var(--line); border-radius:12px;
+              background:#0e1014; border:1px solid var(--line); border-radius:12px;
               padding:9px 9px 7px; cursor:pointer; text-align:left;
               font:inherit; color:inherit;
               display:flex; flex-direction:column; gap:6px; }
@@ -878,7 +844,7 @@
                            letter-spacing:0.08em; text-transform:uppercase;
                            color:var(--cat); font-weight:700;
                            text-shadow:0 0 8px var(--cat), 0 0 18px var(--cat); }
-  .blocco.aFuoco .interruttore.acceso { background:color-mix(in srgb, var(--cat) 10%, var(--incavo));
+  .blocco.aFuoco .interruttore.acceso { background:color-mix(in srgb, var(--cat) 10%, #0e1014);
                                         color:var(--cat); border-color:var(--cat);
                                         text-shadow:0 0 8px var(--cat);
                                         box-shadow:0 0 12px -2px var(--cat); }
@@ -889,7 +855,7 @@
   .blocco.aFuoco .riga-modello { padding:6px 12px 0; }
   .blocco.aFuoco .nome-effetto { appearance:none; -webkit-appearance:none;
                                  display:block; width:auto; max-width:100%;
-                                 margin:0 auto; background:var(--incavo);
+                                 margin:0 auto; background:#0e1014;
                                  border:1px solid var(--line); border-radius:10px;
                                  padding:8px 34px 8px 18px; text-align:center;
                                  text-align-last:center;
@@ -914,7 +880,7 @@
   .velo-elenco { position:fixed; inset:0; z-index:80; padding:18px;
                  background:rgba(0,0,0,0.74); display:flex;
                  align-items:center; justify-content:center; }
-  .elenco-scelta { width:min(430px, 100%); max-height:80vh; background:var(--foglio);
+  .elenco-scelta { width:min(430px, 100%); max-height:80vh; background:#101216;
                    border:1px solid var(--line); border-radius:15px;
                    display:flex; flex-direction:column; overflow:hidden;
                    box-shadow:0 22px 60px rgba(0,0,0,0.7); }
@@ -933,8 +899,8 @@
                  font-family:var(--strumento); font-size:0.82rem; font-weight:600;
                  color:var(--text); white-space:nowrap; overflow:hidden;
                  text-overflow:ellipsis; }
-  .elenco-voce:hover:not(:disabled) { background:var(--rialzo); }
-  .elenco-voce.scelta { background:var(--rialzo); color:var(--cat, var(--text)); }
+  .elenco-voce:hover:not(:disabled) { background:#1c1f25; }
+  .elenco-voce.scelta { background:#1c1f25; color:var(--cat, var(--text)); }
   /* Le voci che senza ampli non si possono scegliere: si leggono, non si
      prendono. Meglio spente che tolte — un elenco che si accorcia da solo
      sembra un catalogo che è sparito. */
@@ -959,12 +925,12 @@
      angolo degli `input` — e dentro aprono l'elenco. Il carattere è quello
      «strumento» perché stanno accanto ai pulsanti, non in mezzo al testo. */
   .tendina-finta { display:flex; align-items:center; gap:8px; max-width:100%;
-                   background:var(--incavo); border:1px solid var(--line);
+                   background:#0e1014; border:1px solid var(--line);
                    color:var(--text); padding:10px 12px; border-radius:10px;
                    font-family:var(--strumento); font-size:0.82rem; font-weight:600;
                    text-align:left; }
-  .tendina-finta:hover { background:var(--incavo); border-color:var(--bordo-forte); }
-  .tendina-finta:disabled { background:var(--spento); border-color:var(--line-soft); }
+  .tendina-finta:hover { background:#0e1014; border-color:#4a515c; }
+  .tendina-finta:disabled { background:#131519; border-color:var(--line-soft); }
   /* Il nome ci sta su una riga sola: se è lungo si tronca, come nell'elenco. */
   .tendina-finta .testo { flex:1; min-width:0; overflow:hidden;
                           text-overflow:ellipsis; white-space:nowrap; }
@@ -1019,11 +985,11 @@
   .pomello svg { display:block; margin:0 auto 5px; overflow:visible;
                  width:58px; height:58px; }
   .riga-pomelli:has(> :nth-child(4)) .pomello svg { width:50px; height:50px; }
-  .pomello .guida { stroke:var(--traccia); stroke-width:8; stroke-linecap:round;
+  .pomello .guida { stroke:#262b33; stroke-width:8; stroke-linecap:round;
                     transform:rotate(135deg); transform-origin:50% 50%; }
   .pomello .arco  { stroke:currentColor; stroke-width:8; stroke-linecap:round;
                     transform:rotate(135deg); transform-origin:50% 50%; }
-  .pomello .corpo { fill:var(--incavo); stroke:var(--traccia); }
+  .pomello .corpo { fill:#0e1014; stroke:#2a2f37; }
   .pomello .tacca { stroke:currentColor; stroke-width:5; stroke-linecap:round; }
   /* Il tubo al neon: l'alone non è un'ombra sotto il disegno, è il disegno
      stesso sfocato due volte — una stretta e forte, una larga e tenue. Sta
@@ -1046,12 +1012,12 @@
   .cursore { text-align:center; cursor:ns-resize; touch-action:none;
              color:var(--cat); user-select:none; -webkit-user-select:none; }
   .cursore .pista { position:relative; height:104px; width:8px; margin:0 auto 6px;
-                    background:var(--traccia); border-radius:4px; }
+                    background:#262b33; border-radius:4px; }
   .cursore .riempi { position:absolute; left:0; right:0; bottom:0;
                      background:var(--cat); border-radius:4px; opacity:0.55; }
   .cursore .tacca-cursore { position:absolute; left:50%; width:26px; height:10px;
                             margin-left:-13px; border-radius:3px;
-                            background:var(--incavo); border:1px solid var(--cat);
+                            background:#0e1014; border:1px solid var(--cat);
                             box-shadow:0 0 6px -1px var(--cat), 0 0 14px -4px var(--cat); }
   .cursore .nome { font-size:0.62rem; }
   .cursore .val { font-size:0.72rem; }
@@ -1061,18 +1027,18 @@
   /* Anche questa è una tendina nostra, dal 26 agosto 2026: era l'ultimo
      `<select>` di sistema rimasto nell'editor. Qui però porta i colori del
      blocco, come tutto quello che gli sta intorno. */
-  .pomello.scelta .tendina-finta { width:100%; background:var(--incavo); color:var(--cat);
+  .pomello.scelta .tendina-finta { width:100%; background:#0e1014; color:var(--cat);
                                    border:1px solid var(--cat); border-radius:8px;
                                    padding:7px 6px; font-size:0.72rem;
                                    font-family:inherit; font-weight:400;
                                    margin-bottom:5px; }
-  .pomello.scelta .tendina-finta:hover { border-color:var(--cat); background:var(--incavo); }
+  .pomello.scelta .tendina-finta:hover { border-color:var(--cat); background:#0e1014; }
   .pomello.scelta .tendina-finta .freccia { color:var(--cat); }
   /* Il «BPM» di delay e Tremolator: una levetta della taglia di un pomello.
      Pista e pallino scuri da spenta; accesa, il pallino sale e prende il
      colore del blocco col suo alone, come l'arco dei pomelli. */
   .pomello.leva { cursor:pointer; }
-  .pomello.leva .pista-leva { fill:var(--incavo); stroke:var(--traccia); stroke-width:3; }
+  .pomello.leva .pista-leva { fill:#0e1014; stroke:#2a2f37; stroke-width:3; }
   .pomello.leva .pallino { fill:#3a404a; transition:cy 0.12s ease-out; }
   .pomello.leva.acceso .pista-leva { stroke:currentColor; }
   .pomello.leva.acceso .pallino { fill:currentColor;
@@ -1092,7 +1058,7 @@
             padding:0; margin-bottom:10px; overflow:hidden; }
   .blocco.spento { opacity:0.55; }
   .blocco .intestazione { display:flex; align-items:center; gap:10px;
-                          padding:9px 12px; background:var(--foglio);
+                          padding:9px 12px; background:#17181c;
                           border-bottom:1px solid var(--line); }
   .blocco .nomi { flex:1; min-width:0; }
   .blocco .categoria { font-size:0.64rem; color:var(--faint); text-transform:uppercase;
@@ -1111,10 +1077,10 @@
                           background-size:5px 5px, 5px 5px;
                           background-repeat:no-repeat; }
   .blocco .nome-effetto:hover { color:#fff; }
-  .blocco .nome-effetto option { background:var(--foglio); color:var(--text);
+  .blocco .nome-effetto option { background:#17181c; color:var(--text);
                                  font-size:0.9rem; font-weight:400; }
   .blocco .interruttore { margin-left:auto; flex:none; font-size:0.7rem; padding:5px 12px;
-                          border-radius:12px; background:var(--rialzo); color:var(--dim);
+                          border-radius:12px; background:#24262b; color:var(--dim);
                           letter-spacing:0.04em; }
   .blocco .interruttore.acceso { background:#1f3a24; color:var(--green); }
 
@@ -1155,7 +1121,7 @@
   .cursore::-moz-range-thumb { width:15px; height:15px; border-radius:50%;
                                background:#f2f2f4; border:1px solid #000; }
 
-  .manopola select.scelta { width:100%; background:var(--foglio); color:var(--text);
+  .manopola select.scelta { width:100%; background:#17181c; color:var(--text);
                             border:1px solid var(--line); border-radius:8px;
                             padding:7px 8px; font:inherit; font-size:0.82rem; }
   .manopola .spiega-extra { color:var(--faint); font-size:0.74rem; }
@@ -1362,14 +1328,6 @@
     <div class="azioni" id="sceltaLingua">
       <button data-lingua="it">Italiano</button>
       <button data-lingua="en">English</button>
-    </div>
-  </div>
-  <!-- Lo sfondo: grigio o nero. Vale per questo apparecchio. -->
-  <div class="sezione-pannello">
-    <h3>Sfondo</h3>
-    <div class="azioni" id="sceltaSfondo">
-      <button data-sfondo="grigio">Grigio</button>
-      <button data-sfondo="nero">Nero</button>
     </div>
   </div>
   <p class="spiega">La libreria vive in questo browser: l'esportazione è l'unico modo di

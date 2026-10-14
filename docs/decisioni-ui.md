@@ -1161,23 +1161,3 @@ inglese, che non si tocca finché l'utente non lo dice). La striscia «versione 
 
 **Verificato**: nel riquadro del browser a 375 px, contro un ampli finto e preset finti.
 **Non ancora** sul telefono con l'ampli vero.
-
-
-## Lo sfondo grigio — 14 ottobre 2026
-
-Chiesto dall'utente: «non nero ma un grigio come questa interfaccia di Claude». È una scelta,
-non un rifacimento: in «Impostazioni e backup» c'è **Sfondo: Grigio · Nero**, e senza una
-scelta vale il grigio. La scelta sta in `localStorage` (`sfondo`), per apparecchio come la
-lingua; uno script in testa a `index.html` mette la classe `grigio` su `<html>` prima che la
-pagina si disegni, e cambia anche il `theme-color` (#262624 o #000000).
-
-Per farlo i grigi scuri scritti a mano nello `<style>` sono diventati variabili coi valori di
-prima (`--incavo` #0e1014, `--foglio` #16181c, `--rialzo` #1f2126, `--spento` #131519,
-`--bordo-forte` #3d434c, `--traccia` #262b33): **il nero è rimasto identico**. Il grigio
-(`html.grigio`, e `html.grigio body.vista-live` per battere le variabili della vista Live)
-è caldo come quello di Claude: fondo #262624, superfici #30302e, campi #1f1e1d. Sul grigio le
-superfici sono più chiare del fondo; i pulsantoni live (`--pad`) salgono invece di scavare,
-perché otto incavi più scuri sembravano una griglia di buchi.
-
-Non toccati: la guida (`guida.css`, sempre nera, si apre dentro l'app), il `manifest` (lo
-sfondo della schermata d'avvio resta nero), i colori scritti nei file JavaScript.
