@@ -1198,3 +1198,30 @@ la regola: **la grafica prima si mostra, poi si pubblica** (CLAUDE.md, Convenzio
 
 **Aperta**: togliere «Fatto» e il titolo anche dalle altre pagine (guida, impostazioni,
 categorie, doppioni)? Chiesto all'utente, nessuna risposta ancora.
+
+
+## I banchi da aggiornare sul pedale — 14 ottobre 2026
+
+Il problema dell'utente: crea i banchi nell'app e li manda al pedale; se poi cambia un preset
+che sta in un banco, il pedale continua a suonare quello vecchio finché il banco non si rimanda,
+e non sempre se ne ricorda. Scelte fra tre proposte: **tutte e tre**.
+
+- **Firmware 2.22**: all'`ELENCA` il pedale manda, prima dell'elenco, una notifica `0x83`
+  «slot:impronta» per ogni banco. L'impronta è FNV-1a a 32 bit su tutto il blocco salvato
+  **tranne il byte dello slot** (indice 4), che dopo uno scambio resta quello vecchio. Notifiche
+  separate perché l'elenco sta già stretto nei suoi 180 byte; un'app vecchia le ignora (le
+  scrive nel registro come «← 0:1a2b3c4d»). Caricato sulla XIAO il 14 ottobre.
+- **Nell'app, collegati al pedale**: ogni banco del pedale si confronta con quello della
+  libreria **con lo stesso nome** (troncato a 39 byte come lo tiene il pedale). Diversi: «cambiato
+  nell'app» in oro e «Aggiorna», che rimanda il banco nello slot dove sta; con più d'uno anche
+  «Aggiorna tutti». Con spostamenti in sospeso «Aggiorna» è spento: prima si applicano quelli.
+- **Il promemoria**: l'app si segna cosa c'è nel pedale (`settings.pedaleInviati`, slot → nome e
+  impronta), da ogni invio e da ogni elenco letto col firmware nuovo; a ogni `ricarica()`
+  ricalcola e accende un **pallino giallo** sulla voce Pedale se un banco là dentro è cambiato. Da
+  scollegati la pagina del Pedale lo dice in chiaro sotto la carta.
+
+**Limiti, detti all'utente**: il confronto è per nome (un banco rinominato va rimandato una
+volta); il pallino vale per l'apparecchio che ha parlato col pedale, il confronto da collegati
+da qualunque apparecchio. **Verificato**: l'impronta di riferimento («a» → e40c292c) e la
+simulazione nel browser; **non ancora** col pedale vero (il riquadro del browser non apre la
+scelta dei dispositivi Bluetooth, e in locale non ci sono banchi): si prova dal telefono.

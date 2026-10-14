@@ -332,6 +332,8 @@ suona.
 - **Web Bluetooth: una sola operazione GATT per volta**, il banco entra in coda come blocco.
 - **Il formato del banco sta in `src/pedale-ponte.js` e `pedale/prova-ble/banchi.h`, che
   cambiano insieme.** `banchi.h` legge byte non nostri: offset e lunghezze vanno verificati.
+  **Così l'impronta** (2.22): FNV-1a 32 bit sul blocco senza il byte dello slot, `bancoImpronta` in
+  `banchi.h` e `impronta` in `pedale-ponte.js`; il pedale la manda con l'elenco (notifica `0x83`).
 
 **Ferramenta, mappa di pulsanti e LED, basetta, hardware che fa danni, scatola**: in
 **`docs/pedale-lavoro.md`**, da leggere prima di toccare il pedale. Anche senza aprirlo:
@@ -380,7 +382,7 @@ l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pu
 Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta indietro
 finché l'utente non dice di aggiornarlo.
 
-**Pedale**: sulla XIAO c'è `prova-ble` (1.5 e poi il looper fino a 2.21, verificate); caricatore
+**Pedale**: sulla XIAO c'è `prova-ble` **2.22** (14 ottobre: l'impronta dei banchi; prima 1.5 e il looper fino a 2.21, verificate); caricatore
 Adafruit 6091 montato e verificato; restano display, looper, LED del tempo, click, bande
 sull'anello. Tutto in `docs/pedale-lavoro.md` («Dove si riprende col pedale») e `docs/looper.md`;
 la versione lunga di questo paragrafo in `docs/diario.md` (estratto del 14 ottobre, sera).
@@ -400,7 +402,7 @@ menu Altro uguale ovunque, lista preset solo nome con banda, «HW PRESET»; `doc
 **`guida.en.html` è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare
 l'inglese.
 
-Sull'app (guscio `v106` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v107` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
