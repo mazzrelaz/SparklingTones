@@ -228,6 +228,23 @@ static bool bancoScambia(uint8_t a, uint8_t b) {
   return true;
 }
 
+/**
+ * L'impronta di un banco (2.22, 14 ottobre 2026): FNV-1a a 32 bit su tutto il
+ * blocco **tranne il byte dello slot** (indice 4), che con uno scambio resta
+ * quello vecchio senza che cambi il contenuto. L'app calcola la stessa sul
+ * banco che ha in libreria (`impronta` in src/pedale-ponte.js): se le due non
+ * coincidono, nel pedale c'e' una versione vecchia del banco. Cambiano insieme.
+ */
+static uint32_t bancoImpronta(const uint8_t* d, size_t n) {
+  uint32_t h = 2166136261u;
+  for (size_t i = 0; i < n; i++) {
+    if (i == 4) continue;
+    h ^= d[i];
+    h *= 16777619u;
+  }
+  return h;
+}
+
 /** Quanti banchi ci sono, e riempie `nomi` con «slot:nome» separati da \n. */
 static uint8_t banchiElenca(char* fuori, size_t max) {
   size_t usato = 0;

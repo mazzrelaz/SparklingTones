@@ -39,7 +39,7 @@ window.PedalePonte = (function () {
 
   const CMD = { CIAO: 0x01, ELENCA: 0x02, INIZIA: 0x10, PEZZO: 0x11,
                 FINE: 0x12, CANCELLA: 0x20, USA: 0x21, SCAMBIA: 0x22 };
-  const RSP = { 0x81: 'info', 0x82: 'elenco', 0x8f: 'errore' };
+  const RSP = { 0x81: 'info', 0x82: 'elenco', 0x83: 'impronta', 0x8f: 'errore' };
 
   const POSTI = 8;
   const TESTO_MAX = 39;          // il firmware tiene 40 byte col terminatore
@@ -129,6 +129,34 @@ window.PedalePonte = (function () {
     return blob.length;
   }
 
+  /**
+   * L'impronta di un blocco (14 ottobre 2026): FNV-1a a 32 bit su tutti i byte
+   * **tranne quello dello slot** (indice 4), che dopo uno scambio nel pedale
+   * resta quello vecchio. **È la stessa di `bancoImpronta` in banchi.h**: il
+   * pedale la manda col suo elenco, e se non coincide con quella del banco in
+   * libreria vuol dire che nel pedale c'è una versione vecchia. Cambiano insieme.
+   */
+  function impronta(blob) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < blob.length; i++) {
+      if (i === 4) continue;
+      h = Math.imul(h ^ blob[i], 0x01000193);
+    }
+    return h >>> 0;
+  }
+
+  /** L'impronta che avrebbe questo banco nel pedale, mandato adesso. */
+  const improntaDiBanco = banco => impronta(blocco(banco, 0));
+
+  /** Il nome come lo tiene il pedale: troncato a 39 byte, come in `testo`. */
+  const nomeNelPedale = s => new TextDecoder().decode(Uint8Array.from(testo(s).slice(1)));
+
+  /** «3:1a2b3c4d» → {slot: 3, impronta: 0x1a2b3c4d} */
+  function leggiImpronta(testo) {
+    const p = String(testo || '').split(':');
+    return { slot: Number(p[0]), impronta: parseInt(p[1], 16) >>> 0 };
+  }
+
   /** «0:Concerto:8\n1:Casa:3\n» → [{slot, nome, pieni}] */
   function leggiElenco(testo) {
     return String(testo || '').split('\n').filter(Boolean).map(riga => {
@@ -138,5 +166,6 @@ window.PedalePonte = (function () {
   }
 
   return { SERVIZIO, COMANDO, STATO, CMD, RSP, POSTI,
-           frameDiPreset, blocco, checksum, invia, leggiElenco };
+           frameDiPreset, blocco, checksum, invia, leggiElenco,
+           impronta, improntaDiBanco, nomeNelPedale, leggiImpronta };
 })();

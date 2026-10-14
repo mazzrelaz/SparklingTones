@@ -24,7 +24,73 @@ const pedale = {
   slots: [],                 // quello che il pedale ha detto, l'ultima volta
   partenza: new Array(8).fill(null),   // la stessa cosa, per slot
   locale:   new Array(8).fill(null),   // la disposizione che stai sistemando
+  impronte: new Map(),       // slot → impronta, arrivate prima dell'elenco
 };
+
+/* --------------------------------------------------------------------
+   Banchi da aggiornare (14 ottobre 2026, chiesto dall'utente)
+
+   Un banco mandato al pedale ci resta com'era: se poi nell'app cambi un
+   preset che ci sta dentro, il pedale continua a suonare quello vecchio
+   finché non lo rimandi, ed è facile non ricordarsene. Il pedale (2.22) manda
+   con l'elenco l'**impronta** di ogni banco; l'app la confronta con quella del
+   banco che ha in libreria **con lo stesso nome**, e se non coincidono la riga
+   dice «cambiato nell'app» e offre «Aggiorna».
+
+   Per accorgersene anche senza collegarsi, l'app si ricorda cosa sa del
+   pedale (`settings.pedaleInviati`: slot → nome e impronta, da ogni invio e da
+   ogni elenco letto) e accende un pallino sulla voce Pedale della barra. Vale
+   per l'apparecchio che ha parlato col pedale; il confronto da collegati vale
+   da qualunque apparecchio, perché l'impronta la tiene il pedale.
+   -------------------------------------------------------------------- */
+
+let pedaleInviati = {};
+
+async function caricaInviatiPedale() {
+  pedaleInviati = (await store.getSetting('pedaleInviati', {})) || {};
+}
+
+async function salvaInviatiPedale() {
+  await store.setSetting('pedaleInviati', pedaleInviati);
+}
+
+/**
+ * Il banco in libreria che corrisponde a un banco del pedale, e se è cambiato.
+ * null se non si può dire: firmware senza impronte, nessun banco con quel
+ * nome, banco vuoto o con un preset senza dati.
+ */
+function confrontaBancoPedale(nome, improntaPedale) {
+  if (improntaPedale == null) return null;
+  const banco = banchi.find(b => PedalePonte.nomeNelPedale(b.nome) === nome);
+  if (!banco) return null;
+  let mia;
+  try { mia = PedalePonte.improntaDiBanco({ nome: banco.nome, posti: postiDiBanco(banco) }); }
+  catch (err) { return null; }
+  return { banco, cambiato: mia !== improntaPedale };
+}
+
+/** I banchi che quest'app sa essere nel pedale e che nel frattempo sono cambiati. */
+function banchiPedaleDaAggiornare() {
+  return Object.entries(pedaleInviati)
+    .map(([slot, r]) => ({ slot: Number(slot), nome: r.nome,
+                           esito: confrontaBancoPedale(r.nome, r.impronta) }))
+    .filter(x => x.esito && x.esito.cambiato);
+}
+
+function aggiornaPallinoPedale() {
+  const da = banchiPedaleDaAggiornare();
+  const tasto = $('tabPedale');
+  tasto.classList.toggle('da-aggiornare', da.length > 0);
+  tasto.title = da.length
+    ? tr('da aggiornare sul pedale: {0}', da.map(x => x.nome).join(', ')) : '';
+  // Da scollegati la pagina lo dice in chiaro, sotto la carta del pedale.
+  const nota = $('notaDaAggiornare');
+  nota.hidden = !(da.length && !pedale.comando);
+  nota.textContent = da.length === 1
+    ? tr('«{0}» è cambiato nell\'app: collegati al pedale e aggiornalo.', da[0].nome)
+    : tr('{0} banchi sono cambiati nell\'app ({1}): collegati al pedale e aggiornali.',
+         da.length, da.map(x => x.nome).join(', '));
+}
 
 /**
  * Tiene le ultime righe, non solo l'ultima: qui la sequenza conta più del
@@ -119,6 +185,7 @@ function disegnaSlotsPedale() {
   const cont = $('slotsPedale');
   cont.innerHTML = '';
 
+  let cambiati = 0;
   for (let s = 0; s < PedalePonte.POSTI; s++) {
     const v = pedale.locale[s];
     const riga = document.createElement('div');
@@ -137,10 +204,25 @@ function disegnaSlotsPedale() {
     riga.append(n, naming);
 
     if (v) {
+      const esito = confrontaBancoPedale(v.nome, v.impronta);
+      const vecchio = !!(esito && esito.cambiato);
+      if (vecchio) cambiati++;
       const quanti = document.createElement('div');
-      quanti.className = 'quanti';
-      quanti.textContent = tr`${v.pieni} preset`;
+      quanti.className = 'quanti' + (vecchio ? ' cambiato' : '');
+      quanti.textContent = vecchio ? tr('cambiato nell\'app') : tr`${v.pieni} preset`;
       naming.appendChild(quanti);
+
+      // «Aggiorna» rimanda il banco della libreria nello slot dove sta adesso
+      // nel pedale. Con spostamenti in sospeso no: prima si applicano quelli.
+      if (vecchio) {
+        const aggiorna = document.createElement('button');
+        aggiorna.className = 'aggiorna-pedale';
+        aggiorna.textContent = tr('Aggiorna');
+        aggiorna.disabled = !pedale.comando || daApplicare();
+        aggiorna.title = tr('rimanda «{0}» al pedale, così com\'è adesso nell\'app', esito.banco.nome);
+        aggiorna.addEventListener('click', () => mandaBanco(esito.banco, v.slot));
+        riga.appendChild(aggiorna);
+      }
 
       // Suonare è immediato: non è una modifica da applicare, è un ordine di
       // suonare adesso. Con spostamenti in sospeso no: lo slot non è più quello.
@@ -180,6 +262,10 @@ function disegnaSlotsPedale() {
     }
     cont.appendChild(riga);
   }
+  // Più di uno da aggiornare: anche «Aggiorna tutti», sopra l'elenco.
+  $('tuttiPedale').hidden = cambiati < 2;
+  $('testoTuttiPedale').textContent = tr('{0} banchi sono cambiati nell\'app', cambiati);
+  $('btnAggiornaTutti').disabled = !pedale.comando || daApplicare();
   aggiornaTastiModifiche();
 }
 
@@ -279,10 +365,26 @@ function comandoPedale(...byte) {
 function rispostaPedale(e) {
   const v = new Uint8Array(e.target.value.buffer);
   const testo = new TextDecoder().decode(v.subarray(1));
+  if (v[0] === 0x83) {                       // l'impronta di un banco, prima dell'elenco
+    const { slot, impronta } = PedalePonte.leggiImpronta(testo);
+    pedale.impronte.set(slot, impronta);
+    return;
+  }
   if (v[0] === 0x82) {                       // l'elenco degli slot
-    pedale.slots = PedalePonte.leggiElenco(testo);
+    pedale.slots = PedalePonte.leggiElenco(testo).map(s =>
+      Object.assign(s, { impronta: pedale.impronte.has(s.slot) ? pedale.impronte.get(s.slot) : null }));
+    // Col firmware che manda le impronte, quello che c'è nel pedale lo dice lui:
+    // l'app si segna quello, e non più solo i propri invii.
+    if (pedale.impronte.size) {
+      pedaleInviati = {};
+      for (const s of pedale.slots)
+        if (s.impronta != null) pedaleInviati[s.slot] = { nome: s.nome, impronta: s.impronta };
+      salvaInviatiPedale();
+    }
+    pedale.impronte = new Map();
     logPedale(tr`elenco: ${pedale.slots.length} slot occupati`);
     ripartiDaPedale();                       // la verità è quella del pedale
+    aggiornaPallinoPedale();
     return;
   }
   logPedale('← ' + testo);
@@ -332,11 +434,19 @@ async function collegaPedale() {
 async function mandaBancoAlPedale() {
   const banco = bancoDaMandare();
   if (!banco) return;
+  $('btnMandaAlPedale').disabled = true;
+  await mandaBanco(banco, tendinaSlotPedale.valore);
+  aggiornaInvioPedale();
+}
+
+/**
+ * Manda un banco della libreria in uno slot del pedale. La usano «Manda al
+ * pedale» e «Aggiorna»; dopo l'invio l'app si segna cosa ha messo nel pedale.
+ */
+async function mandaBanco(banco, slot) {
   const posti = postiDiBanco(banco);
-  const slot  = tendinaSlotPedale.valore;
   const barra = $('avanzamentoPedale').firstElementChild;
 
-  $('btnMandaAlPedale').disabled = true;
   // Tutto il trasferimento entra nella coda come un blocco solo: dentro fa
   // una trentina di scritture, e una notifica che arrivasse a metà non deve
   // potersi infilare in mezzo con un comando suo.
@@ -348,12 +458,25 @@ async function mandaBancoAlPedale() {
         (fatti, totale) => { barra.style.width = Math.round(fatti / totale * 100) + '%'; });
       logPedale(tr('"{0}" → slot {1}: {2} byte in {3} ms', banco.nome, slot + 1, byte,
                 Math.round(performance.now() - t0)));
+      pedaleInviati[slot] = { nome: PedalePonte.nomeNelPedale(banco.nome),
+                              impronta: PedalePonte.improntaDiBanco({ nome: banco.nome, posti }) };
+      await salvaInviatiPedale();
     } catch (err) {
       logPedale(tr('invio fallito: {0}', err.message));
     }
   });
   barra.style.width = '0';
-  aggiornaInvioPedale();
+  aggiornaPallinoPedale();
+}
+
+/** «Aggiorna tutti»: uno dopo l'altro, ognuno nel suo slot. */
+async function aggiornaTuttiPedale() {
+  const da = pedale.partenza
+    .map(v => v && { v, esito: confrontaBancoPedale(v.nome, v.impronta) })
+    .filter(x => x && x.esito && x.esito.cambiato);
+  $('btnAggiornaTutti').disabled = true;
+  for (const { v, esito } of da) await mandaBanco(esito.banco, v.slot);
+  $('btnAggiornaTutti').disabled = false;
 }
 
 
@@ -415,6 +538,7 @@ $('btnPedaleStacca').addEventListener('click', () => {
   if (pedale.device && pedale.device.gatt.connected) pedale.device.gatt.disconnect();
 });
 $('btnMandaAlPedale').addEventListener('click', mandaBancoAlPedale);
+$('btnAggiornaTutti').addEventListener('click', aggiornaTuttiPedale);
 $('btnApplicaPedale').addEventListener('click', applicaAlPedale);
 $('btnAnnullaPedale').addEventListener('click', ripartiDaPedale);
 

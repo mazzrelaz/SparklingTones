@@ -45,6 +45,12 @@ async function ricarica() {
   if (live.banco !== BANCO_AMPLI && !banchi.some(b => b.id === live.banco)) {
     live.banco = BANCO_AMPLI;
   }
+  // Un preset cambiato può aver reso vecchio un banco che sta nel pedale: il
+  // pallino sulla voce Pedale si ricalcola qui, dove passano tutti i cambi.
+  if (typeof aggiornaPallinoPedale === 'function') {
+    await caricaInviatiPedale();
+    aggiornaPallinoPedale();
+  }
 }
 
 /**

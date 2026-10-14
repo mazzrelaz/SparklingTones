@@ -766,6 +766,22 @@
                                align-items:center; justify-content:center; }
   .riga-pedale .altro-pedale:hover { color:var(--text); background:none; }
   .riga-pedale .altro-pedale svg { width:20px; height:20px; fill:currentColor; }
+  /* Un banco cambiato nell'app dopo essere stato mandato: in oro, come gli
+     avvisi gentili, e un tasto «Aggiorna» del suo colore. */
+  .riga-pedale .quanti.cambiato { color:var(--gold); }
+  .aggiorna-pedale { flex:none; padding:7px 12px; font-size:0.78rem; border-radius:999px;
+                     background:none; border-color:#6b5a1e; color:var(--gold); }
+  .aggiorna-pedale:hover:not(:disabled) { background:rgba(240,192,64,0.1); border-color:var(--gold); }
+  .avviso-aggiorna { display:flex; align-items:center; gap:10px; background:var(--panel);
+                     border-radius:12px; padding:10px 12px; margin-bottom:8px;
+                     font-size:0.82rem; color:var(--gold); }
+  .avviso-aggiorna span { flex:1; }
+  #pannelloPedale .nota-da-aggiornare { color:var(--gold); margin:8px 2px 0; }
+  /* Il pallino sulla voce Pedale: c'è un banco da aggiornare. */
+  #tabPedale { position:relative; }
+  #tabPedale.da-aggiornare::before { content:''; position:absolute; top:9px; left:calc(50% + 8px);
+                                     width:8px; height:8px; border-radius:50%;
+                                     background:var(--gold); box-shadow:0 0 6px var(--gold); }
   .modifiche-pedale { display:flex; align-items:center; gap:8px; flex-wrap:wrap;
                       background:var(--panel); border-radius:12px; padding:10px 12px;
                       margin-top:12px; font-size:0.82rem; color:var(--gold); }
@@ -1772,6 +1788,9 @@
   </div>
   <p class="spiega suggerimento-pedale" id="suggerimentoPedale">Prima apri il ponte sul pedale:
     tieni premuti insieme i due tasti banco per un secondo e mezzo.</p>
+  <!-- Banchi cambiati nell'app dopo essere stati mandati: lo si dice anche
+       da scollegati (la riempie aggiornaPallinoPedale). -->
+  <p class="spiega nota-da-aggiornare" id="notaDaAggiornare" hidden></p>
 
   <!-- In alto, non in fondo: un comando fallito deve vedersi subito. -->
   <div class="stato-pannello" id="statoPannelloPedale"></div>
@@ -1804,6 +1823,10 @@
 
   <div class="sezione-pedale">
     <h3 class="eti-sezione">Nel pedale</h3>
+    <div class="avviso-aggiorna" id="tuttiPedale" hidden>
+      <span id="testoTuttiPedale"></span>
+      <button id="btnAggiornaTutti" class="primary">Aggiorna tutti</button>
+    </div>
     <div id="slotsPedale"></div>
     <div class="modifiche-pedale" id="modifichePedale" hidden>
       <span id="notaModifichePedale"></span>

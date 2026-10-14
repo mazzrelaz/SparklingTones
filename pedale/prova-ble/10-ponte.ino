@@ -28,6 +28,10 @@ static const uint8_t CMD_USA      = 0x21;   // slot: carica e suona quel banco
 static const uint8_t CMD_SCAMBIA  = 0x22;   // slot a, slot b
 static const uint8_t RSP_INFO     = 0x81;
 static const uint8_t RSP_ELENCO   = 0x82;
+// L'impronta di un banco, «slot:xxxxxxxx» in esadecimale (2.22): una notifica
+// per banco, prima dell'elenco. Separata dall'elenco perche' quello sta gia'
+// stretto nei suoi 180 byte; un'app vecchia la ignora.
+static const uint8_t RSP_IMPRONTA = 0x83;
 static const uint8_t RSP_ERRORE   = 0x8f;
 
 /* Il blocco in arrivo si accumula in heap e si scrive in LittleFS solo alla
@@ -112,6 +116,16 @@ static void eseguiComandoPesante(const uint8_t* d, size_t n) {
         break;
       }
       case CMD_ELENCA: {
+        // Prima le impronte, una per banco, poi l'elenco: l'app le tiene da
+        // parte e le attacca ai banchi quando arriva l'elenco.
+        for (uint8_t s = 0; s < BANCHI_MAX; s++) {
+          BancoCaricato b = {};
+          if (!bancoCarica(s, b)) continue;
+          char riga[16];
+          snprintf(riga, sizeof(riga), "%u:%08lx", s, (unsigned long)bancoImpronta(b.dati, b.quanti));
+          bancoLibera(b);
+          rispondi(RSP_IMPRONTA, riga);
+        }
         char elenco[180];
         const uint8_t quanti = banchiElenca(elenco, sizeof(elenco));
         Serial.printf("ponte: ELENCA -> %u banchi\n", quanti);
