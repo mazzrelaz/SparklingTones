@@ -240,22 +240,39 @@
 
   /* ---- ricerca ------------------------------------------------------- */
 
-  .cerca { display:flex; gap:8px; align-items:center; margin-top:10px; }
-  .cerca input { flex:1; min-width:0; font-size:1rem; padding:10px 12px; }
-  /* La tendina dell'ordinamento sta larga quanto la sua parola: la riga è
-     della ricerca, che è quella che deve prendersi lo spazio. */
-  .cerca .tendina-finta { flex:none; }
+  /* La ricerca sta sotto gli slot e sopra la libreria che filtra (14 ottobre
+     2026). L'ordinamento è un'icona dentro la casella: apre lo stesso elenco
+     di prima, e la riga resta tutta della ricerca. */
+  .campo-cerca { display:flex; align-items:center; gap:10px; height:46px;
+                 box-sizing:border-box; background:var(--panel);
+                 border:1px solid transparent; border-radius:12px; padding:0 3px 0 14px; }
+  .campo-cerca:focus-within { border-color:#4a515c; }
+  .campo-cerca > svg { width:17px; height:17px; flex:none; fill:none; stroke:var(--dim);
+                       stroke-width:2; stroke-linecap:round; }
+  .campo-cerca input { flex:1; min-width:0; height:100%; background:none; border:none;
+                       padding:0; font-size:1rem; }
+  #btnOrdina { width:40px; height:40px; flex:none; padding:0; display:flex;
+               align-items:center; justify-content:center; background:none;
+               border:none; color:var(--dim); }
+  #btnOrdina:hover { color:var(--text); }
+  #btnOrdina svg { width:18px; height:18px; fill:none; stroke:currentColor;
+                   stroke-width:2; stroke-linecap:round; }
 
-  /* Le categorie sono pastiglie da toccare, non una tendina: sul telefono
-     una tendina costa due gesti e nasconde quello che c'è. */
-  .pastiglie { display:flex; gap:6px; margin-top:8px; overflow-x:auto;
+  /* Famiglie e categorie sono pastiglie da toccare, non una tendina: sul
+     telefono una tendina costa due gesti e nasconde quello che c'è. Prima le
+     famiglie, col loro pallino, poi le categorie. */
+  .pastiglie { display:flex; gap:8px; margin:12px 0 4px; overflow-x:auto;
                padding-bottom:2px; scrollbar-width:none; }
   .pastiglie::-webkit-scrollbar { display:none; }
-  .pastiglia { flex:none; background:#1e2025; color:#b6bbc3; font-size:0.78rem;
-               padding:5px 11px; border-radius:14px; cursor:pointer; white-space:nowrap; }
-  .pastiglia:hover { background:#2e323a; color:var(--text); }
-  .pastiglia.attiva { background:var(--accent); color:#fff; }
-  .pastiglia .quanti { opacity:0.6; font-size:0.72rem; margin-left:3px; }
+  .pastiglia { flex:none; display:inline-flex; align-items:center; gap:7px; height:34px;
+               box-sizing:border-box; padding:0 13px; border:1px solid var(--line);
+               border-radius:999px; color:#c8cad0; font-family:var(--strumento);
+               font-size:0.8rem; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .pastiglia:hover { border-color:#3d434c; color:var(--text); }
+  .pastiglia.attiva { background:var(--text); border-color:var(--text); color:#000; }
+  .pallino-fam { width:8px; height:8px; border-radius:50%; flex:none;
+                 background:var(--famiglia); }
+  .pastiglia .quanti { opacity:0.55; font-size:0.72rem; }
 
   /* ---- vista preset -------------------------------------------------- */
 
@@ -263,10 +280,15 @@
   body.vista-live #vistaPreset { display:none; }
 
   .sezione { margin-bottom:22px; }
-  .sezione > h2 { font-family:var(--strumento); font-size:0.74rem; color:var(--dim);
-                  text-transform:uppercase;
-                  letter-spacing:0.1em; margin:0 0 8px; font-weight:700;
+  .sezione > h2 { font-family:var(--strumento); font-size:0.82rem; color:var(--dim);
+                  margin:0 0 8px; font-weight:600;
                   display:flex; align-items:baseline; gap:8px; }
+  .sezione > h2 .legenda { margin-left:auto; font-weight:500; }
+  .legenda .a { color:#ff8080; }
+  .legenda .b { color:var(--green); }
+  /* Quanti preset passano il filtro: si vede solo mentre si filtra. */
+  .nota-filtro { color:var(--faint); font-size:0.78rem; padding:4px 2px 0; }
+  .nota-filtro:empty { display:none; }
   .sezione > h2 .nota { font-family:var(--font); text-transform:none;
                         letter-spacing:0; font-weight:400;
                         color:var(--faint); font-size:0.72rem; }
@@ -278,61 +300,39 @@
                    font-size:0.82rem; line-height:1.6; }
   .avviso-grosso strong { color:#ffdc7a; }
 
-  /* ---- pannello dell'ampli ------------------------------------------
-     Gli otto slot non sono righe di libreria: sono due banchi da quattro,
-     disposti come i LED sull'ampli — banco A a sinistra, B a destra. */
-
-  /* `.banco` è già preso: nella vista live è il pulsante che sceglie il
-     banco. Qui è una colonna, e due nomi uguali si sarebbero pestati i piedi. */
-  .pannello-ampli { display:grid; grid-template-columns:1fr 1fr; gap:8px;
-                    align-items:start; }
-  .colonna-banco { display:grid; gap:8px; align-content:start; }
-  .colonna-banco.unica { grid-column:1 / -1; grid-template-columns:1fr 1fr; }
-  .colonna-banco.unica .banco-eti { grid-column:1 / -1; }
-  .banco-eti { font-family:var(--strumento); font-size:0.66rem; letter-spacing:0.1em;
-               text-transform:uppercase; font-weight:700; color:var(--faint); }
-  .banco-eti.a { color:#ff9b9b; }
-  .banco-eti.b { color:#9be0a8; }
-
-  /* **Altezza fissa, non minima.** Le due colonne sono due griglie separate,
-     quindi un nome che va su due righe alzava la sua casella e basta: le otto
-     non erano più in pari, e sul telefono, dove i nomi ci stanno più stretti,
-     si vedeva subito. Il nome resta a due righe e poi si tronca (per intero
+  /* ---- gli slot dell'ampli -------------------------------------------
+     Una griglia da quattro (14 ottobre 2026): la riga sopra è il banco A,
+     quella sotto il B, e la sigla ha il colore del LED. Sul NEO una riga
+     sola, CH1–CH4. **Altezza fissa**: un nome su due righe non deve alzare
+     la sua casella e mandare le altre fuori pari; oltre si tronca (per intero
      nel titolo). */
-  .slotcard { background:#0e1014; border:1px solid var(--line); border-radius:12px;
-              padding:9px 10px; height:72px; cursor:pointer;
-              display:flex; flex-direction:column; justify-content:space-between;
-              gap:6px; position:relative; overflow:hidden; }
-  .slotcard.libero { border-style:dashed; background:none; cursor:default; }
-  /* Lo slot aperto si accende come i tasselli dell'editor — anello interno e
-     alone, non il solo bordo colorato: fra otto caselle uguali un filo rosso
-     da un pixel si perdeva. Il colore resta quello di prima. */
+  .pannello-ampli { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px; }
+  .slotcard { background:var(--panel); border:1px solid transparent; border-radius:10px;
+              padding:8px 9px; height:62px; box-sizing:border-box; cursor:pointer;
+              display:flex; flex-direction:column; gap:3px; overflow:hidden; }
+  .slotcard.libero { background:none; border:1px dashed var(--line); cursor:default; }
   .slotcard.attivo { border-color:var(--accent);
-                     background:color-mix(in srgb, var(--accent) 9%, #0e1014);
-                     box-shadow:0 0 0 1px var(--accent) inset,
-                                0 0 10px -1px var(--accent),
-                                0 0 26px -6px var(--accent); }
-  .slotcard.attivo .sigla { color:var(--accent);
-                            text-shadow:0 0 8px var(--accent); }
-  .slotcard .alto { display:flex; align-items:center; gap:6px; }
-  /* Il nome sta **in mezzo** allo spazio che avanza sotto la sigla, non
-     appoggiato in fondo: con l'altezza fissa e un nome corto, in fondo si
-     legge come una cosa caduta giù. Si prende tutto lo spazio libero e ci si
-     centra dentro, così una riga o due stanno sempre nello stesso posto. */
-  .slotcard .basso { flex:1; display:flex; align-items:center; min-height:0; }
+                     background:color-mix(in srgb, var(--accent) 10%, var(--panel)); }
+  .slotcard .alto { display:flex; align-items:center; gap:4px; min-width:0; }
   .slotcard .sigla { font-family:'SF Mono',Consolas,monospace; font-size:0.7rem;
-                     color:var(--faint); }
-  .slotcard .nome-slot { font-family:var(--strumento); font-size:0.86rem;
-                         font-weight:700; line-height:1.25;
-                         overflow:hidden; display:-webkit-box; -webkit-line-clamp:2;
-                         -webkit-box-orient:vertical; }
-  .slotcard.libero .nome-slot { color:var(--faint); font-weight:400; font-size:0.78rem; }
-  .led { width:8px; height:8px; border-radius:50%; flex:none; }
-  /* I LED dei banchi, accesi come quelli dell'editor: l'alone li fa lampadine
-     invece che pallini disegnati. */
-  .led.a { background:#ff5f6d; box-shadow:0 0 6px #ff5f6d, 0 0 14px #ff5f6d; }
-  .led.b { background:#4ade80; box-shadow:0 0 6px #4ade80, 0 0 14px #4ade80; }
-  .led.spento { background:#33373e; box-shadow:none; }
+                     font-weight:700; color:var(--faint); }
+  .slotcard .sigla.a { color:#ff8080; }
+  .slotcard .sigla.b { color:var(--green); }
+  .slotcard .nome-slot { font-family:var(--strumento); font-size:0.8rem; font-weight:600;
+                         line-height:1.2; overflow:hidden; display:-webkit-box;
+                         -webkit-line-clamp:2; -webkit-box-orient:vertical;
+                         overflow-wrap:anywhere; }
+  .slotcard.libero .nome-slot { color:var(--faint); font-weight:400; }
+
+  /* Mai letto niente e niente ampli: al posto di otto caselle vuote, una riga
+     che dice cosa fare. */
+  .invito-collega { display:flex; align-items:center; gap:12px; background:var(--panel);
+                    border-radius:12px; padding:12px 12px 12px 14px;
+                    font-size:0.88rem; color:#c8cad0; line-height:1.35; }
+  .invito-collega svg { width:22px; height:22px; flex:none; fill:none; stroke:var(--dim);
+                        stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .invito-collega span { flex:1; }
+  .invito-collega button { flex:none; padding:10px 16px; }
 
   /* ---- il bollo «JH» ---------------------------------------------------
      Un preset con un effetto del pacchetto Jimi Hendrix in catena non suona
@@ -365,17 +365,14 @@
      il colore si legge senza pensarci, quindi inventarlo sarebbe peggio
      che lasciare la scheda in grigio. */
 
-  .con-famiglia { position:relative; }
-  .con-famiglia::before { content:''; position:absolute; left:0; top:0; bottom:0;
-                          width:4px; background:var(--famiglia); }
-  .con-famiglia > .head { padding-left:16px; }
   .scelta.famiglia.dentro { background:var(--famiglia); color:#000; font-weight:700; }
   .nota-famiglia { color:var(--faint); font-size:0.72rem; margin-top:6px; }
 
-  .row { background:var(--panel); border:1px solid var(--line); border-radius:10px;
-         margin-bottom:8px; overflow:hidden; }
-  .row.libero { border-style:dashed; background:none; }
-  .head { display:flex; align-items:center; gap:9px; padding:10px 12px; cursor:pointer; }
+  /* Le righe di libreria senza riquadro (14 ottobre 2026): una linea sottile
+     fra l'una e l'altra, e lo spazio fa il resto. */
+  .row { border-bottom:1px solid var(--line-soft); }
+  .head { display:flex; align-items:center; gap:10px; padding:9px 2px; min-height:62px;
+          box-sizing:border-box; cursor:pointer; }
 
   /* La catena a pastiglie: nomi leggibili, e i blocchi spenti si vedono spenti. */
   .chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
@@ -384,13 +381,17 @@
   .chip.spento { color:var(--faint); background:none; border:1px solid var(--line);
                  text-decoration:line-through; }
 
-  /* Provare un preset è l'azione più frequente: un tasto, senza aprire nulla. */
-  .via { width:30px; height:30px; border-radius:50%; flex:none; padding:0;
-         font-size:0.7rem; background:#24262b; color:var(--dim); }
-  .via.pronto { background:var(--accent); color:#fff; }
+  /* Provare un preset è l'azione più frequente: un tasto, senza aprire nulla.
+     Un tondo grande quanto un pollice, col solo contorno. */
+  .via { width:40px; height:40px; border-radius:50%; flex:none; padding:0;
+         display:flex; align-items:center; justify-content:center;
+         background:none; border:1px solid var(--line); color:var(--faint); }
+  .via svg { width:13px; height:13px; fill:currentColor; margin-left:2px; }
+  .via.pronto { color:var(--text); border-color:#3d434c; }
+  .via.pronto:hover { background:none; color:var(--accent); border-color:var(--accent); }
+  .via:disabled { background:none; border-color:var(--line-soft); }
   .naming { flex:1; min-width:0; }
-  .name { font-weight:600; font-size:0.93rem; }
-  .row.libero .name { color:var(--faint); font-weight:400; }
+  .name { font-family:var(--strumento); font-weight:600; font-size:1rem; }
   .chain { color:var(--dim); font-size:0.75rem; margin-top:2px;
            white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .slot { color:var(--faint); font-size:0.72rem; font-family:'SF Mono',Consolas,monospace;
@@ -398,20 +399,14 @@
   .slot.a { color:#ff9b9b; border-color:#4a2a2a; }
   .slot.b { color:#9be0a8; border-color:#2a4a32; }
 
-  /* ---- la riga di libreria è **solo il nome** -------------------------
-     Scelta dell'utente, il 14 agosto 2026: nella libreria si scorre per
-     cercare un suono che si conosce già, e per riconoscerlo basta il nome.
-     La catena a pastiglie e le categorie raddoppiavano l'altezza di ogni
-     riga senza aiutare a scorrere — restano nel dettaglio, dove si va
-     quando quel preset lo si vuole davvero guardare. Il colore a sinistra
-     resta: è l'unica cosa che si legge senza leggere. */
-  /* Alzata del 30% il 14 agosto 2026, su richiesta: a 36 px era troppo stretta
-     e il ▶ da 26 si prendeva male col pollice. Ora ~46: l'imbottitura passa da
-     5 a 9 e il tondo torna a 28, che è lo spazio guadagnato speso dove serve. */
-  #listaLibreria .head { padding:9px 12px; gap:8px; }
-  #listaLibreria .name { font-size:1.02rem; }
-  #listaLibreria .via  { width:28px; height:28px; font-size:0.68rem; }
-  #listaLibreria .row  { margin-bottom:6px; }
+  /* ---- sotto il nome, la famiglia e le categorie -----------------------
+     Il 14 agosto 2026 la riga era diventata **solo il nome**, e famiglia e
+     categorie stavano nel dettaglio. Dal 14 ottobre 2026 (bozze scelte
+     dall'utente) tornano in una riga sola e piccola sotto il nome: il pallino
+     della famiglia al posto della striscia colorata, poi le categorie. */
+  .sotto-riga { display:flex; align-items:center; gap:6px; margin-top:3px;
+                font-size:0.8rem; color:var(--dim); min-width:0; }
+  .sotto-riga span:last-child { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   /* `.tags`/`.tag` erano le categorie sotto il nome nella riga di libreria.
      Tolte insieme alla catena il 14 agosto 2026: le categorie si vedono e si
@@ -1173,23 +1168,26 @@
       </div>
     </div>
   </div>
-  <div class="cerca solo-preset">
-    <input type="search" id="search" placeholder="cerca un preset…">
-    <!-- La tendina la monta `montaTendinaOrdine()`: è disegnata da noi, non
-         dal sistema. Qui resta solo il posto dove va. -->
-    <span id="postoOrdina"></span>
-  </div>
-  <div class="pastiglie solo-preset" id="filtriCategoria"></div>
 </header>
 
 <main id="vistaPreset">
   <div id="senzaBluetooth" class="avviso-grosso" hidden></div>
   <div class="sezione" id="sezAmpli">
-    <h2>Preset hardware</h2>
+    <h2>Sull'ampli <span class="legenda" id="legendaAmpli"><span class="a">A</span> rosso ·
+      <span class="b">B</span> verde</span></h2>
     <div id="listaAmpli"></div>
   </div>
+  <!-- La ricerca sta qui e non nell'intestazione (14 ottobre 2026): filtra la
+       libreria che ha sotto. L'ordinamento è l'icona in fondo alla casella. -->
+  <div class="campo-cerca">
+    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6"/><path d="M13 13l5 5"/></svg>
+    <input type="search" id="search" placeholder="cerca un preset…" aria-label="cerca un preset">
+    <button id="btnOrdina" type="button" title="come ordinare la libreria" aria-label="come ordinare la libreria">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M5 10h10M8 15h4"/></svg></button>
+  </div>
+  <div class="pastiglie" id="filtriCategoria"></div>
   <div class="sezione" id="sezLibreria">
-    <h2>In libreria <span class="nota" id="quantiLibreria"></span></h2>
+    <div class="nota-filtro" id="quantiLibreria"></div>
     <div id="listaLibreria"></div>
   </div>
   <div id="log"></div>

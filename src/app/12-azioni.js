@@ -284,9 +284,8 @@ $('search').addEventListener('input', event => {
 });
 
 /**
- * La tendina dell'ordinamento, montata una volta sola: sta nell'intestazione,
- * che non viene ridisegnata, quindi il bottone campa quanto la pagina e
- * `disegnaPreset` gli dice solo cosa mostrare.
+ * L'ordinamento della libreria: l'icona in fondo alla casella di ricerca apre
+ * l'elenco, con la scelta di adesso evidenziata.
  */
 const ORDINI = [
   { valore: 'nome',       testo: tr('nome') },
@@ -294,13 +293,13 @@ const ORDINI = [
   { valore: 'modificato', testo: tr('modificati di recente') },
   { valore: 'famiglia',   testo: tr('famiglia di suono') },
 ];
-tendinaOrdine = tendinaFinta(tr('come ordinare la libreria'), ORDINI, vista.ordine,
-  async scelto => {
+$('btnOrdina').addEventListener('click', () => {
+  apriElenco(tr('come ordinare la libreria'), ORDINI, vista.ordine, async scelto => {
     vista.ordine = scelto;
     disegnaPreset();                     // prima si vede, poi si salva
     await store.setSetting('ordineLibreria', vista.ordine);
   });
-$('postoOrdina').replaceWith(tendinaOrdine);
+});
 
 $('btnExport').addEventListener('click', async () => {
   const backup = await store.exportAll();

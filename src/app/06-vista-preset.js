@@ -10,8 +10,9 @@
    Vista preset
    ==================================================================== */
 
-/** Il preset passa il filtro di ricerca e categoria? */
+/** Il preset passa il filtro di ricerca, famiglia e categoria? */
 function passaIlFiltro(record) {
+  if (vista.famiglia && record.famiglia !== vista.famiglia) return false;
   if (vista.categoria &&
       !(record.tags || []).some(t => t.toLowerCase() === vista.categoria.toLowerCase())) {
     return false;
@@ -26,49 +27,42 @@ function passaIlFiltro(record) {
   return termini.every(t => pagliaio.includes(t));
 }
 
-const filtroAttivo = () => !!(vista.cerca || vista.categoria);
+const filtroAttivo = () => !!(vista.cerca || vista.categoria || vista.famiglia);
 
 function disegnaPreset() {
   disegnaFiltriCategoria();
-  if (tendinaOrdine) tendinaOrdine.aggiorna(vista.ordine);
+  $('btnOrdina').title = tr('ordine: {0}', (ORDINI.find(o => o.valore === vista.ordine) || ORDINI[0]).testo);
 
-  // Gli otto slot non sono righe di libreria: sono il pannello dell'ampli,
-  // due banchi da quattro con i colori dei LED, disposti come li vedi
-  // sull'ampli. Il dettaglio di uno slot si apre a tutta larghezza sotto la
-  // griglia, altrimenti sfonderebbe la colonna.
+  // Gli slot non sono righe di libreria: sono il pannello dell'ampli, una
+  // griglia da quattro — banco A sopra, B sotto, la sigla col colore del LED
+  // (14 ottobre 2026). Il dettaglio di uno slot si apre sotto la griglia.
   const ampli = $('listaAmpli');
   ampli.innerHTML = '';
   let mostratiSuAmpli = 0;
+  // Il NEO non ha banchi né LED, e senza caselle la legenda non spiega niente.
+  $('legendaAmpli').hidden = !modelloAmpli.banchi || (suAmpli.every(r => !r) && !spark.connected);
 
   const griglia = document.createElement('div');
   griglia.className = 'pannello-ampli';
   let apertoSlot = null;
 
-  // Lo Spark NEO ha quattro slot e nessun banco: una colonna sola, a tutta
-  // larghezza, che dispone CH1–CH4 due per riga.
-  const banchiAmpli = modelloAmpli.banchi ? [0, 1] : [0];
-  for (const banco of banchiAmpli) {
-    const colonna = document.createElement('div');
-    colonna.className = 'colonna-banco' + (modelloAmpli.banchi ? '' : ' unica');
-
-    const eti = document.createElement('div');
-    eti.className = 'banco-eti ' + (modelloAmpli.banchi ? (banco === 0 ? 'a' : 'b') : '');
-    eti.textContent = modelloAmpli.banchi ? tr('banco {0}', banco === 0 ? 'A' : 'B')
-                                          : modelloAmpli.nome;
-    colonna.appendChild(eti);
-
-    for (let posto = 0; posto < 4; posto++) {
-      const slot = banco * 4 + posto;
+  // Mai letto niente e niente ampli: al posto di otto caselle vuote, l'invito
+  // a collegarlo. Gli slot letti l'ultima volta invece restano, anche senza
+  // ampli: sono quelli che ha dentro.
+  const maiLetto = suAmpli.every(r => !r);
+  if (maiLetto && !spark.connected) {
+    if (!filtroAttivo()) { ampli.appendChild(invitoCollega()); mostratiSuAmpli = 1; }
+  } else {
+    for (let slot = 0; slot < modelloAmpli.slot; slot++) {
       const record = suAmpli[slot];
       if (record && !passaIlFiltro(record)) continue;
       if (!record && filtroAttivo()) continue;
       mostratiSuAmpli++;
-      colonna.appendChild(schedaSlot(record, slot));
+      griglia.appendChild(schedaSlot(record, slot));
       if (record && vista.aperto === record.id + ':' + slot) apertoSlot = { record, slot };
     }
-    griglia.appendChild(colonna);
+    ampli.appendChild(griglia);
   }
-  ampli.appendChild(griglia);
 
   if (apertoSlot) {
     const sotto = document.createElement('div');
@@ -87,9 +81,12 @@ function disegnaPreset() {
   const visibili = ordinaLibreria(altri.filter(passaIlFiltro));
   visibili.forEach(record => libreria.appendChild(rigaPreset(record, null)));
 
+  // Quanti sono sta nella casella di ricerca; mentre si filtra, anche quanti
+  // passano.
+  $('search').placeholder = tr('cerca fra {0} preset', altri.length);
   $('quantiLibreria').textContent = filtroAttivo()
     ? tr`${visibili.length} di ${altri.length}`
-    : `${altri.length}`;
+    : '';
 
   if (visibili.length === 0) {
     const vuoto = document.createElement('div');
@@ -102,20 +99,43 @@ function disegnaPreset() {
   }
 }
 
+/**
+ * Le pastiglie dei filtri: «tutti», poi le famiglie di suono che qualcuno ha
+ * (col loro pallino), poi le categorie. Famiglia e categoria si sommano:
+ * «Drive» e «Live» insieme sono i drive che usi dal vivo.
+ */
 function disegnaFiltriCategoria() {
   const barra = $('filtriCategoria');
   barra.innerHTML = '';
-  if (categorie.length === 0) {
+  const usate = famiglie.filter(f => tutti.some(r => r.famiglia === f.id));
+  if (categorie.length === 0 && usate.length === 0) {
     barra.style.display = 'none';
     return;
   }
   barra.style.display = '';
 
   const tutte = document.createElement('span');
-  tutte.className = 'pastiglia' + (vista.categoria ? '' : ' attiva');
-  tutte.textContent = tr('tutte');
-  tutte.addEventListener('click', () => { vista.categoria = ''; disegnaPreset(); });
+  tutte.className = 'pastiglia' + (vista.categoria || vista.famiglia ? '' : ' attiva');
+  tutte.textContent = tr('tutti');
+  tutte.addEventListener('click', () => {
+    vista.categoria = vista.famiglia = '';
+    disegnaPreset();
+  });
   barra.appendChild(tutte);
+
+  for (const famiglia of usate) {
+    const p = document.createElement('span');
+    p.className = 'pastiglia' + (vista.famiglia === famiglia.id ? ' attiva' : '');
+    const pallino = document.createElement('span');
+    pallino.className = 'pallino-fam';
+    pallino.style.setProperty('--famiglia', famiglia.colore);
+    p.append(pallino, famiglia.nome);
+    p.addEventListener('click', () => {
+      vista.famiglia = vista.famiglia === famiglia.id ? '' : famiglia.id;
+      disegnaPreset();
+    });
+    barra.appendChild(p);
+  }
 
   for (const { nome, quanti } of categorie) {
     const p = document.createElement('span');
@@ -149,17 +169,15 @@ function schedaSlot(record, slot) {
   // un secondo reticolo sopra quello dei bordi. La famiglia resta dov'è utile:
   // nelle righe di libreria qui sotto, e sul LED dei pulsantoni della vista live.
 
+  // Niente LED disegnato (14 ottobre 2026): è la sigla ad avere il colore del
+  // LED del suo banco, rosso A e verde B. Il NEO non ha LED: sigla grigia.
   const alto = document.createElement('div');
   alto.className = 'alto';
-  const led = document.createElement('span');
-  led.className = 'led ' + (posizione.color === 'rosso' ? 'a' : 'b') +
-                  (record ? '' : ' spento');
-  led.hidden = !posizione.color;          // il NEO non ha LED degli slot
   const sigla = document.createElement('span');
-  sigla.className = 'sigla';
+  sigla.className = 'sigla' + (posizione.color ? (posizione.color === 'rosso' ? ' a' : ' b') : '');
   sigla.textContent = posizione.label;
   sigla.title = titoloSlot(slot);
-  alto.append(led, sigla);
+  alto.append(sigla);
   // Il bollo va **in cima e a destra**: la riga della sigla è l'unica che ha
   // spazio, e il nome sotto sta su due righe e non ne ha da cedere.
   const bollo = bolloHendrix(record);
@@ -173,14 +191,11 @@ function schedaSlot(record, slot) {
   // caselle che si guardano tutte insieme, e otto righe di effetti in più
   // facevano rumore senza aggiungere niente a chi il preset lo conosce già.
   // La catena resta nel dettaglio, che è dove quel preset lo si guarda davvero.
-  const basso = document.createElement('div');
-  basso.className = 'basso';
   const nome = document.createElement('div');
   nome.className = 'nome-slot';
-  nome.textContent = record ? (record.name || tr('(senza nome)')) : tr('non ancora letto');
+  nome.textContent = record ? (record.name || tr('(senza nome)')) : tr('non letto');
   if (record) nome.title = record.name || '';   // per intero, se è troncato
-  basso.appendChild(nome);
-  card.appendChild(basso);
+  card.appendChild(nome);
 
   if (record) {
     const chiave = record.id + ':' + slot;
@@ -191,6 +206,23 @@ function schedaSlot(record, slot) {
     });
   }
   return card;
+}
+
+/** Al posto degli slot, quando non se n'è mai letto nessuno e l'ampli non c'è. */
+function invitoCollega() {
+  const box = document.createElement('div');
+  box.className = 'invito-collega';
+  box.innerHTML = '<svg viewBox="0 0 22 22" aria-hidden="true"><path d="M6 7l10 8-5 4V3l5 4-10 8"/></svg>';
+  const testo = document.createElement('span');
+  testo.textContent = tr('Collega l\'ampli per vedere i suoi preset');
+  const collega = document.createElement('button');
+  collega.className = 'primary';
+  collega.textContent = tr('Collega');
+  // Senza Bluetooth il bollino in alto è spento, e questo con lui.
+  collega.disabled = $('status').disabled;
+  collega.addEventListener('click', () => $('status').click());
+  box.append(testo, collega);
+  return box;
 }
 
 /**
@@ -233,15 +265,27 @@ function nomePastiglia(effetto, posizione) {
 }
 
 /**
- * Il colore della famiglia di suono, se ce l'ha. Chi non ce l'ha resta senza:
- * un colore inventato qui si legge senza pensarci, ed è peggio di nessun colore.
+ * La riga piccola sotto il nome: il pallino e il nome della famiglia di suono,
+ * poi le categorie. O null, se il preset non ha né l'una né le altre. Chi non
+ * ha famiglia resta senza pallino: un colore inventato qui si legge senza
+ * pensarci, ed è peggio di nessun colore.
  */
-function coloraFamiglia(elemento, record) {
-  const scelta = record && record.famiglia &&
-                 famiglie.find(f => f.id === record.famiglia);
-  if (!scelta) return;
-  elemento.classList.add('con-famiglia');
-  elemento.style.setProperty('--famiglia', scelta.colore);
+function sottoRiga(record) {
+  const famiglia = record.famiglia && famiglie.find(f => f.id === record.famiglia);
+  const cat = (record.tags || []).join(', ');
+  if (!famiglia && !cat) return null;
+  const riga = document.createElement('div');
+  riga.className = 'sotto-riga';
+  if (famiglia) {
+    const pallino = document.createElement('span');
+    pallino.className = 'pallino-fam';
+    pallino.style.setProperty('--famiglia', famiglia.colore);
+    riga.appendChild(pallino);
+  }
+  const testo = document.createElement('span');
+  testo.textContent = [famiglia && famiglia.nome, cat].filter(Boolean).join(' · ');
+  riga.appendChild(testo);
+  return riga;
 }
 
 /**
@@ -316,18 +360,19 @@ function rigaPreset(record, slot) {
   const riga = document.createElement('div');
   riga.className = 'row';
   riga.dataset.id = record.id;
-  coloraFamiglia(riga, record);
 
   const head = document.createElement('div');
   head.className = 'head';
 
-  // Solo il nome, per scelta: vedi il commento nel CSS di #listaLibreria.
+  // Il nome, e sotto famiglia e categorie: vedi il commento nel CSS di `.sotto-riga`.
   const naming = document.createElement('div');
   naming.className = 'naming';
   const nome = document.createElement('div');
   nome.className = 'name';
   nome.textContent = record.name || tr('(senza nome)');
   naming.appendChild(nome);
+  const sotto = sottoRiga(record);
+  if (sotto) naming.appendChild(sotto);
 
   head.appendChild(naming);
   const bollo = bolloHendrix(record);
@@ -340,7 +385,8 @@ function rigaPreset(record, slot) {
   // dettaglio: qui è un tasto solo, senza aprire niente.
   const prova = document.createElement('button');
   prova.className = 'via' + (spark.connected ? ' pronto' : '');
-  prova.textContent = '▶';
+  prova.innerHTML = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z"/></svg>';
+  prova.setAttribute('aria-label', tr('suona'));
   prova.title = tr('manda il preset all\'ampli senza sovrascrivere nessuno slot');
   prova.disabled = !spark.connected;
   prova.addEventListener('click', event => {
