@@ -705,3 +705,12 @@ come il pedale. **Ma a 80 bpm, sempre nell'app, 60 s esatti** (ricronometrato), 
 le due misure non stanno nella stessa regola. Aperto: da rifare a cronometro e col
 registro del pedale a 80 bpm.
 Se ricapita l'impallata: registro acceso, e chiedere momento, sintomo e lunghezza della registrazione.
+
+**Il pedale a 80 bpm in «libero»: 48,05 s** (`04` a 221,453, `07` dall'ampli a 269,500;
+`captures/2026-10-14-pedale-looper-libero-80.txt`): 16 battute esatte. **E il perché sta nello
+stesso registro**: entrando nel looper subito dopo l'app ufficiale, il `0x0376` dell'ampli era
+`78 50 04 14 43 43 42 4d 01 6a 60` → 80 bpm, count 4, **battute `0x14` = 20**, libero acceso.
+**L'app ufficiale in «libero» non lascia le battute com'erano: ne scrive abbastanza per 60 s**
+(20 battute × 4 tempi a 80 bpm = 60 s), e l'ampli le accetta anche se 20 non è fra 1…16. Il
+pedale invece lascia 16. Regola probabile: battute = bpm × 60 / 240 = bpm / 4; da confermare
+con un secondo tempo (arrotondamento, e sopra 127 battute il valore va su `0xcc`).

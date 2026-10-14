@@ -1,0 +1,97 @@
+   0,312  batteria: 4008 mV letti, 4004 mV mediati, 3 tacche
+   2,405  scansione...
+  10,417  scansione...
+  18,441  scansione...
+  26,453  scansione...
+  34,489  scansione...
+  42,499  scansione...
+  50,528  scansione...
+  58,560  scansione...
+  66,583  scansione...
+  74,608  scansione...
+  82,632  scansione...
+  90,651  scansione...
+  98,680  scansione...
+ 106,696  scansione...
+ 114,727  scansione...
+ 122,747  scansione...
+ 130,771  scansione...
+ 138,786  scansione...
+ 146,819  scansione...
+ 154,846  scansione...
+ 161,971  trovato: Spark 2 BLE  [f0:9e:9e:10:5a:62]  rssi -74
+ 162,779  connesso, MTU 256, chiesto intervallo 7,5 ms
+ 162,779  pronto. '?' per l'elenco dei comandi.
+ 162,779    TX f0 01 01 00 02 11 f7
+ 162,864  l'ampli dice di chiamarsi "Spark 2"
+ 162,864    TX f0 01 02 00 02 01 00 00 00 f7
+ 163,486  slot 0: "AC - Nylon Reverb" ??? 635 ms
+ 163,486    TX f0 01 03 01 02 01 00 00 01 f7
+ 164,161  slot 1: "Jazz tone" ??? 667 ms
+ 164,161    TX f0 01 04 02 02 01 00 00 02 f7
+ 164,827  slot 2: "PF comfortably numb" ??? 668 ms
+ 164,827    TX f0 01 05 03 02 01 00 00 03 f7
+ 165,533  slot 3: "prova" ??? 704 ms
+ 165,533    TX f0 01 06 04 02 01 00 00 04 f7
+ 166,210  slot 4: "Hey Jimi Solo" ??? 676 ms
+ 166,210    TX f0 01 07 05 02 01 00 00 05 f7
+ 166,881  slot 5: "Sweet Memory" ??? 667 ms
+ 166,881    TX f0 01 08 06 02 01 00 00 06 f7
+ 167,582  slot 6: "Clean Tube" ??? 705 ms
+ 167,582    TX f0 01 09 07 02 01 00 00 07 f7
+ 168,207  slot 7: "SV - For the Love of God" ??? 630 ms
+ 172,170  meta' B mostrata; suona ancora (niente)
+ 175,175  looper acceso
+ 175,175    TX f0 01 0a 00 02 75 f7
+ 175,175    TX f0 01 0b 00 02 76 f7
+ 175,201    RX 0x0375  f0 01 0a 09 03 75 00 09 f7
+ 175,223  looper: 0x09 (dall'ampli)
+ 175,236    RX 0x0376  f0 01 0b 3c 03 76 78 50 04 14 43 43 42 4d 01 6a 60 f7
+ 175,268  looper: 0 bpm, click acceso
+ 187,694    TX f0 01 0c 09 01 75 00 09 f7
+ 187,694  looper: 0x09 (mandato)
+ 187,726    RX 0x0475  f0 01 0c 00 04 75 f7
+ 189,694    TX f0 01 0d 0a 01 75 00 0a f7
+ 189,694  looper: 0x0a (mandato)
+ 189,727    RX 0x0475  f0 01 0d 00 04 75 f7
+ 189,743  looper: 80 bpm, click acceso
+ 191,370    RX 0x0375  f0 01 59 00 03 75 00 00 f7
+ 191,371  looper: 0x00 (dall'ampli)
+ 193,490  impostazioni: 85 bpm, 4 battute, libero
+ 193,506    TX f0 01 0e 29 01 76 78 55 04 04 43 43 42 4d 01 6a 60 f7
+ 193,523    RX 0x0476  f0 01 0e 00 04 76 f7
+ 193,578    RX 0x0363  f0 01 5a 27 03 63 05 4a 42 2a 00 00 f7
+ 194,218  impostazioni: 84 bpm, 4 battute, libero
+ 194,218    TX f0 01 0f 28 01 76 78 54 04 04 43 43 42 4d 01 6a 60 f7
+ 194,256    RX 0x0476  f0 01 0f 00 04 76 f7
+ 194,308    RX 0x0363  f0 01 5b 25 03 63 05 4a 42 28 00 00 f7
+ 194,959  impostazioni: 83 bpm, 4 battute, libero
+ 194,961    TX f0 01 10 2f 01 76 78 53 04 04 43 43 42 4d 01 6a 60 f7
+ 194,985    RX 0x0476  f0 01 10 00 04 76 f7
+ 195,017    RX 0x0363  f0 01 5c 2b 03 63 05 4a 42 26 00 00 f7
+ 196,461  impostazioni: 83 bpm, 16 battute
+ 196,461    TX f0 01 11 3a 01 76 78 53 04 10 42 43 42 4d 01 6a 60 f7
+ 196,492    RX 0x0476  f0 01 11 00 04 76 f7
+ 200,352  impostazioni: 85 bpm, 16 battute
+ 200,353    TX f0 01 12 3c 01 76 78 55 04 10 42 43 42 4d 01 6a 60 f7
+ 200,370    RX 0x0476  f0 01 12 00 04 76 f7
+ 200,525    RX 0x0363  f0 01 5d 27 03 63 05 4a 42 2a 00 00 f7
+ 201,140  impostazioni: 80 bpm, 16 battute
+ 201,140    TX f0 01 13 39 01 76 78 50 04 10 42 43 42 4d 01 6a 60 f7
+ 201,176    RX 0x0476  f0 01 13 00 04 76 f7
+ 201,352    RX 0x0363  f0 01 5e 2d 03 63 05 4a 42 20 00 00 f7
+ 205,154  impostazioni: 80 bpm, 16 battute, libero
+ 205,155    TX f0 01 14 38 01 76 78 50 04 10 43 43 42 4d 01 6a 60 f7
+ 205,177    RX 0x0476  f0 01 14 00 04 76 f7
+ 221,453    TX f0 01 15 04 01 75 00 04 f7
+ 221,453  looper: 0x04 (mandato)
+ 221,488    RX 0x0475  f0 01 15 00 04 75 f7
+ 221,524    RX 0x0375  f0 01 5f 04 03 75 00 04 f7
+ 221,548  looper: 0x04 (dall'ampli)
+ 269,500    RX 0x0375  f0 01 60 07 03 75 00 07 f7
+ 269,501  looper: 0x07 (dall'ampli)
+ 269,525    RX 0x0375  f0 01 61 08 03 75 00 08 f7
+ 269,543  looper: 0x08 (dall'ampli)
+ 285,524    TX f0 01 16 09 01 75 00 09 f7
+ 285,524  looper: 0x09 (mandato)
+ 285,555    RX 0x0475  f0 01 16 00 04 75 f7
