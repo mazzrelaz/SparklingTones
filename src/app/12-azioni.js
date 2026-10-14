@@ -448,34 +448,73 @@ async function importaBackupUfficiale(file, buffer) {
  * Niente si toglie da solo: per ogni preset quando è entrato, se sta
  * sull'ampli, tag e note, e una lettera per il suono — stessa lettera, stessa
  * catena con gli stessi valori.
+ *
+ * **Due modi** (14 ottobre 2026, chiesto dall'utente): «Per suono», il primo,
+ * raccoglie i preset con le stesse impostazioni qualunque nome abbiano;
+ * «Per nome» è quello di prima, per i doppioni entrati col nome uguale.
  */
+let modoDoppioni = 'suono';
+
 $('btnDoppioni').addEventListener('click', () => {
+  modoDoppioni = 'suono';
   apriPannello('pannelloDoppioni');
   disegnaDoppioni();
 });
 
+for (const tasto of document.querySelectorAll('#modoDoppioni button')) {
+  tasto.addEventListener('click', () => {
+    modoDoppioni = tasto.dataset.modo;
+    disegnaDoppioni();
+  });
+}
+
+/** La chiave del suono: gli effetti nell'ordine della catena, acceso o
+ *  spento, ogni parametro per indice, e il tempo. I valori a quattro
+ *  decimali: lo stesso suono passato dall'ampli (float a 32 bit) e
+ *  dall'editor (64 bit) non deve sembrare diverso per un'inezia. Il nome
+ *  del preset non c'entra. Una catena vuota non fa gruppo. */
+function chiaveSuono(record) {
+  const effetti = record.effects || [];
+  if (!effetti.length) return null;
+  const v = x => typeof x === 'number' ? Math.round(x * 10000) / 10000 : x;
+  return JSON.stringify([
+    effetti.map(e => [e.name, !!e.enabled,
+      (e.params || []).map(p => [p.index, v(p.value)]).sort((a, b) => a[0] - b[0])]),
+    v(record.bpm),
+  ]);
+}
+
 function gruppiDoppioni() {
-  const perNome = new Map();
+  const perChiave = new Map();
   for (const record of tutti) {
-    const chiave = PresetStore.chiaveNome(record.name);   // spazi ripetuti e maiuscole non contano
+    const chiave = modoDoppioni === 'suono'
+      ? chiaveSuono(record)
+      : PresetStore.chiaveNome(record.name);   // spazi ripetuti e maiuscole non contano
     if (!chiave) continue;
-    if (!perNome.has(chiave)) perNome.set(chiave, []);
-    perNome.get(chiave).push(record);
+    if (!perChiave.has(chiave)) perChiave.set(chiave, []);
+    perChiave.get(chiave).push(record);
   }
-  return [...perNome.values()]
+  return [...perChiave.values()]
     .filter(g => g.length > 1)
     .map(g => g.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)))
     .sort((a, b) => (a[0].name || '').localeCompare(b[0].name || '', 'it', { sensitivity: 'base' }));
 }
 
 function disegnaDoppioni() {
+  const perSuono = modoDoppioni === 'suono';
+  for (const tasto of document.querySelectorAll('#modoDoppioni button'))
+    tasto.classList.toggle('scelto', tasto.dataset.modo === modoDoppioni);
+  $('spiegaDoppioniSuono').hidden = !perSuono;
+  $('spiegaDoppioniNome').hidden = perSuono;
   const lista = $('listaDoppioni');
   lista.innerHTML = '';
   const gruppi = gruppiDoppioni();
   if (!gruppi.length) {
     const vuoto = document.createElement('p');
     vuoto.className = 'spiega';
-    vuoto.textContent = tr('Nessun doppione: ogni nome compare una volta sola.');
+    vuoto.textContent = perSuono
+      ? tr('Nessun doppione: non ci sono due preset con le stesse impostazioni.')
+      : tr('Nessun doppione: ogni nome compare una volta sola.');
     lista.appendChild(vuoto);
     return;
   }
@@ -487,8 +526,17 @@ function disegnaDoppioni() {
     const box = document.createElement('div');
     box.className = 'gruppo-doppioni';
     const titolo = document.createElement('h4');
-    titolo.textContent = tr`«${gruppo[0].name.trim().replace(/\s+/g, ' ')}», ${gruppo.length} volte`;
+    titolo.textContent = perSuono
+      ? tr`Stesso suono, ${gruppo.length} preset`
+      : tr`«${gruppo[0].name.trim().replace(/\s+/g, ' ')}», ${gruppo.length} volte`;
     box.appendChild(titolo);
+    if (perSuono) {                  // la catena, una volta sola: è uguale per tutti
+      const catena = document.createElement('div');
+      catena.className = 'catena-gruppo';
+      catena.textContent = (gruppo[0].effects || []).filter(e => e.enabled)
+        .map(e => SparkEffetti.nome(e.name)).join(' · ') || tr('(tutti gli effetti spenti)');
+      box.appendChild(catena);
+    }
 
     const lettere = new Map();       // suono -> lettera, nell'ordine in cui compaiono
     for (const record of gruppo) {
@@ -505,8 +553,11 @@ function disegnaDoppioni() {
       dati.className = 'dati';
       const catena = document.createElement('div');
       catena.className = 'catena';
-      catena.textContent = (record.effects || []).filter(e => e.enabled)
-        .map(e => SparkEffetti.nome(e.name)).join(' · ') || tr('(catena vuota)');
+      // Per suono la catena è nel titolo del gruppo: qui il nome, che cambia
+      catena.textContent = perSuono
+        ? record.name.trim().replace(/\s+/g, ' ')
+        : (record.effects || []).filter(e => e.enabled)
+            .map(e => SparkEffetti.nome(e.name)).join(' · ') || tr('(catena vuota)');
       const sotto = document.createElement('div');
       const pezzi = [tr('entrato il {0}', quando(record.createdAt))];
       if (residente(record)) pezzi.push(tr('sull\'ampli in {0}', etichetteSlot(record)));
@@ -524,18 +575,27 @@ function disegnaDoppioni() {
       togli.className = 'pericolo piccolo';
       togli.textContent = tr('Elimina');
       togli.addEventListener('click', async () => {
-        const sullAmpli = residente(record)
-          ? tr(' Sta sull\'ampli in {0}: l\'ampli non viene toccato, e alla prossima lettura ' +
-               'quello slot andrà a uno degli altri con lo stesso nome.', etichetteSlot(record))
-          : '';
+        // Alla lettura un preset dell'ampli si riconosce per UUID e poi per
+        // nome (`importFromAmp`): uno con un nome suo, tolto, rientra.
+        const omonimi = gruppo.some(r => r !== record &&
+          PresetStore.chiaveNome(r.name) === PresetStore.chiaveNome(record.name));
+        const sullAmpli = !residente(record) ? ''
+          : omonimi
+            ? tr(' Sta sull\'ampli in {0}: l\'ampli non viene toccato, e alla prossima lettura ' +
+                 'quello slot andrà a uno degli altri con lo stesso nome.', etichetteSlot(record))
+            : tr(' Sta sull\'ampli in {0}: l\'ampli non viene toccato, e alla prossima lettura ' +
+                 'tornerà in libreria.', etichetteSlot(record));
         const banchiSuoi = banchi.filter(b => (b.posti || []).includes(record.id)).map(b => b.nome);
         const neiBanchiTesto = banchiSuoi.length
           ? ' ' + tr('<strong>Sta nei banchi {0}</strong>: quel posto resterà vuoto, e lo ' +
                      'riempi tu con uno degli altri.', testoConNome(banchiSuoi.join(', ')))
           : '';
         if (!await conferma(tr('eliminare un doppione'),
-          tr('Eliminare <strong>{0}</strong>, entrato il {1}? Gli altri con lo stesso nome restano.',
-             testoConNome(record.name), quando(record.createdAt)) + sullAmpli + neiBanchiTesto,
+          (perSuono
+            ? tr('Eliminare <strong>{0}</strong>, entrato il {1}? Gli altri con lo stesso suono restano.',
+                 testoConNome(record.name), quando(record.createdAt))
+            : tr('Eliminare <strong>{0}</strong>, entrato il {1}? Gli altri con lo stesso nome restano.',
+                 testoConNome(record.name), quando(record.createdAt))) + sullAmpli + neiBanchiTesto,
           { ok: tr('Elimina'), pericolo: true })) return;
         await store.remove(record.id);
         logLine(tr`doppione eliminato: «${record.name}» del ${quando(record.createdAt)}`);
@@ -546,7 +606,9 @@ function disegnaDoppioni() {
         disegnaDoppioni();
       });
 
-      riga.append(lettera, dati, togli);
+      // per suono la lettera sarebbe sempre la stessa
+      if (perSuono) riga.append(dati, togli);
+      else riga.append(lettera, dati, togli);
       box.appendChild(riga);
     }
     lista.appendChild(box);

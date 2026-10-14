@@ -566,6 +566,13 @@
   .gruppo-doppioni { border:1px solid var(--line); border-radius:10px; padding:10px 12px;
                      margin:0 0 12px; }
   .gruppo-doppioni h4 { margin:0 0 6px; font-size:0.9rem; color:var(--text); }
+  .gruppo-doppioni .catena-gruppo { font-size:0.78rem; color:var(--dim); margin:-2px 0 6px; }
+  /* «Per suono | Per nome»: due metà di un solo tasto. */
+  .modo-doppioni { display:inline-flex; border:1px solid var(--line); border-radius:8px;
+                   overflow:hidden; margin:0 0 10px; }
+  .modo-doppioni button { background:none; border:none; border-radius:0; color:var(--dim);
+                          padding:6px 14px; font-size:0.85rem; cursor:pointer; }
+  .modo-doppioni button.scelto { background:var(--accent); color:#fff; }
   .riga-doppione { display:flex; align-items:center; gap:10px; padding:8px 0;
                    border-top:1px solid var(--line); }
   .riga-doppione:first-of-type { border-top:none; }
@@ -1308,7 +1315,14 @@
   </div>
   <div class="sezione-pannello">
     <h3>Doppioni</h3>
-    <p class="spiega">Stesso nome, uno per riga. <strong>Stessa lettera, stesso suono</strong>:
+    <div class="modo-doppioni" id="modoDoppioni">
+      <button type="button" data-modo="suono" class="scelto">Per suono</button>
+      <button type="button" data-modo="nome">Per nome</button>
+    </div>
+    <p class="spiega" id="spiegaDoppioniSuono">Preset con <strong>le stesse impostazioni</strong>,
+      qualunque nome abbiano: stessi effetti nello stesso ordine, accesi e spenti uguali, stesse
+      manopole e stesso tempo. Tag, note e banchi sono di ciascuno: guarda prima di togliere.</p>
+    <p class="spiega" id="spiegaDoppioniNome" hidden>Stesso nome, uno per riga. <strong>Stessa lettera, stesso suono</strong>:
       due preset con la lettera A suonano identici, uno con la B è un'altra versione.
       Tag, note e banchi sono di ciascuno: guarda prima di togliere.</p>
     <div id="listaDoppioni"></div>

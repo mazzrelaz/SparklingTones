@@ -1038,6 +1038,18 @@ svuotato senza avviso. Adesso ogni riga di «Doppioni» dice «nei banchi: …»
 avverte che quel posto resterà vuoto. (Per l'appunto dell'utente: i banchi sono già in
 «Esporta la libreria» e in Dropbox, cinque nel suo file, tutti i posti riconosciuti.)
 
+**I doppioni per suono — 14 ottobre 2026** (chiesto dall'utente): «Doppioni» ha due modi,
+«Per suono | Per nome», e si apre su «Per suono» (scelta dell'utente fra sostituire e
+tenere tutti e due). Per suono si raggruppano i preset con la stessa `chiaveSuono`: effetti
+nell'ordine della catena, acceso/spento, parametri per indice, tempo; **il nome non conta**.
+I valori a quattro decimali, perché lo stesso suono passato dall'ampli (float a 32 bit) e
+dall'editor (64 bit) non deve sembrare diverso; le catene vuote non fanno gruppo. La catena
+sta nel titolo del gruppo, ogni riga dice il nome; niente lettera (sarebbe sempre la A).
+Togliere un preset dell'ampli con un nome suo: la conferma dice che alla prossima lettura
+rientra (`importFromAmp` riconosce per UUID e poi per nome). Provato contro preset finti
+(una differenza di 1e-8 su una manopola resta lo stesso suono; un tempo diverso no), non
+sulla libreria vera.
+
 **L'inglese aggiornato il 7 ottobre 2026** (chiesto dall'utente): le 36 frasi nuove dell'app
 (Doppioni, nomi già in libreria, connessione persa, «Seleziona CHx») in `src/lingua-en.js`,
 `tools/lingua.html` a 538 su 538; e in `docs/protocollo-spark2.en.md` la sezione sul NEO del 2
