@@ -209,8 +209,8 @@ righe di `registroLungo` (`04-log.js`), mostrate prima. Oltre 1800 caratteri il 
 | tre o più vie | `await finestra({titolo, testo, campo, azioni})` | `valore` o `null` |
 
 `testo` è HTML: un nome dai dati passa da **`testoConNome()`**. Esc e tocco fuori → `null`.
-**Nella tendina «⋯» nessuna voce si spegne** (un `disabled` non riceve il clic e la tendina non
-si chiude): senza ampli rispondono con `senzaAmpli(cosa)`.
+**Nel menu «Altro» e nel pannellino del bollino nessuna voce si spegne** (un `disabled` non
+riceve il clic e il menu non si chiude): senza ampli rispondono con `senzaAmpli(cosa)`.
 
 ### L'inglese — lingua secondaria (dal 24 settembre 2026)
 
@@ -390,7 +390,16 @@ A)**: da misurare a cella sotto 3,9 V (`docs/pedale-lavoro.md`). Restano: il dis
 (il quadratino in negativo va ancora guardato), **il looper (firmware 2.13, 7 ottobre 2026; il firmware è diviso in file: FS1 REC/DUB, FS2 annulla/ripeti, FS3 suona, FS4 ferma e tenuto cancella, FS5 tap, tasti banco le battute, conteggio e anello come l'app; 2.19–2.21, 14 ottobre, verificate: «libero» fino a 60 s come l'app, click per tutta la prima registrazione; `docs/looper.md` in fondo)**; **il LED del tempo** (RGB col solo rosso su D1, **collegato in prova, non ancora fissato**: l'utente decide il posto insieme al buzzer, che arriva l'8 ottobre, perché dentro c'è poco spazio; 2.13: lampi corti in un compito suo, verificato dall'utente; FS1 rosso fisso mentre registra); **il click** (2.16, su D3): un disco piezo da 35 mm con 330 Ω, «poco ma accettabile», posto trovato dall'utente (il KY-006 era magnetico) (`docs/looper.md` in fondo); **le bande sull'anello pieno** sono il pannello (confermato), regolazioni da provare con lui (`docs/looper.md`, «Le bande»). **La modalità
 MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non riapre lui.**
 
-Sull'app (guscio `v93` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
+**Interfaccia nuova (14 ottobre 2026, dalle bozze scelte dall'utente)**: barra in basso
+Preset · Live · Altro (il menu, che sale dal basso), bollino dell'ampli al posto di «CONNETTI»
+(pannellino: Rileggi, Importa il suono, Scollega), slot in griglia da quattro, ricerca sotto
+gli slot con filtri anche per famiglia, scheda del preset in un foglio dal basso
+(`disegnaFoglio`, `#velo`) con le note chiuse. Perché e cosa è cambiato dalle bozze:
+`docs/decisioni-ui.md`, «L'interfaccia nuova». **Da verificare sul telefono con l'ampli.**
+**`guida.en.html` è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare
+l'inglese.
+
+Sull'app (guscio `v103` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
@@ -401,20 +410,10 @@ ampli finto):
 6. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
 7. **Togliere dal catalogo altri modelli che l'ampli non ha.**
 8. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
-9. **Spark NEO** (l'utente ce l'ha, 2 ottobre 2026; misure in `docs/protocollo-spark2.md`,
-   «Spark NEO»). **Verificato in cuffia**: si collega col filtro di sempre, **4 slot**
-   (CH1–CH4, nessun LED: si vedono solo dall'app ufficiale), lettura e `0x0101`→`0x7f` +
-   `0x0138` come lo Spark 2. L'app sceglie dal nome (`Spark.profiloAmpli`): l'ultimo ampli
-   collegato sta in `settings.ultimoAmpli`, e leggendo dal NEO gli slot 4–7 si svuotano
-   (`importFromAmp(…, { slotVuoti })`): gli slot in libreria sono sempre dell'ultimo ampli.
-   **Provata dall'utente sul NEO: funziona tutto** — lettura, CH1–CH4, live, «Regola»,
-   manopole, e dal 4 ottobre (v80) anche «Seleziona CHx», che adesso scrive cosa risponde
-   l'ampli (il primo «niente» non si è ripetuto; forse premuto durante la lettura).
-   **Il NEO certi giorni manda lento**: 13 pezzi su 16 in 4 s, e la lettura si arrendeva
-   sulla coda. Dalla v81 il tempo di `_readPresetVia` è il **silenzio** (riparte a ogni
-   pezzo, tetto a 4×): **verificato sul NEO il 4 ottobre**, letti tutti e quattro. Ancora da provare:
-   «Invia a preset HW» sul NEO, Hendrix, il pedale (cerca chiunque annunci `0xFFC0`: col
-   NEO acceso e lo Spark 2 spento dovrebbe agganciarlo).
+9. **Spark NEO**: provato dall'utente, funziona tutto (lettura, CH1–CH4, live, «Regola»,
+   «Seleziona CHx»). Ancora da provare: «Metti in uno slot» sul NEO, Hendrix, il pedale col NEO.
+   Il racconto per intero in `docs/diario.md` (estratto del 14 ottobre 2026) e
+   `docs/protocollo-spark2.md`, «Spark NEO».
 
 **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
 i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di

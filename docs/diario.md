@@ -601,3 +601,23 @@ Sull'app:
 6. **Mettere al sicuro il `preset_backup.zip` che sta su Dropbox**, e importarlo: Positive Grid
    lo dismette nel 2027, ed è **l'unica cosa che scade**.
 
+
+
+### Estratto da CLAUDE.md, 14 ottobre 2026 — copiato parola per parola
+
+Da «Dove si riprende», sfoltito per far posto all'interfaccia nuova:
+
+9. **Spark NEO** (l'utente ce l'ha, 2 ottobre 2026; misure in `docs/protocollo-spark2.md`,
+   «Spark NEO»). **Verificato in cuffia**: si collega col filtro di sempre, **4 slot**
+   (CH1–CH4, nessun LED: si vedono solo dall'app ufficiale), lettura e `0x0101`→`0x7f` +
+   `0x0138` come lo Spark 2. L'app sceglie dal nome (`Spark.profiloAmpli`): l'ultimo ampli
+   collegato sta in `settings.ultimoAmpli`, e leggendo dal NEO gli slot 4–7 si svuotano
+   (`importFromAmp(…, { slotVuoti })`): gli slot in libreria sono sempre dell'ultimo ampli.
+   **Provata dall'utente sul NEO: funziona tutto** — lettura, CH1–CH4, live, «Regola»,
+   manopole, e dal 4 ottobre (v80) anche «Seleziona CHx», che adesso scrive cosa risponde
+   l'ampli (il primo «niente» non si è ripetuto; forse premuto durante la lettura).
+   **Il NEO certi giorni manda lento**: 13 pezzi su 16 in 4 s, e la lettura si arrendeva
+   sulla coda. Dalla v81 il tempo di `_readPresetVia` è il **silenzio** (riparte a ogni
+   pezzo, tetto a 4×): **verificato sul NEO il 4 ottobre**, letti tutti e quattro. Ancora da provare:
+   «Invia a preset HW» sul NEO, Hendrix, il pedale (cerca chiunque annunci `0xFFC0`: col
+   NEO acceso e lo Spark 2 spento dovrebbe agganciarlo).

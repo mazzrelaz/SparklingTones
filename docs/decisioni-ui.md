@@ -1099,3 +1099,65 @@ con una guida sua (costruzione e uso) quando sarà finito.
 - Per guardarla a misura di telefono senza il riquadro (che taglia gli screenshot quando si
   emula il telefono): una pagina su `localhost` con tre `iframe` da 375 px che scorrono
   ciascuno a un capitolo, fotografata con Edge headless.
+
+
+## L'interfaccia nuova — 14 ottobre 2026
+
+L'utente trovava l'app «un po' incasinata». Prima le idee a parole, poi le bozze disegnate
+su una tela (artifact «SparklingTones — nuova interfaccia»): l'utente ha scelto la versione
+A con la barra in basso della B, la ricerca sotto gli slot, la scheda D con le note chiuse e
+la barra in basso visibile anche a scheda aperta; bollino, Live e menu come proposti. Fatta
+in quattro commit (`ede102c`, `bf8a7b2`, `5512df2`, `f8ff151`), guscio v103.
+
+**Cosa era incasinato**: in alto cinque cose che si contendevano l'occhio (due rossi:
+«CONNETTI» e «Live →»); gli otto slot tratteggiati che si prendevano tutta la prima schermata;
+la scheda aperta come un modulo lungo con sei pulsanti tutti uguali; il «⋯» che mescolava
+ampli, libreria e app.
+
+**Cosa c'è adesso:**
+
+- **Barra in basso** (`#barraSotto`): Preset, Live, Altro. Preset e Live cambiano l'hash come
+  prima (l'indietro di Android resta giusto); toccare Preset quando si è già lì chiude la
+  scheda e torna in cima. Altro apre `#menuAltro`, che sale dal basso a gruppi (Libreria:
+  Categorie, Impostazioni e backup, Doppioni; Live: Modifica, Pedale; Aiuto: Guida, Segnala;
+  poi Fai una pausa e il caffè). La barra sta sotto i pannelli a tutto schermo.
+- **Bollino dell'ampli** (`#status`): senza ampli un contorno rosso «Collega»; con l'ampli il
+  nome e il pallino verde, e il tocco apre `#foglioAmpli` (Rileggi gli slot, Importa il suono
+  che sta suonando, Scollega). `collegaMenu` ha preso un `puoAprire`: senza ampli il tocco va
+  al listener che collega.
+- **Slot in griglia da quattro**: A sopra, B sotto, la sigla col colore del LED (niente LED
+  disegnato). Se non se n'è mai letto nessuno e l'ampli non c'è, al posto della griglia una
+  riga con «Collega». Gli slot letti l'ultima volta restano visibili anche senza ampli.
+- **Ricerca sotto gli slot**, con l'ordinamento come icona dentro la casella (apre lo stesso
+  elenco). Il numero dei preset sta nel segnaposto; «3 di 24» compare solo filtrando.
+- **Filtri anche per famiglia di suono** (`vista.famiglia`), prima delle categorie, solo le
+  famiglie che qualcuno ha. Famiglia e categoria si sommano.
+- **Righe di libreria senza riquadro**, il tondo ▶ da 40 px, e sotto il nome il pallino e il
+  nome della famiglia con le categorie. **Questo rovescia la scelta del 14 agosto** («solo il
+  nome»): le bozze approvate le mostravano. Se l'utente le vuole di nuovo via, è `sottoRiga()`.
+- **La scheda in un foglio dal basso** (`#foglioPreset`, `disegnaFoglio`), sopra la barra.
+  Suona (era «Attiva») e Regola grandi; piccoli Seleziona (solo slot), Duplica, Metti in uno
+  slot (era «Invia a preset HW» con la tendina accanto: adesso il dove si sceglie dopo il
+  tocco, con `apriElenco`), Nel banco live (era «Metti nel banco»), Elimina. Il nome si cambia
+  dalla matita (`chiediTesto`), non più da un campo sempre aperto. Le note chiuse
+  (`vista.noteAperte`), la riga ne mostra l'inizio. Si chiude con la ✕, col velo, con Esc, con
+  Preset; andando in Live si chiude da sé.
+- **Il velo è un elemento vero** (`#velo`, z-index 6, sotto i fogli e sotto la barra): la prima
+  prova con un'ombra enorme oscurava bene ma lasciava passare il tocco alla riga sotto.
+
+**Dove ci si è staccati dalle bozze, e perché:**
+
+- Il bollino spento dice **«Collega»**, non «Nessun ampli»: nella vista Live non c'è un'altra
+  via per collegarsi.
+- La voce del pannello «Altro» si chiama **«Impostazioni e backup»**, non «Importa, esporta,
+  Dropbox»: dentro ci sono anche la lingua, i doppioni, la piazza pulita e le licenze.
+- **Seleziona e Nel banco live** non erano nella bozza della scheda: sono funzioni che c'erano,
+  e restano fra i tasti piccoli.
+
+**La guida** italiana è rifatta sulle schermate nuove (disegni in `guida.css`, classi
+`m-bollino`, `m-barra-sotto`, `m-slots4`, `m-foglio`…; le vecchie restano per la guida
+inglese, che non si tocca finché l'utente non lo dice). La striscia «versione nuova» di
+`src/pwa.js` sta sopra la barra (`--barra-sotto`).
+
+**Verificato**: nel riquadro del browser a 375 px, contro un ampli finto e preset finti.
+**Non ancora** sul telefono con l'ampli vero.
