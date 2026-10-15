@@ -210,6 +210,7 @@ function bloccoAFuoco(effetto, posizione) {
   // Bozza del 15 ottobre 2026: un modello con la sua immagine si regola
   // sull'immagine stessa; gli altri restano a pomelli.
   const immagine = SparkImmagini.di(effetto.name);
+  if (immagine) blocco.classList.add('con-immagine');
   blocco.appendChild(immagine ? frontaleImmagine(effetto, immagine)
                               : griglia(effetto, posizione));
   // Se l'immagine ha il suo interruttore (footswitch, levetta), il tasto
