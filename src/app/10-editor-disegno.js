@@ -1081,9 +1081,19 @@ function frontaleImmagine(effetto, info) {
     const pezzo = document.createElement('img');
     pezzo.draggable = false;
     pezzo.alt = '';
-    if (info.manopola) {
-      pezzo.src = info.manopola;
-      Object.assign(pezzo.style, { left: 0, top: 0, width: '100%', height: '100%' });
+    // Il disegno della manopola, con le sue proporzioni: il suo cerchio
+    // combacia con quello del blocco, e gira attorno al suo centro. Quello che
+    // esce dal cerchio (la freccia) si vede, non si taglia.
+    const sp = info.manopola;
+    if (sp) {
+      giro.classList.add('disegno');
+      pezzo.src = sp.src;
+      Object.assign(pezzo.style, {
+        width:  sp.w / (2 * sp.r) * 100 + '%',
+        height: sp.h / (2 * sp.r) * 100 + '%',
+        left:   (0.5 - sp.x / (2 * sp.r)) * 100 + '%',
+        top:    (0.5 - sp.y / (2 * sp.r)) * 100 + '%',
+      });
     } else {
       pezzo.src = info.src;
       Object.assign(pezzo.style, {

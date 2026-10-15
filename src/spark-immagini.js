@@ -8,7 +8,11 @@
 //
 // Le manopole si girano in due modi:
 // - con `manopola` (un disegno a parte, col segno in alto) l'app la disegna e la
-//   gira: è il modo pulito, con l'immagine del blocco **senza** manopole;
+//   gira: è il modo pulito, con l'immagine del blocco **senza** manopole. Anche
+//   della manopola si dà il centro e il raggio del cerchio, nei suoi pixel: non
+//   è per forza quadrata, e la freccia può uscire dal cerchio. Si ingrandisce
+//   finché il suo cerchio combacia con quello del blocco, e gira attorno al
+//   suo centro, senza tagliare niente;
 // - senza, l'app ritaglia il cerchio dall'immagine e gira quello. Funziona con
 //   un'immagine intera, ma quello che sporge dal cerchio resta fermo. `a` è
 //   dove punta il segno nell'immagine, in gradi da ore 12 (negativo a sinistra).
@@ -31,7 +35,7 @@
     },
     Twin: {
       src: 'immagini/blocchi/Twin.svg', w: 512, h: 300,
-      manopola: 'immagini/blocchi/manopola-nera.svg',
+      manopola: { src: 'immagini/blocchi/manopola-nera.svg', w: 100, h: 100, x: 50, y: 50, r: 48 },
       manopole: [
         { indice: 0, x: 120, y: 226, r: 24 },   // Gain
         { indice: 3, x: 190, y: 226, r: 24 },   // Bass

@@ -963,6 +963,8 @@
      una da 30 px è più stretta del dito. */
   .frontale .manopola-img::before { content:''; position:absolute; inset:-10px; border-radius:50%; }
   .frontale .giro { position:absolute; inset:0; border-radius:50%; overflow:hidden; }
+  /* Una manopola disegnata a parte non si taglia: la freccia può uscire dal cerchio. */
+  .frontale .giro.disegno { overflow:visible; border-radius:0; }
   .frontale .giro img { position:absolute; max-width:none; pointer-events:none; }
   /* Mentre si gira, un anello del colore del blocco: dice quale si sta toccando. */
   .frontale .manopola-img.gira { box-shadow:0 0 0 2px var(--cat), 0 0 16px var(--cat); }
