@@ -954,7 +954,11 @@
   .tassello.con-immagine { padding-bottom:9px; }
   .tassello .miniatura { height:52px; width:100%; object-fit:contain; display:block;
                          pointer-events:none; }
-  .frontale { position:relative; width:min(100%, 420px); margin:12px auto 6px;
+  /* Un pedale alto e stretto (il Tube Drive) si rimpicciolisce finché sta tutto
+     sopra la barra in basso, footswitch compreso: ~440 px è quello che sta sopra
+     il riquadro (testa, tempo, catena) più la barra. */
+  .frontale { position:relative; margin:12px auto 6px;
+              width:min(100%, 420px, max(200px, calc((100dvh - 440px) * var(--rapporto, 1))));
               touch-action:none; user-select:none; -webkit-user-select:none; }
   .frontale .sfondo { display:block; width:100%; height:100%; pointer-events:none; }
   .frontale .manopola-img { position:absolute; cursor:ns-resize; touch-action:none;
@@ -1050,6 +1054,9 @@
      prendono. Meglio spente che tolte — un elenco che si accorcia da solo
      sembra un catalogo che è sparito. */
   .elenco-voce.spenta { color:var(--faint); cursor:not-allowed; }
+  /* Le miniature dei blocchi accanto ai nomi (bozza del 15 ottobre 2026). */
+  .con-miniature .elenco-voce { display:flex; align-items:center; gap:12px; }
+  .elenco-mini { flex:none; width:44px; height:44px; object-fit:contain; display:block; }
 
   /* ---- la domanda prima di uscire dall'editor -------------------------
      Stessa scatola dell'elenco dei modelli, che è l'unica finestra che

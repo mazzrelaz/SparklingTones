@@ -261,6 +261,8 @@ function apriElenco(titolo, voci, scelto, quando) {
   const lista = document.createElement('div');
   lista.className = 'elenco-corpo';
 
+  const conMiniature = voci.some(v => v.immagine);
+  if (conMiniature) lista.classList.add('con-miniature');
   let gruppoOra = null;
   for (const voce of voci) {
     if (voce.gruppo && voce.gruppo !== gruppoOra) {
@@ -288,7 +290,19 @@ function apriElenco(titolo, voci, scelto, quando) {
     riga.type = 'button';
     riga.className = 'elenco-voce' + (voce.valore === scelto ? ' scelta' : '') +
                      (voce.spento ? ' spenta' : '');
-    riga.textContent = voce.testo;
+    // La miniatura del blocco accanto al nome, se il modello ha la sua
+    // immagine; quando qualcuna ce l'ha, le altre tengono il posto vuoto, così
+    // i nomi restano in colonna.
+    if (conMiniature) {
+      const mini = document.createElement(voce.immagine ? 'img' : 'span');
+      mini.className = 'elenco-mini';
+      if (voce.immagine) { mini.src = voce.immagine; mini.alt = ''; mini.loading = 'lazy'; }
+      const nome = document.createElement('span');
+      nome.textContent = voce.testo;
+      riga.append(mini, nome);
+    } else {
+      riga.textContent = voce.testo;
+    }
     riga.title = voce.title || voce.testo;
     if (voce.spento) riga.disabled = true;
     else riga.addEventListener('click', () => { chiudi(); quando(voce.valore); });
@@ -572,6 +586,7 @@ function apriSceltaModello(posizione) {
       testo: SparkEffetti.nome(modello) + (reale ? ' — ' + reale : ''),
       gruppo: gruppo || null,
       spento: spento(modello),
+      immagine: (SparkImmagini.di(modello) || {}).src,
       title: spento(modello)
         ? tr('{0} — serve l\'ampli: la tua libreria non l\'ha mai visto, ' +
           'quindi non sappiamo quante manopole abbia', modello)
@@ -1002,6 +1017,7 @@ function frontaleImmagine(effetto, info) {
   const box = document.createElement('div');
   box.className = 'frontale';
   box.style.aspectRatio = `${info.w} / ${info.h}`;
+  box.style.setProperty('--rapporto', info.w / info.h);   // per non uscire dallo schermo
 
   const img = document.createElement('img');
   img.className = 'sfondo';
@@ -1055,7 +1071,7 @@ function frontaleImmagine(effetto, info) {
     // Il disegno della manopola, con le sue proporzioni: il suo cerchio
     // combacia con quello del blocco, e gira attorno al suo centro. Quello che
     // esce dal cerchio (la freccia) si vede, non si taglia.
-    const sp = info.manopola;
+    const sp = m.manopola || info.manopola;
     if (sp) {
       giro.classList.add('disegno');
       pezzo.src = sp.src;
