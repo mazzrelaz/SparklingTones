@@ -1258,6 +1258,8 @@ della settimana. Stima di partenza: 3–5 finestre per tutto; adesso sembra meno
 
 **Cambio di strada, lo stesso giorno**: segnare le manopole a mano «è troppo macchinoso». Adesso l'utente manda **solo l'immagine senza manopole**, e il resto lo faccio io: i centri li trovo dai pixel (sul Blackface Duo, il `Twin`, i puntini bianchi in mezzo alle scale; il raggio dentro l'arco della scala), e disegno io la manopola nello stile dell'immagine (`manopola-neon.svg`). Il LED dell'immagine si scurisce col blocco spento, la levetta ON/OFF lo accende e lo spegne. `tools/segna-manopole.html` resta, ma non serve più all'utente. Una manopola a parte si dà con le sue proporzioni: `{ src, w, h, x, y, r }`, centro e raggio del suo cerchio (la prima, 717 × 778, si schiacciava).
 
+**Bocciato, da non rifare**: sul telefono l'ampli largo dà manopole piccole (~18 px). Provati il ritaglio della sola fila dei comandi (25 px) e i due pannelli dei comandi uno sopra l'altro (38 px): «fa stra cagare, torna come prima». Resta l'immagine intera a tutte le larghezze (il ramo ha il revert, `9e41128`).
+
 **Resta**: le immagini vere degli altri modelli; le scritte da togliere (barra ‹ categoria ›, nome del modello?);
 il cambio di modello col disegno; i blocchi a cursori e il riverbero a scelta; la guida.
 Provato solo nel riquadro del browser a 375 px, senza ampli.
