@@ -1230,3 +1230,32 @@ volta); il pallino vale per l'apparecchio che ha parlato col pedale, il confront
 da qualunque apparecchio. **Verificato**: l'impronta di riferimento («a» → e40c292c) e la
 simulazione nel browser; **non ancora** col pedale vero (il riquadro del browser non apre la
 scelta dei dispositivi Bluetooth, e in locale non ci sono banchi): si prova dal telefono.
+
+
+## L'editor con le immagini — 15 ottobre 2026 (bozza, non pubblicata)
+
+L'utente trova l'editor «incasinato, troppe scritte» e vuole qualcosa di più grafico, come la
+pagina dell'ampli dell'app ufficiale (ha mandato un video): i blocchi disegnati, e le manopole
+girate **sull'immagine**. Le immagini le fa lui (disegni suoi, possono stare nel repository).
+
+**La bozza** sta sul ramo `bozza-editor-grafico` (pushato, non in `main`): `src/spark-immagini.js`
+(tabella modello → immagine, centro e raggio di ogni manopola, spia, pulsante),
+`frontaleImmagine()` in `10-editor-disegno.js`, le immagini in `immagini/blocchi/`. Un modello
+con l'immagine: nel tassello l'immagine al posto di nome e barrette; sotto, l'immagine con le
+manopole che si girano trascinando in verticale (come i pomelli), il footswitch o la levetta che
+accende e spegne (`cambiaAcceso`, tolto il tasto «acceso»), la spia accesa col blocco. Gli altri
+modelli restano a pomelli. Due esempi: Sustain Comp (`BlueComp`, l'immagine intera dell'utente,
+cerchi ritagliati e girati: la parte delle frecce che sporge resta ferma) e Black Duo (`Twin`,
+disegno provvisorio mio senza manopole + `manopola-nera.svg` girata: pulito).
+
+**Scelta dell'utente**: immagini **separate** — il blocco senza manopole e la manopola da sola
+col segno in alto. Le misure le prende lui con **`tools/segna-manopole.html`** (pubblicato:
+tocca centro e bordo di ogni manopola, la spia, il footswitch; esce la voce da incollare in
+`spark-immagini.js`). Provato sul Sustainer: rifà le misure prese a mano entro due pixel.
+
+**Costo misurato**: la bozza l'8% della finestra di 5 ore del piano Pro (dal 26 al 34%), l'1%
+della settimana. Stima di partenza: 3–5 finestre per tutto; adesso sembra meno.
+
+**Resta**: le immagini vere; le scritte da togliere (barra ‹ categoria ›, nome del modello?);
+il cambio di modello col disegno; i blocchi a cursori e il riverbero a scelta; la guida.
+Provato solo nel riquadro del browser a 375 px, senza ampli.

@@ -388,7 +388,10 @@ l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pu
 nuova, sfondo grigio, barra a quattro voci, pagina del Pedale, **banchi da aggiornare** e il ponte
 che si chiude (firmware 2.23). **«Fatto» e titolo tolti anche dalle altre pagine** (sì
 dell'utente; guscio v108; restano editor, scelta del preset per il banco, Dropbox:
-`docs/decisioni-ui.md`). I progetti stanno in
+`docs/decisioni-ui.md`). **In corso: l'editor con le immagini** dei blocchi, manopole girate
+sull'immagine — bozza sul ramo `bozza-editor-grafico` (non in `main`); si aspettano le immagini
+dell'utente, separate (blocco senza manopole + manopola), misurate da lui con
+`tools/segna-manopole.html`. Tutto in `docs/decisioni-ui.md`, ultima sezione. I progetti stanno in
 `C:\Users\massi\Progetti Claude` (spostati il 14 ottobre; copia ogni ora in
 `Desktop\Cloud Backup\Progetti Claude`, che è sincronizzata con Google Drive).
 
