@@ -13,6 +13,8 @@ const NERO = +(q.get('nero') || 0), ISOLE = +(q.get('isole') || 1500);
 // Solo le isole che stanno tutte sopra questa riga: dentro la maniglia, non dentro il corpo.
 const SOPRA = +(q.get('sopra') || 1e9);
 const PIENO = +(q.get('pieno') || 14), ALONE = +(q.get('alone') || 14);
+// Larghezza massima del PNG: sul telefono il riquadro è largo ~400 px, il doppio basta.
+const LARGA = +(q.get('larga') || 900);
 const out = document.getElementById('out');
 const img = new Image();
 img.onload = () => {
@@ -74,9 +76,13 @@ img.onload = () => {
   g.putImageData(dati, 0, 0);
   const m = 4;
   x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(W - 1, x1 + m); y1 = Math.min(H - 1, y1 + m);
-  const c2 = document.createElement('canvas'); c2.width = x1 - x0 + 1; c2.height = y1 - y0 + 1;
-  c2.getContext('2d').drawImage(c, -x0, -y0);
-  out.textContent = `TAGLIO ${x0} ${y0} ${c2.width} ${c2.height}\n` + c2.toDataURL('image/png');
+  // Ritaglio, e rimpicciolito se più largo di LARGA: le misure vanno spostate di
+  // (x0, y0) e moltiplicate per la scala, che si stampa.
+  const lw = x1 - x0 + 1, lh = y1 - y0 + 1, k = Math.min(1, LARGA / lw);
+  const c2 = document.createElement('canvas'); c2.width = Math.round(lw * k); c2.height = Math.round(lh * k);
+  const g2 = c2.getContext('2d'); g2.imageSmoothingQuality = 'high';
+  g2.drawImage(c, x0, y0, lw, lh, 0, 0, c2.width, c2.height);
+  out.textContent = `TAGLIO ${x0} ${y0} ${c2.width} ${c2.height} ${k.toFixed(6)}\n` + c2.toDataURL('image/webp', 0.9);
 };
 img.onerror = () => { out.textContent = 'ERRORE'; };
 img.src = q.get('img');
