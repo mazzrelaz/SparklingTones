@@ -33,18 +33,22 @@
       led: { x: 255, y: 95, r: 13 },
       pulsante: { x: 256, y: 447, r: 30 },
     },
+    // Il Blackface Duo dell'utente (15 ottobre 2026), senza manopole: i centri
+    // sono i puntini bianchi in mezzo alle scale, trovati dai pixel; il raggio
+    // sta dentro l'arco della scala (46 px su Gain, Middle e Volume, 39 su
+    // Bass e Treble), che così resta visibile. Pulsante: la levetta ON/OFF.
     Twin: {
-      src: 'immagini/blocchi/Twin.svg', w: 512, h: 300,
-      manopola: { src: 'immagini/blocchi/manopola-nera.svg', w: 100, h: 100, x: 50, y: 50, r: 48 },
+      src: 'immagini/blocchi/Twin.jpg', w: 1418, h: 736,
+      manopola: { src: 'immagini/blocchi/manopola-neon.svg', w: 100, h: 100, x: 50, y: 50, r: 49 },
       manopole: [
-        { indice: 0, x: 120, y: 226, r: 24 },   // Gain
-        { indice: 3, x: 190, y: 226, r: 24 },   // Bass
-        { indice: 2, x: 260, y: 226, r: 24 },   // Middle
-        { indice: 1, x: 330, y: 226, r: 24 },   // Treble
-        { indice: 4, x: 400, y: 226, r: 24 },   // Master
+        { indice: 0, x: 333.3,  y: 542.7, r: 38 },   // Gain
+        { indice: 3, x: 520.5,  y: 542.7, r: 32 },   // Bass
+        { indice: 2, x: 709.1,  y: 542.7, r: 38 },   // Middle
+        { indice: 1, x: 897.6,  y: 542.7, r: 32 },   // Treble
+        { indice: 4, x: 1084.8, y: 542.7, r: 38 },   // Master (Volume)
       ],
-      led: { x: 58, y: 226, r: 10 },
-      pulsante: { x: 456, y: 222, r: 22 },
+      led: { x: 171, y: 490.5, r: 16 },
+      pulsante: { x: 166, y: 582, r: 34 },
     },
   };
 
