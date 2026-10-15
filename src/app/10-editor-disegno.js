@@ -128,7 +128,19 @@ function tassello(effetto, posizione) {
   const barre = barrette(effetto);
   if (scelto) inModifica.barreAFuoco = barre;    // si aggiornano girando
 
-  t.append(led, cat, modello, barre);
+  // Con un'immagine il tassello mostra quella, al posto del nome e delle barrette.
+  const immagine = SparkImmagini.di(effetto.name);
+  if (immagine) {
+    t.classList.add('con-immagine');
+    const mini = document.createElement('img');
+    mini.className = 'miniatura';
+    mini.src = immagine.src;
+    mini.alt = '';
+    mini.draggable = false;
+    t.append(led, cat, mini);
+  } else {
+    t.append(led, cat, modello, barre);
+  }
   t.addEventListener('click', () => {
     inModifica.scelto = posizione;
     disegnaCatena();
@@ -165,7 +177,17 @@ function bloccoAFuoco(effetto, posizione) {
 
   blocco.appendChild(barraPosizione(posizione));
   blocco.appendChild(intestazioneBlocco(effetto, posizione));
-  blocco.appendChild(griglia(effetto, posizione));
+  // Bozza del 15 ottobre 2026: un modello con la sua immagine si regola
+  // sull'immagine stessa; gli altri restano a pomelli.
+  const immagine = SparkImmagini.di(effetto.name);
+  blocco.appendChild(immagine ? frontaleImmagine(effetto, immagine)
+                              : griglia(effetto, posizione));
+  // Se l'immagine ha il suo interruttore (footswitch, levetta), il tasto
+  // «acceso/spento» è una scritta in più: si accende toccando quello.
+  if (immagine && immagine.pulsante) {
+    const doppio = blocco.querySelector('.interruttore');
+    if (doppio) doppio.remove();
+  }
 
   // Qui c'era l'avviso «è spento: le manopole non si sentono». Tolto il 26
   // agosto 2026 su richiesta — nessun messaggio in questo pannello. Che sia
@@ -647,27 +669,30 @@ function interruttoreDi(effetto) {
   interruttore.type = 'button';
   interruttore.className = 'interruttore' + (effetto.enabled ? ' acceso' : '');
   interruttore.textContent = effetto.enabled ? tr('acceso') : tr('spento');
-  interruttore.addEventListener('click', async () => {
-    effetto.enabled = !effetto.enabled;
-    segnaModificato();
-    if (!inModifica.offline) {
-      try {
-        await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
-      } catch (err) {
-        logLine(tr('errore: {0}', err.message), true);
-      }
-    }
-    // L'ampli scrive lui l'acceso/spento anche nel parametro che lo rispecchia
-    // (misurato: spegnendo il blocco quel parametro va a 0). Se non lo
-    // seguiamo qui, lo schermo resta a dire il contrario finché non si rilegge.
-    if (SparkEffetti.nomeExtra(effetto.name)) {
-      effetto.params.forEach(p => {
-        if (SparkEffetti.extra(effetto.name, p.index)) p.value = effetto.enabled ? 1 : 0;
-      });
-    }
-    disegnaCatena();
-  });
+  interruttore.addEventListener('click', () => cambiaAcceso(effetto));
   return interruttore;
+}
+
+/** Accende o spegne un blocco: dall'interruttore, o dal footswitch dell'immagine. */
+async function cambiaAcceso(effetto) {
+  effetto.enabled = !effetto.enabled;
+  segnaModificato();
+  if (!inModifica.offline) {
+    try {
+      await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
+    } catch (err) {
+      logLine(tr('errore: {0}', err.message), true);
+    }
+  }
+  // L'ampli scrive lui l'acceso/spento anche nel parametro che lo rispecchia
+  // (misurato: spegnendo il blocco quel parametro va a 0). Se non lo
+  // seguiamo qui, lo schermo resta a dire il contrario finché non si rilegge.
+  if (SparkEffetti.nomeExtra(effetto.name)) {
+    effetto.params.forEach(p => {
+      if (SparkEffetti.extra(effetto.name, p.index)) p.value = effetto.enabled ? 1 : 0;
+    });
+  }
+  disegnaCatena();
 }
 
 /**
@@ -992,6 +1017,114 @@ function pomello(effetto, param) {
   const fine = () => { partenzaY = null; nascondiBolla(); };
   box.addEventListener('pointerup', fine);
   box.addEventListener('pointercancel', fine);
+  return box;
+}
+
+/**
+ * Il blocco disegnato com'è: l'immagine del pedale o dell'ampli, con le
+ * manopole che si girano sopra (bozza del 15 ottobre 2026, chiesta
+ * dall'utente: «troppe scritte»). Il gesto è quello del pomello — trascinare
+ * in verticale — e il valore compare nella bolla solo mentre si gira.
+ * Le misure stanno in `src/spark-immagini.js`.
+ */
+function frontaleImmagine(effetto, info) {
+  const box = document.createElement('div');
+  box.className = 'frontale';
+  box.style.aspectRatio = `${info.w} / ${info.h}`;
+
+  const img = document.createElement('img');
+  img.className = 'sfondo';
+  img.src = info.src;
+  img.alt = SparkEffetti.nome(effetto.name);
+  img.draggable = false;
+  box.appendChild(img);
+
+  // Un cerchio dell'immagine, in percentuali: segue la larghezza dello schermo.
+  const posto = (el, { x, y, r }) => Object.assign(el.style, {
+    left:   (x - r) / info.w * 100 + '%',
+    top:    (y - r) / info.h * 100 + '%',
+    width:  2 * r / info.w * 100 + '%',
+    height: 2 * r / info.h * 100 + '%',
+  });
+
+  if (info.led) {
+    const led = document.createElement('div');
+    led.className = 'spia' + (effetto.enabled ? ' accesa' : '');
+    posto(led, info.led);
+    box.appendChild(led);
+  }
+  if (info.pulsante) {
+    const pulsante = document.createElement('button');
+    pulsante.type = 'button';
+    pulsante.className = 'pulsante-img';
+    pulsante.title = effetto.enabled ? tr('spegni') : tr('accendi');
+    posto(pulsante, info.pulsante);
+    pulsante.addEventListener('click', () => cambiaAcceso(effetto));
+    box.appendChild(pulsante);
+  }
+
+  const quante = manopoleVere(effetto).length;
+  for (const m of info.manopole) {
+    const param = effetto.params.find(p => p.index === m.indice);
+    if (!param) continue;
+
+    const man = document.createElement('div');
+    man.className = 'manopola-img';
+    man.title = (nomiParam[effetto.name] || {})[param.index] ||
+                SparkEffetti.manopola(effetto.name, param.index, quante) || '';
+    posto(man, m);
+
+    // Quello che gira: il disegno della manopola, o il cerchio ritagliato
+    // dall'immagine stessa.
+    const giro = document.createElement('div');
+    giro.className = 'giro';
+    const pezzo = document.createElement('img');
+    pezzo.draggable = false;
+    pezzo.alt = '';
+    if (info.manopola) {
+      pezzo.src = info.manopola;
+      Object.assign(pezzo.style, { left: 0, top: 0, width: '100%', height: '100%' });
+    } else {
+      pezzo.src = info.src;
+      Object.assign(pezzo.style, {
+        width:  info.w / (2 * m.r) * 100 + '%',
+        height: info.h / (2 * m.r) * 100 + '%',
+        left:   -(m.x - m.r) / (2 * m.r) * 100 + '%',
+        top:    -(m.y - m.r) / (2 * m.r) * 100 + '%',
+      });
+    }
+    giro.appendChild(pezzo);
+    man.appendChild(giro);
+
+    // Da ore 7:30 (zero) a ore 4:30 (dieci), come i pomelli; `a` è dove
+    // punta il segno nell'immagine così com'è.
+    const disegna = () => {
+      giro.style.transform = `rotate(${param.value * 270 - 135 - (m.a || 0)}deg)`;
+    };
+    disegna();
+
+    let partenzaY = null, partenzaV = 0;
+    man.addEventListener('pointerdown', evento => {
+      partenzaY = evento.clientY;
+      partenzaV = param.value;
+      man.setPointerCapture(evento.pointerId);
+      man.classList.add('gira');
+      mostraBolla(man, param.value);
+    });
+    man.addEventListener('pointermove', evento => {
+      if (partenzaY === null) return;
+      const passo = (partenzaY - evento.clientY) / CORSA_PX;
+      param.value = Math.min(1, Math.max(0, partenzaV + passo));
+      disegna();
+      mostraBolla(man, param.value);
+      aggiornaBarrette();
+      mandaParametro(effetto.name, param.index, param.value);
+    });
+    const fine = () => { partenzaY = null; man.classList.remove('gira'); nascondiBolla(); };
+    man.addEventListener('pointerup', fine);
+    man.addEventListener('pointercancel', fine);
+    box.appendChild(man);
+  }
   return box;
 }
 

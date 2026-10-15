@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Una manopola sola, disegnata col segno in alto (a metà corsa): l'app la
+       gira. Disegno provvisorio della bozza. -->
+  <defs>
+    <radialGradient id="cappa" cx=".38" cy=".32" r=".75">
+      <stop offset="0" stop-color="#4a4b50"/><stop offset=".6" stop-color="#1b1c1f"/>
+      <stop offset="1" stop-color="#050506"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="#0a0a0b"/>
+  <g fill="#1d1e21">
+    <circle cx="50" cy="50" r="46"/>
+  </g>
+  <g stroke="#2e2f33" stroke-width="3">
+    <path d="M50 4v8M50 88v8M4 50h8M88 50h8M17.5 17.5l5.6 5.6M76.9 76.9l5.6 5.6M17.5 82.5l5.6-5.6M76.9 23.1l5.6-5.6"/>
+  </g>
+  <circle cx="50" cy="50" r="34" fill="url(#cappa)" stroke="#000" stroke-width="2"/>
+  <path d="M50 6 L50 34" stroke="#f2f2f2" stroke-width="5" stroke-linecap="round"/>
+</svg>

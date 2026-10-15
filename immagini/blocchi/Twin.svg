@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 300">
+  <!-- Black Duo, disegno provvisorio della bozza: la testata senza manopole.
+       Le manopole le mette l'app, dal disegno manopola-nera.svg. -->
+  <defs>
+    <pattern id="tela" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="#b9bcc2"/>
+      <path d="M0 0L6 6M6 0L0 6" stroke="#8d9097" stroke-width="1.1"/>
+    </pattern>
+    <linearGradient id="cromo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f4f4"/><stop offset=".5" stop-color="#9a9a9a"/>
+      <stop offset="1" stop-color="#e0e0e0"/>
+    </linearGradient>
+    <linearGradient id="pannello" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#26272b"/><stop offset="1" stop-color="#121214"/>
+    </linearGradient>
+  </defs>
+  <!-- maniglia -->
+  <path d="M196 34 v-16 q0-10 10-10 h100 q10 0 10 10 v16" fill="none" stroke="#111" stroke-width="10"/>
+  <path d="M196 34 v-16 q0-10 10-10 h100 q10 0 10 10 v16" fill="none" stroke="#3a3a3a" stroke-width="4"/>
+  <!-- cassa in tolex -->
+  <rect x="6" y="30" width="500" height="264" rx="18" fill="#161616" stroke="#000" stroke-width="3"/>
+  <rect x="12" y="36" width="488" height="252" rx="14" fill="none" stroke="#2c2c2c" stroke-width="2"/>
+  <!-- tela della griglia -->
+  <rect x="26" y="48" width="460" height="128" rx="6" fill="url(#tela)" stroke="#0a0a0a" stroke-width="3"/>
+  <!-- targhetta -->
+  <rect x="186" y="96" width="140" height="34" rx="5" fill="#0d0d0d" stroke="url(#cromo)" stroke-width="2.5"/>
+  <text x="256" y="120" text-anchor="middle" font-family="Georgia, serif" font-style="italic"
+        font-weight="700" font-size="21" fill="#e9e9e9">Black Duo</text>
+  <!-- pannello dei comandi -->
+  <rect x="26" y="190" width="460" height="86" rx="6" fill="url(#pannello)" stroke="#000" stroke-width="2"/>
+  <rect x="26" y="190" width="460" height="3" fill="#3b3c40"/>
+  <!-- spia (si accende col blocco: la disegna l'app) -->
+  <circle cx="58" cy="226" r="12" fill="#2a0c0c" stroke="url(#cromo)" stroke-width="3"/>
+  <text x="58" y="262" text-anchor="middle" font-family="Arial, sans-serif" font-size="9"
+        font-weight="700" fill="#cfd2d6" letter-spacing="1">ON</text>
+  <!-- scale delle manopole: centri a 120, 190, 260, 330, 400, y 226 -->
+  <g fill="#cfd2d6" font-family="Arial, sans-serif" font-size="10" font-weight="700"
+     text-anchor="middle" letter-spacing="1">
+    <text x="120" y="268">GAIN</text>
+    <text x="190" y="268">BASS</text>
+    <text x="260" y="268">MIDDLE</text>
+    <text x="330" y="268">TREBLE</text>
+    <text x="400" y="268">MASTER</text>
+  </g>
+  <g stroke="#cfd2d6" stroke-width="2" stroke-linecap="round">
+    <g id="scala">
+      <path d="M120 226 m-25.5 25.5 l4.2 -4.2"/>
+      <path d="M120 226 m-36 0 l6 0"/>
+      <path d="M120 226 m-25.5 -25.5 l4.2 4.2"/>
+      <path d="M120 226 m0 -36 l0 6"/>
+      <path d="M120 226 m25.5 -25.5 l-4.2 4.2"/>
+      <path d="M120 226 m36 0 l-6 0"/>
+      <path d="M120 226 m25.5 25.5 l-4.2 -4.2"/>
+    </g>
+    <use href="#scala" x="70"/><use href="#scala" x="140"/>
+    <use href="#scala" x="210"/><use href="#scala" x="280"/>
+  </g>
+  <!-- interruttore a levetta, a destra -->
+  <rect x="446" y="212" width="20" height="28" rx="4" fill="#0b0b0b" stroke="url(#cromo)" stroke-width="2"/>
+  <rect x="452" y="206" width="8" height="16" rx="3" fill="url(#cromo)"/>
+</svg>

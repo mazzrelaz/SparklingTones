@@ -948,6 +948,31 @@
   .barrette { display:flex; align-items:flex-end; gap:2px; height:16px; }
   .barrette i { flex:1; background:var(--cat); border-radius:1px; min-height:1px;
                 box-shadow:0 0 6px var(--cat); }
+  /* Bozza del 15 ottobre 2026: i blocchi con la loro immagine. Nel tassello
+     l'immagine prende il posto del nome e delle barrette; sotto, il blocco a
+     fuoco è l'immagine stessa, con le manopole che girano. */
+  .tassello.con-immagine { padding-bottom:9px; }
+  .tassello .miniatura { height:52px; width:100%; object-fit:contain; display:block;
+                         pointer-events:none; }
+  .frontale { position:relative; width:min(100%, 420px); margin:12px auto 6px;
+              touch-action:none; user-select:none; -webkit-user-select:none; }
+  .frontale .sfondo { display:block; width:100%; height:100%; pointer-events:none; }
+  .frontale .manopola-img { position:absolute; cursor:ns-resize; touch-action:none;
+                            border-radius:50%; }
+  /* Le manopole piccole si prendono anche un po' fuori dal bordo: sul telefono
+     una da 30 px è più stretta del dito. */
+  .frontale .manopola-img::before { content:''; position:absolute; inset:-10px; border-radius:50%; }
+  .frontale .giro { position:absolute; inset:0; border-radius:50%; overflow:hidden; }
+  .frontale .giro img { position:absolute; max-width:none; pointer-events:none; }
+  /* Mentre si gira, un anello del colore del blocco: dice quale si sta toccando. */
+  .frontale .manopola-img.gira { box-shadow:0 0 0 2px var(--cat), 0 0 16px var(--cat); }
+  .frontale .spia { position:absolute; border-radius:50%; pointer-events:none;
+                    background:rgba(0,0,0,0.62); }
+  .frontale .spia.accesa { background:radial-gradient(circle, #ffb3a8 0 18%, #ff2a1a 45%, rgba(255,40,20,0) 72%);
+                           box-shadow:0 0 14px 4px rgba(255,40,20,0.55); }
+  .frontale .pulsante-img { position:absolute; border-radius:50%; border:0; padding:0;
+                            background:transparent; cursor:pointer; }
+  .frontale .pulsante-img:active { background:rgba(0,0,0,0.25); }
   .filo { flex:0 0 10px; align-self:center; height:1px; background:var(--line);
           margin:0 -3px; }
 
@@ -1820,6 +1845,7 @@
 <script src="src/dropbox-sync.js"></script>
 <script src="src/spark-protocol.js"></script>
 <script src="src/spark-effetti.js"></script>
+<script src="src/spark-immagini.js"></script>
 <script src="src/spark-transport.js"></script>
 <script src="src/preset-store.js"></script>
 <script src="src/pedale-ponte.js"></script>
