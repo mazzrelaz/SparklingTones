@@ -1015,10 +1015,22 @@ function pomello(effetto, param) {
  * Le misure stanno in `src/spark-immagini.js`.
  */
 function frontaleImmagine(effetto, info) {
+  // **Il riquadro ha sempre la stessa misura** (l'utente, 15 ottobre 2026: nome,
+  // tempo e catena non devono muoversi passando da un blocco all'altro): quella
+  // del Silver 120, il blocco con le manopole più piccole. Ogni immagine ci sta
+  // dentro intera, rimpicciolita quanto serve e centrata: piena larghezza se è
+  // più larga in proporzione, piena altezza se è più alta (il Tube Drive).
+  const fuori = document.createElement('div');
+  fuori.className = 'frontale';
+  const riquadro = SparkImmagini.RIQUADRO;
+  fuori.style.setProperty('--riquadro', riquadro.w / riquadro.h);
+  const larga = (info.w / info.h) / (riquadro.w / riquadro.h);
+
   const box = document.createElement('div');
-  box.className = 'frontale';
+  box.className = 'tela';
   box.style.aspectRatio = `${info.w} / ${info.h}`;
-  box.style.setProperty('--rapporto', info.w / info.h);   // per non uscire dallo schermo
+  box.style.width = Math.min(1, larga) * 100 + '%';
+  fuori.appendChild(box);
 
   const img = document.createElement('img');
   img.className = 'sfondo';
@@ -1123,7 +1135,7 @@ function frontaleImmagine(effetto, info) {
     man.addEventListener('pointercancel', fine);
     box.appendChild(man);
   }
-  return box;
+  return fuori;
 }
 
 /**

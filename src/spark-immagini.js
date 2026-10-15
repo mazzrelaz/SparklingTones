@@ -86,5 +86,10 @@
   window.SparkImmagini = {
     /** L'immagine di un modello, o null se non ce l'ha. */
     di: modello => TABELLA[modello] || null,
+    /**
+     * La misura fissa del riquadro nell'editor: quella del Silver 120, il blocco
+     * con le manopole più piccole. Gli altri ci stanno dentro, rimpiccioliti.
+     */
+    RIQUADRO: { w: TABELLA.RolandJC120.w, h: TABELLA.RolandJC120.h },
   };
 })();

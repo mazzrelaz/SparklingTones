@@ -899,7 +899,11 @@
   /* Il nome tiene meno della metà dello spazio che avanza (era `1`): così la
      catena e il riquadro salgono di un po' e restano più vicini alle dita,
      senza spostare il nome da dove sta. */
-  #pannelloEditor .testa-editor { flex:0.14 0 auto; display:flex;
+  /* Dal 15 ottobre 2026 la testa **non prende niente** dello spazio che avanza
+     (era 0.14): con i blocchi disegnati il riquadro cambia altezza da un blocco
+     all'altro, e nome, tempo e catena si spostavano sotto le dita (l'utente:
+     «devono essere sempre alla stessa altezza»). */
+  #pannelloEditor .testa-editor { flex:0 0 auto; display:flex;
                                   flex-direction:column; justify-content:center; }
   #pannelloEditor .blocco.aFuoco { flex:1 0 auto; display:flex; flex-direction:column; }
   /* Due righe di manopole, sempre: 94 px l'una, 18 di stacco e i 26 di
@@ -954,12 +958,16 @@
   .tassello.con-immagine { padding-bottom:9px; }
   .tassello .miniatura { height:52px; width:100%; object-fit:contain; display:block;
                          pointer-events:none; }
-  /* Un pedale alto e stretto (il Tube Drive) si rimpicciolisce finché sta tutto
-     sopra la barra in basso, footswitch compreso: ~440 px è quello che sta sopra
-     il riquadro (testa, tempo, catena) più la barra. */
-  .frontale { position:relative; margin:12px auto 6px;
-              width:min(100%, 420px, max(200px, calc((100dvh - 440px) * var(--rapporto, 1))));
+  /* Il riquadro dell'immagine ha una misura sola per tutti i blocchi, quella del
+     Silver 120 (`--riquadro`, larghezza su altezza): l'immagine ci sta dentro
+     centrata (`.tela`). Su uno schermo basso si rimpicciolisce finché sta sopra
+     la barra in basso: ~440 px è quello che sta sopra (testa, tempo, catena)
+     più la barra. */
+  .frontale { margin:12px auto 6px; aspect-ratio:var(--riquadro, 1);
+              width:min(100%, 420px, max(200px, calc((100dvh - 440px) * var(--riquadro, 1))));
+              display:flex; align-items:center; justify-content:center;
               touch-action:none; user-select:none; -webkit-user-select:none; }
+  .frontale .tela { position:relative; }
   /* Il riquadro grosso col blocco disegnato ha il fondo nero (l'utente, 15
      ottobre 2026): il neon delle immagini si vede sul buio. */
   .blocco.aFuoco.con-immagine { background:#000; }
