@@ -17,12 +17,6 @@
       document.querySelector('meta[name=theme-color]').setAttribute('content', '#101010');
     }
   })();
-  // SOLO BOZZA (15 ottobre 2026): due prove del bordo grigio dei riquadri
-  // dell'editor, scelte dall'indirizzo: ?bordo=no oppure ?bordo=spesso.
-  (function () {
-    var m = /[?&]bordo=(no|spesso)/.exec(location.search);
-    if (m) document.documentElement.classList.add('bordo-' + m[1]);
-  })();
 </script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -978,9 +972,13 @@
               display:flex; align-items:center; justify-content:center;
               touch-action:none; user-select:none; -webkit-user-select:none; }
   .frontale .tela { position:relative; }
-  /* Il riquadro grosso col blocco disegnato ha il fondo nero (l'utente, 15
-     ottobre 2026): il neon delle immagini si vede sul buio. */
-  .blocco.aFuoco.con-immagine { background:#000; }
+  /* La pagina dell'editor è tutta nera, e il riquadro grosso non ha né bordo
+     né fondo suo: sparisce, e restano il blocco e le sue manopole sul buio,
+     dove il neon delle immagini si vede (l'utente, 15 ottobre 2026; provati
+     anche il bordo tolto e il bordo spesso sul fondo grigio, non convincevano).
+     I tasselli della catena e la barra in basso restano come sono. */
+  #pannelloEditor { background:#000; }
+  #pannelloEditor .blocco.aFuoco { background:transparent; border-color:transparent; }
   .frontale .sfondo { display:block; width:100%; height:100%; pointer-events:none; }
   .frontale .manopola-img { position:absolute; cursor:ns-resize; touch-action:none;
                             border-radius:50%; }
@@ -1243,14 +1241,6 @@
   .blocco { background:var(--panel); border:1px solid var(--line); border-radius:12px;
             padding:0; margin-bottom:10px; overflow:hidden; }
   .blocco.spento { opacity:0.55; }
-  /* SOLO BOZZA: le due prove del bordo grigio dei riquadri dell'editor (il
-     riquadro grosso e i tasselli non scelti; lo scelto tiene il suo colore). */
-  html.bordo-no #pannelloEditor .blocco.aFuoco,
-  html.bordo-no #pannelloEditor .tassello:not(.scelto) { border-color:transparent; }
-  html.bordo-spesso #pannelloEditor .blocco.aFuoco,
-  html.bordo-spesso #pannelloEditor .tassello { border-width:2px; }
-  html.bordo-spesso #pannelloEditor .blocco.aFuoco,
-  html.bordo-spesso #pannelloEditor .tassello:not(.scelto) { border-color:#3a3d44; }
   .blocco .intestazione { display:flex; align-items:center; gap:10px;
                           padding:9px 12px; background:var(--foglio);
                           border-bottom:1px solid var(--line); }
