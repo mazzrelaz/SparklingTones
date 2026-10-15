@@ -1260,6 +1260,8 @@ della settimana. Stima di partenza: 3–5 finestre per tutto; adesso sembra meno
 
 **Bocciato, da non rifare**: sul telefono l'ampli largo dà manopole piccole (~18 px). Provati il ritaglio della sola fila dei comandi (25 px) e i due pannelli dei comandi uno sopra l'altro (38 px): «fa stra cagare, torna come prima». Resta l'immagine intera a tutte le larghezze (il ramo ha il revert, `9e41128`).
 
+**Prima modifica dell'interfaccia** (stesso giorno, sera): nel riquadro grosso via la riga ‹ CATEGORIA › e la tendina del modello; il modello si sceglie col **doppio tocco sul tassello** (`apriSceltaModello`; il riverbero apre i tipi e il suo tassello mostra il tipo; il noise gate niente). Un tocco non ridisegna la catena (`scegliBlocco`): ridisegnarla la ricentrava e il secondo tocco cadeva sul tassello accanto (visto nella prova). Le immagini dell'utente si **scontornano** da noi (sfondo nero uniforme: nero pieno dai bordi più una fascia di 14 px per l'alone, che resta sfumato; una fascia larga entrava nei pannelli scuri dalle fessure) — lo strumento è in scratchpad, `togli-sfondo.html`, da portare in `tools/` se serve ancora.
+
 **Resta**: le immagini vere degli altri modelli; le scritte da togliere (barra ‹ categoria ›, nome del modello?);
 il cambio di modello col disegno; i blocchi a cursori e il riverbero a scelta; la guida.
 Provato solo nel riquadro del browser a 375 px, senza ampli.
