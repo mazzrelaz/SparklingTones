@@ -17,6 +17,12 @@
       document.querySelector('meta[name=theme-color]').setAttribute('content', '#101010');
     }
   })();
+  // SOLO BOZZA (15 ottobre 2026): due prove del bordo grigio dei riquadri
+  // dell'editor, scelte dall'indirizzo: ?bordo=no oppure ?bordo=spesso.
+  (function () {
+    var m = /[?&]bordo=(no|spesso)/.exec(location.search);
+    if (m) document.documentElement.classList.add('bordo-' + m[1]);
+  })();
 </script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1237,6 +1243,14 @@
   .blocco { background:var(--panel); border:1px solid var(--line); border-radius:12px;
             padding:0; margin-bottom:10px; overflow:hidden; }
   .blocco.spento { opacity:0.55; }
+  /* SOLO BOZZA: le due prove del bordo grigio dei riquadri dell'editor (il
+     riquadro grosso e i tasselli non scelti; lo scelto tiene il suo colore). */
+  html.bordo-no #pannelloEditor .blocco.aFuoco,
+  html.bordo-no #pannelloEditor .tassello:not(.scelto) { border-color:transparent; }
+  html.bordo-spesso #pannelloEditor .blocco.aFuoco,
+  html.bordo-spesso #pannelloEditor .tassello { border-width:2px; }
+  html.bordo-spesso #pannelloEditor .blocco.aFuoco,
+  html.bordo-spesso #pannelloEditor .tassello:not(.scelto) { border-color:#3a3d44; }
   .blocco .intestazione { display:flex; align-items:center; gap:10px;
                           padding:9px 12px; background:var(--foglio);
                           border-bottom:1px solid var(--line); }
