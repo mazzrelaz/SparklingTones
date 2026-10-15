@@ -1289,15 +1289,15 @@ di casa (UPC3088350 e il ripetitore) su «Privata» e creato lui la regola del f
 pubbliche, e il firewall non lo tocco io. Senza https niente Bluetooth: solo l'interfaccia, coi
 preset importati da un'esportazione della libreria.
 
-**Le immagini fatte il 15 sera**: Noise Gate (, rosso), LA Comp (), Red
-Comp (), Bass Comp (, azzurro), oltre a Silver 120, Blackface Duo, Tube Drive e
-Sustainer. **Le levette** sono una voce nuova di  ():
+**Le immagini fatte il 15 sera**: Noise Gate (`bias.noisegate`, rosso), LA Comp (`LA2AComp`), Red
+Comp (`Compressor`), Bass Comp (`BassComp`, azzurro), oltre a Silver 120, Blackface Duo, Tube Drive e
+Sustainer. **Le levette** sono una voce nuova di `spark-immagini.js` (`levette: [{ indice, x, y, r, su }]`):
 ritagliate dall'immagine, capovolte quando stanno giù, un tocco le fa scattare fra 0 e 1. Sul LA Comp
 il parametro 0 (Limit/Compress) nei preset veri vale sempre 0; si è assunto **1 = Limit = in alto**, da
 verificare a orecchio con l'ampli. Il procedimento per un'immagine nuova: copia in
- della bozza (non si committa), centri dai puntini bianchi e raggi dai profili di
-luce nel riquadro del browser, , misure spostate di (x0, y0) e moltiplicate per la scala,
-voce in , prova con LED e footswitch contornati.
+`immagini/originali/` della bozza (non si committa), centri dai puntini bianchi e raggi dai profili di
+luce nel riquadro del browser, `tools/togli-sfondo`, misure spostate di (x0, y0) e moltiplicate per la
+scala, voce in `TABELLA`, prova con LED e footswitch contornati.
 
 **Resta**: le immagini vere degli altri modelli (l'utente **non vuole pubblicare niente finché
 non sono caricate tutte**); i blocchi a cursori (EQ) e il riverbero a scelta col disegno; la
