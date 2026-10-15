@@ -4,7 +4,7 @@
   const dentroApp = window.self !== window.top;
 
   // Letta da sola (dal sito, da un link) la guida porta all'app e all'altra
-  // lingua; dentro l'app c'è già il «Fatto» del pannello, e la lingua è quella
+  // lingua; dentro l'app se ne esce dalla barra in basso, e la lingua è quella
   // scelta lì.
   if (!dentroApp) document.querySelector('.fuori').hidden = false;
 

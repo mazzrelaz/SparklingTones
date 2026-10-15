@@ -1196,8 +1196,13 @@ la regola: **la grafica prima si mostra, poi si pubblica** (CLAUDE.md, Convenzio
 - **«HW PRESET»**, piccolo e in maiuscolo, al posto di «Sull'ampli»; via la legenda «A rosso ·
   B verde» («ridicola»): bastano le sigle colorate.
 
-**Aperta**: togliere «Fatto» e il titolo anche dalle altre pagine (guida, impostazioni,
-categorie, doppioni)? Chiesto all'utente, nessuna risposta ancora.
+**Chiusa il 15 ottobre 2026**: togliere «Fatto» e il titolo anche dalle altre pagine? L'utente
+ha detto sì. Tolti da Categorie, Impostazioni e backup, Doppioni, Informazioni, Guida e Segnala
+un problema: se ne esce dalla barra in basso (`chiudiPannelloAperto`, che senza un
+`[data-chiudi]` chiude e basta). La Guida prende tutta la pagina. **Restano** il «Fatto»
+dell'editor (sta accanto a «Salva» e chiede prima di buttare via il lavoro), l'«Annulla» della
+scelta di un preset per il banco (è una scelta a metà, non una pagina) e il «Fatto» del
+collegamento a Dropbox (è un passo della procedura). Guscio v108.
 
 
 ## I banchi da aggiornare sul pedale — 14 ottobre 2026

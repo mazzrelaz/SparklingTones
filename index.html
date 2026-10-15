@@ -171,8 +171,9 @@
   button.neon.blu { --neon:var(--blu); }
   button.neon.oro { --neon:#ffd21e; }
   /* La barra in basso (14 ottobre 2026): Preset, Live e Altro, dove arriva il
-     pollice. Sta sopra la pagina e sotto i pannelli a tutto schermo, che
-     hanno il loro «Fatto». Il corpo della pagina le lascia il suo spazio in
+     pollice. Sta sopra la pagina e anche sopra i pannelli, che dal 15 ottobre
+     2026 non hanno più titolo né «Fatto» (resta solo all'editor, accanto a
+     «Salva»): se ne esce toccando una voce. Il corpo della pagina le lascia il suo spazio in
      fondo, così l'ultima riga della libreria non ci finisce sotto. */
   :root { --barra-sotto:62px; }
   body { box-sizing:border-box;
@@ -653,11 +654,12 @@
                       14px
                       calc(14px + env(safe-area-inset-left)); }
   .pannello.aperto { display:block; }
-  /* La guida scorre dentro la sua cornice, non nel pannello: la barra col
-     «Fatto» resta in vista e la cornice prende tutto il resto. */
+  /* La guida scorre dentro la sua cornice, non nel pannello, e la cornice
+     prende tutta la pagina: dal 15 ottobre 2026 non c'è più la barra col
+     titolo e il «Fatto» sopra (se ne esce dalla barra in basso). */
   #pannelloGuida.aperto { display:flex; flex-direction:column; padding-bottom:0; }
-  #corniceGuida { flex:1; border:0; border-top:1px solid var(--line);
-                  margin:0 -14px; width:calc(100% + 28px); background:#000; }
+  #corniceGuida { flex:1; border:0;
+                  margin:-14px -14px 0; width:calc(100% + 28px); background:#000; }
   /* Segnala un problema: quello che l'app aggiunge, piccolo e leggibile prima di mandarlo. */
   #anteprimaSegnala { white-space:pre-wrap; word-break:break-word; font-size:0.72rem; line-height:1.45;
                       color:var(--dim); background:#0c0d10; border:1px solid var(--line);
@@ -1404,11 +1406,6 @@
 
 <!-- come si organizza la libreria: le famiglie di suono e le categorie -->
 <div class="pannello" id="pannelloCategorie">
-  <div class="barra-alta">
-    <span style="flex:1"></span>
-    <button class="primary" data-chiudi="pannelloCategorie">Fatto</button>
-  </div>
-
   <!-- Due assi diversi, e tenerli distinti è il punto: la famiglia dice che
        tipo di suono è, la categoria dice di che pezzo o di che stile. -->
   <div class="sezione-pannello">
@@ -1437,10 +1434,6 @@
 
 <!-- esporta, importa, diagnostica -->
 <div class="pannello" id="pannelloAltro">
-  <div class="barra-alta">
-    <span style="flex:1"></span>
-    <button class="primary" data-chiudi="pannelloAltro">Fatto</button>
-  </div>
   <!-- La lingua: scritta nelle due lingue, perché la trovi anche chi l'altra
        non la legge. Cambiarla ricarica la pagina. -->
   <div class="sezione-pannello" translate="no">
@@ -1543,10 +1536,6 @@
 
 <!-- i doppioni della libreria -->
 <div class="pannello" id="pannelloDoppioni">
-  <div class="barra-alta">
-    <span style="flex:1"></span>
-    <button class="primary" data-chiudi="pannelloDoppioni">Fatto</button>
-  </div>
   <div class="sezione-pannello">
     <h3>Doppioni</h3>
     <div class="modo-doppioni" id="modoDoppioni">
@@ -1566,11 +1555,6 @@
 
 <!-- informazioni, licenze, responsabilità -->
 <div class="pannello" id="pannelloAbout">
-  <div class="barra-alta">
-    <span style="flex:1"></span>
-    <button class="primary" data-chiudi="pannelloAbout">Fatto</button>
-  </div>
-
   <div class="about">
     <p><strong>SparklingTones</strong> organizza i preset di un amplificatore Spark 2 e li
       manda all'amplificatore via Bluetooth. Gira per intero dentro il browser: non c'è un
@@ -1730,22 +1714,12 @@
      sé perché si legge anche da fuori; dentro una cornice e non aperta al posto
      di questa, perché lasciare index.html farebbe cadere la connessione. -->
 <div class="pannello" id="pannelloGuida">
-  <div class="barra-alta">
-    <h2>Guida</h2>
-    <span style="flex:1"></span>
-    <button class="primary" data-chiudi="pannelloGuida">Fatto</button>
-  </div>
   <iframe id="corniceGuida" title="Guida all'uso"></iframe>
 </div>
 
 <!-- Segnala un problema (9 ottobre 2026): niente server, il messaggio parte
      dalla posta di chi scrive. Quello che l'app ci aggiunge si vede prima. -->
 <div class="pannello" id="pannelloSegnala">
-  <div class="barra-alta">
-    <h2>Segnala un problema</h2>
-    <span style="flex:1"></span>
-    <button class="primary" data-chiudi="pannelloSegnala">Fatto</button>
-  </div>
   <div class="sezione-pannello">
     <p class="spiega">Scrivi cosa stavi facendo, cosa è successo e cosa ti aspettavi. Il messaggio
       parte dalla <strong>tua</strong> posta: l'app non manda niente da sola.</p>
