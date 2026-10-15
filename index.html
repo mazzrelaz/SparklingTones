@@ -972,12 +972,11 @@
               display:flex; align-items:center; justify-content:center;
               touch-action:none; user-select:none; -webkit-user-select:none; }
   .frontale .tela { position:relative; }
-  /* La pagina dell'editor è tutta nera, e il riquadro grosso non ha né bordo
-     né fondo suo: sparisce, e restano il blocco e le sue manopole sul buio,
-     dove il neon delle immagini si vede (l'utente, 15 ottobre 2026; provati
-     anche il bordo tolto e il bordo spesso sul fondo grigio, non convincevano).
-     I tasselli della catena e la barra in basso restano come sono. */
-  #pannelloEditor { background:#000; }
+  /* Il riquadro grosso non ha né bordo né fondo suo: prende il fondo della
+     pagina e sparisce, e restano il blocco e le sue manopole (l'utente, 15
+     ottobre 2026). Provati e scartati: il riquadro nero sulla pagina grigia, il
+     bordo tolto o più spesso, la pagina dell'editor tutta nera. I tasselli
+     della catena e la barra in basso restano come sono. */
   #pannelloEditor .blocco.aFuoco { background:transparent; border-color:transparent; }
   .frontale .sfondo { display:block; width:100%; height:100%; pointer-events:none; }
   .frontale .manopola-img { position:absolute; cursor:ns-resize; touch-action:none;
