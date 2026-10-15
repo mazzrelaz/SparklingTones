@@ -1256,6 +1256,8 @@ tocca centro e bordo di ogni manopola, la spia, il footswitch; esce la voce da i
 **Costo misurato**: la bozza l'8% della finestra di 5 ore del piano Pro (dal 26 al 34%), l'1%
 della settimana. Stima di partenza: 3–5 finestre per tutto; adesso sembra meno.
 
-**Resta**: le immagini vere; le scritte da togliere (barra ‹ categoria ›, nome del modello?);
+**Cambio di strada, lo stesso giorno**: segnare le manopole a mano «è troppo macchinoso». Adesso l'utente manda **solo l'immagine senza manopole**, e il resto lo faccio io: i centri li trovo dai pixel (sul Blackface Duo, il `Twin`, i puntini bianchi in mezzo alle scale; il raggio dentro l'arco della scala), e disegno io la manopola nello stile dell'immagine (`manopola-neon.svg`). Il LED dell'immagine si scurisce col blocco spento, la levetta ON/OFF lo accende e lo spegne. `tools/segna-manopole.html` resta, ma non serve più all'utente. Una manopola a parte si dà con le sue proporzioni: `{ src, w, h, x, y, r }`, centro e raggio del suo cerchio (la prima, 717 × 778, si schiacciava).
+
+**Resta**: le immagini vere degli altri modelli; le scritte da togliere (barra ‹ categoria ›, nome del modello?);
 il cambio di modello col disegno; i blocchi a cursori e il riverbero a scelta; la guida.
 Provato solo nel riquadro del browser a 375 px, senza ampli.

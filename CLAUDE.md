@@ -390,8 +390,8 @@ che si chiude (firmware 2.23). **«Fatto» e titolo tolti anche dalle altre pagi
 dell'utente; guscio v108; restano editor, scelta del preset per il banco, Dropbox:
 `docs/decisioni-ui.md`). **In corso: l'editor con le immagini** dei blocchi, manopole girate
 sull'immagine — bozza sul ramo `bozza-editor-grafico` (non in `main`); si aspettano le immagini
-dell'utente, separate (blocco senza manopole + manopola), misurate da lui con
-`tools/segna-manopole.html`. Tutto in `docs/decisioni-ui.md`, ultima sezione. I progetti stanno in
+dell'utente, **senza manopole**: le manopole e le misure le faccio io (primo fatto: il
+Blackface Duo). Tutto in `docs/decisioni-ui.md`, ultima sezione. I progetti stanno in
 `C:\Users\massi\Progetti Claude` (spostati il 14 ottobre; copia ogni ora in
 `Desktop\Cloud Backup\Progetti Claude`, che è sincronizzata con Google Drive).
 
