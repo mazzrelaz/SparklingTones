@@ -105,6 +105,10 @@ function striscia() {
   return fila;
 }
 
+/** Il tocco di prima su un tassello, per riconoscere il doppio tocco. */
+const DOPPIO_TOCCO_MS = 400;
+let toccoTassello = { posizione: -1, quando: 0 };
+
 function tassello(effetto, posizione) {
   const scelto = posizione === inModifica.scelto;
   const t = document.createElement('button');
@@ -123,7 +127,8 @@ function tassello(effetto, posizione) {
 
   const modello = document.createElement('div');
   modello.className = 'modello';
-  modello.textContent = SparkEffetti.nome(effetto.name);
+  modello.textContent = (candidatiModello(effetto, posizione).length < 2 && nomeTipo(effetto)) ||
+                        SparkEffetti.nome(effetto.name);
 
   const barre = barrette(effetto);
   if (scelto) inModifica.barreAFuoco = barre;    // si aggiornano girando
@@ -141,11 +146,34 @@ function tassello(effetto, posizione) {
   } else {
     t.append(led, cat, modello, barre);
   }
+  // Un tocco porta il blocco a fuoco; due tocchi ravvicinati aprono la scelta
+  // del modello (o del tipo). Il doppio tocco si conta a mano: il primo tocco
+  // ridisegna la catena, e il secondo cade già su un tassello nuovo.
   t.addEventListener('click', () => {
-    inModifica.scelto = posizione;
-    disegnaCatena();
+    const adesso = Date.now();
+    const doppio = toccoTassello.posizione === posizione &&
+                   adesso - toccoTassello.quando < DOPPIO_TOCCO_MS;
+    toccoTassello = doppio ? { posizione: -1, quando: 0 } : { posizione, quando: adesso };
+    scegliBlocco(posizione);
+    if (doppio) apriSceltaModello(posizione);
   });
   return t;
+}
+
+/**
+ * Porta un blocco a fuoco **senza ridisegnare la catena**: cambia solo quale
+ * tassello è acceso e il riquadro sotto. Ridisegnarla la faceva anche
+ * ricentrare, e il secondo tocco di un doppio tocco cadeva sul tassello accanto.
+ */
+function scegliBlocco(posizione) {
+  inModifica.scelto = posizione;
+  const catena = $('catena');
+  const tasselli = catena.querySelectorAll('.striscia .tassello');
+  const vecchio = catena.querySelector('.blocco.aFuoco');
+  if (!tasselli.length || !vecchio) { disegnaCatena(); return; }
+  tasselli.forEach((t, i) => t.classList.toggle('scelto', i === posizione));
+  inModifica.barreAFuoco = tasselli[posizione].querySelector('.barrette');
+  vecchio.replaceWith(bloccoAFuoco(inModifica.effetti[posizione], posizione));
 }
 
 /**
@@ -175,8 +203,10 @@ function bloccoAFuoco(effetto, posizione) {
   blocco.className = 'blocco aFuoco' + (effetto.enabled ? '' : ' spento');
   blocco.style.setProperty('--cat', coloreDi(posizione));
 
-  blocco.appendChild(barraPosizione(posizione));
-  blocco.appendChild(intestazioneBlocco(effetto, posizione));
+  // Niente più riga ‹ CATEGORIA › né tendina del modello (l'utente, 15 ottobre
+  // 2026: la categoria sta già sul tassello; il modello si cambia col doppio
+  // tocco sul tassello, `apriSceltaModello`).
+  blocco.appendChild(intestazioneBlocco(effetto));
   // Bozza del 15 ottobre 2026: un modello con la sua immagine si regola
   // sull'immagine stessa; gli altri restano a pomelli.
   const immagine = SparkImmagini.di(effetto.name);
@@ -202,39 +232,6 @@ function bloccoAFuoco(effetto, posizione) {
   return blocco;
 }
 
-/** ‹ CATEGORIA › — si cambia blocco anche senza tornare sulla striscia. */
-function barraPosizione(posizione) {
-  const barra = document.createElement('div');
-  barra.className = 'barra-posizione';
-
-  const vaiA = (dove, segno, etichetta) => {
-    const tasto = document.createElement('button');
-    tasto.type = 'button';
-    tasto.className = 'freccia';
-    tasto.textContent = segno;
-    tasto.title = etichetta;
-    tasto.disabled = dove < 0 || dove >= inModifica.effetti.length;
-    tasto.addEventListener('click', () => {
-      inModifica.scelto = dove;
-      disegnaCatena();
-    });
-    return tasto;
-  };
-
-  const dove = document.createElement('div');
-  dove.className = 'dove';
-  dove.textContent = Spark.CATENA[posizione] || tr`posizione ${posizione + 1}`;
-
-  barra.append(vaiA(posizione - 1, '‹', tr('il blocco prima')), dove,
-               vaiA(posizione + 1, '›', tr('il blocco dopo')));
-  return barra;
-}
-
-/**
- * Il nome del blocco è una tendina: da lì si cambia il modello. L'era di un
- * pulsante «cambia» accanto al nome è finita perché nessuno collegava il
- * pulsante al nome che stava leggendo.
- */
 /**
  * L'elenco da cui si sceglie un modello o un tipo.
  *
@@ -508,7 +505,13 @@ function candidatiModello(effetto, posizione) {
   return candidati;
 }
 
-function intestazioneBlocco(effetto, posizione) {
+/**
+ * Il doppio tocco su un tassello: l'elenco dei modelli per quella posizione,
+ * o dei tipi se il modello è unico (il riverbero). Il noise gate non ha niente
+ * da scegliere, e non apre niente.
+ */
+function apriSceltaModello(posizione) {
+  const effetto = inModifica.effetti[posizione];
   const candidati = candidatiModello(effetto, posizione);
   // **Senza ampli i modelli mai visti restano nell'elenco, ma spenti.** Prima
   // li toglievo, ed era sbagliato: la tendina passava da quaranta voci a sette
@@ -542,18 +545,14 @@ function intestazioneBlocco(effetto, posizione) {
   // e non la trovava nessuno).
   if (candidati.length < 2) {
     const param = paramScelta(effetto);
-    return param ? intestazioneScelta(effetto, param)
-                 : intestazioneFissa(effetto);
+    if (param) apriSceltaTipo(effetto, param);
+    return;
   }
 
   // **Non è un `<select>`**, e la ragione è il telefono: lì il menu di sistema
   // ignora i nostri caratteri, e con «Silver 120 — Roland JC120» manda ogni
   // voce a capo su due righe — trentanove ampli così sono uno schermo e mezzo
   // da scorrere. Un elenco disegnato da noi tiene ogni ampli su **una riga**.
-  const scelta = document.createElement('button');
-  scelta.type = 'button';
-  scelta.className = 'nome-effetto';
-  scelta.title = tr('tocca per mettere un altro modello in questa posizione');
   const voci = [];
 
   // I modelli **usciti da questo ampli** vengono per primi: esistono di sicuro.
@@ -618,9 +617,6 @@ function intestazioneBlocco(effetto, posizione) {
   // stato verificato contro l'app ufficiale, l'elenco è quello completo, e una
   // voce che chiede di scrivere un nome a mano non serve più a niente.
 
-  const reale = SparkEffetti.ampliReale(effetto.name);
-  scelta.textContent = SparkEffetti.nome(effetto.name) + (reale ? ' — ' + reale : '');
-
   // Senza ampli il modello **si cambia dal 26 agosto 2026**, chiesto
   // dall'utente. Prima era spento, e la ragione era buona: cambiarlo vuol dire
   // fargli ricostruire un blocco DSP e poi rileggere quanti parametri ha
@@ -628,19 +624,17 @@ function intestazioneBlocco(effetto, posizione) {
   // che pianta l'ampli. La via d'uscita non è tirare a indovinare: è **copiare
   // un blocco vero**, preso da un preset della libreria che quel modello ce
   // l'ha già. Per questo qui offline restano solo i modelli visti.
-  if (inModifica.offline) {
-    scelta.title = tr('senza ampli si può mettere solo un modello che la libreria ' +
-                   'ha già visto: di quello sappiamo quante manopole ha');
-  }
+  apriElenco(Spark.CATENA[posizione], voci, effetto.name,
+             valore => cambiaModello(posizione, valore));
+}
 
-  scelta.addEventListener('click', () => {
-    apriElenco(Spark.CATENA[posizione], voci, effetto.name,
-               valore => cambiaModello(posizione, valore));
-  });
-
+/**
+ * La riga sopra l'immagine o le manopole: la nota Hendrix, se serve, e
+ * l'acceso/spento (che sparisce quando l'immagine ha il suo footswitch).
+ */
+function intestazioneBlocco(effetto) {
   const riga = document.createElement('div');
   riga.className = 'riga-modello';
-  riga.appendChild(scelta);
 
   // Scelto un Hendrix, la ragione per cui non si sente resta scritta finché
   // quel blocco è quello: sceglierlo e sentirlo muto sono due momenti diversi,
@@ -696,36 +690,11 @@ async function cambiaAcceso(effetto) {
 }
 
 /**
- * Il titolo di un blocco che non ha niente da scegliere: il noise gate. Ha lo
- * stesso posto e la stessa taglia della tendina, così la catena non balla
- * passando da un blocco all'altro — solo, non si apre.
+ * La scelta di un blocco il cui modello è unico ma che sceglie fra **tipi** —
+ * il riverbero: per chi suona «Plate Rich» *è* il nome di quel blocco. Si
+ * apre col doppio tocco sul tassello, come quella dei modelli.
  */
-function intestazioneFissa(effetto) {
-  const riga = document.createElement('div');
-  riga.className = 'riga-modello';
-  const titolo = document.createElement('div');
-  titolo.className = 'nome-effetto fisso';
-  titolo.textContent = SparkEffetti.nome(effetto.name);
-  titolo.title = effetto.name;
-  riga.append(titolo, interruttoreDi(effetto));
-  return riga;
-}
-
-/**
- * Il titolo di un blocco il cui modello è unico ma che sceglie fra **tipi** —
- * il riverbero. La tendina grande governa quel parametro invece del modello:
- * per chi suona «Plate Rich» *è* il nome di quel blocco, e cercarlo in una
- * casella in fondo alle manopole era il posto sbagliato.
- */
-function intestazioneScelta(effetto, param) {
-  const riga = document.createElement('div');
-  riga.className = 'riga-modello';
-
-  const menu = document.createElement('button');
-  menu.type = 'button';
-  menu.className = 'nome-effetto';
-  menu.title = tr('tocca per cambiare tipo');
-
+function apriSceltaTipo(effetto, param) {
   const quante = SparkEffetti.posizioni(effetto.name, param.index);
   const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
   const voci = [];
@@ -741,20 +710,22 @@ function intestazioneScelta(effetto, param) {
                 testo: tr('valore dell\'ampli ({0})', mostraValore(param.value)) });
   }
   const ora = String(dove === -1 ? param.value : SparkEffetti.valorePosizione(dove));
-  menu.textContent = (voci.find(v => v.valore === ora) || {}).testo ||
-                     SparkEffetti.nome(effetto.name);
-
-  menu.addEventListener('click', () => {
-    apriElenco(Spark.CATENA[Spark.CATENA.length - 1], voci, ora, valore => {
-      param.value = Number(valore);
-      aggiornaBarrette();
-      mandaParametro(effetto.name, param.index, param.value);
-      disegnaCatena();
-    });
+  apriElenco(Spark.CATENA[Spark.CATENA.length - 1], voci, ora, valore => {
+    param.value = Number(valore);
+    aggiornaBarrette();
+    mandaParametro(effetto.name, param.index, param.value);
+    disegnaCatena();
   });
+}
 
-  riga.append(menu, interruttoreDi(effetto));
-  return riga;
+/** Il nome del tipo scelto, per il tassello del riverbero: è il nome di quel blocco. */
+function nomeTipo(effetto) {
+  const param = paramScelta(effetto);
+  if (!param) return null;
+  const quante = SparkEffetti.posizioni(effetto.name, param.index);
+  const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
+  const dove = SparkEffetti.posizioneDi(param.value, quante);
+  return nomi && dove >= 0 ? nomi[dove] : null;
 }
 
 /* ------------------------------------------------------------------
