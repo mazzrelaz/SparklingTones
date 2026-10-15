@@ -1110,18 +1110,19 @@
      dà il tasto stesso, che è anche il posto dove si sta già guardando.
      Acceso e con un pallino quando c'è del lavoro non salvato; spento e con
      la spunta subito dopo aver salvato. */
-  /* Salva e Fatto come Regola e Suona della scheda del preset: arrotondati,
-     icona e scritta; il «?» tondo accanto (15 ottobre 2026). */
-  #pannelloEditor .tasto-testa { height:44px; border-radius:14px; padding:0 16px;
-                                 font-size:0.98rem; font-weight:700;
-                                 display:inline-flex; align-items:center; gap:8px; }
+  /* Salva e Fatto: arrotondati, icona e scritta, piccoli e uguali, col bordo e
+     senza rosso (l'utente, 15 ottobre 2026); il «?» tondo accanto. Il rosso
+     resta solo su Salva quando c'è lavoro da salvare. */
+  #pannelloEditor .tasto-testa { height:34px; border-radius:11px; padding:0 11px;
+                                 font-size:0.85rem; font-weight:700;
+                                 display:inline-flex; align-items:center; gap:6px; }
   #pannelloEditor .tasto-testa:not(.primary) { background:none; border-color:var(--bordo-forte); }
-  #pannelloEditor .tasto-testa svg { width:17px; height:17px; flex:none; fill:none;
+  #pannelloEditor .tasto-testa svg { width:14px; height:14px; flex:none; fill:none;
                                      stroke:currentColor; stroke-width:1.8;
                                      stroke-linecap:round; stroke-linejoin:round; }
-  #pannelloEditor .tasto-aiuto { width:44px; height:44px; padding:0; border-radius:50%;
+  #pannelloEditor .tasto-aiuto { width:34px; height:34px; padding:0; border-radius:50%;
                                  background:none; border-color:var(--bordo-forte);
-                                 font-size:1.05rem; font-weight:700; color:var(--dim); }
+                                 font-size:0.9rem; font-weight:700; color:var(--dim); }
   #btnSalvaModifiche.da-salvare { border-color:var(--accent); color:#ffd7d9;
                                   background:#2a1417; }
   #btnSalvaModifiche.da-salvare::before { content:'• '; color:var(--accent); }
@@ -1704,7 +1705,7 @@
          «Come funziona» è il «?» qui accanto. Sul telefono resta «Salva»:
          quelle due parole in più mandano la barra a capo. -->
     <button id="btnSalvaModifiche" class="tasto-testa"></button>
-    <button class="primary tasto-testa" data-chiudi="pannelloEditor"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg><span>Fatto</span></button>
+    <button class="tasto-testa" data-chiudi="pannelloEditor"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg><span>Fatto</span></button>
     <button id="btnAiutoEditor" class="tasto-aiuto" title="Come funziona">?</button>
   </div>
   <!-- Il nome del preset, dentro un'insegna al neon del colore della sua
