@@ -27,6 +27,16 @@
     ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
 
   const TABELLA = {
+    Compressor: {                                     // Red Comp
+      src: 'immagini/blocchi/Compressor.webp', w: 832, h: 1227,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 234.6, y: 257.5, r: 72 },     // Output
+        { indice: 1, x: 593,   y: 257.4, r: 72 },     // Sensitivity
+      ],
+      led: { x: 415, y: 107, r: 28 },
+      pulsante: { x: 415, y: 1047, r: 90 },
+    },
     // LA Comp. Il parametro 0, Limit/Compress, è la levetta in mezzo: nei preset
     // veri vale sempre 0. **Da verificare a orecchio quale sia Limit**: qui si
     // assume 1 = Limit = levetta in alto, com'è disegnata.
