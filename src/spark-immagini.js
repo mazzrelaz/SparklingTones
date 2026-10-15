@@ -27,6 +27,16 @@
     ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
 
   const TABELLA = {
+    BassComp: {                                       // Bass Comp
+      src: 'immagini/blocchi/BassComp.webp', w: 900, h: 1361,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 249.2, y: 282.5, r: 99.7 },   // Comp
+        { indice: 1, x: 649,   y: 282.5, r: 99.7 },   // Gain
+      ],
+      led: { x: 449, y: 110, r: 30.2 },
+      pulsante: { x: 449, y: 1161.2, r: 84.6 },
+    },
     Compressor: {                                     // Red Comp
       src: 'immagini/blocchi/Compressor.webp', w: 832, h: 1227,
       manopola: manopola('rossa'),
