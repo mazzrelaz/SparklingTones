@@ -1587,32 +1587,6 @@ async function svuotaCoda() {
   avviaInvioParametri();       // se nel frattempo il dito ha mosso ancora
 }
 
-/**
- * Ricarica la catena da quello che l'ampli ha davvero adesso, senza
- * rimandargli il preset. Serve quando la verità può essere cambiata sotto:
- * una manopola girata sull'ampli, l'app ufficiale, un comando che non sappiamo
- * se ha attecchito — e serve per misurare, perché il modo di capire cos'è un
- * parametro è scrivergli un valore e guardare cosa ci ridà l'ampli.
- */
-$('btnRileggi').addEventListener('click', async () => {
-  if (!inModifica) return;
-  if (inModifica.offline) {
-    logLine(tr('stai regolando la copia in libreria: non c\'è nessun ampli da rileggere.'), true);
-    return;
-  }
-  if (!spark.connected) {
-    logLine(tr('ampli non connesso: non c\'è niente da rileggere.'), true);
-    return;
-  }
-  logProgress(tr('rileggo la catena dall\'ampli…'));
-  const catena = await aggiornaCatenaDallAmpli();
-  // La riuscita finisce solo nel log: nel pannello ci va quello che non va.
-  logLine(catena
-    ? tr('catena riletta: adesso sullo schermo c\'è quello che ha l\'ampli.')
-    : tr('non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.'),
-    !catena);
-});
-
 /* ---- il lavoro non salvato, e come si vede -------------------------------
    Due richieste dell'utente del 26 agosto 2026, e sono la stessa cosa vista da
    due lati: **premendo «Salva» non si aveva la certezza di niente**, e **con
@@ -1645,13 +1619,20 @@ let timerSalvato = null;
  * un'operazione che ha senso, ed è quella che porta in libreria quello che
  * l'ampli sta suonando.
  */
+/** Le icone di Salva (il dischetto) e di Salvato (la spunta, come «Fatto»). */
+const ICONA_SALVA = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h10l3 3v11H4z"/><path d="M7 3v4h6V3M7 17v-5h6v5"/></svg>';
+const ICONA_FATTO = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>';
+
 function aggiornaTastoSalva(appenaSalvato) {
   const tasto = $('btnSalvaModifiche');
   clearTimeout(timerSalvato);
   tasto.classList.remove('da-salvare', 'salvato');
 
   if (appenaSalvato) {
-    tasto.textContent = tr('✓ Salvato');
+    tasto.innerHTML = ICONA_FATTO;
+    const scritta = document.createElement('span');
+    scritta.textContent = tr('Salvato');
+    tasto.appendChild(scritta);
     tasto.classList.add('salvato');
     // Poi torna com'era: una spunta che resta per sempre finirebbe per dire
     // «salvato» anche dopo la prossima manopola girata.
@@ -1661,11 +1642,14 @@ function aggiornaTastoSalva(appenaSalvato) {
 
   // Il testo lungo sparisce sul telefono: quelle due parole in più sono la
   // differenza fra una riga sola e una barra che va a capo.
-  tasto.textContent = tr('Salva');
+  tasto.innerHTML = ICONA_SALVA;
+  const scritta = document.createElement('span');
+  scritta.textContent = tr('Salva');
   const lungo = document.createElement('span');
   lungo.className = 'solo-largo';
   lungo.textContent = tr(' in libreria');
-  tasto.appendChild(lungo);
+  scritta.appendChild(lungo);
+  tasto.appendChild(scritta);
   if (inModifica && inModifica.toccato) tasto.classList.add('da-salvare');
 }
 
