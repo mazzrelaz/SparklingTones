@@ -19,13 +19,30 @@
 // ore 12, negativo a sinistra): resta, ma non lo usa più nessuno.
 //
 // `led` è la spia (accesa col blocco), `pulsante` il footswitch o la levetta
-// (lo accende e lo spegne).
+// (lo accende e lo spegne). `levette`: interruttori di un parametro (0 o 1),
+// ritagliati dall'immagine e capovolti quando stanno giù.
 'use strict';
 (function () {
   const manopola = colore =>
     ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
 
   const TABELLA = {
+    // LA Comp. Il parametro 0, Limit/Compress, è la levetta in mezzo: nei preset
+    // veri vale sempre 0. **Da verificare a orecchio quale sia Limit**: qui si
+    // assume 1 = Limit = levetta in alto, com'è disegnata.
+    LA2AComp: {
+      src: 'immagini/blocchi/LA2AComp.webp', w: 900, h: 1327,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 1, x: 251.6, y: 278.6, r: 84.7 },   // Gain
+        { indice: 2, x: 650.8, y: 278.5, r: 84.7 },   // Peak Reduction
+      ],
+      levette: [
+        { indice: 0, x: 449.5, y: 444.1, r: 53.6, su: 1 },   // Limit (su) / Compress (giù)
+      ],
+      led: { x: 449.5, y: 115.8, r: 25.4 },
+      pulsante: { x: 449.5, y: 1105, r: 76.2 },
+    },
     'bias.noisegate': {                               // Noise Gate, rosso
       src: 'immagini/blocchi/bias.noisegate.webp', w: 900, h: 1349,
       manopola: manopola('rossa'),

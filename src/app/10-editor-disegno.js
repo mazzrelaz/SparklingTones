@@ -1070,6 +1070,46 @@ function frontaleImmagine(effetto, info) {
     box.appendChild(pulsante);
   }
 
+  // Le levette (il Limit/Compress del LA Comp): un tocco le fa scattare fra 0
+  // e 1. La levetta è quella dell'immagine, ritagliata e **capovolta** quando
+  // sta giù; `su` è il valore del parametro con la levetta in alto, com'è
+  // disegnata.
+  for (const l of info.levette || []) {
+    const param = effetto.params.find(p => p.index === l.indice);
+    if (!param) continue;
+    const lev = document.createElement('button');
+    lev.type = 'button';
+    lev.className = 'levetta-img';
+    lev.title = SparkEffetti.manopola(effetto.name, param.index, manopoleVere(effetto).length) || '';
+    posto(lev, l);
+    const giro = document.createElement('div');
+    giro.className = 'giro';
+    const pezzo = document.createElement('img');
+    pezzo.src = info.src;
+    pezzo.alt = '';
+    pezzo.draggable = false;
+    Object.assign(pezzo.style, {
+      width:  info.w / (2 * l.r) * 100 + '%',
+      height: info.h / (2 * l.r) * 100 + '%',
+      left:   -(l.x - l.r) / (2 * l.r) * 100 + '%',
+      top:    -(l.y - l.r) / (2 * l.r) * 100 + '%',
+    });
+    giro.appendChild(pezzo);
+    lev.appendChild(giro);
+    const disegna = () => {
+      const inAlto = (param.value >= 0.5 ? 1 : 0) === (l.su === undefined ? 1 : l.su);
+      giro.style.transform = inAlto ? '' : 'scaleY(-1)';
+    };
+    disegna();
+    lev.addEventListener('click', () => {
+      param.value = param.value >= 0.5 ? 0 : 1;
+      disegna();
+      aggiornaBarrette();
+      mandaParametro(effetto.name, param.index, param.value);
+    });
+    box.appendChild(lev);
+  }
+
   const quante = manopoleVere(effetto).length;
   for (const m of info.manopole) {
     const param = effetto.params.find(p => p.index === m.indice);
