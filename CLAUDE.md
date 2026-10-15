@@ -336,7 +336,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 in `main`, worktree nello scratchpad), **impaginazione approvata**. **Non si pubblica finché non
 ci sono tutte le immagini** (scelta dell'utente). Le immagini arrivano **senza manopole**, col
 puntino bianco al centro e lo sfondo nero: sfondo (`tools/togli-sfondo/`), manopole e misure le
-faccio io. Fatte: Silver 120, Blackface Duo, Tube Drive, Sustainer. Dal telefono si guarda in rete
+faccio io. **Fatte 8** (sera del 15): Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate,
+LA Comp (con la levetta Limit/Compress: **quale sia Limit è da verificare a orecchio**), Red Comp,
+Bass Comp. Domani altre: l'utente aveva finito i crediti per generarle. Dal telefono si guarda in rete
 di casa (`node tools/server-rete.js <bozza> 8096` → `http://192.168.0.223:8096`). Tutto in
 `docs/decisioni-ui.md`, ultima sezione.
 
