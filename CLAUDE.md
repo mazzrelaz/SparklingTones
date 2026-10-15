@@ -389,9 +389,11 @@ nuova, sfondo grigio, barra a quattro voci, pagina del Pedale, **banchi da aggio
 che si chiude (firmware 2.23). **«Fatto» e titolo tolti anche dalle altre pagine** (sì
 dell'utente; guscio v108; restano editor, scelta del preset per il banco, Dropbox:
 `docs/decisioni-ui.md`). **In corso: l'editor con le immagini** dei blocchi, manopole girate
-sull'immagine — bozza sul ramo `bozza-editor-grafico` (non in `main`); si aspettano le immagini
-dell'utente, **senza manopole**: le manopole e le misure le faccio io (primo fatto: il
-Blackface Duo). Tutto in `docs/decisioni-ui.md`, ultima sezione. I progetti stanno in
+sull'immagine — bozza sul ramo `bozza-editor-grafico` (non in `main`), **impaginazione approvata**
+la sera del 15; **non si pubblica finché non ci sono tutte le immagini** (scelta dell'utente).
+Le immagini arrivano **senza manopole**, col puntino bianco al centro: sfondo, manopole e misure
+li faccio io (fatti: Silver 120, Blackface Duo, Tube Drive, Sustainer). Dal telefono la si guarda
+in rete di casa. Tutto in `docs/decisioni-ui.md`, ultima sezione. I progetti stanno in
 `C:\Users\massi\Progetti Claude` (spostati il 14 ottobre; copia ogni ora in
 `Desktop\Cloud Backup\Progetti Claude`, che è sincronizzata con Google Drive).
 

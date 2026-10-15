@@ -1264,6 +1264,31 @@ della settimana. Stima di partenza: 3–5 finestre per tutto; adesso sembra meno
 
 **Stile cyberpunk** (stessa sera, scelta dell'utente): Silver 120 con la cassa sotto «per riempire il riquadro», Tube Drive, Sustainer cyberpunk al posto di quello azzurro; l'utente disegna senza manopole e con un puntino bianco al centro di ognuna. Le immagini escono da `tools/togli-sfondo` in **WebP trasparente a 900 px** (~100 KB; in PNG erano ~1 MB). Le manopole sono nostre, nei colori di ogni blocco (`manopola-verde|azzurra|viola|neon.svg`; una manopola può avere la sua). **Nell'elenco dei modelli la miniatura** accanto al nome (le voci senza immagine tengono il posto vuoto). Un pedale alto si rimpicciolisce finché sta sopra la barra in basso (`--rapporto`, `100dvh - 440px`).
 
-**Resta**: le immagini vere degli altri modelli; le scritte da togliere (barra ‹ categoria ›, nome del modello?);
-il cambio di modello col disegno; i blocchi a cursori e il riverbero a scelta; la guida.
-Provato solo nel riquadro del browser a 375 px, senza ampli.
+**L'impaginazione approvata** («ci siamo, aggiudicato», 15 ottobre 2026, sera; vista dall'utente
+sul suo telefono):
+- **Riquadro dell'immagine a misura fissa**, quella del Silver 120 (`SparkImmagini.RIQUADRO`, il
+  blocco con le manopole più piccole); ogni immagine ci sta dentro centrata. **Nome, tempo e
+  catena non si muovono mai**: la testa non prende lo spazio che avanza (era `flex:0.14`),
+  misurato sui sette blocchi. Il nome sta 16 px più in basso (`padding-top`).
+- **Il riquadro grosso non ha né bordo né fondo suo**: grigio come la pagina, sparisce.
+  **Scartati**: riquadro nero sulla pagina grigia, bordo tolto, bordo più spesso, pagina
+  dell'editor tutta nera; e prima ancora il ritaglio della fila dei comandi sul telefono.
+- **Effetto spento: il suo tassello sale di 12 px e si sbiadisce** (la striscia ha 14 px d'aria
+  in alto); acceso e spento aggiornano il tassello al suo posto (`cambiaAcceso` → `scegliBlocco`),
+  così si vede il movimento.
+- **In alto Salva, Fatto e «?»**, piccoli (34 px), col bordo, uguali, **niente rosso** (resta
+  solo su Salva con lavoro non salvato); Salva col dischetto, Fatto con la spunta. **Tolti
+  «Rileggi dall'ampli» e il menu ⋯**: «Come funziona» è il «?».
+- **Scheda del preset**: Famiglia e Categorie chiuse come le Note (`rigaApribile`), la riga
+  chiusa dice cosa c'è dentro.
+
+**Per vederla dal telefono senza pubblicare**: `node tools/server-rete.js <bozza> 8096` (
+ascolta su tutta la rete) e sul telefono `http://192.168.0.223:8096`. L'utente ha messo la rete
+di casa (UPC3088350 e il ripetitore) su «Privata» e creato lui la regola del firewall
+«Bozzaa Sparklingtones», TCP 8096, solo privata: la regola di Windows blocca Node sulle reti
+pubbliche, e il firewall non lo tocco io. Senza https niente Bluetooth: solo l'interfaccia, coi
+preset importati da un'esportazione della libreria.
+
+**Resta**: le immagini vere degli altri modelli (l'utente **non vuole pubblicare niente finché
+non sono caricate tutte**); i blocchi a cursori (EQ) e il riverbero a scelta col disegno; la
+guida; poi la prova vera col telefono e l'ampli.
