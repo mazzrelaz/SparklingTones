@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Segna le manopole</title>
+<!--
+  Per l'editor con le immagini (bozza del 15 ottobre 2026): dice all'app dove
+  stanno le manopole sull'immagine di un pedale o di un ampli. Si sceglie
+  l'immagine, il modello e, se c'è, la manopola disegnata a parte; poi per ogni
+  manopola si tocca il centro e il bordo. Esce una voce da incollare in
+  src/spark-immagini.js. Gira anche da file://, senza server.
+-->
+<style>
+  :root { --bg:#101010; --carta:#1c1c1c; --testo:#eee; --dim:#9a9a9a; --rosso:#e0182d; --linea:#333; }
+  body { margin:0; background:var(--bg); color:var(--testo); font:15px/1.45 system-ui, sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:14px 16px 40px; }
+  h1 { font-size:1.15rem; margin:4px 0 10px; }
+  .passo { background:var(--carta); border:1px solid var(--linea); border-radius:12px; padding:12px; margin:10px 0; }
+  .passo h2 { font-size:0.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin:0 0 8px; }
+  label.file { display:inline-block; background:#2a2a2a; border:1px solid #444; border-radius:8px; padding:8px 12px; cursor:pointer; }
+  label.file input { display:none; }
+  input[type=search] { width:100%; box-sizing:border-box; padding:9px 10px; border-radius:8px; border:1px solid #444; background:#151515; color:var(--testo); font:inherit; }
+  #modelli { max-height:220px; overflow:auto; margin-top:6px; }
+  #modelli button { display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--linea);
+                    color:var(--testo); padding:7px 4px; font:inherit; cursor:pointer; }
+  #modelli button small { color:var(--dim); }
+  #modelli button.scelto { color:#fff; background:#3a1218; }
+  .nota { color:var(--dim); font-size:0.85rem; margin:6px 0 0; }
+  #tela { position:relative; margin:10px 0; touch-action:manipulation; user-select:none; -webkit-user-select:none; }
+  #tela img.sfondo { display:block; width:100%; }
+  .segno { position:absolute; border:2px solid #f0f; border-radius:50%; pointer-events:none; box-sizing:border-box; }
+  .segno.fatto { border-color:#2f2; }
+  .segno .giro { position:absolute; inset:0; border-radius:50%; overflow:hidden; }
+  .segno .giro img { position:absolute; max-width:none; }
+  .croce { position:absolute; width:10px; height:10px; margin:-5px; border-radius:50%; background:#f0f; pointer-events:none; }
+  #domanda { font-weight:700; color:#fff; min-height:1.4em; }
+  .tasti { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .tasti button { background:#2a2a2a; color:var(--testo); border:1px solid #444; border-radius:8px; padding:8px 12px; font:inherit; cursor:pointer; }
+  .tasti button.primo { background:var(--rosso); border-color:var(--rosso); color:#fff; font-weight:700; }
+  input[type=range] { width:100%; }
+  textarea { width:100%; box-sizing:border-box; height:190px; background:#0b0b0b; color:#cfc; border:1px solid #444; border-radius:8px; font:12px/1.4 ui-monospace, monospace; padding:8px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Segna le manopole</h1>
+
+  <div class="passo">
+    <h2>1 · L'immagine del pedale o dell'ampli</h2>
+    <label class="file">Scegli l'immagine<input type="file" id="fileSfondo" accept="image/*"></label>
+    <span id="nomeSfondo" class="nota"></span>
+  </div>
+
+  <div class="passo">
+    <h2>2 · Il modello</h2>
+    <input type="search" id="cerca" placeholder="cerca: sustain, twin, delay…">
+    <div id="modelli"></div>
+  </div>
+
+  <div class="passo">
+    <h2>3 · La manopola a parte (se ce l'hai)</h2>
+    <label class="file">Scegli la manopola<input type="file" id="fileManopola" accept="image/*"></label>
+    <span id="nomeManopola" class="nota"></span>
+    <p class="nota">Un'immagine sola della manopola, col segno dritto verso l'alto. Senza, l'app gira il
+      cerchio ritagliato dall'immagine del pedale: allora come «bordo» tocca la punta della freccia.</p>
+  </div>
+
+  <div class="passo" id="passoSegna" hidden>
+    <h2>4 · Tocca sull'immagine</h2>
+    <div id="domanda"></div>
+    <div class="tasti">
+      <button id="btnSalta">Salta questa</button>
+      <button id="btnIndietro">Rifai l'ultima</button>
+    </div>
+    <div id="tela"></div>
+    <div id="prova" hidden>
+      <p class="nota">Prova: tutte le manopole insieme, da 0 a 10.</p>
+      <input type="range" id="valore" min="0" max="1000" value="500">
+    </div>
+  </div>
+
+  <div class="passo" id="passoFine" hidden>
+    <h2>5 · Il risultato</h2>
+    <p class="nota" id="spiegaFine"></p>
+    <textarea id="uscita" readonly></textarea>
+    <div class="tasti"><button class="primo" id="btnCopia">Copia</button></div>
+  </div>
+</main>
+
+<script src="../src/spark-effetti.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const S = window.SparkEffetti;
+
+let sfondo = null;          // { url, w, h, nome }
+let manopola = null;        // { url, nome }
+let modello = null;
+let domande = [];           // le cose da toccare, in fila
+let fatte = [];             // { tipo, indice, nome, x, y, r, a }
+let tocco = null;           // il centro toccato, in attesa del bordo
+
+const leggiFile = (input, quando) => input.addEventListener('change', () => {
+  const f = input.files[0];
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  quando(url, f.name);
+});
+
+leggiFile($('fileSfondo'), (url, nome) => {
+  const img = new Image();
+  img.onload = () => {
+    sfondo = { url, w: img.naturalWidth, h: img.naturalHeight, nome };
+    $('nomeSfondo').textContent = `${nome} — ${sfondo.w} × ${sfondo.h}`;
+    ricomincia();
+  };
+  img.src = url;
+});
+leggiFile($('fileManopola'), (url, nome) => {
+  manopola = { url, nome };
+  $('nomeManopola').textContent = nome;
+  ricomincia();
+});
+
+/* ---- i modelli ---- */
+function elencoModelli() {
+  const filtro = $('cerca').value.trim().toLowerCase();
+  const box = $('modelli');
+  box.innerHTML = '';
+  S.MODELLI.forEach((gruppo, posizione) => gruppo.forEach(id => {
+    const testo = `${S.nome(id)} ${id} ${S.ampliReale(id) || ''}`.toLowerCase();
+    if (filtro && !testo.includes(filtro)) return;
+    const b = document.createElement('button');
+    b.className = id === modello ? 'scelto' : '';
+    const reale = S.ampliReale(id);
+    b.innerHTML = '';
+    b.append(S.nome(id) + (reale ? ' — ' + reale : ''));
+    const piccolo = document.createElement('small');
+    piccolo.textContent = '  ' + id;
+    b.append(piccolo);
+    b.addEventListener('click', () => { modello = id; elencoModelli(); ricomincia(); });
+    box.appendChild(b);
+  }));
+}
+$('cerca').addEventListener('input', elencoModelli);
+elencoModelli();
+
+/** Le manopole del modello nell'ordine in cui si leggono: per gli ampli quello del frontale. */
+function manopoleDel(id) {
+  const quante = S.quanteManopole(id);
+  const vere = [];
+  for (let i = 0; i < quante; i++) {
+    if (S.extra(id, i) || S.interruttore(id, i)) continue;
+    vere.push({ indice: i, nome: S.manopola(id, i, quante) || `manopola ${i + 1}` });
+  }
+  const toni = ['Gain', 'Treble', 'Middle', 'Bass', 'Master'];
+  const frontale = vere.length === 5 && toni.every((t, i) => vere[i].nome === t);
+  return frontale ? [0, 3, 2, 1, 4].map(i => vere[i]) : vere;
+}
+
+/* ---- il segnare ---- */
+function ricomincia() {
+  if (!sfondo || !modello) return;
+  domande = manopoleDel(modello).map(m => ({ tipo: 'manopola', ...m }));
+  domande.push({ tipo: 'led', nome: 'la spia (il LED)' });
+  domande.push({ tipo: 'pulsante', nome: 'il footswitch o l\'interruttore' });
+  fatte = [];
+  tocco = null;
+  $('passoSegna').hidden = false;
+  disegna();
+}
+
+const prossima = () => domande[fatte.length];
+
+function chiedi() {
+  const d = prossima();
+  if (!d) { $('domanda').textContent = 'Finito.'; return; }
+  const cosa = d.tipo === 'manopola' ? `la manopola ${d.nome.toUpperCase()}` : d.nome;
+  if (!tocco) $('domanda').textContent = `Tocca il CENTRO di ${cosa}`;
+  else if (d.tipo === 'manopola' && !manopola)
+    $('domanda').textContent = `Tocca la PUNTA della freccia di ${cosa}`;
+  else $('domanda').textContent = `Tocca il BORDO di ${cosa}`;
+}
+
+$('tela').addEventListener('click', evento => {
+  const d = prossima();
+  if (!d || !sfondo) return;
+  const r = $('tela').getBoundingClientRect();
+  const x = (evento.clientX - r.left) / r.width * sfondo.w;
+  const y = (evento.clientY - r.top) / r.height * sfondo.h;
+  if (!tocco) { tocco = { x, y }; disegna(); return; }
+  const dx = x - tocco.x, dy = y - tocco.y;
+  const voce = { ...d, x: tocco.x, y: tocco.y, r: Math.hypot(dx, dy) };
+  // La direzione della freccia, in gradi da ore 12: serve solo all'immagine intera.
+  if (d.tipo === 'manopola' && !manopola) voce.a = Math.atan2(dx, -dy) * 180 / Math.PI;
+  fatte.push(voce);
+  tocco = null;
+  disegna();
+});
+$('btnSalta').addEventListener('click', () => {
+  const d = prossima();
+  if (!d) return;
+  fatte.push({ ...d, salta: true });
+  tocco = null;
+  disegna();
+});
+$('btnIndietro').addEventListener('click', () => {
+  if (tocco) tocco = null; else fatte.pop();
+  disegna();
+});
+
+function disegna() {
+  const tela = $('tela');
+  tela.innerHTML = '';
+  if (!sfondo) return;
+  const img = document.createElement('img');
+  img.className = 'sfondo';
+  img.src = sfondo.url;
+  tela.appendChild(img);
+  const pct = (v, tot) => v / tot * 100 + '%';
+  const valore = $('valore').value / 1000;
+
+  for (const f of fatte) {
+    if (f.salta) continue;
+    const s = document.createElement('div');
+    s.className = 'segno fatto';
+    Object.assign(s.style, { left: pct(f.x - f.r, sfondo.w), top: pct(f.y - f.r, sfondo.h),
+                             width: pct(2 * f.r, sfondo.w), height: pct(2 * f.r, sfondo.h) });
+    if (f.tipo === 'manopola') {
+      const giro = document.createElement('div');
+      giro.className = 'giro';
+      const pezzo = document.createElement('img');
+      if (manopola) {
+        pezzo.src = manopola.url;
+        Object.assign(pezzo.style, { left: 0, top: 0, width: '100%', height: '100%' });
+      } else {
+        pezzo.src = sfondo.url;
+        Object.assign(pezzo.style, { width: pct(sfondo.w, 2 * f.r), height: pct(sfondo.h, 2 * f.r),
+                                     left: '-' + pct(f.x - f.r, 2 * f.r), top: '-' + pct(f.y - f.r, 2 * f.r) });
+      }
+      giro.style.transform = `rotate(${valore * 270 - 135 - (f.a || 0)}deg)`;
+      giro.appendChild(pezzo);
+      s.appendChild(giro);
+    }
+    tela.appendChild(s);
+  }
+  if (tocco) {
+    const c = document.createElement('div');
+    c.className = 'croce';
+    Object.assign(c.style, { left: pct(tocco.x, sfondo.w), top: pct(tocco.y, sfondo.h) });
+    tela.appendChild(c);
+  }
+  $('prova').hidden = !fatte.some(f => f.tipo === 'manopola' && !f.salta);
+  chiedi();
+  risultato();
+}
+$('valore').addEventListener('input', disegna);
+
+/* ---- la voce per src/spark-immagini.js ---- */
+function risultato() {
+  const finito = !prossima();
+  $('passoFine').hidden = !finito;
+  if (!finito) return;
+  const n = v => Math.round(v * 10) / 10;
+  const est = (sfondo.nome.match(/\.[a-z0-9]+$/i) || ['.png'])[0].toLowerCase();
+  const righe = [];
+  righe.push(`    ${/^[A-Za-z_$][\w$]*$/.test(modello) ? modello : `'${modello}'`}: {`);
+  righe.push(`      src: 'immagini/blocchi/${modello}${est}', w: ${sfondo.w}, h: ${sfondo.h},`);
+  if (manopola) {
+    const estM = (manopola.nome.match(/\.[a-z0-9]+$/i) || ['.png'])[0].toLowerCase();
+    righe.push(`      manopola: 'immagini/blocchi/${modello}-manopola${estM}',`);
+  }
+  righe.push('      manopole: [');
+  for (const f of fatte) {
+    if (f.tipo !== 'manopola' || f.salta) continue;
+    const a = f.a !== undefined ? `, a: ${Math.round(f.a)}` : '';
+    righe.push(`        { indice: ${f.indice}, x: ${n(f.x)}, y: ${n(f.y)}, r: ${n(f.r)}${a} },   // ${f.nome}`);
+  }
+  righe.push('      ],');
+  for (const tipo of ['led', 'pulsante']) {
+    const f = fatte.find(v => v.tipo === tipo && !v.salta);
+    if (f) righe.push(`      ${tipo}: { x: ${n(f.x)}, y: ${n(f.y)}, r: ${n(f.r)} },`);
+  }
+  righe.push('    },');
+  $('uscita').value = righe.join('\n');
+  $('spiegaFine').textContent = `Copia questo testo e incollamelo, e mandami l'immagine` +
+    (manopola ? ' e la manopola' : '') + `. Se un cerchio è venuto storto, «Rifai l'ultima».`;
+}
+$('btnCopia').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText($('uscita').value); $('btnCopia').textContent = 'Copiato'; }
+  catch { $('uscita').select(); document.execCommand('copy'); $('btnCopia').textContent = 'Copiato'; }
+  setTimeout(() => { $('btnCopia').textContent = 'Copia'; }, 1500);
+});
+</script>
+</body>
+</html>
