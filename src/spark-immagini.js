@@ -26,6 +26,16 @@
     ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
 
   const TABELLA = {
+    'bias.noisegate': {                               // Noise Gate, rosso
+      src: 'immagini/blocchi/bias.noisegate.webp', w: 900, h: 1349,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 254.2, y: 285.8, r: 71.9 },   // Threshold
+        { indice: 1, x: 650.9, y: 285.8, r: 71.9 },   // Decay
+      ],
+      led: { x: 450.3, y: 122.5, r: 21.3 },
+      pulsante: { x: 450.3, y: 1085.7, r: 60.4 },
+    },
     // Il Sustainer cyberpunk (al posto di quello azzurro del primo giro).
     BlueComp: {
       src: 'immagini/blocchi/BlueComp.webp', w: 900, h: 906,
