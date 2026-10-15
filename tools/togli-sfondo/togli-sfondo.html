@@ -1,0 +1,83 @@
+<!doctype html>
+<meta charset="utf-8">
+<pre id="out">ATTESA</pre>
+<script>
+// Toglie lo sfondo scuro e uniforme di un'immagine: parte dai bordi e si allarga
+// sui pixel scuri (luce < ALTO), fermandosi al contorno. Dentro quella zona la
+// trasparenza segue la luce (sotto BASSO trasparente del tutto): l'alone resta,
+// sfumato. Poi si stringe al riquadro di ciò che resta.
+// Uso: togli-sfondo.html?img=<url>&alto=70&basso=20&nero=14&isole=1500&sopra=130
+const q = new URLSearchParams(location.search);
+const ALTO = +(q.get('alto') || 70), BASSO = +(q.get('basso') || 20);
+const NERO = +(q.get('nero') || 0), ISOLE = +(q.get('isole') || 1500);
+// Solo le isole che stanno tutte sopra questa riga: dentro la maniglia, non dentro il corpo.
+const SOPRA = +(q.get('sopra') || 1e9);
+const PIENO = +(q.get('pieno') || 14), ALONE = +(q.get('alone') || 14);
+const out = document.getElementById('out');
+const img = new Image();
+img.onload = () => {
+  const W = img.naturalWidth, H = img.naturalHeight;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const dati = g.getImageData(0, 0, W, H); const d = dati.data;
+  const luce = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++) luce[i] = Math.max(d[i*4], d[i*4+1], d[i*4+2]);
+
+  // Prima il nero pieno (luce < PIENO) che parte dai bordi: lo sfondo di sicuro.
+  // Poi una fascia di ALONE pixel attorno, sui pixel scuri (luce < ALTO): lì la
+  // trasparenza segue la luce. La fascia è stretta apposta: i pannelli scuri
+  // dell'oggetto, raggiunti da una fessura, restano interi.
+  const fondo = new Uint8Array(W * H);
+  const dist = new Int16Array(W * H).fill(-1);
+  let fila = [];
+  const semina = i => { if (dist[i] < 0 && luce[i] < PIENO) { dist[i] = 0; fondo[i] = 1; fila.push(i); } };
+  for (let x = 0; x < W; x++) { semina(x); semina((H - 1) * W + x); }
+  for (let y = 0; y < H; y++) { semina(y * W); semina(y * W + W - 1); }
+  for (let k = 0; k < fila.length; k++) {
+    const i = fila[k], x = i % W;
+    for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) semina(j >= 0 && j < W * H ? j : i);
+  }
+  for (let passo = 1; passo <= ALONE; passo++) {
+    const prossima = [];
+    for (const i of fila) {
+      const x = i % W;
+      for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) {
+        if (j >= 0 && j < W * H && dist[j] < 0 && luce[j] < ALTO) { dist[j] = passo; fondo[j] = 1; prossima.push(j); }
+      }
+    }
+    fila = prossima;
+  }
+  // Le isole nere chiuse (l'interno della maniglia): nero pieno e grandi.
+  if (NERO) {
+    const visto = new Uint8Array(W * H);
+    for (let s = 0; s < W * H; s++) {
+      if (visto[s] || fondo[s] || luce[s] >= NERO) continue;
+      const isola = [s]; visto[s] = 1;
+      for (let k = 0; k < isola.length; k++) {
+        const i = isola[k], x = i % W;
+        for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) {
+          if (j >= 0 && j < W * H && !visto[j] && !fondo[j] && luce[j] < NERO) { visto[j] = 1; isola.push(j); }
+        }
+      }
+      let fondoIsola = 0; for (const i of isola) fondoIsola = Math.max(fondoIsola, (i / W) | 0);
+      if (isola.length > ISOLE && fondoIsola < SOPRA) for (const i of isola) fondo[i] = 1;
+    }
+  }
+  let x0 = W, y0 = H, x1 = 0, y1 = 0;
+  for (let i = 0; i < W * H; i++) {
+    let a = 1;
+    if (fondo[i]) a = Math.min(1, Math.max(0, (luce[i] - BASSO) / (ALTO - BASSO)));
+    if (a > 0 && a < 1) for (let k = 0; k < 3; k++) d[i*4+k] = Math.min(255, Math.round(d[i*4+k] / a));
+    d[i*4+3] = Math.round(a * 255);
+    if (a > 0.06) { const x = i % W, y = (i / W) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  g.putImageData(dati, 0, 0);
+  const m = 4;
+  x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(W - 1, x1 + m); y1 = Math.min(H - 1, y1 + m);
+  const c2 = document.createElement('canvas'); c2.width = x1 - x0 + 1; c2.height = y1 - y0 + 1;
+  c2.getContext('2d').drawImage(c, -x0, -y0);
+  out.textContent = `TAGLIO ${x0} ${y0} ${c2.width} ${c2.height}\n` + c2.toDataURL('image/png');
+};
+img.onerror = () => { out.textContent = 'ERRORE'; };
+img.src = q.get('img');
+</script>
