@@ -33,6 +33,10 @@
   .segno.fatto { border-color:#2f2; }
   .segno .giro { position:absolute; inset:0; border-radius:50%; overflow:hidden; }
   .segno .giro img { position:absolute; max-width:none; }
+  .segno .giro.disegno { overflow:visible; border-radius:0; }
+  #telaManopola { position:relative; width:min(100%, 260px); margin:10px auto 0; }
+  #telaManopola img.sfondo { display:block; width:100%; background:repeating-conic-gradient(#2a2a2a 0 25%, #1a1a1a 0 50%) 0 0/16px 16px; }
+  .domanda { font-weight:700; color:#fff; margin-top:10px; }
   .croce { position:absolute; width:10px; height:10px; margin:-5px; border-radius:50%; background:#f0f; pointer-events:none; }
   #domanda { font-weight:700; color:#fff; min-height:1.4em; }
   .tasti { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
@@ -65,6 +69,13 @@
     <span id="nomeManopola" class="nota"></span>
     <p class="nota">Un'immagine sola della manopola, col segno dritto verso l'alto. Senza, l'app gira il
       cerchio ritagliato dall'immagine del pedale: allora come «bordo» tocca la punta della freccia.</p>
+    <!-- La manopola non è per forza quadrata, e la freccia può uscire dal
+         cerchio: per questo anche lì si segnano il centro e il bordo. -->
+    <div id="passoManopola" hidden>
+      <div id="domandaManopola" class="domanda"></div>
+      <div class="tasti"><button id="btnRifaiManopola">Rifai</button></div>
+      <div id="telaManopola"></div>
+    </div>
   </div>
 
   <div class="passo" id="passoSegna" hidden>
@@ -119,9 +130,71 @@ leggiFile($('fileSfondo'), (url, nome) => {
   img.src = url;
 });
 leggiFile($('fileManopola'), (url, nome) => {
-  manopola = { url, nome };
-  $('nomeManopola').textContent = nome;
-  ricomincia();
+  const img = new Image();
+  img.onload = () => {
+    // x, y, r: il cerchio della manopola nei suoi pixel, da segnare.
+    manopola = { url, nome, w: img.naturalWidth, h: img.naturalHeight };
+    $('nomeManopola').textContent = `${nome} — ${manopola.w} × ${manopola.h}`;
+    toccoManopola = null;
+    disegnaManopola();
+    ricomincia();
+  };
+  img.src = url;
+});
+
+/* ---- il cerchio della manopola ---- */
+let toccoManopola = null;
+const manopolaPronta = () => !manopola || manopola.r !== undefined;
+
+function disegnaManopola() {
+  const tela = $('telaManopola');
+  $('passoManopola').hidden = !manopola;
+  tela.innerHTML = '';
+  if (!manopola) return;
+  const img = document.createElement('img');
+  img.className = 'sfondo';
+  img.src = manopola.url;
+  tela.appendChild(img);
+  const pct = (v, tot) => v / tot * 100 + '%';
+  if (manopola.r !== undefined) {
+    const s = document.createElement('div');
+    s.className = 'segno fatto';
+    Object.assign(s.style, { left: pct(manopola.x - manopola.r, manopola.w), top: pct(manopola.y - manopola.r, manopola.h),
+                             width: pct(2 * manopola.r, manopola.w), height: pct(2 * manopola.r, manopola.h) });
+    tela.appendChild(s);
+  }
+  const punto = manopola.r !== undefined ? manopola : toccoManopola;
+  if (punto) {
+    const c = document.createElement('div');
+    c.className = 'croce';
+    Object.assign(c.style, { left: pct(punto.x, manopola.w), top: pct(punto.y, manopola.h) });
+    tela.appendChild(c);
+  }
+  $('domandaManopola').textContent = manopola.r !== undefined
+    ? 'Fatto: il cerchio verde deve stare sul bordo del cerchio della manopola (la freccia può uscire).'
+    : toccoManopola ? 'Sulla manopola: tocca il BORDO del cerchio (non la punta della freccia)'
+                    : 'Sulla manopola: tocca il CENTRO, dove gira';
+}
+$('telaManopola').addEventListener('click', evento => {
+  if (!manopola || manopola.r !== undefined) return;
+  const r = $('telaManopola').getBoundingClientRect();
+  const x = (evento.clientX - r.left) / r.width * manopola.w;
+  const y = (evento.clientY - r.top) / r.height * manopola.h;
+  if (!toccoManopola) toccoManopola = { x, y };
+  else {
+    Object.assign(manopola, { x: toccoManopola.x, y: toccoManopola.y,
+                              r: Math.hypot(x - toccoManopola.x, y - toccoManopola.y) });
+    toccoManopola = null;
+  }
+  disegnaManopola();
+  disegna();
+});
+$('btnRifaiManopola').addEventListener('click', () => {
+  if (!manopola) return;
+  delete manopola.x; delete manopola.y; delete manopola.r;
+  toccoManopola = null;
+  disegnaManopola();
+  disegna();
 });
 
 /* ---- i modelli ---- */
@@ -233,8 +306,14 @@ function disegna() {
       giro.className = 'giro';
       const pezzo = document.createElement('img');
       if (manopola) {
+        // Con le sue proporzioni, il suo cerchio sul cerchio segnato, senza tagli.
+        giro.classList.add('disegno');
+        if (!manopolaPronta()) continue;
         pezzo.src = manopola.url;
-        Object.assign(pezzo.style, { left: 0, top: 0, width: '100%', height: '100%' });
+        Object.assign(pezzo.style, {
+          width: pct(manopola.w, 2 * manopola.r), height: pct(manopola.h, 2 * manopola.r),
+          left: (0.5 - manopola.x / (2 * manopola.r)) * 100 + '%',
+          top:  (0.5 - manopola.y / (2 * manopola.r)) * 100 + '%' });
       } else {
         pezzo.src = sfondo.url;
         Object.assign(pezzo.style, { width: pct(sfondo.w, 2 * f.r), height: pct(sfondo.h, 2 * f.r),
@@ -260,7 +339,7 @@ $('valore').addEventListener('input', disegna);
 
 /* ---- la voce per src/spark-immagini.js ---- */
 function risultato() {
-  const finito = !prossima();
+  const finito = !prossima() && manopolaPronta();
   $('passoFine').hidden = !finito;
   if (!finito) return;
   const n = v => Math.round(v * 10) / 10;
@@ -270,7 +349,8 @@ function risultato() {
   righe.push(`      src: 'immagini/blocchi/${modello}${est}', w: ${sfondo.w}, h: ${sfondo.h},`);
   if (manopola) {
     const estM = (manopola.nome.match(/\.[a-z0-9]+$/i) || ['.png'])[0].toLowerCase();
-    righe.push(`      manopola: 'immagini/blocchi/${modello}-manopola${estM}',`);
+    righe.push(`      manopola: { src: 'immagini/blocchi/${modello}-manopola${estM}', ` +
+               `w: ${manopola.w}, h: ${manopola.h}, x: ${n(manopola.x)}, y: ${n(manopola.y)}, r: ${n(manopola.r)} },`);
   }
   righe.push('      manopole: [');
   for (const f of fatte) {
