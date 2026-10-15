@@ -702,7 +702,14 @@ async function cambiaAcceso(effetto) {
       if (SparkEffetti.extra(effetto.name, p.index)) p.value = effetto.enabled ? 1 : 0;
     });
   }
-  disegnaCatena();
+  // Il tassello si aggiorna al suo posto invece di ridisegnare la catena: così
+  // si vede salire (spento) e riscendere (acceso), e la catena non si sposta.
+  const posizione = inModifica.effetti.indexOf(effetto);
+  const t = $('catena').querySelectorAll('.striscia .tassello')[posizione];
+  if (!t) { disegnaCatena(); return; }
+  t.classList.toggle('acceso', effetto.enabled);
+  t.classList.toggle('spento', !effetto.enabled);
+  scegliBlocco(inModifica.scelto);
 }
 
 /**

@@ -903,7 +903,7 @@
      (era 0.14): con i blocchi disegnati il riquadro cambia altezza da un blocco
      all'altro, e nome, tempo e catena si spostavano sotto le dita (l'utente:
      «devono essere sempre alla stessa altezza»). */
-  #pannelloEditor .testa-editor { flex:0 0 auto; display:flex;
+  #pannelloEditor .testa-editor { flex:0 0 auto; display:flex; padding-top:16px;
                                   flex-direction:column; justify-content:center; }
   #pannelloEditor .blocco.aFuoco { flex:1 0 auto; display:flex; flex-direction:column; }
   /* Due righe di manopole, sempre: 94 px l'una, 18 di stacco e i 26 di
@@ -917,7 +917,8 @@
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
   /* Quando i sette tasselli ci stanno tutti, la fila va **in mezzo**: allineata
      a sinistra lasciava un vuoto a destra e sembrava caduta da una parte. */
-  .striscia { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 9px;
+  /* In alto 14 px di aria: ci sale il tassello di un effetto spento. */
+  .striscia { display:flex; gap:8px; overflow-x:auto; padding:14px 2px 9px;
               justify-content:center; scroll-snap-type:x proximity; }
   /* Quando invece non ci stanno — sotto gli ~820 px la fila è più larga dello
      schermo — si scorre, e allora `center` va tolto o taglia il primo tassello.
@@ -938,7 +939,10 @@
   .tassello.scelto { border-color:var(--cat);
                      box-shadow:0 0 0 1px var(--cat) inset,
                                 0 0 10px -1px var(--cat), 0 0 26px -6px var(--cat); }
-  .tassello.spento { opacity:0.5; }
+  /* Un effetto spento **esce dalla catena**: il suo tassello si alza di un po' e
+     si spegne, come un pedale messo da parte (l'utente, 15 ottobre 2026). */
+  .tassello { transition:transform .2s ease, opacity .2s ease; }
+  .tassello.spento { opacity:0.5; transform:translateY(-12px); }
   .tassello .cat { font-family:var(--strumento); font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
                    color:var(--cat); font-weight:700;
                    text-shadow:0 0 6px var(--cat), 0 0 14px var(--cat); }
@@ -961,10 +965,10 @@
   /* Il riquadro dell'immagine ha una misura sola per tutti i blocchi, quella del
      Silver 120 (`--riquadro`, larghezza su altezza): l'immagine ci sta dentro
      centrata (`.tela`). Su uno schermo basso si rimpicciolisce finché sta sopra
-     la barra in basso: ~440 px è quello che sta sopra (testa, tempo, catena)
+     la barra in basso: ~470 px è quello che sta sopra (testa, tempo, catena)
      più la barra. */
   .frontale { margin:12px auto 6px; aspect-ratio:var(--riquadro, 1);
-              width:min(100%, 420px, max(200px, calc((100dvh - 440px) * var(--riquadro, 1))));
+              width:min(100%, 420px, max(200px, calc((100dvh - 470px) * var(--riquadro, 1))));
               display:flex; align-items:center; justify-content:center;
               touch-action:none; user-select:none; -webkit-user-select:none; }
   .frontale .tela { position:relative; }
