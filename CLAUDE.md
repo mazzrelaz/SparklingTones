@@ -7,73 +7,57 @@ racconta il progetto a chi arriva da fuori. **Dove si riprende** è in fondo.
 
 ## Questa memoria
 
-Entra intera in contesto a **ogni** sessione: qui resta solo **ciò che mi impedisce di fare
-danni o di ripercorrere una strada chiusa**, più il lavoro in corso. Il ragionamento sta in
-`docs/`, da aprire solo quando si rimette in discussione quella cosa:
+Entra intera in contesto a **ogni** sessione: qui solo **ciò che impedisce di fare danni o di
+ripercorrere una strada chiusa**, più il lavoro in corso. Il ragionamento sta in `docs/`:
 
 | file | quando aprirlo |
 |---|---|
-| `docs/pedale-lavoro.md` | **prima di toccare il pedale**: compilare e caricare, mappa, basetta, hardware, cosa manca |
-| `docs/pedale.md` | si rimette in discussione il pedale: forma, ferramenta, scatola, BLE, ponte, MIDI |
-| `docs/protocollo-spark2.md` | protocollo, encoder, scrittura dei preset, Hendrix |
-| `docs/decisioni-ui.md` | si rimette in discussione una scelta grafica o di flusso; l'inglese |
-| `docs/dropbox.md` | il sync si rompe o si cambia trasporto; la fine del backup ufficiale nel 2027 |
-| `docs/looper.md` | si riapre il looper (capitolo archiviato) |
-| `docs/snake.md` | si riapre StompSnake |
+| `docs/pedale-lavoro.md` | **prima di toccare il pedale**: compilare, caricare, mappa, basetta, cosa manca |
+| `docs/pedale.md` | si rimette in discussione il pedale (forma, BLE, ponte, MIDI) |
+| `docs/protocollo-spark2.md` | protocollo, encoder, scrittura dei preset, Hendrix, NEO |
+| `docs/decisioni-ui.md` | una scelta grafica o di flusso; l'inglese; **l'editor con le immagini** (ultima sezione) |
+| `docs/dropbox.md` | il sync; la fine del backup ufficiale nel 2027 |
+| `docs/looper.md` · `docs/snake.md` | il looper (archiviato) · StompSnake |
 | `docs/HANDOFF-2026-08-10.md` | ricerca originale: comandi, tipi dati, catture |
-| `docs/diario.md` | com'è andata una sessione passata; le versioni lunghe di questo file |
-| `docs/sito.md` | si tocca `sparklingtones.com` |
-| `docs/sicurezza.md` | audit del 17 settembre 2026, tutti e sei i punti corretti |
+| `docs/diario.md` | sessioni passate; **le versioni lunghe di questo file** |
+| `docs/sito.md` · `docs/sicurezza.md` | `sparklingtones.com` · audit del 17 settembre 2026 |
 
-**I documenti grossi non si leggono interi** (`pedale.md` 173 KB ≈ 55.000 token,
-`decisioni-ui.md` 60 KB, `HANDOFF` 45 KB): `grep -n '^#'` per l'indice, poi solo la sezione.
-
-**Si sposta, non si butta**: ogni sfoltita copia parola per parola in `docs/` ciò che accorcia
-(l'ultima il 24 settembre 2026, da 34 a 23 KB, per il consumo di token). **Si rigonfia in due
-settimane**: si rimisura con `wc -c CLAUDE.md`, e sopra i 30 KB si sfoltisce.
-
+**I documenti grossi non si leggono interi** (`pedale.md` 173 KB, `decisioni-ui.md` ~90 KB,
+`HANDOFF` 45 KB): `grep -n '^#'` per l'indice, poi solo la sezione. **Si sposta, non si butta**:
+ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 15 ottobre 2026, da 30 a
+~20 KB). Si rimisura con `wc -c CLAUDE.md`: sopra i 30 KB si sfoltisce.
 
 ## Struttura
 
 ```
-index.html                        HTML e <style> dell'app: sezione Preset e sezione Live, stesso documento
-src/app/01-…15-*.js               lo script dell'app, in fila (fino al 7 ottobre 2026 stava in index.html)
-live.html                         rimando a index.html#live
-guida.html / guida.en.html        guida all'uso (grafica in guida.css e guida.js, comuni); l'app apre in un iframe quella della sua lingua (⋯ → Guida)
-guida-pedale.html / .en.html     guida del pedale (pezzi, schemi, montaggio, uso; foto in foto/pedale/); ci si arriva dal capitolo Live di guida.html e guida.en.html
+index.html                        HTML e l'unico <style>: Preset e Live nello stesso documento
+src/app/01-…15-*.js               lo script dell'app, in fila
+guida.html / guida.en.html        guida all'uso (guida.css, guida.js); guida-pedale(.en).html
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
-src/spark-protocol.js             encoder/decoder puro, senza I/O — il cuore del progetto
+src/spark-protocol.js             encoder/decoder puro — il cuore del progetto
 src/spark-transport.js            BLE: coda di invio, attesa risposte, lettura preset
 src/preset-store.js               libreria IndexedDB: import, backup, banchi, categorie
-src/spark-effetti.js              nomi di effetti e manopole + MODELLI (catalogo Soundshed)
-src/spark-backup.js               legge preset_backup.zip dell'app ufficiale
-src/dropbox-sync.js               sync della libreria: OAuth PKCE, niente server
-src/pedale-ponte.js               sponda app del ponte BLE verso il pedale
-src/pwa.js / src/snake-pedali.js  service worker; StompSnake
-src/lingua.js                     le lingue: tr() e la traduzione dell'HTML all'avvio
-src/lingua-en.js                  l'inglese — NON si legge (vedi «L'inglese»)
-pedale/prova-ble/                 firmware del pedale: prova-ble.ino (include e variabili) + 01-…11-*.ino in fila, banchi.h
-pedale/prova-espansore/           pulsanti e LED: mappatura guidata e prova a mano
-pedale/prova-usb|display|midi/    altri sketch di prova
+src/spark-effetti.js              nomi di effetti e manopole + MODELLI
+src/spark-backup.js · dropbox-sync.js · pedale-ponte.js · pwa.js · snake-pedali.js
+src/lingua.js / lingua-en.js      le lingue (lingua-en.js NON si legge: vedi «L'inglese»)
+pedale/prova-ble/                 firmware del pedale (prova-ble.ino + 01-…11-*.ino, banchi.h)
+pedale/prova-espansore|usb|display|midi/   sketch di prova (mappatura guidata di pulsanti e LED)
 pcb/                              scheda in KiCad, ACCANTONATA: non si tocca e non si propone
-tools/                            simulatore, generatori, sonde, serve.ps1, script scatola
-tools/video-demo/                 video dimostrativo: ampli e pedale finti, regia, MP4 a 30 fps, voce (Kokoro)
+tools/                            serve.ps1, server-rete.js, togli-sfondo/, segna-manopole.html, video-demo/
 test/*.html                       protocol 147, transport 64, store 151, backup 41, dropbox 38
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
 ```
 
-**`tools/explorer.html` è CONGELATO** (copia propria del protocollo, single-file per il
-telefono): le modifiche vanno in `src/`.
+**`tools/explorer.html` è CONGELATO**: le modifiche vanno in `src/`.
 
-**Lo script dell'app sta in `src/app/`, un file per sezione** (diviso il 7 ottobre 2026; backup:
-tag `prima-della-divisione`), caricati in fila da `index.html` come script classici: const,
-let e funzioni si vedono fra un file e l'altro, ma **il codice che gira al caricamento usa solo
-quello dei file prima**. Un file nuovo va anche nel guscio di `sw.js`. `index.html` (90 KB,
-HTML e il solo `<style>`) e `10-editor-disegno.js` (~1.600 righe) non si leggono interi.
+**Lo script dell'app sta in `src/app/`, un file per sezione**, caricati in fila da `index.html` come
+script classici: const, let e funzioni si vedono fra un file e l'altro, ma **il codice che gira
+al caricamento usa solo quello dei file prima**. Un file nuovo va anche nel guscio di `sw.js`.
+`index.html` (90 KB) e `10-editor-disegno.js` (~1.700 righe) non si leggono interi.
 
-Niente build, tutto da `file://`: i moduli sono classic script (`window.Spark`, …), perché gli
-ES module lì sono bloccati. **IndexedDB di `file://` e di https sono due origini diverse**: la
-libreria non passa dall'una all'altra, si esporta in JSON.
+Niente build, tutto da `file://`: i moduli sono classic script (`window.Spark`, …). **IndexedDB di
+`file://`, di https e di ogni indirizzo locale sono origini diverse**: la libreria non passa
+dall'una all'altra, si esporta in JSON.
 
 ## Trappole dell'ambiente
 
@@ -91,14 +75,14 @@ libreria non passa dall'una all'altra, si esporta in JSON.
   ripetitive si scrive uno script nello scratchpad, che deve **conservare le CRLF** dei file.
 - **`sed -i` di Git Bash converte le CRLF in LF**: con `core.autocrlf=true` il diff resta
   pulito, ma lo si controlla.
-- **Per le suite su `localhost`** c'è `spark-locale` nel `.claude/launch.json` di `Progetti
-  Claude` (la cartella sopra: il riquadro del browser lo cerca lì); il risultato si legge da
-  `#summary` e dai `.fail`.
-- **Le bozze** (la grafica si mostra prima di pubblicarla): `git worktree` nello scratchpad,
-  servito con `serve.ps1 -Radice <cartella> -Porta 8097`; altra origine, quindi preset finti, e
-  **il service worker va tolto a ogni ricarica** o serve i file vecchi. **Il riquadro del browser
-  non apre la scelta dei dispositivi Bluetooth** (la annulla da solo): il pedale e l'ampli veri si
-  provano solo dall'app pubblicata.
+- **Il riquadro del browser** legge i server da `spark/.claude/launch.json` (non dalla cartella
+  sopra): `spark-locale` (8099) per le suite e l'app; per una bozza si aggiunge lì, **senza
+  committarla**, una voce con `serve.ps1 -Radice <cartella> -Porta 8097`. Il risultato delle suite
+  si legge da `#summary` e dai `.fail`.
+- **Le bozze** (la grafica si mostra prima di pubblicarla): `git worktree` nello scratchpad; altra
+  origine, quindi preset finti, e **il service worker va tolto a ogni ricarica**. Dal telefono:
+  `tools/server-rete.js` (vedi «Dove si riprende»). **Il riquadro del browser non apre la scelta
+  dei dispositivi Bluetooth**: ampli e pedale veri si provano solo dall'app pubblicata.
 
 **Dopo ogni modifica a `src/`, le suite in `test/` devono restare verdi.** Girano con Edge
 headless (poi si cerca `id="summary"`):
@@ -195,12 +179,11 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
 - **Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**;
   `pulisciStatoPannelli()` le nasconde e chi ci scrive la rimostra (`statoDelPannello`).
 
-### Segnala un problema (9 ottobre 2026)
+### Segnala un problema e donazioni
 
-⋯ → «Segnala un problema»: **mailto a `mazzbackup@gmail.com`** (scelta dell'utente: solo email,
-niente GitHub, niente server), col testo dell'utente più versione, browser, ampli e le ultime 25
-righe di `registroLungo` (`04-log.js`), mostrate prima. Oltre 1800 caratteri il registro si accorcia.
-**Donazioni** (10 ottobre 2026): ultima voce del menu ⋯, in oro, «☕ Offrimi un caffè» → `buymeacoffee.com/mazzgear` in una scheda nuova (`window.open`: lasciare la pagina farebbe cadere l'ampli). Anche sul sito.
+Menu Altro: **mailto a `mazzbackup@gmail.com`** (solo email, scelta dell'utente) con versione,
+browser, ampli e le ultime righe del registro, mostrate prima. «☕ Offrimi un caffè» apre
+`buymeacoffee.com/mazzgear` con `window.open`: lasciare la pagina farebbe cadere l'ampli.
 
 ### Niente finestre né tendine del sistema
 
@@ -235,21 +218,13 @@ lo stesso, quando serve.
 
 ### Nomi di effetti e manopole (`src/spark-effetti.js`)
 
-- Dal catalogo **Soundshed** (MIT): sono **proposte**, in corsivo; un nome scritto a mano vince;
-  `manopola()` scarta la riga se dichiara più manopole di quelle mandate. **Il credito a
-  Soundshed non si toglie** (domanda chiusa).
-- **L'ordine sullo schermo non è quello degli indici**: si legge Gain, Bass, Middle, Treble,
-  Master, ma gli indici sono `Gain(0), Treble(1), Middle(2), Bass(3), Master(4)`. Due test.
-  `quante` = manopole vere; i parametri in più sono l'acceso/spento del blocco.
-- **I nomi dei parametri li dà l'utente**, per modello (`settings.nomiParametri`);
-  `importBackup` li **aggiunge**, non sovrascrive.
-- **`MODELLI` è verificato contro l'app ufficiale** (26 agosto 2026). **Un nome nuovo si
-  verifica allo stesso modo** (elenco ufficiale o preset uscito dall'ampli); una voce nuova
-  dell'elenco non è per forza un modello nuovo (l'«Auto Wah» è `JH.Vox846`).
-- **Il «BPM» di delay e Tremolator è un interruttore** (`interruttori` nella tabella, 7 ottobre
-  2026): nei preset veri vale solo 0 o 1, come nell'app ufficiale; acceso manda 1, spento 0.
-- Gli Hendrix stanno in fondo a ogni tendina, sotto «Jimi Hendrix Pack»
-  (`SparkEffetti.GRUPPO_HENDRIX`).
+- Dal catalogo **Soundshed** (MIT): sono proposte, un nome scritto a mano vince. **Il credito a
+  Soundshed non si toglie.** I nomi dei parametri li dà l'utente, per modello.
+- **L'ordine sullo schermo non è quello degli indici**: Gain, Bass, Middle, Treble, Master, ma gli
+  indici sono `Gain(0), Treble(1), Middle(2), Bass(3), Master(4)`. Due test.
+- **`MODELLI` è verificato contro l'app ufficiale** (26 agosto 2026): un nome nuovo si verifica
+  allo stesso modo. **Il «BPM» di delay e Tremolator è un interruttore** (0 o 1). Gli Hendrix
+  stanno in fondo a ogni tendina.
 
 ## Protocollo — quello che non va dimenticato mai
 
@@ -302,57 +277,37 @@ si verifica rileggendo dall'ampli, una variante alla volta; **strumentare prima 
 
 ## Il pedale ESP32
 
-Tutto il ragionamento in **`docs/pedale.md`**. Qui il minimo per non fare danni.
-
-**Cos'è**: la vista live staccata dal telefono; prende i preset dall'app, poi va da solo con lo
-Spark. Solo preset. Sta in questo repo perché app e firmware si cambiano nello stesso commit.
-**Comandi**: quattro footswitch = i quattro suoni della metà corrente; il quinto **cambia metà
-senza toccare il suono**; due tasti banco a mano. Quattro LED bicolore **tutti insieme**, rosso
-A, verde B; se la metà mostrata non è quella che suona, LED spenti e l'OLED dice **♪** cosa
-suona.
+Ragionamento in **`docs/pedale.md`**, lavoro in **`docs/pedale-lavoro.md`**. È la vista live
+staccata dal telefono: prende i banchi dall'app, poi va da solo con lo Spark. Quattro footswitch =
+i quattro suoni della metà corrente, il quinto cambia metà senza toccare il suono, due tasti banco.
 
 **Le regole che non si toccano:**
 
-- **Mai scrivere sugli slot hardware.** I banchi dall'app: `0x0101` su `0x7f` + `0x0138` con
-  `0x7f`, e il LED dell'ampli lampeggia, ed è giusto. **L'«Amp Preset» invece, dal 4 ottobre
-  2026 (decisione dell'utente, cambia quella del 14 agosto), è letto dall'ampli a ogni
-  collegamento** (`0x0211` per il nome, `0x0201` per slot, se ne tiene solo il nome) **e si
-  suona selezionando lo slot** con `0x0138`: istantaneo, non scrive niente. Spark 2 o NEO li
-  sceglie l'utente coi tasti banco quando l'ampli non c'è (sinistro Spark 2, destro NEO;
-  `/ampli.txt`); `preset_frames.h` non è più incluso. **Verificato sul pedale col NEO il 4 ottobre (1.3)**:
-  si collega, l'Amp Preset cambia subito. I banchi sul NEO: vedi l'eccezione qui sotto. **Banchi da fuori**: `frameAccettabile()` in `banchi.h` accetta solo
-  frame `0x0101` verso `0x7f`, e **il ponte BLE parte chiuso** — si apre coi due tasti banco
-  insieme per 1,5 s, due minuti alla volta (`docs/sicurezza.md`).
-- **L'app preserializza**: il firmware patcha solo il seq (indice 2; il checksum non lo copre).
-  **Eccezione dal 4 ottobre 2026 (1.4, scelta dell'utente, «strada A»): sul NEO il pedale
-  ricompone il payload dai frame e lo ridivide a pezzi da 128** (`mandaPresetNeo`): il NEO
-  costa ~40 ms a pezzo più ~1 ms a byte, e così un preset passa da 1,0–1,15 s a 0,5–0,77 s.
-  **Mai sullo Spark 2: i 128 lo disconnettono.** I banchi restano uguali per i due ampli. **Verificato
-  sul pedale il 4 ottobre (1.4): NEO e Spark 2, banchi e Amp Preset.**
+- **Mai scrivere sugli slot hardware.** I banchi suonano con `0x0101` su `0x7f` + `0x0138` con
+  `0x7f` (il LED dell'ampli lampeggia, ed è giusto). L'**«Amp Preset»** si legge dall'ampli a ogni
+  collegamento e si suona **selezionando lo slot** con `0x0138` (4 ottobre 2026, verificato).
+- **Banchi da fuori**: `frameAccettabile()` in `banchi.h` accetta solo frame `0x0101` verso
+  `0x7f`, e **il ponte BLE parte chiuso** (due tasti banco per 1,5 s, due minuti; si chiude quando
+  l'app si stacca, 2.23).
+- **L'app preserializza**: il firmware patcha solo il seq. **Eccezione: sul NEO il pedale ridivide
+  il payload a pezzi da 128** (`mandaPresetNeo`). **Mai sullo Spark 2: i 128 lo disconnettono.**
 - **Un padrone alla volta**: con l'ampli connesso al pedale il browser non lo trova. **Se un
   footswitch non fa niente, primo sospetto: l'app ancora collegata al pedale.**
-- **Mai operazioni BLE dentro un callback BLE** (NimBLE si blocca): bandiera, e lavoro nel
-  `loop()`.
+- **Mai operazioni BLE dentro un callback BLE** (NimBLE si blocca): bandiera, e lavoro nel `loop()`.
 - **Nessuna attesa bloccante che non guardi gli ingressi**; vince l'ultima pressione;
-  **l'antirimbalzo aspetta che il segnale stia fermo**.
-- **Web Bluetooth: una sola operazione GATT per volta**, il banco entra in coda come blocco.
-- **Il formato del banco sta in `src/pedale-ponte.js` e `pedale/prova-ble/banchi.h`, che
-  cambiano insieme.** `banchi.h` legge byte non nostri: offset e lunghezze vanno verificati.
-  **Così l'impronta** (2.22): FNV-1a 32 bit sul blocco senza il byte dello slot, `bancoImpronta` in
-  `banchi.h` e `impronta` in `pedale-ponte.js`; il pedale la manda con l'elenco (notifica `0x83`).
-
-**Ferramenta, mappa di pulsanti e LED, basetta, hardware che fa danni, scatola**: in
-**`docs/pedale-lavoro.md`**, da leggere prima di toccare il pedale. Anche senza aprirlo:
-**la mappa di pulsanti e LED non si scrive a mente** (si prende dalla mappatura guidata di
-`prova-espansore`, e si chiede la foto), e **i nomi dei pezzi sono fissi** (basetta, XIAO,
-espansore, pista, pettine, linea, pannello, scatola, cavo, piastrina LED, footswitch, tasti
-banco, pulsanti; vietati coperchio, top, rotaia, striscia, modulo).
+  l'antirimbalzo aspetta che il segnale stia fermo. **Web Bluetooth: una operazione GATT per volta.**
+- **Il formato del banco sta in `src/pedale-ponte.js` e `banchi.h`, che cambiano insieme**, impronta
+  compresa (FNV-1a 32 bit, `bancoImpronta` / `impronta`). `banchi.h` legge byte non nostri:
+  offset e lunghezze vanno verificati.
+- **La mappa di pulsanti e LED non si scrive a mente** (mappatura guidata di `prova-espansore`, e
+  si chiede la foto). **I nomi dei pezzi sono fissi** (basetta, XIAO, espansore, pista, pettine,
+  linea, pannello, scatola, cavo, piastrina LED, footswitch, tasti banco, pulsanti; vietati
+  coperchio, top, rotaia, striscia, modulo).
 
 ## StompSnake
 
-Snake in «Fai una pausa». **Non tocca niente dell'app** (solo `SnakePedali.apri()`); record e
-«muto» in `localStorage`, non in `settings`. Vive in `src/snake-pedali.js`, ciclo a
-`setInterval`, banco di prova `tools/snake-banco.html`. Il resto in `docs/snake.md`.
+Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'app**, record in
+`localStorage`. Il resto in `docs/snake.md`.
 
 ## Convenzioni
 
@@ -371,72 +326,30 @@ Snake in «Fai una pausa». **Non tocca niente dell'app** (solo `SnakePedali.apr
 
 ## Dropbox e sito
 
-**Sync Dropbox**: funziona (verificato 24 agosto 2026), OAuth **PKCE senza redirect** e senza
-server, backup **versione 2** con banchi e **lapidi che non vincono sempre** (un preset toccato
-dopo resta). L'app key la registra l'utente, una volta per apparecchio. **Positive Grid chiude
-il suo backup su Dropbox nel 2027**: non tocca il nostro sync, solo da dove si prende
-`preset_backup.zip`. Tutto in `docs/dropbox.md`.
+**Sync Dropbox** funziona (OAuth PKCE senza server, backup versione 2, lapidi): `docs/dropbox.md`.
+**`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
+ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-**`sparklingtones.com`** sta in `C:\Users\massi\Progetti Claude\sparklingtones-sito`
-(`mazzrelaz/sparklingtones-sito`). **L'app non si sposta lì**: il dominio custom vale per
-l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pull --rebase`**
-(GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
+## Dove si riprende — 15 ottobre 2026 (sera)
 
-## Dove si riprende — 15 ottobre 2026
+**In corso: l'editor con le immagini dei blocchi** — bozza sul ramo `bozza-editor-grafico` (non
+in `main`, worktree nello scratchpad), **impaginazione approvata**. **Non si pubblica finché non
+ci sono tutte le immagini** (scelta dell'utente). Le immagini arrivano **senza manopole**, col
+puntino bianco al centro e lo sfondo nero: sfondo (`tools/togli-sfondo/`), manopole e misure le
+faccio io. Fatte: Silver 120, Blackface Duo, Tube Drive, Sustainer. Dal telefono si guarda in rete
+di casa (`node tools/server-rete.js <bozza> 8096` → `http://192.168.0.223:8096`). Tutto in
+`docs/decisioni-ui.md`, ultima sezione.
 
-**Provato dall'utente sul telefono, col pedale e l'ampli veri: «funziona tutto»** — interfaccia
-nuova, sfondo grigio, barra a quattro voci, pagina del Pedale, **banchi da aggiornare** e il ponte
-che si chiude (firmware 2.23). **«Fatto» e titolo tolti anche dalle altre pagine** (sì
-dell'utente; guscio v108; restano editor, scelta del preset per il banco, Dropbox:
-`docs/decisioni-ui.md`). **In corso: l'editor con le immagini** dei blocchi, manopole girate
-sull'immagine — bozza sul ramo `bozza-editor-grafico` (non in `main`), **impaginazione approvata**
-la sera del 15; **non si pubblica finché non ci sono tutte le immagini** (scelta dell'utente).
-Le immagini arrivano **senza manopole**, col puntino bianco al centro: sfondo, manopole e misure
-li faccio io (fatti: Silver 120, Blackface Duo, Tube Drive, Sustainer). Dal telefono la si guarda
-in rete di casa. Tutto in `docs/decisioni-ui.md`, ultima sezione. I progetti stanno in
-`C:\Users\massi\Progetti Claude` (spostati il 14 ottobre; copia ogni ora in
-`Desktop\Cloud Backup\Progetti Claude`, che è sincronizzata con Google Drive).
+**Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v108`. **`guida.en.html`** è
+rimasta alle schermate vecchie.
 
+**Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
+(niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor
+con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
+preset vero, il NEO), **discussi e non aperti**, e il resto del pedale: `docs/diario.md`, estratto
+del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
 
-**L'inglese è fatto** (24 settembre 2026): app e sito, con la scelta della lingua, pubblicati.
-Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta indietro
-finché l'utente non dice di aggiornarlo.
-
-**Pedale**: sulla XIAO c'è `prova-ble` **2.23** (15 ottobre: il ponte si chiude quando l'app si stacca; 2.22 l'impronta dei banchi, tutte e due provate dall'utente il 15; prima 1.5 e il looper fino a 2.21, verificate); caricatore
-Adafruit 6091 montato e verificato; restano display, looper, LED del tempo, click, bande
-sull'anello. Tutto in `docs/pedale-lavoro.md` («Dove si riprende col pedale») e `docs/looper.md`;
-la versione lunga di questo paragrafo in `docs/diario.md` (estratto del 14 ottobre, sera).
-**La modalità MIDI è ferma per scelta dell'utente: non proporre altre funzioni MIDI finché non
-riapre lui.**
-
-**L'interfaccia di oggi** (14 ottobre 2026: barra in basso Preset · Live · Pedale · Altro su tutte
-le pagine, bollino dell'ampli, scheda del preset dal basso, sfondo grigio a scelta, banchi da
-aggiornare sul pedale): `docs/decisioni-ui.md`, le tre sezioni del 14 ottobre. **`guida.en.html`
-è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare l'inglese.
-
-Sull'app (guscio `v108` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
-ampli finto):
-
-3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
-   **In stand-by per scelta dell'utente** (2 ottobre 2026): non va né sul NEO né, dice lui,
-   sullo Spark 2. Non riaprirlo finché non lo riapre lui.
-4. **Editor con l'ampli acceso e sul telefono**.
-5. **L'ampli che non si pianta girando le manopole**: correzione non verificata.
-6. **«Importa un file» con un preset vero**: se non entra, si chiedono i primi byte del file.
-7. **Togliere dal catalogo altri modelli che l'ampli non ha.**
-8. **Mettere al sicuro il `preset_backup.zip` su Dropbox**: è l'unica cosa che scade (2027).
-9. **Spark NEO**: provato dall'utente, funziona tutto (lettura, CH1–CH4, live, «Regola»,
-   «Seleziona CHx»). Ancora da provare: «Metti in uno slot» sul NEO, Hendrix, il pedale col NEO.
-   Il racconto per intero in `docs/diario.md` (estratto del 14 ottobre 2026) e
-   `docs/protocollo-spark2.md`, «Spark NEO».
-
-**La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
-i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
-GitHub di togliere i commit vecchi dalla cache (`docs/sicurezza.md`, punto 1). **Mai più
-catture o strumenti con la chiave `0x0170` nel repository.**
-
-**Discussi e non aperti, da non rifare** (la modalità MIDI non è più qui: è lavoro in
-programma, vedi sopra — resta valido il ragionamento in `docs/pedale.md`, e le due trappole:
-Windows non sa fare BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT): preset creati con l'AI
-(`docs/diario.md`); il banco che si trasferisce in ~6 s (solo ottimizzazione); la scheda in
-`pcb/` (se si riapre: prima stringere il contorno, poi misurare gli interassi veri del KAmod).
+**La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key). **Mai più
+catture o strumenti con la chiave `0x0170` nel repository.** I progetti stanno in
+`C:\Users\massi\Progetti Claude` (copia ogni ora in `Desktop\Cloud Backup`, su Google Drive).
