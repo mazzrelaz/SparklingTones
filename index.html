@@ -954,9 +954,16 @@
   .tassello.con-immagine { padding-bottom:9px; }
   .tassello .miniatura { height:52px; width:100%; object-fit:contain; display:block;
                          pointer-events:none; }
-  .frontale { position:relative; width:min(100%, 420px); margin:12px auto 6px;
+  .frontale { width:min(100%, 420px); margin:12px auto 6px;
+              display:flex; flex-direction:column; align-items:center; gap:10px;
               touch-action:none; user-select:none; -webkit-user-select:none; }
+  .frontale .riquadro { position:relative; }
   .frontale .sfondo { display:block; width:100%; height:100%; pointer-events:none; }
+  /* Sul telefono, solo i pannelli dei comandi, uno sopra l'altro: il più largo
+     a tutta larghezza, il resto dell'immagine tagliato. */
+  .frontale.ritagliato { width:100%; }
+  .frontale.ritagliato .riquadro { overflow:hidden; border-radius:10px; }
+  .frontale.ritagliato .sfondo { max-width:none; }
   .frontale .manopola-img { position:absolute; cursor:ns-resize; touch-action:none;
                             border-radius:50%; }
   /* Le manopole piccole si prendono anche un po' fuori dal bordo: sul telefono

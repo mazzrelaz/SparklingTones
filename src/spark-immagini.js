@@ -18,7 +18,8 @@
 //   dove punta il segno nell'immagine, in gradi da ore 12 (negativo a sinistra).
 //
 // `led` è la spia (accesa col blocco), `pulsante` il footswitch (lo accende e
-// lo spegne).
+// lo spegne). `comandi`, facoltativo: i rettangoli che sul telefono si
+// mostrano al posto dell'immagine intera, uno sopra l'altro.
 'use strict';
 (function () {
   const TABELLA = {
@@ -49,6 +50,9 @@
       ],
       led: { x: 171, y: 490.5, r: 16 },
       pulsante: { x: 166, y: 582, r: 34 },
+      // Sul telefono si vedono solo i due pannelli dei comandi, uno sopra
+      // l'altro: spia, Gain, Bass e Middle; poi Treble e Volume.
+      comandi: [{ x: 118, y: 452, w: 684, h: 198 }, { x: 806, y: 452, w: 358, h: 198 }],
     },
   };
 
