@@ -1028,63 +1028,32 @@ function pomello(effetto, param) {
  * Le misure stanno in `src/spark-immagini.js`.
  */
 function frontaleImmagine(effetto, info) {
-  // Sul telefono un ampli largo e basso fa manopole da pochi millimetri: lì si
-  // mostrano solo i pannelli dei comandi (`comandi`, uno o più rettangoli
-  // dell'immagine), **uno sopra l'altro**, tutti alla stessa scala, il più
-  // largo a tutta larghezza. L'ampli intero resta nel tassello in alto.
-  const stretto = window.matchMedia('(max-width: 600px)').matches;
-  const regioni = stretto && info.comandi
-    ? [].concat(info.comandi)
-    : [{ x: 0, y: 0, w: info.w, h: info.h }];
-  const ritagliato = regioni[0].w !== info.w || regioni[0].h !== info.h;
-  const largo = Math.max(...regioni.map(v => v.w));
-
-  const tutto = document.createElement('div');
-  tutto.className = 'frontale' + (ritagliato ? ' ritagliato' : '');
-  for (const v of regioni) tutto.appendChild(riquadroImmagine(effetto, info, v, largo, ritagliato));
-  return tutto;
-}
-
-/** Un rettangolo `v` dell'immagine, con le manopole, la spia e il pulsante che ci cadono dentro. */
-function riquadroImmagine(effetto, info, v, largo, ritagliato) {
   const box = document.createElement('div');
-  box.className = 'riquadro';
-  box.style.aspectRatio = `${v.w} / ${v.h}`;
-  box.style.width = v.w / largo * 100 + '%';
+  box.className = 'frontale';
+  box.style.aspectRatio = `${info.w} / ${info.h}`;
 
   const img = document.createElement('img');
   img.className = 'sfondo';
   img.src = info.src;
   img.alt = SparkEffetti.nome(effetto.name);
   img.draggable = false;
-  if (ritagliato) {
-    Object.assign(img.style, {
-      position: 'absolute',
-      width:  info.w / v.w * 100 + '%',
-      height: info.h / v.h * 100 + '%',
-      left:   -v.x / v.w * 100 + '%',
-      top:    -v.y / v.h * 100 + '%',
-    });
-  }
   box.appendChild(img);
 
-  // Un cerchio dell'immagine, in percentuali del riquadro: segue la larghezza
-  // dello schermo. Ci va solo ciò che ha il centro dentro il riquadro.
-  const dentro = ({ x, y }) => x >= v.x && x < v.x + v.w && y >= v.y && y < v.y + v.h;
+  // Un cerchio dell'immagine, in percentuali: segue la larghezza dello schermo.
   const posto = (el, { x, y, r }) => Object.assign(el.style, {
-    left:   (x - r - v.x) / v.w * 100 + '%',
-    top:    (y - r - v.y) / v.h * 100 + '%',
-    width:  2 * r / v.w * 100 + '%',
-    height: 2 * r / v.h * 100 + '%',
+    left:   (x - r) / info.w * 100 + '%',
+    top:    (y - r) / info.h * 100 + '%',
+    width:  2 * r / info.w * 100 + '%',
+    height: 2 * r / info.h * 100 + '%',
   });
 
-  if (info.led && dentro(info.led)) {
+  if (info.led) {
     const led = document.createElement('div');
     led.className = 'spia' + (effetto.enabled ? ' accesa' : '');
     posto(led, info.led);
     box.appendChild(led);
   }
-  if (info.pulsante && dentro(info.pulsante)) {
+  if (info.pulsante) {
     const pulsante = document.createElement('button');
     pulsante.type = 'button';
     pulsante.className = 'pulsante-img';
@@ -1096,7 +1065,6 @@ function riquadroImmagine(effetto, info, v, largo, ritagliato) {
 
   const quante = manopoleVere(effetto).length;
   for (const m of info.manopole) {
-    if (!dentro(m)) continue;
     const param = effetto.params.find(p => p.index === m.indice);
     if (!param) continue;
 
