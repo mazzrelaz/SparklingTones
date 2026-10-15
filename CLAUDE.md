@@ -382,14 +382,13 @@ il suo backup su Dropbox nel 2027**: non tocca il nostro sync, solo da dove si p
 l'intero repo e porterebbe via PWA e libreria. **Prima di ogni push lì, `git pull --rebase`**
 (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 14 ottobre 2026 (sera)
+## Dove si riprende — 15 ottobre 2026
 
-**Domani, prima di tutto**: le prove dell'utente sul telefono, col pedale e l'ampli veri, di
-quello pubblicato oggi — interfaccia nuova, sfondo grigio, barra a quattro voci, pagina del Pedale,
-e soprattutto **i banchi da aggiornare** (firmware 2.22 già sulla XIAO; mai provato col pedale
-vero). Se un banco risulta «cambiato» senza esserlo: farsi incollare «Copia il log del pedale».
-**Domanda aperta**: togliere «Fatto» e il titolo anche dalle altre pagine (guida, impostazioni,
-categorie, doppioni)? Chiesta, nessuna risposta. I progetti stanno in
+**Provato dall'utente sul telefono, col pedale e l'ampli veri: «funziona tutto»** — interfaccia
+nuova, sfondo grigio, barra a quattro voci, pagina del Pedale, **banchi da aggiornare** e il ponte
+che si chiude (firmware 2.23). **«Fatto» e titolo tolti anche dalle altre pagine** (sì
+dell'utente; guscio v108; restano editor, scelta del preset per il banco, Dropbox:
+`docs/decisioni-ui.md`). I progetti stanno in
 `C:\Users\massi\Progetti Claude` (spostati il 14 ottobre; copia ogni ora in
 `Desktop\Cloud Backup\Progetti Claude`, che è sincronizzata con Google Drive).
 
@@ -398,7 +397,7 @@ categorie, doppioni)? Chiesta, nessuna risposta. I progetti stanno in
 Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta indietro
 finché l'utente non dice di aggiornarlo.
 
-**Pedale**: sulla XIAO c'è `prova-ble` **2.23** (15 ottobre: il ponte si chiude quando l'app si stacca; 2.22 l'impronta dei banchi; prima 1.5 e il looper fino a 2.21, verificate); caricatore
+**Pedale**: sulla XIAO c'è `prova-ble` **2.23** (15 ottobre: il ponte si chiude quando l'app si stacca; 2.22 l'impronta dei banchi, tutte e due provate dall'utente il 15; prima 1.5 e il looper fino a 2.21, verificate); caricatore
 Adafruit 6091 montato e verificato; restano display, looper, LED del tempo, click, bande
 sull'anello. Tutto in `docs/pedale-lavoro.md` («Dove si riprende col pedale») e `docs/looper.md`;
 la versione lunga di questo paragrafo in `docs/diario.md` (estratto del 14 ottobre, sera).
@@ -410,7 +409,7 @@ le pagine, bollino dell'ampli, scheda del preset dal basso, sfondo grigio a scel
 aggiornare sul pedale): `docs/decisioni-ui.md`, le tre sezioni del 14 ottobre. **`guida.en.html`
 è rimasta alle schermate vecchie** finché l'utente non dice di aggiornare l'inglese.
 
-Sull'app (guscio `v107` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
+Sull'app (guscio `v108` in `sw.js`; **guida all'uso in `guida.html`, inglese in `guida.en.html`** (8 ottobre: disegni in CSS delle schermate, **da ritoccare quando una schermata cambia**; quella del pedale si fa a pedale finito); bollo «Spark LIVE» sui preset dell'altro ampli; **aperti il 7 ottobre**: la connessione che cade da sola — il registro adesso dice come, si aspetta lo screenshot, poi forse il ricollegamento automatico; l'unione Dropbox che tocca tutti i preset e può far tornare un cancellato (`docs/decisioni-ui.md`, «I doppioni»); **`src/app/` non ha suite**, le mie prove sono contro un
 ampli finto):
 
 3. **Tap tempo con l'ampli acceso**: `0x0176` è verificato dalla sonda, non dall'app.
