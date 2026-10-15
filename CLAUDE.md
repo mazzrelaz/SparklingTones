@@ -398,7 +398,7 @@ categorie, doppioni)? Chiesta, nessuna risposta. I progetti stanno in
 Da qui vale la regola di «L'inglese»: si lavora in italiano, e l'inglese resta indietro
 finché l'utente non dice di aggiornarlo.
 
-**Pedale**: sulla XIAO c'è `prova-ble` **2.22** (14 ottobre: l'impronta dei banchi; prima 1.5 e il looper fino a 2.21, verificate); caricatore
+**Pedale**: sulla XIAO c'è `prova-ble` **2.23** (15 ottobre: il ponte si chiude quando l'app si stacca; 2.22 l'impronta dei banchi; prima 1.5 e il looper fino a 2.21, verificate); caricatore
 Adafruit 6091 montato e verificato; restano display, looper, LED del tempo, click, bande
 sull'anello. Tutto in `docs/pedale-lavoro.md` («Dove si riprende col pedale») e `docs/looper.md`;
 la versione lunga di questo paragrafo in `docs/diario.md` (estratto del 14 ottobre, sera).

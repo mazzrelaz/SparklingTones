@@ -291,7 +291,10 @@ static volatile bool appEntrata = false, appUscita = false;
  * scollegato — e si apre **tenendo premuti i due tasti banco insieme**, per
  * due minuti. Il tempo di far partire un trasferimento dall'app; finche'
  * l'app resta collegata la finestra non scade, cosi' non si taglia un banco a
- * meta'. */
+ * meta'. **Quando l'app si stacca il ponte si chiude subito** (2.23, chiesto
+ * dall'utente): restava aperto fino alla fine dei due minuti, e per tutto quel
+ * tempo chiunque poteva collegarsi e far mollare l'ampli. Per ricollegarsi si
+ * riapre coi due tasti banco. */
 class Collegamenti : public BLEServerCallbacks {
   void onConnect(BLEServer* s) override {
     connApp = s->getConnId();
@@ -372,7 +375,10 @@ static void sbrigaPonte() {
     sganciato       = false;
     ultimoTentativo = 0;
     momentoSgancio  = millis();
-    annuncia();                      // senza, il pedale sparisce per sempre
+    // Il ponte si chiude con lei (2.23). chiudiPonte rifa' anche l'annuncio:
+    // senza, il pedale sparisce per sempre.
+    if (ponteAperto()) chiudiPonte("l'app si e' staccata");
+    else               annuncia();
   }
   if (midiUscito) {
     midiUscito = false;
