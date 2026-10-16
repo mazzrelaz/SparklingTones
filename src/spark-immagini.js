@@ -427,6 +427,22 @@
       led: { x: 101.6, y: 310.8, r: 9.5 },
       pulsante: { x: 101.6, y: 371.4, r: 17.5 },
     },
+    // J.H. Sun 100S (Sunn 100S): il nome non è scritto sul disegno, l'ha detto
+    // l'utente. La manopola copre quella nera disegnata; l'accensione è un
+    // interruttore rettangolare (`w`/`h`) con la lucina rossa dentro (la spia).
+    'JH.Sunn100': {
+      src: 'immagini/blocchi/JH.Sunn100.webp', w: 900, h: 846,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 215,   y: 317.1, r: 32.9 },   // Gain
+        { indice: 3, x: 332.1, y: 317.1, r: 32.9 },   // Bass
+        { indice: 2, x: 448.6, y: 317.1, r: 32.9 },   // Middle
+        { indice: 1, x: 564.3, y: 317.1, r: 32.9 },   // Treble
+        { indice: 4, x: 681.1, y: 317.1, r: 32.9 },   // Master (Volume)
+      ],
+      led: { x: 120, y: 311.4, r: 6 },
+      pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
+    },
     // J.H. 45/100 (Marshall JTM45/100): pannello dorato, la manopola copre il
     // cerchio della scala e lascia le tacche. Pulsante: la levetta sotto Indicator.
     'JH.JTM45': {
