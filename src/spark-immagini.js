@@ -351,6 +351,21 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // Tweed Bass (Fender Bassman): attorno ai puntini solo la scala arancione; la
+    // manopola ci sta dentro. Pulsante: la levetta Power.
+    Bassman: {
+      src: 'immagini/blocchi/Bassman.webp', w: 900, h: 889,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 203.8, y: 335.5, r: 30.7 },   // Gain
+        { indice: 3, x: 324.1, y: 335.5, r: 30.7 },   // Bass
+        { indice: 2, x: 446.8, y: 335.5, r: 30.7 },   // Middle
+        { indice: 1, x: 569.7, y: 335.5, r: 30.7 },   // Treble
+        { indice: 4, x: 691.3, y: 335.5, r: 30.7 },   // Master (Volume)
+      ],
+      led: { x: 90.1, y: 303.2, r: 11 },
+      pulsante: { x: 89.9, y: 365.3, r: 17.5 },
+    },
     // AC Boost (il nome del modello ha davvero lo spazio): la manopola copre il
     // disco rosso dentro le tacche. Pulsante: la levetta Power.
     'AC Boost': {
