@@ -45,6 +45,18 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Phaser: Intensity a sinistra e Speed a destra, arancioni e grandi dentro
+    // l'arco interno.
+    Phaser: {
+      src: 'immagini/blocchi/Phaser.webp', w: 900, h: 1320,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 1, x: 248.9, y: 269.7, r: 91.6 },   // Intensity
+        { indice: 0, x: 657.8, y: 269.7, r: 91.6 },   // Speed
+      ],
+      led: { x: 449.9, y: 114.9, r: 18.3 },
+      pulsante: { x: 450.5, y: 1081.3, r: 51.3 },
+    },
     // Classic Vibe (modello «MiniVibe»): Speed e Intensity grandi, dentro
     // l'anello interno.
     MiniVibe: {
