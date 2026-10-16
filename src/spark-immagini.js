@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // American High Gain: la scala sta stretta attorno ai puntini, la manopola
+    // resta dentro (più piccola). Pulsante: la levetta ON/OFF.
+    AmericanHighGain: {
+      src: 'immagini/blocchi/AmericanHighGain.webp', w: 900, h: 875,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 208.4, y: 340.5, r: 27.9 },   // Gain
+        { indice: 3, x: 328.3, y: 340.5, r: 27.9 },   // Bass
+        { indice: 2, x: 449.6, y: 340.5, r: 27.9 },   // Middle
+        { indice: 1, x: 571.4, y: 340.5, r: 27.9 },   // Treble
+        { indice: 4, x: 690,   y: 340.5, r: 27.9 },   // Master (Volume)
+      ],
+      led: { x: 102.2, y: 308.9, r: 9.6 },
+      pulsante: { x: 99.9, y: 365.9, r: 17.6 },
+    },
     // British 30 (Orange AD30): pannello arancione; al posto delle manopole il
     // disegno ha dei mirini neri, la nostra copre il centro e lascia le tacche.
     // Pulsante: la levetta ON/OFF.
