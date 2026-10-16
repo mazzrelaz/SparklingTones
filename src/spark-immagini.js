@@ -351,6 +351,21 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // American Deluxe: la manopola copre il disco nero dentro le tacche gialle.
+    // Pulsante: la levetta Power.
+    Deluxe65: {
+      src: 'immagini/blocchi/Deluxe65.webp', w: 900, h: 886,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 204.7, y: 342.1, r: 33.7 },   // Gain
+        { indice: 3, x: 326.4, y: 342.1, r: 33.7 },   // Bass
+        { indice: 2, x: 450.1, y: 342.1, r: 33.7 },   // Middle
+        { indice: 1, x: 574.8, y: 342.1, r: 33.7 },   // Treble
+        { indice: 4, x: 696.7, y: 342.1, r: 33.7 },   // Master (Volume)
+      ],
+      led: { x: 96.3, y: 306.4, r: 9.5 },
+      pulsante: { x: 96.6, y: 365.1, r: 17.6 },
+    },
     // ODS 50: la manopola copre il disco scuro dentro l'anello arancione.
     // Pulsante: la levetta ON/OFF.
     ODS50CN: {
