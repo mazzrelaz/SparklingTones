@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Fishboy (modello «AcousticAmpV2»): pannello dorato; la manopola copre
+    // quella nera disegnata e lascia la scala. Pulsante: la levetta Power.
+    AcousticAmpV2: {
+      src: 'immagini/blocchi/AcousticAmpV2.webp', w: 900, h: 850,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 205.9, y: 328.3, r: 33.1 },   // Gain
+        { indice: 3, x: 326.9, y: 328.3, r: 33.1 },   // Bass
+        { indice: 2, x: 450,   y: 328.3, r: 33.1 },   // Middle
+        { indice: 1, x: 572.4, y: 328.3, r: 33.1 },   // Treble
+        { indice: 4, x: 695.5, y: 328.3, r: 33.1 },   // Master (Volume)
+      ],
+      led: { x: 99.6, y: 296.2, r: 9.4 },
+      pulsante: { x: 99.4, y: 353.5, r: 17.3 },
+    },
     // Pure Acoustic (modello «Acoustic»): tutto verde; la manopola sta dentro
     // la corona di puntini. Pulsante: la levetta (qui OFF in alto, ON in basso).
     Acoustic: {
