@@ -1,13 +1,13 @@
 // Sparkling Tones — 16-bozza-pulsanti.js: SOLO NELLA BOZZA, non si pubblica.
 // Il selettore per confrontare sul telefono i tre vestiti cyberpunk dei
 // pulsantoni della vista Live (16 ottobre 2026): «Ora» è quello pubblicato,
-// D, E e F le proposte (A, B e C bocciate) (gli stili stanno in index.html, `body.pad-…`).
+// D, G e H le proposte (terzo giro) (gli stili stanno in index.html, `body.pad-…`).
 'use strict';
 (function () {
-  const VOCI = [['', 'Ora'], ['d', 'D'], ['e', 'E'], ['f', 'F']];
+  const VOCI = [['', 'Ora'], ['d', 'D'], ['g', 'G'], ['h', 'H']];
   let scelta;
   try { scelta = localStorage.getItem('bozza-pad'); } catch (e) { scelta = null; }
-  if (!['', 'd', 'e', 'f'].includes(scelta)) scelta = 'd';
+  if (!['', 'd', 'g', 'h'].includes(scelta)) scelta = 'd';
 
   const box = document.createElement('div');
   box.id = 'bozzaPad';
