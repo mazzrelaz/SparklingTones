@@ -1087,7 +1087,8 @@ function frontaleImmagine(effetto, info) {
 
   if (info.led) {
     const led = document.createElement('div');
-    led.className = 'spia' + (effetto.enabled ? ' accesa' : '');
+    led.className = 'spia' + (effetto.enabled ? ' accesa' : '') +
+                    (info.led.colore ? ' ' + info.led.colore : '');
     posto(led, info.led);
     box.appendChild(led);
   }

@@ -18,7 +18,7 @@
 // un'immagine con le manopole dentro; `a` è dove punta il segno, in gradi da
 // ore 12, negativo a sinistra): resta, ma non lo usa più nessuno.
 //
-// `led` è la spia (accesa col blocco), `pulsante` il footswitch o la levetta
+// `led` è la spia (accesa col blocco; rossa, o `colore: 'viola'`),`pulsante` il footswitch o la levetta
 // (lo accende e lo spegne). `levette`: interruttori di un parametro (0 o 1),
 // ritagliati dall'immagine e capovolti quando stanno giù.
 'use strict';
@@ -44,6 +44,25 @@
       ],
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
+    },
+    // Reverse Delay (modello «DelayReverse»): Mix e Time grandi in alto, Decay
+    // e Filter in mezzo, azzurre dentro gli anelli di tacche. Il BPM
+    // (parametro 4) è la levetta sotto la scritta: disegnata come un anello
+    // visto dall'alto, senza leva, quindi capovolta non cambia.
+    DelayReverse: {
+      src: 'immagini/blocchi/DelayReverse.webp', w: 900, h: 888,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 202.7, y: 155.9, r: 67.1 },   // Mix
+        { indice: 3, x: 698.5, y: 155.8, r: 67.1 },   // Time
+        { indice: 1, x: 340.3, y: 346.4, r: 49.6 },   // Decay
+        { indice: 2, x: 559.7, y: 346.5, r: 49.6 },   // Filter
+      ],
+      levette: [
+        { indice: 4, x: 447.8, y: 212.2, r: 19, su: 0 },   // BPM
+      ],
+      led: { x: 449.3, y: 103.6, r: 16, colore: 'viola' },   // spia bianca e viola, non rossa
+      pulsante: { x: 446.4, y: 775.3, r: 45.9 },
     },
     // Echo Tape (modello «DelayRe201»): Sustain e Short → Long grandi in alto,
     // Volume e Tone in mezzo, dentro gli archi. Il BPM (parametro 4) è la
