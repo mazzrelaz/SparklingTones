@@ -51,15 +51,13 @@ function èFrontale(effetto, vere) {
 
 
 /**
- * L'insegna col nome del preset, accesa del colore della sua famiglia di
- * suono. Senza famiglia resta bianca: inventarle un colore qui vorrebbe dire
- * far leggere una famiglia che non c'è.
+ * L'insegna col nome del preset, sempre bianca. Prima prendeva il colore della
+ * famiglia di suono; l'utente l'ha voluta bianca per tutti (16 ottobre 2026):
+ * sotto ci sono già i colori della catena e delle immagini.
  */
 function accendiInsegna(record) {
-  const scelta = record && record.famiglia &&
-                 famiglie.find(f => f.id === record.famiglia);
   $('titoloEditor').textContent = record.name;
-  $('riquadroPreset').style.setProperty('--fam', scelta ? scelta.colore : '#ffffff');
+  $('riquadroPreset').style.setProperty('--fam', '#ffffff');
 }
 function disegnaCatena() {
   const catena = $('catena');
