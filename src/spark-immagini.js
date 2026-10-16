@@ -45,6 +45,20 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Chorus (modello «ChorusAnalog»): la manopola copre quella nera disegnata
+    // e lascia l'arco. Spia: il «Check»; footswitch in basso.
+    ChorusAnalog: {
+      src: 'immagini/blocchi/ChorusAnalog.webp', w: 900, h: 887,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 196.1, y: 150.6, r: 65.1 },   // E.Level
+        { indice: 3, x: 702.6, y: 150.6, r: 65.1 },   // Tone
+        { indice: 1, x: 338.4, y: 345.9, r: 51.8 },   // Rate
+        { indice: 2, x: 559.9, y: 346,   r: 51.8 },   // Depth
+      ],
+      led: { x: 448.7, y: 144.8, r: 14.8 },
+      pulsante: { x: 448.9, y: 777.2, r: 42.9 },
+    },
     // Bass EQ: come il Guitar EQ, con le sue bande; il Level in fondo a destra.
     BassEQ6: {
       src: 'immagini/blocchi/BassEQ6.webp', w: 900, h: 910,
