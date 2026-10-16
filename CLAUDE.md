@@ -340,8 +340,8 @@ una sessione nuova non c'è, `git worktree add <scratchpad>/bozza-editor bozza-e
 la voce `spark-bozza` di `.claude/launch.json` (non committata) va puntata lì. Le immagini arrivano
 **senza manopole**, col puntino bianco al centro e lo sfondo nero: sfondo (`tools/togli-sfondo/`;
 se lo sfondo è blu scuro, `&pieno=62&alto=120&basso=60`; grigio scuro, `&pieno=45&alto=100&basso=45`), manopole e misure le faccio io.
-**Fatte 22**: Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate, LA Comp, Red Comp, Bass
-Comp, Optical Comp, Legendary Wah, Auto Wah, Clone Drive, Over Drive, J.H. Axle Fuzz, J.H. Super Fuzz, J.H. Octave Fuzz, J.H. Fuzz Zone, Booster, Fuzz Face, Black Op, Bass Muff, Guitar Muff. Centri e raggi:
+**Fatte 23**: Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate, LA Comp, Red Comp, Bass
+Comp, Optical Comp, Legendary Wah, Auto Wah, Clone Drive, Over Drive, J.H. Axle Fuzz, J.H. Super Fuzz, J.H. Octave Fuzz, J.H. Fuzz Zone, Booster, Fuzz Face, Black Op, Bass Muff, Guitar Muff, Bassmaster. Centri e raggi:
 `tools/togli-sfondo/misura.ps1 -Immagine <originale> [-Profili 'x,y,lung;…']` (puntini bianchi, spia
 rossa, anelli delle scale), poi `esegui.ps1` e le misure spostate del taglio e per la scala. **Da verificare a orecchio**: quale posizione della
 levetta sia Limit (LA Comp) e -15 dB (Optical Comp); nel wah, 1/2 = 0,5 e il tempo lineare.
