@@ -45,6 +45,18 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Classic Vibe (modello «MiniVibe»): Speed e Intensity grandi, dentro
+    // l'anello interno.
+    MiniVibe: {
+      src: 'immagini/blocchi/MiniVibe.webp', w: 900, h: 1333,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 257.8, y: 263.2, r: 85.4 },   // Speed
+        { indice: 1, x: 644.7, y: 263.2, r: 85.4 },   // Intensity
+      ],
+      led: { x: 448, y: 118.6, r: 18 },
+      pulsante: { x: 452.8, y: 1111.7, r: 47.5 },
+    },
     // J.H. Legendary Vibe (modello «JH.VoodooVibeJr»): quattro manopole dentro
     // l'arco tratteggiato; Mix è il Chorus/Vibrato (parametro 3), continuo.
     'JH.VoodooVibeJr': {
