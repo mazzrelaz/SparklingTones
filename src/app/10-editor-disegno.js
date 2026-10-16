@@ -134,7 +134,7 @@ function tassello(effetto, posizione) {
   if (scelto) inModifica.barreAFuoco = barre;    // si aggiornano girando
 
   // Con un'immagine il tassello mostra quella, al posto del nome e delle barrette.
-  const immagine = immagineBlocco(effetto.name);
+  const immagine = immagineBlocco(effetto.name, effetto);
   if (immagine) {
     t.classList.add('con-immagine');
     const mini = document.createElement('img');
@@ -209,7 +209,7 @@ function bloccoAFuoco(effetto, posizione) {
   blocco.appendChild(intestazioneBlocco(effetto));
   // Bozza del 15 ottobre 2026: un modello con la sua immagine si regola
   // sull'immagine stessa; gli altri restano a pomelli.
-  const immagine = immagineBlocco(effetto.name);
+  const immagine = immagineBlocco(effetto.name, effetto);
   if (immagine) blocco.classList.add('con-immagine');
   blocco.appendChild(immagine ? frontaleImmagine(effetto, immagine)
                               : griglia(effetto, posizione));
@@ -522,10 +522,12 @@ function candidatiModello(effetto, posizione) {
 
 /**
  * Senza il pacchetto Hendrix (`haHendrix`) il wah si chiama «Auto Wah» e ha la
- * sua immagine, quella del pedale gratuito con la sola Sensitivity.
+ * sua immagine, quella del pedale gratuito con la sola Sensitivity. Il
+ * riverbero ha un'immagine per tipo: con l'effetto si guarda anche quello.
  */
-const immagineBlocco = nome =>
-  SparkImmagini.di(nome === 'JH.Vox846' && !haHendrix() ? 'AutoWah' : nome);
+const immagineBlocco = (nome, effetto) =>
+  SparkImmagini.di(nome === 'JH.Vox846' && !haHendrix() ? 'AutoWah' : nome,
+                   effetto ? nomeTipo(effetto) : null);
 const nomeBlocco = nome =>
   nome === 'JH.Vox846' && !haHendrix() ? tr('Auto Wah') : SparkEffetti.nome(nome);
 
@@ -753,7 +755,8 @@ function apriSceltaTipo(effetto, param) {
   const voci = [];
   for (let n = 0; n < quante; n++) {
     voci.push({ valore: String(SparkEffetti.valorePosizione(n)),
-                testo: nomi ? nomi[n] : tr('posizione {0}', n + 1) });
+                testo: nomi ? nomi[n] : tr('posizione {0}', n + 1),
+                immagine: nomi && (SparkImmagini.di(effetto.name, nomi[n]) || {}).src });
   }
   const dove = SparkEffetti.posizioneDi(param.value, quante);
   // L'ampli riporta un valore che non è nessuna delle posizioni note: si

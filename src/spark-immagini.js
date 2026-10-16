@@ -18,9 +18,14 @@
 // un'immagine con le manopole dentro; `a` è dove punta il segno, in gradi da
 // ore 12, negativo a sinistra): resta, ma non lo usa più nessuno.
 //
-// `led` è la spia (accesa col blocco; rossa, o `colore: 'viola'`),`pulsante` il footswitch o la levetta
-// (lo accende e lo spegne). `levette`: interruttori di un parametro (0 o 1),
-// ritagliati dall'immagine e capovolti quando stanno giù.
+// `led` è la spia (accesa col blocco; rossa, o `colore: 'viola'`), `pulsante`
+// il footswitch o la levetta (lo accende e lo spegne). `levette`: interruttori
+// di un parametro (0 o 1), ritagliati dall'immagine e capovolti quando stanno giù.
+//
+// Il riverbero ha **un'immagine per tipo** (scelta dell'utente, 16 ottobre
+// 2026): la voce si chiama col modello e il nome del tipo, `'bias.reverb:Hall
+// Natural'`, e il file `Reverb-HallNatural.webp`. Un tipo senza immagine resta
+// a pomelli.
 'use strict';
 (function () {
   const manopola = colore =>
@@ -1195,8 +1200,8 @@
   };
 
   window.SparkImmagini = {
-    /** L'immagine di un modello, o null se non ce l'ha. */
-    di: modello => TABELLA[modello] || null,
+    /** L'immagine di un modello (e del suo tipo, per il riverbero), o null. */
+    di: (modello, tipo) => (tipo && TABELLA[modello + ':' + tipo]) || TABELLA[modello] || null,
     /**
      * La misura fissa del riquadro nell'editor: quella del Silver 120, il blocco
      * con le manopole più piccole. Gli altri ci stanno dentro, rimpiccioliti.
