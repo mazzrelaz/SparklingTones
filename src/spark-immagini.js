@@ -137,6 +137,19 @@
       led: { x: 385, y: 92, r: 20 },
       pulsante: { x: 385, y: 942, r: 70 },
     },
+    // Clone Drive: ogni manopola nel colore della sua scala (Gain arancione,
+    // Output viola, Treble azzurro). Pulsante: il cerchio sotto l'arciere.
+    KlonCentaurSilver: {
+      src: 'immagini/blocchi/KlonCentaurSilver.webp', w: 900, h: 1313,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 2, x: 227.5, y: 221.8, r: 83.4 },   // Gain
+        { indice: 0, x: 672.6, y: 221.9, r: 83.4, manopola: manopola('viola') },     // Output
+        { indice: 1, x: 449.9, y: 438.9, r: 69,   manopola: manopola('azzurra') },   // Treble
+      ],
+      led: { x: 449.9, y: 99.1, r: 13 },
+      pulsante: { x: 444, y: 1083, r: 58 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
