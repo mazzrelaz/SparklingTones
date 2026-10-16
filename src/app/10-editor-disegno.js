@@ -19,7 +19,8 @@
  * Un colore acceso per posizione della catena, così la categoria si riconosce
  * senza leggerla. Sono tinte sature con l'alone, e il fondo dei tasselli è
  * **più scuro** della pagina: il neon si vede sul buio, e un pannello grigio
- * smorza tutto quello che ci sta sopra.
+ * smorza tutto quello che ci sta sopra. Provato un colore solo per tutti (il
+ * blu dei delay, 16 ottobre 2026): all'utente non è piaciuto, si è tornati qui.
  */
 const COLORI_CATENA = ['#00d9ff', '#c04bff', '#ff3040', '#ffd21e',
                        '#17e39b', '#3aa0ff', '#8b6bff'];
@@ -105,6 +106,10 @@ function striscia() {
   return fila;
 }
 
+/** Il tocco di prima su un tassello, per riconoscere il doppio tocco. */
+const DOPPIO_TOCCO_MS = 400;
+let toccoTassello = { posizione: -1, quando: 0 };
+
 function tassello(effetto, posizione) {
   const scelto = posizione === inModifica.scelto;
   const t = document.createElement('button');
@@ -123,17 +128,53 @@ function tassello(effetto, posizione) {
 
   const modello = document.createElement('div');
   modello.className = 'modello';
-  modello.textContent = SparkEffetti.nome(effetto.name);
+  modello.textContent = (candidatiModello(effetto, posizione).length < 2 && nomeTipo(effetto)) ||
+                        nomeBlocco(effetto.name);
 
   const barre = barrette(effetto);
   if (scelto) inModifica.barreAFuoco = barre;    // si aggiornano girando
 
-  t.append(led, cat, modello, barre);
+  // Con un'immagine il tassello mostra quella, al posto del nome e delle barrette.
+  const immagine = immagineBlocco(effetto.name, effetto);
+  if (immagine) {
+    t.classList.add('con-immagine');
+    const mini = document.createElement('img');
+    mini.className = 'miniatura';
+    mini.src = immagine.src;
+    mini.alt = '';
+    mini.draggable = false;
+    t.append(led, cat, mini);
+  } else {
+    t.append(led, cat, modello, barre);
+  }
+  // Un tocco porta il blocco a fuoco; due tocchi ravvicinati aprono la scelta
+  // del modello (o del tipo). Il doppio tocco si conta a mano: il primo tocco
+  // ridisegna la catena, e il secondo cade già su un tassello nuovo.
   t.addEventListener('click', () => {
-    inModifica.scelto = posizione;
-    disegnaCatena();
+    const adesso = Date.now();
+    const doppio = toccoTassello.posizione === posizione &&
+                   adesso - toccoTassello.quando < DOPPIO_TOCCO_MS;
+    toccoTassello = doppio ? { posizione: -1, quando: 0 } : { posizione, quando: adesso };
+    scegliBlocco(posizione);
+    if (doppio) apriSceltaModello(posizione);
   });
   return t;
+}
+
+/**
+ * Porta un blocco a fuoco **senza ridisegnare la catena**: cambia solo quale
+ * tassello è acceso e il riquadro sotto. Ridisegnarla la faceva anche
+ * ricentrare, e il secondo tocco di un doppio tocco cadeva sul tassello accanto.
+ */
+function scegliBlocco(posizione) {
+  inModifica.scelto = posizione;
+  const catena = $('catena');
+  const tasselli = catena.querySelectorAll('.striscia .tassello');
+  const vecchio = catena.querySelector('.blocco.aFuoco');
+  if (!tasselli.length || !vecchio) { disegnaCatena(); return; }
+  tasselli.forEach((t, i) => t.classList.toggle('scelto', i === posizione));
+  inModifica.barreAFuoco = tasselli[posizione].querySelector('.barrette');
+  vecchio.replaceWith(bloccoAFuoco(inModifica.effetti[posizione], posizione));
 }
 
 /**
@@ -163,9 +204,22 @@ function bloccoAFuoco(effetto, posizione) {
   blocco.className = 'blocco aFuoco' + (effetto.enabled ? '' : ' spento');
   blocco.style.setProperty('--cat', coloreDi(posizione));
 
-  blocco.appendChild(barraPosizione(posizione));
-  blocco.appendChild(intestazioneBlocco(effetto, posizione));
-  blocco.appendChild(griglia(effetto, posizione));
+  // Niente più riga ‹ CATEGORIA › né tendina del modello (l'utente, 15 ottobre
+  // 2026: la categoria sta già sul tassello; il modello si cambia col doppio
+  // tocco sul tassello, `apriSceltaModello`).
+  blocco.appendChild(intestazioneBlocco(effetto));
+  // Bozza del 15 ottobre 2026: un modello con la sua immagine si regola
+  // sull'immagine stessa; gli altri restano a pomelli.
+  const immagine = immagineBlocco(effetto.name, effetto);
+  if (immagine) blocco.classList.add('con-immagine');
+  blocco.appendChild(immagine ? frontaleImmagine(effetto, immagine)
+                              : griglia(effetto, posizione));
+  // Se l'immagine ha il suo interruttore (footswitch, levetta), il tasto
+  // «acceso/spento» è una scritta in più: si accende toccando quello.
+  if (immagine && immagine.pulsante) {
+    const doppio = blocco.querySelector('.interruttore');
+    if (doppio) doppio.remove();
+  }
 
   // Qui c'era l'avviso «è spento: le manopole non si sentono». Tolto il 26
   // agosto 2026 su richiesta — nessun messaggio in questo pannello. Che sia
@@ -180,39 +234,6 @@ function bloccoAFuoco(effetto, posizione) {
   return blocco;
 }
 
-/** ‹ CATEGORIA › — si cambia blocco anche senza tornare sulla striscia. */
-function barraPosizione(posizione) {
-  const barra = document.createElement('div');
-  barra.className = 'barra-posizione';
-
-  const vaiA = (dove, segno, etichetta) => {
-    const tasto = document.createElement('button');
-    tasto.type = 'button';
-    tasto.className = 'freccia';
-    tasto.textContent = segno;
-    tasto.title = etichetta;
-    tasto.disabled = dove < 0 || dove >= inModifica.effetti.length;
-    tasto.addEventListener('click', () => {
-      inModifica.scelto = dove;
-      disegnaCatena();
-    });
-    return tasto;
-  };
-
-  const dove = document.createElement('div');
-  dove.className = 'dove';
-  dove.textContent = Spark.CATENA[posizione] || tr`posizione ${posizione + 1}`;
-
-  barra.append(vaiA(posizione - 1, '‹', tr('il blocco prima')), dove,
-               vaiA(posizione + 1, '›', tr('il blocco dopo')));
-  return barra;
-}
-
-/**
- * Il nome del blocco è una tendina: da lì si cambia il modello. L'era di un
- * pulsante «cambia» accanto al nome è finita perché nessuno collegava il
- * pulsante al nome che stava leggendo.
- */
 /**
  * L'elenco da cui si sceglie un modello o un tipo.
  *
@@ -242,6 +263,8 @@ function apriElenco(titolo, voci, scelto, quando) {
   const lista = document.createElement('div');
   lista.className = 'elenco-corpo';
 
+  const conMiniature = voci.some(v => v.immagine);
+  if (conMiniature) lista.classList.add('con-miniature');
   let gruppoOra = null;
   for (const voce of voci) {
     if (voce.gruppo && voce.gruppo !== gruppoOra) {
@@ -269,7 +292,19 @@ function apriElenco(titolo, voci, scelto, quando) {
     riga.type = 'button';
     riga.className = 'elenco-voce' + (voce.valore === scelto ? ' scelta' : '') +
                      (voce.spento ? ' spenta' : '');
-    riga.textContent = voce.testo;
+    // La miniatura del blocco accanto al nome, se il modello ha la sua
+    // immagine; quando qualcuna ce l'ha, le altre tengono il posto vuoto, così
+    // i nomi restano in colonna.
+    if (conMiniature) {
+      const mini = document.createElement(voce.immagine ? 'img' : 'span');
+      mini.className = 'elenco-mini';
+      if (voce.immagine) { mini.src = voce.immagine; mini.alt = ''; mini.loading = 'lazy'; }
+      const nome = document.createElement('span');
+      nome.textContent = voce.testo;
+      riga.append(mini, nome);
+    } else {
+      riga.textContent = voce.testo;
+    }
     riga.title = voce.title || voce.testo;
     if (voce.spento) riga.disabled = true;
     else riga.addEventListener('click', () => { chiudi(); quando(voce.valore); });
@@ -486,7 +521,24 @@ function candidatiModello(effetto, posizione) {
   return candidati;
 }
 
-function intestazioneBlocco(effetto, posizione) {
+/**
+ * Senza il pacchetto Hendrix (`haHendrix`) il wah si chiama «Auto Wah» e ha la
+ * sua immagine, quella del pedale gratuito con la sola Sensitivity. Il
+ * riverbero ha un'immagine per tipo: con l'effetto si guarda anche quello.
+ */
+const immagineBlocco = (nome, effetto) =>
+  SparkImmagini.di(nome === 'JH.Vox846' && !haHendrix() ? 'AutoWah' : nome,
+                   effetto ? nomeTipo(effetto) : null);
+const nomeBlocco = nome =>
+  nome === 'JH.Vox846' && !haHendrix() ? tr('Auto Wah') : SparkEffetti.nome(nome);
+
+/**
+ * Il doppio tocco su un tassello: l'elenco dei modelli per quella posizione,
+ * o dei tipi se il modello è unico (il riverbero). Il noise gate non ha niente
+ * da scegliere, e non apre niente.
+ */
+function apriSceltaModello(posizione) {
+  const effetto = inModifica.effetti[posizione];
   const candidati = candidatiModello(effetto, posizione);
   // **Senza ampli i modelli mai visti restano nell'elenco, ma spenti.** Prima
   // li toglievo, ed era sbagliato: la tendina passava da quaranta voci a sette
@@ -520,18 +572,14 @@ function intestazioneBlocco(effetto, posizione) {
   // e non la trovava nessuno).
   if (candidati.length < 2) {
     const param = paramScelta(effetto);
-    return param ? intestazioneScelta(effetto, param)
-                 : intestazioneFissa(effetto);
+    if (param) apriSceltaTipo(effetto, param);
+    return;
   }
 
   // **Non è un `<select>`**, e la ragione è il telefono: lì il menu di sistema
   // ignora i nostri caratteri, e con «Silver 120 — Roland JC120» manda ogni
   // voce a capo su due righe — trentanove ampli così sono uno schermo e mezzo
   // da scorrere. Un elenco disegnato da noi tiene ogni ampli su **una riga**.
-  const scelta = document.createElement('button');
-  scelta.type = 'button';
-  scelta.className = 'nome-effetto';
-  scelta.title = tr('tocca per mettere un altro modello in questa posizione');
   const voci = [];
 
   // I modelli **usciti da questo ampli** vengono per primi: esistono di sicuro.
@@ -548,9 +596,10 @@ function intestazioneBlocco(effetto, posizione) {
     const reale = SparkEffetti.ampliReale(modello);
     voci.push({
       valore: modello,
-      testo: SparkEffetti.nome(modello) + (reale ? ' — ' + reale : ''),
+      testo: nomeBlocco(modello) + (reale ? ' — ' + reale : ''),
       gruppo: gruppo || null,
       spento: spento(modello),
+      immagine: (immagineBlocco(modello) || {}).src,
       title: spento(modello)
         ? tr('{0} — serve l\'ampli: la tua libreria non l\'ha mai visto, ' +
           'quindi non sappiamo quante manopole abbia', modello)
@@ -565,6 +614,8 @@ function intestazioneBlocco(effetto, posizione) {
   const raggruppa = candidati.some(m => SparkEffetti.ampliGruppo(m));
   if (raggruppa) {
     for (const gruppo of SparkEffetti.GRUPPI_AMPLI) {
+      // Senza il pacchetto Hendrix i suoi ampli non ci sono.
+      if (gruppo === SparkEffetti.GRUPPO_HENDRIX && !haHendrix()) continue;
       candidati.filter(m => SparkEffetti.ampliGruppo(m) === gruppo)
                .forEach(m => metti(m, gruppo));
     }
@@ -585,8 +636,14 @@ function intestazioneBlocco(effetto, posizione) {
     // finivano in fondo sotto «dal catalogo, da provare», che aveva senso
     // finché il catalogo era incerto: adesso è verificato tutto contro l'app.
     candidati.filter(m => !SparkEffetti.eHendrix(m)).forEach(m => metti(m));
-    candidati.filter(m => SparkEffetti.eHendrix(m))
-             .forEach(m => metti(m, SparkEffetti.GRUPPO_HENDRIX));
+    // Senza il pacchetto Hendrix non c'è il suo gruppo: resta solo il wah, che
+    // per chi non ce l'ha è l'Auto Wah gratuito (vedi `eAutoWahLibero`).
+    if (haHendrix()) {
+      candidati.filter(m => SparkEffetti.eHendrix(m))
+               .forEach(m => metti(m, SparkEffetti.GRUPPO_HENDRIX));
+    } else if (candidati.includes('JH.Vox846')) {
+      metti('JH.Vox846');
+    }
   }
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
   // fonte elenca, e senza questa via non ci si arriverebbe mai. Senza ampli
@@ -596,9 +653,6 @@ function intestazioneBlocco(effetto, posizione) {
   // stato verificato contro l'app ufficiale, l'elenco è quello completo, e una
   // voce che chiede di scrivere un nome a mano non serve più a niente.
 
-  const reale = SparkEffetti.ampliReale(effetto.name);
-  scelta.textContent = SparkEffetti.nome(effetto.name) + (reale ? ' — ' + reale : '');
-
   // Senza ampli il modello **si cambia dal 26 agosto 2026**, chiesto
   // dall'utente. Prima era spento, e la ragione era buona: cambiarlo vuol dire
   // fargli ricostruire un blocco DSP e poi rileggere quanti parametri ha
@@ -606,24 +660,35 @@ function intestazioneBlocco(effetto, posizione) {
   // che pianta l'ampli. La via d'uscita non è tirare a indovinare: è **copiare
   // un blocco vero**, preso da un preset della libreria che quel modello ce
   // l'ha già. Per questo qui offline restano solo i modelli visti.
-  if (inModifica.offline) {
-    scelta.title = tr('senza ampli si può mettere solo un modello che la libreria ' +
-                   'ha già visto: di quello sappiamo quante manopole ha');
-  }
-
-  scelta.addEventListener('click', () => {
-    apriElenco(Spark.CATENA[posizione], voci, effetto.name,
-               valore => cambiaModello(posizione, valore));
+  apriElenco(Spark.CATENA[posizione], voci, effetto.name, async valore => {
+    await cambiaModello(posizione, valore);
+    // L'Auto Wah gratuito è il wah in Auto Detect: lo si mette così.
+    if (valore === 'JH.Vox846' && !haHendrix()) {
+      const modo = inModifica.effetti[posizione].params.find(p => p.index === 0);
+      if (modo && modo.value < 0.9) {
+        modo.value = 1;
+        mandaParametro(valore, 0, 1);
+        scegliBlocco(posizione);
+      }
+    }
   });
+}
 
+/**
+ * La riga sopra l'immagine o le manopole: la nota Hendrix, se serve, e
+ * l'acceso/spento (che sparisce quando l'immagine ha il suo footswitch).
+ */
+function intestazioneBlocco(effetto) {
   const riga = document.createElement('div');
   riga.className = 'riga-modello';
-  riga.appendChild(scelta);
 
   // Scelto un Hendrix, la ragione per cui non si sente resta scritta finché
   // quel blocco è quello: sceglierlo e sentirlo muto sono due momenti diversi,
   // e in mezzo può passare tutto il tempo che serve a dimenticarsene.
-  if (SparkEffetti.eHendrix(effetto.name)) {
+  // Senza il pacchetto Hendrix il wah in Auto Detect è l'Auto Wah gratuito, e
+  // la nota non serve.
+  if (SparkEffetti.eHendrix(effetto.name) &&
+      (haHendrix() || SparkEffetti.vuoleHendrix(effetto))) {
     const nota = document.createElement('div');
     nota.className = 'nota-jh';
     const bollo = document.createElement('span');
@@ -647,66 +712,52 @@ function interruttoreDi(effetto) {
   interruttore.type = 'button';
   interruttore.className = 'interruttore' + (effetto.enabled ? ' acceso' : '');
   interruttore.textContent = effetto.enabled ? tr('acceso') : tr('spento');
-  interruttore.addEventListener('click', async () => {
-    effetto.enabled = !effetto.enabled;
-    segnaModificato();
-    if (!inModifica.offline) {
-      try {
-        await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
-      } catch (err) {
-        logLine(tr('errore: {0}', err.message), true);
-      }
-    }
-    // L'ampli scrive lui l'acceso/spento anche nel parametro che lo rispecchia
-    // (misurato: spegnendo il blocco quel parametro va a 0). Se non lo
-    // seguiamo qui, lo schermo resta a dire il contrario finché non si rilegge.
-    if (SparkEffetti.nomeExtra(effetto.name)) {
-      effetto.params.forEach(p => {
-        if (SparkEffetti.extra(effetto.name, p.index)) p.value = effetto.enabled ? 1 : 0;
-      });
-    }
-    disegnaCatena();
-  });
+  interruttore.addEventListener('click', () => cambiaAcceso(effetto));
   return interruttore;
 }
 
-/**
- * Il titolo di un blocco che non ha niente da scegliere: il noise gate. Ha lo
- * stesso posto e la stessa taglia della tendina, così la catena non balla
- * passando da un blocco all'altro — solo, non si apre.
- */
-function intestazioneFissa(effetto) {
-  const riga = document.createElement('div');
-  riga.className = 'riga-modello';
-  const titolo = document.createElement('div');
-  titolo.className = 'nome-effetto fisso';
-  titolo.textContent = SparkEffetti.nome(effetto.name);
-  titolo.title = effetto.name;
-  riga.append(titolo, interruttoreDi(effetto));
-  return riga;
+/** Accende o spegne un blocco: dall'interruttore, o dal footswitch dell'immagine. */
+async function cambiaAcceso(effetto) {
+  effetto.enabled = !effetto.enabled;
+  segnaModificato();
+  if (!inModifica.offline) {
+    try {
+      await spark.send(Spark.commands.effectOnOff(effetto.name, effetto.enabled));
+    } catch (err) {
+      logLine(tr('errore: {0}', err.message), true);
+    }
+  }
+  // L'ampli scrive lui l'acceso/spento anche nel parametro che lo rispecchia
+  // (misurato: spegnendo il blocco quel parametro va a 0). Se non lo
+  // seguiamo qui, lo schermo resta a dire il contrario finché non si rilegge.
+  if (SparkEffetti.nomeExtra(effetto.name)) {
+    effetto.params.forEach(p => {
+      if (SparkEffetti.extra(effetto.name, p.index)) p.value = effetto.enabled ? 1 : 0;
+    });
+  }
+  // Il tassello si aggiorna al suo posto invece di ridisegnare la catena: così
+  // si vede salire (spento) e riscendere (acceso), e la catena non si sposta.
+  const posizione = inModifica.effetti.indexOf(effetto);
+  const t = $('catena').querySelectorAll('.striscia .tassello')[posizione];
+  if (!t) { disegnaCatena(); return; }
+  t.classList.toggle('acceso', effetto.enabled);
+  t.classList.toggle('spento', !effetto.enabled);
+  scegliBlocco(inModifica.scelto);
 }
 
 /**
- * Il titolo di un blocco il cui modello è unico ma che sceglie fra **tipi** —
- * il riverbero. La tendina grande governa quel parametro invece del modello:
- * per chi suona «Plate Rich» *è* il nome di quel blocco, e cercarlo in una
- * casella in fondo alle manopole era il posto sbagliato.
+ * La scelta di un blocco il cui modello è unico ma che sceglie fra **tipi** —
+ * il riverbero: per chi suona «Plate Rich» *è* il nome di quel blocco. Si
+ * apre col doppio tocco sul tassello, come quella dei modelli.
  */
-function intestazioneScelta(effetto, param) {
-  const riga = document.createElement('div');
-  riga.className = 'riga-modello';
-
-  const menu = document.createElement('button');
-  menu.type = 'button';
-  menu.className = 'nome-effetto';
-  menu.title = tr('tocca per cambiare tipo');
-
+function apriSceltaTipo(effetto, param) {
   const quante = SparkEffetti.posizioni(effetto.name, param.index);
   const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
   const voci = [];
   for (let n = 0; n < quante; n++) {
     voci.push({ valore: String(SparkEffetti.valorePosizione(n)),
-                testo: nomi ? nomi[n] : tr('posizione {0}', n + 1) });
+                testo: nomi ? nomi[n] : tr('posizione {0}', n + 1),
+                immagine: nomi && (SparkImmagini.di(effetto.name, nomi[n]) || {}).src });
   }
   const dove = SparkEffetti.posizioneDi(param.value, quante);
   // L'ampli riporta un valore che non è nessuna delle posizioni note: si
@@ -716,20 +767,22 @@ function intestazioneScelta(effetto, param) {
                 testo: tr('valore dell\'ampli ({0})', mostraValore(param.value)) });
   }
   const ora = String(dove === -1 ? param.value : SparkEffetti.valorePosizione(dove));
-  menu.textContent = (voci.find(v => v.valore === ora) || {}).testo ||
-                     SparkEffetti.nome(effetto.name);
-
-  menu.addEventListener('click', () => {
-    apriElenco(Spark.CATENA[Spark.CATENA.length - 1], voci, ora, valore => {
-      param.value = Number(valore);
-      aggiornaBarrette();
-      mandaParametro(effetto.name, param.index, param.value);
-      disegnaCatena();
-    });
+  apriElenco(Spark.CATENA[Spark.CATENA.length - 1], voci, ora, valore => {
+    param.value = Number(valore);
+    aggiornaBarrette();
+    mandaParametro(effetto.name, param.index, param.value);
+    disegnaCatena();
   });
+}
 
-  riga.append(menu, interruttoreDi(effetto));
-  return riga;
+/** Il nome del tipo scelto, per il tassello del riverbero: è il nome di quel blocco. */
+function nomeTipo(effetto) {
+  const param = paramScelta(effetto);
+  if (!param) return null;
+  const quante = SparkEffetti.posizioni(effetto.name, param.index);
+  const nomi = SparkEffetti.nomiPosizioni(effetto.name, param.index);
+  const dove = SparkEffetti.posizioneDi(param.value, quante);
+  return nomi && dove >= 0 ? nomi[dove] : null;
 }
 
 /* ------------------------------------------------------------------
@@ -925,7 +978,7 @@ function etichettaDi(effetto, param, quante) {
 const RAGGIO = 34, GIRO = 2 * Math.PI * RAGGIO * 0.75;   // 270 gradi di corsa
 const CORSA_PX = 300;                                    // pixel da zero a uno
 
-function pomello(effetto, param) {
+function pomello(effetto, param, formato = mostraValore) {
   const box = document.createElement('div');
   box.className = 'pomello';
 
@@ -968,7 +1021,7 @@ function pomello(effetto, param) {
   const disegna = () => {
     arco.setAttribute('stroke-dasharray', `${GIRO * param.value} 999`);
     tacca.setAttribute('transform', `rotate(${-135 + param.value * 270} 50 50)`);
-    valore.textContent = mostraValore(param.value);
+    valore.textContent = formato(param.value);
   };
   disegna();
 
@@ -978,14 +1031,14 @@ function pomello(effetto, param) {
     partenzaY = evento.clientY;
     partenzaV = param.value;
     box.setPointerCapture(evento.pointerId);
-    mostraBolla(box, param.value);
+    mostraBolla(box, param.value, formato);
   });
   box.addEventListener('pointermove', evento => {
     if (partenzaY === null) return;
     const passo = (partenzaY - evento.clientY) / CORSA_PX;
     param.value = Math.min(1, Math.max(0, partenzaV + passo));
     disegna();
-    mostraBolla(box, param.value);
+    mostraBolla(box, param.value, formato);
     aggiornaBarrette();
     mandaParametro(effetto.name, param.index, param.value);
   });
@@ -993,6 +1046,394 @@ function pomello(effetto, param) {
   box.addEventListener('pointerup', fine);
   box.addEventListener('pointercancel', fine);
   return box;
+}
+
+/**
+ * Il blocco disegnato com'è: l'immagine del pedale o dell'ampli, con le
+ * manopole che si girano sopra (bozza del 15 ottobre 2026, chiesta
+ * dall'utente: «troppe scritte»). Il gesto è quello del pomello — trascinare
+ * in verticale — e il valore compare nella bolla solo mentre si gira.
+ * Le misure stanno in `src/spark-immagini.js`.
+ */
+function frontaleImmagine(effetto, info) {
+  // **Il riquadro ha sempre la stessa misura** (l'utente, 15 ottobre 2026: nome,
+  // tempo e catena non devono muoversi passando da un blocco all'altro): quella
+  // del Silver 120, il blocco con le manopole più piccole. Ogni immagine ci sta
+  // dentro intera, rimpicciolita quanto serve e centrata: piena larghezza se è
+  // più larga in proporzione, piena altezza se è più alta (il Tube Drive).
+  const fuori = document.createElement('div');
+  fuori.className = 'frontale';
+  const riquadro = SparkImmagini.RIQUADRO;
+  fuori.style.setProperty('--riquadro', riquadro.w / riquadro.h);
+  const larga = (info.w / info.h) / (riquadro.w / riquadro.h);
+
+  const box = document.createElement('div');
+  box.className = 'tela';
+  box.style.aspectRatio = `${info.w} / ${info.h}`;
+  box.style.width = Math.min(1, larga) * 100 + '%';
+  fuori.appendChild(box);
+
+  const img = document.createElement('img');
+  img.className = 'sfondo';
+  img.src = info.src;
+  img.alt = SparkEffetti.nome(effetto.name);
+  img.draggable = false;
+  box.appendChild(img);
+
+  // Un cerchio dell'immagine, in percentuali: segue la larghezza dello schermo.
+  // Un cerchio (r) o un rettangolo (w × h), col centro in (x, y).
+  const posto = (el, { x, y, r, w = 2 * r, h = 2 * r }) => Object.assign(el.style, {
+    left:   (x - w / 2) / info.w * 100 + '%',
+    top:    (y - h / 2) / info.h * 100 + '%',
+    width:  w / info.w * 100 + '%',
+    height: h / info.h * 100 + '%',
+  });
+
+  if (info.led) {
+    const led = document.createElement('div');
+    led.className = 'spia' + (effetto.enabled ? ' accesa' : '') +
+                    (info.led.colore ? ' ' + info.led.colore : '');
+    posto(led, info.led);
+    box.appendChild(led);
+  }
+  if (info.pulsante) {
+    const pulsante = document.createElement('button');
+    pulsante.type = 'button';
+    pulsante.className = 'pulsante-img';
+    pulsante.title = effetto.enabled ? tr('spegni') : tr('accendi');
+    posto(pulsante, info.pulsante);
+    if (info.pulsante.w) pulsante.classList.add('rettangolo');
+    pulsante.addEventListener('click', () => cambiaAcceso(effetto));
+    box.appendChild(pulsante);
+  }
+  // I tasti che aprono un pannellino (l'«Auto» del wah): `apre` è il nome del
+  // pannellino in PANNELLI_IMMAGINE.
+  for (const t of info.tasti || []) {
+    const tasto = document.createElement('button');
+    tasto.type = 'button';
+    tasto.className = 'pulsante-img rettangolo';
+    posto(tasto, t);
+    tasto.addEventListener('click', () => PANNELLI_IMMAGINE[t.apre](effetto));
+    box.appendChild(tasto);
+  }
+
+  // Le levette (il Limit/Compress del LA Comp): un tocco le fa scattare fra 0
+  // e 1. La levetta è quella dell'immagine, ritagliata e **capovolta** quando
+  // sta giù; `su` è il valore del parametro con la levetta in alto, com'è
+  // disegnata.
+  for (const l of info.levette || []) {
+    const param = effetto.params.find(p => p.index === l.indice);
+    if (!param) continue;
+    const lev = document.createElement('button');
+    lev.type = 'button';
+    lev.className = 'levetta-img';
+    lev.title = SparkEffetti.manopola(effetto.name, param.index, manopoleVere(effetto).length) || '';
+    posto(lev, l);
+    const giro = document.createElement('div');
+    giro.className = 'giro';
+    const pezzo = document.createElement('img');
+    pezzo.src = info.src;
+    pezzo.alt = '';
+    pezzo.draggable = false;
+    Object.assign(pezzo.style, {
+      width:  info.w / (2 * l.r) * 100 + '%',
+      height: info.h / (2 * l.r) * 100 + '%',
+      left:   -(l.x - l.r) / (2 * l.r) * 100 + '%',
+      top:    -(l.y - l.r) / (2 * l.r) * 100 + '%',
+    });
+    giro.appendChild(pezzo);
+    lev.appendChild(giro);
+    const disegna = () => {
+      const inAlto = (param.value >= 0.5 ? 1 : 0) === (l.su === undefined ? 1 : l.su);
+      giro.style.transform = inAlto ? '' : 'scaleY(-1)';
+    };
+    disegna();
+    lev.addEventListener('click', () => {
+      param.value = param.value >= 0.5 ? 0 : 1;
+      disegna();
+      aggiornaBarrette();
+      mandaParametro(effetto.name, param.index, param.value);
+    });
+    box.appendChild(lev);
+  }
+
+  // I cursori degli equalizzatori: un cappuccio che scorre sulla pista
+  // disegnata, da `y1` (zero, in basso) a `y0` (dieci, in alto); a metà corsa
+  // la banda è a zero dB. Si trascina in verticale e il cappuccio segue il dito.
+  for (const c of info.cursori || []) {
+    const param = effetto.params.find(p => p.index === c.indice);
+    if (!param) continue;
+    const pista = document.createElement('div');
+    pista.className = 'cursore-img';
+    pista.title = (nomiParam[effetto.name] || {})[param.index] ||
+                  SparkEffetti.manopola(effetto.name, param.index, manopoleVere(effetto).length) || '';
+    posto(pista, { x: c.x, y: (c.y0 + c.y1) / 2, w: c.w, h: c.y1 - c.y0 + c.alto });
+    const tappo = document.createElement('div');
+    tappo.className = 'tappo';
+    tappo.style.height = c.alto / (c.y1 - c.y0 + c.alto) * 100 + '%';
+    pista.appendChild(tappo);
+    const disegna = () => {
+      tappo.style.bottom = param.value * (1 - c.alto / (c.y1 - c.y0 + c.alto)) * 100 + '%';
+    };
+    disegna();
+
+    let partenzaY = null, partenzaV = 0;
+    pista.addEventListener('pointerdown', evento => {
+      partenzaY = evento.clientY;
+      partenzaV = param.value;
+      pista.setPointerCapture(evento.pointerId);
+      pista.classList.add('gira');
+      mostraBolla(pista, param.value);
+    });
+    pista.addEventListener('pointermove', evento => {
+      if (partenzaY === null) return;
+      const corsa = pista.getBoundingClientRect().height * (1 - c.alto / (c.y1 - c.y0 + c.alto));
+      param.value = Math.min(1, Math.max(0, partenzaV + (partenzaY - evento.clientY) / corsa));
+      disegna();
+      mostraBolla(pista, param.value);
+      aggiornaBarrette();
+      mandaParametro(effetto.name, param.index, param.value);
+    });
+    const fine = () => { partenzaY = null; pista.classList.remove('gira'); nascondiBolla(); };
+    pista.addEventListener('pointerup', fine);
+    pista.addEventListener('pointercancel', fine);
+    box.appendChild(pista);
+  }
+
+  if (info.barra) avviaBarraWah(box, effetto, info.barra, posto);
+
+  const quante = manopoleVere(effetto).length;
+  for (const m of info.manopole) {
+    const param = effetto.params.find(p => p.index === m.indice);
+    if (!param) continue;
+
+    const man = document.createElement('div');
+    man.className = 'manopola-img';
+    man.title = (nomiParam[effetto.name] || {})[param.index] ||
+                SparkEffetti.manopola(effetto.name, param.index, quante) || '';
+    posto(man, m);
+
+    // Quello che gira: il disegno della manopola, o il cerchio ritagliato
+    // dall'immagine stessa.
+    const giro = document.createElement('div');
+    giro.className = 'giro';
+    const pezzo = document.createElement('img');
+    pezzo.draggable = false;
+    pezzo.alt = '';
+    // Il disegno della manopola, con le sue proporzioni: il suo cerchio
+    // combacia con quello del blocco, e gira attorno al suo centro. Quello che
+    // esce dal cerchio (la freccia) si vede, non si taglia.
+    const sp = m.manopola || info.manopola;
+    if (sp) {
+      giro.classList.add('disegno');
+      pezzo.src = sp.src;
+      Object.assign(pezzo.style, {
+        width:  sp.w / (2 * sp.r) * 100 + '%',
+        height: sp.h / (2 * sp.r) * 100 + '%',
+        left:   (0.5 - sp.x / (2 * sp.r)) * 100 + '%',
+        top:    (0.5 - sp.y / (2 * sp.r)) * 100 + '%',
+      });
+    } else {
+      pezzo.src = info.src;
+      Object.assign(pezzo.style, {
+        width:  info.w / (2 * m.r) * 100 + '%',
+        height: info.h / (2 * m.r) * 100 + '%',
+        left:   -(m.x - m.r) / (2 * m.r) * 100 + '%',
+        top:    -(m.y - m.r) / (2 * m.r) * 100 + '%',
+      });
+    }
+    giro.appendChild(pezzo);
+    man.appendChild(giro);
+
+    // Da ore 7:30 (zero) a ore 4:30 (dieci), come i pomelli; `a` è dove
+    // punta il segno nell'immagine così com'è.
+    const disegna = () => {
+      giro.style.transform = `rotate(${param.value * 270 - 135 - (m.a || 0)}deg)`;
+    };
+    disegna();
+
+    let partenzaY = null, partenzaV = 0;
+    man.addEventListener('pointerdown', evento => {
+      partenzaY = evento.clientY;
+      partenzaV = param.value;
+      man.setPointerCapture(evento.pointerId);
+      man.classList.add('gira');
+      mostraBolla(man, param.value);
+    });
+    man.addEventListener('pointermove', evento => {
+      if (partenzaY === null) return;
+      const passo = (partenzaY - evento.clientY) / CORSA_PX;
+      param.value = Math.min(1, Math.max(0, partenzaV + passo));
+      disegna();
+      mostraBolla(man, param.value);
+      aggiornaBarrette();
+      mandaParametro(effetto.name, param.index, param.value);
+    });
+    const fine = () => { partenzaY = null; man.classList.remove('gira'); nascondiBolla(); };
+    man.addEventListener('pointerup', fine);
+    man.addEventListener('pointercancel', fine);
+    box.appendChild(man);
+  }
+  return fuori;
+}
+
+/**
+ * La colonna di puntini del wah: si accendono dal basso e salgono e scendono
+ * con la forma d'onda scelta, al suo tempo, come nell'app ufficiale. Il ciclo
+ * gira a `setInterval` (non `requestAnimationFrame`, che nel riquadro di prova
+ * non gira) e si ferma da sé quando il blocco non è più sullo schermo.
+ */
+let timerBarra = null;
+
+/** Il livello (0…1) di ciascuna forma d'onda in un punto del ciclo (0…1). */
+const FORME_WAH = [
+  f => 1 - Math.abs(2 * f - 1),                                              // triangoli
+  f => f < 0.8 ? 0.45 * f / 0.8 : f < 0.9 ? 0.45 + (f - 0.8) * 5.5
+                                          : Math.max(0, 1 - (f - 0.9) * 10), // salita e scatto
+  f => f,                                                                    // rampa
+  f => f < 0.15 ? 1 - Math.abs(f / 0.075 - 1) : 0.85 * (f - 0.15) / 0.85,    // scatto e rampa
+  f => f < 0.3 ? 1 - Math.abs((f % 0.15) / 0.075 - 1) : 0.85 * (f - 0.3) / 0.7,
+  // Auto Detect segue quello che si suona, e noi il suono non lo sentiamo: un
+  // respiro lento, solo per dire che è vivo.
+  f => 0.5 - 0.5 * Math.cos(2 * Math.PI * f),
+];
+
+/** Quanto dura un ciclo, in ms: la nota al bpm del preset, o i millisecondi. */
+function periodoWah(effetto) {
+  const v = i => (effetto.params.find(p => p.index === i) || {}).value || 0;
+  if (Math.round(v(0) * 5) === 5) return 1600;
+  if (v(1) >= 0.5) {
+    const quarto = 60000 / (inModifica.bpm || 120);
+    return quarto * ([0.5, 1, 2, 4][Math.round(v(3) / 0.25)] || 1);   // 1/8, 1/4, 1/2, 1
+  }
+  return 125 + v(2) * 875;
+}
+
+function avviaBarraWah(box, effetto, b, posto) {
+  clearInterval(timerBarra);
+  const punti = [];
+  for (let i = 0; i < b.n; i++) {                  // il primo è quello in basso
+    const p = document.createElement('div');
+    p.className = 'punto-barra';
+    posto(p, { x: b.x, y: b.y1 - (b.y1 - b.y0) * i / (b.n - 1), r: b.r });
+    box.appendChild(p);
+    punti.push(p);
+  }
+  const inizio = Date.now();
+  timerBarra = setInterval(() => {
+    if (!box.isConnected) { clearInterval(timerBarra); return; }
+    let livello = 0;
+    if (effetto.enabled) {
+      const modo = Math.round(((effetto.params.find(p => p.index === 0) || {}).value || 0) * 5);
+      const periodo = periodoWah(effetto);
+      livello = FORME_WAH[modo]((Date.now() - inizio) % periodo / periodo);
+    }
+    const accesi = Math.round(livello * b.n);
+    punti.forEach((p, i) => p.classList.toggle('acceso', i < accesi));
+  }, 40);
+}
+
+/**
+ * I pannellini che un tasto dell'immagine apre (`tasti[].apre` in
+ * `spark-immagini.js`).
+ */
+const PANNELLI_IMMAGINE = { autowah: apriAutoWah };
+
+/**
+ * L'«Auto» del Legendary Wah (`JH.Vox846`), come nell'app ufficiale: la
+ * modalità fra cinque forme d'onda e Auto Detect, e sotto quello che vale per
+ * lei. Dal 2026 il wah non si muove più a mano (solo con un pedale
+ * d'espressione), quindi qui c'è tutto quello che si regola.
+ *
+ * I parametri sono **misurati** il 16 ottobre 2026 (docs/protocollo-spark2.md):
+ * 0 modalità (sei posizioni a passi di 0,2, Auto Detect = 1), 1 BPM acceso o
+ * spento, 2 tempo da 125 a 1000 ms (BPM spento), 3 la nota (BPM acceso: 1/8 = 0,
+ * 1/4 = 0,25, 1 = 0,75; 1/2 = 0,5 dedotto), 4 Sensitivity (solo Auto Detect).
+ */
+const ONDE_WAH = [
+  'M2 16 L7 5 L12 16 L17 5 L22 16 L27 5 L32 16',     // triangoli fitti
+  'M2 15 L12 11 L15 5 L18 16 L28 11 L31 5 L34 16',    // salita lenta e scatto
+  'M2 15 L28 7 L32 16',                                // una rampa lunga
+  'M2 15 L6 5 L10 16 L29 8 L33 16',                    // scatto e rampa
+  'M2 15 L6 5 L10 16 L14 5 L18 16 L29 8 L33 16',       // due scatti e rampa
+];
+const NOTE_WAH = [['1/8', 0], ['1/4', 0.25], ['1/2', 0.5], ['1', 0.75]];
+
+function apriAutoWah(effetto) {
+  const par = i => effetto.params.find(p => p.index === i);
+  const manda = p => { aggiornaBarrette(); mandaParametro(effetto.name, p.index, p.value); };
+
+  const velo = document.createElement('div');
+  velo.className = 'velo-elenco';
+  const box = document.createElement('div');
+  box.className = 'elenco-scelta autowah';
+  box.style.setProperty('--cat', coloreDi(inModifica.effetti.indexOf(effetto)));
+  const testa = document.createElement('div');
+  testa.className = 'elenco-testa';
+  testa.textContent = tr('Auto Wah Mode');
+  const corpo = document.createElement('div');
+  box.append(testa, corpo);
+  velo.appendChild(box);
+  document.body.appendChild(velo);
+
+  const disegna = () => {
+    corpo.innerHTML = '';
+    const modo = par(0);
+    const ora = Math.round(modo.value * 5);          // 0…4 le onde, 5 Auto Detect
+
+    const griglia = document.createElement('div');
+    griglia.className = 'modi-wah';
+    for (let n = 0; n < 6; n++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'modo-wah' + (n === ora ? ' scelto' : '');
+      if (n < 5) b.innerHTML = `<svg viewBox="0 0 36 20" aria-hidden="true"><path d="${ONDE_WAH[n]}"/></svg>`;
+      else b.textContent = tr('Auto Detect');
+      b.addEventListener('click', () => { modo.value = n / 5; manda(modo); disegna(); });
+      griglia.appendChild(b);
+    }
+
+    const sotto = document.createElement('div');
+    sotto.className = 'sotto-wah';
+    if (ora === 5) {
+      sotto.appendChild(pomello(effetto, par(4)));            // Sensitivity
+    } else {
+      const bpm = par(1);
+      const leva = cellaInterruttore(effetto, bpm);
+      // La levetta manda già il suo valore; qui si ridisegna il resto, che
+      // cambia (note con BPM acceso, millisecondi con BPM spento).
+      leva.addEventListener('click', () => setTimeout(disegna));
+      sotto.appendChild(leva);
+      if (bpm.value >= 0.5) {
+        const nota = par(3);
+        const note = document.createElement('div');
+        note.className = 'note-wah';
+        const vicina = NOTE_WAH.reduce((a, b) =>
+          Math.abs(b[1] - nota.value) < Math.abs(a[1] - nota.value) ? b : a);
+        for (const [testo, valore] of NOTE_WAH) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'nota-wah' + (vicina[1] === valore ? ' scelta' : '');
+          b.textContent = testo;
+          b.addEventListener('click', () => { nota.value = valore; manda(nota); disegna(); });
+          note.appendChild(b);
+        }
+        sotto.appendChild(note);
+      } else {
+        sotto.appendChild(pomello(effetto, par(2), v => Math.round(125 + v * 875) + ' ms'));
+      }
+    }
+    corpo.append(griglia, sotto);
+  };
+  disegna();
+
+  function chiudi() {
+    velo.remove();
+    document.removeEventListener('keydown', tasto);
+  }
+  function tasto(evento) { if (evento.key === 'Escape') chiudi(); }
+  document.addEventListener('keydown', tasto);
+  velo.addEventListener('click', evento => { if (evento.target === velo) chiudi(); });
 }
 
 /**
@@ -1101,10 +1542,13 @@ function aggiornaBarrette() {
 }
 
 /** Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
-function mostraBolla(dentro, valore) {
+function mostraBolla(dentro, valore, formato = mostraValore) {
   const bolla = $('bolla');
+  // Sta nel body, non nel pannello dell'editor: così si vede anche sopra un
+  // pannellino aperto (l'Auto del wah), che sta sopra l'editor.
+  if (bolla.parentNode !== document.body) document.body.appendChild(bolla);
   const r = dentro.getBoundingClientRect();
-  bolla.textContent = mostraValore(valore);
+  bolla.textContent = formato(valore);
   bolla.hidden = false;
   bolla.style.left = (r.left + r.width / 2) + 'px';
   bolla.style.top  = r.top + 'px';
@@ -1437,32 +1881,6 @@ async function svuotaCoda() {
   avviaInvioParametri();       // se nel frattempo il dito ha mosso ancora
 }
 
-/**
- * Ricarica la catena da quello che l'ampli ha davvero adesso, senza
- * rimandargli il preset. Serve quando la verità può essere cambiata sotto:
- * una manopola girata sull'ampli, l'app ufficiale, un comando che non sappiamo
- * se ha attecchito — e serve per misurare, perché il modo di capire cos'è un
- * parametro è scrivergli un valore e guardare cosa ci ridà l'ampli.
- */
-$('btnRileggi').addEventListener('click', async () => {
-  if (!inModifica) return;
-  if (inModifica.offline) {
-    logLine(tr('stai regolando la copia in libreria: non c\'è nessun ampli da rileggere.'), true);
-    return;
-  }
-  if (!spark.connected) {
-    logLine(tr('ampli non connesso: non c\'è niente da rileggere.'), true);
-    return;
-  }
-  logProgress(tr('rileggo la catena dall\'ampli…'));
-  const catena = await aggiornaCatenaDallAmpli();
-  // La riuscita finisce solo nel log: nel pannello ci va quello che non va.
-  logLine(catena
-    ? tr('catena riletta: adesso sullo schermo c\'è quello che ha l\'ampli.')
-    : tr('non riesco a rileggere la catena: quello che vedi è l\'ultima cosa vista.'),
-    !catena);
-});
-
 /* ---- il lavoro non salvato, e come si vede -------------------------------
    Due richieste dell'utente del 26 agosto 2026, e sono la stessa cosa vista da
    due lati: **premendo «Salva» non si aveva la certezza di niente**, e **con
@@ -1495,13 +1913,20 @@ let timerSalvato = null;
  * un'operazione che ha senso, ed è quella che porta in libreria quello che
  * l'ampli sta suonando.
  */
+/** Le icone di Salva (il dischetto) e di Salvato (la spunta, come «Fatto»). */
+const ICONA_SALVA = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h10l3 3v11H4z"/><path d="M7 3v4h6V3M7 17v-5h6v5"/></svg>';
+const ICONA_FATTO = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>';
+
 function aggiornaTastoSalva(appenaSalvato) {
   const tasto = $('btnSalvaModifiche');
   clearTimeout(timerSalvato);
   tasto.classList.remove('da-salvare', 'salvato');
 
   if (appenaSalvato) {
-    tasto.textContent = tr('✓ Salvato');
+    tasto.innerHTML = ICONA_FATTO;
+    const scritta = document.createElement('span');
+    scritta.textContent = tr('Salvato');
+    tasto.appendChild(scritta);
     tasto.classList.add('salvato');
     // Poi torna com'era: una spunta che resta per sempre finirebbe per dire
     // «salvato» anche dopo la prossima manopola girata.
@@ -1511,11 +1936,14 @@ function aggiornaTastoSalva(appenaSalvato) {
 
   // Il testo lungo sparisce sul telefono: quelle due parole in più sono la
   // differenza fra una riga sola e una barra che va a capo.
-  tasto.textContent = tr('Salva');
+  tasto.innerHTML = ICONA_SALVA;
+  const scritta = document.createElement('span');
+  scritta.textContent = tr('Salva');
   const lungo = document.createElement('span');
   lungo.className = 'solo-largo';
   lungo.textContent = tr(' in libreria');
-  tasto.appendChild(lungo);
+  scritta.appendChild(lungo);
+  tasto.appendChild(scritta);
   if (inModifica && inModifica.toccato) tasto.classList.add('da-salvare');
 }
 

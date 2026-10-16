@@ -1,0 +1,1354 @@
+// Sparkling Tones — spark-immagini.js: le immagini dei blocchi per l'editor.
+//
+// Bozza del 15 ottobre 2026. Un modello che ha un'immagine si regola girando
+// le manopole sull'immagine stessa; uno che non ce l'ha resta come prima.
+//
+// Le immagini le disegna l'utente **senza manopole**, con un puntino bianco al
+// centro di ognuna; lo sfondo nero lo togliamo noi (`tools/togli-sfondo/`, che
+// ritaglia, rimpicciolisce a 900 px e salva in WebP trasparente). Le misure
+// sono in pixel dell'immagine finita (w × h): centro della manopola (x, y),
+// trovato dal puntino, e raggio (r), poco dentro l'arco della scala.
+// `indice` è il parametro dell'ampli che quella manopola muove.
+//
+// Le manopole le disegniamo noi (`manopola`, col segno in alto, a metà corsa),
+// nei colori di ogni blocco; una manopola può avere la sua. Del disegno si dà
+// il centro e il raggio del cerchio, nei suoi pixel: si ingrandisce finché il
+// suo cerchio combacia con quello del blocco, e gira attorno al suo centro.
+// Senza `manopola` l'app ritaglia il cerchio dall'immagine e gira quello (per
+// un'immagine con le manopole dentro; `a` è dove punta il segno, in gradi da
+// ore 12, negativo a sinistra): resta, ma non lo usa più nessuno.
+//
+// `led` è la spia (accesa col blocco; rossa, o `colore: 'viola'`), `pulsante`
+// il footswitch o la levetta (lo accende e lo spegne). `levette`: interruttori
+// di un parametro (0 o 1), ritagliati dall'immagine e capovolti quando stanno giù.
+//
+// Il riverbero ha **un'immagine per tipo** (scelta dell'utente, 16 ottobre
+// 2026): la voce si chiama col modello e il nome del tipo, `'bias.reverb:Hall
+// Natural'`, e il file `Reverb-HallNatural.webp`. Un tipo senza immagine resta
+// a pomelli.
+'use strict';
+(function () {
+  const manopola = colore =>
+    ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
+
+  const TABELLA = {
+    // Guitar EQ: niente manopole, sette cursori (`cursori`: centro `x`, corsa
+    // del cappuccio da `y1`, zero, a `y0`, dieci; `w` e `alto` del cappuccio).
+    // Le sei bande da sinistra, il Level (parametro 0) in fondo a destra.
+    GuitarEQ6: {
+      src: 'immagini/blocchi/GuitarEQ6.webp', w: 900, h: 926,
+      manopole: [],
+      cursori: [
+        { indice: 1, x: 102.2, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 100
+        { indice: 2, x: 211,   y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 200
+        { indice: 3, x: 319.8, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 400
+        { indice: 4, x: 427.8, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 800
+        { indice: 5, x: 537.4, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 1.6K
+        { indice: 6, x: 645.9, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 3.2K
+        { indice: 0, x: 798.2, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // Level
+      ],
+      led: { x: 722.5, y: 125.3, r: 12.4 },
+      pulsante: { x: 448.8, y: 819.2, r: 43.5 },
+    },
+    // Riverbero, tipo Chamber: oro e viola; Level, Time, Damping e Dwell più grandi delle due in mezzo.
+    'bias.reverb:Chamber': {
+      src: 'immagini/blocchi/Reverb-Chamber.webp', w: 900, h: 872,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 166.7, y: 129.7, r: 69.3 },   // Level
+        { indice: 1, x: 166.7, y: 365.3, r: 69.3 },   // Damping
+        { indice: 2, x: 346.1, y: 273.6, r: 65.6 },   // Low Cut
+        { indice: 3, x: 556.2, y: 273.6, r: 65.6 },   // High Cut
+        { indice: 4, x: 735.1, y: 365.3, r: 69.3 },   // Dwell
+        { indice: 5, x: 735.1, y: 129.7, r: 69.3 },   // Time
+      ],
+      led: { x: 449.3, y: 105, r: 13.9 },
+      pulsante: { x: 450, y: 783.3, r: 45.2 },
+    },
+    // Riverbero, tipo Plate Short: rame e arancio, la spia fra «9VDC» e «CHECK».
+    'bias.reverb:Plate Short': {
+      src: 'immagini/blocchi/Reverb-PlateShort.webp', w: 900, h: 869,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 162.8, y: 138, r: 59.9 },   // Level
+        { indice: 1, x: 162.9, y: 385, r: 59.9 },   // Damping
+        { indice: 2, x: 342.1, y: 284.4, r: 59.9 },   // Low Cut
+        { indice: 3, x: 554.2, y: 284.3, r: 59.9 },   // High Cut
+        { indice: 4, x: 735, y: 385.1, r: 59.9 },   // Dwell
+        { indice: 5, x: 734.8, y: 137.9, r: 59.9 },   // Time
+      ],
+      led: { x: 446.7, y: 104.4, r: 14.6 },
+      pulsante: { x: 450.4, y: 760.6, r: 40.1 },
+    },
+    // Riverbero, tipo Hall Ambient: sull'immagine «Ambient»; oro dentro gli anelli tratteggiati.
+    'bias.reverb:Hall Ambient': {
+      src: 'immagini/blocchi/Reverb-HallAmbient.webp', w: 900, h: 876,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 172.8, y: 145.1, r: 56.2 },   // Level
+        { indice: 1, x: 172.7, y: 385.3, r: 56.2 },   // Damping
+        { indice: 2, x: 349.6, y: 290.2, r: 56.2 },   // Low Cut
+        { indice: 3, x: 548.3, y: 290.2, r: 56.2 },   // High Cut
+        { indice: 4, x: 726.4, y: 385.1, r: 56.2 },   // Dwell
+        { indice: 5, x: 726.3, y: 145, r: 56.2 },   // Time
+      ],
+      led: { x: 447.8, y: 116.7, r: 16.3 },
+      pulsante: { x: 448.5, y: 767, r: 47.3 },
+    },
+    // Riverbero, tipo Room Studio B: viola; niente spia rossa: la spia è il puntino nel mirino in alto, viola.
+    'bias.reverb:Room Studio B': {
+      src: 'immagini/blocchi/Reverb-RoomStudioB.webp', w: 900, h: 881,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 170, y: 147.6, r: 57.1 },   // Level
+        { indice: 1, x: 168.9, y: 394.2, r: 57.1 },   // Damping
+        { indice: 2, x: 345.6, y: 287.7, r: 57.1 },   // Low Cut
+        { indice: 3, x: 556.8, y: 287.7, r: 57.1 },   // High Cut
+        { indice: 4, x: 731.6, y: 394.2, r: 57.1 },   // Dwell
+        { indice: 5, x: 729, y: 147.6, r: 57.1 },   // Time
+      ],
+      led: { x: 449.6, y: 121.6, r: 13.2, colore: 'viola' },
+      pulsante: { x: 449.6, y: 762.3, r: 45.4 },
+    },
+    // Riverbero, tipo Hall Natural: verde.
+    'bias.reverb:Hall Natural': {
+      src: 'immagini/blocchi/Reverb-HallNatural.webp', w: 900, h: 874,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 166.3, y: 146.4, r: 65.6 },   // Level
+        { indice: 1, x: 166.3, y: 386.5, r: 65.6 },   // Damping
+        { indice: 2, x: 344.6, y: 286.3, r: 65.6 },   // Low Cut
+        { indice: 3, x: 557.8, y: 286.3, r: 65.6 },   // High Cut
+        { indice: 4, x: 736.6, y: 386.5, r: 65.6 },   // Dwell
+        { indice: 5, x: 736.6, y: 146.4, r: 65.6 },   // Time
+      ],
+      led: { x: 450.7, y: 116.7, r: 14.6 },
+      pulsante: { x: 450.7, y: 776.7, r: 45.2 },
+    },
+    // Riverbero, tipo Plate Rich: sull'immagine «Classic Plate» (abbinamento dell'utente); azzurro e magenta.
+    'bias.reverb:Plate Rich': {
+      src: 'immagini/blocchi/Reverb-PlateRich.webp', w: 900, h: 872,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 167.1, y: 145.7, r: 62.5 },   // Level
+        { indice: 1, x: 166.9, y: 387.1, r: 62.5 },   // Damping
+        { indice: 2, x: 343, y: 283.2, r: 62.5 },   // Low Cut
+        { indice: 3, x: 556, y: 283.5, r: 62.5 },   // High Cut
+        { indice: 4, x: 732.4, y: 387.6, r: 62.5 },   // Dwell
+        { indice: 5, x: 732.1, y: 145.8, r: 62.5 },   // Time
+      ],
+      led: { x: 450, y: 118.5, r: 15.3 },
+      pulsante: { x: 442.7, y: 785.1, r: 45.1 },
+    },
+    // Riverbero, tipo Hall Medium: sull'immagine «Holy Grail» (abbinamento dell'utente); viola e azzurro.
+    'bias.reverb:Hall Medium': {
+      src: 'immagini/blocchi/Reverb-HallMedium.webp', w: 900, h: 861,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 173.4, y: 136.7, r: 54 },   // Level
+        { indice: 1, x: 173.4, y: 378.8, r: 54 },   // Damping
+        { indice: 2, x: 345.2, y: 279.3, r: 54 },   // Low Cut
+        { indice: 3, x: 552.5, y: 279.3, r: 54 },   // High Cut
+        { indice: 4, x: 725, y: 378.8, r: 54 },   // Dwell
+        { indice: 5, x: 725, y: 136.8, r: 54 },   // Time
+      ],
+      led: { x: 450.4, y: 116.8, r: 14.6 },
+      pulsante: { x: 450.4, y: 776.6, r: 43.8 },
+    },
+    // Riverbero, tipo Plate Long: sull'immagine «Reflection» (abbinamento dell'utente); azzurro, la spia viola.
+    'bias.reverb:Plate Long': {
+      src: 'immagini/blocchi/Reverb-PlateLong.webp', w: 900, h: 904,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 172.3, y: 144.7, r: 67.9 },   // Level
+        { indice: 1, x: 172.4, y: 404.6, r: 67.9 },   // Damping
+        { indice: 2, x: 341.8, y: 293.4, r: 67.9 },   // Low Cut
+        { indice: 3, x: 557.3, y: 293.4, r: 67.9 },   // High Cut
+        { indice: 4, x: 727.5, y: 404.6, r: 67.9 },   // Dwell
+        { indice: 5, x: 727.5, y: 144.7, r: 67.9 },   // Time
+      ],
+      led: { x: 450, y: 119, r: 11.7, colore: 'viola' },
+      pulsante: { x: 450.4, y: 779.6, r: 48.2 },
+    },
+    // Riverbero, tipo Room Studio A: sei manopole rosa dentro gli anelli —
+    // Level e Damping a sinistra, Low Cut e High Cut in mezzo, Time e Dwell a
+    // destra. La spia («CHECK») in alto.
+    'bias.reverb:Room Studio A': {
+      src: 'immagini/blocchi/Reverb-RoomStudioA.webp', w: 900, h: 880,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 172,   y: 146.2, r: 65.6 },   // Level
+        { indice: 1, x: 172,   y: 396.5, r: 65.6 },   // Damping
+        { indice: 2, x: 343.8, y: 290.7, r: 65.6 },   // Low Cut
+        { indice: 3, x: 555.8, y: 290.9, r: 65.6 },   // High Cut
+        { indice: 4, x: 729.5, y: 396.5, r: 65.6 },   // Dwell
+        { indice: 5, x: 729.4, y: 146.2, r: 65.6 },   // Time
+      ],
+      led: { x: 450.4, y: 123.6, r: 14.6 },
+      pulsante: { x: 450, y: 772.7, r: 48.1 },
+    },
+    // Vintage Delay:Repeat Rate e Intensity in alto, Echo in mezzo, rosa
+    // dentro i cerchi col mirino. Il BPM (parametro 3) è la levetta fra le
+    // due, ON in alto e OFF in basso, disegnata giù (OFF): `su: 0`. La spia
+    // sta sopra il footswitch.
+    VintageDelay: {
+      src: 'immagini/blocchi/VintageDelay.webp', w: 900, h: 1345,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 230,   y: 215.6, r: 81.5 },   // Repeat Rate
+        { indice: 1, x: 667.6, y: 215.5, r: 81.5 },   // Intensity
+        { indice: 2, x: 448.2, y: 432.1, r: 81.5 },   // Echo
+      ],
+      levette: [
+        { indice: 3, x: 448.2, y: 213, r: 29.6, su: 0 },   // BPM: disegnata OFF (giù)
+      ],
+      led: { x: 448.2, y: 1045.4, r: 20.4 },
+      pulsante: { x: 448.2, y: 1190.7, r: 64.8 },
+    },
+    // Reverse Delay (modello «DelayReverse»): Mix e Time grandi in alto, Decay
+    // e Filter in mezzo, azzurre dentro gli anelli di tacche. Il BPM
+    // (parametro 4) è la levetta sotto la scritta: disegnata come un anello
+    // visto dall'alto, senza leva, quindi capovolta non cambia.
+    DelayReverse: {
+      src: 'immagini/blocchi/DelayReverse.webp', w: 900, h: 888,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 202.7, y: 155.9, r: 67.1 },   // Mix
+        { indice: 3, x: 698.5, y: 155.8, r: 67.1 },   // Time
+        { indice: 1, x: 340.3, y: 346.4, r: 49.6 },   // Decay
+        { indice: 2, x: 559.7, y: 346.5, r: 49.6 },   // Filter
+      ],
+      levette: [
+        { indice: 4, x: 447.8, y: 212.2, r: 19, su: 0 },   // BPM
+      ],
+      led: { x: 449.3, y: 103.6, r: 16, colore: 'viola' },   // spia bianca e viola, non rossa
+      pulsante: { x: 446.4, y: 775.3, r: 45.9 },
+    },
+    // Echo Tape (modello «DelayRe201»): Sustain e Short → Long grandi in alto,
+    // Volume e Tone in mezzo, dentro gli archi. Il BPM (parametro 4) è la
+    // levetta sotto la spia, disegnata giù.
+    DelayRe201: {
+      src: 'immagini/blocchi/DelayRe201.webp', w: 900, h: 885,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 201.4, y: 150.6, r: 69.3 },   // Sustain
+        { indice: 3, x: 700.6, y: 150.5, r: 69.3 },   // Short -> Long
+        { indice: 1, x: 334.3, y: 335.5, r: 61.9 },   // Volume
+        { indice: 2, x: 566.5, y: 335.5, r: 61.9 },   // Tone
+      ],
+      levette: [
+        { indice: 4, x: 448.9, y: 207.1, r: 20.6, su: 0 },   // BPM: disegnata giù
+      ],
+      led: { x: 448.5, y: 101, r: 16.2 },
+      pulsante: { x: 448.9, y: 771.7, r: 46.4 },
+    },
+    // Multi Head (modello «DelayMultiHead»): Repeat Rate e Mode Selector
+    // grandi in alto, Intensity ed Echo Vol sui due dischi scuri in mezzo
+    // (la manopola li copre). I numeri 1–4 del Mode sono solo disegno: il
+    // parametro è continuo. Il BPM (parametro 4) è la levetta, disegnata giù.
+    DelayMultiHead: {
+      src: 'immagini/blocchi/DelayMultiHead.webp', w: 900, h: 879,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 201.8, y: 152.2, r: 77.9 },   // Repeat Rate
+        { indice: 3, x: 696.9, y: 152.2, r: 77.9 },   // Mode Selector
+        { indice: 1, x: 346.1, y: 338.1, r: 63.2 },   // Intensity
+        { indice: 2, x: 553.3, y: 338.1, r: 63.2 },   // Echo Vol
+      ],
+      levette: [
+        { indice: 4, x: 450, y: 205.7, r: 22, su: 0 },   // BPM: disegnata giù
+      ],
+      led: { x: 449.3, y: 103.6, r: 16.2 },
+      pulsante: { x: 449.6, y: 764.8, r: 47 },
+    },
+    // Digital Delay (modello «DelayMono»): E.Level e Mode grandi in alto,
+    // F.Back e D.Time in mezzo. Le quattro tacche del Mode (50 ms … 1 s) sono
+    // solo disegno: nell'ampli il parametro è continuo e la manopola gira
+    // liscia. Il BPM (parametro 4) è la levetta sotto la spia, disegnata giù.
+    DelayMono: {
+      src: 'immagini/blocchi/DelayMono.webp', w: 900, h: 887,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 195,   y: 162.6, r: 77.4 },   // E.Level
+        { indice: 3, x: 698.7, y: 162.6, r: 77.4 },   // Mode
+        { indice: 1, x: 344.8, y: 344.2, r: 57.5 },   // F.Back
+        { indice: 2, x: 553.7, y: 344.2, r: 57.5 },   // D.Time
+      ],
+      levette: [
+        { indice: 4, x: 448.2, y: 209.3, r: 19.9, su: 0 },   // BPM: disegnata giù
+      ],
+      led: { x: 448.2, y: 104.7, r: 19.2 },
+      pulsante: { x: 447.4, y: 785.8, r: 47.2 },
+    },
+    // Echo Filt (modello «DelayEchoFilt», sull'immagine «Delay/Echo»): Delay e
+    // Tone grandi in alto, Feedback e Level in mezzo; il BPM (parametro 4, un
+    // interruttore) è la levetta sotto la spia, vista dall'alto: si prende per
+    // disegnata giù (`su: 0`), e a 1 si capovolge.
+    DelayEchoFilt: {
+      src: 'immagini/blocchi/DelayEchoFilt.webp', w: 900, h: 867,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 196,   y: 154.2, r: 80.6 },   // Delay
+        { indice: 3, x: 703.3, y: 154.2, r: 80.6 },   // Tone
+        { indice: 1, x: 342.5, y: 338.8, r: 54.9 },   // Feedback
+        { indice: 2, x: 555.5, y: 338.8, r: 54.9 },   // Level
+      ],
+      levette: [
+        { indice: 4, x: 449.8, y: 214.6, r: 19, su: 0 },   // BPM
+      ],
+      led: { x: 450.5, y: 101.1, r: 14.6 },
+      pulsante: { x: 449.6, y: 776.2, r: 48.3 },
+    },
+    // Vibrato (modello «Vibrato01»): Speed e Depth grandi, dentro la scala.
+    Vibrato01: {
+      src: 'immagini/blocchi/Vibrato01.webp', w: 900, h: 1351,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 248.3, y: 276.3, r: 99 },     // Speed
+        { indice: 1, x: 652.1, y: 276.3, r: 99 },     // Depth
+      ],
+      led: { x: 453.6, y: 101.1, r: 18 },
+      pulsante: { x: 448.2, y: 1116.9, r: 49.5 },
+    },
+    // UniVibe: Speed e Intensity grandi; il Chorus/Vibrato (parametro 1) è la
+    // levetta in mezzo, disegnata giù (VIBRATO): `su: 0`, a 1 si alza verso
+    // CHORUS. **Da verificare a orecchio** quale valore sia il chorus: si
+    // assume 1 = Chorus, come nel J.H. Legendary Vibe. Nell'ampli il
+    // parametro è continuo; la levetta manda solo 0 o 1.
+    UniVibe: {
+      src: 'immagini/blocchi/UniVibe.webp', w: 900, h: 1308,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 254.8, y: 255.2, r: 90.8 },   // Speed
+        { indice: 2, x: 644.7, y: 255.3, r: 90.8 },   // Intensity
+      ],
+      levette: [
+        { indice: 1, x: 450.5, y: 430.5, r: 34.5, su: 0 },   // Chorus (su) / Vibrato (giù, com'è disegnata)
+      ],
+      led: { x: 448.9, y: 109, r: 18.2 },
+      pulsante: { x: 449.5, y: 1088.9, r: 49.9 },
+    },
+    // Tremolo Square: come il Tremolo, verde, dentro l'anello di tacche.
+    TremoloSquare: {
+      src: 'immagini/blocchi/TremoloSquare.webp', w: 900, h: 1336,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 237.7, y: 223.4, r: 72.3 },   // Speed
+        { indice: 1, x: 666,   y: 223.4, r: 72.3 },   // Depth
+        { indice: 2, x: 451.4, y: 458.8, r: 68.5 },   // Level
+      ],
+      led: { x: 449.5, y: 109.1, r: 19 },
+      pulsante: { x: 450, y: 1103.6, r: 52.3 },
+    },
+    // Tremolo: Speed e Depth in alto, Level in mezzo, gialle dentro l'anello.
+    Tremolo: {
+      src: 'immagini/blocchi/Tremolo.webp', w: 900, h: 1312,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 237.6, y: 219.9, r: 61.6 },   // Speed
+        { indice: 1, x: 660.2, y: 220,   r: 61.6 },   // Depth
+        { indice: 2, x: 448.9, y: 429.8, r: 56 },     // Level
+      ],
+      led: { x: 448.7, y: 109.2, r: 18.7 },
+      pulsante: { x: 448.6, y: 1089.3, r: 48.5 },
+    },
+    // Tremolator: Depth e Speed dentro l'arco; il BPM (parametro 2, un
+    // interruttore) è la levetta in mezzo, in alto ON e in basso OFF. Qui la
+    // levetta è disegnata giù (OFF): `su: 0` vuol dire che col valore 0 si
+    // mostra com'è disegnata, e con 1 si capovolge e punta a ON.
+    Tremolator: {
+      src: 'immagini/blocchi/Tremolator.webp', w: 900, h: 1365,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 246.6, y: 269.3, r: 91.9 },   // Depth
+        { indice: 1, x: 652.9, y: 269.3, r: 91.9 },   // Speed
+      ],
+      levette: [
+        { indice: 2, x: 449.5, y: 432.1, r: 38.6, su: 0 },   // BPM: disegnata OFF (giù)
+      ],
+      led: { x: 446.6, y: 111.7, r: 19.3 },
+      pulsante: { x: 452.3, y: 1118.8, r: 52.4 },
+    },
+    // Phaser: Intensity a sinistra e Speed a destra, arancioni e grandi dentro
+    // l'arco interno.
+    Phaser: {
+      src: 'immagini/blocchi/Phaser.webp', w: 900, h: 1320,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 1, x: 248.9, y: 269.7, r: 91.6 },   // Intensity
+        { indice: 0, x: 657.8, y: 269.7, r: 91.6 },   // Speed
+      ],
+      led: { x: 449.9, y: 114.9, r: 18.3 },
+      pulsante: { x: 450.5, y: 1081.3, r: 51.3 },
+    },
+    // Classic Vibe (modello «MiniVibe»): Speed e Intensity grandi, dentro
+    // l'anello interno.
+    MiniVibe: {
+      src: 'immagini/blocchi/MiniVibe.webp', w: 900, h: 1333,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 257.8, y: 263.2, r: 85.4 },   // Speed
+        { indice: 1, x: 644.7, y: 263.2, r: 85.4 },   // Intensity
+      ],
+      led: { x: 448, y: 118.6, r: 18 },
+      pulsante: { x: 452.8, y: 1111.7, r: 47.5 },
+    },
+    // J.H. Legendary Vibe (modello «JH.VoodooVibeJr»): quattro manopole dentro
+    // l'arco tratteggiato; Mix è il Chorus/Vibrato (parametro 3), continuo.
+    'JH.VoodooVibeJr': {
+      src: 'immagini/blocchi/JH.VoodooVibeJr.webp', w: 900, h: 1169,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 196.2, y: 240.1, r: 49.8 },   // Speed
+        { indice: 2, x: 555.5, y: 240.3, r: 49.8 },   // Intensity
+        { indice: 1, x: 312,   y: 519.4, r: 49.8 },   // Sweep
+        { indice: 3, x: 673.7, y: 519.5, r: 49.8 },   // Mix (Chorus/Vibrato)
+      ],
+      led: { x: 448.5, y: 771.3, r: 13.8 },
+      pulsante: { x: 450.5, y: 900.9, r: 42.5 },
+    },
+    // Flanger: Rate e Depth in alto, Mix in mezzo, rosa dentro gli anelli.
+    Flanger: {
+      src: 'immagini/blocchi/Flanger.webp', w: 900, h: 1302,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 239.1, y: 216.1, r: 73.7 },   // Rate
+        { indice: 2, x: 662.5, y: 216.1, r: 73.7 },   // Depth
+        { indice: 1, x: 449.5, y: 414.9, r: 64.5 },   // Mix
+      ],
+      led: { x: 449.4, y: 90.6, r: 18.4 },
+      pulsante: { x: 449.5, y: 1091.6, r: 46.1 },
+    },
+    // Cloner Chorus: Rate grande dentro la scala. La Depth nel disegno è un
+    // pallino fra HIGH e LOW, ma nell'ampli è continua: una manopola piccola.
+    Cloner: {
+      src: 'immagini/blocchi/Cloner.webp', w: 898, h: 1463,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 448.7, y: 265.4, r: 110 },    // Rate
+        { indice: 1, x: 710,   y: 331.3, r: 36 },     // Depth
+      ],
+      led: { x: 182.1, y: 334.8, r: 17 },
+      pulsante: { x: 451, y: 1032, r: 55 },
+    },
+    // Chorus (modello «ChorusAnalog»): la manopola copre quella nera disegnata
+    // e lascia l'arco. Spia: il «Check»; footswitch in basso.
+    ChorusAnalog: {
+      src: 'immagini/blocchi/ChorusAnalog.webp', w: 900, h: 887,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 196.1, y: 150.6, r: 65.1 },   // E.Level
+        { indice: 3, x: 702.6, y: 150.6, r: 65.1 },   // Tone
+        { indice: 1, x: 338.4, y: 345.9, r: 51.8 },   // Rate
+        { indice: 2, x: 559.9, y: 346,   r: 51.8 },   // Depth
+      ],
+      led: { x: 448.7, y: 144.8, r: 14.8 },
+      pulsante: { x: 448.9, y: 777.2, r: 42.9 },
+    },
+    // Bass EQ: come il Guitar EQ, con le sue bande; il Level in fondo a destra.
+    BassEQ6: {
+      src: 'immagini/blocchi/BassEQ6.webp', w: 900, h: 910,
+      manopole: [],
+      cursori: [
+        { indice: 1, x: 100.8, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 50
+        { indice: 2, x: 212,   y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 120
+        { indice: 3, x: 320.4, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 400
+        { indice: 4, x: 430.1, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 800
+        { indice: 5, x: 539.7, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 4.5K
+        { indice: 6, x: 648.9, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 10K
+        { indice: 0, x: 803,   y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // Level
+      ],
+      led: { x: 727.4, y: 113.2, r: 13.8 },
+      pulsante: { x: 452.3, y: 795.7, r: 35.3 },
+    },
+    // L'Auto Wah gratuito: il wah in Auto Detect (vedi `eAutoWahLibero`), per chi
+    // non ha il pacchetto Hendrix. Power accende e spegne, la sola manopola è la
+    // Sensitivity (parametro 4); la colonna di puntini respira come in Auto Detect.
+    AutoWah: {
+      src: 'immagini/blocchi/AutoWah.webp', w: 900, h: 1012,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 4, x: 739.8, y: 565.4, r: 66 },   // Sensitivity
+      ],
+      led: { x: 826.5, y: 339.3, r: 19.3 },
+      pulsante: { x: 738.4, y: 340.2, w: 289.8, h: 115.9 },          // Power
+      barra: { x: 512.7, y0: 134.8, y1: 874.6, n: 20, r: 8 },
+    },
+    // Il Legendary Wah. Niente manopole sull'immagine: a mano il wah non si muove
+    // più (aggiornamento di Positive Grid, 2026). Power accende e spegne, Auto
+    // apre il pannellino delle modalità (`tasti`); la colonna di puntini
+    // (`barra`) sale e scende con la forma d'onda, come nell'app ufficiale.
+    'JH.Vox846': {
+      src: 'immagini/blocchi/JH.Vox846.webp', w: 900, h: 992,
+      manopole: [],
+      led: { x: 813.8, y: 374.8, r: 14 },
+      pulsante: { x: 733.4, y: 368.6, w: 288.2, h: 119.2 },          // Power
+      tasti: [{ x: 726.7, y: 553.9, w: 313.6, h: 128.8, apre: 'autowah' }],
+      barra: { x: 502.2, y0: 129.7, y1: 858.8, n: 20, r: 8 },
+    },
+    // Optical Comp, rifatto. Il parametro 2, Pad, è la levetta in mezzo: in alto
+    // -15 dB, in basso 0 dB; qui è disegnata giù (`su: 0`). **Da verificare a
+    // orecchio**: si assume 1 = -15 dB = in alto.
+    BBEOpticalComp: {
+      src: 'immagini/blocchi/BBEOpticalComp.webp', w: 900, h: 1315,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 248, y: 267.8, r: 119.8 },   // Volume
+        { indice: 1, x: 650.9, y: 269.7, r: 119.8 },   // Comp
+      ],
+      levette: [
+        { indice: 2, x: 450.5, y: 433.7, r: 36.3, su: 0 },   // Pad: 0 dB (giù, com'è disegnata) / -15 dB (su)
+      ],
+      led: { x: 447.3, y: 105.2, r: 20 },
+      pulsante: { x: 449.1, y: 1106.9, r: 72.6 },
+    },
+    BassComp: {                                       // Bass Comp
+      src: 'immagini/blocchi/BassComp.webp', w: 900, h: 1361,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 249.2, y: 282.5, r: 99.7 },   // Comp
+        { indice: 1, x: 649,   y: 282.5, r: 99.7 },   // Gain
+      ],
+      led: { x: 449, y: 110, r: 30.2 },
+      pulsante: { x: 449, y: 1161.2, r: 84.6 },
+    },
+    // Red Comp (modello «Compressor»), rifatto: Output e Sensitivity dentro i
+    // cerchi col mirino.
+    Compressor: {
+      src: 'immagini/blocchi/Compressor.webp', w: 900, h: 1347,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 249.4, y: 276.5, r: 91.2 },   // Output
+        { indice: 1, x: 650.8, y: 276.6, r: 91.2 },   // Sensitivity
+      ],
+      led: { x: 449.5, y: 107.6, r: 20.1 },
+      pulsante: { x: 449.5, y: 1117, r: 68.4 },
+    },
+    // LA Comp. Il parametro 0, Limit/Compress, è la levetta in mezzo: nei preset
+    // veri vale sempre 0. **Da verificare a orecchio quale sia Limit**: qui si
+    // assume 1 = Limit = levetta in alto, com'è disegnata.
+    LA2AComp: {
+      src: 'immagini/blocchi/LA2AComp.webp', w: 900, h: 1327,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 1, x: 251.6, y: 278.6, r: 84.7 },   // Gain
+        { indice: 2, x: 650.8, y: 278.5, r: 84.7 },   // Peak Reduction
+      ],
+      levette: [
+        { indice: 0, x: 449.5, y: 444.1, r: 53.6, su: 1 },   // Limit (su) / Compress (giù)
+      ],
+      led: { x: 449.5, y: 115.8, r: 25.4 },
+      pulsante: { x: 449.5, y: 1105, r: 76.2 },
+    },
+    'bias.noisegate': {                               // Noise Gate, rosso
+      src: 'immagini/blocchi/bias.noisegate.webp', w: 900, h: 1349,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 254.2, y: 285.8, r: 71.9 },   // Threshold
+        { indice: 1, x: 650.9, y: 285.8, r: 71.9 },   // Decay
+      ],
+      led: { x: 450.3, y: 122.5, r: 21.3 },
+      pulsante: { x: 450.3, y: 1085.7, r: 60.4 },
+    },
+    // Sustainer (modello «BlueComp»), rifatto: Level e Sustain grandi, Tone e
+    // Attack in mezzo, dentro gli archi.
+    BlueComp: {
+      src: 'immagini/blocchi/BlueComp.webp', w: 900, h: 875,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 200.3, y: 161, r: 78.1 },   // Level
+        { indice: 3, x: 698.4, y: 160.9, r: 78.1 },   // Sustain
+        { indice: 1, x: 349.7, y: 342.8, r: 65.1 },   // Tone
+        { indice: 2, x: 550, y: 342.7, r: 65.1 },   // Attack
+      ],
+      led: { x: 450, y: 145.8, r: 15.9 },
+      pulsante: { x: 450, y: 768.3, r: 44.9 },
+    },
+    // Tube Drive (modello «DistortionTS9»), rifatto: Overdrive e Level in alto,
+    // Tone in mezzo, dentro le corone di tacche.
+    DistortionTS9: {
+      src: 'immagini/blocchi/DistortionTS9.webp', w: 900, h: 1324,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 236.3, y: 212.2, r: 104.2 },   // Overdrive
+        { indice: 2, x: 669, y: 212.2, r: 104.2 },   // Level
+        { indice: 1, x: 449.8, y: 430.5, r: 85.3 },   // Tone
+      ],
+      led: { x: 450, y: 99.5, r: 17.1 },
+      pulsante: { x: 449.1, y: 1094.2, r: 66.3 },
+    },
+    // Clone Drive: ogni manopola nel colore della sua scala (Gain arancione,
+    // Output viola, Treble azzurro). Pulsante: il cerchio sotto l'arciere.
+    KlonCentaurSilver: {
+      src: 'immagini/blocchi/KlonCentaurSilver.webp', w: 900, h: 1313,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 2, x: 227.5, y: 221.8, r: 83.4 },   // Gain
+        { indice: 0, x: 672.6, y: 221.9, r: 83.4, manopola: manopola('viola') },     // Output
+        { indice: 1, x: 449.9, y: 438.9, r: 69,   manopola: manopola('azzurra') },   // Treble
+      ],
+      led: { x: 449.9, y: 99.1, r: 13 },
+      pulsante: { x: 444, y: 1083, r: 58 },
+    },
+    Overdrive: {                                      // Over Drive, giallo
+      src: 'immagini/blocchi/Overdrive.webp', w: 900, h: 1296,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 238.1, y: 213.7, r: 74.8 },   // Level
+        { indice: 2, x: 659.2, y: 213.7, r: 74.8 },   // Drive
+        { indice: 1, x: 449.2, y: 419.6, r: 62.1 },   // Tone
+      ],
+      led: { x: 450.2, y: 101.5, r: 18.8 },             // Check
+      pulsante: { x: 450, y: 1059.1, r: 61 },
+    },
+    // J.H. Axle Fuzz, lo scudo: l'originale è già sotto i 900 px, resta alla sua
+    // misura. Pulsante: il cerchio dentro l'ovale, sotto la firma.
+    'JH.AxisFuzz': {
+      src: 'immagini/blocchi/JH.AxisFuzz.webp', w: 887, h: 1013,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 248.5, y: 208.5, r: 56 },     // Volume
+        { indice: 1, x: 633.1, y: 208.6, r: 56 },     // Drive
+      ],
+      led: { x: 440.3, y: 129.2, r: 17 },
+      pulsante: { x: 441, y: 589, r: 60 },
+    },
+    // J.H. Super Fuzz. Qui le manopole disegnate sono cerchi neri col segno
+    // bianco, non puntini: i centri vengono dall'anello rosso attorno (raggio
+    // ~92), e la nostra manopola copre il segno.
+    'JH.SupaFuzz': {
+      src: 'immagini/blocchi/JH.SupaFuzz.webp', w: 702, h: 1341,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 181, y: 229.5, r: 88 },       // Volume
+        { indice: 1, x: 520, y: 229,   r: 88 },       // Filter
+      ],
+      led: { x: 350.7, y: 115.8, r: 16 },
+      pulsante: { x: 351, y: 943, r: 48 },
+    },
+    // J.H. Octave Fuzz: scale azzurre e viola, la manopola «neon». Il raggio sta
+    // dentro l'arco grigio sottile; pulsante: l'esagono in basso.
+    'JH.Octavia': {
+      src: 'immagini/blocchi/JH.Octavia.webp', w: 900, h: 1530,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 231.2, y: 440.6, r: 89.7 },   // Level
+        { indice: 1, x: 662.8, y: 440.5, r: 89.7 },   // Fuzz
+      ],
+      led: { x: 445.8, y: 180.5, r: 18.5 },
+      pulsante: { x: 447.1, y: 1203.1, r: 81 },
+    },
+    // J.H. Fuzz Zone: Volume azzurro, Attack rosa (manopola-rosa.svg), dentro
+    // l'arco della scala. La spia è il cerchio più interno dei tre rossi.
+    'JH.FuzzTone': {
+      src: 'immagini/blocchi/JH.FuzzTone.webp', w: 900, h: 1434,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 231.7, y: 414,   r: 98 },     // Volume
+        { indice: 1, x: 665.5, y: 414.1, r: 98, manopola: manopola('rosa') },   // Attack
+      ],
+      led: { x: 449.4, y: 177.3, r: 31.7 },
+      pulsante: { x: 450, y: 1104.1, r: 132.6 },
+    },
+    // Booster, rifatto: una manopola sola, il Gain, dentro l'arco verde; la spia
+    // sotto la scritta GAIN.
+    Booster: {
+      src: 'immagini/blocchi/Booster.webp', w: 900, h: 1490,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 450.1, y: 271.6, r: 144.7 },   // Gain
+      ],
+      led: { x: 448.5, y: 541.8, r: 22 },
+      pulsante: { x: 450, y: 1118.5, r: 69.8 },
+    },
+    // Fuzz Face: attorno ai puntini non c'è una scala, quindi il raggio lo
+    // decide la cornice (le manopole grandi quanto ci stanno, ~50 px di aria).
+    Fuzz: {
+      src: 'immagini/blocchi/Fuzz.webp', w: 900, h: 1561,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 215.2, y: 212.2, r: 125.2 },  // Volume
+        { indice: 1, x: 678.9, y: 211,   r: 125.2 },  // Fuzz
+      ],
+      led: { x: 449.1, y: 121.7, r: 23.3 },
+      pulsante: { x: 450, y: 1255.2, r: 68 },
+    },
+    // Black Op (modello «ProCoRat»), rifatto: Distortion e Volume in alto, Filter
+    // in mezzo, dentro le corone di tacche azzurre e viola.
+    ProCoRat: {
+      src: 'immagini/blocchi/ProCoRat.webp', w: 900, h: 1347,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 232.5, y: 209.2, r: 113.6 },   // Distortion
+        { indice: 2, x: 666.6, y: 209.6, r: 113.6 },   // Volume
+        { indice: 1, x: 449.5, y: 453.5, r: 86.4 },   // Filter
+      ],
+      led: { x: 449.1, y: 100.9, r: 20 },
+      pulsante: { x: 449.1, y: 1100, r: 63.6 },
+    },
+    // Bass Muff. Lo sfondo dell'originale è grigio scuro, non nero: si è tolto
+    // con `&pieno=45&alto=100&basso=45`. La manopola copre il cerchio interno e
+    // lascia quello esterno; il footswitch è il cerchio col puntino in basso.
+    BassBigMuff: {
+      src: 'immagini/blocchi/BassBigMuff.webp', w: 900, h: 1350,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 2, x: 228,   y: 215.1, r: 112.4 },  // Sustain
+        { indice: 0, x: 671.8, y: 215.1, r: 112.4 },  // Volume
+        { indice: 1, x: 448.9, y: 432.5, r: 93.9 },   // Tone
+      ],
+      led: { x: 449.4, y: 100.7, r: 21.3 },
+      pulsante: { x: 449.5, y: 1115.3, r: 67.6 },
+    },
+    // Guitar Muff: la manopola rosa copre l'anello interno e lascia quello
+    // viola con la scala 0–10.
+    GuitarMuff: {
+      src: 'immagini/blocchi/GuitarMuff.webp', w: 900, h: 1372,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 230.8, y: 232.6, r: 112.1 },  // Volume
+        { indice: 2, x: 667.4, y: 232.6, r: 112.1 },  // Sustain
+        { indice: 1, x: 447.4, y: 449.6, r: 93.2 },   // Tone
+      ],
+      led: { x: 449.2, y: 117.4, r: 20.5 },
+      pulsante: { x: 449.2, y: 1123.9, r: 56.8 },
+    },
+    // Bassmaster: niente scala attorno ai puntini; il raggio lo decidono le
+    // scritte sotto (~95 px nell'originale) e le piste accanto. Azzurre come le
+    // scritte, sul pannello arancione.
+    MaestroBassmaster: {
+      src: 'immagini/blocchi/MaestroBassmaster.webp', w: 900, h: 1321,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 232.1, y: 263.9, r: 57.6 },   // Brass Vol
+        { indice: 2, x: 664.5, y: 263.9, r: 57.6 },   // Bass Vol
+        { indice: 1, x: 448.4, y: 463.6, r: 57.6 },   // Sensitivity
+      ],
+      led: { x: 448.1, y: 93.8, r: 19.7 },
+      pulsante: { x: 448.5, y: 1122, r: 56.8 },
+    },
+    // SAB Driver, rifatto. Il parametro 3, HP/LP, è la levetta fra Volume e Drive:
+    // in alto HP, in basso LP; qui è disegnata giù (`su: 0`). **Da verificare a
+    // orecchio**: si assume 1 = HP = in alto. La spia sta sopra il footswitch.
+    SABdriver: {
+      src: 'immagini/blocchi/SABdriver.webp', w: 900, h: 1310,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 234.7, y: 216.2, r: 91.3 },   // Volume
+        { indice: 2, x: 668.2, y: 216.1, r: 91.3 },   // Drive
+        { indice: 1, x: 450.1, y: 442.4, r: 88.5 },   // Tone
+      ],
+      levette: [
+        { indice: 3, x: 450.9, y: 209, r: 29.2, su: 0 },   // LP (giù, com'è disegnata) / HP (su)
+      ],
+      led: { x: 450, y: 1026.9, r: 18.3 },
+      pulsante: { x: 450, y: 1166.5, r: 69.4 },
+    },
+    // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
+    // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
+    RolandJC120: {
+      src: 'immagini/blocchi/RolandJC120.webp', w: 900, h: 877,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 205.9, y: 340, r: 30.9 },     // Gain
+        { indice: 3, x: 326.9, y: 340, r: 27.1 },     // Bass
+        { indice: 2, x: 447.6, y: 340, r: 30.9 },     // Middle
+        { indice: 1, x: 568.6, y: 340, r: 27.1, manopola: manopola('verde') },  // Treble
+        { indice: 4, x: 688.9, y: 340, r: 30.9, manopola: manopola('verde') },  // Master (Volume)
+      ],
+      led: { x: 102, y: 306.9, r: 11.2 },
+      pulsante: { x: 100.6, y: 359.7, r: 23.4 },
+    },
+    // Il Blackface Duo, terza versione (16 ottobre, rifatto dall'utente): la
+    // testata sulla sua cassa. La manopola copre quella nera disegnata e lascia
+    // la scala 0-10; pulsante: la levetta ON/OFF.
+    Twin: {
+      src: 'immagini/blocchi/Twin.webp', w: 900, h: 854,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 207.1, y: 329.3, r: 31.4 },   // Gain
+        { indice: 3, x: 327.9, y: 329.3, r: 31.4 },   // Bass
+        { indice: 2, x: 449.3, y: 329.3, r: 31.4 },   // Middle
+        { indice: 1, x: 571.4, y: 329.3, r: 31.4 },   // Treble
+        { indice: 4, x: 689.3, y: 329.3, r: 31.4 },   // Master (Volume)
+      ],
+      led: { x: 101.4, y: 293, r: 8.6 },
+      pulsante: { x: 100, y: 350.7, r: 17.1 },
+    },
+    // Match DC: le tacche della scala stanno strette attorno ai puntini, e la
+    // manopola resta dentro (più piccola che sull'AD Clean). Pulsante: la levetta ON.
+    '94MatchDCV2': {
+      src: 'immagini/blocchi/94MatchDCV2.webp', w: 900, h: 855,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 203.4, y: 342.1, r: 21.6 },   // Gain
+        { indice: 3, x: 324.3, y: 342.1, r: 21.6 },   // Bass
+        { indice: 2, x: 448.8, y: 342.1, r: 21.6 },   // Middle
+        { indice: 1, x: 573.1, y: 342.1, r: 21.6 },   // Treble
+        { indice: 4, x: 694.8, y: 342.1, r: 21.6 },   // Master (Volume)
+      ],
+      led: { x: 97.3, y: 305.4, r: 9.3 },
+      pulsante: { x: 97, y: 362.3, r: 15.8 },
+    },
+    // Blues Boy (Fender Blues Junior tweed): la manopola copre il disco nero dentro
+    // la scala. Pulsante: la levetta ON/OFF.
+    BluesJrTweed: {
+      src: 'immagini/blocchi/BluesJrTweed.webp', w: 900, h: 899,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 205.6, y: 336.2, r: 32.9 },   // Gain
+        { indice: 3, x: 327,   y: 336.2, r: 32.9 },   // Bass
+        { indice: 2, x: 449.3, y: 336.2, r: 32.9 },   // Middle
+        { indice: 1, x: 571.4, y: 336.2, r: 32.9 },   // Treble
+        { indice: 4, x: 692.7, y: 336.2, r: 32.9 },   // Master (Volume)
+      ],
+      led: { x: 99.7, y: 302.6, r: 10.5 },
+      pulsante: { x: 99.3, y: 363.7, r: 17.9 },
+    },
+    // Tweed Bass (Fender Bassman): attorno ai puntini solo la scala arancione; la
+    // manopola ci sta dentro. Pulsante: la levetta Power.
+    Bassman: {
+      src: 'immagini/blocchi/Bassman.webp', w: 900, h: 889,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 203.8, y: 335.5, r: 30.7 },   // Gain
+        { indice: 3, x: 324.1, y: 335.5, r: 30.7 },   // Bass
+        { indice: 2, x: 446.8, y: 335.5, r: 30.7 },   // Middle
+        { indice: 1, x: 569.7, y: 335.5, r: 30.7 },   // Treble
+        { indice: 4, x: 691.3, y: 335.5, r: 30.7 },   // Master (Volume)
+      ],
+      led: { x: 90.1, y: 303.2, r: 11 },
+      pulsante: { x: 89.9, y: 365.3, r: 17.5 },
+    },
+    // AC Boost (il nome del modello ha davvero lo spazio): la manopola copre il
+    // disco rosso dentro le tacche. Pulsante: la levetta Power.
+    'AC Boost': {
+      src: 'immagini/blocchi/ACBoost.webp', w: 900, h: 856,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 207.2, y: 333.9, r: 33.5 },   // Gain
+        { indice: 3, x: 327.2, y: 333.9, r: 33.5 },   // Bass
+        { indice: 2, x: 449.4, y: 333.9, r: 33.5 },   // Middle
+        { indice: 1, x: 570.7, y: 333.9, r: 33.5 },   // Treble
+        { indice: 4, x: 689.9, y: 333.9, r: 33.5 },   // Master (Volume)
+      ],
+      led: { x: 103, y: 299, r: 9.3 },
+      pulsante: { x: 102, y: 358, r: 17.1 },
+    },
+    // Checkmate: attorno ai puntini solo la corona di tacche; la manopola ci sta
+    // dentro. Pulsante: la levetta ON/OFF.
+    Checkmate: {
+      src: 'immagini/blocchi/Checkmate.webp', w: 900, h: 847,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 209,   y: 337.3, r: 31.1 },   // Gain
+        { indice: 3, x: 328.4, y: 337.3, r: 31.1 },   // Bass
+        { indice: 2, x: 448.4, y: 337.3, r: 31.1 },   // Middle
+        { indice: 1, x: 569.6, y: 337.3, r: 31.1 },   // Treble
+        { indice: 4, x: 689.6, y: 337.3, r: 31.1 },   // Master (Volume)
+      ],
+      led: { x: 103.9, y: 300.1, r: 9.2 },
+      pulsante: { x: 103.8, y: 358.6, r: 16.9 },
+    },
+    // Two Stone SP50: la manopola copre il disco nero dentro le tacche; Gain,
+    // Middle e Volume più grandi di Bass e Treble, com'è disegnato. Pulsante:
+    // la levetta Power.
+    TwoStoneSP50: {
+      src: 'immagini/blocchi/TwoStoneSP50.webp', w: 900, h: 890,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 206.2, y: 346.5, r: 38 },     // Gain
+        { indice: 3, x: 326.8, y: 346.5, r: 32.2 },   // Bass
+        { indice: 2, x: 448.2, y: 346.5, r: 38 },     // Middle
+        { indice: 1, x: 570.3, y: 346.5, r: 32.2 },   // Treble
+        { indice: 4, x: 689.4, y: 346.5, r: 38 },     // Master (Volume)
+      ],
+      led: { x: 101.6, y: 310.8, r: 9.5 },
+      pulsante: { x: 101.6, y: 371.4, r: 17.5 },
+    },
+    // Lux Verb: pannello argento; la manopola copre quella nera disegnata e
+    // lascia la scala. Pulsante: la levetta ON/OFF.
+    OverDrivenLuxVerb: {
+      src: 'immagini/blocchi/OverDrivenLuxVerb.webp', w: 900, h: 874,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 202.7, y: 344.5, r: 33 },     // Gain
+        { indice: 3, x: 323.3, y: 344.5, r: 33 },     // Bass
+        { indice: 2, x: 448.1, y: 344.5, r: 33 },     // Middle
+        { indice: 1, x: 569.9, y: 344.5, r: 33 },     // Treble
+        { indice: 4, x: 690,   y: 344.5, r: 33 },     // Master (Volume)
+      ],
+      led: { x: 94.8, y: 309.6, r: 10 },
+      pulsante: { x: 96.2, y: 366, r: 17.2 },
+    },
+    // JM45: pannello dorato; la manopola copre quella dorata disegnata e lascia
+    // le tacche. Pulsante: la levetta ON/OFF.
+    OverDrivenJM45: {
+      src: 'immagini/blocchi/OverDrivenJM45.webp', w: 900, h: 862,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 206.3, y: 338.2, r: 34.6 },   // Gain
+        { indice: 3, x: 325.2, y: 338.2, r: 34.6 },   // Bass
+        { indice: 2, x: 446.4, y: 338.2, r: 34.6 },   // Middle
+        { indice: 1, x: 569,   y: 338.2, r: 34.6 },   // Treble
+        { indice: 4, x: 688.7, y: 338.2, r: 34.6 },   // Master (Volume)
+      ],
+      led: { x: 101, y: 304, r: 10.1 },
+      pulsante: { x: 100.2, y: 364.2, r: 17.3 },
+    },
+    // Plexiglas (Marshall Plexi): pannello dorato; la manopola copre quella nera
+    // disegnata e lascia i numeri. Pulsante: la levetta ON/OFF.
+    Plexi: {
+      src: 'immagini/blocchi/Plexi.webp', w: 900, h: 853,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 207.8, y: 332.6, r: 33.9 },   // Gain
+        { indice: 3, x: 326,   y: 332.6, r: 33.9 },   // Bass
+        { indice: 2, x: 445.3, y: 332.6, r: 33.9 },   // Middle
+        { indice: 1, x: 566.9, y: 332.6, r: 33.9 },   // Treble
+        { indice: 4, x: 684.2, y: 332.6, r: 33.9 },   // Master (Volume)
+      ],
+      led: { x: 103.9, y: 297.6, r: 9.9 },
+      pulsante: { x: 104.6, y: 356.3, r: 15.6 },
+    },
+    // J.H. D-Show Master (Fender Dual Showman): il nome non è scritto sul
+    // disegno, l'ha detto l'utente. Pannello nero in alto; attorno ai puntini
+    // solo la scala. Pulsante: la levetta Power.
+    'JH.DualShowman': {
+      src: 'immagini/blocchi/JH.DualShowman.webp', w: 900, h: 837,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 204.6, y: 135.1, r: 31.2 },   // Gain
+        { indice: 3, x: 325.8, y: 135.1, r: 31.2 },   // Bass
+        { indice: 2, x: 447.2, y: 135.1, r: 31.2 },   // Middle
+        { indice: 1, x: 570,   y: 135.1, r: 31.2 },   // Treble
+        { indice: 4, x: 690.7, y: 135.1, r: 31.2 },   // Master (Volume)
+      ],
+      led: { x: 111.2, y: 110.4, r: 7.1 },
+      pulsante: { x: 109.3, y: 160.4, r: 12.8 },
+    },
+    // J.H. Sun 100S (Sunn 100S): il nome non è scritto sul disegno, l'ha detto
+    // l'utente. La manopola copre quella nera disegnata; l'accensione è un
+    // interruttore rettangolare (`w`/`h`) con la lucina rossa dentro (la spia).
+    'JH.Sunn100': {
+      src: 'immagini/blocchi/JH.Sunn100.webp', w: 900, h: 846,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 215,   y: 317.1, r: 32.9 },   // Gain
+        { indice: 3, x: 332.1, y: 317.1, r: 32.9 },   // Bass
+        { indice: 2, x: 448.6, y: 317.1, r: 32.9 },   // Middle
+        { indice: 1, x: 564.3, y: 317.1, r: 32.9 },   // Treble
+        { indice: 4, x: 681.1, y: 317.1, r: 32.9 },   // Master (Volume)
+      ],
+      led: { x: 120, y: 311.4, r: 6 },
+      pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
+    },
+    // Hammer 500 (ampli da basso): tutto viola; la manopola copre quella nera
+    // disegnata e lascia l'arco. Pulsante: la levetta Power.
+    Hammer500: {
+      src: 'immagini/blocchi/Hammer500.webp', w: 900, h: 883,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 200.7, y: 332.7, r: 31.6 },   // Gain
+        { indice: 3, x: 322.6, y: 332.7, r: 31.6 },   // Bass
+        { indice: 2, x: 444.1, y: 332.7, r: 31.6 },   // Middle
+        { indice: 1, x: 569.4, y: 332.7, r: 31.6 },   // Treble
+        { indice: 4, x: 692.2, y: 332.7, r: 31.6 },   // Master (Volume)
+      ],
+      led: { x: 94.7, y: 295, r: 9.3 },
+      pulsante: { x: 93.3, y: 356.7, r: 17.2 },
+    },
+    // W600 (ampli da basso): pannello dorato; la manopola copre quella nera
+    // disegnata e lascia la scala. Pulsante: la levetta ON/OFF.
+    W600: {
+      src: 'immagini/blocchi/W600.webp', w: 900, h: 860,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 207.6, y: 336.9, r: 28.8 },   // Gain
+        { indice: 3, x: 330.1, y: 336.9, r: 28.8 },   // Bass
+        { indice: 2, x: 451.7, y: 336.9, r: 28.8 },   // Middle
+        { indice: 1, x: 573.8, y: 336.9, r: 28.8 },   // Treble
+        { indice: 4, x: 694.8, y: 336.9, r: 28.8 },   // Master (Volume)
+      ],
+      led: { x: 100.2, y: 300.7, r: 9.4 },
+      pulsante: { x: 98.8, y: 358.4, r: 17.3 },
+    },
+    // Sunny 3000 (ampli da basso): pannello nero; la manopola sta dentro la
+    // scala. Pulsante: la levetta ON/OFF.
+    Sunny3000: {
+      src: 'immagini/blocchi/Sunny3000.webp', w: 900, h: 873,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 200.8, y: 339.1, r: 31.6 },   // Gain
+        { indice: 3, x: 323.8, y: 339.1, r: 31.6 },   // Bass
+        { indice: 2, x: 446.2, y: 339.1, r: 31.6 },   // Middle
+        { indice: 1, x: 569.7, y: 339.1, r: 31.6 },   // Treble
+        { indice: 4, x: 690.2, y: 339.1, r: 31.6 },   // Master (Volume)
+      ],
+      led: { x: 95.3, y: 304.9, r: 9.3 },
+      pulsante: { x: 94.2, y: 362.3, r: 17.3 },
+    },
+    // RB-800 (modello «GK800», ampli da basso): pannello nero e verde acqua;
+    // la manopola copre quella nera disegnata e lascia l'anello. Pulsante: la
+    // levetta Power.
+    GK800: {
+      src: 'immagini/blocchi/GK800.webp', w: 900, h: 839,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 202.5, y: 334.9, r: 37.1 },   // Gain
+        { indice: 3, x: 325.7, y: 334.9, r: 37.1 },   // Bass
+        { indice: 2, x: 447.4, y: 334.9, r: 37.1 },   // Middle
+        { indice: 1, x: 570.5, y: 334.9, r: 37.1 },   // Treble
+        { indice: 4, x: 693.4, y: 334.9, r: 37.1 },   // Master (Volume)
+      ],
+      led: { x: 96.1, y: 299, r: 9.3 },
+      pulsante: { x: 96.4, y: 356.9, r: 17.1 },
+    },
+    // Flat Acoustic: pannello nero e oro; la manopola copre quella nera
+    // disegnata e lascia la scala. Pulsante: la levetta Power.
+    FlatAcoustic: {
+      src: 'immagini/blocchi/FlatAcoustic.webp', w: 900, h: 881,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 198.8, y: 337.7, r: 31.9 },   // Gain
+        { indice: 3, x: 320.8, y: 337.7, r: 31.9 },   // Bass
+        { indice: 2, x: 443.8, y: 337.7, r: 31.9 },   // Middle
+        { indice: 1, x: 564.8, y: 337.7, r: 31.9 },   // Treble
+        { indice: 4, x: 687.6, y: 337.7, r: 31.9 },   // Master (Volume)
+      ],
+      led: { x: 89.5, y: 303.8, r: 9.4 },
+      pulsante: { x: 88.3, y: 367.1, r: 17.4 },
+    },
+    // Jumbo (modello «FatAcousticV2»), rifatto: azzurro e viola; la manopola copre
+    // quella nera disegnata e lascia i numeri. Pulsante: la levetta Power.
+    FatAcousticV2: {
+      src: 'immagini/blocchi/FatAcousticV2.webp', w: 900, h: 874,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 201, y: 342.6, r: 29.3 },   // Gain
+        { indice: 3, x: 325.4, y: 342.6, r: 29.3 },   // Bass
+        { indice: 2, x: 448.5, y: 342.6, r: 29.3 },   // Middle
+        { indice: 1, x: 571.1, y: 342.6, r: 29.3 },   // Treble
+        { indice: 4, x: 692.8, y: 342.6, r: 29.3 },   // Master (Volume)
+      ],
+      led: { x: 94.9, y: 307.6, r: 10.3 },
+      pulsante: { x: 93.7, y: 367.6, r: 20.5 },
+    },
+    // Fishboy (modello «AcousticAmpV2»): pannello dorato; la manopola copre
+    // quella nera disegnata e lascia la scala. Pulsante: la levetta Power.
+    AcousticAmpV2: {
+      src: 'immagini/blocchi/AcousticAmpV2.webp', w: 900, h: 850,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 205.9, y: 328.3, r: 33.1 },   // Gain
+        { indice: 3, x: 326.9, y: 328.3, r: 33.1 },   // Bass
+        { indice: 2, x: 450,   y: 328.3, r: 33.1 },   // Middle
+        { indice: 1, x: 572.4, y: 328.3, r: 33.1 },   // Treble
+        { indice: 4, x: 695.5, y: 328.3, r: 33.1 },   // Master (Volume)
+      ],
+      led: { x: 99.6, y: 296.2, r: 9.4 },
+      pulsante: { x: 99.4, y: 353.5, r: 17.3 },
+    },
+    // Pure Acoustic (modello «Acoustic»): tutto verde; la manopola sta dentro
+    // la corona di puntini. Pulsante: la levetta (qui OFF in alto, ON in basso).
+    Acoustic: {
+      src: 'immagini/blocchi/Acoustic.webp', w: 900, h: 876,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 205.2, y: 339.8, r: 33.4 },   // Gain
+        { indice: 3, x: 326.9, y: 339.8, r: 33.4 },   // Bass
+        { indice: 2, x: 449.6, y: 339.8, r: 33.4 },   // Middle
+        { indice: 1, x: 571.7, y: 339.8, r: 33.4 },   // Treble
+        { indice: 4, x: 692.6, y: 339.8, r: 33.4 },   // Master (Volume)
+      ],
+      led: { x: 101.2, y: 307.1, r: 9.4 },
+      pulsante: { x: 100.8, y: 366.2, r: 17.4 },
+    },
+    // BE 101 (Friedman BE-100), rifatto: pannello arancione, la cassa sotto; la
+    // manopola dentro la scala. Pulsante: la levetta ON/OFF.
+    BE101: {
+      src: 'immagini/blocchi/BE101.webp', w: 900, h: 883,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 194.3, y: 345.7, r: 30.1 },   // Gain
+        { indice: 3, x: 316.9, y: 345.7, r: 30.1 },   // Bass
+        { indice: 2, x: 443.4, y: 345.8, r: 30.1 },   // Middle
+        { indice: 1, x: 567.7, y: 345.8, r: 30.1 },   // Treble
+        { indice: 4, x: 690.5, y: 345.6, r: 30.1 },   // Master (Volume)
+      ],
+      led: { x: 87.8, y: 307.8, r: 9.3 },
+      pulsante: { x: 87.6, y: 368.2, r: 20.1 },
+    },
+    // Rocker V (modello «Invader»), rifatto: testata viola e arancione, la cassa
+    // sotto; le manopole dentro le corone di tacche azzurre. Pulsante: la levetta
+    // Power.
+    Invader: {
+      src: 'immagini/blocchi/Invader.webp', w: 900, h: 861,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 192.7, y: 328.3, r: 31.4 },   // Gain
+        { indice: 3, x: 317.6, y: 328.3, r: 31.4 },   // Bass
+        { indice: 2, x: 442.9, y: 328.3, r: 31.4 },   // Middle
+        { indice: 1, x: 569.9, y: 328.3, r: 31.4 },   // Treble
+        { indice: 4, x: 693.8, y: 328.3, r: 31.4 },   // Master (Volume)
+      ],
+      led: { x: 87.4, y: 291.8, r: 9.3 },
+      pulsante: { x: 87.1, y: 344.7, r: 20 },
+    },
+    // SwitchAxe (Friedman BE-100, canale lead): pannello nero; la manopola
+    // copre quella nera disegnata e lascia l'arco. Pulsante: la levetta ON/OFF.
+    SwitchAxeLead: {
+      src: 'immagini/blocchi/SwitchAxeLead.webp', w: 900, h: 868,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 204.2, y: 332.8, r: 31.6 },   // Gain
+        { indice: 3, x: 324.2, y: 332.8, r: 31.6 },   // Bass
+        { indice: 2, x: 446.4, y: 332.8, r: 31.6 },   // Middle
+        { indice: 1, x: 569.3, y: 332.8, r: 31.6 },   // Treble
+        { indice: 4, x: 689.4, y: 332.8, r: 31.6 },   // Master (Volume)
+      ],
+      led: { x: 98.4, y: 301.1, r: 9.3 },
+      pulsante: { x: 97, y: 363, r: 17.3 },
+    },
+    // Insane 6508 (Peavey 6505+): pannello nero; la manopola sta dentro la
+    // scala. Pulsante: la levetta ON/OFF.
+    '6505Plus': {
+      src: 'immagini/blocchi/6505Plus.webp', w: 900, h: 865,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 205.5, y: 338.4, r: 32.9 },   // Gain
+        { indice: 3, x: 325.4, y: 338.4, r: 32.9 },   // Bass
+        { indice: 2, x: 448.3, y: 338.4, r: 32.9 },   // Middle
+        { indice: 1, x: 571.2, y: 338.4, r: 32.9 },   // Treble
+        { indice: 4, x: 691.7, y: 338.4, r: 32.9 },   // Master (Volume)
+      ],
+      led: { x: 101.9, y: 302.3, r: 9.3 },
+      pulsante: { x: 100.2, y: 364.9, r: 17.2 },
+    },
+    // Insane (EVH): pannello argento; la manopola copre quella argentata
+    // disegnata e lascia il cerchio nero con le tacche. Pulsante: la levetta.
+    EVH: {
+      src: 'immagini/blocchi/EVH.webp', w: 900, h: 865,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 194.8, y: 341.9, r: 38.4 },   // Gain
+        { indice: 3, x: 320.6, y: 341.9, r: 38.4 },   // Bass
+        { indice: 2, x: 447.9, y: 341.9, r: 38.4 },   // Middle
+        { indice: 1, x: 573.7, y: 341.9, r: 38.4 },   // Treble
+        { indice: 4, x: 698.8, y: 341.9, r: 38.4 },   // Master (Volume)
+      ],
+      led: { x: 87.9, y: 307.3, r: 9.2 },
+      pulsante: { x: 87.4, y: 364.7, r: 17.1 },
+    },
+    // Treadplate (Mesa Rectifier): pannello nero; la manopola sta dentro il
+    // cerchio bianco. Pulsante: la levetta ON/OFF.
+    Rectifier: {
+      src: 'immagini/blocchi/Rectifier.webp', w: 900, h: 897,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 200.1, y: 342.1, r: 31.2 },   // Gain
+        { indice: 3, x: 325.7, y: 342.1, r: 31.2 },   // Bass
+        { indice: 2, x: 449.6, y: 342.1, r: 31.2 },   // Middle
+        { indice: 1, x: 575.8, y: 342.1, r: 31.2 },   // Treble
+        { indice: 4, x: 700.1, y: 342.1, r: 31.2 },   // Master (Volume)
+      ],
+      led: { x: 95.4, y: 310.9, r: 9.6 },
+      pulsante: { x: 95, y: 367.3, r: 17.8 },
+    },
+    // YJM100: pannello dorato; la manopola copre quella nera disegnata e lascia
+    // le tacche. Gain, Middle e Volume un po' più grandi, com'è disegnato.
+    // Pulsante: la levetta ON/OFF.
+    YJM100: {
+      src: 'immagini/blocchi/YJM100.webp', w: 900, h: 907,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 202.5, y: 356.7, r: 35 },     // Gain
+        { indice: 3, x: 322.5, y: 356.7, r: 32.1 },   // Bass
+        { indice: 2, x: 445.8, y: 356.7, r: 35 },     // Middle
+        { indice: 1, x: 569.3, y: 356.7, r: 32.1 },   // Treble
+        { indice: 4, x: 691.3, y: 356.7, r: 35 },     // Master (Volume)
+      ],
+      led: { x: 94.3, y: 320, r: 10.2 },
+      pulsante: { x: 94.8, y: 380.7, r: 17.5 },
+    },
+    // SLO 100 (Soldano): pannello argento; la manopola copre quella nera
+    // disegnata e lascia la scala. Pulsante: la levetta Power.
+    SLO100: {
+      src: 'immagini/blocchi/SLO100.webp', w: 900, h: 912,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 194,   y: 359, r: 37.1 },     // Gain
+        { indice: 3, x: 317.6, y: 359, r: 37.1 },     // Bass
+        { indice: 2, x: 445.3, y: 359, r: 37.1 },     // Middle
+        { indice: 1, x: 572.7, y: 359, r: 37.1 },     // Treble
+        { indice: 4, x: 697.3, y: 359, r: 37.1 },     // Master (Volume)
+      ],
+      led: { x: 87.6, y: 322.4, r: 9.6 },
+      pulsante: { x: 88.3, y: 384.3, r: 16.3 },
+    },
+    // American High Gain: la scala sta stretta attorno ai puntini, la manopola
+    // resta dentro (più piccola). Pulsante: la levetta ON/OFF.
+    AmericanHighGain: {
+      src: 'immagini/blocchi/AmericanHighGain.webp', w: 900, h: 875,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 208.4, y: 340.5, r: 27.9 },   // Gain
+        { indice: 3, x: 328.3, y: 340.5, r: 27.9 },   // Bass
+        { indice: 2, x: 449.6, y: 340.5, r: 27.9 },   // Middle
+        { indice: 1, x: 571.4, y: 340.5, r: 27.9 },   // Treble
+        { indice: 4, x: 690,   y: 340.5, r: 27.9 },   // Master (Volume)
+      ],
+      led: { x: 102.2, y: 308.9, r: 9.6 },
+      pulsante: { x: 99.9, y: 365.9, r: 17.6 },
+    },
+    // British 30 (Orange AD30): pannello arancione; al posto delle manopole il
+    // disegno ha dei mirini neri, la nostra copre il centro e lascia le tacche.
+    // Pulsante: la levetta ON/OFF.
+    OrangeAD30: {
+      src: 'immagini/blocchi/OrangeAD30.webp', w: 900, h: 900,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 207.2, y: 349.6, r: 32.8 },   // Gain
+        { indice: 3, x: 324.8, y: 349.6, r: 32.8 },   // Bass
+        { indice: 2, x: 443.9, y: 349.6, r: 32.8 },   // Middle
+        { indice: 1, x: 573.2, y: 349.6, r: 32.8 },   // Treble
+        { indice: 4, x: 690.1, y: 349.6, r: 32.8 },   // Master (Volume)
+      ],
+      led: { x: 92.3, y: 321, r: 9.7 },
+      pulsante: { x: 91.6, y: 382.2, r: 17.9 },
+    },
+    // RB 101 (Bogner): pannello argento; la manopola copre quella nera
+    // disegnata. Gain, Middle e Volume più grandi di Bass e Treble, com'è
+    // disegnato. Pulsante: la levetta ON/OFF.
+    Bogner: {
+      src: 'immagini/blocchi/Bogner.webp', w: 900, h: 846,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 206.5, y: 332.1, r: 37.1 },   // Gain
+        { indice: 3, x: 325.9, y: 332.1, r: 31.4 },   // Bass
+        { indice: 2, x: 446.6, y: 332.1, r: 37.1 },   // Middle
+        { indice: 1, x: 569.1, y: 332.1, r: 31.4 },   // Treble
+        { indice: 4, x: 687.9, y: 332.1, r: 37.1 },   // Master (Volume)
+      ],
+      led: { x: 101.2, y: 297.6, r: 9.3 },
+      pulsante: { x: 101.2, y: 358.4, r: 17.1 },
+    },
+    // J.H. Tone City 100 (Sound City One Hundred): pannello dorato; la manopola
+    // sta dentro il cerchio tratteggiato. Pulsante: la levetta Power.
+    'JH.SoundCity100': {
+      src: 'immagini/blocchi/JH.SoundCity100.webp', w: 900, h: 848,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 242.9, y: 297, r: 31.9 },     // Gain
+        { indice: 3, x: 347.6, y: 297, r: 31.9 },     // Bass
+        { indice: 2, x: 451.2, y: 297, r: 31.9 },     // Middle
+        { indice: 1, x: 555.2, y: 297, r: 31.9 },     // Treble
+        { indice: 4, x: 657.9, y: 297, r: 31.9 },     // Master (Volume)
+      ],
+      led: { x: 146.5, y: 261.7, r: 8.7 },
+      pulsante: { x: 146.6, y: 319.4, r: 16 },
+    },
+    // J.H. Super 100 (Marshall Super Lead 100): pannello dorato come il 45/100;
+    // la manopola sta dentro la scala. Pulsante: la levetta sotto Indicator.
+    'JH.SuperLead100': {
+      src: 'immagini/blocchi/JH.SuperLead100.webp', w: 900, h: 845,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 233.3, y: 299.5, r: 32.4 },   // Gain
+        { indice: 3, x: 340,   y: 299.5, r: 32.4 },   // Bass
+        { indice: 2, x: 447.4, y: 299.5, r: 32.4 },   // Middle
+        { indice: 1, x: 551.9, y: 299.5, r: 32.4 },   // Treble
+        { indice: 4, x: 657.9, y: 299.5, r: 32.4 },   // Master (Volume)
+      ],
+      led: { x: 129.5, y: 262.7, r: 8.8 },
+      pulsante: { x: 129.5, y: 322.3, r: 16.2 },
+    },
+    // J.H. 45/100 (Marshall JTM45/100): pannello dorato, la manopola copre il
+    // cerchio della scala e lascia le tacche. Pulsante: la levetta sotto Indicator.
+    'JH.JTM45': {
+      src: 'immagini/blocchi/JH.JTM45.webp', w: 900, h: 898,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 233.6, y: 315.5, r: 31.6 },   // Gain
+        { indice: 3, x: 339.6, y: 315.5, r: 31.6 },   // Bass
+        { indice: 2, x: 448.5, y: 315.5, r: 31.6 },   // Middle
+        { indice: 1, x: 554.4, y: 315.5, r: 31.6 },   // Treble
+        { indice: 4, x: 661.1, y: 315.5, r: 31.6 },   // Master (Volume)
+      ],
+      led: { x: 132.3, y: 280.1, r: 9.8 },
+      pulsante: { x: 132.2, y: 343.3, r: 16.5 },
+    },
+    // J.H. Bass Master (Fender Bassman 50 del 1968): il nome non è scritto sul
+    // disegno, l'ha detto l'utente. Pannello in alto, sopra la griglia; Middle e
+    // Volume un po' più grandi, com'è disegnato. Pulsante: la levetta Power.
+    'JH.Bassman50Silver': {
+      src: 'immagini/blocchi/JH.Bassman50Silver.webp', w: 900, h: 854,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 202.8, y: 137.4, r: 32 },     // Gain
+        { indice: 3, x: 325.7, y: 137.4, r: 32 },     // Bass
+        { indice: 2, x: 448,   y: 137.4, r: 33.4 },   // Middle
+        { indice: 1, x: 570.9, y: 137.4, r: 32 },     // Treble
+        { indice: 4, x: 692.8, y: 137.4, r: 33.4 },   // Master (Volume)
+      ],
+      led: { x: 107.4, y: 107.4, r: 8.5 },
+      pulsante: { x: 107.4, y: 160.8, r: 12.8 },
+    },
+    // American Deluxe: la manopola copre il disco nero dentro le tacche gialle.
+    // Pulsante: la levetta Power.
+    Deluxe65: {
+      src: 'immagini/blocchi/Deluxe65.webp', w: 900, h: 886,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 204.7, y: 342.1, r: 33.7 },   // Gain
+        { indice: 3, x: 326.4, y: 342.1, r: 33.7 },   // Bass
+        { indice: 2, x: 450.1, y: 342.1, r: 33.7 },   // Middle
+        { indice: 1, x: 574.8, y: 342.1, r: 33.7 },   // Treble
+        { indice: 4, x: 696.7, y: 342.1, r: 33.7 },   // Master (Volume)
+      ],
+      led: { x: 96.3, y: 306.4, r: 9.5 },
+      pulsante: { x: 96.6, y: 365.1, r: 17.6 },
+    },
+    // ODS 50: la manopola copre il disco scuro dentro l'anello arancione.
+    // Pulsante: la levetta ON/OFF.
+    ODS50CN: {
+      src: 'immagini/blocchi/ODS50CN.webp', w: 900, h: 842,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 205.8, y: 334.2, r: 33.2 },   // Gain
+        { indice: 3, x: 327.2, y: 334.2, r: 33.2 },   // Bass
+        { indice: 2, x: 447.5, y: 334.2, r: 33.2 },   // Middle
+        { indice: 1, x: 571.8, y: 334.2, r: 33.2 },   // Treble
+        { indice: 4, x: 691.5, y: 334.2, r: 33.2 },   // Master (Volume)
+      ],
+      led: { x: 96.1, y: 299.5, r: 9.9 },
+      pulsante: { x: 96.1, y: 358.2, r: 17 },
+    },
+    // AD Clean, la testata sulla sua cassa (la prima fatta con le API di OpenAI).
+    // La manopola copre il disco scuro dentro le tacche arancioni; pulsante: la
+    // levetta OFF sotto la spia.
+    ADClean: {
+      src: 'immagini/blocchi/ADClean.webp', w: 900, h: 853,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 202,   y: 345.3, r: 28.7 },   // Gain
+        { indice: 3, x: 327.3, y: 345.3, r: 28.7 },   // Bass
+        { indice: 2, x: 450,   y: 345.3, r: 28.7 },   // Middle
+        { indice: 1, x: 572.7, y: 345.3, r: 28.7 },   // Treble
+        { indice: 4, x: 696.2, y: 345.3, r: 28.7 },   // Master (Volume)
+      ],
+      led: { x: 86.7, y: 310, r: 9.3 },
+      pulsante: { x: 84.7, y: 367.5, r: 18.7 },
+    },
+  };
+
+  window.SparkImmagini = {
+    /** L'immagine di un modello (e del suo tipo, per il riverbero), o null. */
+    di: (modello, tipo) => (tipo && TABELLA[modello + ':' + tipo]) || TABELLA[modello] || null,
+    /**
+     * La misura fissa del riquadro nell'editor: quella del Silver 120, il blocco
+     * con le manopole più piccole. Gli altri ci stanno dentro, rimpiccioliti.
+     */
+    RIQUADRO: { w: TABELLA.RolandJC120.w, h: TABELLA.RolandJC120.h },
+  };
+})();

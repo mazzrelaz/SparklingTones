@@ -10,8 +10,17 @@
    Vista preset
    ==================================================================== */
 
+/**
+ * Senza il pacchetto Hendrix (`haHendrix`) un preset che ne usa uno non si
+ * vede: tanto non suonerebbe. L'Auto Wah gratuito non conta (`vuoleHendrix`).
+ */
+const visibileSenzaHendrix = record =>
+  haHendrix() || !SparkEffetti.presetConHendrix(record && record.effects);
+
 /** Il preset passa il filtro di ricerca, famiglia e categoria? */
-function passaIlFiltro(record) {
+function passaIlFiltro(record, slotAmpli = false) {
+  // Gli slot dell'ampli restano: sono quello che c'è dentro l'ampli.
+  if (!slotAmpli && !visibileSenzaHendrix(record)) return false;
   if (vista.famiglia && record.famiglia !== vista.famiglia) return false;
   if (vista.categoria &&
       !(record.tags || []).some(t => t.toLowerCase() === vista.categoria.toLowerCase())) {
@@ -52,7 +61,7 @@ function disegnaPreset() {
   } else {
     for (let slot = 0; slot < modelloAmpli.slot; slot++) {
       const record = suAmpli[slot];
-      if (record && !passaIlFiltro(record)) continue;
+      if (record && !passaIlFiltro(record, true)) continue;
       if (!record && filtroAttivo()) continue;
       mostratiSuAmpli++;
       griglia.appendChild(schedaSlot(record, slot));
@@ -67,7 +76,7 @@ function disegnaPreset() {
   // Per id e non per oggetto: `hardware()` rilegge dal database, quindi
   // restituisce copie diverse dagli stessi record che stanno in `tutti`.
   const sullAmpli = new Set(suAmpli.filter(Boolean).map(r => r.id));
-  const altri = tutti.filter(r => !sullAmpli.has(r.id));
+  const altri = tutti.filter(r => !sullAmpli.has(r.id) && visibileSenzaHendrix(r));
   const visibili = ordinaLibreria(altri.filter(passaIlFiltro));
   visibili.forEach(record => libreria.appendChild(rigaPreset(record, null)));
 
@@ -316,6 +325,9 @@ function etichettaSlot(slot) {
  * che l'app ufficiale si è connessa una volta da quando l'ampli è acceso.
  */
 function bolloHendrix(record) {
+  // Senza il pacchetto Hendrix (`haHendrix`) di bolli non ce ne sono: i preset
+  // che lo vogliono non si vedono, e il wah rimasto è l'Auto Wah gratuito.
+  if (!haHendrix()) return null;
   const dentro = SparkEffetti.hendrixNellaCatena(record && record.effects);
   if (dentro.length === 0) return null;
 
@@ -416,9 +428,32 @@ const ICONE_SCHEDA = {
   chiudi:   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>',
   matita:   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></svg>',
   note:     '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h7l3 3v11H5z"/><path d="M8 10h5M8 13h4"/></svg>',
+  famiglia: '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="8" r="3.5"/><circle cx="13" cy="8" r="3.5"/><circle cx="10" cy="13" r="3.5"/></svg>',
+  categorie:'<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4v5l8 8 6-6-8-8H4a1 1 0 0 0-1 1z"/><circle cx="7" cy="7" r="1.2"/></svg>',
   giu:      '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg>',
   su:       '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 12l5-5 5 5"/></svg>',
 };
+
+/**
+ * Una riga che apre e chiude una sezione della scheda (famiglia, categorie,
+ * note): icona, nome, e da chiusa l'anteprima di cosa c'è dentro.
+ */
+function rigaApribile(icona, etichetta, anteprima, aperta, quando) {
+  const riga = document.createElement('button');
+  riga.type = 'button';
+  riga.className = 'riga-note';
+  riga.setAttribute('aria-expanded', aperta ? 'true' : 'false');
+  riga.innerHTML = ICONE_SCHEDA[icona];
+  const eti = document.createElement('span');
+  eti.textContent = etichetta;
+  const ante = document.createElement('span');
+  ante.className = 'anteprima';
+  ante.textContent = aperta ? '' : anteprima;
+  riga.append(eti, ante);
+  riga.insertAdjacentHTML('beforeend', aperta ? ICONE_SCHEDA.su : ICONE_SCHEDA.giu);
+  riga.addEventListener('click', quando);
+  return riga;
+}
 
 /** Un pulsante della scheda: icona e scritta. */
 function tastoScheda(icona, testo, classe = '') {
@@ -660,17 +695,21 @@ function dettaglio(record, slot) {
   det.appendChild(piccole);
   if (avvisoAltriSlot) det.appendChild(avvisoAltriSlot);
 
-  const sep = document.createElement('div');
-  sep.className = 'scheda-sep';
-  det.appendChild(sep);
+  // Famiglia, categorie e note stanno **chiuse**, ognuna dietro la sua riga
+  // (l'utente, 15 ottobre 2026: prima solo le note; famiglia e categorie
+  // aperte si prendevano mezza scheda). La riga chiusa dice cosa c'è dentro.
+  // Le righe hanno il filo sopra: il separatore di prima sarebbe doppio.
 
   /* famiglia di suono ---------------------------------------------- */
   // Un asse a sé, che con le categorie non c'entra: quelle sono lo stile
   // (Pink Floyd, jazz, il pezzo), questa è *che tipo di suono è*. Una sola,
   // scelta a mano, e si può togliere — chi non ce l'ha resta senza colore.
-  const etiFam = document.createElement('div');
-  etiFam.className = 'scheda-eti';
-  etiFam.textContent = tr('Famiglia');
+  const famAperta = vista.famigliaAperta === chiave;
+  det.appendChild(rigaApribile('famiglia', tr('Famiglia'),
+    famiglia ? famiglia.nome : tr('nessuna'), famAperta, () => {
+      vista.famigliaAperta = famAperta ? null : chiave;
+      disegnaPreset();
+    }));
   const scelteFam = document.createElement('div');
   scelteFam.className = 'scelte';
   for (const fam of famiglie) {
@@ -686,12 +725,15 @@ function dettaglio(record, slot) {
     });
     scelteFam.appendChild(s);
   }
-  det.append(etiFam, scelteFam);
+  if (famAperta) det.appendChild(scelteFam);
 
   /* categorie ----------------------------------------------------- */
-  const etiCat = document.createElement('div');
-  etiCat.className = 'scheda-eti';
-  etiCat.textContent = tr('Categorie');
+  const catAperte = vista.categorieAperte === chiave;
+  det.appendChild(rigaApribile('categorie', tr('Categorie'),
+    (record.tags || []).join(', ') || tr('nessuna'), catAperte, () => {
+      vista.categorieAperte = catAperte ? null : chiave;
+      disegnaPreset();
+    }));
   const scelte = document.createElement('div');
   scelte.className = 'scelte';
   const sue = new Set((record.tags || []).map(t => t.toLowerCase()));
@@ -721,33 +763,21 @@ function dettaglio(record, slot) {
     disegnaPreset();
   });
   scelte.appendChild(nuova);
-  det.append(etiCat, scelte);
+  if (catAperte) det.appendChild(scelte);
 
   /* note ---------------------------------------------------------- */
   // Chiuse, scelta dell'utente sulle bozze: si leggono poco, e aperte si
   // prendevano mezza scheda. La riga dice se ce n'è e come cominciano.
   const aperte = vista.noteAperte === chiave;
-  const rigaNote = document.createElement('button');
-  rigaNote.type = 'button';
-  rigaNote.className = 'riga-note';
-  rigaNote.setAttribute('aria-expanded', aperte ? 'true' : 'false');
-  rigaNote.innerHTML = ICONE_SCHEDA.note;
-  const etiNote = document.createElement('span');
-  etiNote.textContent = tr('Note');
-  const anteprima = document.createElement('span');
-  anteprima.className = 'anteprima';
-  anteprima.textContent = aperte ? '' : (record.notes || '').trim().split('\n')[0];
-  rigaNote.append(etiNote, anteprima);
-  rigaNote.insertAdjacentHTML('beforeend', aperte ? ICONE_SCHEDA.su : ICONE_SCHEDA.giu);
-  rigaNote.addEventListener('click', () => {
-    vista.noteAperte = aperte ? null : chiave;
-    disegnaPreset();
-    if (!aperte) {
-      const campo = $('foglioPreset').querySelector('textarea');
-      if (campo) campo.focus();
-    }
-  });
-  det.appendChild(rigaNote);
+  det.appendChild(rigaApribile('note', tr('Note'),
+    (record.notes || '').trim().split('\n')[0], aperte, () => {
+      vista.noteAperte = aperte ? null : chiave;
+      disegnaPreset();
+      if (!aperte) {
+        const campo = $('foglioPreset').querySelector('textarea');
+        if (campo) campo.focus();
+      }
+    }));
 
   if (aperte) {
     const note = document.createElement('textarea');

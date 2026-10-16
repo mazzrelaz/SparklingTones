@@ -832,8 +832,8 @@
                               0 0 26px var(--fam, #ffffff); }
   .modo-editor { text-align:center; font-family:var(--strumento);
                  font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em;
-                 font-weight:700; color:var(--gold); margin:0 0 18px;
-                 text-shadow:0 0 10px rgba(240,192,64,0.5); }
+                 font-weight:700; color:var(--blu); margin:0 0 18px;
+                 text-shadow:0 0 10px rgba(58,160,255,0.5); }
 
   /* Il tempo del preset. Sta qui e non nella vista live — chiesto dall'utente
      il 28 agosto 2026: là si suona e basta, il tempo è una cosa che si sceglie
@@ -849,7 +849,7 @@
   .riga-tempo .passo { min-width:2.2em; padding:4px 8px; font-size:1rem; }
   #valoreTempo { font-size:1.5rem; font-weight:700; min-width:2.6em;
                  text-align:center; font-variant-numeric:tabular-nums;
-                 color:var(--gold); text-shadow:0 0 10px rgba(240,192,64,0.45); }
+                 color:var(--blu); text-shadow:0 0 10px rgba(58,160,255,0.45); }
   #valoreTempo .un { font-size:0.62rem; opacity:0.6; margin-left:2px;
                      text-shadow:none; }
   /* Il tap si accende a ogni battuta: senza un segno, chi batte non sa se il
@@ -899,7 +899,11 @@
   /* Il nome tiene meno della metà dello spazio che avanza (era `1`): così la
      catena e il riquadro salgono di un po' e restano più vicini alle dita,
      senza spostare il nome da dove sta. */
-  #pannelloEditor .testa-editor { flex:0.14 0 auto; display:flex;
+  /* Dal 15 ottobre 2026 la testa **non prende niente** dello spazio che avanza
+     (era 0.14): con i blocchi disegnati il riquadro cambia altezza da un blocco
+     all'altro, e nome, tempo e catena si spostavano sotto le dita (l'utente:
+     «devono essere sempre alla stessa altezza»). */
+  #pannelloEditor .testa-editor { flex:0 0 auto; display:flex; padding-top:16px;
                                   flex-direction:column; justify-content:center; }
   #pannelloEditor .blocco.aFuoco { flex:1 0 auto; display:flex; flex-direction:column; }
   /* Due righe di manopole, sempre: 94 px l'una, 18 di stacco e i 26 di
@@ -913,7 +917,8 @@
      sul buio, e un pannello grigio smorza tutto quello che ci sta sopra. */
   /* Quando i sette tasselli ci stanno tutti, la fila va **in mezzo**: allineata
      a sinistra lasciava un vuoto a destra e sembrava caduta da una parte. */
-  .striscia { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 9px;
+  /* In alto 14 px di aria: ci sale il tassello di un effetto spento. */
+  .striscia { display:flex; gap:8px; overflow-x:auto; padding:14px 2px 9px;
               justify-content:center; scroll-snap-type:x proximity; }
   /* Quando invece non ci stanno — sotto gli ~820 px la fila è più larga dello
      schermo — si scorre, e allora `center` va tolto o taglia il primo tassello.
@@ -931,10 +936,16 @@
               padding:9px 9px 7px; cursor:pointer; text-align:left;
               font:inherit; color:inherit;
               display:flex; flex-direction:column; gap:6px; }
+  /* L'alone del tassello scelto sta dentro gli 8–9 px che la striscia ha
+     attorno: più largo, la striscia (che scorre, quindi taglia) lo troncava
+     di netto sotto. */
   .tassello.scelto { border-color:var(--cat);
                      box-shadow:0 0 0 1px var(--cat) inset,
-                                0 0 10px -1px var(--cat), 0 0 26px -6px var(--cat); }
-  .tassello.spento { opacity:0.5; }
+                                0 0 6px -1px var(--cat), 0 0 12px -4px var(--cat); }
+  /* Un effetto spento **esce dalla catena**: il suo tassello si alza di un po' e
+     si spegne, come un pedale messo da parte (l'utente, 15 ottobre 2026). */
+  .tassello { transition:transform .2s ease, opacity .2s ease; }
+  .tassello.spento { opacity:0.5; transform:translateY(-12px); }
   .tassello .cat { font-family:var(--strumento); font-size:0.6rem; text-transform:uppercase; letter-spacing:0.06em;
                    color:var(--cat); font-weight:700;
                    text-shadow:0 0 6px var(--cat), 0 0 14px var(--cat); }
@@ -948,6 +959,85 @@
   .barrette { display:flex; align-items:flex-end; gap:2px; height:16px; }
   .barrette i { flex:1; background:var(--cat); border-radius:1px; min-height:1px;
                 box-shadow:0 0 6px var(--cat); }
+  /* Bozza del 15 ottobre 2026: i blocchi con la loro immagine. Nel tassello
+     l'immagine prende il posto del nome e delle barrette; sotto, il blocco a
+     fuoco è l'immagine stessa, con le manopole che girano. */
+  .tassello.con-immagine { padding-bottom:9px; }
+  .tassello .miniatura { height:52px; width:100%; object-fit:contain; display:block;
+                         pointer-events:none; }
+  /* Il riquadro dell'immagine ha una misura sola per tutti i blocchi, quella del
+     Silver 120 (`--riquadro`, larghezza su altezza): l'immagine ci sta dentro
+     centrata (`.tela`). Su uno schermo basso si rimpicciolisce finché sta sopra
+     la barra in basso: ~470 px è quello che sta sopra (testa, tempo, catena)
+     più la barra. */
+  .frontale { margin:12px auto 6px; aspect-ratio:var(--riquadro, 1);
+              width:min(100%, 420px, max(200px, calc((100dvh - 470px) * var(--riquadro, 1))));
+              display:flex; align-items:center; justify-content:center;
+              touch-action:none; user-select:none; -webkit-user-select:none; }
+  .frontale .tela { position:relative; }
+  /* Il riquadro grosso non ha né bordo né fondo suo: prende il fondo della
+     pagina e sparisce, e restano il blocco e le sue manopole (l'utente, 15
+     ottobre 2026). Provati e scartati: il riquadro nero sulla pagina grigia, il
+     bordo tolto o più spesso, la pagina dell'editor tutta nera. I tasselli
+     della catena e la barra in basso restano come sono. */
+  #pannelloEditor .blocco.aFuoco { background:transparent; border-color:transparent; }
+  .frontale .sfondo { display:block; width:100%; height:100%; pointer-events:none; }
+  .frontale .manopola-img { position:absolute; cursor:ns-resize; touch-action:none;
+                            border-radius:50%; }
+  /* Le manopole piccole si prendono anche un po' fuori dal bordo: sul telefono
+     una da 30 px è più stretta del dito. */
+  .frontale .manopola-img::before { content:''; position:absolute; inset:-14px; border-radius:50%; }
+  .frontale .giro { position:absolute; inset:0; border-radius:50%; overflow:hidden; }
+  /* Una manopola disegnata a parte non si taglia: la freccia può uscire dal cerchio. */
+  .frontale .giro.disegno { overflow:visible; border-radius:0; }
+  .frontale .giro img { position:absolute; max-width:none; pointer-events:none; }
+  /* Mentre si gira, un anello del colore del blocco: dice quale si sta toccando. */
+  .frontale .manopola-img.gira { box-shadow:0 0 0 2px var(--cat), 0 0 16px var(--cat); }
+  .frontale .spia { position:absolute; border-radius:50%; pointer-events:none;
+                    background:rgba(0,0,0,0.62); }
+  .frontale .spia.accesa { background:radial-gradient(circle, #ffb3a8 0 18%, #ff2a1a 45%, rgba(255,40,20,0) 72%);
+                           box-shadow:0 0 14px 4px rgba(255,40,20,0.55); }
+  .frontale .spia.accesa.viola { background:radial-gradient(circle, #ffffff 0 18%, #c88cff 45%, rgba(170,90,255,0) 72%);
+                                 box-shadow:0 0 14px 4px rgba(170,90,255,0.55); }
+  .frontale .pulsante-img { position:absolute; border-radius:50%; border:0; padding:0;
+                            background:transparent; cursor:pointer; }
+  .frontale .pulsante-img:active { background:rgba(0,0,0,0.25); }
+  .frontale .pulsante-img.rettangolo { border-radius:14px; }
+  /* La colonna di puntini del wah: accesi salgono e scendono con l'onda. */
+  .frontale .punto-barra { position:absolute; border-radius:50%; pointer-events:none; }
+  .frontale .punto-barra.acceso { background:radial-gradient(circle, #fff 0 18%, #ff3b4a 45%, rgba(255,40,60,0) 72%);
+                                  box-shadow:0 0 10px 2px rgba(255,40,60,0.55); }
+  /* Il pannellino «Auto» del Legendary Wah: sei modalità in griglia, come
+     nell'app ufficiale, e sotto Sensitivity, oppure BPM con le note o i ms. */
+  .autowah .modi-wah { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px 14px 6px; }
+  .autowah .modo-wah { height:62px; border:1px solid var(--line); border-radius:10px;
+                       background:var(--incavo); color:var(--text); font-weight:700;
+                       display:flex; align-items:center; justify-content:center; }
+  .autowah .modo-wah svg { width:72px; height:40px; fill:none; stroke:currentColor;
+                           stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+  .autowah .modo-wah.scelto { border-color:var(--cat); color:var(--cat);
+                              background:color-mix(in srgb, var(--cat) 14%, var(--incavo));
+                              box-shadow:0 0 12px -2px var(--cat); }
+  .autowah .sotto-wah { display:flex; align-items:center; justify-content:center;
+                        gap:22px; padding:14px 14px 18px; min-height:150px; }
+  .autowah .note-wah { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .autowah .nota-wah { min-width:58px; height:42px; border:1px solid var(--line); border-radius:10px;
+                       background:var(--incavo); color:var(--text); font-weight:700; }
+  .autowah .nota-wah.scelta { border-color:var(--cat); color:var(--cat); }
+  /* Una levetta dell'immagine (Limit/Compress): scatta capovolgendosi. */
+  .frontale .levetta-img { position:absolute; border:0; padding:0; border-radius:50%;
+                           background:transparent; cursor:pointer; }
+  .frontale .levetta-img .giro { transition:transform .15s ease; }
+  /* Un cursore degli equalizzatori: la pista disegnata e sopra il cappuccio,
+     nel colore del blocco; si prende anche un po' fuori, come le manopole. */
+  .frontale .cursore-img { position:absolute; cursor:ns-resize; touch-action:none; }
+  .frontale .cursore-img::before { content:''; position:absolute; inset:-6px -10px; }
+  .frontale .cursore-img .tappo { position:absolute; left:0; right:0; border-radius:6px;
+      background:#1a1d2b;
+      border:2px solid var(--cat); box-shadow:0 0 10px var(--cat), inset 0 0 6px rgba(255,255,255,0.15); }
+  .frontale .cursore-img .tappo::after { content:''; position:absolute; left:18%; right:18%; top:50%;
+      height:2px; margin-top:-1px; background:#fff; box-shadow:0 0 6px #fff; border-radius:1px; }
+  .frontale .cursore-img.gira .tappo { box-shadow:0 0 18px var(--cat), 0 0 4px #fff; }
   .filo { flex:0 0 10px; align-self:center; height:1px; background:var(--line);
           margin:0 -3px; }
 
@@ -1023,6 +1113,9 @@
      prendono. Meglio spente che tolte — un elenco che si accorcia da solo
      sembra un catalogo che è sparito. */
   .elenco-voce.spenta { color:var(--faint); cursor:not-allowed; }
+  /* Le miniature dei blocchi accanto ai nomi (bozza del 15 ottobre 2026). */
+  .con-miniature .elenco-voce { display:flex; align-items:center; gap:12px; }
+  .elenco-mini { flex:none; width:44px; height:44px; object-fit:contain; display:block; }
 
   /* ---- la domanda prima di uscire dall'editor -------------------------
      Stessa scatola dell'elenco dei modelli, che è l'unica finestra che
@@ -1061,6 +1154,19 @@
      dà il tasto stesso, che è anche il posto dove si sta già guardando.
      Acceso e con un pallino quando c'è del lavoro non salvato; spento e con
      la spunta subito dopo aver salvato. */
+  /* Salva e Fatto: arrotondati, icona e scritta, piccoli e uguali, col bordo e
+     senza rosso (l'utente, 15 ottobre 2026); il «?» tondo accanto. Il rosso
+     resta solo su Salva quando c'è lavoro da salvare. */
+  #pannelloEditor .tasto-testa { height:34px; border-radius:11px; padding:0 11px;
+                                 font-size:0.85rem; font-weight:700;
+                                 display:inline-flex; align-items:center; gap:6px; }
+  #pannelloEditor .tasto-testa:not(.primary) { background:none; border-color:var(--bordo-forte); }
+  #pannelloEditor .tasto-testa svg { width:14px; height:14px; flex:none; fill:none;
+                                     stroke:currentColor; stroke-width:1.8;
+                                     stroke-linecap:round; stroke-linejoin:round; }
+  #pannelloEditor .tasto-aiuto { width:34px; height:34px; padding:0; border-radius:50%;
+                                 background:none; border-color:var(--bordo-forte);
+                                 font-size:0.9rem; font-weight:700; color:var(--dim); }
   #btnSalvaModifiche.da-salvare { border-color:var(--accent); color:#ffd7d9;
                                   background:#2a1417; }
   #btnSalvaModifiche.da-salvare::before { content:'• '; color:var(--accent); }
@@ -1164,7 +1270,7 @@
   .pomello.leva:not(.acceso) .val { color:var(--faint); text-shadow:none; }
   .pomello.leva:focus-visible { outline:1px solid var(--cat); outline-offset:4px; border-radius:8px; }
   /* Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
-  .bolla { position:fixed; z-index:60; font-family:var(--strumento); transform:translate(-50%,-150%);
+  .bolla { position:fixed; z-index:90; font-family:var(--strumento); transform:translate(-50%,-150%);
            background:var(--text); color:#101216; font-weight:700; font-size:1.2rem;
            padding:6px 14px; border-radius:10px; pointer-events:none;
            font-variant-numeric:tabular-nums; box-shadow:0 4px 18px rgba(0,0,0,0.6); }
@@ -1451,6 +1557,16 @@
       <button data-sfondo="nero">Nero</button>
     </div>
   </div>
+  <!-- Il pacchetto Hendrix: lo dichiara l'utente, perché dall'ampli non si legge. -->
+  <div class="sezione-pannello">
+    <h3>Pacchetto Jimi Hendrix</h3>
+    <p class="spiega">Ce l'hai sbloccato sull'ampli? Se no, gli effetti Hendrix e i preset che li
+      usano non si vedono, e il wah è l'Auto Wah gratuito.</p>
+    <div class="azioni" id="sceltaHendrix">
+      <button data-hendrix="si">Sì</button>
+      <button data-hendrix="no">No</button>
+    </div>
+  </div>
   <p class="spiega">La libreria vive in questo browser: l'esportazione è l'unico modo di
     portarla su un altro apparecchio o di metterla al sicuro.</p>
   <div class="azioni">
@@ -1637,22 +1753,14 @@
 <div class="pannello" id="pannelloEditor">
   <div class="barra-alta">
     <span style="flex:1"></span>
-    <!-- Sul telefono resta «Salva»: quelle due parole in più sono la
-         differenza fra una riga sola e una barra che va a capo. -->
-    <button id="btnSalvaModifiche">Salva<span class="solo-largo"> in libreria</span></button>
-    <button class="primary" data-chiudi="pannelloEditor">Fatto</button>
-    <!-- Come nell'intestazione: davanti restano le due cose che si fanno
-         girando le manopole — salvare e uscire — e il resto sta dietro il
-         menu. La guida non è più un «?» solitario: in un elenco un punto
-         interrogativo da solo non dice cosa apre. -->
-    <div class="menu-wrap">
-      <button id="btnMenuEditor" aria-haspopup="true" aria-expanded="false"
-              title="le altre azioni">⋯</button>
-      <div id="menuEditor" class="tendina" hidden>
-        <button id="btnRileggi">Rileggi dall'ampli</button>
-        <button id="btnAiutoEditor">Come funziona</button>
-      </div>
-    </div>
+    <!-- Salva e Fatto come i tasti grandi della scheda del preset (Regola e
+         Suona): icona e scritta, arrotondati (l'utente, 15 ottobre 2026). Il
+         menu ⋯ non c'è più: «Rileggi dall'ampli» è tolto (non serviva), e
+         «Come funziona» è il «?» qui accanto. Sul telefono resta «Salva»:
+         quelle due parole in più mandano la barra a capo. -->
+    <button id="btnSalvaModifiche" class="tasto-testa"></button>
+    <button class="tasto-testa" data-chiudi="pannelloEditor"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg><span>Fatto</span></button>
+    <button id="btnAiutoEditor" class="tasto-aiuto" title="Come funziona">?</button>
   </div>
   <!-- Il nome del preset, dentro un'insegna al neon del colore della sua
        famiglia di suono: clean, drive, acoustic, bass. Chi non ne ha resta bianco —
@@ -1820,6 +1928,7 @@
 <script src="src/dropbox-sync.js"></script>
 <script src="src/spark-protocol.js"></script>
 <script src="src/spark-effetti.js"></script>
+<script src="src/spark-immagini.js"></script>
 <script src="src/spark-transport.js"></script>
 <script src="src/preset-store.js"></script>
 <script src="src/pedale-ponte.js"></script>

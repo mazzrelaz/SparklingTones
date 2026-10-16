@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Manopola cyberpunk, gialla: scura, col bordo al neon e il segno
+       bianco acceso. Disegnata col segno in alto (a metà corsa): l'app la gira. -->
+  <defs>
+    <radialGradient id="cappa" cx=".36" cy=".3" r=".8">
+      <stop offset="0" stop-color="#4a4f72"/>
+      <stop offset=".55" stop-color="#1c1f33"/>
+      <stop offset="1" stop-color="#0b0c16"/>
+    </radialGradient>
+    <linearGradient id="bordo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff27a"/>
+      <stop offset="1" stop-color="#ffc21f"/>
+    </linearGradient>
+    <filter id="alone" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.2"/>
+    </filter>
+  </defs>
+  <!-- corpo zigrinato -->
+  <circle cx="50" cy="50" r="48" fill="#0c0e19" stroke="url(#bordo)" stroke-width="2"/>
+  <g stroke="#2d3150" stroke-width="2.4" stroke-linecap="round">
+    <path d="M50 5v6M50 89v6M5 50h6M89 50h6"/>
+    <path d="M18.2 18.2l4.2 4.2M77.6 77.6l4.2 4.2M18.2 81.8l4.2-4.2M77.6 22.4l4.2-4.2"/>
+    <path d="M32.8 8.5l2.3 5.5M64.9 86l2.3 5.5M8.5 67.2l5.5-2.3M86 35.1l5.5-2.3"/>
+    <path d="M67.2 8.5l-2.3 5.5M35.1 86l-2.3 5.5M8.5 32.8l5.5 2.3M86 64.9l5.5 2.3"/>
+  </g>
+  <!-- cappello -->
+  <circle cx="50" cy="50" r="36" fill="url(#cappa)" stroke="#05060c" stroke-width="2"/>
+  <ellipse cx="41" cy="36" rx="15" ry="8" fill="#ffffff" opacity=".08"/>
+  <!-- il segno, con l'alone -->
+  <path d="M50 10 L50 40" stroke="#fff0a0" stroke-width="9" stroke-linecap="round"
+        opacity=".55" filter="url(#alone)"/>
+  <path d="M50 10 L50 40" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round"/>
+</svg>

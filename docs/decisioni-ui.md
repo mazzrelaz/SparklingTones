@@ -1344,3 +1344,13 @@ Comp ha la levetta Pad disegnata giù (0 dB, `su: 0`); resta da verificare a ore
 -15 dB. Le manopole del Booster ora verdi, del Rocker V azzurre. Poco dopo anche **Black Op** e
 **SAB Driver**; nel SAB la levetta HP/LP è disegnata giù (LP, `su: 0`), e resta da verificare a
 orecchio quale valore sia HP.
+
+**Provato e scartato, stessa sera**: un colore solo per tutta la catena (il blu dei delay, per
+alone, nome della famiglia e spia): all'utente non è piaciuto, si è tornati ai colori per famiglia.
+È rimasto invece l'alone più piccolo del tassello scelto (`0 0 6px -1px`, `0 0 12px -4px`): quello
+di prima usciva dagli 8–9 px attorno alla striscia, che scorre e quindi lo tagliava di netto. Il
+numero dei bpm e la scritta OFFLINE sono passati dall'oro al blu (`--blu`).
+
+**Pubblicato il 16 ottobre 2026 (sera)**, col sì dell'utente: il ramo `bozza-editor-grafico` è in
+`main`, guscio `v109`. La guida resta quella dell'editor vecchio finché l'utente non ha provato
+tutto per un po' (sua scelta).

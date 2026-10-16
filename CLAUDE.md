@@ -333,35 +333,26 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 
 ## Dove si riprende — 16 ottobre 2026
 
-**In corso: l'editor con le immagini dei blocchi** — bozza sul ramo `bozza-editor-grafico`
-(**pushato, non in `main`**), **impaginazione approvata**. **Non si pubblica finché non ci sono
-tutte le immagini** (scelta dell'utente). Il worktree stava nello scratchpad di una sessione: se in
-una sessione nuova non c'è, `git worktree add <scratchpad>/bozza-editor bozza-editor-grafico`, e
-la voce `spark-bozza` di `.claude/launch.json` (non committata) va puntata lì. L'utente le genera con
-**`tools/genera-immagini.html`** (16 ottobre: API OpenAI, `gpt-image-2.5-flare`, qualità bassa, ~0,6
-centesimi l'una; originale + logo + la sua richiesta di Gemini; la chiave sta solo nel suo browser). Le immagini arrivano
-**senza manopole**, col puntino bianco al centro e lo sfondo nero: sfondo (`tools/togli-sfondo/`;
-se lo sfondo è blu scuro, `&pieno=62&alto=120&basso=60`; grigio scuro, `&pieno=45&alto=100&basso=45`), manopole e misure le faccio io.
-**Fatte 89, tutte** (16 ottobre): Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate, LA Comp, Red Comp, Bass
-Comp, Optical Comp, Legendary Wah, Auto Wah, Clone Drive, Over Drive, J.H. Axle Fuzz, J.H. Super Fuzz, J.H. Octave Fuzz, J.H. Fuzz Zone, Booster, Fuzz Face, Black Op, Bass Muff, Guitar Muff, Bassmaster, SAB Driver, AD Clean, Match DC, ODS 50, American Deluxe, J.H. Bass Master, J.H. 45/100, Two Stone SP50, Checkmate, AC Boost, Tweed Bass, Blues Boy, J.H. Sun 100S, J.H. D-Show Master, Plexiglas, JM45, Lux Verb, J.H. Super 100, J.H. Tone City 100, RB 101, British 30, American High Gain, SLO 100, YJM100, Treadplate, Insane, Insane 6508, SwitchAxe, Rocker V, BE 101, Pure Acoustic, Fishboy, Jumbo, Flat Acoustic, RB-800, Sunny 3000, W600, Hammer 500, Guitar EQ e Bass EQ (coi `cursori`, voce nuova), Chorus, Cloner Chorus, Flanger, J.H. Legendary Vibe, Classic Vibe, Phaser, Tremolator, Tremolo, Tremolo Square, UniVibe, Vibrato (la modulazione è completa), Echo Filt (il «Delay/Echo»), Digital Delay e Multi Head (le tacche del Mode solo disegno), Echo Tape, Reverse Delay (spia viola: `led.colore`), Vintage Delay (i delay sono completi); il Blackface Duo rifatto; e i nove riverberi, **un'immagine per tipo** (scelta dell'utente): voce
-`'bias.reverb:Hall Natural'`, file `Reverb-HallNatural.webp`; Plate Rich, Hall Medium e Plate Long stanno
-sulle immagini «Classic Plate», «Holy Grail» e «Reflection» (abbinamento dell'utente). **Rifatti dall'utente** (stessa sera, sostituiscono i vecchi): Red Comp,
-Sustainer, Tube Drive, Optical Comp (levetta Pad ora disegnata giù), Booster, Rocker V, Jumbo, BE 101, Black Op, SAB Driver (levetta HP/LP ora disegnata giù). **Restano prima di
-pubblicare**: la guida, il Silver 120 forse da rifare nello stile nuovo, le levette da verificare a
-orecchio, e il sì dell'utente (è grafica). Gli ampli Hendrix arrivano senza nome scritto: si
-chiede quale sia. Una voce si copia dalla precedente (stesso schema: 5 manopole, `led`, levetta). Centri e raggi:
-`tools/togli-sfondo/misura.ps1 -Immagine <originale> [-Profili 'x,y,lung;…']` (puntini bianchi, spia
-rossa, anelli delle scale), poi `esegui.ps1` e le misure spostate del taglio e per la scala. **Da verificare a orecchio**: quale posizione della
-levetta sia Limit (LA Comp), -15 dB (Optical Comp), HP (SAB Driver) e Chorus (UniVibe); nel wah, 1/2 = 0,5 e il tempo lineare.
-**Il wah** (16 ottobre): parametri misurati (`docs/protocollo-spark2.md`, ultima sezione), pannello
-Auto, barra che si muove. **«Pacchetto Jimi Hendrix: sì/no»** in Impostazioni (`haHendrix()`): col
-no spariscono effetti e preset Hendrix e il wah è l'Auto Wah gratuito. **Gli otto slot
-dell'ampli e i banchi live** mostrano comunque i loro preset: va bene così (l'utente, 16 ottobre). Dal telefono si guarda in rete di casa (`node
-tools/server-rete.js <bozza> 8096` → `http://192.168.0.223:8096`). Tutto in
-`docs/decisioni-ui.md`, ultima sezione.
+**Pubblicato il 16 ottobre 2026 (sera): l'editor con le immagini dei blocchi** (ramo
+`bozza-editor-grafico` unito in `main`, guscio `v109`). Ogni modello ha la sua immagine (89, in
+`immagini/blocchi/`; tabella e misure in `src/spark-immagini.js`; i riverberi una per tipo, voce
+`'bias.reverb:<tipo>'`); le manopole si girano sull'immagine, il modello si sceglie col doppio tocco
+sul tassello; «Pacchetto Jimi Hendrix: sì/no» in Impostazioni (`haHendrix()`). **L'utente lo prova
+per un po': la guida non si tocca finché non lo dice lui** (è rimasta all'editor vecchio). **Da
+verificare a orecchio**: quale posizione della levetta sia Limit (LA Comp), -15 dB (Optical Comp), HP
+(SAB Driver) e Chorus (UniVibe); nel wah, 1/2 = 0,5 e il tempo lineare. Il Silver 120 forse da rifare
+nello stile nuovo. **Un'immagine nuova o rifatta** arriva senza manopole, col puntino bianco al centro
+e lo sfondo nero: `tools/togli-sfondo/misura.ps1` (centri, spia, anelli) ed `esegui.ps1` (sfondo, 900
+px, WebP), misure spostate del taglio e per la scala, cerchi controllati sull'originale, voce in
+`TABELLA`, prova nell'editor. Le genera l'utente con `tools/genera-immagini.html` (API OpenAI; una
+copia generica sta sul suo Desktop, «Genera immagini.html»). Copia delle finite in `Progetti
+Claude\Spark immagini finite` (fuori dal repository, non si aggiorna da sola). **Provato e
+scartato**: un colore solo per la catena (restano i colori per famiglia, con l'alone più piccolo del
+tassello scelto). Tempo e OFFLINE in blu. Il worktree della bozza non serve più. Dettaglio in
+`docs/decisioni-ui.md`, ultime sezioni; la versione lunga di questo paragrafo in `docs/diario.md`.
 
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
-14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v108`. **`guida.en.html`** è
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v109` (16 ottobre, sera). **`guida.en.html`** è
 rimasta alle schermate vecchie.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale

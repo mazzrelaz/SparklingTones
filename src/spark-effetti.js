@@ -99,7 +99,9 @@ window.SparkEffetti = (function () {
     // `eHendrix`), **di proposito**: la variante Hendrix di questo blocco vuole
     // ancora lo sblocco, quindi l'avviso ogni tanto parla a vuoto ma non tace
     // mai quando servirebbe. Fra i due errori possibili, quello giusto è questo.
-    'JH.Vox846': { nome: 'J.H. Legendary Wah', manopole: ['P1', 'Mode', 'P3', 'P4', 'P5'] },
+    // Nomi misurati il 16 ottobre 2026 (docs/protocollo-spark2.md): il «Mode» di
+    // Soundshed era l'interruttore BPM, la modalità è il parametro 0.
+    'JH.Vox846': { nome: 'J.H. Legendary Wah', manopole: ['Modalità', 'BPM', 'Tempo', 'Nota', 'Sensitivity'] },
 
     /* ---- Drive ---- */
     'Booster': { nome: 'Booster', manopole: ['Gain'] },
@@ -584,6 +586,23 @@ window.SparkEffetti = (function () {
   }
 
   /**
+   * **L'«Auto Wah» gratuito è il Legendary Wah in Auto Detect** (misurato il 16
+   * ottobre 2026: stesso `JH.Vox846`, stessi sei numeri, il parametro 0 a 1).
+   * Non vuole lo sblocco Hendrix, quindi per chi non ha il pacchetto resta.
+   */
+  function eAutoWahLibero(effetto) {
+    if (!effetto || effetto.name !== 'JH.Vox846') return false;
+    const modo = (effetto.params || []).find(p => p.index === 0);
+    return !!modo && modo.value >= 0.9;
+  }
+
+  /** Un effetto che suona solo col pacchetto Hendrix sbloccato. */
+  const vuoleHendrix = effetto => !!effetto && eHendrix(effetto.name) && !eAutoWahLibero(effetto);
+
+  /** Un preset con almeno un effetto che vuole il pacchetto Hendrix. */
+  const presetConHendrix = effetti => (effetti || []).some(vuoleHendrix);
+
+  /**
    * **I modelli dello Spark LIVE** (e dell'EDGE): quelli del canale del
    * microfono, che sullo Spark 2 e sul NEO non esistono. Arrivano col backup
    * dell'app ufficiale, che porta tutta la libreria del cloud e non solo quella
@@ -605,5 +624,6 @@ window.SparkEffetti = (function () {
   return { TABELLA, MODELLI, AMPLI, GRUPPI_AMPLI, nome, manopola, extra, nomeExtra,
            affidabile, ampliReale, ampliGruppo, aCursori, quanteManopole,
            quantiConosciuti, posizioni, nomiPosizioni, valorePosizione, posizioneDi, interruttore,
-           eHendrix, hendrixNellaCatena, GRUPPO_HENDRIX, eLive, liveNellaCatena };
+           eHendrix, hendrixNellaCatena, GRUPPO_HENDRIX, eLive, liveNellaCatena,
+           eAutoWahLibero, vuoleHendrix, presetConHendrix };
 })();

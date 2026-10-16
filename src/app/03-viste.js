@@ -146,5 +146,4 @@ document.addEventListener('keydown', evento => {
 
 collegaMenu('tabAltro', 'menuAltro');
 collegaMenu('status', 'foglioAmpli', { puoAprire: () => spark.connected });
-collegaMenu('btnMenuEditor', 'menuEditor');
 

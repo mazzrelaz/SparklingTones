@@ -49,6 +49,24 @@ for (const tasto of document.querySelectorAll('#sceltaSfondo [data-sfondo]')) {
 }
 scegliSfondo(document.documentElement.classList.contains('grigio') ? 'grigio' : 'nero');
 
+// Il pacchetto Hendrix, sì o no (16 ottobre 2026; vedi `haHendrix`). Cambia
+// subito quello che si vede: la libreria, il live e l'editor se è aperto.
+function segnaHendrix() {
+  for (const tasto of document.querySelectorAll('#sceltaHendrix [data-hendrix]')) {
+    tasto.classList.toggle('primary', (tasto.dataset.hendrix === 'si') === haHendrix());
+  }
+}
+for (const tasto of document.querySelectorAll('#sceltaHendrix [data-hendrix]')) {
+  tasto.addEventListener('click', () => {
+    try { localStorage.setItem('hendrix', tasto.dataset.hendrix); } catch (e) { /* resta com'era */ }
+    segnaHendrix();
+    disegnaPreset();
+    disegnaLive();
+    if (inModifica) disegnaCatena();
+  });
+}
+segnaHendrix();
+
 // La goliardata, fra una canzone e l'altra. Si apre **sopra** «Altro» invece
 // che al posto suo — `apriPannello` chiuderebbe tutto — così «Fatto» riporta
 // dov'era. Il gioco non tocca niente: né la radio, né la libreria.
