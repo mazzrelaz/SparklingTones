@@ -351,6 +351,21 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // AC Boost (il nome del modello ha davvero lo spazio): la manopola copre il
+    // disco rosso dentro le tacche. Pulsante: la levetta Power.
+    'AC Boost': {
+      src: 'immagini/blocchi/ACBoost.webp', w: 900, h: 856,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 207.2, y: 333.9, r: 33.5 },   // Gain
+        { indice: 3, x: 327.2, y: 333.9, r: 33.5 },   // Bass
+        { indice: 2, x: 449.4, y: 333.9, r: 33.5 },   // Middle
+        { indice: 1, x: 570.7, y: 333.9, r: 33.5 },   // Treble
+        { indice: 4, x: 689.9, y: 333.9, r: 33.5 },   // Master (Volume)
+      ],
+      led: { x: 103, y: 299, r: 9.3 },
+      pulsante: { x: 102, y: 358, r: 17.1 },
+    },
     // Checkmate: attorno ai puntini solo la corona di tacche; la manopola ci sta
     // dentro. Pulsante: la levetta ON/OFF.
     Checkmate: {
