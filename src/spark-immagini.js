@@ -504,6 +504,22 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // RB 101 (Bogner): pannello argento; la manopola copre quella nera
+    // disegnata. Gain, Middle e Volume più grandi di Bass e Treble, com'è
+    // disegnato. Pulsante: la levetta ON/OFF.
+    Bogner: {
+      src: 'immagini/blocchi/Bogner.webp', w: 900, h: 846,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 206.5, y: 332.1, r: 37.1 },   // Gain
+        { indice: 3, x: 325.9, y: 332.1, r: 31.4 },   // Bass
+        { indice: 2, x: 446.6, y: 332.1, r: 37.1 },   // Middle
+        { indice: 1, x: 569.1, y: 332.1, r: 31.4 },   // Treble
+        { indice: 4, x: 687.9, y: 332.1, r: 37.1 },   // Master (Volume)
+      ],
+      led: { x: 101.2, y: 297.6, r: 9.3 },
+      pulsante: { x: 101.2, y: 358.4, r: 17.1 },
+    },
     // J.H. Tone City 100 (Sound City One Hundred): pannello dorato; la manopola
     // sta dentro il cerchio tratteggiato. Pulsante: la levetta Power.
     'JH.SoundCity100': {
