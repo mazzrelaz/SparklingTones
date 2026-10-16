@@ -45,6 +45,24 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Echo Tape (modello «DelayRe201»): Sustain e Short → Long grandi in alto,
+    // Volume e Tone in mezzo, dentro gli archi. Il BPM (parametro 4) è la
+    // levetta sotto la spia, disegnata giù.
+    DelayRe201: {
+      src: 'immagini/blocchi/DelayRe201.webp', w: 900, h: 885,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 201.4, y: 150.6, r: 69.3 },   // Sustain
+        { indice: 3, x: 700.6, y: 150.5, r: 69.3 },   // Short -> Long
+        { indice: 1, x: 334.3, y: 335.5, r: 61.9 },   // Volume
+        { indice: 2, x: 566.5, y: 335.5, r: 61.9 },   // Tone
+      ],
+      levette: [
+        { indice: 4, x: 448.9, y: 207.1, r: 20.6, su: 0 },   // BPM: disegnata giù
+      ],
+      led: { x: 448.5, y: 101, r: 16.2 },
+      pulsante: { x: 448.9, y: 771.7, r: 46.4 },
+    },
     // Multi Head (modello «DelayMultiHead»): Repeat Rate e Mode Selector
     // grandi in alto, Intensity ed Echo Vol sui due dischi scuri in mezzo
     // (la manopola li copre). I numeri 1–4 del Mode sono solo disegno: il
