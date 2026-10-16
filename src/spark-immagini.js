@@ -246,6 +246,20 @@
       led: { x: 449.2, y: 100.2, r: 19.1 },
       pulsante: { x: 450, y: 1120.2, r: 51.6 },
     },
+    // Bass Muff. Lo sfondo dell'originale è grigio scuro, non nero: si è tolto
+    // con `&pieno=45&alto=100&basso=45`. La manopola copre il cerchio interno e
+    // lascia quello esterno; il footswitch è il cerchio col puntino in basso.
+    BassBigMuff: {
+      src: 'immagini/blocchi/BassBigMuff.webp', w: 900, h: 1350,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 2, x: 228,   y: 215.1, r: 112.4 },  // Sustain
+        { indice: 0, x: 671.8, y: 215.1, r: 112.4 },  // Volume
+        { indice: 1, x: 448.9, y: 432.5, r: 93.9 },   // Tone
+      ],
+      led: { x: 449.4, y: 100.7, r: 21.3 },
+      pulsante: { x: 449.5, y: 1115.3, r: 67.6 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
