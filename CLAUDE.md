@@ -342,8 +342,8 @@ la voce `spark-bozza` di `.claude/launch.json` (non committata) va puntata lì. 
 centesimi l'una; originale + logo + la sua richiesta di Gemini; la chiave sta solo nel suo browser). Le immagini arrivano
 **senza manopole**, col puntino bianco al centro e lo sfondo nero: sfondo (`tools/togli-sfondo/`;
 se lo sfondo è blu scuro, `&pieno=62&alto=120&basso=60`; grigio scuro, `&pieno=45&alto=100&basso=45`), manopole e misure le faccio io.
-**Fatte 31**: Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate, LA Comp, Red Comp, Bass
-Comp, Optical Comp, Legendary Wah, Auto Wah, Clone Drive, Over Drive, J.H. Axle Fuzz, J.H. Super Fuzz, J.H. Octave Fuzz, J.H. Fuzz Zone, Booster, Fuzz Face, Black Op, Bass Muff, Guitar Muff, Bassmaster, SAB Driver, AD Clean, Match DC, ODS 50, American Deluxe, J.H. Bass Master, J.H. 45/100, Two Stone SP50; il Blackface Duo rifatto. Centri e raggi:
+**Fatte 32**: Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate, LA Comp, Red Comp, Bass
+Comp, Optical Comp, Legendary Wah, Auto Wah, Clone Drive, Over Drive, J.H. Axle Fuzz, J.H. Super Fuzz, J.H. Octave Fuzz, J.H. Fuzz Zone, Booster, Fuzz Face, Black Op, Bass Muff, Guitar Muff, Bassmaster, SAB Driver, AD Clean, Match DC, ODS 50, American Deluxe, J.H. Bass Master, J.H. 45/100, Two Stone SP50, Checkmate; il Blackface Duo rifatto. Centri e raggi:
 `tools/togli-sfondo/misura.ps1 -Immagine <originale> [-Profili 'x,y,lung;…']` (puntini bianchi, spia
 rossa, anelli delle scale), poi `esegui.ps1` e le misure spostate del taglio e per la scala. **Da verificare a orecchio**: quale posizione della
 levetta sia Limit (LA Comp), -15 dB (Optical Comp) e HP (SAB Driver); nel wah, 1/2 = 0,5 e il tempo lineare.
