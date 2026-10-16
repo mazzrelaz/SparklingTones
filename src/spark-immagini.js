@@ -45,6 +45,23 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Tremolator: Depth e Speed dentro l'arco; il BPM (parametro 2, un
+    // interruttore) è la levetta in mezzo, in alto ON e in basso OFF. Qui la
+    // levetta è disegnata giù (OFF): `su: 0` vuol dire che col valore 0 si
+    // mostra com'è disegnata, e con 1 si capovolge e punta a ON.
+    Tremolator: {
+      src: 'immagini/blocchi/Tremolator.webp', w: 900, h: 1365,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 246.6, y: 269.3, r: 91.9 },   // Depth
+        { indice: 1, x: 652.9, y: 269.3, r: 91.9 },   // Speed
+      ],
+      levette: [
+        { indice: 2, x: 449.5, y: 432.1, r: 38.6, su: 0 },   // BPM: disegnata OFF (giù)
+      ],
+      led: { x: 446.6, y: 111.7, r: 19.3 },
+      pulsante: { x: 452.3, y: 1118.8, r: 52.4 },
+    },
     // Phaser: Intensity a sinistra e Speed a destra, arancioni e grandi dentro
     // l'arco interno.
     Phaser: {
