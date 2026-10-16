@@ -682,11 +682,33 @@
                     box-shadow:0 0 8px -3px rgba(123,92,255,.6); }
   body.pad-g .pad .nome { color:#eef0f3; font-size:1.08rem; text-shadow:0 0 6px rgba(160,140,255,.35); }
   body.pad-g .pad.libero { background:none; border:1px dashed #3a3550; }
+  /* Senza LED (l'utente non li vuole): il preset che suona lo dice il
+     bagliore, che pulsa piano, ai bordi e dietro il nome, nei colori della
+     sfumatura del bordo. */
+  body.pad-g .pad .ledpad { display:none; }
+  body.pad-g .pad .nome { position:relative; z-index:1; }
   body.pad-g .pad.attivo { background:linear-gradient(#0a0912, #050608) padding-box,
                                       linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
-                           box-shadow:inset 0 0 22px -8px rgba(123,92,255,.7),
-                                      0 0 12px -1px rgba(123,92,255,.9), 0 0 30px -8px rgba(43,228,255,.6); }
-  body.pad-g .pad.attivo .nome { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(123,92,255,.8); }
+                           animation:pulsaG 2.4s ease-in-out infinite; }
+  body.pad-g .pad.attivo::after { content:''; position:absolute; left:10%; right:10%; top:28%; bottom:28%;
+                                  border-radius:50%; pointer-events:none; filter:blur(10px);
+                                  background:radial-gradient(ellipse at center, rgba(255,43,214,.55),
+                                             rgba(123,92,255,.35) 45%, rgba(43,228,255,0) 75%);
+                                  animation:pulsaGLuce 2.4s ease-in-out infinite; }
+  body.pad-g .pad.attivo .nome { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(255,43,214,.7); }
+  @keyframes pulsaG {
+    0%, 100% { box-shadow:inset 0 0 22px -8px rgba(123,92,255,.6),
+                          0 0 10px -2px rgba(123,92,255,.8), 0 0 26px -8px rgba(43,228,255,.5); }
+    50%      { box-shadow:inset 0 0 30px -6px rgba(255,43,214,.55),
+                          0 0 16px 0 rgba(255,43,214,.75), 0 0 36px -4px rgba(43,228,255,.75); }
+  }
+  @keyframes pulsaGLuce {
+    0%, 100% { opacity:.5; transform:scale(.9); }
+    50%      { opacity:1; transform:scale(1.06); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body.pad-g .pad.attivo, body.pad-g .pad.attivo::after { animation:none; }
+  }
 
   /* H · Vetro: niente piste, un vetro scuro con un riflesso in alto e righe
      di scansione finissime; bordo grigio con un filo di luce bianca. Acceso:
