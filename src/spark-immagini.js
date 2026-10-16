@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Insane 6508 (Peavey 6505+): pannello nero; la manopola sta dentro la
+    // scala. Pulsante: la levetta ON/OFF.
+    '6505Plus': {
+      src: 'immagini/blocchi/6505Plus.webp', w: 900, h: 865,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 205.5, y: 338.4, r: 32.9 },   // Gain
+        { indice: 3, x: 325.4, y: 338.4, r: 32.9 },   // Bass
+        { indice: 2, x: 448.3, y: 338.4, r: 32.9 },   // Middle
+        { indice: 1, x: 571.2, y: 338.4, r: 32.9 },   // Treble
+        { indice: 4, x: 691.7, y: 338.4, r: 32.9 },   // Master (Volume)
+      ],
+      led: { x: 101.9, y: 302.3, r: 9.3 },
+      pulsante: { x: 100.2, y: 364.9, r: 17.2 },
+    },
     // Insane (EVH): pannello argento; la manopola copre quella argentata
     // disegnata e lascia il cerchio nero con le tacche. Pulsante: la levetta.
     EVH: {
