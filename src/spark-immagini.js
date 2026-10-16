@@ -198,6 +198,18 @@
       led: { x: 445.8, y: 180.5, r: 18.5 },
       pulsante: { x: 447.1, y: 1203.1, r: 81 },
     },
+    // J.H. Fuzz Zone: Volume azzurro, Attack rosa (manopola-rosa.svg), dentro
+    // l'arco della scala. La spia è il cerchio più interno dei tre rossi.
+    'JH.FuzzTone': {
+      src: 'immagini/blocchi/JH.FuzzTone.webp', w: 900, h: 1434,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 231.7, y: 414,   r: 98 },     // Volume
+        { indice: 1, x: 665.5, y: 414.1, r: 98, manopola: manopola('rosa') },   // Attack
+      ],
+      led: { x: 449.4, y: 177.3, r: 31.7 },
+      pulsante: { x: 450, y: 1104.1, r: 132.6 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
