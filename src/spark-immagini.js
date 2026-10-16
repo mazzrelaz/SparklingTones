@@ -45,6 +45,18 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Tremolo: Speed e Depth in alto, Level in mezzo, gialle dentro l'anello.
+    Tremolo: {
+      src: 'immagini/blocchi/Tremolo.webp', w: 900, h: 1312,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 237.6, y: 219.9, r: 61.6 },   // Speed
+        { indice: 1, x: 660.2, y: 220,   r: 61.6 },   // Depth
+        { indice: 2, x: 448.9, y: 429.8, r: 56 },     // Level
+      ],
+      led: { x: 448.7, y: 109.2, r: 18.7 },
+      pulsante: { x: 448.6, y: 1089.3, r: 48.5 },
+    },
     // Tremolator: Depth e Speed dentro l'arco; il BPM (parametro 2, un
     // interruttore) è la levetta in mezzo, in alto ON e in basso OFF. Qui la
     // levetta è disegnata giù (OFF): `su: 0` vuol dire che col valore 0 si
