@@ -45,6 +45,25 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Multi Head (modello «DelayMultiHead»): Repeat Rate e Mode Selector
+    // grandi in alto, Intensity ed Echo Vol sui due dischi scuri in mezzo
+    // (la manopola li copre). I numeri 1–4 del Mode sono solo disegno: il
+    // parametro è continuo. Il BPM (parametro 4) è la levetta, disegnata giù.
+    DelayMultiHead: {
+      src: 'immagini/blocchi/DelayMultiHead.webp', w: 900, h: 879,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 201.8, y: 152.2, r: 77.9 },   // Repeat Rate
+        { indice: 3, x: 696.9, y: 152.2, r: 77.9 },   // Mode Selector
+        { indice: 1, x: 346.1, y: 338.1, r: 63.2 },   // Intensity
+        { indice: 2, x: 553.3, y: 338.1, r: 63.2 },   // Echo Vol
+      ],
+      levette: [
+        { indice: 4, x: 450, y: 205.7, r: 22, su: 0 },   // BPM: disegnata giù
+      ],
+      led: { x: 449.3, y: 103.6, r: 16.2 },
+      pulsante: { x: 449.6, y: 764.8, r: 47 },
+    },
     // Digital Delay (modello «DelayMono»): E.Level e Mode grandi in alto,
     // F.Back e D.Time in mezzo. Le quattro tacche del Mode (50 ms … 1 s) sono
     // solo disegno: nell'ampli il parametro è continuo e la manopola gira
