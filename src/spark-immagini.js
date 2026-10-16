@@ -260,6 +260,19 @@
       led: { x: 449.4, y: 100.7, r: 21.3 },
       pulsante: { x: 449.5, y: 1115.3, r: 67.6 },
     },
+    // Guitar Muff: la manopola rosa copre l'anello interno e lascia quello
+    // viola con la scala 0–10.
+    GuitarMuff: {
+      src: 'immagini/blocchi/GuitarMuff.webp', w: 900, h: 1372,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 230.8, y: 232.6, r: 112.1 },  // Volume
+        { indice: 2, x: 667.4, y: 232.6, r: 112.1 },  // Sustain
+        { indice: 1, x: 447.4, y: 449.6, r: 93.2 },   // Tone
+      ],
+      led: { x: 449.2, y: 117.4, r: 20.5 },
+      pulsante: { x: 449.2, y: 1123.9, r: 56.8 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
