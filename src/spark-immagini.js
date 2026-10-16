@@ -173,6 +173,19 @@
       led: { x: 440.3, y: 129.2, r: 17 },
       pulsante: { x: 441, y: 589, r: 60 },
     },
+    // J.H. Super Fuzz. Qui le manopole disegnate sono cerchi neri col segno
+    // bianco, non puntini: i centri vengono dall'anello rosso attorno (raggio
+    // ~92), e la nostra manopola copre il segno.
+    'JH.SupaFuzz': {
+      src: 'immagini/blocchi/JH.SupaFuzz.webp', w: 702, h: 1341,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 181, y: 229.5, r: 88 },       // Volume
+        { indice: 1, x: 520, y: 229,   r: 88 },       // Filter
+      ],
+      led: { x: 350.7, y: 115.8, r: 16 },
+      pulsante: { x: 351, y: 943, r: 48 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
