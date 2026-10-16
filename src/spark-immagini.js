@@ -45,6 +45,25 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Digital Delay (modello «DelayMono»): E.Level e Mode grandi in alto,
+    // F.Back e D.Time in mezzo. Le quattro tacche del Mode (50 ms … 1 s) sono
+    // solo disegno: nell'ampli il parametro è continuo e la manopola gira
+    // liscia. Il BPM (parametro 4) è la levetta sotto la spia, disegnata giù.
+    DelayMono: {
+      src: 'immagini/blocchi/DelayMono.webp', w: 900, h: 887,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 195,   y: 162.6, r: 77.4 },   // E.Level
+        { indice: 3, x: 698.7, y: 162.6, r: 77.4 },   // Mode
+        { indice: 1, x: 344.8, y: 344.2, r: 57.5 },   // F.Back
+        { indice: 2, x: 553.7, y: 344.2, r: 57.5 },   // D.Time
+      ],
+      levette: [
+        { indice: 4, x: 448.2, y: 209.3, r: 19.9, su: 0 },   // BPM: disegnata giù
+      ],
+      led: { x: 448.2, y: 104.7, r: 19.2 },
+      pulsante: { x: 447.4, y: 785.8, r: 47.2 },
+    },
     // Echo Filt (modello «DelayEchoFilt», sull'immagine «Delay/Echo»): Delay e
     // Tone grandi in alto, Feedback e Level in mezzo; il BPM (parametro 4, un
     // interruttore) è la levetta sotto la spia, vista dall'alto: si prende per
