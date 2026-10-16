@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // BE 101 (Friedman BE-100): pannello arancione; la manopola sta dentro la
+    // scala tratteggiata. Pulsante: la levetta ON/OFF.
+    BE101: {
+      src: 'immagini/blocchi/BE101.webp', w: 900, h: 879,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 192.3, y: 338.8, r: 30.1 },   // Gain
+        { indice: 3, x: 317.2, y: 338.8, r: 30.1 },   // Bass
+        { indice: 2, x: 443.5, y: 338.8, r: 30.1 },   // Middle
+        { indice: 1, x: 570.6, y: 338.8, r: 30.1 },   // Treble
+        { indice: 4, x: 694,   y: 338.8, r: 30.1 },   // Master (Volume)
+      ],
+      led: { x: 86.3, y: 305.8, r: 9.3 },
+      pulsante: { x: 86.1, y: 367.5, r: 17.2 },
+    },
     // Rocker V (modello «Invader»): pannello nero e arancione; attorno ai
     // puntini solo la corona di tacche bianche. Pulsante: la levetta Power.
     Invader: {
