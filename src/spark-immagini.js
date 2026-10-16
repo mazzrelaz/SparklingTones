@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Pure Acoustic (modello «Acoustic»): tutto verde; la manopola sta dentro
+    // la corona di puntini. Pulsante: la levetta (qui OFF in alto, ON in basso).
+    Acoustic: {
+      src: 'immagini/blocchi/Acoustic.webp', w: 900, h: 876,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 205.2, y: 339.8, r: 33.4 },   // Gain
+        { indice: 3, x: 326.9, y: 339.8, r: 33.4 },   // Bass
+        { indice: 2, x: 449.6, y: 339.8, r: 33.4 },   // Middle
+        { indice: 1, x: 571.7, y: 339.8, r: 33.4 },   // Treble
+        { indice: 4, x: 692.6, y: 339.8, r: 33.4 },   // Master (Volume)
+      ],
+      led: { x: 101.2, y: 307.1, r: 9.4 },
+      pulsante: { x: 100.8, y: 366.2, r: 17.4 },
+    },
     // BE 101 (Friedman BE-100): pannello arancione; la manopola sta dentro la
     // scala tratteggiata. Pulsante: la levetta ON/OFF.
     BE101: {
