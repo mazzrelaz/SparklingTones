@@ -11,8 +11,8 @@
    ==================================================================== */
 
 // Nella vista preset il log tiene le ultime righe: i messaggi del trasporto
-// sono spesso la parte diagnostica più utile. Nella live è una riga sola:
-// lì si suona, non si legge.
+// sono spesso la parte diagnostica più utile. Nella live niente: lì si suona,
+// non si legge (la riga sotto i pulsantoni l'ha tolta l'utente, 16 ottobre 2026).
 const righeLog = [];
 let logProvvisorio = false;
 
@@ -29,7 +29,6 @@ function logLine(msg, risposta) {
   righeLog.push(msg);
   if (righeLog.length > 8) righeLog.shift();
   $('log').textContent = righeLog.join('\n');
-  $('logLive').textContent = msg;
   statoDelPannello(msg, risposta);
 }
 
@@ -39,7 +38,6 @@ function logProgress(msg) {
   righeLog.push(msg);
   logProvvisorio = true;
   $('log').textContent = righeLog.join('\n');
-  $('logLive').textContent = msg;
   statoDelPannello(msg);
 }
 
