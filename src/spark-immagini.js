@@ -125,6 +125,51 @@
       led: { x: 450.7, y: 116.7, r: 14.6 },
       pulsante: { x: 450.7, y: 776.7, r: 45.2 },
     },
+    // Riverbero, tipo Plate Rich: sull'immagine «Classic Plate» (abbinamento dell'utente); azzurro e magenta.
+    'bias.reverb:Plate Rich': {
+      src: 'immagini/blocchi/Reverb-PlateRich.webp', w: 900, h: 872,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 167.1, y: 145.7, r: 62.5 },   // Level
+        { indice: 1, x: 166.9, y: 387.1, r: 62.5 },   // Damping
+        { indice: 2, x: 343, y: 283.2, r: 62.5 },   // Low Cut
+        { indice: 3, x: 556, y: 283.5, r: 62.5 },   // High Cut
+        { indice: 4, x: 732.4, y: 387.6, r: 62.5 },   // Dwell
+        { indice: 5, x: 732.1, y: 145.8, r: 62.5 },   // Time
+      ],
+      led: { x: 450, y: 118.5, r: 15.3 },
+      pulsante: { x: 442.7, y: 785.1, r: 45.1 },
+    },
+    // Riverbero, tipo Hall Medium: sull'immagine «Holy Grail» (abbinamento dell'utente); viola e azzurro.
+    'bias.reverb:Hall Medium': {
+      src: 'immagini/blocchi/Reverb-HallMedium.webp', w: 900, h: 861,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 173.4, y: 136.7, r: 54 },   // Level
+        { indice: 1, x: 173.4, y: 378.8, r: 54 },   // Damping
+        { indice: 2, x: 345.2, y: 279.3, r: 54 },   // Low Cut
+        { indice: 3, x: 552.5, y: 279.3, r: 54 },   // High Cut
+        { indice: 4, x: 725, y: 378.8, r: 54 },   // Dwell
+        { indice: 5, x: 725, y: 136.8, r: 54 },   // Time
+      ],
+      led: { x: 450.4, y: 116.8, r: 14.6 },
+      pulsante: { x: 450.4, y: 776.6, r: 43.8 },
+    },
+    // Riverbero, tipo Plate Long: sull'immagine «Reflection» (abbinamento dell'utente); azzurro, la spia viola.
+    'bias.reverb:Plate Long': {
+      src: 'immagini/blocchi/Reverb-PlateLong.webp', w: 900, h: 904,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 172.3, y: 144.7, r: 67.9 },   // Level
+        { indice: 1, x: 172.4, y: 404.6, r: 67.9 },   // Damping
+        { indice: 2, x: 341.8, y: 293.4, r: 67.9 },   // Low Cut
+        { indice: 3, x: 557.3, y: 293.4, r: 67.9 },   // High Cut
+        { indice: 4, x: 727.5, y: 404.6, r: 67.9 },   // Dwell
+        { indice: 5, x: 727.5, y: 144.7, r: 67.9 },   // Time
+      ],
+      led: { x: 450, y: 119, r: 11.7, colore: 'viola' },
+      pulsante: { x: 450.4, y: 779.6, r: 48.2 },
+    },
     // Riverbero, tipo Room Studio A: sei manopole rosa dentro gli anelli —
     // Level e Damping a sinistra, Low Cut e High Cut in mezzo, Time e Dwell a
     // destra. La spia («CHECK») in alto.
