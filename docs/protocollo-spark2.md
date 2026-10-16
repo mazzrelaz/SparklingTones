@@ -564,3 +564,23 @@ L'utente ha uno Spark NEO (cuffie con l'ampli dentro). Misurato con `tools/neo-s
   contro 65–70: **~40 ms a pezzo + ~1 ms a byte**, quindi sotto il mezzo secondo non si scende
   (un preset è ~420 byte). L'utente: «molto meglio, anche se non siamo ai livelli dello
   Spark». Scelta la strada A: il pedale ridivide da sé sul NEO (firmware 1.4).
+
+## I parametri del Legendary Wah (`JH.Vox846`) — 16 ottobre 2026, misurati
+
+Il catalogo li chiamava «P1, Mode, P3, P4, P5»: nomi provvisori, e «Mode» era sbagliato.
+Misurati dall'utente: regolato il wah nell'app ufficiale, salvato negli slot A1–A4, letti
+dalla nostra app (Regola) e confrontati i valori (0–10 sullo schermo = 0–1 nel preset).
+
+| indice | cos'è | valori misurati |
+|---|---|---|
+| 0 | modalità (Auto Wah Mode) | prima forma d'onda 0, quinta 0,8, Auto Detect 1: sei posizioni a passi di 0,2, nell'ordine di lettura della griglia 2×3 dell'app ufficiale |
+| 1 | BPM Mode | 0 spento, 1 acceso |
+| 2 | tempo con BPM spento | 0 = 125 ms, 1 = 1000 ms |
+| 3 | nota con BPM acceso | 1/8 = 0, 1/4 = 0,25, 1 = 0,75 |
+| 4 | Sensitivity (solo in Auto Detect) | 0,8 con Sensitivity 8,0 |
+| 5 | sempre 0 | non toccato |
+
+**Dedotti, non misurati**: 1/2 = 0,5; il tempo lineare fra 125 e 1000 ms. Con BPM acceso l'app
+ufficiale scrive anche l'indice 2, ma i valori non tornano coi millisecondi della nota al bpm del
+preset: lì conta l'indice 3. **Dopo un aggiornamento di Positive Grid il wah non si muove più a
+mano**: solo auto, o con un pedale d'espressione esterno (l'utente, 16 ottobre 2026).
