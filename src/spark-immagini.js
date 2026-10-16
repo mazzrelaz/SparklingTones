@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Treadplate (Mesa Rectifier): pannello nero; la manopola sta dentro il
+    // cerchio bianco. Pulsante: la levetta ON/OFF.
+    Rectifier: {
+      src: 'immagini/blocchi/Rectifier.webp', w: 900, h: 897,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 200.1, y: 342.1, r: 31.2 },   // Gain
+        { indice: 3, x: 325.7, y: 342.1, r: 31.2 },   // Bass
+        { indice: 2, x: 449.6, y: 342.1, r: 31.2 },   // Middle
+        { indice: 1, x: 575.8, y: 342.1, r: 31.2 },   // Treble
+        { indice: 4, x: 700.1, y: 342.1, r: 31.2 },   // Master (Volume)
+      ],
+      led: { x: 95.4, y: 310.9, r: 9.6 },
+      pulsante: { x: 95, y: 367.3, r: 17.8 },
+    },
     // YJM100: pannello dorato; la manopola copre quella nera disegnata e lascia
     // le tacche. Gain, Middle e Volume un po' più grandi, com'è disegnato.
     // Pulsante: la levetta ON/OFF.
