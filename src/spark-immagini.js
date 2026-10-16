@@ -45,6 +45,24 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // UniVibe: Speed e Intensity grandi; il Chorus/Vibrato (parametro 1) è la
+    // levetta in mezzo, disegnata giù (VIBRATO): `su: 0`, a 1 si alza verso
+    // CHORUS. **Da verificare a orecchio** quale valore sia il chorus: si
+    // assume 1 = Chorus, come nel J.H. Legendary Vibe. Nell'ampli il
+    // parametro è continuo; la levetta manda solo 0 o 1.
+    UniVibe: {
+      src: 'immagini/blocchi/UniVibe.webp', w: 900, h: 1308,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 254.8, y: 255.2, r: 90.8 },   // Speed
+        { indice: 2, x: 644.7, y: 255.3, r: 90.8 },   // Intensity
+      ],
+      levette: [
+        { indice: 1, x: 450.5, y: 430.5, r: 34.5, su: 0 },   // Chorus (su) / Vibrato (giù, com'è disegnata)
+      ],
+      led: { x: 448.9, y: 109, r: 18.2 },
+      pulsante: { x: 449.5, y: 1088.9, r: 49.9 },
+    },
     // Tremolo Square: come il Tremolo, verde, dentro l'anello di tacche.
     TremoloSquare: {
       src: 'immagini/blocchi/TremoloSquare.webp', w: 900, h: 1336,
