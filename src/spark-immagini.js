@@ -45,6 +45,18 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Cloner Chorus: Rate grande dentro la scala. La Depth nel disegno è un
+    // pallino fra HIGH e LOW, ma nell'ampli è continua: una manopola piccola.
+    Cloner: {
+      src: 'immagini/blocchi/Cloner.webp', w: 898, h: 1463,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 448.7, y: 265.4, r: 110 },    // Rate
+        { indice: 1, x: 710,   y: 331.3, r: 36 },     // Depth
+      ],
+      led: { x: 182.1, y: 334.8, r: 17 },
+      pulsante: { x: 451, y: 1032, r: 55 },
+    },
     // Chorus (modello «ChorusAnalog»): la manopola copre quella nera disegnata
     // e lascia l'arco. Spia: il «Check»; footswitch in basso.
     ChorusAnalog: {
