@@ -686,19 +686,30 @@
   body.pad-g .pad.libero { background:none; border:2px dashed #4a4d55; }
   /* La sfumatura solo su quello che suona (l'utente): gli altri hanno il bordo
      grigio, con un filo di bagliore bianco. */
+  /* Profondità (l'utente): tasti in rilievo. Luce sul bordo alto, ombra in
+     basso dentro, sotto lo spessore del tasto (`0 5px 0`) e la sua ombra sul
+     fondo; toccato scende. Quello che suona è premuto: più basso, spessore 2. */
   body.pad-g .pad:not(.attivo):not(.libero) {
-       background:linear-gradient(#050608, #050608) padding-box,
+       background:linear-gradient(180deg, #12141a, #050608 62%) padding-box,
                   linear-gradient(#4a4d54, #4a4d54) border-box;
-       box-shadow:0 0 8px -3px rgba(255,255,255,.25); }
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.16), inset 0 -4px 8px rgba(0,0,0,.75),
+                  0 5px 0 #262930, 0 10px 14px -4px rgba(0,0,0,.95),
+                  0 0 8px -3px rgba(255,255,255,.25); }
+  body.pad-g .pad { transition:transform .08s ease, filter .2s ease; }
+  body.pad-g .pad:not(.attivo):not(.libero):active {
+       transform:translateY(3px);
+       box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 -2px 6px rgba(0,0,0,.75),
+                  0 2px 0 #262930, 0 4px 6px -2px rgba(0,0,0,.9); }
   /* Senza LED (l'utente non li vuole): il preset che suona lo dice il
      bagliore, che pulsa piano, ai bordi e dietro il nome, nei colori della
      sfumatura del bordo. */
   body.pad-g .pad .ledpad { display:none; }
   /* Quelli che non suonano un po' più scuri (l'utente): risalta quello acceso. */
-  body.pad-g .pad:not(.attivo) { filter:brightness(.62) saturate(.85); transition:filter .2s ease; }
+  body.pad-g .pad:not(.attivo) { filter:brightness(.62) saturate(.85); }
   body.pad-g .pad .nome { position:relative; z-index:1; }
-  body.pad-g .pad.attivo { background:linear-gradient(#0a0912, #050608) padding-box,
+  body.pad-g .pad.attivo { background:linear-gradient(180deg, #0a0912, #050608 70%) padding-box,
                                       linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
+                           transform:translateY(3px);
                            animation:pulsaG 2.4s ease-in-out infinite; }
   body.pad-g .pad.attivo::after { content:''; position:absolute; left:10%; right:10%; top:28%; bottom:28%;
                                   border-radius:50%; pointer-events:none; filter:blur(10px);
@@ -707,9 +718,11 @@
                                   animation:pulsaGLuce 2.4s ease-in-out infinite; }
   body.pad-g .pad.attivo .nome { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(255,43,214,.7); }
   @keyframes pulsaG {
-    0%, 100% { box-shadow:inset 0 0 22px -8px rgba(123,92,255,.6),
+    0%, 100% { box-shadow:inset 0 2px 6px rgba(0,0,0,.8), inset 0 0 22px -8px rgba(123,92,255,.6),
+                          0 2px 0 #262930,
                           0 0 10px -2px rgba(123,92,255,.8), 0 0 26px -8px rgba(43,228,255,.5); }
-    50%      { box-shadow:inset 0 0 30px -6px rgba(255,43,214,.55),
+    50%      { box-shadow:inset 0 2px 6px rgba(0,0,0,.8), inset 0 0 30px -6px rgba(255,43,214,.55),
+                          0 2px 0 #262930,
                           0 0 16px 0 rgba(255,43,214,.75), 0 0 36px -4px rgba(43,228,255,.75); }
   }
   @keyframes pulsaGLuce {
