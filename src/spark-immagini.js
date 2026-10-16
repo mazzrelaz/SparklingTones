@@ -233,6 +233,19 @@
       led: { x: 449.1, y: 121.7, r: 23.3 },
       pulsante: { x: 450, y: 1255.2, r: 68 },
     },
+    // Black Op: la manopola copre il cerchio interno e lascia l'anello attorno
+    // (e la scala bianca) in vista. Contorni da azzurro a viola: la «neon».
+    ProCoRat: {
+      src: 'immagini/blocchi/ProCoRat.webp', w: 900, h: 1355,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 227.9, y: 214.5, r: 114.2 },  // Distortion
+        { indice: 2, x: 672.6, y: 214.4, r: 114.2 },  // Volume
+        { indice: 1, x: 448.8, y: 432.5, r: 94.3 },   // Filter
+      ],
+      led: { x: 449.2, y: 100.2, r: 19.1 },
+      pulsante: { x: 450, y: 1120.2, r: 51.6 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
