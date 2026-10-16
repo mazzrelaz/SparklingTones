@@ -345,9 +345,8 @@ Comp, Optical Comp, Legendary Wah, Auto Wah. **Da verificare a orecchio**: quale
 levetta sia Limit (LA Comp) e -15 dB (Optical Comp); nel wah, 1/2 = 0,5 e il tempo lineare.
 **Il wah** (16 ottobre): parametri misurati (`docs/protocollo-spark2.md`, ultima sezione), pannello
 Auto, barra che si muove. **«Pacchetto Jimi Hendrix: sì/no»** in Impostazioni (`haHendrix()`): col
-no spariscono effetti e preset Hendrix e il wah è l'Auto Wah gratuito. **Domanda aperta
-all'utente**: col no, nascondere anche i preset Hendrix negli **otto slot dell'ampli** e nei
-**banchi live**? (Per ora restano.) Dal telefono si guarda in rete di casa (`node
+no spariscono effetti e preset Hendrix e il wah è l'Auto Wah gratuito. **Gli otto slot
+dell'ampli e i banchi live** mostrano comunque i loro preset: va bene così (l'utente, 16 ottobre). Dal telefono si guarda in rete di casa (`node
 tools/server-rete.js <bozza> 8096` → `http://192.168.0.223:8096`). Tutto in
 `docs/decisioni-ui.md`, ultima sezione.
 

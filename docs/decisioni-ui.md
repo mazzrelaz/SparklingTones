@@ -1319,4 +1319,4 @@ guida; poi la prova vera col telefono e l'ampli.
   spariscono gli Hendrix e gli ampli del loro gruppo, il wah si chiama «Auto Wah» e scegliendolo va in
   Auto Detect; il blocco mostra l'immagine dell'Auto Wah (Power, Sensitivity, barra); niente nota né
   bollo JH. **Gli otto slot dell'ampli restano visibili** (sono quello che c'è dentro) e i banchi
-  live non cambiano: **domanda aperta all'utente**.
+  live non cambiano: **va bene così**, ha detto l'utente.
