@@ -27,6 +27,24 @@
     ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
 
   const TABELLA = {
+    // Guitar EQ: niente manopole, sette cursori (`cursori`: centro `x`, corsa
+    // del cappuccio da `y1`, zero, a `y0`, dieci; `w` e `alto` del cappuccio).
+    // Le sei bande da sinistra, il Level (parametro 0) in fondo a destra.
+    GuitarEQ6: {
+      src: 'immagini/blocchi/GuitarEQ6.webp', w: 900, h: 926,
+      manopole: [],
+      cursori: [
+        { indice: 1, x: 102.2, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 100
+        { indice: 2, x: 211,   y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 200
+        { indice: 3, x: 319.8, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 400
+        { indice: 4, x: 427.8, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 800
+        { indice: 5, x: 537.4, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 1.6K
+        { indice: 6, x: 645.9, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // 3.2K
+        { indice: 0, x: 798.2, y0: 192.7, y1: 577.5, w: 48.2, alto: 20.2 },   // Level
+      ],
+      led: { x: 722.5, y: 125.3, r: 12.4 },
+      pulsante: { x: 448.8, y: 819.2, r: 43.5 },
+    },
     // L'Auto Wah gratuito: il wah in Auto Detect (vedi `eAutoWahLibero`), per chi
     // non ha il pacchetto Hendrix. Power accende e spegne, la sola manopola è la
     // Sensitivity (parametro 4); la colonna di puntini respira come in Auto Detect.

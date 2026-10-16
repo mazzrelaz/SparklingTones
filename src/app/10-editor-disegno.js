@@ -1152,6 +1152,49 @@ function frontaleImmagine(effetto, info) {
     box.appendChild(lev);
   }
 
+  // I cursori degli equalizzatori: un cappuccio che scorre sulla pista
+  // disegnata, da `y1` (zero, in basso) a `y0` (dieci, in alto); a metà corsa
+  // la banda è a zero dB. Si trascina in verticale e il cappuccio segue il dito.
+  for (const c of info.cursori || []) {
+    const param = effetto.params.find(p => p.index === c.indice);
+    if (!param) continue;
+    const pista = document.createElement('div');
+    pista.className = 'cursore-img';
+    pista.title = (nomiParam[effetto.name] || {})[param.index] ||
+                  SparkEffetti.manopola(effetto.name, param.index, manopoleVere(effetto).length) || '';
+    posto(pista, { x: c.x, y: (c.y0 + c.y1) / 2, w: c.w, h: c.y1 - c.y0 + c.alto });
+    const tappo = document.createElement('div');
+    tappo.className = 'tappo';
+    tappo.style.height = c.alto / (c.y1 - c.y0 + c.alto) * 100 + '%';
+    pista.appendChild(tappo);
+    const disegna = () => {
+      tappo.style.bottom = param.value * (1 - c.alto / (c.y1 - c.y0 + c.alto)) * 100 + '%';
+    };
+    disegna();
+
+    let partenzaY = null, partenzaV = 0;
+    pista.addEventListener('pointerdown', evento => {
+      partenzaY = evento.clientY;
+      partenzaV = param.value;
+      pista.setPointerCapture(evento.pointerId);
+      pista.classList.add('gira');
+      mostraBolla(pista, param.value);
+    });
+    pista.addEventListener('pointermove', evento => {
+      if (partenzaY === null) return;
+      const corsa = pista.getBoundingClientRect().height * (1 - c.alto / (c.y1 - c.y0 + c.alto));
+      param.value = Math.min(1, Math.max(0, partenzaV + (partenzaY - evento.clientY) / corsa));
+      disegna();
+      mostraBolla(pista, param.value);
+      aggiornaBarrette();
+      mandaParametro(effetto.name, param.index, param.value);
+    });
+    const fine = () => { partenzaY = null; pista.classList.remove('gira'); nascondiBolla(); };
+    pista.addEventListener('pointerup', fine);
+    pista.addEventListener('pointercancel', fine);
+    box.appendChild(pista);
+  }
+
   if (info.barra) avviaBarraWah(box, effetto, info.barra, posto);
 
   const quante = manopoleVere(effetto).length;
