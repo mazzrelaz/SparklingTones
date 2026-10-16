@@ -1302,3 +1302,21 @@ scala, voce in `TABELLA`, prova con LED e footswitch contornati.
 **Resta**: le immagini vere degli altri modelli (l'utente **non vuole pubblicare niente finché
 non sono caricate tutte**); i blocchi a cursori (EQ) e il riverbero a scelta col disegno; la
 guida; poi la prova vera col telefono e l'ampli.
+
+### Il Legendary Wah, l'Auto Wah e il pacchetto Hendrix — 16 ottobre 2026 (bozza)
+
+- **Il wah** (`JH.Vox846`): dopo un aggiornamento di Positive Grid non si muove più a mano (solo
+  pedale d'espressione), quindi niente trascinamento. Sull'immagine: **Power** (pulsante
+  rettangolare, `w`/`h`), il pallino rosso, **Auto** (`tasti: [{ apre: 'autowah' }]`) che apre un
+  pannellino come quello dell'app ufficiale: sei modalità a riquadri; sotto, in Auto Detect la sola
+  Sensitivity, altrimenti l'interruttore BPM con le note (1/8, 1/4, 1/2, 1) o la manopola dei ms.
+  **La colonna di puntini** (`barra`) sale e scende con la forma d'onda al suo tempo (nota al bpm del
+  preset, o ms), a `setInterval`; in Auto Detect un respiro lento (il suono non lo sentiamo).
+- **L'Auto Wah gratuito è il Legendary in Auto Detect**: misurato, stessi sei numeri. Non si
+  distingue dai dati, quindi l'utente **dichiara** in Impostazioni se ha il pacchetto Hendrix
+  (scelta B dell'utente, contro A «un'immagine sola»). **Col no**: spariscono i preset con un effetto
+  Hendrix (libreria e scelta per i banchi), tranne quelli col solo Auto Wah; dall'elenco dei modelli
+  spariscono gli Hendrix e gli ampli del loro gruppo, il wah si chiama «Auto Wah» e scegliendolo va in
+  Auto Detect; il blocco mostra l'immagine dell'Auto Wah (Power, Sensitivity, barra); niente nota né
+  bollo JH. **Gli otto slot dell'ampli restano visibili** (sono quello che c'è dentro) e i banchi
+  live non cambiano: **domanda aperta all'utente**.

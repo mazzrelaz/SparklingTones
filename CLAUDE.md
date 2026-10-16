@@ -146,7 +146,8 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
   l'`<input>` non ha `accept`. Senza `meta.id` l'UUID lo diamo noi.
 - **Il bollo «JH»** (effetto Hendrix in catena) sta in **quattro posti, e quattro restano**:
   schede, tendina dei modelli, blocco a fuoco dell'editor, riga di log in `mandaPreset`. Non
-  nella vista live (decisione dell'utente) né sul pedale.
+  nella vista live (decisione dell'utente) né sul pedale. Nella bozza (16 ottobre): **col
+  pacchetto Hendrix dichiarato «no» i bolli spariscono**, perché i preset Hendrix non si vedono.
 
 ### Sezione Live
 
@@ -330,16 +331,24 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 15 ottobre 2026 (sera)
+## Dove si riprende — 16 ottobre 2026
 
-**In corso: l'editor con le immagini dei blocchi** — bozza sul ramo `bozza-editor-grafico` (non
-in `main`, worktree nello scratchpad), **impaginazione approvata**. **Non si pubblica finché non
-ci sono tutte le immagini** (scelta dell'utente). Le immagini arrivano **senza manopole**, col
-puntino bianco al centro e lo sfondo nero: sfondo (`tools/togli-sfondo/`), manopole e misure le
-faccio io. **Fatte 8** (sera del 15): Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate,
-LA Comp (con la levetta Limit/Compress: **quale sia Limit è da verificare a orecchio**), Red Comp,
-Bass Comp. Domani altre: l'utente aveva finito i crediti per generarle. Dal telefono si guarda in rete
-di casa (`node tools/server-rete.js <bozza> 8096` → `http://192.168.0.223:8096`). Tutto in
+**In corso: l'editor con le immagini dei blocchi** — bozza sul ramo `bozza-editor-grafico`
+(**pushato, non in `main`**), **impaginazione approvata**. **Non si pubblica finché non ci sono
+tutte le immagini** (scelta dell'utente). Il worktree stava nello scratchpad di una sessione: se in
+una sessione nuova non c'è, `git worktree add <scratchpad>/bozza-editor bozza-editor-grafico`, e
+la voce `spark-bozza` di `.claude/launch.json` (non committata) va puntata lì. Le immagini arrivano
+**senza manopole**, col puntino bianco al centro e lo sfondo nero: sfondo (`tools/togli-sfondo/`;
+se lo sfondo è blu scuro, `&pieno=62&alto=120&basso=60`), manopole e misure le faccio io.
+**Fatte 11**: Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate, LA Comp, Red Comp, Bass
+Comp, Optical Comp, Legendary Wah, Auto Wah. **Da verificare a orecchio**: quale posizione della
+levetta sia Limit (LA Comp) e -15 dB (Optical Comp); nel wah, 1/2 = 0,5 e il tempo lineare.
+**Il wah** (16 ottobre): parametri misurati (`docs/protocollo-spark2.md`, ultima sezione), pannello
+Auto, barra che si muove. **«Pacchetto Jimi Hendrix: sì/no»** in Impostazioni (`haHendrix()`): col
+no spariscono effetti e preset Hendrix e il wah è l'Auto Wah gratuito. **Domanda aperta
+all'utente**: col no, nascondere anche i preset Hendrix negli **otto slot dell'ampli** e nei
+**banchi live**? (Per ora restano.) Dal telefono si guarda in rete di casa (`node
+tools/server-rete.js <bozza> 8096` → `http://192.168.0.223:8096`). Tutto in
 `docs/decisioni-ui.md`, ultima sezione.
 
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
