@@ -427,6 +427,21 @@
       led: { x: 101.6, y: 310.8, r: 9.5 },
       pulsante: { x: 101.6, y: 371.4, r: 17.5 },
     },
+    // Lux Verb: pannello argento; la manopola copre quella nera disegnata e
+    // lascia la scala. Pulsante: la levetta ON/OFF.
+    OverDrivenLuxVerb: {
+      src: 'immagini/blocchi/OverDrivenLuxVerb.webp', w: 900, h: 874,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 202.7, y: 344.5, r: 33 },     // Gain
+        { indice: 3, x: 323.3, y: 344.5, r: 33 },     // Bass
+        { indice: 2, x: 448.1, y: 344.5, r: 33 },     // Middle
+        { indice: 1, x: 569.9, y: 344.5, r: 33 },     // Treble
+        { indice: 4, x: 690,   y: 344.5, r: 33 },     // Master (Volume)
+      ],
+      led: { x: 94.8, y: 309.6, r: 10 },
+      pulsante: { x: 96.2, y: 366, r: 17.2 },
+    },
     // JM45: pannello dorato; la manopola copre quella dorata disegnata e lascia
     // le tacche. Pulsante: la levetta ON/OFF.
     OverDrivenJM45: {
