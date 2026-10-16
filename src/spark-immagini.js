@@ -351,6 +351,21 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // Checkmate: attorno ai puntini solo la corona di tacche; la manopola ci sta
+    // dentro. Pulsante: la levetta ON/OFF.
+    Checkmate: {
+      src: 'immagini/blocchi/Checkmate.webp', w: 900, h: 847,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 209,   y: 337.3, r: 31.1 },   // Gain
+        { indice: 3, x: 328.4, y: 337.3, r: 31.1 },   // Bass
+        { indice: 2, x: 448.4, y: 337.3, r: 31.1 },   // Middle
+        { indice: 1, x: 569.6, y: 337.3, r: 31.1 },   // Treble
+        { indice: 4, x: 689.6, y: 337.3, r: 31.1 },   // Master (Volume)
+      ],
+      led: { x: 103.9, y: 300.1, r: 9.2 },
+      pulsante: { x: 103.8, y: 358.6, r: 16.9 },
+    },
     // Two Stone SP50: la manopola copre il disco nero dentro le tacche; Gain,
     // Middle e Volume più grandi di Bass e Treble, com'è disegnato. Pulsante:
     // la levetta Power.
