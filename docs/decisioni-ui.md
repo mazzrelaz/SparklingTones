@@ -1320,3 +1320,14 @@ guida; poi la prova vera col telefono e l'ampli.
   Auto Detect; il blocco mostra l'immagine dell'Auto Wah (Power, Sensitivity, barra); niente nota né
   bollo JH. **Gli otto slot dell'ampli restano visibili** (sono quello che c'è dentro) e i banchi
   live non cambiano: **va bene così**, ha detto l'utente.
+
+### Il riverbero: un'immagine per tipo — 16 ottobre 2026 (bozza)
+
+Finiti i delay, restava il riverbero, che è un modello solo (`bias.reverb`) con nove tipi
+(parametro 6). **Scelta dell'utente: un'immagine per ogni tipo.** In `spark-immagini.js` la voce
+si chiama col modello e il tipo (`'bias.reverb:Plate Rich'`) e `SparkImmagini.di(modello, tipo)`
+la cerca prima di quella del modello; l'editor passa il tipo di adesso (`nomeTipo`). Cambiando tipo
+col doppio tocco si ridisegna la catena, e il blocco prende l'immagine nuova; nell'elenco dei tipi
+c'è la miniatura. Un tipo senza immagine resta a pomelli. In `tools/genera-immagini.html` il
+riverbero è nove voci, e il file si chiama `Reverb-PlateRich`. Provato nella bozza con
+un'immagine finta su un tipo.

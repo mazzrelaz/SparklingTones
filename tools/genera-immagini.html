@@ -151,6 +151,15 @@ const GRUPPI = ['Noise gate', 'Compressori e wah', 'Drive', 'Ampli', 'Modulazion
 
 const E = window.SparkEffetti;
 const $ = id => document.getElementById(id);
+
+// Il riverbero ha un'immagine per tipo (scelta dell'utente, 16 ottobre 2026):
+// nell'elenco una voce per tipo, «bias.reverb:Hall Natural», e il file
+// «Reverb-HallNatural».
+const TIPO_RIVERBERO = 6;
+const vociDi = m => m === 'bias.reverb'
+  ? E.nomiPosizioni(m, TIPO_RIVERBERO).map(t => m + ':' + t) : [m];
+const etichetta = m => m.includes(':') ? m.split(':')[1] : E.nome(m);
+const nomeFile = m => m.includes(':') ? 'Reverb-' + m.split(':')[1].replace(/\s+/g, '') : m;
 const leggi = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const scrivi = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
 
@@ -198,10 +207,10 @@ function disegnaElenco() {
     const box = document.createElement('div');
     box.className = 'gruppo';
     box.innerHTML = `<b>${GRUPPI[g] || 'Altro'}</b><div></div>`;
-    for (const m of new Set(gruppo)) {
+    for (const m of [...new Set(gruppo)].flatMap(vociDi)) {
       const b = document.createElement('button');
       b.className = 'modello' + (eFatto(m) ? ' fatto' : '') + (m === scelto ? ' scelto' : '');
-      b.textContent = E.nome(m);
+      b.textContent = etichetta(m);
       b.title = m;
       b.addEventListener('click', () => { if (m !== scelto) $('colore').value = ''; scelto = m; disegnaElenco(); });
       box.lastChild.appendChild(b);
@@ -302,7 +311,7 @@ $('genera').addEventListener('click', async () => {
 function mostra(dati, m) {
   const box = $('risultati');
   if (box.querySelector('p.nota')) box.innerHTML = '';
-  const base = m || 'immagine';
+  const base = m ? nomeFile(m) : 'immagine';
   (dati.data || []).forEach((d, i) => {
     const src = d.b64_json ? 'data:image/png;base64,' + d.b64_json : d.url;
     if (!src) return;
@@ -310,7 +319,7 @@ function mostra(dati, m) {
     card.className = 'risultato';
     card.innerHTML = '<img alt=""><div class="riga"><span></span><a><button>Salva</button></a></div>';
     card.querySelector('img').src = src;
-    card.querySelector('span').textContent = m ? E.nome(m) : '';
+    card.querySelector('span').textContent = m ? etichetta(m) : '';
     const a = card.querySelector('a');
     a.href = src;
     a.download = `${base}${i ? '-' + (i + 1) : ''}.png`;
