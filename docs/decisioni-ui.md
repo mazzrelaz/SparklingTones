@@ -1331,3 +1331,8 @@ col doppio tocco si ridisegna la catena, e il blocco prende l'immagine nuova; ne
 c'è la miniatura. Un tipo senza immagine resta a pomelli. In `tools/genera-immagini.html` il
 riverbero è nove voci, e il file si chiama `Reverb-PlateRich`. Provato nella bozza con
 un'immagine finta su un tipo.
+
+**Le nove immagini** (16 ottobre, sera): Room Studio A e B, Chamber, Plate Short, Hall Ambient
+(«Ambient») e Hall Natural col nome del tipo scritto; tre con un nome di fantasia, abbinate
+dall'utente: «Classic Plate» = Plate Rich, «Holy Grail» = Hall Medium, «Reflection» = Plate Long.
+Room Studio B e Plate Long hanno la spia viola (`led.colore`). Con queste **le immagini sono tutte**.
