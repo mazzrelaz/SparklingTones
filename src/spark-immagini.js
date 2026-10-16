@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Insane (EVH): pannello argento; la manopola copre quella argentata
+    // disegnata e lascia il cerchio nero con le tacche. Pulsante: la levetta.
+    EVH: {
+      src: 'immagini/blocchi/EVH.webp', w: 900, h: 865,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 194.8, y: 341.9, r: 38.4 },   // Gain
+        { indice: 3, x: 320.6, y: 341.9, r: 38.4 },   // Bass
+        { indice: 2, x: 447.9, y: 341.9, r: 38.4 },   // Middle
+        { indice: 1, x: 573.7, y: 341.9, r: 38.4 },   // Treble
+        { indice: 4, x: 698.8, y: 341.9, r: 38.4 },   // Master (Volume)
+      ],
+      led: { x: 87.9, y: 307.3, r: 9.2 },
+      pulsante: { x: 87.4, y: 364.7, r: 17.1 },
+    },
     // Treadplate (Mesa Rectifier): pannello nero; la manopola sta dentro il
     // cerchio bianco. Pulsante: la levetta ON/OFF.
     Rectifier: {
