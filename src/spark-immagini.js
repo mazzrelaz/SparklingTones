@@ -336,6 +336,22 @@
       led: { x: 75.2, y: 324.7, r: 11 },
       pulsante: { x: 71.8, y: 387.9, r: 23.5 },
     },
+    // AD Clean, la testata sulla sua cassa (la prima fatta con le API di OpenAI).
+    // La manopola copre il disco scuro dentro le tacche arancioni; pulsante: la
+    // levetta OFF sotto la spia.
+    ADClean: {
+      src: 'immagini/blocchi/ADClean.webp', w: 900, h: 853,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 202,   y: 345.3, r: 28.7 },   // Gain
+        { indice: 3, x: 327.3, y: 345.3, r: 28.7 },   // Bass
+        { indice: 2, x: 450,   y: 345.3, r: 28.7 },   // Middle
+        { indice: 1, x: 572.7, y: 345.3, r: 28.7 },   // Treble
+        { indice: 4, x: 696.2, y: 345.3, r: 28.7 },   // Master (Volume)
+      ],
+      led: { x: 86.7, y: 310, r: 9.3 },
+      pulsante: { x: 84.7, y: 367.5, r: 18.7 },
+    },
   };
 
   window.SparkImmagini = {
