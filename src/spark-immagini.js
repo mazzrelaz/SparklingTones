@@ -210,6 +210,17 @@
       led: { x: 449.4, y: 177.3, r: 31.7 },
       pulsante: { x: 450, y: 1104.1, r: 132.6 },
     },
+    // Booster: una manopola sola, il Gain, dentro il cerchio viola. La spia è
+    // l'anello rosso sotto la scritta GAIN; pulsante: il cerchio sotto il razzo.
+    Booster: {
+      src: 'immagini/blocchi/Booster.webp', w: 900, h: 1480,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 447.4, y: 282.6, r: 106.1 },  // Gain
+      ],
+      led: { x: 447.7, y: 582.6, r: 24.2 },
+      pulsante: { x: 447.7, y: 1153, r: 75.8 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
