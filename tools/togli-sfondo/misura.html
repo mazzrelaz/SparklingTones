@@ -1,0 +1,45 @@
+<!doctype html><meta charset="utf-8"><body><pre id="out"></pre><script>
+const q = new URLSearchParams(location.search);
+const img = new Image();
+img.onload = () => {
+  const W = img.width, H = img.height, c = document.createElement('canvas');
+  c.width = W; c.height = H; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  const d = g.getImageData(0, 0, W, H).data, out = [];
+  out.push('IMG ' + W + ' x ' + H);
+  // macchie bianche (puntini) e macchie rosse sature (spia)
+  const prova = {
+    bianco: (r, gg, b) => r > 235 && gg > 235 && b > 235,
+    rosso: (r, gg, b) => r > 200 && gg < 90 && b < 110,
+  };
+  for (const [nome, f] of Object.entries(prova)) {
+    const vis = new Uint8Array(W * H);
+    for (let i = 0; i < W * H; i++) {
+      if (vis[i] || !f(d[i*4], d[i*4+1], d[i*4+2])) continue;
+      let n = 0, sx = 0, sy = 0, x0 = 1e9, x1 = 0, y0 = 1e9, y1 = 0; const st = [i]; vis[i] = 1;
+      while (st.length) {
+        const k = st.pop(), x = k % W, y = (k / W) | 0; n++; sx += x; sy += y;
+        x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+        for (const m of [k-1, k+1, k-W, k+W]) if (m >= 0 && m < W*H && !vis[m] && f(d[m*4], d[m*4+1], d[m*4+2])) { vis[m] = 1; st.push(m); }
+      }
+      if (n > 150) out.push(nome + ' n ' + n + ' c ' + (sx/n).toFixed(1) + ',' + (sy/n).toFixed(1) + ' box ' + x0 + '-' + x1 + ' ' + y0 + '-' + y1);
+    }
+  }
+  // profili di luce: dal centro verso destra e verso sinistra, la luminosità
+  for (const p of (q.get('profili') || '').split(';').filter(Boolean)) {
+    const [cx, cy, len] = p.split(',').map(Number);
+    for (const dir of [1, -1, 'su', 'giu']) {
+      const v = [];
+      for (let t = 0; t < len; t++) {
+        const v1 = dir === 'su' || dir === 'giu'; const x = v1 ? cx : Math.round(cx + dir * t), y = v1 ? Math.round(cy + (dir === 'su' ? -t : t)) : cy;
+        const k = (y * W + x) * 4; v.push(Math.round((d[k] + d[k+1] + d[k+2]) / 3));
+      }
+      // solo i picchi sopra 90
+      const picchi = [];
+      for (let t = 1; t < len - 1; t++) if (v[t] > 90 && v[t] >= v[t-1] && v[t] >= v[t+1]) picchi.push(t + ':' + v[t]);
+      out.push('profilo ' + cx + ',' + cy + ' ' + dir + ' ' + picchi.join(' '));
+    }
+  }
+  document.getElementById('out').textContent = out.join('\n');
+};
+img.src = q.get('img');
+</script>
