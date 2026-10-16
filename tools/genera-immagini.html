@@ -80,6 +80,11 @@
         <p class="nota" style="margin:2px 0 6px">Lo carichi una volta: me lo ricordo io.</p>
         <input type="file" id="logo" accept="image/png,image/jpeg,image/webp">
         <div class="anteprima" id="vediLogo"></div>
+        <label style="display:flex;gap:6px;align-items:flex-start;margin-top:8px">
+          <input type="checkbox" id="conLogo">
+          <span>Allega il logo a questo pedale<br><span class="nota">Solo se nell'originale c'è
+          la scritta «Positive Grid»: il logo è rosso e, allegato sempre, tinge di rosso tutto.</span></span>
+        </label>
       </div>
     </div>
   </section>
@@ -97,13 +102,20 @@
       <button id="ripristina">Rimetti il testo di partenza</button>
       <span class="nota" style="margin:0">Le modifiche al testo restano salvate.</span>
     </div>
+    <div style="margin-top:12px">
+      <b>Colore dominante di questo pedale</b>
+      <span class="nota">(facoltativo, per esempio «verde» o «azzurro e bianco»)</span>
+      <input type="text" id="colore" placeholder="lascia vuoto per non dirlo" style="margin-top:6px">
+      <p class="nota" style="margin:6px 0 0">Se lo scrivi, alla richiesta si aggiunge una frase
+      che lo dice chiaro. Si svuota quando scegli un altro pedale.</p>
+    </div>
     <div class="riga scelte" style="margin-top:12px">
       <span>Qualità:</span>
       <label><input type="radio" name="qualita" value="low" checked> bassa</label>
       <label><input type="radio" name="qualita" value="medium"> media</label>
       <span>Quante:</span>
-      <label><input type="radio" name="quante" value="1"> 1</label>
-      <label><input type="radio" name="quante" value="2" checked> 2</label>
+      <label><input type="radio" name="quante" value="1" checked> 1</label>
+      <label><input type="radio" name="quante" value="2"> 2</label>
       <label><input type="radio" name="quante" value="4"> 4</label>
     </div>
     <div class="riga scelte" style="margin-top:6px">
@@ -160,6 +172,7 @@ function anteprima(id, src) { $(id).innerHTML = src ? `<img alt="" src="${src}">
 
 $('originale').addEventListener('change', () => {
   originale = $('originale').files[0] || null;
+  $('conLogo').checked = false;   // il logo si decide pedale per pedale
   anteprima('vediOriginale', originale && URL.createObjectURL(originale));
 });
 
@@ -190,7 +203,7 @@ function disegnaElenco() {
       b.className = 'modello' + (eFatto(m) ? ' fatto' : '') + (m === scelto ? ' scelto' : '');
       b.textContent = E.nome(m);
       b.title = m;
-      b.addEventListener('click', () => { scelto = m; disegnaElenco(); });
+      b.addEventListener('click', () => { if (m !== scelto) $('colore').value = ''; scelto = m; disegnaElenco(); });
       box.lastChild.appendChild(b);
     }
     el.appendChild(box);
@@ -205,6 +218,19 @@ $('ripristina').addEventListener('click', () => { $('richiesta').value = RICHIES
 // --- la chiamata ---
 const valore = nome => document.querySelector(`input[name=${nome}]:checked`).value;
 
+/** L'immagine col lato lungo al più di `lato` pixel, in PNG (la trasparenza del logo resta). */
+async function rimpicciolisci(blob, lato) {
+  const bmp = await createImageBitmap(blob);
+  const k = Math.min(1, lato / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * k);
+  c.height = Math.round(bmp.height * k);
+  const g = c.getContext('2d');
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(bmp, 0, 0, c.width, c.height);
+  return new Promise(ok => c.toBlob(ok, 'image/png'));
+}
+
 function stato(testo, errore) {
   $('stato').textContent = testo;
   $('stato').className = errore ? 'errore' : '';
@@ -216,16 +242,35 @@ $('genera').addEventListener('click', async () => {
   if (!originale) return stato("Manca l'immagine originale (punto 2).", true);
   if ($('ricorda').checked) scrivi('openai-chiave', chiave);
 
+  const conLogo = $('conLogo').checked;
+  if (conLogo && !logo) return stato('Hai chiesto il logo ma non è caricato (punto 2).', true);
+
+  // La richiesta, più il colore se c'è: scritto chiaro pesa più di «il colore
+  // dominante deve rimanere», e il rosso del logo allegato non deve tingere il resto.
+  let testo = $('richiesta').value;
+  const colore = $('colore').value.trim();
+  if (colore) {
+    testo += `\nIl colore dominante del pedale è: ${colore}. Usalo come colore principale delle linee neon.`;
+    if (conLogo) testo += ' Non prendere i colori dal logo allegato: il logo va solo al posto della scritta "positive grid".';
+  }
+
   // Modifica di un'immagine: l'originale per primo, poi il logo. La misura la
-  // sceglie il modello («auto»), così resta la forma dell'originale.
+  // sceglie il modello («auto»), così resta la forma dell'originale. Gli
+  // allegati si rimpiccioliscono prima: le immagini mandate si pagano, e la
+  // qualità bassa non usa più di così.
+  stato('Preparo le immagini…');
   const corpo = new FormData();
   corpo.append('model', valore('motore'));
-  corpo.append('prompt', $('richiesta').value);
+  corpo.append('prompt', testo);
   corpo.append('size', 'auto');
   corpo.append('quality', valore('qualita'));
   corpo.append('n', valore('quante'));
-  corpo.append('image[]', originale, originale.name);
-  if (logo) corpo.append('image[]', logo, 'logo-sparklingtones.png');
+  try {
+    corpo.append('image[]', await rimpicciolisci(originale, 1024), 'originale.png');
+    if (conLogo) corpo.append('image[]', await rimpicciolisci(logo, 256), 'logo-sparklingtones.png');
+  } catch (e) {
+    return stato("Non riesco a leggere l'immagine originale o il logo: " + e.message, true);
+  }
 
   $('genera').disabled = true;
   const inizio = Date.now();
