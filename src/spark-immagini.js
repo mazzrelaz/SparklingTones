@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Flat Acoustic: pannello nero e oro; la manopola copre quella nera
+    // disegnata e lascia la scala. Pulsante: la levetta Power.
+    FlatAcoustic: {
+      src: 'immagini/blocchi/FlatAcoustic.webp', w: 900, h: 881,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 198.8, y: 337.7, r: 31.9 },   // Gain
+        { indice: 3, x: 320.8, y: 337.7, r: 31.9 },   // Bass
+        { indice: 2, x: 443.8, y: 337.7, r: 31.9 },   // Middle
+        { indice: 1, x: 564.8, y: 337.7, r: 31.9 },   // Treble
+        { indice: 4, x: 687.6, y: 337.7, r: 31.9 },   // Master (Volume)
+      ],
+      led: { x: 89.5, y: 303.8, r: 9.4 },
+      pulsante: { x: 88.3, y: 367.1, r: 17.4 },
+    },
     // Jumbo (modello «FatAcousticV2»): tutto azzurro; la manopola copre
     // quella nera disegnata e lascia la scala. Pulsante: la levetta Power.
     FatAcousticV2: {
