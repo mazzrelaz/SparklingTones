@@ -675,7 +675,7 @@
   /* G · Pedale con l'accento: come la D, ma il bordo è una sfumatura fissa
      azzurro-viola-magenta, la stessa per tutti (il «pelo di blu/viola» delle
      immagini degli effetti). Acceso: il viola si accende e si allarga. */
-  body.pad-g .pad { --piste:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Cg fill='none' stroke='%237b6cff' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M0 20h30l10 10h40M120 70H90l-10-10H50l-8 8H0M60 0v14l8 8M20 90V76l10-10'/%3E%3C/g%3E%3Cg fill='%237b6cff' fill-opacity='.22'%3E%3Ccircle cx='80' cy='30' r='2'/%3E%3Ccircle cx='42' cy='68' r='2'/%3E%3Ccircle cx='68' cy='22' r='2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 90px;
+  body.pad-g .pad { --piste:var(--piste-ferme); --piste-ferme:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Cg fill='none' stroke='%237b6cff' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M0 20h30l10 10h40M120 70H90l-10-10H50l-8 8H0M60 0v14l8 8M20 90V76l10-10'/%3E%3C/g%3E%3Cg fill='%237b6cff' fill-opacity='.22'%3E%3Ccircle cx='80' cy='30' r='2'/%3E%3Ccircle cx='42' cy='68' r='2'/%3E%3Ccircle cx='68' cy='22' r='2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 90px;
                     border-radius:12px; border:2px solid transparent;
                     background:linear-gradient(#050608, #050608) padding-box,
                                linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
@@ -710,6 +710,7 @@
   body.pad-g .pad.attivo { background:linear-gradient(180deg, #0a0912, #050608 70%) padding-box,
                                       linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
                            transform:translateY(3px);
+                           --piste:url('immagini/circuito-elettroni.svg') 0 0 / 120px 90px;
                            animation:pulsaG 2.4s ease-in-out infinite; }
   body.pad-g .pad.attivo::after { content:''; position:absolute; left:10%; right:10%; top:28%; bottom:28%;
                                   border-radius:50%; pointer-events:none; filter:blur(10px);
@@ -731,6 +732,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     body.pad-g .pad.attivo, body.pad-g .pad.attivo::after { animation:none; }
+    body.pad-g .pad.attivo { --piste:var(--piste-ferme); }
   }
 
   /* H · Vetro: niente piste, un vetro scuro con un riflesso in alto e righe
