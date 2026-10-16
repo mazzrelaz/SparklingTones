@@ -45,6 +45,17 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Vibrato (modello «Vibrato01»): Speed e Depth grandi, dentro la scala.
+    Vibrato01: {
+      src: 'immagini/blocchi/Vibrato01.webp', w: 900, h: 1351,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 248.3, y: 276.3, r: 99 },     // Speed
+        { indice: 1, x: 652.1, y: 276.3, r: 99 },     // Depth
+      ],
+      led: { x: 453.6, y: 101.1, r: 18 },
+      pulsante: { x: 448.2, y: 1116.9, r: 49.5 },
+    },
     // UniVibe: Speed e Intensity grandi; il Chorus/Vibrato (parametro 1) è la
     // levetta in mezzo, disegnata giù (VIBRATO): `su: 0`, a 1 si alza verso
     // CHORUS. **Da verificare a orecchio** quale valore sia il chorus: si
