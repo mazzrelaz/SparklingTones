@@ -45,6 +45,22 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Bass EQ: come il Guitar EQ, con le sue bande; il Level in fondo a destra.
+    BassEQ6: {
+      src: 'immagini/blocchi/BassEQ6.webp', w: 900, h: 910,
+      manopole: [],
+      cursori: [
+        { indice: 1, x: 100.8, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 50
+        { indice: 2, x: 212,   y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 120
+        { indice: 3, x: 320.4, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 400
+        { indice: 4, x: 430.1, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 800
+        { indice: 5, x: 539.7, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 4.5K
+        { indice: 6, x: 648.9, y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // 10K
+        { indice: 0, x: 803,   y0: 185.5, y1: 562.7, w: 47.5, alto: 19.9 },   // Level
+      ],
+      led: { x: 727.4, y: 113.2, r: 13.8 },
+      pulsante: { x: 452.3, y: 795.7, r: 35.3 },
+    },
     // L'Auto Wah gratuito: il wah in Auto Detect (vedi `eAutoWahLibero`), per chi
     // non ha il pacchetto Hendrix. Power accende e spegne, la sola manopola è la
     // Sensitivity (parametro 4); la colonna di puntini respira come in Auto Detect.
