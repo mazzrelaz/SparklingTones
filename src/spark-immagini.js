@@ -351,6 +351,21 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // Blues Boy (Fender Blues Junior tweed): la manopola copre il disco nero dentro
+    // la scala. Pulsante: la levetta ON/OFF.
+    BluesJrTweed: {
+      src: 'immagini/blocchi/BluesJrTweed.webp', w: 900, h: 899,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 205.6, y: 336.2, r: 32.9 },   // Gain
+        { indice: 3, x: 327,   y: 336.2, r: 32.9 },   // Bass
+        { indice: 2, x: 449.3, y: 336.2, r: 32.9 },   // Middle
+        { indice: 1, x: 571.4, y: 336.2, r: 32.9 },   // Treble
+        { indice: 4, x: 692.7, y: 336.2, r: 32.9 },   // Master (Volume)
+      ],
+      led: { x: 99.7, y: 302.6, r: 10.5 },
+      pulsante: { x: 99.3, y: 363.7, r: 17.9 },
+    },
     // Tweed Bass (Fender Bassman): attorno ai puntini solo la scala arancione; la
     // manopola ci sta dentro. Pulsante: la levetta Power.
     Bassman: {
