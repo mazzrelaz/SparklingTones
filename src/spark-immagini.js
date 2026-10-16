@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // W600 (ampli da basso): pannello dorato; la manopola copre quella nera
+    // disegnata e lascia la scala. Pulsante: la levetta ON/OFF.
+    W600: {
+      src: 'immagini/blocchi/W600.webp', w: 900, h: 860,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 207.6, y: 336.9, r: 28.8 },   // Gain
+        { indice: 3, x: 330.1, y: 336.9, r: 28.8 },   // Bass
+        { indice: 2, x: 451.7, y: 336.9, r: 28.8 },   // Middle
+        { indice: 1, x: 573.8, y: 336.9, r: 28.8 },   // Treble
+        { indice: 4, x: 694.8, y: 336.9, r: 28.8 },   // Master (Volume)
+      ],
+      led: { x: 100.2, y: 300.7, r: 9.4 },
+      pulsante: { x: 98.8, y: 358.4, r: 17.3 },
+    },
     // Sunny 3000 (ampli da basso): pannello nero; la manopola sta dentro la
     // scala. Pulsante: la levetta ON/OFF.
     Sunny3000: {
