@@ -45,6 +45,18 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Tremolo Square: come il Tremolo, verde, dentro l'anello di tacche.
+    TremoloSquare: {
+      src: 'immagini/blocchi/TremoloSquare.webp', w: 900, h: 1336,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 237.7, y: 223.4, r: 72.3 },   // Speed
+        { indice: 1, x: 666,   y: 223.4, r: 72.3 },   // Depth
+        { indice: 2, x: 451.4, y: 458.8, r: 68.5 },   // Level
+      ],
+      led: { x: 449.5, y: 109.1, r: 19 },
+      pulsante: { x: 450, y: 1103.6, r: 52.3 },
+    },
     // Tremolo: Speed e Depth in alto, Level in mezzo, gialle dentro l'anello.
     Tremolo: {
       src: 'immagini/blocchi/Tremolo.webp', w: 900, h: 1312,
