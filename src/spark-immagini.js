@@ -504,6 +504,22 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // YJM100: pannello dorato; la manopola copre quella nera disegnata e lascia
+    // le tacche. Gain, Middle e Volume un po' più grandi, com'è disegnato.
+    // Pulsante: la levetta ON/OFF.
+    YJM100: {
+      src: 'immagini/blocchi/YJM100.webp', w: 900, h: 907,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 202.5, y: 356.7, r: 35 },     // Gain
+        { indice: 3, x: 322.5, y: 356.7, r: 32.1 },   // Bass
+        { indice: 2, x: 445.8, y: 356.7, r: 35 },     // Middle
+        { indice: 1, x: 569.3, y: 356.7, r: 32.1 },   // Treble
+        { indice: 4, x: 691.3, y: 356.7, r: 35 },     // Master (Volume)
+      ],
+      led: { x: 94.3, y: 320, r: 10.2 },
+      pulsante: { x: 94.8, y: 380.7, r: 17.5 },
+    },
     // SLO 100 (Soldano): pannello argento; la manopola copre quella nera
     // disegnata e lascia la scala. Pulsante: la levetta Power.
     SLO100: {
