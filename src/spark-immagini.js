@@ -427,6 +427,21 @@
       led: { x: 101.6, y: 310.8, r: 9.5 },
       pulsante: { x: 101.6, y: 371.4, r: 17.5 },
     },
+    // JM45: pannello dorato; la manopola copre quella dorata disegnata e lascia
+    // le tacche. Pulsante: la levetta ON/OFF.
+    OverDrivenJM45: {
+      src: 'immagini/blocchi/OverDrivenJM45.webp', w: 900, h: 862,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 206.3, y: 338.2, r: 34.6 },   // Gain
+        { indice: 3, x: 325.2, y: 338.2, r: 34.6 },   // Bass
+        { indice: 2, x: 446.4, y: 338.2, r: 34.6 },   // Middle
+        { indice: 1, x: 569,   y: 338.2, r: 34.6 },   // Treble
+        { indice: 4, x: 688.7, y: 338.2, r: 34.6 },   // Master (Volume)
+      ],
+      led: { x: 101, y: 304, r: 10.1 },
+      pulsante: { x: 100.2, y: 364.2, r: 17.3 },
+    },
     // Plexiglas (Marshall Plexi): pannello dorato; la manopola copre quella nera
     // disegnata e lascia i numeri. Pulsante: la levetta ON/OFF.
     Plexi: {
