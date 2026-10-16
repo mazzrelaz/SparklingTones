@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // SLO 100 (Soldano): pannello argento; la manopola copre quella nera
+    // disegnata e lascia la scala. Pulsante: la levetta Power.
+    SLO100: {
+      src: 'immagini/blocchi/SLO100.webp', w: 900, h: 912,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 194,   y: 359, r: 37.1 },     // Gain
+        { indice: 3, x: 317.6, y: 359, r: 37.1 },     // Bass
+        { indice: 2, x: 445.3, y: 359, r: 37.1 },     // Middle
+        { indice: 1, x: 572.7, y: 359, r: 37.1 },     // Treble
+        { indice: 4, x: 697.3, y: 359, r: 37.1 },     // Master (Volume)
+      ],
+      led: { x: 87.6, y: 322.4, r: 9.6 },
+      pulsante: { x: 88.3, y: 384.3, r: 16.3 },
+    },
     // American High Gain: la scala sta stretta attorno ai puntini, la manopola
     // resta dentro (più piccola). Pulsante: la levetta ON/OFF.
     AmericanHighGain: {
