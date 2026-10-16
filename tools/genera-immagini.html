@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genera immagini dei blocchi</title>
+<style>
+  :root { --fondo: #111; --pannello: #1c1c1c; --bordo: #333; --testo: #eee; --tenue: #999;
+          --accento: #e8203a; --ok: #1fd47a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--testo);
+         font: 15px/1.45 system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 4px 0 2px; }
+  h2 { font-size: 15px; margin: 0 0 8px; color: var(--tenue); font-weight: 600;
+       text-transform: uppercase; letter-spacing: .05em; }
+  p.nota { color: var(--tenue); margin: 0 0 14px; }
+  section { background: var(--pannello); border: 1px solid var(--bordo); border-radius: 10px;
+            padding: 14px; margin: 0 0 14px; }
+  input[type=password], textarea {
+    width: 100%; background: #0b0b0b; color: var(--testo); border: 1px solid var(--bordo);
+    border-radius: 8px; padding: 8px 10px; font: inherit; }
+  textarea { min-height: 200px; }
+  button { background: #2a2a2a; color: var(--testo); border: 1px solid #444; border-radius: 8px;
+           padding: 8px 14px; font: inherit; cursor: pointer; }
+  button.grande { background: var(--accento); border-color: var(--accento); font-weight: 600;
+                  padding: 10px 22px; }
+  button:disabled { opacity: .5; cursor: default; }
+  .riga { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  .scelte label { display: inline-flex; gap: 5px; align-items: center; margin-right: 12px; }
+  .allegati { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .allegati { grid-template-columns: 1fr; } main { padding: 12px 16px; } }
+  .anteprima { margin-top: 8px; min-height: 40px; }
+  .anteprima img { max-height: 160px; max-width: 100%; border-radius: 6px; border: 1px solid var(--bordo); }
+  #elenco { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow: auto; }
+  .gruppo b { display: block; color: var(--tenue); font-size: 13px; margin: 2px 0 4px; }
+  .gruppo div { display: flex; flex-wrap: wrap; gap: 6px; }
+  .modello { padding: 5px 10px; font-size: 14px; }
+  .modello.fatto { color: var(--ok); border-color: #1d5c3d; }
+  .modello.fatto::after { content: " ✓"; }
+  .modello.scelto { background: var(--accento); border-color: var(--accento); color: #fff; }
+  #stato { margin-top: 10px; color: var(--tenue); min-height: 1.4em; white-space: pre-wrap; }
+  #stato.errore { color: #ff7a7a; }
+  #risultati { display: flex; flex-wrap: wrap; gap: 14px; }
+  .risultato { background: #000; border: 1px solid var(--bordo); border-radius: 10px;
+               padding: 8px; width: min(100%, 300px); }
+  .risultato img { width: 100%; display: block; border-radius: 6px; }
+  .risultato .riga { margin-top: 8px; justify-content: space-between; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Genera le immagini dei blocchi</h1>
+  <p class="nota">Con le API di OpenAI, come facevi con Gemini: l'immagine originale, il logo e
+  la tua richiesta. Premi «Genera», salva quella che ti piace e mandala in chat. Ogni tentativo
+  in qualità bassa costa meno di un centesimo.</p>
+
+  <section>
+    <h2>1 · La chiave</h2>
+    <input type="password" id="chiave" placeholder="sk-…" autocomplete="off">
+    <div class="riga" style="margin-top:8px">
+      <label><input type="checkbox" id="ricorda" checked> ricordala su questo computer</label>
+      <button id="dimentica">Dimentica la chiave</button>
+    </div>
+    <p class="nota" style="margin:8px 0 0">Resta solo in questo browser: non va nel progetto
+    e non la vede nessuno. Chi ce l'ha spende i tuoi crediti, quindi non mandarla a nessuno.</p>
+  </section>
+
+  <section>
+    <h2>2 · Le immagini da allegare</h2>
+    <div class="allegati">
+      <div>
+        <b>L'immagine originale</b>
+        <p class="nota" style="margin:2px 0 6px">Quella del pedale da trasformare.</p>
+        <input type="file" id="originale" accept="image/png,image/jpeg,image/webp">
+        <div class="anteprima" id="vediOriginale"></div>
+      </div>
+      <div>
+        <b>Il logo SparklingTones</b>
+        <p class="nota" style="margin:2px 0 6px">Lo carichi una volta: me lo ricordo io.</p>
+        <input type="file" id="logo" accept="image/png,image/jpeg,image/webp">
+        <div class="anteprima" id="vediLogo"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · Che pedale è (per il nome del file)</h2>
+    <p class="nota" style="margin:0 0 8px">Quelli con la ✓ sono già fatti.</p>
+    <div id="elenco"></div>
+  </section>
+
+  <section>
+    <h2>4 · La richiesta</h2>
+    <textarea id="richiesta"></textarea>
+    <div class="riga" style="margin-top:6px">
+      <button id="ripristina">Rimetti il testo di partenza</button>
+      <span class="nota" style="margin:0">Le modifiche al testo restano salvate.</span>
+    </div>
+    <div class="riga scelte" style="margin-top:12px">
+      <span>Qualità:</span>
+      <label><input type="radio" name="qualita" value="low" checked> bassa</label>
+      <label><input type="radio" name="qualita" value="medium"> media</label>
+      <span>Quante:</span>
+      <label><input type="radio" name="quante" value="1"> 1</label>
+      <label><input type="radio" name="quante" value="2" checked> 2</label>
+      <label><input type="radio" name="quante" value="4"> 4</label>
+    </div>
+    <div class="riga scelte" style="margin-top:6px">
+      <span>Modello:</span>
+      <label><input type="radio" name="motore" value="gpt-image-2.5-flare" checked> 2.5 flare</label>
+      <label><input type="radio" name="motore" value="gpt-image-2.5-sunburst"> 2.5 sunburst (più preciso)</label>
+    </div>
+    <div class="riga" style="margin-top:12px">
+      <button class="grande" id="genera">Genera</button>
+    </div>
+    <div id="stato"></div>
+  </section>
+
+  <section>
+    <h2>5 · Le immagini</h2>
+    <div id="risultati"><p class="nota" style="margin:0">Qui compaiono le immagini generate.</p></div>
+  </section>
+</main>
+
+<script src="../src/spark-effetti.js"></script>
+<script>
+'use strict';
+// La richiesta che l'utente usava con Gemini (16 ottobre 2026), allegando l'originale e il logo.
+const RICHIESTA = "Modifica questa immagine con uno stile cyberpunk . deve rimanere un immagine bidimensionale su sfondo nero.. Le manopole vanno rimosse e al loro posto un solo punto bianco al centro, ma mantieni le eventuali scritte o numerazioni con le linee di riferimento intorno alle manopole . qualora ci fosse una scritta \"positive grid\" rimuovila e al suo posto metti il logo allegato rispettando lo stile del resto, ma solo esclusivamente se la scritta \"positive grid\" è presente. il colore dominante deve rimanere, ma utilizzando effetti neon line e senza perdere lo stile cyberpunk , non fare colori pieni troppo presenti.. Metti sempre un pelo di blu/viola anche se non presenti. non devono essere mai aggiunti elementi che escano dal riquadro Dell immagine stessa.. Ti ricordo che lo sfondo deve essere rigorosamente nero.";
+
+// Le immagini già fatte nella bozza dell'editor (ramo bozza-editor-grafico), finché
+// spark-immagini.js non è in main; quelle salvate da qui si segnano da sole.
+const GIA_FATTE = ['RolandJC120', 'Twin', 'DistortionTS9', 'BlueComp', 'bias.noisegate',
+  'LA2AComp', 'Compressor', 'BassComp', 'BBEOpticalComp', 'JH.Vox846', 'AutoWah',
+  'KlonCentaurSilver', 'Overdrive', 'JH.AxisFuzz', 'JH.SupaFuzz', 'JH.Octavia', 'JH.FuzzTone',
+  'Booster', 'Fuzz', 'ProCoRat', 'BassBigMuff', 'GuitarMuff', 'MaestroBassmaster', 'SABdriver'];
+const GRUPPI = ['Noise gate', 'Compressori e wah', 'Drive', 'Ampli', 'Modulazione', 'Delay', 'Riverbero'];
+
+const E = window.SparkEffetti;
+const $ = id => document.getElementById(id);
+const leggi = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const scrivi = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} };
+
+let scelto = null;
+let originale = null;   // File
+let logo = null;        // Blob
+
+const salvate = () => { try { return JSON.parse(leggi('genera-fatte') || '[]'); } catch (e) { return []; } };
+const eFatto = m => GIA_FATTE.includes(m) || salvate().includes(m);
+
+// --- la chiave ---
+$('chiave').value = leggi('openai-chiave') || '';
+$('chiave').addEventListener('change', () => { if ($('ricorda').checked) scrivi('openai-chiave', $('chiave').value.trim()); });
+$('ricorda').addEventListener('change', () => scrivi('openai-chiave', $('ricorda').checked ? $('chiave').value.trim() : null));
+$('dimentica').addEventListener('click', () => { $('chiave').value = ''; scrivi('openai-chiave', null); });
+
+// --- gli allegati ---
+function anteprima(id, src) { $(id).innerHTML = src ? `<img alt="" src="${src}">` : ''; }
+
+$('originale').addEventListener('change', () => {
+  originale = $('originale').files[0] || null;
+  anteprima('vediOriginale', originale && URL.createObjectURL(originale));
+});
+
+// Il logo si ricorda come data URL: è piccolo e serve ogni volta.
+async function logoDaDataUrl(u) { return u ? (await fetch(u)).blob() : null; }
+$('logo').addEventListener('change', () => {
+  const f = $('logo').files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = async () => { scrivi('genera-logo', r.result); logo = await logoDaDataUrl(r.result); anteprima('vediLogo', r.result); };
+  r.readAsDataURL(f);
+});
+(async () => {
+  const u = leggi('genera-logo');
+  if (u) { logo = await logoDaDataUrl(u); anteprima('vediLogo', u); }
+})();
+
+// --- l'elenco dei pedali ---
+function disegnaElenco() {
+  const el = $('elenco');
+  el.innerHTML = '';
+  E.MODELLI.forEach((gruppo, g) => {
+    const box = document.createElement('div');
+    box.className = 'gruppo';
+    box.innerHTML = `<b>${GRUPPI[g] || 'Altro'}</b><div></div>`;
+    for (const m of new Set(gruppo)) {
+      const b = document.createElement('button');
+      b.className = 'modello' + (eFatto(m) ? ' fatto' : '') + (m === scelto ? ' scelto' : '');
+      b.textContent = E.nome(m);
+      b.title = m;
+      b.addEventListener('click', () => { scelto = m; disegnaElenco(); });
+      box.lastChild.appendChild(b);
+    }
+    el.appendChild(box);
+  });
+}
+
+// --- la richiesta ---
+$('richiesta').value = leggi('genera-richiesta') || RICHIESTA;
+$('richiesta').addEventListener('input', () => scrivi('genera-richiesta', $('richiesta').value));
+$('ripristina').addEventListener('click', () => { $('richiesta').value = RICHIESTA; scrivi('genera-richiesta', null); });
+
+// --- la chiamata ---
+const valore = nome => document.querySelector(`input[name=${nome}]:checked`).value;
+
+function stato(testo, errore) {
+  $('stato').textContent = testo;
+  $('stato').className = errore ? 'errore' : '';
+}
+
+$('genera').addEventListener('click', async () => {
+  const chiave = $('chiave').value.trim();
+  if (!chiave) return stato('Manca la chiave (punto 1).', true);
+  if (!originale) return stato("Manca l'immagine originale (punto 2).", true);
+  if ($('ricorda').checked) scrivi('openai-chiave', chiave);
+
+  // Modifica di un'immagine: l'originale per primo, poi il logo. La misura la
+  // sceglie il modello («auto»), così resta la forma dell'originale.
+  const corpo = new FormData();
+  corpo.append('model', valore('motore'));
+  corpo.append('prompt', $('richiesta').value);
+  corpo.append('size', 'auto');
+  corpo.append('quality', valore('qualita'));
+  corpo.append('n', valore('quante'));
+  corpo.append('image[]', originale, originale.name);
+  if (logo) corpo.append('image[]', logo, 'logo-sparklingtones.png');
+
+  $('genera').disabled = true;
+  const inizio = Date.now();
+  const orologio = setInterval(() => stato(`Sto disegnando… ${Math.round((Date.now() - inizio) / 1000)} s (di solito meno di un minuto)`), 1000);
+  try {
+    const r = await fetch('https://api.openai.com/v1/images/edits', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + chiave }, body: corpo,
+    });
+    const dati = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      const msg = (dati.error && dati.error.message) || `errore ${r.status}`;
+      const aiuto = r.status === 401 ? '\nLa chiave non è valida: ricopiala da platform.openai.com → API keys.'
+        : r.status === 429 ? '\nTroppe richieste, o crediti finiti: controlla Billing su platform.openai.com.'
+        : '';
+      throw new Error(msg + aiuto);
+    }
+    mostra(dati, scelto);
+    const u = dati.usage;
+    stato(`Fatto in ${Math.round((Date.now() - inizio) / 1000)} s.` +
+      (u ? ` Token: ${u.input_tokens ?? '?'} in entrata, ${u.output_tokens ?? '?'} in uscita.` : ''));
+  } catch (e) {
+    stato('Non è andata: ' + e.message, true);
+  } finally {
+    clearInterval(orologio);
+    $('genera').disabled = false;
+  }
+});
+
+function mostra(dati, m) {
+  const box = $('risultati');
+  if (box.querySelector('p.nota')) box.innerHTML = '';
+  const base = m || 'immagine';
+  (dati.data || []).forEach((d, i) => {
+    const src = d.b64_json ? 'data:image/png;base64,' + d.b64_json : d.url;
+    if (!src) return;
+    const card = document.createElement('div');
+    card.className = 'risultato';
+    card.innerHTML = '<img alt=""><div class="riga"><span></span><a><button>Salva</button></a></div>';
+    card.querySelector('img').src = src;
+    card.querySelector('span').textContent = m ? E.nome(m) : '';
+    const a = card.querySelector('a');
+    a.href = src;
+    a.download = `${base}${i ? '-' + (i + 1) : ''}.png`;
+    a.addEventListener('click', () => {
+      if (!m) return;
+      const s = salvate();
+      if (!s.includes(m)) { s.push(m); scrivi('genera-fatte', JSON.stringify(s)); disegnaElenco(); }
+    });
+    box.prepend(card);
+  });
+}
+
+disegnaElenco();
+</script>
+</body>
+</html>

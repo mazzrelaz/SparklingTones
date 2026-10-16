@@ -337,7 +337,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 (**pushato, non in `main`**), **impaginazione approvata**. **Non si pubblica finché non ci sono
 tutte le immagini** (scelta dell'utente). Il worktree stava nello scratchpad di una sessione: se in
 una sessione nuova non c'è, `git worktree add <scratchpad>/bozza-editor bozza-editor-grafico`, e
-la voce `spark-bozza` di `.claude/launch.json` (non committata) va puntata lì. Le immagini arrivano
+la voce `spark-bozza` di `.claude/launch.json` (non committata) va puntata lì. L'utente le genera con
+**`tools/genera-immagini.html`** (16 ottobre: API OpenAI, `gpt-image-2.5-flare`, qualità bassa, ~0,6
+centesimi l'una; originale + logo + la sua richiesta di Gemini; la chiave sta solo nel suo browser). Le immagini arrivano
 **senza manopole**, col puntino bianco al centro e lo sfondo nero: sfondo (`tools/togli-sfondo/`;
 se lo sfondo è blu scuro, `&pieno=62&alto=120&basso=60`; grigio scuro, `&pieno=45&alto=100&basso=45`), manopole e misure le faccio io.
 **Fatte 24**: Silver 120, Blackface Duo, Tube Drive, Sustainer, Noise Gate, LA Comp, Red Comp, Bass
