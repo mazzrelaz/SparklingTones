@@ -427,6 +427,21 @@
       led: { x: 101.6, y: 310.8, r: 9.5 },
       pulsante: { x: 101.6, y: 371.4, r: 17.5 },
     },
+    // Plexiglas (Marshall Plexi): pannello dorato; la manopola copre quella nera
+    // disegnata e lascia i numeri. Pulsante: la levetta ON/OFF.
+    Plexi: {
+      src: 'immagini/blocchi/Plexi.webp', w: 900, h: 853,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 207.8, y: 332.6, r: 33.9 },   // Gain
+        { indice: 3, x: 326,   y: 332.6, r: 33.9 },   // Bass
+        { indice: 2, x: 445.3, y: 332.6, r: 33.9 },   // Middle
+        { indice: 1, x: 566.9, y: 332.6, r: 33.9 },   // Treble
+        { indice: 4, x: 684.2, y: 332.6, r: 33.9 },   // Master (Volume)
+      ],
+      led: { x: 103.9, y: 297.6, r: 9.9 },
+      pulsante: { x: 104.6, y: 356.3, r: 15.6 },
+    },
     // J.H. D-Show Master (Fender Dual Showman): il nome non è scritto sul
     // disegno, l'ha detto l'utente. Pannello nero in alto; attorno ai puntini
     // solo la scala. Pulsante: la levetta Power.
