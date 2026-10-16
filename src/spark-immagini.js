@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Hammer 500 (ampli da basso): tutto viola; la manopola copre quella nera
+    // disegnata e lascia l'arco. Pulsante: la levetta Power.
+    Hammer500: {
+      src: 'immagini/blocchi/Hammer500.webp', w: 900, h: 883,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 200.7, y: 332.7, r: 31.6 },   // Gain
+        { indice: 3, x: 322.6, y: 332.7, r: 31.6 },   // Bass
+        { indice: 2, x: 444.1, y: 332.7, r: 31.6 },   // Middle
+        { indice: 1, x: 569.4, y: 332.7, r: 31.6 },   // Treble
+        { indice: 4, x: 692.2, y: 332.7, r: 31.6 },   // Master (Volume)
+      ],
+      led: { x: 94.7, y: 295, r: 9.3 },
+      pulsante: { x: 93.3, y: 356.7, r: 17.2 },
+    },
     // W600 (ampli da basso): pannello dorato; la manopola copre quella nera
     // disegnata e lascia la scala. Pulsante: la levetta ON/OFF.
     W600: {
