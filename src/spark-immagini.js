@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Jumbo (modello «FatAcousticV2»): tutto azzurro; la manopola copre
+    // quella nera disegnata e lascia la scala. Pulsante: la levetta Power.
+    FatAcousticV2: {
+      src: 'immagini/blocchi/FatAcousticV2.webp', w: 900, h: 863,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 204.3, y: 336.2, r: 30.4 },   // Gain
+        { indice: 3, x: 326.8, y: 336.2, r: 30.4 },   // Bass
+        { indice: 2, x: 448.6, y: 336.2, r: 30.4 },   // Middle
+        { indice: 1, x: 571.7, y: 336.2, r: 30.4 },   // Treble
+        { indice: 4, x: 692.8, y: 336.2, r: 30.4 },   // Master (Volume)
+      ],
+      led: { x: 98.5, y: 303.6, r: 9.4 },
+      pulsante: { x: 97.8, y: 362.3, r: 17.4 },
+    },
     // Fishboy (modello «AcousticAmpV2»): pannello dorato; la manopola copre
     // quella nera disegnata e lascia la scala. Pulsante: la levetta Power.
     AcousticAmpV2: {
