@@ -50,7 +50,24 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
-    // Vintage Delay: Repeat Rate e Intensity in alto, Echo in mezzo, rosa
+    // Riverbero, tipo Room Studio A: sei manopole rosa dentro gli anelli —
+    // Level e Damping a sinistra, Low Cut e High Cut in mezzo, Time e Dwell a
+    // destra. La spia («CHECK») in alto.
+    'bias.reverb:Room Studio A': {
+      src: 'immagini/blocchi/Reverb-RoomStudioA.webp', w: 900, h: 880,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 172,   y: 146.2, r: 65.6 },   // Level
+        { indice: 1, x: 172,   y: 396.5, r: 65.6 },   // Damping
+        { indice: 2, x: 343.8, y: 290.7, r: 65.6 },   // Low Cut
+        { indice: 3, x: 555.8, y: 290.9, r: 65.6 },   // High Cut
+        { indice: 4, x: 729.5, y: 396.5, r: 65.6 },   // Dwell
+        { indice: 5, x: 729.4, y: 146.2, r: 65.6 },   // Time
+      ],
+      led: { x: 450.4, y: 123.6, r: 14.6 },
+      pulsante: { x: 450, y: 772.7, r: 48.1 },
+    },
+    // Vintage Delay:Repeat Rate e Intensity in alto, Echo in mezzo, rosa
     // dentro i cerchi col mirino. Il BPM (parametro 3) è la levetta fra le
     // due, ON in alto e OFF in basso, disegnata giù (OFF): `su: 0`. La spia
     // sta sopra il footswitch.
