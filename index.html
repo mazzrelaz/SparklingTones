@@ -69,6 +69,9 @@
        colpo d'occhio, che su una manopola è quello che serve. */
     --strumento:'Space Grotesk','Inter',-apple-system,sans-serif;
   }
+  /* Niente «trascina in giù per ricaricare» (l'utente, 16 ottobre 2026): una
+     strisciata per sbaglio ricaricava la pagina e faceva cadere l'ampli. */
+  html, body { overscroll-behavior-y:none; }
   html { height:100%; }
   body { margin:0; min-height:100%; background:var(--bg); color:var(--text);
          font-family:var(--font); font-size:15px;
