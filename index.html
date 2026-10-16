@@ -683,7 +683,13 @@
   /* Bordo da 2 e niente viti negli angoli (l'utente): sul fondo solo le piste. */
   body.pad-g .pad::before { background:var(--piste); }
   body.pad-g .pad .nome { color:#eef0f3; font-size:1.08rem; text-shadow:0 0 6px rgba(160,140,255,.35); }
-  body.pad-g .pad.libero { background:none; border:2px dashed #3a3550; }
+  body.pad-g .pad.libero { background:none; border:2px dashed #4a4d55; }
+  /* La sfumatura solo su quello che suona (l'utente): gli altri hanno il bordo
+     grigio, con un filo di bagliore bianco. */
+  body.pad-g .pad:not(.attivo):not(.libero) {
+       background:linear-gradient(#050608, #050608) padding-box,
+                  linear-gradient(#80848d, #80848d) border-box;
+       box-shadow:0 0 8px -3px rgba(255,255,255,.35); }
   /* Senza LED (l'utente non li vuole): il preset che suona lo dice il
      bagliore, che pulsa piano, ai bordi e dietro il nome, nei colori della
      sfumatura del bordo. */
