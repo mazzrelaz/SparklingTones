@@ -1336,3 +1336,9 @@ un'immagine finta su un tipo.
 («Ambient») e Hall Natural col nome del tipo scritto; tre con un nome di fantasia, abbinate
 dall'utente: «Classic Plate» = Plate Rich, «Holy Grail» = Hall Medium, «Reflection» = Plate Long.
 Room Studio B e Plate Long hanno la spia viola (`led.colore`). Con queste **le immagini sono tutte**.
+
+**Otto immagini rifatte** (16 ottobre, sera; l'utente: «questi voglio che sostituiscano gli
+esistenti»): Red Comp, Sustainer, Tube Drive, Optical Comp, Booster, Rocker V, Jumbo e BE 101, nello
+stile nuovo; gli ampli ora hanno la cassa sotto. Misure rifatte da capo, indici invariati. L'Optical
+Comp ha la levetta Pad disegnata giù (0 dB, `su: 0`); resta da verificare a orecchio quale valore sia
+-15 dB. Le manopole del Booster ora verdi, del Rocker V azzurre.
