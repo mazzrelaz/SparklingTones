@@ -636,75 +636,86 @@
   .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
                 background:var(--accent); transition:width 0.12s linear; }
 
-  /* BOZZA del 16 ottobre 2026: tre vestiti cyberpunk per i pulsantoni, come le
-     immagini dei blocchi, da confrontare sul telefono (il selettore A/B/C è
-     `16-bozza-pulsanti.js`, solo nella bozza). Tutti disegnati qui, senza
-     immagini: seguono la misura del pulsante, che cambia col telefono. Il
-     colore è quello della famiglia del preset (`--led`, sul pulsante). */
+  /* BOZZA del 16 ottobre 2026: vestiti cyberpunk per i pulsantoni, da
+     confrontare sul telefono (il selettore è `16-bozza-pulsanti.js`, solo nella
+     bozza). Tutti disegnati qui, senza immagini: seguono la misura del pulsante,
+     che cambia col telefono. Il colore è quello della famiglia del preset
+     (`--led`, sul pulsante). Primo giro A/B/C (neon, footswitch, HUD): bocciati
+     tutti dall'utente. Secondo giro: D, E, F. */
   body[class*="pad-"] .pad { --c:var(--led, #3a3f47); }
   body[class*="pad-"] .pad.libero { --c:#3a3f47; }
 
-  /* A · Neon: fondo nero, il colore della famiglia che sale dal basso, nome
-     al neon, due staffe agli angoli in basso. */
-  body.pad-a .pad { border-radius:10px; border:1px solid color-mix(in srgb, var(--c) 45%, #000);
-                    background:radial-gradient(140% 100% at 50% 135%, color-mix(in srgb, var(--c) 24%, transparent), transparent 62%), #07080b;
-                    box-shadow:inset 0 0 22px -12px var(--c); }
-  body.pad-a .pad .nome { color:#fff; font-size:1.12rem;
-                          text-shadow:0 0 6px var(--c), 0 0 16px color-mix(in srgb, var(--c) 70%, transparent); }
-  body.pad-a .pad::before, body.pad-a .pad::after { content:''; position:absolute; bottom:6px;
-                          width:14px; height:14px; pointer-events:none; opacity:0.8; }
-  body.pad-a .pad::before { left:6px; border-left:2px solid var(--c); border-bottom:2px solid var(--c);
-                            border-bottom-left-radius:6px; }
-  body.pad-a .pad::after { right:6px; border-right:2px solid var(--c); border-bottom:2px solid var(--c);
-                           border-bottom-right-radius:6px; }
-  body.pad-a .pad.attivo { border-color:var(--c);
-                           background:radial-gradient(140% 100% at 50% 135%, color-mix(in srgb, var(--c) 40%, transparent), transparent 66%), #0a0c10;
-                           box-shadow:0 0 0 1px var(--c) inset, 0 0 12px -2px var(--c),
-                                      0 0 30px -10px var(--c), inset 0 0 30px -10px var(--c); }
+  /* D · Pedale: come le immagini degli effetti. Doppio contorno al neon (fuori
+     sottile, dentro del colore della famiglia), quattro viti negli angoli,
+     piste di circuito appena accennate sul fondo, e il nome dentro
+     un'insegna, come quella dell'editor. */
+  body.pad-d .pad { border-radius:12px; align-items:center; text-align:center;
+                    border:1px solid color-mix(in srgb, var(--c) 55%, #000);
+                    background:#050608;
+                    box-shadow:inset 0 0 0 4px #050608, inset 0 0 0 5px color-mix(in srgb, var(--c) 45%, transparent),
+                               0 0 10px -4px var(--c); }
+  body.pad-d .pad::before { content:''; position:absolute; inset:0; pointer-events:none;
+                            background:radial-gradient(circle at 12px 12px, #8a909a 0 2px, #2a2d33 2.6px, transparent 3.4px),
+                                       radial-gradient(circle at calc(100% - 12px) 12px, #8a909a 0 2px, #2a2d33 2.6px, transparent 3.4px),
+                                       radial-gradient(circle at 12px calc(100% - 12px), #8a909a 0 2px, #2a2d33 2.6px, transparent 3.4px),
+                                       radial-gradient(circle at calc(100% - 12px) calc(100% - 12px), #8a909a 0 2px, #2a2d33 2.6px, transparent 3.4px),
+                                       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Cg fill='none' stroke='%237b6cff' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M0 20h30l10 10h40M120 70H90l-10-10H50l-8 8H0M60 0v14l8 8M20 90V76l10-10'/%3E%3C/g%3E%3Cg fill='%237b6cff' fill-opacity='.22'%3E%3Ccircle cx='80' cy='30' r='2'/%3E%3Ccircle cx='42' cy='68' r='2'/%3E%3Ccircle cx='68' cy='22' r='2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 90px; }
+  body.pad-d .pad .ledpad { left:22px; top:10px; }
+  body.pad-d .pad .n { right:24px; }
+  body.pad-d .pad .nome { padding:5px 12px; border:1px solid var(--c); border-radius:8px; max-width:100%;
+                          background:#07080b; color:#fff; text-shadow:0 0 8px var(--c);
+                          box-shadow:0 0 8px -2px var(--c), inset 0 0 8px -3px var(--c); }
+  body.pad-d .pad.libero .nome { border-style:dashed; box-shadow:none; text-shadow:none; color:var(--faint); }
+  body.pad-d .pad.attivo { border-color:var(--c); background:color-mix(in srgb, var(--c) 10%, #050608);
+                           box-shadow:inset 0 0 0 4px #050608, inset 0 0 0 5px var(--c), inset 0 0 26px -8px var(--c),
+                                      0 0 14px -2px var(--c), 0 0 30px -10px var(--c); }
+  body.pad-d .pad.attivo .nome { background:color-mix(in srgb, var(--c) 20%, #07080b);
+                                 box-shadow:0 0 14px -1px var(--c), inset 0 0 10px -2px var(--c); }
 
-  /* B · Footswitch: un pedale in piccolo. Nome in alto al centro, sotto il
-     footswitch di metallo con l'anello del colore della famiglia, che si
-     accende quando quel preset suona. */
-  body.pad-b .pad { border-radius:12px; border:1px solid color-mix(in srgb, var(--c) 35%, #1c1f25);
-                    background:linear-gradient(160deg, #13161b, #07080a);
-                    justify-content:flex-start; align-items:center; text-align:center;
-                    padding-top:22px; font-size:1rem; }
-  body.pad-b .pad .nome { color:#fff; text-shadow:0 0 8px color-mix(in srgb, var(--c) 60%, transparent); }
-  body.pad-b .pad::before { content:''; position:absolute; left:50%; bottom:9%; height:38%;
-                            aspect-ratio:1; transform:translateX(-50%); border-radius:50%; pointer-events:none;
-                            background:radial-gradient(circle at 50% 38%, #e4e7ec 0 6%, #9aa0a9 20%, #454a53 44%, #1b1d21 62%, #0c0d0f 70%);
-                            box-shadow:0 0 0 2px #0c0d0f, 0 0 0 4px color-mix(in srgb, var(--c) 55%, #000),
-                                       0 0 10px -2px var(--c); }
-  body.pad-b .pad.libero::before { opacity:0.35; }
-  body.pad-b .pad.attivo { border-color:var(--c);
-                           background:linear-gradient(160deg, color-mix(in srgb, var(--c) 16%, #13161b), #07080a);
-                           box-shadow:0 0 0 1px var(--c) inset, 0 0 12px -2px var(--c), 0 0 30px -10px var(--c); }
-  body.pad-b .pad.attivo::before { box-shadow:0 0 0 2px #0c0d0f, 0 0 0 4px var(--c),
-                                              0 0 16px 2px var(--c); }
+  /* E · Synthwave: contorno sfumato dal magenta all'azzurro, la griglia in
+     prospettiva sul fondo e l'orizzonte acceso del colore della famiglia;
+     nome bianco con la sbavatura magenta/azzurra dei vecchi schermi. */
+  body.pad-e .pad { border-radius:12px; border:1.5px solid transparent;
+                    background:linear-gradient(180deg, #0a0712, #05040a) padding-box,
+                               linear-gradient(135deg, #ff2bd6, #3aa0ff) border-box; }
+  body.pad-e .pad::before { content:''; position:absolute; left:-30%; right:-30%; bottom:0; height:42%;
+                            pointer-events:none; transform:perspective(90px) rotateX(48deg); transform-origin:bottom;
+                            background:repeating-linear-gradient(90deg, rgba(255,43,214,.45) 0 1px, transparent 1px 16px),
+                                       repeating-linear-gradient(0deg, rgba(58,160,255,.45) 0 1px, transparent 1px 9px);
+                            -webkit-mask-image:linear-gradient(transparent, #000 70%); mask-image:linear-gradient(transparent, #000 70%); }
+  body.pad-e .pad::after { content:''; position:absolute; left:0; right:0; bottom:42%; height:1px; pointer-events:none;
+                           background:var(--c); box-shadow:0 0 8px 1px var(--c), 0 0 22px 2px color-mix(in srgb, var(--c) 50%, transparent); }
+  body.pad-e .pad .nome { position:relative; z-index:1; margin-bottom:22%; color:#fff; font-size:1.1rem;
+                          text-shadow:-1px 0 #ff2bd6, 1px 0 #2be4ff, 0 0 10px rgba(255,255,255,.35); }
+  body.pad-e .pad.libero { background:#05040a; border:1px dashed #2a2340; }
+  body.pad-e .pad.libero::before, body.pad-e .pad.libero::after { opacity:0.25; }
+  body.pad-e .pad.attivo { background:linear-gradient(180deg, color-mix(in srgb, var(--c) 18%, #0a0712), #05040a) padding-box,
+                                      linear-gradient(135deg, #ff2bd6, #3aa0ff) border-box;
+                           box-shadow:0 0 14px -2px #ff2bd6, 0 0 26px -8px #3aa0ff; }
+  body.pad-e .pad.attivo::after { box-shadow:0 0 10px 2px var(--c), 0 0 30px 6px color-mix(in srgb, var(--c) 60%, transparent); }
 
-  /* C · HUD: angoli tagliati, griglia sottile del colore della famiglia, nome
-     in maiuscolo e una linea accesa in basso, come un pannello di comando. */
-  body.pad-c .pad { border-radius:3px; border:1px solid color-mix(in srgb, var(--c) 35%, #15171b);
-                    clip-path:polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
-                    background:repeating-linear-gradient(0deg, color-mix(in srgb, var(--c) 8%, transparent) 0 1px, transparent 1px 14px),
-                               repeating-linear-gradient(90deg, color-mix(in srgb, var(--c) 8%, transparent) 0 1px, transparent 1px 14px),
-                               #06070a; }
-  body.pad-c .pad .nome { text-transform:uppercase; letter-spacing:0.06em; font-size:0.92rem;
-                          color:color-mix(in srgb, var(--c) 30%, #ffffff); text-shadow:0 0 8px var(--c); }
-  body.pad-c .pad .n { right:24px; }
-  body.pad-c .pad::before { content:''; position:absolute; left:18px; right:28%; bottom:0; height:2px;
-                            background:var(--c); box-shadow:0 0 8px var(--c); opacity:0.75; pointer-events:none; }
-  body.pad-c .pad.libero::before { opacity:0.25; }
-  body.pad-c .pad.attivo { border-color:var(--c);
-                           background:repeating-linear-gradient(0deg, color-mix(in srgb, var(--c) 16%, transparent) 0 1px, transparent 1px 14px),
-                                      repeating-linear-gradient(90deg, color-mix(in srgb, var(--c) 16%, transparent) 0 1px, transparent 1px 14px),
-                                      color-mix(in srgb, var(--c) 10%, #06070a);
-                           box-shadow:inset 0 0 0 1px var(--c), inset 0 0 28px -6px var(--c); }
-  body.pad-c .pad.attivo::before { opacity:1; right:18px; }
+  /* F · Tasto retroilluminato: un tasto da tastiera di scena, scuro e in
+     rilievo, con un anello di luce del colore della famiglia appena dentro il
+     bordo. Quando suona si illumina da dentro, come una lampadina sotto la
+     plastica. */
+  body.pad-f .pad { border-radius:16px; align-items:center; text-align:center; border:1px solid #2a2e36;
+                    background:linear-gradient(180deg, #1b1e24, #0b0c0f);
+                    box-shadow:inset 0 1px 0 rgba(255,255,255,.08), inset 0 -3px 8px rgba(0,0,0,.6),
+                               inset 0 0 0 7px #0d0e12, inset 0 0 0 8px color-mix(in srgb, var(--c) 50%, #000),
+                               inset 0 0 0 9px #0d0e12, inset 0 0 22px -6px color-mix(in srgb, var(--c) 40%, transparent); }
+  body.pad-f .pad .ledpad { left:18px; top:16px; }
+  body.pad-f .pad .n { right:18px; top:14px; }
+  body.pad-f .pad .nome { color:color-mix(in srgb, var(--c) 22%, #e8e8ea); text-shadow:0 0 6px color-mix(in srgb, var(--c) 45%, transparent); }
+  body.pad-f .pad.libero { background:none; }
+  body.pad-f .pad.attivo { border-color:var(--c);
+                           background:radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--c) 42%, #0b0c0f), #0b0c0f 78%);
+                           box-shadow:inset 0 1px 0 rgba(255,255,255,.12),
+                                      inset 0 0 0 7px transparent, inset 0 0 0 8px var(--c), inset 0 0 18px 2px var(--c),
+                                      0 0 14px -2px var(--c), 0 0 30px -10px var(--c); }
+  body.pad-f .pad.attivo .nome { color:#fff; text-shadow:0 0 6px var(--c), 0 0 16px var(--c); }
 
-  /* In modifica dei banchi il bordo oro tratteggiato resta, in tutte e tre. */
+  /* In modifica dei banchi il bordo oro tratteggiato resta, in tutte. */
   body[class*="pad-"] .pad.inModifica { border-color:var(--gold); border-style:dashed; }
-  body[class*="pad-"] .pad.libero { background:none; box-shadow:none; border-style:dashed; }
 
   /* Il selettore della bozza, solo nella vista Live. */
   #bozzaPad { position:fixed; top:6px; left:50%; transform:translateX(-50%); z-index:60;
