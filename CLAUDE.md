@@ -337,6 +337,12 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 
 ## Dove si riprende — 16 ottobre 2026
 
+**Da fare per primo (chiesto dall'utente la sera del 16 ottobre, «per domani»)**: nella vista Live,
+**tenendo premuto 2 secondi su un pulsantone si entra direttamente nell'editor** di quel preset
+(`apriEditor`). Da pensare: la pressione lunga non deve far partire il preset come il tocco normale,
+un segno che la pressione sta caricando, i posti vuoti e la modalità «Modifica» dei banchi. È grafica
+e comportamento: prima la bozza.
+
 **Pubblicato il 16 ottobre 2026 (sera): l'editor con le immagini dei blocchi** (ramo
 `bozza-editor-grafico` unito in `main`, guscio `v109`). Ogni modello ha la sua immagine (89, in
 `immagini/blocchi/`; tabella e misure in `src/spark-immagini.js`; i riverberi una per tipo, voce
