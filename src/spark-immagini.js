@@ -27,6 +27,21 @@
     ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
 
   const TABELLA = {
+    // Optical Comp. Il parametro 2, Pad, è la levetta in mezzo: in alto -15 dB,
+    // in basso 0 dB. **Da verificare a orecchio**: si assume 1 = -15 dB = in alto.
+    BBEOpticalComp: {
+      src: 'immagini/blocchi/BBEOpticalComp.webp', w: 900, h: 1341,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 249.4, y: 276.8, r: 95.4 },   // Volume
+        { indice: 1, x: 649.8, y: 276.8, r: 95.4, manopola: manopola('azzurra') },   // Comp
+      ],
+      levette: [
+        { indice: 2, x: 450.5, y: 448.9, r: 53.3, su: 1 },   // Pad: -15 dB (su) / 0 dB (giù)
+      ],
+      led: { x: 449.6, y: 113, r: 30.9 },
+      pulsante: { x: 450.5, y: 1132.9, r: 92.6 },
+    },
     BassComp: {                                       // Bass Comp
       src: 'immagini/blocchi/BassComp.webp', w: 900, h: 1361,
       manopola: manopola('azzurra'),
