@@ -351,6 +351,22 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // Two Stone SP50: la manopola copre il disco nero dentro le tacche; Gain,
+    // Middle e Volume più grandi di Bass e Treble, com'è disegnato. Pulsante:
+    // la levetta Power.
+    TwoStoneSP50: {
+      src: 'immagini/blocchi/TwoStoneSP50.webp', w: 900, h: 890,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 206.2, y: 346.5, r: 38 },     // Gain
+        { indice: 3, x: 326.8, y: 346.5, r: 32.2 },   // Bass
+        { indice: 2, x: 448.2, y: 346.5, r: 38 },     // Middle
+        { indice: 1, x: 570.3, y: 346.5, r: 32.2 },   // Treble
+        { indice: 4, x: 689.4, y: 346.5, r: 38 },     // Master (Volume)
+      ],
+      led: { x: 101.6, y: 310.8, r: 9.5 },
+      pulsante: { x: 101.6, y: 371.4, r: 17.5 },
+    },
     // J.H. 45/100 (Marshall JTM45/100): pannello dorato, la manopola copre il
     // cerchio della scala e lascia le tacche. Pulsante: la levetta sotto Indicator.
     'JH.JTM45': {
