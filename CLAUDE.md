@@ -348,11 +348,11 @@ px, WebP), misure spostate del taglio e per la scala, cerchi controllati sull'or
 copia generica sta sul suo Desktop, «Genera immagini.html»). Copia delle finite in `Progetti
 Claude\Spark immagini finite` (fuori dal repository, non si aggiorna da sola). **Provato e
 scartato**: un colore solo per la catena (restano i colori per famiglia, con l'alone più piccolo del
-tassello scelto). Tempo e OFFLINE in blu. Il worktree della bozza non serve più. Dettaglio in
+tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre bianca (non segue più la famiglia). Il worktree della bozza non serve più. Dettaglio in
 `docs/decisioni-ui.md`, ultime sezioni; la versione lunga di questo paragrafo in `docs/diario.md`.
 
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
-14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v109` (16 ottobre, sera). **`guida.en.html`** è
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v110` (16 ottobre, sera). **`guida.en.html`** è
 rimasta alle schermate vecchie.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
