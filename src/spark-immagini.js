@@ -504,6 +504,22 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // British 30 (Orange AD30): pannello arancione; al posto delle manopole il
+    // disegno ha dei mirini neri, la nostra copre il centro e lascia le tacche.
+    // Pulsante: la levetta ON/OFF.
+    OrangeAD30: {
+      src: 'immagini/blocchi/OrangeAD30.webp', w: 900, h: 900,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 207.2, y: 349.6, r: 32.8 },   // Gain
+        { indice: 3, x: 324.8, y: 349.6, r: 32.8 },   // Bass
+        { indice: 2, x: 443.9, y: 349.6, r: 32.8 },   // Middle
+        { indice: 1, x: 573.2, y: 349.6, r: 32.8 },   // Treble
+        { indice: 4, x: 690.1, y: 349.6, r: 32.8 },   // Master (Volume)
+      ],
+      led: { x: 92.3, y: 321, r: 9.7 },
+      pulsante: { x: 91.6, y: 382.2, r: 17.9 },
+    },
     // RB 101 (Bogner): pannello argento; la manopola copre quella nera
     // disegnata. Gain, Middle e Volume più grandi di Bass e Treble, com'è
     // disegnato. Pulsante: la levetta ON/OFF.
