@@ -59,15 +59,18 @@ function disegnaLive() {
       + (live.modifica && banco ? ' inModifica' : '')
       + (live.sposta === posto ? ' inMano' : '');
 
+    // Il colore della famiglia sta sul pulsante intero: il LED lo eredita, e
+    // le versioni cyberpunk (bozza, 16 ottobre 2026) ci colorano bordo e nome.
     const ledpad = document.createElement('span');
     ledpad.className = 'ledpad';
-    if (!vuoto) ledpad.style.setProperty('--led', coloreLed(record));
+    if (!vuoto) pad.style.setProperty('--led', coloreLed(record));
 
     const numero = document.createElement('span');
     numero.className = 'n';
     numero.textContent = banco ? posto + 1 : postoAmpli(posto).label;
 
     const nome = document.createElement('span');
+    nome.className = 'nome';
     nome.textContent = vuoto
       ? (banco ? (live.modifica ? tr('tocca per scegliere') : tr('vuoto')) : tr('non letto'))
       : record.name;

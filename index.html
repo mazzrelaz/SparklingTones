@@ -636,6 +636,84 @@
   .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
                 background:var(--accent); transition:width 0.12s linear; }
 
+  /* BOZZA del 16 ottobre 2026: tre vestiti cyberpunk per i pulsantoni, come le
+     immagini dei blocchi, da confrontare sul telefono (il selettore A/B/C è
+     `16-bozza-pulsanti.js`, solo nella bozza). Tutti disegnati qui, senza
+     immagini: seguono la misura del pulsante, che cambia col telefono. Il
+     colore è quello della famiglia del preset (`--led`, sul pulsante). */
+  body[class*="pad-"] .pad { --c:var(--led, #3a3f47); }
+  body[class*="pad-"] .pad.libero { --c:#3a3f47; }
+
+  /* A · Neon: fondo nero, il colore della famiglia che sale dal basso, nome
+     al neon, due staffe agli angoli in basso. */
+  body.pad-a .pad { border-radius:10px; border:1px solid color-mix(in srgb, var(--c) 45%, #000);
+                    background:radial-gradient(140% 100% at 50% 135%, color-mix(in srgb, var(--c) 24%, transparent), transparent 62%), #07080b;
+                    box-shadow:inset 0 0 22px -12px var(--c); }
+  body.pad-a .pad .nome { color:#fff; font-size:1.12rem;
+                          text-shadow:0 0 6px var(--c), 0 0 16px color-mix(in srgb, var(--c) 70%, transparent); }
+  body.pad-a .pad::before, body.pad-a .pad::after { content:''; position:absolute; bottom:6px;
+                          width:14px; height:14px; pointer-events:none; opacity:0.8; }
+  body.pad-a .pad::before { left:6px; border-left:2px solid var(--c); border-bottom:2px solid var(--c);
+                            border-bottom-left-radius:6px; }
+  body.pad-a .pad::after { right:6px; border-right:2px solid var(--c); border-bottom:2px solid var(--c);
+                           border-bottom-right-radius:6px; }
+  body.pad-a .pad.attivo { border-color:var(--c);
+                           background:radial-gradient(140% 100% at 50% 135%, color-mix(in srgb, var(--c) 40%, transparent), transparent 66%), #0a0c10;
+                           box-shadow:0 0 0 1px var(--c) inset, 0 0 12px -2px var(--c),
+                                      0 0 30px -10px var(--c), inset 0 0 30px -10px var(--c); }
+
+  /* B · Footswitch: un pedale in piccolo. Nome in alto al centro, sotto il
+     footswitch di metallo con l'anello del colore della famiglia, che si
+     accende quando quel preset suona. */
+  body.pad-b .pad { border-radius:12px; border:1px solid color-mix(in srgb, var(--c) 35%, #1c1f25);
+                    background:linear-gradient(160deg, #13161b, #07080a);
+                    justify-content:flex-start; align-items:center; text-align:center;
+                    padding-top:22px; font-size:1rem; }
+  body.pad-b .pad .nome { color:#fff; text-shadow:0 0 8px color-mix(in srgb, var(--c) 60%, transparent); }
+  body.pad-b .pad::before { content:''; position:absolute; left:50%; bottom:9%; height:38%;
+                            aspect-ratio:1; transform:translateX(-50%); border-radius:50%; pointer-events:none;
+                            background:radial-gradient(circle at 50% 38%, #e4e7ec 0 6%, #9aa0a9 20%, #454a53 44%, #1b1d21 62%, #0c0d0f 70%);
+                            box-shadow:0 0 0 2px #0c0d0f, 0 0 0 4px color-mix(in srgb, var(--c) 55%, #000),
+                                       0 0 10px -2px var(--c); }
+  body.pad-b .pad.libero::before { opacity:0.35; }
+  body.pad-b .pad.attivo { border-color:var(--c);
+                           background:linear-gradient(160deg, color-mix(in srgb, var(--c) 16%, #13161b), #07080a);
+                           box-shadow:0 0 0 1px var(--c) inset, 0 0 12px -2px var(--c), 0 0 30px -10px var(--c); }
+  body.pad-b .pad.attivo::before { box-shadow:0 0 0 2px #0c0d0f, 0 0 0 4px var(--c),
+                                              0 0 16px 2px var(--c); }
+
+  /* C · HUD: angoli tagliati, griglia sottile del colore della famiglia, nome
+     in maiuscolo e una linea accesa in basso, come un pannello di comando. */
+  body.pad-c .pad { border-radius:3px; border:1px solid color-mix(in srgb, var(--c) 35%, #15171b);
+                    clip-path:polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+                    background:repeating-linear-gradient(0deg, color-mix(in srgb, var(--c) 8%, transparent) 0 1px, transparent 1px 14px),
+                               repeating-linear-gradient(90deg, color-mix(in srgb, var(--c) 8%, transparent) 0 1px, transparent 1px 14px),
+                               #06070a; }
+  body.pad-c .pad .nome { text-transform:uppercase; letter-spacing:0.06em; font-size:0.92rem;
+                          color:color-mix(in srgb, var(--c) 30%, #ffffff); text-shadow:0 0 8px var(--c); }
+  body.pad-c .pad .n { right:24px; }
+  body.pad-c .pad::before { content:''; position:absolute; left:18px; right:28%; bottom:0; height:2px;
+                            background:var(--c); box-shadow:0 0 8px var(--c); opacity:0.75; pointer-events:none; }
+  body.pad-c .pad.libero::before { opacity:0.25; }
+  body.pad-c .pad.attivo { border-color:var(--c);
+                           background:repeating-linear-gradient(0deg, color-mix(in srgb, var(--c) 16%, transparent) 0 1px, transparent 1px 14px),
+                                      repeating-linear-gradient(90deg, color-mix(in srgb, var(--c) 16%, transparent) 0 1px, transparent 1px 14px),
+                                      color-mix(in srgb, var(--c) 10%, #06070a);
+                           box-shadow:inset 0 0 0 1px var(--c), inset 0 0 28px -6px var(--c); }
+  body.pad-c .pad.attivo::before { opacity:1; right:18px; }
+
+  /* In modifica dei banchi il bordo oro tratteggiato resta, in tutte e tre. */
+  body[class*="pad-"] .pad.inModifica { border-color:var(--gold); border-style:dashed; }
+  body[class*="pad-"] .pad.libero { background:none; box-shadow:none; border-style:dashed; }
+
+  /* Il selettore della bozza, solo nella vista Live. */
+  #bozzaPad { position:fixed; top:6px; left:50%; transform:translateX(-50%); z-index:60;
+              display:flex; gap:4px; background:#000c; border:1px solid var(--line);
+              border-radius:10px; padding:3px; }
+  #bozzaPad button { padding:4px 10px; font-size:0.78rem; border-radius:7px; }
+  #bozzaPad button.scelto { background:var(--blu); border-color:var(--blu); color:#fff; }
+  body:not(.vista-live) #bozzaPad { display:none; }
+
 
   /* ---- pannelli a tutto schermo -------------------------------------- */
 
@@ -1944,5 +2022,7 @@
 <script src="src/app/13-dropbox.js"></script>
 <script src="src/app/14-pedale.js"></script>
 <script src="src/app/15-partenza.js"></script>
+<!-- BOZZA: il selettore dei pulsantoni, da togliere prima di pubblicare. -->
+<script src="src/app/16-bozza-pulsanti.js"></script>
 </body>
 </html>
