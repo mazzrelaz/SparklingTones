@@ -45,6 +45,20 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // J.H. Legendary Vibe (modello «JH.VoodooVibeJr»): quattro manopole dentro
+    // l'arco tratteggiato; Mix è il Chorus/Vibrato (parametro 3), continuo.
+    'JH.VoodooVibeJr': {
+      src: 'immagini/blocchi/JH.VoodooVibeJr.webp', w: 900, h: 1169,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 196.2, y: 240.1, r: 49.8 },   // Speed
+        { indice: 2, x: 555.5, y: 240.3, r: 49.8 },   // Intensity
+        { indice: 1, x: 312,   y: 519.4, r: 49.8 },   // Sweep
+        { indice: 3, x: 673.7, y: 519.5, r: 49.8 },   // Mix (Chorus/Vibrato)
+      ],
+      led: { x: 448.5, y: 771.3, r: 13.8 },
+      pulsante: { x: 450.5, y: 900.9, r: 42.5 },
+    },
     // Flanger: Rate e Depth in alto, Mix in mezzo, rosa dentro gli anelli.
     Flanger: {
       src: 'immagini/blocchi/Flanger.webp', w: 900, h: 1302,
