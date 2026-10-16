@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // J.H. Super 100 (Marshall Super Lead 100): pannello dorato come il 45/100;
+    // la manopola sta dentro la scala. Pulsante: la levetta sotto Indicator.
+    'JH.SuperLead100': {
+      src: 'immagini/blocchi/JH.SuperLead100.webp', w: 900, h: 845,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 233.3, y: 299.5, r: 32.4 },   // Gain
+        { indice: 3, x: 340,   y: 299.5, r: 32.4 },   // Bass
+        { indice: 2, x: 447.4, y: 299.5, r: 32.4 },   // Middle
+        { indice: 1, x: 551.9, y: 299.5, r: 32.4 },   // Treble
+        { indice: 4, x: 657.9, y: 299.5, r: 32.4 },   // Master (Volume)
+      ],
+      led: { x: 129.5, y: 262.7, r: 8.8 },
+      pulsante: { x: 129.5, y: 322.3, r: 16.2 },
+    },
     // J.H. 45/100 (Marshall JTM45/100): pannello dorato, la manopola copre il
     // cerchio della scala e lascia le tacche. Pulsante: la levetta sotto Indicator.
     'JH.JTM45': {
