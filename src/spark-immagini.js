@@ -351,6 +351,21 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // J.H. 45/100 (Marshall JTM45/100): pannello dorato, la manopola copre il
+    // cerchio della scala e lascia le tacche. Pulsante: la levetta sotto Indicator.
+    'JH.JTM45': {
+      src: 'immagini/blocchi/JH.JTM45.webp', w: 900, h: 898,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 233.6, y: 315.5, r: 31.6 },   // Gain
+        { indice: 3, x: 339.6, y: 315.5, r: 31.6 },   // Bass
+        { indice: 2, x: 448.5, y: 315.5, r: 31.6 },   // Middle
+        { indice: 1, x: 554.4, y: 315.5, r: 31.6 },   // Treble
+        { indice: 4, x: 661.1, y: 315.5, r: 31.6 },   // Master (Volume)
+      ],
+      led: { x: 132.3, y: 280.1, r: 9.8 },
+      pulsante: { x: 132.2, y: 343.3, r: 16.5 },
+    },
     // J.H. Bass Master (Fender Bassman 50 del 1968): il nome non è scritto sul
     // disegno, l'ha detto l'utente. Pannello in alto, sopra la griglia; Middle e
     // Volume un po' più grandi, com'è disegnato. Pulsante: la levetta Power.
