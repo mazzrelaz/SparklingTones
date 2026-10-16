@@ -273,6 +273,20 @@
       led: { x: 449.2, y: 117.4, r: 20.5 },
       pulsante: { x: 449.2, y: 1123.9, r: 56.8 },
     },
+    // Bassmaster: niente scala attorno ai puntini; il raggio lo decidono le
+    // scritte sotto (~95 px nell'originale) e le piste accanto. Azzurre come le
+    // scritte, sul pannello arancione.
+    MaestroBassmaster: {
+      src: 'immagini/blocchi/MaestroBassmaster.webp', w: 900, h: 1321,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 232.1, y: 263.9, r: 57.6 },   // Brass Vol
+        { indice: 2, x: 664.5, y: 263.9, r: 57.6 },   // Bass Vol
+        { indice: 1, x: 448.4, y: 463.6, r: 57.6 },   // Sensitivity
+      ],
+      led: { x: 448.1, y: 93.8, r: 19.7 },
+      pulsante: { x: 448.5, y: 1122, r: 56.8 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
