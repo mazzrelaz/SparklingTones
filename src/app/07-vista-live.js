@@ -59,8 +59,9 @@ function disegnaLive() {
       + (live.modifica && banco ? ' inModifica' : '')
       + (live.sposta === posto ? ' inMano' : '');
 
-    // Il colore della famiglia sta sul pulsante intero: il LED lo eredita, e
-    // le versioni cyberpunk (bozza, 16 ottobre 2026) ci colorano bordo e nome.
+    // Il colore della famiglia sta sul pulsante e il LED lo eredita. Col
+    // vestito del 16 ottobre 2026 il LED non si mostra (l'utente non lo vuole),
+    // ma resta qui: rimetterlo è una riga di stile.
     const ledpad = document.createElement('span');
     ledpad.className = 'ledpad';
     if (!vuoto) pad.style.setProperty('--led', coloreLed(record));

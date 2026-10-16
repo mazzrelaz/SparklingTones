@@ -636,121 +636,66 @@
   .pad .barra { position:absolute; left:0; bottom:0; height:3px; width:0;
                 background:var(--accent); transition:width 0.12s linear; }
 
-  /* BOZZA del 16 ottobre 2026: vestiti cyberpunk per i pulsantoni, da
-     confrontare sul telefono (il selettore è `16-bozza-pulsanti.js`, solo nella
-     bozza). Tutti disegnati qui, senza immagini: seguono la misura del pulsante,
-     che cambia col telefono. Primo giro A/B/C, secondo D/E/F: piaciuta la D.
-     Terzo giro, sulla D, con le richieste dell'utente: **il bordo è uguale per
-     tutti**, neutro, con un lieve bagliore bianco che cresce quando il preset
-     suona; **niente cornice attorno al nome**; **il colore della famiglia
-     resta solo nel LED** in alto a sinistra. D è quella; G e H due varianti. */
-  body[class*="pad-"] .pad { align-items:center; text-align:center; }
-  /* Le viti negli angoli, comuni a D, G e H (`--piste`: il disegno del fondo). */
-  body[class*="pad-"] .pad::before { content:''; position:absolute; inset:0; pointer-events:none;
-       background:radial-gradient(circle at 12px 12px, #8a909a 0 2px, #2a2d33 2.6px, transparent 3.4px),
-                  radial-gradient(circle at calc(100% - 12px) 12px, #8a909a 0 2px, #2a2d33 2.6px, transparent 3.4px),
-                  radial-gradient(circle at 12px calc(100% - 12px), #8a909a 0 2px, #2a2d33 2.6px, transparent 3.4px),
-                  radial-gradient(circle at calc(100% - 12px) calc(100% - 12px), #8a909a 0 2px, #2a2d33 2.6px, transparent 3.4px),
-                  var(--piste, none); }
-  body[class*="pad-"] .pad .ledpad { left:22px; top:10px; }
-  body[class*="pad-"] .pad .n { right:24px; }
-  body[class*="pad-"] .pad.libero { border-style:dashed; box-shadow:none; }
-  body[class*="pad-"] .pad.libero::before { opacity:0.4; }
-  body[class*="pad-"] .pad.libero .nome { color:var(--faint); text-shadow:none; }
-
-  /* D · Pedale: doppio contorno grigio, il secondo appena dentro il bordo,
-     piste di circuito accennate sul fondo, nome bianco. Acceso: i due
-     contorni diventano bianchi e il bagliore si allarga. */
-  body.pad-d .pad { --piste:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Cg fill='none' stroke='%237b6cff' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M0 20h30l10 10h40M120 70H90l-10-10H50l-8 8H0M60 0v14l8 8M20 90V76l10-10'/%3E%3C/g%3E%3Cg fill='%237b6cff' fill-opacity='.22'%3E%3Ccircle cx='80' cy='30' r='2'/%3E%3Ccircle cx='42' cy='68' r='2'/%3E%3Ccircle cx='68' cy='22' r='2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 90px;
-                    border-radius:12px; border:1px solid #4a4e57; background:#050608;
-                    box-shadow:inset 0 0 0 4px #050608, inset 0 0 0 5px rgba(255,255,255,.10),
-                               0 0 8px -3px rgba(255,255,255,.35); }
-  body.pad-d .pad .nome { color:#eef0f3; font-size:1.08rem; text-shadow:0 0 6px rgba(255,255,255,.3); }
-  body.pad-d .pad.attivo { border-color:#e8ecf2; background:#08090c;
-                           box-shadow:inset 0 0 0 4px #050608, inset 0 0 0 5px rgba(255,255,255,.6),
-                                      inset 0 0 24px -8px rgba(255,255,255,.35),
-                                      0 0 10px -1px rgba(255,255,255,.75), 0 0 28px -8px rgba(255,255,255,.55); }
-  body.pad-d .pad.attivo .nome { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(255,255,255,.6); }
-
-  /* G · Pedale con l'accento: come la D, ma il bordo è una sfumatura fissa
-     azzurro-viola-magenta, la stessa per tutti (il «pelo di blu/viola» delle
-     immagini degli effetti). Acceso: il viola si accende e si allarga. */
-  body.pad-g .pad { --piste:var(--piste-ferme); --piste-ferme:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Cg fill='none' stroke='%237b6cff' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M0 20h30l10 10h40M120 70H90l-10-10H50l-8 8H0M60 0v14l8 8M20 90V76l10-10'/%3E%3C/g%3E%3Cg fill='%237b6cff' fill-opacity='.22'%3E%3Ccircle cx='80' cy='30' r='2'/%3E%3Ccircle cx='42' cy='68' r='2'/%3E%3Ccircle cx='68' cy='22' r='2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 90px;
-                    border-radius:12px; border:2px solid transparent;
-                    background:linear-gradient(#050608, #050608) padding-box,
-                               linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
-                    box-shadow:0 0 8px -3px rgba(123,92,255,.6); }
-  /* Bordo da 2 e niente viti negli angoli (l'utente): sul fondo solo le piste. */
-  body.pad-g .pad::before { background:var(--piste); }
-  body.pad-g .pad .nome { color:#eef0f3; font-size:1.08rem; text-shadow:0 0 6px rgba(160,140,255,.35); }
-  body.pad-g .pad.libero { background:none; border:2px dashed #2e3036; }
-  /* La sfumatura solo su quello che suona (l'utente): gli altri hanno il bordo
-     grigio, con un filo di bagliore bianco. */
-  body.pad-g .pad:not(.attivo):not(.libero) {
+  /* Il vestito dei pulsantoni, scelto il 16 ottobre 2026 dopo tre giri di bozze
+     (A/B/C, D/E/F, poi D, G, H: è la G, ritoccata con l'utente). Tutto
+     disegnato qui, senza immagini: segue la misura del pulsante, che cambia col
+     telefono. Fondo nero con le piste di un circuito appena accennate, nome al
+     centro. **Niente LED** (l'utente non li vuole: il colore della famiglia nei
+     pulsantoni non c'è più). Quelli che non suonano: bordo sottile grigio scuro,
+     un po' più scuri. Quello che suona: bordo da 2 sfumato azzurro-viola-fucsia,
+     un bagliore che pulsa ai bordi e dietro il nome, e la corrente che scorre
+     sulle piste (`immagini/circuito-elettroni.svg`); fermo se il telefono chiede
+     meno animazioni. Il selettore `body.vista-live` dà a queste regole il peso
+     per vincere su quelle di sopra e su `html.grigio .pad.attivo`. */
+  body.vista-live .pad { --piste:var(--piste-ferme); --piste-ferme:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Cg fill='none' stroke='%237b6cff' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M0 20h30l10 10h40M120 70H90l-10-10H50l-8 8H0M60 0v14l8 8M20 90V76l10-10'/%3E%3C/g%3E%3Cg fill='%237b6cff' fill-opacity='.22'%3E%3Ccircle cx='80' cy='30' r='2'/%3E%3Ccircle cx='42' cy='68' r='2'/%3E%3Ccircle cx='68' cy='22' r='2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 90px;
+                         align-items:center; text-align:center;
+                         border-radius:12px; border:2px solid transparent;
+                         background:linear-gradient(#050608, #050608) padding-box,
+                                    linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
+                         box-shadow:0 0 8px -3px rgba(123,92,255,.6); }
+  body.vista-live .pad::before { content:''; position:absolute; inset:0; pointer-events:none;
+                                 background:var(--piste); }
+  body.vista-live .pad .ledpad { display:none; }
+  body.vista-live .pad .n { right:14px; }
+  body.vista-live .pad .nome { position:relative; z-index:1; color:#eef0f3; font-size:1.08rem;
+                               text-shadow:0 0 6px rgba(160,140,255,.35); }
+  body.vista-live .pad:not(.attivo):not(.libero) {
        background:linear-gradient(#050608, #050608) padding-box,
                   linear-gradient(#2e3036, #2e3036) border-box;
        box-shadow:0 0 8px -3px rgba(255,255,255,.15); }
-  /* Senza LED (l'utente non li vuole): il preset che suona lo dice il
-     bagliore, che pulsa piano, ai bordi e dietro il nome, nei colori della
-     sfumatura del bordo. */
-  body.pad-g .pad .ledpad { display:none; }
-  /* Quelli che non suonano un po' più scuri (l'utente): risalta quello acceso. */
-  body.pad-g .pad:not(.attivo) { filter:brightness(.62) saturate(.85); transition:filter .2s ease; }
-  /* Bordo da 2 solo su quello che suona; gli altri tornano sottili (l'utente). */
-  body.pad-g .pad:not(.attivo) { border-width:1px; }
-  body.pad-g .pad .nome { position:relative; z-index:1; }
-  body.pad-g .pad.attivo { background:linear-gradient(#0a0912, #050608) padding-box,
-                                      linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
-                           --piste:url('immagini/circuito-elettroni.svg') 0 0 / 120px 90px;
-                           animation:pulsaG 2.4s ease-in-out infinite; }
-  body.pad-g .pad.attivo::after { content:''; position:absolute; left:10%; right:10%; top:28%; bottom:28%;
-                                  border-radius:50%; pointer-events:none; filter:blur(10px);
-                                  background:radial-gradient(ellipse at center, rgba(255,43,214,.55),
-                                             rgba(123,92,255,.35) 45%, rgba(43,228,255,0) 75%);
-                                  animation:pulsaGLuce 2.4s ease-in-out infinite; }
-  body.pad-g .pad.attivo .nome { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(255,43,214,.7); }
-  @keyframes pulsaG {
+  body.vista-live .pad:not(.attivo) { border-width:1px; filter:brightness(.62) saturate(.85);
+                                      transition:filter .2s ease; }
+  body.vista-live .pad.libero { background:none; border-style:dashed; border-color:#2e3036; box-shadow:none; }
+  body.vista-live .pad.libero::before { opacity:0.4; }
+  body.vista-live .pad.libero .nome { color:var(--faint); text-shadow:none; }
+  /* In modifica dei banchi: il bordo oro tratteggiato, e oro pieno su quello in mano. */
+  body.vista-live .pad.inModifica:not(.attivo):not(.libero) { background:#050608; border:1px dashed var(--gold); }
+  body.vista-live .pad.inMano:not(.attivo):not(.libero) { background:#241f16; border:1px solid var(--gold); }
+
+  body.vista-live .pad.attivo { background:linear-gradient(#0a0912, #050608) padding-box,
+                                           linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
+                                --piste:url('immagini/circuito-elettroni.svg') 0 0 / 120px 90px;
+                                animation:pulsaPad 2.4s ease-in-out infinite; }
+  body.vista-live .pad.attivo::after { content:''; position:absolute; left:10%; right:10%; top:28%; bottom:28%;
+                                       border-radius:50%; pointer-events:none; filter:blur(10px);
+                                       background:radial-gradient(ellipse at center, rgba(255,43,214,.55),
+                                                  rgba(123,92,255,.35) 45%, rgba(43,228,255,0) 75%);
+                                       animation:pulsaPadLuce 2.4s ease-in-out infinite; }
+  body.vista-live .pad.attivo .nome { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(255,43,214,.7); }
+  @keyframes pulsaPad {
     0%, 100% { box-shadow:inset 0 0 22px -8px rgba(123,92,255,.6),
                           0 0 10px -2px rgba(123,92,255,.8), 0 0 26px -8px rgba(43,228,255,.5); }
     50%      { box-shadow:inset 0 0 30px -6px rgba(255,43,214,.55),
                           0 0 16px 0 rgba(255,43,214,.75), 0 0 36px -4px rgba(43,228,255,.75); }
   }
-  @keyframes pulsaGLuce {
+  @keyframes pulsaPadLuce {
     0%, 100% { opacity:.5; transform:scale(.9); }
     50%      { opacity:1; transform:scale(1.06); }
   }
   @media (prefers-reduced-motion: reduce) {
-    body.pad-g .pad.attivo, body.pad-g .pad.attivo::after { animation:none; }
-    body.pad-g .pad.attivo { --piste:var(--piste-ferme); }
+    body.vista-live .pad.attivo, body.vista-live .pad.attivo::after { animation:none; }
+    body.vista-live .pad.attivo { --piste:var(--piste-ferme); }
   }
-
-  /* H · Vetro: niente piste, un vetro scuro con un riflesso in alto e righe
-     di scansione finissime; bordo grigio con un filo di luce bianca. Acceso:
-     contorno bianco al neon, con un alone appena freddo. */
-  body.pad-h .pad { --piste:repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 3px);
-                    border-radius:14px; border:1px solid #3d4048;
-                    background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,0) 46%),
-                               linear-gradient(180deg, #0c0d11, #050608);
-                    box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 0 7px -3px rgba(255,255,255,.4); }
-  body.pad-h .pad .nome { color:#e6e8ec; font-size:1.08rem; letter-spacing:0.01em;
-                          text-shadow:0 0 5px rgba(255,255,255,.25); }
-  body.pad-h .pad.attivo { border-color:#f2f5fa;
-                           background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0) 50%),
-                                      linear-gradient(180deg, #11131a, #07080b);
-                           box-shadow:inset 0 0 0 1px rgba(255,255,255,.8), inset 0 0 20px -6px rgba(200,220,255,.45),
-                                      0 0 10px -1px rgba(255,255,255,.8), 0 0 30px -8px rgba(170,200,255,.6); }
-  body.pad-h .pad.attivo .nome { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(200,220,255,.7); }
-
-  /* In modifica dei banchi il bordo oro tratteggiato resta, in tutte. */
-  body[class*="pad-"] .pad.inModifica { border-color:var(--gold); border-style:dashed; }
-
-  /* Il selettore della bozza, solo nella vista Live. */
-  #bozzaPad { position:fixed; top:6px; left:50%; transform:translateX(-50%); z-index:60;
-              display:flex; gap:4px; background:#000c; border:1px solid var(--line);
-              border-radius:10px; padding:3px; }
-  #bozzaPad button { padding:4px 10px; font-size:0.78rem; border-radius:7px; }
-  #bozzaPad button.scelto { background:var(--blu); border-color:var(--blu); color:#fff; }
-  body:not(.vista-live) #bozzaPad { display:none; }
 
 
   /* ---- pannelli a tutto schermo -------------------------------------- */
@@ -2060,7 +2005,5 @@
 <script src="src/app/13-dropbox.js"></script>
 <script src="src/app/14-pedale.js"></script>
 <script src="src/app/15-partenza.js"></script>
-<!-- BOZZA: il selettore dei pulsantoni, da togliere prima di pubblicare. -->
-<script src="src/app/16-bozza-pulsanti.js"></script>
 </body>
 </html>
