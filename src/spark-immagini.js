@@ -50,6 +50,81 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Riverbero, tipo Chamber: oro e viola; Level, Time, Damping e Dwell più grandi delle due in mezzo.
+    'bias.reverb:Chamber': {
+      src: 'immagini/blocchi/Reverb-Chamber.webp', w: 900, h: 872,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 166.7, y: 129.7, r: 69.3 },   // Level
+        { indice: 1, x: 166.7, y: 365.3, r: 69.3 },   // Damping
+        { indice: 2, x: 346.1, y: 273.6, r: 65.6 },   // Low Cut
+        { indice: 3, x: 556.2, y: 273.6, r: 65.6 },   // High Cut
+        { indice: 4, x: 735.1, y: 365.3, r: 69.3 },   // Dwell
+        { indice: 5, x: 735.1, y: 129.7, r: 69.3 },   // Time
+      ],
+      led: { x: 449.3, y: 105, r: 13.9 },
+      pulsante: { x: 450, y: 783.3, r: 45.2 },
+    },
+    // Riverbero, tipo Plate Short: rame e arancio, la spia fra «9VDC» e «CHECK».
+    'bias.reverb:Plate Short': {
+      src: 'immagini/blocchi/Reverb-PlateShort.webp', w: 900, h: 869,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 162.8, y: 138, r: 59.9 },   // Level
+        { indice: 1, x: 162.9, y: 385, r: 59.9 },   // Damping
+        { indice: 2, x: 342.1, y: 284.4, r: 59.9 },   // Low Cut
+        { indice: 3, x: 554.2, y: 284.3, r: 59.9 },   // High Cut
+        { indice: 4, x: 735, y: 385.1, r: 59.9 },   // Dwell
+        { indice: 5, x: 734.8, y: 137.9, r: 59.9 },   // Time
+      ],
+      led: { x: 446.7, y: 104.4, r: 14.6 },
+      pulsante: { x: 450.4, y: 760.6, r: 40.1 },
+    },
+    // Riverbero, tipo Hall Ambient: sull'immagine «Ambient»; oro dentro gli anelli tratteggiati.
+    'bias.reverb:Hall Ambient': {
+      src: 'immagini/blocchi/Reverb-HallAmbient.webp', w: 900, h: 876,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 172.8, y: 145.1, r: 56.2 },   // Level
+        { indice: 1, x: 172.7, y: 385.3, r: 56.2 },   // Damping
+        { indice: 2, x: 349.6, y: 290.2, r: 56.2 },   // Low Cut
+        { indice: 3, x: 548.3, y: 290.2, r: 56.2 },   // High Cut
+        { indice: 4, x: 726.4, y: 385.1, r: 56.2 },   // Dwell
+        { indice: 5, x: 726.3, y: 145, r: 56.2 },   // Time
+      ],
+      led: { x: 447.8, y: 116.7, r: 16.3 },
+      pulsante: { x: 448.5, y: 767, r: 47.3 },
+    },
+    // Riverbero, tipo Room Studio B: viola; niente spia rossa: la spia è il puntino nel mirino in alto, viola.
+    'bias.reverb:Room Studio B': {
+      src: 'immagini/blocchi/Reverb-RoomStudioB.webp', w: 900, h: 881,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 170, y: 147.6, r: 57.1 },   // Level
+        { indice: 1, x: 168.9, y: 394.2, r: 57.1 },   // Damping
+        { indice: 2, x: 345.6, y: 287.7, r: 57.1 },   // Low Cut
+        { indice: 3, x: 556.8, y: 287.7, r: 57.1 },   // High Cut
+        { indice: 4, x: 731.6, y: 394.2, r: 57.1 },   // Dwell
+        { indice: 5, x: 729, y: 147.6, r: 57.1 },   // Time
+      ],
+      led: { x: 449.6, y: 121.6, r: 13.2, colore: 'viola' },
+      pulsante: { x: 449.6, y: 762.3, r: 45.4 },
+    },
+    // Riverbero, tipo Hall Natural: verde.
+    'bias.reverb:Hall Natural': {
+      src: 'immagini/blocchi/Reverb-HallNatural.webp', w: 900, h: 874,
+      manopola: manopola('verde'),
+      manopole: [
+        { indice: 0, x: 166.3, y: 146.4, r: 65.6 },   // Level
+        { indice: 1, x: 166.3, y: 386.5, r: 65.6 },   // Damping
+        { indice: 2, x: 344.6, y: 286.3, r: 65.6 },   // Low Cut
+        { indice: 3, x: 557.8, y: 286.3, r: 65.6 },   // High Cut
+        { indice: 4, x: 736.6, y: 386.5, r: 65.6 },   // Dwell
+        { indice: 5, x: 736.6, y: 146.4, r: 65.6 },   // Time
+      ],
+      led: { x: 450.7, y: 116.7, r: 14.6 },
+      pulsante: { x: 450.7, y: 776.7, r: 45.2 },
+    },
     // Riverbero, tipo Room Studio A: sei manopole rosa dentro gli anelli —
     // Level e Damping a sinistra, Low Cut e High Cut in mezzo, Time e Dwell a
     // destra. La spia («CHECK») in alto.
