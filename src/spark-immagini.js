@@ -320,21 +320,21 @@
       led: { x: 102, y: 306.9, r: 11.2 },
       pulsante: { x: 100.6, y: 359.7, r: 23.4 },
     },
-    // Il Blackface Duo: i centri sono i puntini bianchi in mezzo alle scale; il
-    // raggio sta dentro l'arco (Gain, Middle e Volume più larghi di Bass e
-    // Treble), che così resta visibile. Pulsante: la levetta ON/OFF.
+    // Il Blackface Duo, seconda versione (16 ottobre, API di OpenAI): la testata
+    // sulla sua cassa, come l'AD Clean. La manopola sta dentro le tacche della
+    // scala 0-10; pulsante: la levetta ON/OFF.
     Twin: {
-      src: 'immagini/blocchi/Twin.webp', w: 900, h: 488,
-      manopola: manopola('neon'),
+      src: 'immagini/blocchi/Twin.webp', w: 900, h: 859,
+      manopola: manopola('rossa'),
       manopole: [
-        { indice: 0, x: 187.2, y: 360.8, r: 26.2 },   // Gain
-        { indice: 3, x: 316.4, y: 360.8, r: 22.1 },   // Bass
-        { indice: 2, x: 446.6, y: 360.8, r: 26.2 },   // Middle
-        { indice: 1, x: 576.7, y: 360.8, r: 22.1 },   // Treble
-        { indice: 4, x: 705.9, y: 360.8, r: 26.2 },   // Master (Volume)
+        { indice: 0, x: 200.6, y: 334.6, r: 25.9 },   // Gain
+        { indice: 3, x: 320.6, y: 334.6, r: 25.9 },   // Bass
+        { indice: 2, x: 443.5, y: 334.6, r: 25.9 },   // Middle
+        { indice: 1, x: 571.3, y: 334.6, r: 25.9 },   // Treble
+        { indice: 4, x: 693.7, y: 334.6, r: 25.9 },   // Master (Volume)
       ],
-      led: { x: 75.2, y: 324.7, r: 11 },
-      pulsante: { x: 71.8, y: 387.9, r: 23.5 },
+      led: { x: 97.7, y: 298.7, r: 9.3 },
+      pulsante: { x: 95.6, y: 355.1, r: 17.3 },
     },
     // AD Clean, la testata sulla sua cassa (la prima fatta con le API di OpenAI).
     // La manopola copre il disco scuro dentro le tacche arancioni; pulsante: la
