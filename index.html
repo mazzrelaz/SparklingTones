@@ -936,9 +936,12 @@
               padding:9px 9px 7px; cursor:pointer; text-align:left;
               font:inherit; color:inherit;
               display:flex; flex-direction:column; gap:6px; }
+  /* L'alone del tassello scelto sta dentro gli 8–9 px che la striscia ha
+     attorno: più largo, la striscia (che scorre, quindi taglia) lo troncava
+     di netto sotto. */
   .tassello.scelto { border-color:var(--cat);
                      box-shadow:0 0 0 1px var(--cat) inset,
-                                0 0 10px -1px var(--cat), 0 0 26px -6px var(--cat); }
+                                0 0 6px -1px var(--cat), 0 0 12px -4px var(--cat); }
   /* Un effetto spento **esce dalla catena**: il suo tassello si alza di un po' e
      si spegne, come un pedale messo da parte (l'utente, 15 ottobre 2026). */
   .tassello { transition:transform .2s ease, opacity .2s ease; }
