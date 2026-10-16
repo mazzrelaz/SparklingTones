@@ -486,20 +486,21 @@
       tasti: [{ x: 726.7, y: 553.9, w: 313.6, h: 128.8, apre: 'autowah' }],
       barra: { x: 502.2, y0: 129.7, y1: 858.8, n: 20, r: 8 },
     },
-    // Optical Comp. Il parametro 2, Pad, è la levetta in mezzo: in alto -15 dB,
-    // in basso 0 dB. **Da verificare a orecchio**: si assume 1 = -15 dB = in alto.
+    // Optical Comp, rifatto. Il parametro 2, Pad, è la levetta in mezzo: in alto
+    // -15 dB, in basso 0 dB; qui è disegnata giù (`su: 0`). **Da verificare a
+    // orecchio**: si assume 1 = -15 dB = in alto.
     BBEOpticalComp: {
-      src: 'immagini/blocchi/BBEOpticalComp.webp', w: 900, h: 1341,
+      src: 'immagini/blocchi/BBEOpticalComp.webp', w: 900, h: 1315,
       manopola: manopola('rossa'),
       manopole: [
-        { indice: 0, x: 249.4, y: 276.8, r: 95.4 },   // Volume
-        { indice: 1, x: 649.8, y: 276.8, r: 95.4, manopola: manopola('azzurra') },   // Comp
+        { indice: 0, x: 248, y: 267.8, r: 119.8 },   // Volume
+        { indice: 1, x: 650.9, y: 269.7, r: 119.8 },   // Comp
       ],
       levette: [
-        { indice: 2, x: 450.5, y: 448.9, r: 53.3, su: 1 },   // Pad: -15 dB (su) / 0 dB (giù)
+        { indice: 2, x: 450.5, y: 433.7, r: 36.3, su: 0 },   // Pad: 0 dB (giù, com'è disegnata) / -15 dB (su)
       ],
-      led: { x: 449.6, y: 113, r: 30.9 },
-      pulsante: { x: 450.5, y: 1132.9, r: 92.6 },
+      led: { x: 447.3, y: 105.2, r: 20 },
+      pulsante: { x: 449.1, y: 1106.9, r: 72.6 },
     },
     BassComp: {                                       // Bass Comp
       src: 'immagini/blocchi/BassComp.webp', w: 900, h: 1361,
@@ -511,15 +512,17 @@
       led: { x: 449, y: 110, r: 30.2 },
       pulsante: { x: 449, y: 1161.2, r: 84.6 },
     },
-    Compressor: {                                     // Red Comp
-      src: 'immagini/blocchi/Compressor.webp', w: 832, h: 1227,
+    // Red Comp (modello «Compressor»), rifatto: Output e Sensitivity dentro i
+    // cerchi col mirino.
+    Compressor: {
+      src: 'immagini/blocchi/Compressor.webp', w: 900, h: 1347,
       manopola: manopola('rossa'),
       manopole: [
-        { indice: 0, x: 234.6, y: 257.5, r: 72 },     // Output
-        { indice: 1, x: 593,   y: 257.4, r: 72 },     // Sensitivity
+        { indice: 0, x: 249.4, y: 276.5, r: 91.2 },   // Output
+        { indice: 1, x: 650.8, y: 276.6, r: 91.2 },   // Sensitivity
       ],
-      led: { x: 415, y: 107, r: 28 },
-      pulsante: { x: 415, y: 1047, r: 90 },
+      led: { x: 449.5, y: 107.6, r: 20.1 },
+      pulsante: { x: 449.5, y: 1117, r: 68.4 },
     },
     // LA Comp. Il parametro 0, Limit/Compress, è la levetta in mezzo: nei preset
     // veri vale sempre 0. **Da verificare a orecchio quale sia Limit**: qui si
@@ -547,29 +550,32 @@
       led: { x: 450.3, y: 122.5, r: 21.3 },
       pulsante: { x: 450.3, y: 1085.7, r: 60.4 },
     },
-    // Il Sustainer cyberpunk (al posto di quello azzurro del primo giro).
+    // Sustainer (modello «BlueComp»), rifatto: Level e Sustain grandi, Tone e
+    // Attack in mezzo, dentro gli archi.
     BlueComp: {
-      src: 'immagini/blocchi/BlueComp.webp', w: 900, h: 906,
+      src: 'immagini/blocchi/BlueComp.webp', w: 900, h: 875,
       manopola: manopola('viola'),
       manopole: [
-        { indice: 0, x: 198.7, y: 175,   r: 78.6 },   // Level
-        { indice: 3, x: 704.2, y: 175,   r: 78.6 },   // Sustain
-        { indice: 1, x: 345.6, y: 361.3, r: 57.1 },   // Tone
-        { indice: 2, x: 558.8, y: 361.3, r: 57.1 },   // Attack
+        { indice: 0, x: 200.3, y: 161, r: 78.1 },   // Level
+        { indice: 3, x: 698.4, y: 160.9, r: 78.1 },   // Sustain
+        { indice: 1, x: 349.7, y: 342.8, r: 65.1 },   // Tone
+        { indice: 2, x: 550, y: 342.7, r: 65.1 },   // Attack
       ],
-      led: { x: 451.8, y: 158.9, r: 23.2 },
-      pulsante: { x: 450.9, y: 791.1, r: 62.5 },
+      led: { x: 450, y: 145.8, r: 15.9 },
+      pulsante: { x: 450, y: 768.3, r: 44.9 },
     },
-    DistortionTS9: {                                  // Tube Drive
-      src: 'immagini/blocchi/DistortionTS9.webp', w: 774, h: 1155,
+    // Tube Drive (modello «DistortionTS9»), rifatto: Overdrive e Level in alto,
+    // Tone in mezzo, dentro le corone di tacche.
+    DistortionTS9: {
+      src: 'immagini/blocchi/DistortionTS9.webp', w: 900, h: 1324,
       manopola: manopola('verde'),
       manopole: [
-        { indice: 0, x: 198.4, y: 192.9, r: 66 },     // Overdrive
-        { indice: 2, x: 571.8, y: 192.8, r: 66 },     // Level
-        { indice: 1, x: 385.6, y: 376.5, r: 54 },     // Tone
+        { indice: 0, x: 236.3, y: 212.2, r: 104.2 },   // Overdrive
+        { indice: 2, x: 669, y: 212.2, r: 104.2 },   // Level
+        { indice: 1, x: 449.8, y: 430.5, r: 85.3 },   // Tone
       ],
-      led: { x: 385, y: 92, r: 20 },
-      pulsante: { x: 385, y: 942, r: 70 },
+      led: { x: 450, y: 99.5, r: 17.1 },
+      pulsante: { x: 449.1, y: 1094.2, r: 66.3 },
     },
     // Clone Drive: ogni manopola nel colore della sua scala (Gain arancione,
     // Output viola, Treble azzurro). Pulsante: il cerchio sotto l'arciere.
@@ -644,16 +650,16 @@
       led: { x: 449.4, y: 177.3, r: 31.7 },
       pulsante: { x: 450, y: 1104.1, r: 132.6 },
     },
-    // Booster: una manopola sola, il Gain, dentro il cerchio viola. La spia è
-    // l'anello rosso sotto la scritta GAIN; pulsante: il cerchio sotto il razzo.
+    // Booster, rifatto: una manopola sola, il Gain, dentro l'arco verde; la spia
+    // sotto la scritta GAIN.
     Booster: {
-      src: 'immagini/blocchi/Booster.webp', w: 900, h: 1480,
-      manopola: manopola('viola'),
+      src: 'immagini/blocchi/Booster.webp', w: 900, h: 1490,
+      manopola: manopola('verde'),
       manopole: [
-        { indice: 0, x: 447.4, y: 282.6, r: 106.1 },  // Gain
+        { indice: 0, x: 450.1, y: 271.6, r: 144.7 },   // Gain
       ],
-      led: { x: 447.7, y: 582.6, r: 24.2 },
-      pulsante: { x: 447.7, y: 1153, r: 75.8 },
+      led: { x: 448.5, y: 541.8, r: 22 },
+      pulsante: { x: 450, y: 1118.5, r: 69.8 },
     },
     // Fuzz Face: attorno ai puntini non c'è una scala, quindi il raggio lo
     // decide la cornice (le manopole grandi quanto ci stanno, ~50 px di aria).
@@ -1014,20 +1020,20 @@
       led: { x: 89.5, y: 303.8, r: 9.4 },
       pulsante: { x: 88.3, y: 367.1, r: 17.4 },
     },
-    // Jumbo (modello «FatAcousticV2»): tutto azzurro; la manopola copre
-    // quella nera disegnata e lascia la scala. Pulsante: la levetta Power.
+    // Jumbo (modello «FatAcousticV2»), rifatto: azzurro e viola; la manopola copre
+    // quella nera disegnata e lascia i numeri. Pulsante: la levetta Power.
     FatAcousticV2: {
-      src: 'immagini/blocchi/FatAcousticV2.webp', w: 900, h: 863,
+      src: 'immagini/blocchi/FatAcousticV2.webp', w: 900, h: 874,
       manopola: manopola('azzurra'),
       manopole: [
-        { indice: 0, x: 204.3, y: 336.2, r: 30.4 },   // Gain
-        { indice: 3, x: 326.8, y: 336.2, r: 30.4 },   // Bass
-        { indice: 2, x: 448.6, y: 336.2, r: 30.4 },   // Middle
-        { indice: 1, x: 571.7, y: 336.2, r: 30.4 },   // Treble
-        { indice: 4, x: 692.8, y: 336.2, r: 30.4 },   // Master (Volume)
+        { indice: 0, x: 201, y: 342.6, r: 29.3 },   // Gain
+        { indice: 3, x: 325.4, y: 342.6, r: 29.3 },   // Bass
+        { indice: 2, x: 448.5, y: 342.6, r: 29.3 },   // Middle
+        { indice: 1, x: 571.1, y: 342.6, r: 29.3 },   // Treble
+        { indice: 4, x: 692.8, y: 342.6, r: 29.3 },   // Master (Volume)
       ],
-      led: { x: 98.5, y: 303.6, r: 9.4 },
-      pulsante: { x: 97.8, y: 362.3, r: 17.4 },
+      led: { x: 94.9, y: 307.6, r: 10.3 },
+      pulsante: { x: 93.7, y: 367.6, r: 20.5 },
     },
     // Fishboy (modello «AcousticAmpV2»): pannello dorato; la manopola copre
     // quella nera disegnata e lascia la scala. Pulsante: la levetta Power.
@@ -1059,35 +1065,36 @@
       led: { x: 101.2, y: 307.1, r: 9.4 },
       pulsante: { x: 100.8, y: 366.2, r: 17.4 },
     },
-    // BE 101 (Friedman BE-100): pannello arancione; la manopola sta dentro la
-    // scala tratteggiata. Pulsante: la levetta ON/OFF.
+    // BE 101 (Friedman BE-100), rifatto: pannello arancione, la cassa sotto; la
+    // manopola dentro la scala. Pulsante: la levetta ON/OFF.
     BE101: {
-      src: 'immagini/blocchi/BE101.webp', w: 900, h: 879,
+      src: 'immagini/blocchi/BE101.webp', w: 900, h: 883,
       manopola: manopola('arancione'),
       manopole: [
-        { indice: 0, x: 192.3, y: 338.8, r: 30.1 },   // Gain
-        { indice: 3, x: 317.2, y: 338.8, r: 30.1 },   // Bass
-        { indice: 2, x: 443.5, y: 338.8, r: 30.1 },   // Middle
-        { indice: 1, x: 570.6, y: 338.8, r: 30.1 },   // Treble
-        { indice: 4, x: 694,   y: 338.8, r: 30.1 },   // Master (Volume)
+        { indice: 0, x: 194.3, y: 345.7, r: 30.1 },   // Gain
+        { indice: 3, x: 316.9, y: 345.7, r: 30.1 },   // Bass
+        { indice: 2, x: 443.4, y: 345.8, r: 30.1 },   // Middle
+        { indice: 1, x: 567.7, y: 345.8, r: 30.1 },   // Treble
+        { indice: 4, x: 690.5, y: 345.6, r: 30.1 },   // Master (Volume)
       ],
-      led: { x: 86.3, y: 305.8, r: 9.3 },
-      pulsante: { x: 86.1, y: 367.5, r: 17.2 },
+      led: { x: 87.8, y: 307.8, r: 9.3 },
+      pulsante: { x: 87.6, y: 368.2, r: 20.1 },
     },
-    // Rocker V (modello «Invader»): pannello nero e arancione; attorno ai
-    // puntini solo la corona di tacche bianche. Pulsante: la levetta Power.
+    // Rocker V (modello «Invader»), rifatto: testata viola e arancione, la cassa
+    // sotto; le manopole dentro le corone di tacche azzurre. Pulsante: la levetta
+    // Power.
     Invader: {
-      src: 'immagini/blocchi/Invader.webp', w: 900, h: 853,
-      manopola: manopola('arancione'),
+      src: 'immagini/blocchi/Invader.webp', w: 900, h: 861,
+      manopola: manopola('azzurra'),
       manopole: [
-        { indice: 0, x: 197.9, y: 331.4, r: 29.7 },   // Gain
-        { indice: 3, x: 319.9, y: 331.4, r: 29.7 },   // Bass
-        { indice: 2, x: 443.6, y: 331.4, r: 29.7 },   // Middle
-        { indice: 1, x: 565.5, y: 331.4, r: 29.7 },   // Treble
-        { indice: 4, x: 687.9, y: 331.4, r: 29.7 },   // Master (Volume)
+        { indice: 0, x: 192.7, y: 328.3, r: 31.4 },   // Gain
+        { indice: 3, x: 317.6, y: 328.3, r: 31.4 },   // Bass
+        { indice: 2, x: 442.9, y: 328.3, r: 31.4 },   // Middle
+        { indice: 1, x: 569.9, y: 328.3, r: 31.4 },   // Treble
+        { indice: 4, x: 693.8, y: 328.3, r: 31.4 },   // Master (Volume)
       ],
-      led: { x: 89.8, y: 294.7, r: 9.2 },
-      pulsante: { x: 89.1, y: 350, r: 17 },
+      led: { x: 87.4, y: 291.8, r: 9.3 },
+      pulsante: { x: 87.1, y: 344.7, r: 20 },
     },
     // SwitchAxe (Friedman BE-100, canale lead): pannello nero; la manopola
     // copre quella nera disegnata e lascia l'arco. Pulsante: la levetta ON/OFF.
