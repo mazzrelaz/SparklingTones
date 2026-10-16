@@ -221,6 +221,18 @@
       led: { x: 447.7, y: 582.6, r: 24.2 },
       pulsante: { x: 447.7, y: 1153, r: 75.8 },
     },
+    // Fuzz Face: attorno ai puntini non c'è una scala, quindi il raggio lo
+    // decide la cornice (le manopole grandi quanto ci stanno, ~50 px di aria).
+    Fuzz: {
+      src: 'immagini/blocchi/Fuzz.webp', w: 900, h: 1561,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 0, x: 215.2, y: 212.2, r: 125.2 },  // Volume
+        { indice: 1, x: 678.9, y: 211,   r: 125.2 },  // Fuzz
+      ],
+      led: { x: 449.1, y: 121.7, r: 23.3 },
+      pulsante: { x: 450, y: 1255.2, r: 68 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
