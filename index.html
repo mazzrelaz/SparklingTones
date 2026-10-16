@@ -686,6 +686,8 @@
      bagliore, che pulsa piano, ai bordi e dietro il nome, nei colori della
      sfumatura del bordo. */
   body.pad-g .pad .ledpad { display:none; }
+  /* Quelli che non suonano un po' più scuri (l'utente): risalta quello acceso. */
+  body.pad-g .pad:not(.attivo) { filter:brightness(.62) saturate(.85); transition:filter .2s ease; }
   body.pad-g .pad .nome { position:relative; z-index:1; }
   body.pad-g .pad.attivo { background:linear-gradient(#0a0912, #050608) padding-box,
                                       linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
