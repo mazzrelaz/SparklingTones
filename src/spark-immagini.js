@@ -336,6 +336,21 @@
       led: { x: 97.7, y: 298.7, r: 9.3 },
       pulsante: { x: 95.6, y: 355.1, r: 17.3 },
     },
+    // Match DC: le tacche della scala stanno strette attorno ai puntini, e la
+    // manopola resta dentro (più piccola che sull'AD Clean). Pulsante: la levetta ON.
+    '94MatchDCV2': {
+      src: 'immagini/blocchi/94MatchDCV2.webp', w: 900, h: 855,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 203.4, y: 342.1, r: 21.6 },   // Gain
+        { indice: 3, x: 324.3, y: 342.1, r: 21.6 },   // Bass
+        { indice: 2, x: 448.8, y: 342.1, r: 21.6 },   // Middle
+        { indice: 1, x: 573.1, y: 342.1, r: 21.6 },   // Treble
+        { indice: 4, x: 694.8, y: 342.1, r: 21.6 },   // Master (Volume)
+      ],
+      led: { x: 97.3, y: 305.4, r: 9.3 },
+      pulsante: { x: 97, y: 362.3, r: 15.8 },
+    },
     // AD Clean, la testata sulla sua cassa (la prima fatta con le API di OpenAI).
     // La manopola copre il disco scuro dentro le tacche arancioni; pulsante: la
     // levetta OFF sotto la spia.
