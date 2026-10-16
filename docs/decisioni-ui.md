@@ -1354,3 +1354,27 @@ numero dei bpm e la scritta OFFLINE sono passati dall'oro al blu (`--blu`).
 **Pubblicato il 16 ottobre 2026 (sera)**, col sì dell'utente: il ramo `bozza-editor-grafico` è in
 `main`, guscio `v109`. La guida resta quella dell'editor vecchio finché l'utente non ha provato
 tutto per un po' (sua scelta).
+
+## I pulsantoni della vista Live, rifatti — 16 ottobre 2026 (sera)
+
+L'utente voleva un'immagine per i pulsantoni; misurati, cambiano col telefono (163 × 129 punti su uno
+schermo da 360, 189 × 157 su uno da 412, sempre tutti uguali fra loro), quindi un'immagine fissa si
+deformerebbe: si è scelto di disegnarli in CSS. Tre giri di bozze col selettore nella vista Live:
+A/B/C (neon, footswitch, HUD: bocciati tutti), D/E/F (pedale con viti e piste, synthwave, tasto
+retroilluminato: piaciuta la D), poi D, G, H ritoccate. **Scelta la G**, con queste richieste
+dell'utente, una dopo l'altra:
+
+- il bordo uguale per tutti, neutro; **il colore della famiglia solo nel LED**, poi **niente LED**;
+- niente cornice attorno al nome, niente viti negli angoli;
+- **chi suona**: bordo da 2 sfumato azzurro-viola-fucsia, un bagliore che **pulsa** (2,4 s) ai bordi e
+  dietro il nome, e la **corrente che scorre** sulle piste del circuito (SVG animato da sé,
+  `immagini/circuito-elettroni.svg`, messo nel guscio per il palco senza rete); fermo se il telefono
+  chiede meno animazioni;
+- **chi non suona**: bordo sottile, grigio scuro (`#2e3036`), e tutto un po' più scuro
+  (`brightness(.62)`);
+- **provato e tolto**: il rilievo dei tasti (luce sopra, spessore sotto, quello che suona premuto).
+
+Le regole stanno sotto `body.vista-live .pad`, che pesa abbastanza da vincere su quelle vecchie e su
+`html.grigio .pad.attivo`. Il colore della famiglia resta su `--led` del pulsante, e il LED è solo
+nascosto: rimetterlo è una riga. I bordi oro della modifica dei banchi restano. Pubblicato col
+guscio `v112`. Nello stesso giro è sparita la riga di log sotto i pulsantoni (`#logLive`).

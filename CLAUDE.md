@@ -153,7 +153,11 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
 
 - **Preset già in uno slot: istantaneo con `0x0138`; altrimenti invio intero, ~1 s.**
 - **Banchi da otto, quattro a sinistra e quattro a destra** (`grid-auto-flow: column`, quattro
-  righe). Ogni pulsantone ha un LED verde, anche vuoto.
+  righe). **Il vestito dei pulsantoni** (16 ottobre 2026, scelto dall'utente in tre giri di bozze):
+  fondo nero con le piste di un circuito, **niente LED**; chi non suona ha il bordo sottile grigio
+  scuro ed è più scuro; chi suona ha il bordo sfumato azzurro-viola-fucsia, un bagliore che pulsa e la
+  corrente che scorre (`immagini/circuito-elettroni.svg`, nel guscio). Tutto in CSS: i pulsanti
+  cambiano misura col telefono, un'immagine fissa non va. Niente riga di log sotto.
 - **Il banco «Ampli» si ricava da `slots`**, non è salvato. I banchi dell'utente
   (`settings.banchi`) **non scrivono mai sull'ampli**: niente «Prepara».
 
@@ -352,7 +356,7 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 `docs/decisioni-ui.md`, ultime sezioni; la versione lunga di questo paragrafo in `docs/diario.md`.
 
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
-14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v111` (16 ottobre, sera). **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro. **`guida.en.html`** è
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v112` (16 ottobre, sera). **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro. **`guida.en.html`** è
 rimasta alle schermate vecchie.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
