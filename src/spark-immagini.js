@@ -351,6 +351,21 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // ODS 50: la manopola copre il disco scuro dentro l'anello arancione.
+    // Pulsante: la levetta ON/OFF.
+    ODS50CN: {
+      src: 'immagini/blocchi/ODS50CN.webp', w: 900, h: 842,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 205.8, y: 334.2, r: 33.2 },   // Gain
+        { indice: 3, x: 327.2, y: 334.2, r: 33.2 },   // Bass
+        { indice: 2, x: 447.5, y: 334.2, r: 33.2 },   // Middle
+        { indice: 1, x: 571.8, y: 334.2, r: 33.2 },   // Treble
+        { indice: 4, x: 691.5, y: 334.2, r: 33.2 },   // Master (Volume)
+      ],
+      led: { x: 96.1, y: 299.5, r: 9.9 },
+      pulsante: { x: 96.1, y: 358.2, r: 17 },
+    },
     // AD Clean, la testata sulla sua cassa (la prima fatta con le API di OpenAI).
     // La manopola copre il disco scuro dentro le tacche arancioni; pulsante: la
     // levetta OFF sotto la spia.
