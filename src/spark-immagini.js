@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Sunny 3000 (ampli da basso): pannello nero; la manopola sta dentro la
+    // scala. Pulsante: la levetta ON/OFF.
+    Sunny3000: {
+      src: 'immagini/blocchi/Sunny3000.webp', w: 900, h: 873,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 200.8, y: 339.1, r: 31.6 },   // Gain
+        { indice: 3, x: 323.8, y: 339.1, r: 31.6 },   // Bass
+        { indice: 2, x: 446.2, y: 339.1, r: 31.6 },   // Middle
+        { indice: 1, x: 569.7, y: 339.1, r: 31.6 },   // Treble
+        { indice: 4, x: 690.2, y: 339.1, r: 31.6 },   // Master (Volume)
+      ],
+      led: { x: 95.3, y: 304.9, r: 9.3 },
+      pulsante: { x: 94.2, y: 362.3, r: 17.3 },
+    },
     // RB-800 (modello «GK800», ampli da basso): pannello nero e verde acqua;
     // la manopola copre quella nera disegnata e lascia l'anello. Pulsante: la
     // levetta Power.
