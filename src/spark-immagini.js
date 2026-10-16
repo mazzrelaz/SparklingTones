@@ -287,6 +287,24 @@
       led: { x: 448.1, y: 93.8, r: 19.7 },
       pulsante: { x: 448.5, y: 1122, r: 56.8 },
     },
+    // SAB Driver. Il parametro 3, HP/LP, è la levetta fra Volume e Drive: in
+    // alto HP, in basso LP. Nell'unico preset vero visto vale 1. **Da
+    // verificare a orecchio**: si assume 1 = HP = in alto, com'è disegnata.
+    // La spia è la luce azzurra sopra il footswitch.
+    SABdriver: {
+      src: 'immagini/blocchi/SABdriver.webp', w: 900, h: 1611,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 197.8, y: 251.3, r: 125.9 },  // Volume
+        { indice: 2, x: 701.3, y: 251.3, r: 125.9 },  // Drive
+        { indice: 1, x: 449.6, y: 513.4, r: 107.9 },  // Tone
+      ],
+      levette: [
+        { indice: 3, x: 449.6, y: 241.9, r: 34.2, su: 1 },   // HP (su) / LP (giù)
+      ],
+      led: { x: 449.6, y: 1272.2, r: 25.2 },
+      pulsante: { x: 449.6, y: 1435, r: 80.9 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
