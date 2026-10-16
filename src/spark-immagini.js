@@ -673,18 +673,18 @@
       led: { x: 449.1, y: 121.7, r: 23.3 },
       pulsante: { x: 450, y: 1255.2, r: 68 },
     },
-    // Black Op: la manopola copre il cerchio interno e lascia l'anello attorno
-    // (e la scala bianca) in vista. Contorni da azzurro a viola: la «neon».
+    // Black Op (modello «ProCoRat»), rifatto: Distortion e Volume in alto, Filter
+    // in mezzo, dentro le corone di tacche azzurre e viola.
     ProCoRat: {
-      src: 'immagini/blocchi/ProCoRat.webp', w: 900, h: 1355,
+      src: 'immagini/blocchi/ProCoRat.webp', w: 900, h: 1347,
       manopola: manopola('neon'),
       manopole: [
-        { indice: 0, x: 227.9, y: 214.5, r: 114.2 },  // Distortion
-        { indice: 2, x: 672.6, y: 214.4, r: 114.2 },  // Volume
-        { indice: 1, x: 448.8, y: 432.5, r: 94.3 },   // Filter
+        { indice: 0, x: 232.5, y: 209.2, r: 113.6 },   // Distortion
+        { indice: 2, x: 666.6, y: 209.6, r: 113.6 },   // Volume
+        { indice: 1, x: 449.5, y: 453.5, r: 86.4 },   // Filter
       ],
-      led: { x: 449.2, y: 100.2, r: 19.1 },
-      pulsante: { x: 450, y: 1120.2, r: 51.6 },
+      led: { x: 449.1, y: 100.9, r: 20 },
+      pulsante: { x: 449.1, y: 1100, r: 63.6 },
     },
     // Bass Muff. Lo sfondo dell'originale è grigio scuro, non nero: si è tolto
     // con `&pieno=45&alto=100&basso=45`. La manopola copre il cerchio interno e
@@ -727,23 +727,22 @@
       led: { x: 448.1, y: 93.8, r: 19.7 },
       pulsante: { x: 448.5, y: 1122, r: 56.8 },
     },
-    // SAB Driver. Il parametro 3, HP/LP, è la levetta fra Volume e Drive: in
-    // alto HP, in basso LP. Nell'unico preset vero visto vale 1. **Da
-    // verificare a orecchio**: si assume 1 = HP = in alto, com'è disegnata.
-    // La spia è la luce azzurra sopra il footswitch.
+    // SAB Driver, rifatto. Il parametro 3, HP/LP, è la levetta fra Volume e Drive:
+    // in alto HP, in basso LP; qui è disegnata giù (`su: 0`). **Da verificare a
+    // orecchio**: si assume 1 = HP = in alto. La spia sta sopra il footswitch.
     SABdriver: {
-      src: 'immagini/blocchi/SABdriver.webp', w: 900, h: 1611,
-      manopola: manopola('viola'),
+      src: 'immagini/blocchi/SABdriver.webp', w: 900, h: 1310,
+      manopola: manopola('neon'),
       manopole: [
-        { indice: 0, x: 197.8, y: 251.3, r: 125.9 },  // Volume
-        { indice: 2, x: 701.3, y: 251.3, r: 125.9 },  // Drive
-        { indice: 1, x: 449.6, y: 513.4, r: 107.9 },  // Tone
+        { indice: 0, x: 234.7, y: 216.2, r: 91.3 },   // Volume
+        { indice: 2, x: 668.2, y: 216.1, r: 91.3 },   // Drive
+        { indice: 1, x: 450.1, y: 442.4, r: 88.5 },   // Tone
       ],
       levette: [
-        { indice: 3, x: 449.6, y: 241.9, r: 34.2, su: 1 },   // HP (su) / LP (giù)
+        { indice: 3, x: 450.9, y: 209, r: 29.2, su: 0 },   // LP (giù, com'è disegnata) / HP (su)
       ],
-      led: { x: 449.6, y: 1272.2, r: 25.2 },
-      pulsante: { x: 449.6, y: 1435, r: 80.9 },
+      led: { x: 450, y: 1026.9, r: 18.3 },
+      pulsante: { x: 450, y: 1166.5, r: 69.4 },
     },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
