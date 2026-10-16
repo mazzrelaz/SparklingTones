@@ -351,6 +351,22 @@
       led: { x: 97.3, y: 305.4, r: 9.3 },
       pulsante: { x: 97, y: 362.3, r: 15.8 },
     },
+    // J.H. Bass Master (Fender Bassman 50 del 1968): il nome non è scritto sul
+    // disegno, l'ha detto l'utente. Pannello in alto, sopra la griglia; Middle e
+    // Volume un po' più grandi, com'è disegnato. Pulsante: la levetta Power.
+    'JH.Bassman50Silver': {
+      src: 'immagini/blocchi/JH.Bassman50Silver.webp', w: 900, h: 854,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 202.8, y: 137.4, r: 32 },     // Gain
+        { indice: 3, x: 325.7, y: 137.4, r: 32 },     // Bass
+        { indice: 2, x: 448,   y: 137.4, r: 33.4 },   // Middle
+        { indice: 1, x: 570.9, y: 137.4, r: 32 },     // Treble
+        { indice: 4, x: 692.8, y: 137.4, r: 33.4 },   // Master (Volume)
+      ],
+      led: { x: 107.4, y: 107.4, r: 8.5 },
+      pulsante: { x: 107.4, y: 160.8, r: 12.8 },
+    },
     // American Deluxe: la manopola copre il disco nero dentro le tacche gialle.
     // Pulsante: la levetta Power.
     Deluxe65: {
