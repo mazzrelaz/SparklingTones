@@ -944,7 +944,7 @@ function etichettaDi(effetto, param, quante) {
 const RAGGIO = 34, GIRO = 2 * Math.PI * RAGGIO * 0.75;   // 270 gradi di corsa
 const CORSA_PX = 300;                                    // pixel da zero a uno
 
-function pomello(effetto, param) {
+function pomello(effetto, param, formato = mostraValore) {
   const box = document.createElement('div');
   box.className = 'pomello';
 
@@ -987,7 +987,7 @@ function pomello(effetto, param) {
   const disegna = () => {
     arco.setAttribute('stroke-dasharray', `${GIRO * param.value} 999`);
     tacca.setAttribute('transform', `rotate(${-135 + param.value * 270} 50 50)`);
-    valore.textContent = mostraValore(param.value);
+    valore.textContent = formato(param.value);
   };
   disegna();
 
@@ -997,14 +997,14 @@ function pomello(effetto, param) {
     partenzaY = evento.clientY;
     partenzaV = param.value;
     box.setPointerCapture(evento.pointerId);
-    mostraBolla(box, param.value);
+    mostraBolla(box, param.value, formato);
   });
   box.addEventListener('pointermove', evento => {
     if (partenzaY === null) return;
     const passo = (partenzaY - evento.clientY) / CORSA_PX;
     param.value = Math.min(1, Math.max(0, partenzaV + passo));
     disegna();
-    mostraBolla(box, param.value);
+    mostraBolla(box, param.value, formato);
     aggiornaBarrette();
     mandaParametro(effetto.name, param.index, param.value);
   });
@@ -1047,11 +1047,12 @@ function frontaleImmagine(effetto, info) {
   box.appendChild(img);
 
   // Un cerchio dell'immagine, in percentuali: segue la larghezza dello schermo.
-  const posto = (el, { x, y, r }) => Object.assign(el.style, {
-    left:   (x - r) / info.w * 100 + '%',
-    top:    (y - r) / info.h * 100 + '%',
-    width:  2 * r / info.w * 100 + '%',
-    height: 2 * r / info.h * 100 + '%',
+  // Un cerchio (r) o un rettangolo (w × h), col centro in (x, y).
+  const posto = (el, { x, y, r, w = 2 * r, h = 2 * r }) => Object.assign(el.style, {
+    left:   (x - w / 2) / info.w * 100 + '%',
+    top:    (y - h / 2) / info.h * 100 + '%',
+    width:  w / info.w * 100 + '%',
+    height: h / info.h * 100 + '%',
   });
 
   if (info.led) {
@@ -1066,8 +1067,19 @@ function frontaleImmagine(effetto, info) {
     pulsante.className = 'pulsante-img';
     pulsante.title = effetto.enabled ? tr('spegni') : tr('accendi');
     posto(pulsante, info.pulsante);
+    if (info.pulsante.w) pulsante.classList.add('rettangolo');
     pulsante.addEventListener('click', () => cambiaAcceso(effetto));
     box.appendChild(pulsante);
+  }
+  // I tasti che aprono un pannellino (l'«Auto» del wah): `apre` è il nome del
+  // pannellino in PANNELLI_IMMAGINE.
+  for (const t of info.tasti || []) {
+    const tasto = document.createElement('button');
+    tasto.type = 'button';
+    tasto.className = 'pulsante-img rettangolo';
+    posto(tasto, t);
+    tasto.addEventListener('click', () => PANNELLI_IMMAGINE[t.apre](effetto));
+    box.appendChild(tasto);
   }
 
   // Le levette (il Limit/Compress del LA Comp): un tocco le fa scattare fra 0
@@ -1109,6 +1121,8 @@ function frontaleImmagine(effetto, info) {
     });
     box.appendChild(lev);
   }
+
+  if (info.barra) avviaBarraWah(box, effetto, info.barra, posto);
 
   const quante = manopoleVere(effetto).length;
   for (const m of info.manopole) {
@@ -1183,6 +1197,165 @@ function frontaleImmagine(effetto, info) {
     box.appendChild(man);
   }
   return fuori;
+}
+
+/**
+ * La colonna di puntini del wah: si accendono dal basso e salgono e scendono
+ * con la forma d'onda scelta, al suo tempo, come nell'app ufficiale. Il ciclo
+ * gira a `setInterval` (non `requestAnimationFrame`, che nel riquadro di prova
+ * non gira) e si ferma da sé quando il blocco non è più sullo schermo.
+ */
+let timerBarra = null;
+
+/** Il livello (0…1) di ciascuna forma d'onda in un punto del ciclo (0…1). */
+const FORME_WAH = [
+  f => 1 - Math.abs(2 * f - 1),                                              // triangoli
+  f => f < 0.8 ? 0.45 * f / 0.8 : f < 0.9 ? 0.45 + (f - 0.8) * 5.5
+                                          : Math.max(0, 1 - (f - 0.9) * 10), // salita e scatto
+  f => f,                                                                    // rampa
+  f => f < 0.15 ? 1 - Math.abs(f / 0.075 - 1) : 0.85 * (f - 0.15) / 0.85,    // scatto e rampa
+  f => f < 0.3 ? 1 - Math.abs((f % 0.15) / 0.075 - 1) : 0.85 * (f - 0.3) / 0.7,
+  // Auto Detect segue quello che si suona, e noi il suono non lo sentiamo: un
+  // respiro lento, solo per dire che è vivo.
+  f => 0.5 - 0.5 * Math.cos(2 * Math.PI * f),
+];
+
+/** Quanto dura un ciclo, in ms: la nota al bpm del preset, o i millisecondi. */
+function periodoWah(effetto) {
+  const v = i => (effetto.params.find(p => p.index === i) || {}).value || 0;
+  if (Math.round(v(0) * 5) === 5) return 1600;
+  if (v(1) >= 0.5) {
+    const quarto = 60000 / (inModifica.bpm || 120);
+    return quarto * ([0.5, 1, 2, 4][Math.round(v(3) / 0.25)] || 1);   // 1/8, 1/4, 1/2, 1
+  }
+  return 125 + v(2) * 875;
+}
+
+function avviaBarraWah(box, effetto, b, posto) {
+  clearInterval(timerBarra);
+  const punti = [];
+  for (let i = 0; i < b.n; i++) {                  // il primo è quello in basso
+    const p = document.createElement('div');
+    p.className = 'punto-barra';
+    posto(p, { x: b.x, y: b.y1 - (b.y1 - b.y0) * i / (b.n - 1), r: b.r });
+    box.appendChild(p);
+    punti.push(p);
+  }
+  const inizio = Date.now();
+  timerBarra = setInterval(() => {
+    if (!box.isConnected) { clearInterval(timerBarra); return; }
+    let livello = 0;
+    if (effetto.enabled) {
+      const modo = Math.round(((effetto.params.find(p => p.index === 0) || {}).value || 0) * 5);
+      const periodo = periodoWah(effetto);
+      livello = FORME_WAH[modo]((Date.now() - inizio) % periodo / periodo);
+    }
+    const accesi = Math.round(livello * b.n);
+    punti.forEach((p, i) => p.classList.toggle('acceso', i < accesi));
+  }, 40);
+}
+
+/**
+ * I pannellini che un tasto dell'immagine apre (`tasti[].apre` in
+ * `spark-immagini.js`).
+ */
+const PANNELLI_IMMAGINE = { autowah: apriAutoWah };
+
+/**
+ * L'«Auto» del Legendary Wah (`JH.Vox846`), come nell'app ufficiale: la
+ * modalità fra cinque forme d'onda e Auto Detect, e sotto quello che vale per
+ * lei. Dal 2026 il wah non si muove più a mano (solo con un pedale
+ * d'espressione), quindi qui c'è tutto quello che si regola.
+ *
+ * I parametri sono **misurati** il 16 ottobre 2026 (docs/protocollo-spark2.md):
+ * 0 modalità (sei posizioni a passi di 0,2, Auto Detect = 1), 1 BPM acceso o
+ * spento, 2 tempo da 125 a 1000 ms (BPM spento), 3 la nota (BPM acceso: 1/8 = 0,
+ * 1/4 = 0,25, 1 = 0,75; 1/2 = 0,5 dedotto), 4 Sensitivity (solo Auto Detect).
+ */
+const ONDE_WAH = [
+  'M2 16 L7 5 L12 16 L17 5 L22 16 L27 5 L32 16',     // triangoli fitti
+  'M2 15 L12 11 L15 5 L18 16 L28 11 L31 5 L34 16',    // salita lenta e scatto
+  'M2 15 L28 7 L32 16',                                // una rampa lunga
+  'M2 15 L6 5 L10 16 L29 8 L33 16',                    // scatto e rampa
+  'M2 15 L6 5 L10 16 L14 5 L18 16 L29 8 L33 16',       // due scatti e rampa
+];
+const NOTE_WAH = [['1/8', 0], ['1/4', 0.25], ['1/2', 0.5], ['1', 0.75]];
+
+function apriAutoWah(effetto) {
+  const par = i => effetto.params.find(p => p.index === i);
+  const manda = p => { aggiornaBarrette(); mandaParametro(effetto.name, p.index, p.value); };
+
+  const velo = document.createElement('div');
+  velo.className = 'velo-elenco';
+  const box = document.createElement('div');
+  box.className = 'elenco-scelta autowah';
+  box.style.setProperty('--cat', coloreDi(inModifica.effetti.indexOf(effetto)));
+  const testa = document.createElement('div');
+  testa.className = 'elenco-testa';
+  testa.textContent = tr('Auto Wah Mode');
+  const corpo = document.createElement('div');
+  box.append(testa, corpo);
+  velo.appendChild(box);
+  document.body.appendChild(velo);
+
+  const disegna = () => {
+    corpo.innerHTML = '';
+    const modo = par(0);
+    const ora = Math.round(modo.value * 5);          // 0…4 le onde, 5 Auto Detect
+
+    const griglia = document.createElement('div');
+    griglia.className = 'modi-wah';
+    for (let n = 0; n < 6; n++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'modo-wah' + (n === ora ? ' scelto' : '');
+      if (n < 5) b.innerHTML = `<svg viewBox="0 0 36 20" aria-hidden="true"><path d="${ONDE_WAH[n]}"/></svg>`;
+      else b.textContent = tr('Auto Detect');
+      b.addEventListener('click', () => { modo.value = n / 5; manda(modo); disegna(); });
+      griglia.appendChild(b);
+    }
+
+    const sotto = document.createElement('div');
+    sotto.className = 'sotto-wah';
+    if (ora === 5) {
+      sotto.appendChild(pomello(effetto, par(4)));            // Sensitivity
+    } else {
+      const bpm = par(1);
+      const leva = cellaInterruttore(effetto, bpm);
+      // La levetta manda già il suo valore; qui si ridisegna il resto, che
+      // cambia (note con BPM acceso, millisecondi con BPM spento).
+      leva.addEventListener('click', () => setTimeout(disegna));
+      sotto.appendChild(leva);
+      if (bpm.value >= 0.5) {
+        const nota = par(3);
+        const note = document.createElement('div');
+        note.className = 'note-wah';
+        const vicina = NOTE_WAH.reduce((a, b) =>
+          Math.abs(b[1] - nota.value) < Math.abs(a[1] - nota.value) ? b : a);
+        for (const [testo, valore] of NOTE_WAH) {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'nota-wah' + (vicina[1] === valore ? ' scelta' : '');
+          b.textContent = testo;
+          b.addEventListener('click', () => { nota.value = valore; manda(nota); disegna(); });
+          note.appendChild(b);
+        }
+        sotto.appendChild(note);
+      } else {
+        sotto.appendChild(pomello(effetto, par(2), v => Math.round(125 + v * 875) + ' ms'));
+      }
+    }
+    corpo.append(griglia, sotto);
+  };
+  disegna();
+
+  function chiudi() {
+    velo.remove();
+    document.removeEventListener('keydown', tasto);
+  }
+  function tasto(evento) { if (evento.key === 'Escape') chiudi(); }
+  document.addEventListener('keydown', tasto);
+  velo.addEventListener('click', evento => { if (evento.target === velo) chiudi(); });
 }
 
 /**
@@ -1291,10 +1464,13 @@ function aggiornaBarrette() {
 }
 
 /** Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
-function mostraBolla(dentro, valore) {
+function mostraBolla(dentro, valore, formato = mostraValore) {
   const bolla = $('bolla');
+  // Sta nel body, non nel pannello dell'editor: così si vede anche sopra un
+  // pannellino aperto (l'Auto del wah), che sta sopra l'editor.
+  if (bolla.parentNode !== document.body) document.body.appendChild(bolla);
   const r = dentro.getBoundingClientRect();
-  bolla.textContent = mostraValore(valore);
+  bolla.textContent = formato(valore);
   bolla.hidden = false;
   bolla.style.left = (r.left + r.width / 2) + 'px';
   bolla.style.top  = r.top + 'px';

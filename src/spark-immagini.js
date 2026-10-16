@@ -27,6 +27,18 @@
     ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
 
   const TABELLA = {
+    // Il Legendary Wah. Niente manopole sull'immagine: a mano il wah non si muove
+    // più (aggiornamento di Positive Grid, 2026). Power accende e spegne, Auto
+    // apre il pannellino delle modalità (`tasti`); la colonna di puntini
+    // (`barra`) sale e scende con la forma d'onda, come nell'app ufficiale.
+    'JH.Vox846': {
+      src: 'immagini/blocchi/JH.Vox846.webp', w: 900, h: 992,
+      manopole: [],
+      led: { x: 813.8, y: 374.8, r: 14 },
+      pulsante: { x: 733.4, y: 368.6, w: 288.2, h: 119.2 },          // Power
+      tasti: [{ x: 726.7, y: 553.9, w: 313.6, h: 128.8, apre: 'autowah' }],
+      barra: { x: 502.2, y0: 129.7, y1: 858.8, n: 20, r: 8 },
+    },
     // Optical Comp. Il parametro 2, Pad, è la levetta in mezzo: in alto -15 dB,
     // in basso 0 dB. **Da verificare a orecchio**: si assume 1 = -15 dB = in alto.
     BBEOpticalComp: {

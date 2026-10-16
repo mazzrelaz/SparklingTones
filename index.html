@@ -997,6 +997,28 @@
   .frontale .pulsante-img { position:absolute; border-radius:50%; border:0; padding:0;
                             background:transparent; cursor:pointer; }
   .frontale .pulsante-img:active { background:rgba(0,0,0,0.25); }
+  .frontale .pulsante-img.rettangolo { border-radius:14px; }
+  /* La colonna di puntini del wah: accesi salgono e scendono con l'onda. */
+  .frontale .punto-barra { position:absolute; border-radius:50%; pointer-events:none; }
+  .frontale .punto-barra.acceso { background:radial-gradient(circle, #fff 0 18%, #ff3b4a 45%, rgba(255,40,60,0) 72%);
+                                  box-shadow:0 0 10px 2px rgba(255,40,60,0.55); }
+  /* Il pannellino «Auto» del Legendary Wah: sei modalità in griglia, come
+     nell'app ufficiale, e sotto Sensitivity, oppure BPM con le note o i ms. */
+  .autowah .modi-wah { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px 14px 6px; }
+  .autowah .modo-wah { height:62px; border:1px solid var(--line); border-radius:10px;
+                       background:var(--incavo); color:var(--text); font-weight:700;
+                       display:flex; align-items:center; justify-content:center; }
+  .autowah .modo-wah svg { width:72px; height:40px; fill:none; stroke:currentColor;
+                           stroke-width:2; stroke-linejoin:round; stroke-linecap:round; }
+  .autowah .modo-wah.scelto { border-color:var(--cat); color:var(--cat);
+                              background:color-mix(in srgb, var(--cat) 14%, var(--incavo));
+                              box-shadow:0 0 12px -2px var(--cat); }
+  .autowah .sotto-wah { display:flex; align-items:center; justify-content:center;
+                        gap:22px; padding:14px 14px 18px; min-height:150px; }
+  .autowah .note-wah { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .autowah .nota-wah { min-width:58px; height:42px; border:1px solid var(--line); border-radius:10px;
+                       background:var(--incavo); color:var(--text); font-weight:700; }
+  .autowah .nota-wah.scelta { border-color:var(--cat); color:var(--cat); }
   /* Una levetta dell'immagine (Limit/Compress): scatta capovolgendosi. */
   .frontale .levetta-img { position:absolute; border:0; padding:0; border-radius:50%;
                            background:transparent; cursor:pointer; }
@@ -1233,7 +1255,7 @@
   .pomello.leva:not(.acceso) .val { color:var(--faint); text-shadow:none; }
   .pomello.leva:focus-visible { outline:1px solid var(--cat); outline-offset:4px; border-radius:8px; }
   /* Il valore grande mentre si trascina: sotto il dito il numerino non si vede. */
-  .bolla { position:fixed; z-index:60; font-family:var(--strumento); transform:translate(-50%,-150%);
+  .bolla { position:fixed; z-index:90; font-family:var(--strumento); transform:translate(-50%,-150%);
            background:var(--text); color:#101216; font-weight:700; font-size:1.2rem;
            padding:6px 14px; border-radius:10px; pointer-events:none;
            font-variant-numeric:tabular-nums; box-shadow:0 4px 18px rgba(0,0,0,0.6); }

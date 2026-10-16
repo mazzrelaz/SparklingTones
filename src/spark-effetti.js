@@ -99,7 +99,9 @@ window.SparkEffetti = (function () {
     // `eHendrix`), **di proposito**: la variante Hendrix di questo blocco vuole
     // ancora lo sblocco, quindi l'avviso ogni tanto parla a vuoto ma non tace
     // mai quando servirebbe. Fra i due errori possibili, quello giusto è questo.
-    'JH.Vox846': { nome: 'J.H. Legendary Wah', manopole: ['P1', 'Mode', 'P3', 'P4', 'P5'] },
+    // Nomi misurati il 16 ottobre 2026 (docs/protocollo-spark2.md): il «Mode» di
+    // Soundshed era l'interruttore BPM, la modalità è il parametro 0.
+    'JH.Vox846': { nome: 'J.H. Legendary Wah', manopole: ['Modalità', 'BPM', 'Tempo', 'Nota', 'Sensitivity'] },
 
     /* ---- Drive ---- */
     'Booster': { nome: 'Booster', manopole: ['Gain'] },
