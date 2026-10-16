@@ -69,7 +69,9 @@ async function mandaPreset(record, slot) {
   // sia sbloccato, quindi questa riga parla anche quando va tutto bene. È il
   // motivo per cui di posti così ce n'è uno, e non cinque: una scritta che
   // grida al lupo ogni volta smette di essere letta.
-  const hendrix = SparkEffetti.hendrixNellaCatena(record.effects);
+  // Senza il pacchetto Hendrix dichiarato, l'Auto Wah gratuito non va segnalato.
+  const hendrix = haHendrix() ? SparkEffetti.hendrixNellaCatena(record.effects)
+    : (record.effects || []).filter(SparkEffetti.vuoleHendrix).map(e => e.name);
   if (hendrix.length) {
     logLine(tr('«{0}» ha {1} del pacchetto Jimi Hendrix ({2}). ' +
             'Se non li senti, collega una volta l\'app ufficiale all\'ampli e riprova: ' +

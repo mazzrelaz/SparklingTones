@@ -10,8 +10,17 @@
    Vista preset
    ==================================================================== */
 
+/**
+ * Senza il pacchetto Hendrix (`haHendrix`) un preset che ne usa uno non si
+ * vede: tanto non suonerebbe. L'Auto Wah gratuito non conta (`vuoleHendrix`).
+ */
+const visibileSenzaHendrix = record =>
+  haHendrix() || !SparkEffetti.presetConHendrix(record && record.effects);
+
 /** Il preset passa il filtro di ricerca, famiglia e categoria? */
-function passaIlFiltro(record) {
+function passaIlFiltro(record, slotAmpli = false) {
+  // Gli slot dell'ampli restano: sono quello che c'è dentro l'ampli.
+  if (!slotAmpli && !visibileSenzaHendrix(record)) return false;
   if (vista.famiglia && record.famiglia !== vista.famiglia) return false;
   if (vista.categoria &&
       !(record.tags || []).some(t => t.toLowerCase() === vista.categoria.toLowerCase())) {
@@ -52,7 +61,7 @@ function disegnaPreset() {
   } else {
     for (let slot = 0; slot < modelloAmpli.slot; slot++) {
       const record = suAmpli[slot];
-      if (record && !passaIlFiltro(record)) continue;
+      if (record && !passaIlFiltro(record, true)) continue;
       if (!record && filtroAttivo()) continue;
       mostratiSuAmpli++;
       griglia.appendChild(schedaSlot(record, slot));
@@ -67,7 +76,7 @@ function disegnaPreset() {
   // Per id e non per oggetto: `hardware()` rilegge dal database, quindi
   // restituisce copie diverse dagli stessi record che stanno in `tutti`.
   const sullAmpli = new Set(suAmpli.filter(Boolean).map(r => r.id));
-  const altri = tutti.filter(r => !sullAmpli.has(r.id));
+  const altri = tutti.filter(r => !sullAmpli.has(r.id) && visibileSenzaHendrix(r));
   const visibili = ordinaLibreria(altri.filter(passaIlFiltro));
   visibili.forEach(record => libreria.appendChild(rigaPreset(record, null)));
 
@@ -316,6 +325,9 @@ function etichettaSlot(slot) {
  * che l'app ufficiale si è connessa una volta da quando l'ampli è acceso.
  */
 function bolloHendrix(record) {
+  // Senza il pacchetto Hendrix (`haHendrix`) di bolli non ce ne sono: i preset
+  // che lo vogliono non si vedono, e il wah rimasto è l'Auto Wah gratuito.
+  if (!haHendrix()) return null;
   const dentro = SparkEffetti.hendrixNellaCatena(record && record.effects);
   if (dentro.length === 0) return null;
 

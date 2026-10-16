@@ -27,6 +27,19 @@
     ({ src: `immagini/blocchi/manopola-${colore}.svg`, w: 100, h: 100, x: 50, y: 50, r: 49 });
 
   const TABELLA = {
+    // L'Auto Wah gratuito: il wah in Auto Detect (vedi `eAutoWahLibero`), per chi
+    // non ha il pacchetto Hendrix. Power accende e spegne, la sola manopola è la
+    // Sensitivity (parametro 4); la colonna di puntini respira come in Auto Detect.
+    AutoWah: {
+      src: 'immagini/blocchi/AutoWah.webp', w: 900, h: 1012,
+      manopola: manopola('rossa'),
+      manopole: [
+        { indice: 4, x: 739.8, y: 565.4, r: 66 },   // Sensitivity
+      ],
+      led: { x: 826.5, y: 339.3, r: 19.3 },
+      pulsante: { x: 738.4, y: 340.2, w: 289.8, h: 115.9 },          // Power
+      barra: { x: 512.7, y0: 134.8, y1: 874.6, n: 20, r: 8 },
+    },
     // Il Legendary Wah. Niente manopole sull'immagine: a mano il wah non si muove
     // più (aggiornamento di Positive Grid, 2026). Power accende e spegne, Auto
     // apre il pannellino delle modalità (`tasti`); la colonna di puntini

@@ -128,13 +128,13 @@ function tassello(effetto, posizione) {
   const modello = document.createElement('div');
   modello.className = 'modello';
   modello.textContent = (candidatiModello(effetto, posizione).length < 2 && nomeTipo(effetto)) ||
-                        SparkEffetti.nome(effetto.name);
+                        nomeBlocco(effetto.name);
 
   const barre = barrette(effetto);
   if (scelto) inModifica.barreAFuoco = barre;    // si aggiornano girando
 
   // Con un'immagine il tassello mostra quella, al posto del nome e delle barrette.
-  const immagine = SparkImmagini.di(effetto.name);
+  const immagine = immagineBlocco(effetto.name);
   if (immagine) {
     t.classList.add('con-immagine');
     const mini = document.createElement('img');
@@ -209,7 +209,7 @@ function bloccoAFuoco(effetto, posizione) {
   blocco.appendChild(intestazioneBlocco(effetto));
   // Bozza del 15 ottobre 2026: un modello con la sua immagine si regola
   // sull'immagine stessa; gli altri restano a pomelli.
-  const immagine = SparkImmagini.di(effetto.name);
+  const immagine = immagineBlocco(effetto.name);
   if (immagine) blocco.classList.add('con-immagine');
   blocco.appendChild(immagine ? frontaleImmagine(effetto, immagine)
                               : griglia(effetto, posizione));
@@ -521,6 +521,15 @@ function candidatiModello(effetto, posizione) {
 }
 
 /**
+ * Senza il pacchetto Hendrix (`haHendrix`) il wah si chiama «Auto Wah» e ha la
+ * sua immagine, quella del pedale gratuito con la sola Sensitivity.
+ */
+const immagineBlocco = nome =>
+  SparkImmagini.di(nome === 'JH.Vox846' && !haHendrix() ? 'AutoWah' : nome);
+const nomeBlocco = nome =>
+  nome === 'JH.Vox846' && !haHendrix() ? tr('Auto Wah') : SparkEffetti.nome(nome);
+
+/**
  * Il doppio tocco su un tassello: l'elenco dei modelli per quella posizione,
  * o dei tipi se il modello è unico (il riverbero). Il noise gate non ha niente
  * da scegliere, e non apre niente.
@@ -584,10 +593,10 @@ function apriSceltaModello(posizione) {
     const reale = SparkEffetti.ampliReale(modello);
     voci.push({
       valore: modello,
-      testo: SparkEffetti.nome(modello) + (reale ? ' — ' + reale : ''),
+      testo: nomeBlocco(modello) + (reale ? ' — ' + reale : ''),
       gruppo: gruppo || null,
       spento: spento(modello),
-      immagine: (SparkImmagini.di(modello) || {}).src,
+      immagine: (immagineBlocco(modello) || {}).src,
       title: spento(modello)
         ? tr('{0} — serve l\'ampli: la tua libreria non l\'ha mai visto, ' +
           'quindi non sappiamo quante manopole abbia', modello)
@@ -602,6 +611,8 @@ function apriSceltaModello(posizione) {
   const raggruppa = candidati.some(m => SparkEffetti.ampliGruppo(m));
   if (raggruppa) {
     for (const gruppo of SparkEffetti.GRUPPI_AMPLI) {
+      // Senza il pacchetto Hendrix i suoi ampli non ci sono.
+      if (gruppo === SparkEffetti.GRUPPO_HENDRIX && !haHendrix()) continue;
       candidati.filter(m => SparkEffetti.ampliGruppo(m) === gruppo)
                .forEach(m => metti(m, gruppo));
     }
@@ -622,8 +633,14 @@ function apriSceltaModello(posizione) {
     // finivano in fondo sotto «dal catalogo, da provare», che aveva senso
     // finché il catalogo era incerto: adesso è verificato tutto contro l'app.
     candidati.filter(m => !SparkEffetti.eHendrix(m)).forEach(m => metti(m));
-    candidati.filter(m => SparkEffetti.eHendrix(m))
-             .forEach(m => metti(m, SparkEffetti.GRUPPO_HENDRIX));
+    // Senza il pacchetto Hendrix non c'è il suo gruppo: resta solo il wah, che
+    // per chi non ce l'ha è l'Auto Wah gratuito (vedi `eAutoWahLibero`).
+    if (haHendrix()) {
+      candidati.filter(m => SparkEffetti.eHendrix(m))
+               .forEach(m => metti(m, SparkEffetti.GRUPPO_HENDRIX));
+    } else if (candidati.includes('JH.Vox846')) {
+      metti('JH.Vox846');
+    }
   }
   // L'elenco non è per forza completo: l'ampli conosce modelli che nessuna
   // fonte elenca, e senza questa via non ci si arriverebbe mai. Senza ampli
@@ -640,8 +657,18 @@ function apriSceltaModello(posizione) {
   // che pianta l'ampli. La via d'uscita non è tirare a indovinare: è **copiare
   // un blocco vero**, preso da un preset della libreria che quel modello ce
   // l'ha già. Per questo qui offline restano solo i modelli visti.
-  apriElenco(Spark.CATENA[posizione], voci, effetto.name,
-             valore => cambiaModello(posizione, valore));
+  apriElenco(Spark.CATENA[posizione], voci, effetto.name, async valore => {
+    await cambiaModello(posizione, valore);
+    // L'Auto Wah gratuito è il wah in Auto Detect: lo si mette così.
+    if (valore === 'JH.Vox846' && !haHendrix()) {
+      const modo = inModifica.effetti[posizione].params.find(p => p.index === 0);
+      if (modo && modo.value < 0.9) {
+        modo.value = 1;
+        mandaParametro(valore, 0, 1);
+        scegliBlocco(posizione);
+      }
+    }
+  });
 }
 
 /**
@@ -655,7 +682,10 @@ function intestazioneBlocco(effetto) {
   // Scelto un Hendrix, la ragione per cui non si sente resta scritta finché
   // quel blocco è quello: sceglierlo e sentirlo muto sono due momenti diversi,
   // e in mezzo può passare tutto il tempo che serve a dimenticarsene.
-  if (SparkEffetti.eHendrix(effetto.name)) {
+  // Senza il pacchetto Hendrix il wah in Auto Detect è l'Auto Wah gratuito, e
+  // la nota non serve.
+  if (SparkEffetti.eHendrix(effetto.name) &&
+      (haHendrix() || SparkEffetti.vuoleHendrix(effetto))) {
     const nota = document.createElement('div');
     nota.className = 'nota-jh';
     const bollo = document.createElement('span');

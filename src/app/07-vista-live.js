@@ -245,7 +245,8 @@ function disegnaElencoScelta() {
   const elenco = $('elencoScegli');
   elenco.innerHTML = '';
   const termine = $('cercaScegli').value.trim().toLowerCase();
-  const candidati = tutti.filter(r => !termine || (r.name || '').toLowerCase().includes(termine));
+  const candidati = tutti.filter(r => visibileSenzaHendrix(r) &&
+    (!termine || (r.name || '').toLowerCase().includes(termine)));
 
   if (candidati.length === 0) {
     elenco.innerHTML = '<div class="vuoto-sezione">' + tr('Nessun preset.') + '</div>';

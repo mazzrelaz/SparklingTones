@@ -24,6 +24,17 @@ let famiglie   = [];      // {id, nome, colore}: clean, drive, acoustic, bass
 // Niente preferiti: tolti su richiesta dell'utente. Il campo `favorite` resta
 // nei record e nello store — cancellarlo butterebbe via delle scelte già
 // fatte — ma non si vede e non filtra più niente.
+/**
+ * **Hai il pacchetto Jimi Hendrix?** Lo dichiara l'utente in «Impostazioni e
+ * backup» (16 ottobre 2026): lo sblocco sta dentro l'ampli e da qui non si
+ * legge. Col «no» gli effetti Hendrix e i preset che li usano non si vedono, e
+ * il wah è l'Auto Wah gratuito. Di serie sì, com'era prima. Sta in
+ * localStorage perché vale per questo apparecchio, come lo sfondo.
+ */
+function haHendrix() {
+  try { return localStorage.getItem('hendrix') !== 'no'; } catch (e) { return true; }
+}
+
 const vista = { cerca: '', categoria: '', famiglia: '', aperto: null, noteAperte: null,
                 famigliaAperta: null, categorieAperte: null, ordine: 'nome' };
 const live  = { banco: 'ampli', modifica: false, attivo: null, occupato: false,
