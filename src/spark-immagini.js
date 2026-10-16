@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // J.H. Tone City 100 (Sound City One Hundred): pannello dorato; la manopola
+    // sta dentro il cerchio tratteggiato. Pulsante: la levetta Power.
+    'JH.SoundCity100': {
+      src: 'immagini/blocchi/JH.SoundCity100.webp', w: 900, h: 848,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 242.9, y: 297, r: 31.9 },     // Gain
+        { indice: 3, x: 347.6, y: 297, r: 31.9 },     // Bass
+        { indice: 2, x: 451.2, y: 297, r: 31.9 },     // Middle
+        { indice: 1, x: 555.2, y: 297, r: 31.9 },     // Treble
+        { indice: 4, x: 657.9, y: 297, r: 31.9 },     // Master (Volume)
+      ],
+      led: { x: 146.5, y: 261.7, r: 8.7 },
+      pulsante: { x: 146.6, y: 319.4, r: 16 },
+    },
     // J.H. Super 100 (Marshall Super Lead 100): pannello dorato come il 45/100;
     // la manopola sta dentro la scala. Pulsante: la levetta sotto Indicator.
     'JH.SuperLead100': {
