@@ -186,6 +186,18 @@
       led: { x: 350.7, y: 115.8, r: 16 },
       pulsante: { x: 351, y: 943, r: 48 },
     },
+    // J.H. Octave Fuzz: scale azzurre e viola, la manopola «neon». Il raggio sta
+    // dentro l'arco grigio sottile; pulsante: l'esagono in basso.
+    'JH.Octavia': {
+      src: 'immagini/blocchi/JH.Octavia.webp', w: 900, h: 1530,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 231.2, y: 440.6, r: 89.7 },   // Level
+        { indice: 1, x: 662.8, y: 440.5, r: 89.7 },   // Fuzz
+      ],
+      led: { x: 445.8, y: 180.5, r: 18.5 },
+      pulsante: { x: 447.1, y: 1203.1, r: 81 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
