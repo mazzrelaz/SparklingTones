@@ -161,6 +161,18 @@
       led: { x: 450.2, y: 101.5, r: 18.8 },             // Check
       pulsante: { x: 450, y: 1059.1, r: 61 },
     },
+    // J.H. Axle Fuzz, lo scudo: l'originale è già sotto i 900 px, resta alla sua
+    // misura. Pulsante: il cerchio dentro l'ovale, sotto la firma.
+    'JH.AxisFuzz': {
+      src: 'immagini/blocchi/JH.AxisFuzz.webp', w: 887, h: 1013,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 248.5, y: 208.5, r: 56 },     // Volume
+        { indice: 1, x: 633.1, y: 208.6, r: 56 },     // Drive
+      ],
+      led: { x: 440.3, y: 129.2, r: 17 },
+      pulsante: { x: 441, y: 589, r: 60 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
