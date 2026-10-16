@@ -45,6 +45,24 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Vintage Delay: Repeat Rate e Intensity in alto, Echo in mezzo, rosa
+    // dentro i cerchi col mirino. Il BPM (parametro 3) è la levetta fra le
+    // due, ON in alto e OFF in basso, disegnata giù (OFF): `su: 0`. La spia
+    // sta sopra il footswitch.
+    VintageDelay: {
+      src: 'immagini/blocchi/VintageDelay.webp', w: 900, h: 1345,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 230,   y: 215.6, r: 81.5 },   // Repeat Rate
+        { indice: 1, x: 667.6, y: 215.5, r: 81.5 },   // Intensity
+        { indice: 2, x: 448.2, y: 432.1, r: 81.5 },   // Echo
+      ],
+      levette: [
+        { indice: 3, x: 448.2, y: 213, r: 29.6, su: 0 },   // BPM: disegnata OFF (giù)
+      ],
+      led: { x: 448.2, y: 1045.4, r: 20.4 },
+      pulsante: { x: 448.2, y: 1190.7, r: 64.8 },
+    },
     // Reverse Delay (modello «DelayReverse»): Mix e Time grandi in alto, Decay
     // e Filter in mezzo, azzurre dentro gli anelli di tacche. Il BPM
     // (parametro 4) è la levetta sotto la scritta: disegnata come un anello
