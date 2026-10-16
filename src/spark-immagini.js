@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // SwitchAxe (Friedman BE-100, canale lead): pannello nero; la manopola
+    // copre quella nera disegnata e lascia l'arco. Pulsante: la levetta ON/OFF.
+    SwitchAxeLead: {
+      src: 'immagini/blocchi/SwitchAxeLead.webp', w: 900, h: 868,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 204.2, y: 332.8, r: 31.6 },   // Gain
+        { indice: 3, x: 324.2, y: 332.8, r: 31.6 },   // Bass
+        { indice: 2, x: 446.4, y: 332.8, r: 31.6 },   // Middle
+        { indice: 1, x: 569.3, y: 332.8, r: 31.6 },   // Treble
+        { indice: 4, x: 689.4, y: 332.8, r: 31.6 },   // Master (Volume)
+      ],
+      led: { x: 98.4, y: 301.1, r: 9.3 },
+      pulsante: { x: 97, y: 363, r: 17.3 },
+    },
     // Insane 6508 (Peavey 6505+): pannello nero; la manopola sta dentro la
     // scala. Pulsante: la levetta ON/OFF.
     '6505Plus': {
