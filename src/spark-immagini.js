@@ -150,6 +150,17 @@
       led: { x: 449.9, y: 99.1, r: 13 },
       pulsante: { x: 444, y: 1083, r: 58 },
     },
+    Overdrive: {                                      // Over Drive, giallo
+      src: 'immagini/blocchi/Overdrive.webp', w: 900, h: 1296,
+      manopola: manopola('gialla'),
+      manopole: [
+        { indice: 0, x: 238.1, y: 213.7, r: 74.8 },   // Level
+        { indice: 2, x: 659.2, y: 213.7, r: 74.8 },   // Drive
+        { indice: 1, x: 449.2, y: 419.6, r: 62.1 },   // Tone
+      ],
+      led: { x: 450.2, y: 101.5, r: 18.8 },             // Check
+      pulsante: { x: 450, y: 1059.1, r: 61 },
+    },
     // Il Silver 120 con la sua cassa sotto, per riempire il riquadro: i primi
     // tre comandi sul pannello azzurro, Treble e Volume su quello verde.
     RolandJC120: {
