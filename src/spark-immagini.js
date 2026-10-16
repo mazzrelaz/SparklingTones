@@ -504,6 +504,22 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // RB-800 (modello «GK800», ampli da basso): pannello nero e verde acqua;
+    // la manopola copre quella nera disegnata e lascia l'anello. Pulsante: la
+    // levetta Power.
+    GK800: {
+      src: 'immagini/blocchi/GK800.webp', w: 900, h: 839,
+      manopola: manopola('azzurra'),
+      manopole: [
+        { indice: 0, x: 202.5, y: 334.9, r: 37.1 },   // Gain
+        { indice: 3, x: 325.7, y: 334.9, r: 37.1 },   // Bass
+        { indice: 2, x: 447.4, y: 334.9, r: 37.1 },   // Middle
+        { indice: 1, x: 570.5, y: 334.9, r: 37.1 },   // Treble
+        { indice: 4, x: 693.4, y: 334.9, r: 37.1 },   // Master (Volume)
+      ],
+      led: { x: 96.1, y: 299, r: 9.3 },
+      pulsante: { x: 96.4, y: 356.9, r: 17.1 },
+    },
     // Flat Acoustic: pannello nero e oro; la manopola copre quella nera
     // disegnata e lascia la scala. Pulsante: la levetta Power.
     FlatAcoustic: {
