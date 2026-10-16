@@ -45,6 +45,25 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Echo Filt (modello «DelayEchoFilt», sull'immagine «Delay/Echo»): Delay e
+    // Tone grandi in alto, Feedback e Level in mezzo; il BPM (parametro 4, un
+    // interruttore) è la levetta sotto la spia, vista dall'alto: si prende per
+    // disegnata giù (`su: 0`), e a 1 si capovolge.
+    DelayEchoFilt: {
+      src: 'immagini/blocchi/DelayEchoFilt.webp', w: 900, h: 867,
+      manopola: manopola('neon'),
+      manopole: [
+        { indice: 0, x: 196,   y: 154.2, r: 80.6 },   // Delay
+        { indice: 3, x: 703.3, y: 154.2, r: 80.6 },   // Tone
+        { indice: 1, x: 342.5, y: 338.8, r: 54.9 },   // Feedback
+        { indice: 2, x: 555.5, y: 338.8, r: 54.9 },   // Level
+      ],
+      levette: [
+        { indice: 4, x: 449.8, y: 214.6, r: 19, su: 0 },   // BPM
+      ],
+      led: { x: 450.5, y: 101.1, r: 14.6 },
+      pulsante: { x: 449.6, y: 776.2, r: 48.3 },
+    },
     // Vibrato (modello «Vibrato01»): Speed e Depth grandi, dentro la scala.
     Vibrato01: {
       src: 'immagini/blocchi/Vibrato01.webp', w: 900, h: 1351,
