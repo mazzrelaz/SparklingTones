@@ -45,6 +45,18 @@
       led: { x: 722.5, y: 125.3, r: 12.4 },
       pulsante: { x: 448.8, y: 819.2, r: 43.5 },
     },
+    // Flanger: Rate e Depth in alto, Mix in mezzo, rosa dentro gli anelli.
+    Flanger: {
+      src: 'immagini/blocchi/Flanger.webp', w: 900, h: 1302,
+      manopola: manopola('rosa'),
+      manopole: [
+        { indice: 0, x: 239.1, y: 216.1, r: 73.7 },   // Rate
+        { indice: 2, x: 662.5, y: 216.1, r: 73.7 },   // Depth
+        { indice: 1, x: 449.5, y: 414.9, r: 64.5 },   // Mix
+      ],
+      led: { x: 449.4, y: 90.6, r: 18.4 },
+      pulsante: { x: 449.5, y: 1091.6, r: 46.1 },
+    },
     // Cloner Chorus: Rate grande dentro la scala. La Depth nel disegno è un
     // pallino fra HIGH e LOW, ma nell'ampli è continua: una manopola piccola.
     Cloner: {
