@@ -427,6 +427,22 @@
       led: { x: 101.6, y: 310.8, r: 9.5 },
       pulsante: { x: 101.6, y: 371.4, r: 17.5 },
     },
+    // J.H. D-Show Master (Fender Dual Showman): il nome non è scritto sul
+    // disegno, l'ha detto l'utente. Pannello nero in alto; attorno ai puntini
+    // solo la scala. Pulsante: la levetta Power.
+    'JH.DualShowman': {
+      src: 'immagini/blocchi/JH.DualShowman.webp', w: 900, h: 837,
+      manopola: manopola('viola'),
+      manopole: [
+        { indice: 0, x: 204.6, y: 135.1, r: 31.2 },   // Gain
+        { indice: 3, x: 325.8, y: 135.1, r: 31.2 },   // Bass
+        { indice: 2, x: 447.2, y: 135.1, r: 31.2 },   // Middle
+        { indice: 1, x: 570,   y: 135.1, r: 31.2 },   // Treble
+        { indice: 4, x: 690.7, y: 135.1, r: 31.2 },   // Master (Volume)
+      ],
+      led: { x: 111.2, y: 110.4, r: 7.1 },
+      pulsante: { x: 109.3, y: 160.4, r: 12.8 },
+    },
     // J.H. Sun 100S (Sunn 100S): il nome non è scritto sul disegno, l'ha detto
     // l'utente. La manopola copre quella nera disegnata; l'accensione è un
     // interruttore rettangolare (`w`/`h`) con la lucina rossa dentro (la spia).
