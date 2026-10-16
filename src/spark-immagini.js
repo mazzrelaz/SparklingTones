@@ -504,6 +504,21 @@
       led: { x: 120, y: 311.4, r: 6 },
       pulsante: { x: 121.4, y: 318.6, w: 27.1, h: 60 },
     },
+    // Rocker V (modello «Invader»): pannello nero e arancione; attorno ai
+    // puntini solo la corona di tacche bianche. Pulsante: la levetta Power.
+    Invader: {
+      src: 'immagini/blocchi/Invader.webp', w: 900, h: 853,
+      manopola: manopola('arancione'),
+      manopole: [
+        { indice: 0, x: 197.9, y: 331.4, r: 29.7 },   // Gain
+        { indice: 3, x: 319.9, y: 331.4, r: 29.7 },   // Bass
+        { indice: 2, x: 443.6, y: 331.4, r: 29.7 },   // Middle
+        { indice: 1, x: 565.5, y: 331.4, r: 29.7 },   // Treble
+        { indice: 4, x: 687.9, y: 331.4, r: 29.7 },   // Master (Volume)
+      ],
+      led: { x: 89.8, y: 294.7, r: 9.2 },
+      pulsante: { x: 89.1, y: 350, r: 17 },
+    },
     // SwitchAxe (Friedman BE-100, canale lead): pannello nero; la manopola
     // copre quella nera disegnata e lascia l'arco. Pulsante: la levetta ON/OFF.
     SwitchAxeLead: {
