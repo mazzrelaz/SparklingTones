@@ -1341,4 +1341,6 @@ Room Studio B e Plate Long hanno la spia viola (`led.colore`). Con queste **le i
 esistenti»): Red Comp, Sustainer, Tube Drive, Optical Comp, Booster, Rocker V, Jumbo e BE 101, nello
 stile nuovo; gli ampli ora hanno la cassa sotto. Misure rifatte da capo, indici invariati. L'Optical
 Comp ha la levetta Pad disegnata giù (0 dB, `su: 0`); resta da verificare a orecchio quale valore sia
--15 dB. Le manopole del Booster ora verdi, del Rocker V azzurre.
+-15 dB. Le manopole del Booster ora verdi, del Rocker V azzurre. Poco dopo anche **Black Op** e
+**SAB Driver**; nel SAB la levetta HP/LP è disegnata giù (LP, `su: 0`), e resta da verificare a
+orecchio quale valore sia HP.
