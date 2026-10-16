@@ -16,14 +16,15 @@
    ==================================================================== */
 
 /**
- * Il colore della catena: alone dei tasselli, nome della categoria, manopole
- * girate. Prima ce n'era uno per posizione; con le immagini dei blocchi, che
- * hanno già i loro colori, l'utente ne ha chiesto **uno solo per tutti**, il
- * blu che era dei delay (bozza del 16 ottobre 2026). Il fondo dei tasselli è
- * **più scuro** della pagina: il neon si vede sul buio.
+ * Un colore acceso per posizione della catena, così la categoria si riconosce
+ * senza leggerla. Sono tinte sature con l'alone, e il fondo dei tasselli è
+ * **più scuro** della pagina: il neon si vede sul buio, e un pannello grigio
+ * smorza tutto quello che ci sta sopra. Provato un colore solo per tutti (il
+ * blu dei delay, 16 ottobre 2026): all'utente non è piaciuto, si è tornati qui.
  */
-const COLORE_CATENA = '#3aa0ff';
-const coloreDi = () => COLORE_CATENA;
+const COLORI_CATENA = ['#00d9ff', '#c04bff', '#ff3040', '#ffd21e',
+                       '#17e39b', '#3aa0ff', '#8b6bff'];
+const coloreDi = posizione => COLORI_CATENA[posizione % COLORI_CATENA.length];
 
 /**
  * I valori viaggiano da 0 a 1 — è quello che vuole l'ampli — ma si leggono da
