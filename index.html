@@ -802,6 +802,9 @@
   button.imp-voce.pericolo::after { display:none; }
   .imp-campo input[type=text] { flex:1; min-width:0; }
   /* 17 ottobre 2026: Genera con l'IA. */
+  /* Le voci nascoste lo restano: `display` delle regole qui sopra e del menu
+     batte l'attributo `hidden`, e la voce si vedeva lo stesso. */
+  .foglio-menu button[hidden], button.imp-voce[hidden] { display:none; }
   #descrizioneIA { display:block; width:100%; box-sizing:border-box; resize:vertical;
                    border:none; background:none; padding:12px 14px; min-height:96px;
                    font:inherit; font-size:0.92rem; line-height:1.45; color:var(--text); }
