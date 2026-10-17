@@ -408,13 +408,6 @@
   .head { display:flex; align-items:center; gap:10px; padding:9px 2px; min-height:62px;
           box-sizing:border-box; cursor:pointer; }
 
-  /* La catena a pastiglie: nomi leggibili, e i blocchi spenti si vedono spenti. */
-  .chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:5px; }
-  .chip { background:var(--rialzo); color:#b6bbc3; font-size:0.7rem; padding:2px 8px;
-          border-radius:9px; white-space:nowrap; }
-  .chip.spento { color:var(--faint); background:none; border:1px solid var(--line);
-                 text-decoration:line-through; }
-
   /* Provare un preset è l'azione più frequente: un tasto, senza aprire nulla.
      Un tondo grande quanto un pollice, col solo contorno. */
   .via { width:40px; height:40px; border-radius:50%; flex:none; padding:0;
@@ -484,7 +477,6 @@
                         background:none; color:var(--faint); display:flex;
                         align-items:center; justify-content:center; }
   .scheda-nome button:hover { background:none; color:var(--text); }
-  .scheda .chips { margin-top:6px; }
   .scheda svg { width:18px; height:18px; flex:none; fill:none; stroke:currentColor;
                 stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
   .scheda-grandi { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
@@ -767,6 +759,48 @@
   .sezione-pannello:first-of-type { border-top:none; padding-top:0; margin-top:0; }
   .sezione-pannello h3 { font-size:0.76rem; color:var(--dim); text-transform:uppercase;
                          letter-spacing:0.06em; margin:0 0 6px; font-weight:700; }
+  /* Impostazioni a riquadri (17 ottobre 2026): ogni riquadro è un gruppo di
+     voci, una per riga, separate da una linea sottile; le spiegazioni stanno
+     sotto, piccole. La linea è un'ombra sopra la voce: la prima la perde da
+     sola contro il bordo del riquadro, anche quando quelle prima sono nascoste. */
+  .imp-titolo { font-family:var(--font); font-size:0.7rem; font-weight:600;
+                color:var(--dim); text-transform:uppercase; letter-spacing:0.07em;
+                margin:26px 4px 8px; }
+  .imp-gruppo { background:var(--panel); border:1px solid var(--line); border-radius:14px;
+                overflow:hidden; }
+  .imp-voce { display:flex; align-items:center; justify-content:space-between; gap:12px;
+              min-height:52px; padding:10px 14px; box-sizing:border-box;
+              box-shadow:0 -1px 0 var(--line); }
+  .imp-etichetta { font-family:var(--font); font-size:0.92rem; font-weight:500; color:var(--text); }
+  .imp-testo { min-width:0; }
+  .imp-nota { font-family:var(--font); font-size:0.76rem; line-height:1.45; color:var(--dim);
+              margin:3px 0 0; }
+  .imp-nota-voce { padding:0 14px 12px; margin:0; }
+  .imp-nota-sotto { font-size:0.76rem; line-height:1.5; color:var(--faint); margin:8px 4px 0; }
+  .imp-nota-sotto strong, .imp-nota-sotto code { color:var(--dim); }
+  #dropboxQuando { color:var(--dim); }
+  #pannelloAltro:has(#dropboxCollegato[hidden]) #dropboxQuando,
+  #pannelloAltro:has(#dropboxDaCollegare[hidden]) .imp-solo-da-collegare { display:none; }
+  /* La scelta a due posizioni: quella attiva è chiara, come le pastiglie dei
+     filtri. Lo stato lo segna ancora `primary`, messo dallo script. */
+  .imp-scelta { display:inline-flex; flex:none; padding:3px; gap:2px; border-radius:10px;
+                background:var(--incavo); border:1px solid var(--line); }
+  .imp-scelta button { background:none; border:none; border-radius:7px; padding:6px 12px;
+                       font-size:0.8rem; color:var(--dim); box-shadow:none; }
+  .imp-scelta button:hover { background:var(--rialzo); color:var(--text); }
+  .imp-scelta button.primary, .imp-scelta button.primary:hover { background:var(--text); color:#000; }
+  /* Le voci che fanno qualcosa: tutta la riga è il tasto, con la freccina. */
+  button.imp-voce { width:100%; background:none; border:none; border-radius:0; text-align:left;
+                    font-family:var(--font); font-size:0.92rem; font-weight:500; color:var(--text); }
+  button.imp-voce:hover { background:var(--rialzo); }
+  button.imp-voce::after { content:''; width:7px; height:7px; flex:none; margin-right:3px;
+                           border-top:1.6px solid var(--faint); border-right:1.6px solid var(--faint);
+                           transform:rotate(45deg); }
+  button.imp-voce.imp-principale { font-weight:700; }
+  button.imp-voce.imp-lieve { color:var(--dim); }
+  button.imp-voce.pericolo { color:var(--rosso); }
+  button.imp-voce.pericolo::after { display:none; }
+  .imp-campo input[type=text] { flex:1; min-width:0; }
   .famiglia-voce input[type=color] { width:34px; height:26px; padding:2px; flex:none;
                                      background:var(--foglio); border:1px solid var(--line);
                                      border-radius:7px; cursor:pointer; }
@@ -1651,44 +1685,54 @@
 
 <!-- esporta, importa, diagnostica -->
 <div class="pannello" id="pannelloAltro">
-  <!-- La lingua: scritta nelle due lingue, perché la trovi anche chi l'altra
-       non la legge. Cambiarla ricarica la pagina. -->
-  <div class="sezione-pannello" translate="no">
-    <h3>Lingua · Language</h3>
-    <div class="azioni" id="sceltaLingua">
-      <button data-lingua="it">Italiano</button>
-      <button data-lingua="en">English</button>
+  <!-- Le impostazioni a riquadri (17 ottobre 2026, l'utente: «incasinata»): una
+       voce per riga, le scelte come interruttori a due posizioni, le
+       spiegazioni piccole sotto il riquadro. I testi sono quelli di prima,
+       parola per parola, così la traduzione li ritrova. -->
+  <div class="imp-gruppo">
+    <!-- La lingua: scritta nelle due lingue, perché la trovi anche chi l'altra
+         non la legge. Cambiarla ricarica la pagina. -->
+    <div class="imp-voce" translate="no">
+      <span class="imp-etichetta">Lingua · Language</span>
+      <div class="imp-scelta" id="sceltaLingua">
+        <button data-lingua="it">Italiano</button>
+        <button data-lingua="en">English</button>
+      </div>
+    </div>
+    <!-- Lo sfondo: grigio o nero. Vale per questo apparecchio. -->
+    <div class="imp-voce">
+      <span class="imp-etichetta">Sfondo</span>
+      <div class="imp-scelta" id="sceltaSfondo">
+        <button data-sfondo="grigio">Grigio</button>
+        <button data-sfondo="nero">Nero</button>
+      </div>
+    </div>
+    <!-- Il pacchetto Hendrix: lo dichiara l'utente, perché dall'ampli non si legge. -->
+    <div class="imp-voce">
+      <div class="imp-testo">
+        <span class="imp-etichetta">Pacchetto Jimi Hendrix</span>
+        <p class="imp-nota">Ce l'hai sbloccato sull'ampli? Se no, gli effetti Hendrix e i preset che li
+          usano non si vedono, e il wah è l'Auto Wah gratuito.</p>
+      </div>
+      <div class="imp-scelta" id="sceltaHendrix">
+        <button data-hendrix="si">Sì</button>
+        <button data-hendrix="no">No</button>
+      </div>
     </div>
   </div>
-  <!-- Lo sfondo: grigio o nero. Vale per questo apparecchio. -->
-  <div class="sezione-pannello">
-    <h3>Sfondo</h3>
-    <div class="azioni" id="sceltaSfondo">
-      <button data-sfondo="grigio">Grigio</button>
-      <button data-sfondo="nero">Nero</button>
-    </div>
-  </div>
-  <!-- Il pacchetto Hendrix: lo dichiara l'utente, perché dall'ampli non si legge. -->
-  <div class="sezione-pannello">
-    <h3>Pacchetto Jimi Hendrix</h3>
-    <p class="spiega">Ce l'hai sbloccato sull'ampli? Se no, gli effetti Hendrix e i preset che li
-      usano non si vedono, e il wah è l'Auto Wah gratuito.</p>
-    <div class="azioni" id="sceltaHendrix">
-      <button data-hendrix="si">Sì</button>
-      <button data-hendrix="no">No</button>
-    </div>
-  </div>
-  <p class="spiega">La libreria vive in questo browser: l'esportazione è l'unico modo di
-    portarla su un altro apparecchio o di metterla al sicuro.</p>
-  <div class="azioni">
-    <button id="btnExport">Esporta la libreria</button>
-    <button id="btnImport">Importa un file</button>
+
+  <h3 class="imp-titolo">Backup</h3>
+  <div class="imp-gruppo">
+    <button id="btnExport" class="imp-voce">Esporta la libreria</button>
+    <button id="btnImport" class="imp-voce">Importa un file</button>
     <!-- Niente `accept`: il file si riconosce dal contenuto. Un tono condiviso
          dall'app ufficiale può avere un'estensione che non conosciamo, e con
          un filtro non si riuscirebbe nemmeno a sceglierlo. -->
     <input type="file" id="fileInput" hidden>
   </div>
-  <p class="spiega" style="margin-top:12px">Si importano i backup di quest'app (.json), il
+  <p class="imp-nota-sotto">La libreria vive in questo browser: l'esportazione è l'unico modo di
+    portarla su un altro apparecchio o di metterla al sicuro.</p>
+  <p class="imp-nota-sotto">Si importano i backup di quest'app (.json), il
     <code>preset_backup.zip</code> dell'app ufficiale e <strong>un preset singolo</strong>
     esportato da lì. Se ce l'hai già, se ne aggiorna il suono: tag, note e famiglia
     restano. Un suono che l'ampli sta già facendo non ha bisogno di nessun file:
@@ -1696,68 +1740,62 @@
     bollino dell'ampli in alto.</p>
 
   <!-- Dropbox: la stessa libreria sul computer e sul telefono. -->
-  <div class="sezione-pannello" style="margin-top:22px">
-    <h3>Dropbox</h3>
-    <p class="spiega">Due gesti espliciti, mai in automatico. Quello che arriva si
-      <strong>fonde</strong>: aggiorna i preset che riconosce, aggiunge quelli che non ci
-      sono, e quelli cancellati sull'altro apparecchio spariscono anche qui — a meno che
-      tu non li abbia toccati dopo.</p>
-
+  <h3 class="imp-titolo">Dropbox</h3>
+  <div class="imp-gruppo">
     <div id="dropboxCollegato" hidden>
-      <div class="azioni">
-        <button id="btnDropboxSu" class="primary">Manda su Dropbox</button>
-        <button id="btnDropboxGiu">Prendi da Dropbox</button>
-      </div>
-      <p class="spiega" id="dropboxQuando">&nbsp;</p>
-      <button id="btnDropboxVia" class="piccolo">Scollega Dropbox</button>
+      <button id="btnDropboxSu" class="imp-voce imp-principale">Manda su Dropbox</button>
+      <button id="btnDropboxGiu" class="imp-voce">Prendi da Dropbox</button>
+      <button id="btnDropboxVia" class="imp-voce imp-lieve">Scollega Dropbox</button>
     </div>
 
     <div id="dropboxDaCollegare">
-      <div class="barra-alta">
+      <div class="imp-voce imp-campo">
         <input type="text" id="dropboxChiave" placeholder="app key della tua app Dropbox"
-               autocomplete="off" spellcheck="false" style="flex:1">
-        <button id="btnDropboxCollega" class="primary">Collega</button>
+               autocomplete="off" spellcheck="false">
+        <button id="btnDropboxCollega" class="primary piccolo">Collega</button>
       </div>
-      <div id="dropboxPassoDue" hidden style="margin-top:10px">
-        <p class="spiega">Si è aperta la pagina di Dropbox: autorizza, e incolla qui il
+      <div id="dropboxPassoDue" hidden>
+        <div class="imp-voce imp-campo">
+          <input type="text" id="dropboxCodice" placeholder="codice da Dropbox"
+                 autocomplete="off" spellcheck="false">
+          <button id="btnDropboxFine" class="primary piccolo">Fatto</button>
+        </div>
+        <p class="imp-nota imp-nota-voce">Si è aperta la pagina di Dropbox: autorizza, e incolla qui il
           codice che ti mostra. Se non si è aperta da sé — sul telefono capita, il
           browser la blocca come una finestra a sorpresa — <a id="dropboxLink" href="#"
           target="_blank" rel="noopener">aprila da qui</a>.</p>
-        <div class="barra-alta">
-          <input type="text" id="dropboxCodice" placeholder="codice da Dropbox"
-                 autocomplete="off" spellcheck="false" style="flex:1">
-          <button id="btnDropboxFine" class="primary">Fatto</button>
-        </div>
       </div>
-      <p class="spiega" style="margin-top:10px">Serve un'app tua, una volta sola: su
-        <code>dropbox.com/developers</code>, «Create app», <em>Scoped access</em> e
-        <em>App folder</em>; nella scheda «Permissions» spunta
-        <code>files.content.write</code> e <code>files.content.read</code>. L'app key sta
-        nella scheda «Settings». L'app secret non serve: una pagina come questa non
-        potrebbe tenerlo nascosto, ed è il motivo per cui si usa PKCE.</p>
     </div>
   </div>
+  <p class="imp-nota-sotto" id="dropboxQuando">&nbsp;</p>
+  <p class="imp-nota-sotto">Due gesti espliciti, mai in automatico. Quello che arriva si
+    <strong>fonde</strong>: aggiorna i preset che riconosce, aggiunge quelli che non ci
+    sono, e quelli cancellati sull'altro apparecchio spariscono anche qui — a meno che
+    tu non li abbia toccati dopo.</p>
+  <p class="imp-nota-sotto imp-solo-da-collegare">Serve un'app tua, una volta sola: su
+    <code>dropbox.com/developers</code>, «Create app», <em>Scoped access</em> e
+    <em>App folder</em>; nella scheda «Permissions» spunta
+    <code>files.content.write</code> e <code>files.content.read</code>. L'app key sta
+    nella scheda «Settings». L'app secret non serve: una pagina come questa non
+    potrebbe tenerlo nascosto, ed è il motivo per cui si usa PKCE.</p>
 
-  <!-- I doppioni: preset con lo stesso nome, da guardare e scegliere. -->
-  <div class="sezione-pannello" style="margin-top:22px">
-    <h3>Doppioni</h3>
-    <p class="spiega">I preset che in libreria hanno <strong>lo stesso nome</strong>, uno sotto
-      l'altro: quando sono entrati, se stanno sull'ampli, e se suonano uguale. Scegli tu
-      quali togliere.</p>
-    <button id="btnDoppioni" class="piccolo">Cerca i doppioni</button>
+  <!-- I doppioni e la piazza pulita: la libreria si guarda e si svuota, l'ampli
+       resta com'è. -->
+  <h3 class="imp-titolo">Libreria</h3>
+  <div class="imp-gruppo">
+    <button id="btnDoppioni" class="imp-voce">Cerca i doppioni</button>
+    <button id="btnSvuota" class="imp-voce pericolo">Elimina tutti i preset</button>
   </div>
+  <p class="imp-nota-sotto">I preset che in libreria hanno <strong>lo stesso nome</strong>, uno sotto
+    l'altro: quando sono entrati, se stanno sull'ampli, e se suonano uguale. Scegli tu
+    quali togliere.</p>
+  <p class="imp-nota-sotto">Toglie dalla libreria tutti i preset <strong>tranne gli otto
+    caricati sull'ampli</strong>, che restano coi loro tag e le loro note. L'ampli non
+    viene toccato. Se usi Dropbox, al prossimo «Manda su» spariranno anche di là.</p>
 
-  <!-- Fare piazza pulita: la libreria si svuota, l'ampli resta com'è. -->
-  <div class="sezione-pannello" style="margin-top:22px">
-    <h3>Fare piazza pulita</h3>
-    <p class="spiega">Toglie dalla libreria tutti i preset <strong>tranne gli otto
-      caricati sull'ampli</strong>, che restano coi loro tag e le loro note. L'ampli non
-      viene toccato. Se usi Dropbox, al prossimo «Manda su» spariranno anche di là.</p>
-    <button id="btnSvuota" class="pericolo piccolo">Elimina tutti i preset</button>
-  </div>
   <div class="stato-pannello" hidden></div>
-  <div style="margin-top:20px">
-    <button id="btnAbout" class="piccolo">Informazioni, licenze e responsabilità</button>
+  <div class="imp-gruppo" style="margin-top:22px">
+    <button id="btnAbout" class="imp-voce">Informazioni, licenze e responsabilità</button>
   </div>
 </div>
 

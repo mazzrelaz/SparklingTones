@@ -202,7 +202,7 @@ function schedaSlot(record, slot) {
   // c'erano ed è stato l'utente a toglierli il 26 agosto 2026. Sono otto
   // caselle che si guardano tutte insieme, e otto righe di effetti in più
   // facevano rumore senza aggiungere niente a chi il preset lo conosce già.
-  // La catena resta nel dettaglio, che è dove quel preset lo si guarda davvero.
+  // La catena si guarda nell'editor (dal 17 ottobre 2026 nemmeno nel dettaglio).
   const nome = document.createElement('div');
   nome.className = 'nome-slot';
   nome.textContent = record ? (record.name || tr('(senza nome)')) : tr('non letto');
@@ -235,45 +235,6 @@ function invitoCollega() {
   collega.addEventListener('click', () => $('status').click());
   box.append(testo, collega);
   return box;
-}
-
-/**
- * La catena a pastiglie, coi nomi leggibili invece degli identificativi
- * dell'ampli: `bias.noisegate · LA2AComp · …` a colpo d'occhio non dice
- * niente. Si mostrano i cinque blocchi che fanno il carattere del suono —
- * drive, ampli, modulazione, delay, riverbero — e i blocchi spenti si vedono
- * spenti invece di sparire: fa parte di com'è fatto quel suono.
- *
- * Il riverbero porta il **tipo** invece della parola «Riverbero», che è
- * sempre la stessa e non distingue niente.
- */
-function pastiglieCatena(record) {
-  const riga = document.createElement('div');
-  riga.className = 'chips';
-  const effetti = record.effects || [];
-
-  for (let posizione = 2; posizione <= 6; posizione++) {
-    const effetto = effetti[posizione];
-    if (!effetto) continue;
-    const chip = document.createElement('span');
-    chip.className = 'chip' + (effetto.enabled ? '' : ' spento');
-    chip.textContent = nomePastiglia(effetto, posizione);
-    chip.title = Spark.CATENA[posizione] + ': ' + effetto.name;
-    riga.appendChild(chip);
-  }
-  return riga;
-}
-
-function nomePastiglia(effetto, posizione) {
-  const nomi = SparkEffetti.nomiPosizioni(effetto.name, 6);
-  if (posizione === 6 && nomi) {
-    const param = (effetto.params || []).find(p => p.index === 6);
-    const dove = param
-      ? SparkEffetti.posizioneDi(param.value, SparkEffetti.posizioni(effetto.name, 6))
-      : -1;
-    if (dove !== -1) return nomi[dove];
-  }
-  return SparkEffetti.nome(effetto.name);
 }
 
 /**
@@ -519,8 +480,9 @@ function dettaglio(record, slot) {
   });
   boxNome.append(titolo, rinomina);
 
-  // La catena a pastiglie, una volta sola: nelle righe di libreria non c'è.
-  det.append(testa, boxNome, pastiglieCatena(record));
+  // Sotto il nome niente elenco degli effetti (17 ottobre 2026, l'utente):
+  // la catena si guarda nell'editor, con le immagini.
+  det.append(testa, boxNome);
 
   /* le due grandi ------------------------------------------------- */
   const grandi = document.createElement('div');
