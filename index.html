@@ -810,6 +810,13 @@
   #catenaIA .riga-ia .imp-nota { width:92px; flex:none; margin:0; }
   #catenaIA .riga-ia.spento .imp-etichetta { color:var(--faint); }
   #pannelloGeneraIA .imp-campo input { border:none; background:none; padding:0; }
+  #sceltaModelloIA .imp-nota { display:block; }
+  #sceltaModelloIA .costo-ia { flex:none; font-size:0.74rem; color:var(--dim); white-space:nowrap; }
+  #sceltaModelloIA button.imp-voce::after { border:none; transform:none; width:18px; height:18px;
+                                            margin:0; border-radius:50%; box-sizing:border-box;
+                                            border:1.6px solid var(--bordo-forte); }
+  #sceltaModelloIA button.imp-voce.scelto::after { background:var(--accent); border-color:var(--accent);
+                                                   box-shadow:inset 0 0 0 3.5px var(--panel); }
   .famiglia-voce input[type=color] { width:34px; height:26px; padding:2px; flex:none;
                                      background:var(--foglio); border:1px solid var(--line);
                                      border-radius:7px; cursor:pointer; }
@@ -1841,6 +1848,23 @@
     </div>
   </div>
 
+  <h3 class="imp-titolo">Modello</h3>
+  <div class="imp-gruppo" id="sceltaModelloIA">
+    <button class="imp-voce" data-modello="gpt-6-luna">
+      <span class="imp-testo"><span class="imp-etichetta">Luna</span>
+        <span class="imp-nota">Economico e veloce: l'idea giusta, le manopole più a caso.</span></span>
+      <span class="costo-ia">meno di 0,1 cent</span></button>
+    <button class="imp-voce" data-modello="gpt-6.1-sol">
+      <span class="imp-testo"><span class="imp-etichetta">Sol · consigliato</span>
+        <span class="imp-nota">Equilibrato: conosce bene ampli e pedali.</span></span>
+      <span class="costo-ia">circa 1 cent</span></button>
+    <button class="imp-voce" data-modello="gpt-6-astra">
+      <span class="imp-testo"><span class="imp-etichetta">Astra</span>
+        <span class="imp-nota">Il più accurato, ma più lento.</span></span>
+      <span class="costo-ia">circa 5 cent</span></button>
+  </div>
+  <p class="imp-nota-sotto">Il costo è per ogni preset generato.</p>
+
   <h3 class="imp-titolo">Chiave OpenAI</h3>
   <div class="imp-gruppo">
     <div class="imp-voce imp-campo">
@@ -1849,7 +1873,7 @@
     <button id="btnDimenticaIA" class="imp-voce imp-lieve">Togli la chiave da questo apparecchio</button>
   </div>
   <p class="imp-nota-sotto">La chiave resta in questo browser e va solo a OpenAI. Ogni «Genera»
-    costa qualche centesimo, scalato dai tuoi crediti su <code>platform.openai.com</code>.</p>
+    si paga a OpenAI, scalato dai tuoi crediti su <code>platform.openai.com</code>.</p>
 </div>
 
 <!-- i doppioni della libreria -->

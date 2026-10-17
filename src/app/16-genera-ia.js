@@ -21,8 +21,14 @@
    l'app non ha un server. Si paga a OpenAI per ogni «Genera».
    ==================================================================== */
 
-const MODELLO_IA = 'gpt-6.1-sol';
+// I tre modelli di OpenAI che si possono scegliere (nomi verificati sulla loro
+// documentazione il 17 ottobre 2026). Il costo è misurato su Sol — un preset,
+// 4.407 token, 1 centesimo scalato dai crediti — e per gli altri due è la
+// stessa richiesta coi loro prezzi: Luna un ventesimo, Astra cinque volte.
+const MODELLI_IA = ['gpt-6-luna', 'gpt-6.1-sol', 'gpt-6-astra'];
+const MODELLO_IA_PREDEFINITO = 'gpt-6.1-sol';
 const CHIAVE_IA = 'openai-chiave';
+const CHIAVE_MODELLO_IA = 'openai-modello';
 const TEMPO_MAX_IA_MS = 120000;
 
 // I sette blocchi, nell'ordine di `Spark.CATENA`: sono le chiavi del JSON.
@@ -32,6 +38,16 @@ let generato = null;          // { record, spiegazione } dell'ultima risposta
 
 function leggiChiaveIA() {
   try { return localStorage.getItem(CHIAVE_IA) || ''; } catch (e) { return ''; }
+}
+function modelloIA() {
+  let scelto = null;
+  try { scelto = localStorage.getItem(CHIAVE_MODELLO_IA); } catch (e) { /* vale il predefinito */ }
+  return MODELLI_IA.includes(scelto) ? scelto : MODELLO_IA_PREDEFINITO;
+}
+function segnaModelloIA() {
+  for (const tasto of document.querySelectorAll('#sceltaModelloIA [data-modello]')) {
+    tasto.classList.toggle('scelto', tasto.dataset.modello === modelloIA());
+  }
 }
 function scriviChiaveIA(valore) {
   try {
@@ -133,7 +149,7 @@ async function chiediAllIA(descrizione, chiave) {
       signal: ferma.signal,
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + chiave },
       body: JSON.stringify({
-        model: MODELLO_IA,
+        model: modelloIA(),
         instructions: istruzioniIA(),
         input: descrizione,
         text: { format: { type: 'json_schema', name: 'preset_spark', strict: true,
@@ -311,7 +327,7 @@ async function generaConIA() {
     const { record, avvisi } = presetDaIA(risposta, scheletro, descrizione);
     generato = { record, spiegazione: String(risposta.spiegazione || '') };
     disegnaGenerato();
-    logLine(tr('«{0}» pronto, partendo da «{1}».', record.name, scheletro.name) +
+    logLine(tr('«{0}» pronto ({1}), partendo da «{2}».', record.name, modelloIA(), scheletro.name) +
             (avvisi.length ? ' ' + avvisi.join('; ') : ''));
   } catch (e) {
     logLine(e.message, true);
@@ -323,8 +339,15 @@ async function generaConIA() {
 $('btnMenuGeneraIA').addEventListener('click', () => {
   apriPannello('pannelloGeneraIA');
   $('chiaveIA').value = leggiChiaveIA();
+  segnaModelloIA();
   disegnaGenerato();
 });
+for (const tasto of document.querySelectorAll('#sceltaModelloIA [data-modello]')) {
+  tasto.addEventListener('click', () => {
+    try { localStorage.setItem(CHIAVE_MODELLO_IA, tasto.dataset.modello); } catch (e) { /* resta com'era */ }
+    segnaModelloIA();
+  });
+}
 $('btnGeneraIA').addEventListener('click', generaConIA);
 $('btnSuonaIA').addEventListener('click', () => {
   if (!generato) return;
