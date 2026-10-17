@@ -31,7 +31,7 @@ ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 15 ot
 
 ```
 index.html                        HTML e l'unico <style>: Preset e Live nello stesso documento
-src/app/01-…15-*.js               lo script dell'app, in fila
+src/app/01-…16-*.js               lo script dell'app, in fila (16: Genera con l'IA)
 guida.html / guida.en.html        guida all'uso (guida.css, guida.js); guida-pedale(.en).html
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
 src/spark-protocol.js             encoder/decoder puro — il cuore del progetto
@@ -362,7 +362,7 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 `docs/decisioni-ui.md`, ultime sezioni; la versione lunga di questo paragrafo in `docs/diario.md`.
 
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
-14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v116` (17 ottobre): **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro. **`guida.en.html`** è
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v117` (17 ottobre): **«Genera con l'IA»** nel menu Altro (`16-genera-ia.js`, pubblicato **non ancora sentito sull'ampli**): OpenAI con la chiave dell'utente in `localStorage`, modelli Luna/Sol/Astra (Sol predefinito; **misurato: 4.407 token, 1 centesimo**), risposta a schema con `enum` dei MODELLI, preset costruito sopra uno vero della libreria come il Duplica, salvato solo con «Salva in libreria». **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro. **`guida.en.html`** è
 rimasta alle schermate vecchie.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale

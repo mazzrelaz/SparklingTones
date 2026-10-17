@@ -4,7 +4,7 @@
 'use strict';
 
 /* ====================================================================
-   Genera con l'IA (BOZZA del 17 ottobre 2026)
+   Genera con l'IA (17 ottobre 2026)
 
    L'utente scrive che suono vuole; OpenAI risponde con un JSON a forma
    fissa — un modello per ognuno dei sette blocchi, acceso o spento, e le
