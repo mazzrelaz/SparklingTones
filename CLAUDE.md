@@ -332,6 +332,11 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
   `store.importFromAmp([...])`.
 - **Questa memoria la aggiorno io**, sempre a fine sessione; si registrano anche le ipotesi
   escluse da misure. Si segna sempre cosa è verificato sull'hardware.
+- **Controllo di sicurezza dopo ogni novità grossa** (17 ottobre 2026, scelta dell'utente al posto
+  di un appuntamento fisso): una funzione che parla con l'esterno (chiavi, rete, Bluetooth, file
+  importati, firmware del ponte) la ricontrollo io prima di chiudere la sessione, o propongo una
+  sessione apposta se è lungo; l'esito va in `docs/sicurezza.md`, con la data. Ultimo audit intero
+  17 settembre 2026; **«Genera con l'IA» non è ancora ricontrollata a fondo**.
 - Italiano in commenti e UI; la UI ha anche l'inglese, secondario (vedi «L'inglese»). Byte
   in hex minuscolo separato da spazi.
 
