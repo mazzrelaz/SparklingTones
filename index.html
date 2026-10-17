@@ -802,21 +802,46 @@
   button.imp-voce.pericolo::after { display:none; }
   .imp-campo input[type=text] { flex:1; min-width:0; }
   /* 17 ottobre 2026: Genera con l'IA. */
+  /* Le voci nascoste lo restano: `display` delle regole qui sopra e del menu
+     batte l'attributo `hidden`, e la voce si vedeva lo stesso. */
+  .foglio-menu button[hidden], button.imp-voce[hidden] { display:none; }
   #descrizioneIA { display:block; width:100%; box-sizing:border-box; resize:vertical;
-                   border:none; background:none; padding:12px 14px; min-height:84px;
-                   font:inherit; font-size:0.92rem; color:var(--text); }
+                   border:none; background:none; padding:12px 14px; min-height:96px;
+                   font:inherit; font-size:0.92rem; line-height:1.45; color:var(--text); }
   #descrizioneIA:focus { outline:none; }
-  #catenaIA .riga-ia { min-height:44px; justify-content:flex-start; }
+  #btnGeneraIA { display:block; width:100%; height:48px; margin-top:12px; font-size:0.95rem; }
+  #btnGeneraIA.in-corso { opacity:0.7; animation:respiraIA 1.4s ease-in-out infinite; }
+  @keyframes respiraIA { 50% { opacity:0.4; } }
+  #pannelloGeneraIA .testa-ia { padding:14px 14px 10px; }
+  #pannelloGeneraIA .nome-ia { font-family:var(--strumento); font-size:1.1rem; font-weight:700; }
+  #catenaIA .riga-ia { min-height:42px; justify-content:flex-start; }
   #catenaIA .riga-ia .imp-nota { width:92px; flex:none; margin:0; }
+  #catenaIA .riga-ia .imp-etichetta { font-size:0.88rem; }
   #catenaIA .riga-ia.spento .imp-etichetta { color:var(--faint); }
+  #pannelloGeneraIA .azioni-ia { display:flex; gap:10px; margin-top:12px; }
+  #pannelloGeneraIA .azioni-ia button { flex:1; height:44px; }
   #pannelloGeneraIA .imp-campo input { border:none; background:none; padding:0; }
-  #sceltaModelloIA .imp-nota { display:block; }
-  #sceltaModelloIA .costo-ia { flex:none; font-size:0.74rem; color:var(--dim); white-space:nowrap; }
-  #sceltaModelloIA button.imp-voce::after { border:none; transform:none; width:18px; height:18px;
-                                            margin:0; border-radius:50%; box-sizing:border-box;
-                                            border:1.6px solid var(--bordo-forte); }
-  #sceltaModelloIA button.imp-voce.scelto::after { background:var(--accent); border-color:var(--accent);
-                                                   box-shadow:inset 0 0 0 3.5px var(--panel); }
+  /* Le due parti che si aprono: la freccina gira verso il basso quando sono aperte. */
+  #pannelloGeneraIA button.apribile::after { transition:transform .15s ease; }
+  #pannelloGeneraIA button.apribile.aperto::after { transform:rotate(135deg); }
+  #pannelloGeneraIA .parte-ia { box-shadow:0 -1px 0 var(--line); background:var(--incavo); }
+  #statoChiaveIA.manca { color:var(--gold); }
+  .modelli-ia .imp-nota, #pannelloGeneraIA .apribile .imp-nota { display:block; }
+  /* I modelli come una tabella senza righe: descrizione, costo stimato e il tondo
+     della scelta in tre colonne fisse, così i costi stanno uno sotto l'altro. */
+  .modelli-ia button.imp-voce { display:grid; grid-template-columns:minmax(0, 1fr) 92px 18px;
+                                column-gap:12px; align-items:center; }
+  .modelli-ia .costo-ia { font-size:0.74rem; color:var(--dim); line-height:1.3; }
+  .modelli-ia button.imp-voce::after { border:none; transform:none; width:18px; height:18px;
+                                       margin:0; border-radius:50%; box-sizing:border-box;
+                                       border:1.6px solid var(--bordo-forte); }
+  .modelli-ia button.imp-voce.scelto::after { background:var(--accent); border-color:var(--accent);
+                                              box-shadow:inset 0 0 0 3.5px var(--incavo); }
+  .modelli-ia button.imp-voce, #pannelloGeneraIA .parte-ia .imp-voce { background:none; }
+  .testo-ia { padding:4px 14px 14px; font-size:0.84rem; line-height:1.55; color:var(--dim); }
+  .testo-ia h4 { font-size:0.84rem; color:var(--text); margin:14px 0 4px; }
+  .testo-ia p { margin:0 0 8px; }
+  .testo-ia strong, .testo-ia code { color:var(--text); }
   .famiglia-voce input[type=color] { width:34px; height:26px; padding:2px; flex:none;
                                      background:var(--foglio); border:1px solid var(--line);
                                      border-radius:7px; cursor:pointer; }
@@ -1641,8 +1666,9 @@
     <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 13V3M6 7l4-4 4 4M4 13v4h12v-4"/></svg>Impostazioni e backup</button>
   <button id="btnMenuDoppioni">
     <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="6" y="6" width="11" height="11" rx="2"/><path d="M3 13V4a1 1 0 0 1 1-1h9"/></svg>Doppioni</button>
-  <!-- 17 ottobre 2026: un preset da una descrizione, con l'IA. -->
-  <button id="btnMenuGeneraIA">
+  <!-- 17 ottobre 2026: un preset da una descrizione, con l'IA. Nascosta finché
+       non la si sblocca con la password in Impostazioni (16-genera-ia.js). -->
+  <button id="btnMenuGeneraIA" hidden>
     <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5l1.6 4.4 4.4 1.6-4.4 1.6L10 14.5l-1.6-4.4-4.4-1.6 4.4-1.6z"/><path d="M15.5 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg>Genera con l'IA</button>
   <div class="gruppo-menu">Aiuto</div>
   <!-- La guida c'è in tutte e due le viste: chi la cerca suonando non deve
@@ -1819,61 +1845,153 @@
   <div class="stato-pannello" hidden></div>
   <div class="imp-gruppo" style="margin-top:22px">
     <button id="btnAbout" class="imp-voce">Informazioni, licenze e responsabilità</button>
+    <!-- Le funzioni in prova si sbloccano con una password (17 ottobre 2026,
+         l'utente): per ora solo «Genera con l'IA». -->
+    <button id="btnSbloccaIA" class="imp-voce imp-lieve">Funzioni nascoste</button>
+    <button id="btnBloccaIA" class="imp-voce imp-lieve" hidden>Nascondi «Genera con l'IA»</button>
   </div>
 </div>
 
-<!-- 17 ottobre 2026: Genera con l'IA (src/app/16-genera-ia.js). -->
+<!-- 17 ottobre 2026: Genera con l'IA (src/app/16-genera-ia.js). In cima la
+     descrizione e «Genera», poi il preset proposto; sotto, chiuse, le
+     impostazioni (servizio, modello, chiave) e la spiegazione. Senza chiave le
+     impostazioni si aprono da sole. -->
 <div class="pannello" id="pannelloGeneraIA">
   <div class="barra-alta">
     <!-- Solo il marchio, lo mette `marchioNeiPannelli()`. -->
   </div>
   <h3 class="imp-titolo" style="margin-top:4px">Genera con l'IA</h3>
   <div class="imp-gruppo">
-    <textarea id="descrizioneIA" rows="3"
+    <textarea id="descrizioneIA" rows="4"
               placeholder="Che suono vuoi? Per esempio: clean cristallino alla Little Wing, poco riverbero"></textarea>
   </div>
-  <p class="imp-nota-sotto">L'IA sceglie ampli, effetti e manopole fra quelli che lo Spark 2
-    ha davvero; il preset parte da uno della tua libreria. È un punto di partenza: le
-    manopole si sistemano a orecchio, con «Regola».</p>
-  <button id="btnGeneraIA" class="primary" style="width:100%;margin-top:14px">Genera</button>
+  <button id="btnGeneraIA" class="primary">Genera</button>
   <div class="stato-pannello" hidden></div>
 
   <div id="risultatoIA" hidden>
-    <h3 class="imp-titolo" id="nomeIA"></h3>
-    <div class="imp-gruppo" id="catenaIA"></div>
-    <p class="imp-nota-sotto" id="spiegazioneIA"></p>
-    <div class="azioni" style="margin-top:14px">
+    <h3 class="imp-titolo">Il preset proposto</h3>
+    <div class="imp-gruppo">
+      <div class="testa-ia">
+        <div class="nome-ia" id="nomeIA"></div>
+        <p class="imp-nota" id="motivoIA"></p>
+      </div>
+      <div id="catenaIA"></div>
+    </div>
+    <div class="azioni-ia">
       <button id="btnSuonaIA" class="primary">Suona</button>
       <button id="btnSalvaIA">Salva in libreria</button>
     </div>
   </div>
 
-  <h3 class="imp-titolo">Modello</h3>
-  <div class="imp-gruppo" id="sceltaModelloIA">
-    <button class="imp-voce" data-modello="gpt-6-luna">
-      <span class="imp-testo"><span class="imp-etichetta">Luna</span>
-        <span class="imp-nota">Economico e veloce: l'idea giusta, le manopole più a caso.</span></span>
-      <span class="costo-ia">meno di 0,1 cent</span></button>
-    <button class="imp-voce" data-modello="gpt-6.1-sol">
-      <span class="imp-testo"><span class="imp-etichetta">Sol · consigliato</span>
-        <span class="imp-nota">Equilibrato: conosce bene ampli e pedali.</span></span>
-      <span class="costo-ia">circa 1 cent</span></button>
-    <button class="imp-voce" data-modello="gpt-6-astra">
-      <span class="imp-testo"><span class="imp-etichetta">Astra</span>
-        <span class="imp-nota">Il più accurato, ma più lento.</span></span>
-      <span class="costo-ia">circa 5 cent</span></button>
-  </div>
-  <p class="imp-nota-sotto">Il costo è per ogni preset generato.</p>
-
-  <h3 class="imp-titolo">Chiave OpenAI</h3>
-  <div class="imp-gruppo">
-    <div class="imp-voce imp-campo">
-      <input type="password" id="chiaveIA" placeholder="sk-…" autocomplete="off" spellcheck="false">
+  <div class="imp-gruppo" style="margin-top:26px">
+    <button id="btnApriImpostazioniIA" class="imp-voce apribile" aria-controls="impostazioniIA">
+      <span class="imp-testo"><span class="imp-etichetta">Servizio e chiave</span>
+        <span class="imp-nota"><span id="riassuntoIA"></span> · <span id="statoChiaveIA"></span></span></span></button>
+    <div id="impostazioniIA" class="parte-ia" hidden>
+      <div class="imp-voce">
+        <span class="imp-etichetta">Servizio</span>
+        <div class="imp-scelta" id="sceltaServizioIA">
+          <button data-servizio="openai">OpenAI</button>
+          <button data-servizio="anthropic">Anthropic</button>
+        </div>
+      </div>
+      <div class="modelli-ia" data-modelli-di="openai">
+        <button class="imp-voce" data-modello="gpt-6-luna">
+          <span class="imp-testo"><span class="imp-etichetta">Luna</span>
+            <span class="imp-nota">Economico e veloce: l'idea giusta, le manopole più a caso.</span></span>
+          <span class="costo-ia">&lt; 0,1 cent</span></button>
+        <button class="imp-voce" data-modello="gpt-6.1-sol">
+          <span class="imp-testo"><span class="imp-etichetta">Sol · consigliato</span>
+            <span class="imp-nota">Equilibrato: conosce bene ampli e pedali.</span></span>
+          <span class="costo-ia">circa 1 cent</span></button>
+        <button class="imp-voce" data-modello="gpt-6-astra">
+          <span class="imp-testo"><span class="imp-etichetta">Astra</span>
+            <span class="imp-nota">Il più accurato, ma più lento.</span></span>
+          <span class="costo-ia">circa 8 cent</span></button>
+      </div>
+      <div class="modelli-ia" data-modelli-di="anthropic">
+        <button class="imp-voce" data-modello="claude-haiku-5-5">
+          <span class="imp-testo"><span class="imp-etichetta">Haiku</span>
+            <span class="imp-nota">Economico e veloce, ma meno preciso.</span></span>
+          <span class="costo-ia">&lt; 0,1 cent</span></button>
+        <button class="imp-voce" data-modello="claude-sonnet-5-5">
+          <span class="imp-testo"><span class="imp-etichetta">Sonnet</span>
+            <span class="imp-nota">Equilibrato: conosce bene ampli e pedali.</span></span>
+          <span class="costo-ia">circa 1 cent</span></button>
+        <button class="imp-voce" data-modello="claude-opus-5-5">
+          <span class="imp-testo"><span class="imp-etichetta">Opus · consigliato</span>
+            <span class="imp-nota">Il più accurato di Anthropic.</span></span>
+          <span class="costo-ia">circa 2-3 cent</span></button>
+      </div>
+      <div class="imp-voce imp-campo">
+        <input type="password" id="chiaveIA" placeholder="incolla qui la chiave API"
+               autocomplete="off" spellcheck="false">
+      </div>
+      <p class="imp-nota imp-nota-voce" data-chiave-di="openai">Si crea su
+        <code>platform.openai.com</code>, alla voce «API keys». Comincia con <code>sk-</code>.</p>
+      <p class="imp-nota imp-nota-voce" data-chiave-di="anthropic">Si crea su
+        <code>console.anthropic.com</code>, alla voce «API Keys». Comincia con <code>sk-ant-</code>.</p>
+      <button id="btnDimenticaIA" class="imp-voce imp-lieve">Togli la chiave da questo apparecchio</button>
     </div>
-    <button id="btnDimenticaIA" class="imp-voce imp-lieve">Togli la chiave da questo apparecchio</button>
+    <button id="btnApriSpiegazioneIA" class="imp-voce apribile" aria-controls="comeFunzionaIA">
+      <span class="imp-etichetta">Come funziona, chiavi e costi</span></button>
+    <div id="comeFunzionaIA" class="parte-ia testo-ia" hidden>
+      <h4>Come funziona</h4>
+      <p>Scrivi che suono vuoi. L'app manda la tua descrizione al servizio che hai scelto,
+        insieme all'elenco degli ampli, degli effetti e delle manopole che lo Spark 2 ha
+        davvero. L'IA sceglie un modello per ognuno dei sette blocchi e dove mettere le
+        manopole.</p>
+      <p>Il preset l'app lo costruisce partendo da uno della tua libreria, come col
+        Duplica, e prima di mandarlo all'ampli controlla che l'ampli lo accetti.
+        <strong>«Suona»</strong> lo fa sentire senza toccare gli slot; <strong>«Salva in
+        libreria»</strong> lo tiene, e da lì lo ritocchi con «Regola». Se non lo salvi,
+        sparisce.</p>
+      <p>È un punto di partenza: l'IA conosce gli ampli e i pedali veri, ma le manopole le
+        indovina. Più la descrizione è precisa — che chitarra usi, che pickup, che canzone —
+        più il risultato si avvicina.</p>
+      <h4>La chiave</h4>
+      <p>Per usare il servizio serve una <strong>chiave API</strong>: una specie di password
+        personale, legata al tuo conto, con cui il servizio ti fa pagare ogni richiesta.
+        <strong>Non è l'abbonamento a ChatGPT o a Claude</strong>: è un conto a parte, a
+        credito, che si ricarica sul sito per sviluppatori.</p>
+      <p><strong>OpenAI:</strong> su <code>platform.openai.com</code> entra col tuo account,
+        apri «API keys» e premi «Create new secret key»; i crediti si caricano in «Billing».</p>
+      <p><strong>Anthropic:</strong> su <code>console.anthropic.com</code> entra col tuo
+        account, apri «API Keys» e premi «Create Key»; i crediti si caricano in «Billing».</p>
+      <p>Copia la chiave e incollala qui sopra, in «Servizio e chiave»: si salva da sola.
+        Resta <strong>solo in questo browser, su questo apparecchio</strong>, e parte solo
+        verso il servizio scelto, mai verso di noi: l'app non ha un server. Sul telefono e
+        sul computer va messa una volta per ciascuno.</p>
+      <p>Trattala come una password: non mandarla a nessuno. Se pensi che qualcun altro
+        l'abbia vista, o se perdi il telefono, cancellala dalla pagina del servizio e
+        creane un'altra.</p>
+      <h4>Quanto costa</h4>
+      <p>Si paga ogni «Genera», scalato dai crediti. Con Sol di OpenAI un preset è costato
+        1 centesimo; accanto a ogni modello c'è la sua stima. Sulla pagina del servizio
+        puoi mettere un limite di spesa al mese, così non ci sono sorprese.</p>
+      <!-- Chiesto dall'utente il 17 ottobre 2026: che sia chiaro che non abbiamo
+           niente a che fare coi due servizi, e di chi è la responsabilità. -->
+      <h4>Responsabilità</h4>
+      <p>SparklingTones è un'app indipendente: <strong>non ha nessun legame con OpenAI
+        (ChatGPT) né con Anthropic (Claude)</strong>, che non la sponsorizzano, non la
+        approvano e non ne rispondono. I loro nomi servono solo a dire a quale servizio
+        vanno le richieste.</p>
+      <p>Il servizio di IA lo usi tu, con il tuo account e la tua chiave, alle condizioni
+        d'uso e secondo l'informativa sulla privacy del servizio che scegli: sono loro a
+        ricevere la descrizione che scrivi e a farti pagare le richieste. Noi non vediamo
+        né la chiave né le richieste, e <strong>non rispondiamo dei costi, dei limiti,
+        dell'interruzione del servizio o di come tratta i tuoi dati</strong>.</p>
+      <p>Le risposte le scrive un'IA: possono essere sbagliate o non suonare come ti
+        aspetti. L'app controlla che il preset sia accettato dall'ampli, ma non può
+        garantire il risultato. La prima volta che suoni un preset generato, tieni il
+        volume basso.</p>
+      <p>OpenAI e ChatGPT sono marchi di OpenAI; Anthropic e Claude sono marchi di
+        Anthropic.</p>
+    </div>
   </div>
-  <p class="imp-nota-sotto">La chiave resta in questo browser e va solo a OpenAI. Ogni «Genera»
-    si paga a OpenAI, scalato dai tuoi crediti su <code>platform.openai.com</code>.</p>
+  <p class="imp-nota-sotto">App indipendente: nessun legame con OpenAI né con Anthropic.
+    Il servizio lo usi con il tuo account e alle sue condizioni: leggi «Come funziona,
+    chiavi e costi».</p>
 </div>
 
 <!-- i doppioni della libreria -->

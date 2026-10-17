@@ -6,7 +6,7 @@
 /* ====================================================================
    Genera con l'IA (17 ottobre 2026)
 
-   L'utente scrive che suono vuole; OpenAI risponde con un JSON a forma
+   L'utente scrive che suono vuole; l'IA risponde con un JSON a forma
    fissa — un modello per ognuno dei sette blocchi, acceso o spento, e le
    manopole — e il preset lo costruiamo noi, **partendo da uno vero della
    libreria**, come il Duplica: un preset nuovo non parte mai dal nulla.
@@ -17,18 +17,41 @@
    non lo decide l'IA: si copia da un blocco uscito dall'ampli
    (`campioneModello`), o si prende dalla tabella, come nell'editor.
 
-   La chiave è dell'utente e resta in questo browser (`localStorage`):
-   l'app non ha un server. Si paga a OpenAI per ogni «Genera».
+   Due servizi, a scelta dell'utente: OpenAI o Anthropic. Le chiavi sono
+   sue e restano in questo browser (`localStorage`), una per servizio:
+   l'app non ha un server. Si chiamano con `fetch`, senza le loro librerie,
+   perché l'app non ha dipendenze né build.
    ==================================================================== */
 
-// I tre modelli di OpenAI che si possono scegliere (nomi verificati sulla loro
-// documentazione il 17 ottobre 2026). Il costo è misurato su Sol — un preset,
-// 4.407 token, 1 centesimo scalato dai crediti — e per gli altri due è la
-// stessa richiesta coi loro prezzi: Luna un ventesimo, Astra cinque volte.
-const MODELLI_IA = ['gpt-6-luna', 'gpt-6.1-sol', 'gpt-6-astra'];
-const MODELLO_IA_PREDEFINITO = 'gpt-6.1-sol';
-const CHIAVE_IA = 'openai-chiave';
-const CHIAVE_MODELLO_IA = 'openai-modello';
+// I modelli che si possono scegliere, tre per servizio (nomi verificati sulla
+// loro documentazione il 17 ottobre 2026). Il costo è misurato su Sol — un
+// preset, 4.407 token, 1 centesimo scalato dai crediti — e per gli altri è la
+// stessa richiesta coi loro prezzi per token: Luna e Haiku un ventesimo,
+// Sonnet uguale, Opus il doppio. Astra provato dall'utente: 7-8 centesimi, più
+// dei cinque dei prezzi, perché ragiona più a lungo; per Opus si dice 2-3.
+const SERVIZI_IA = {
+  openai: {
+    nome: 'OpenAI',
+    chiave: 'openai-chiave', chiaveModello: 'openai-modello',
+    predefinito: 'gpt-6.1-sol',
+    modelli: ['gpt-6-luna', 'gpt-6.1-sol', 'gpt-6-astra'],
+  },
+  anthropic: {
+    nome: 'Anthropic',
+    chiave: 'anthropic-chiave', chiaveModello: 'anthropic-modello',
+    predefinito: 'claude-opus-5-5',
+    modelli: ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5'],
+  },
+};
+const CHIAVE_SERVIZIO_IA = 'ia-servizio';
+
+// La funzione è nascosta finché non la si sblocca con una password (17 ottobre
+// 2026, scelta dell'utente: per ora resta in prova). Nel codice c'è solo
+// l'impronta SHA-256 della password, non la password; ma il codice è pubblico,
+// quindi è una porta socchiusa, non una serratura: tiene lontano chi usa l'app,
+// non chi legge i sorgenti. Lo sblocco vale per questo apparecchio.
+const IMPRONTA_PASSWORD_IA = '523bdf4f3cb1ebf0d021a0a6265a8b4bf9a6d21da2f7545304b2aa14671df557';
+const CHIAVE_SBLOCCO_IA = 'ia-sbloccata';
 const TEMPO_MAX_IA_MS = 120000;
 
 // I sette blocchi, nell'ordine di `Spark.CATENA`: sono le chiavi del JSON.
@@ -36,24 +59,103 @@ const POSTI_IA = ['gate', 'comp', 'drive', 'ampli', 'modulazione', 'delay', 'riv
 
 let generato = null;          // { record, spiegazione } dell'ultima risposta
 
-function leggiChiaveIA() {
-  try { return localStorage.getItem(CHIAVE_IA) || ''; } catch (e) { return ''; }
+function leggiIA(chiave) {
+  try { return localStorage.getItem(chiave) || ''; } catch (e) { return ''; }
 }
-function modelloIA() {
-  let scelto = null;
-  try { scelto = localStorage.getItem(CHIAVE_MODELLO_IA); } catch (e) { /* vale il predefinito */ }
-  return MODELLI_IA.includes(scelto) ? scelto : MODELLO_IA_PREDEFINITO;
-}
-function segnaModelloIA() {
-  for (const tasto of document.querySelectorAll('#sceltaModelloIA [data-modello]')) {
-    tasto.classList.toggle('scelto', tasto.dataset.modello === modelloIA());
-  }
-}
-function scriviChiaveIA(valore) {
+function scriviIA(chiave, valore) {
   try {
-    if (valore) localStorage.setItem(CHIAVE_IA, valore);
-    else localStorage.removeItem(CHIAVE_IA);
+    if (valore) localStorage.setItem(chiave, valore);
+    else localStorage.removeItem(chiave);
   } catch (e) { /* resta per questa volta */ }
+}
+
+function iaSbloccata() {
+  return leggiIA(CHIAVE_SBLOCCO_IA) === '1';
+}
+
+/** La voce del menu e le due righe di Impostazioni, secondo lo sblocco. */
+function segnaSbloccoIA() {
+  const sbloccata = iaSbloccata();
+  $('btnMenuGeneraIA').hidden = !sbloccata;
+  $('btnSbloccaIA').hidden = sbloccata;
+  $('btnBloccaIA').hidden = !sbloccata;
+}
+
+async function improntaIA(testo) {
+  const byte = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(testo));
+  return [...new Uint8Array(byte)].map(n => n.toString(16).padStart(2, '0')).join('');
+}
+
+async function sbloccaIA() {
+  const scritta = await finestra({
+    titolo: tr('Funzioni nascoste'),
+    testo: tr('Scrivi la password per sbloccare le funzioni in prova.'),
+    campo: { valore: '', invito: tr('password'), tipo: 'password' },
+    azioni: [
+      { testo: tr('Sblocca'), classe: 'primary', vuoleTesto: true },
+      { testo: tr('Annulla'), valore: null },
+    ],
+  });
+  if (scritta === null || scritta === undefined) return;
+  if (await improntaIA(String(scritta).trim()) !== IMPRONTA_PASSWORD_IA) {
+    await avvisa(tr('Password sbagliata'), tr('Non è quella giusta: niente è cambiato.'));
+    return;
+  }
+  scriviIA(CHIAVE_SBLOCCO_IA, '1');
+  segnaSbloccoIA();
+  await avvisa(tr('Sbloccata'), tr('«Genera con l\'IA» adesso sta nel menu <strong>Altro</strong>, ' +
+                                   'nel gruppo Libreria.'));
+}
+
+/** Il servizio scelto: 'openai' finché l'utente non sceglie altro. */
+function servizioIA() {
+  const scelto = leggiIA(CHIAVE_SERVIZIO_IA);
+  return SERVIZI_IA[scelto] ? scelto : 'openai';
+}
+function modelloIA(servizio = servizioIA()) {
+  const voce = SERVIZI_IA[servizio];
+  const scelto = leggiIA(voce.chiaveModello);
+  return voce.modelli.includes(scelto) ? scelto : voce.predefinito;
+}
+function chiaveIA(servizio = servizioIA()) {
+  return leggiIA(SERVIZI_IA[servizio].chiave);
+}
+
+/** Il nome breve di un modello, come sta scritto nel suo tasto. */
+function nomeModelloIA(modello) {
+  const tasto = document.querySelector(`[data-modello="${modello}"] .imp-etichetta`);
+  return tasto ? tasto.textContent.replace(/ ·.*$/, '') : modello;
+}
+
+/**
+ * Le impostazioni dell'IA come stanno adesso: il servizio acceso, i modelli
+ * di quel servizio, la sua chiave nel campo, e la riga riassuntiva in alto.
+ */
+function segnaImpostazioniIA() {
+  const servizio = servizioIA();
+  for (const tasto of document.querySelectorAll('#sceltaServizioIA [data-servizio]')) {
+    tasto.classList.toggle('primary', tasto.dataset.servizio === servizio);
+  }
+  for (const gruppo of document.querySelectorAll('[data-modelli-di]')) {
+    gruppo.hidden = gruppo.dataset.modelliDi !== servizio;
+  }
+  for (const tasto of document.querySelectorAll('[data-modello]')) {
+    tasto.classList.toggle('scelto', tasto.dataset.modello === modelloIA(tasto.closest('[data-modelli-di]').dataset.modelliDi));
+  }
+  for (const nota of document.querySelectorAll('[data-chiave-di]')) {
+    nota.hidden = nota.dataset.chiaveDi !== servizio;
+  }
+  $('chiaveIA').value = chiaveIA();
+  $('riassuntoIA').textContent = `${SERVIZI_IA[servizio].nome} · ${nomeModelloIA(modelloIA())}`;
+  $('statoChiaveIA').textContent = chiaveIA() ? tr('chiave salvata') : tr('manca la chiave');
+  $('statoChiaveIA').classList.toggle('manca', !chiaveIA());
+}
+
+/** Apre o chiude una delle due parti che stanno sotto: le impostazioni o la spiegazione. */
+function apriParteIA(id, aperta) {
+  const parte = $(id);
+  parte.hidden = aperta === undefined ? !parte.hidden : !aperta;
+  document.querySelector(`[aria-controls="${id}"]`).classList.toggle('aperto', !parte.hidden);
 }
 
 /**
@@ -138,42 +240,60 @@ function schemaIA() {
            required: Object.keys(properties), properties };
 }
 
-/** La domanda a OpenAI. Torna l'oggetto della risposta, o lancia un errore da mostrare. */
-async function chiediAllIA(descrizione, chiave) {
+/**
+ * Una `fetch` con un tempo massimo: oltre, si smette di aspettare e si dice
+ * perché, invece di lasciare il tasto spento per sempre.
+ */
+async function fetchIA(url, opzioni, servizio) {
   const ferma = new AbortController();
   const timer = setTimeout(() => ferma.abort(), TEMPO_MAX_IA_MS);
-  let risposta;
   try {
-    risposta = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      signal: ferma.signal,
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + chiave },
-      body: JSON.stringify({
-        model: modelloIA(),
-        instructions: istruzioniIA(),
-        input: descrizione,
-        text: { format: { type: 'json_schema', name: 'preset_spark', strict: true,
-                          schema: schemaIA() } },
-      }),
-    });
+    const risposta = await fetch(url, Object.assign({ signal: ferma.signal }, opzioni));
+    return { risposta, dati: await risposta.json().catch(() => null) };
   } catch (e) {
     throw new Error(e.name === 'AbortError'
-      ? tr('OpenAI non ha risposto in due minuti.')
-      : tr('non riesco a raggiungere OpenAI: controlla la connessione.'));
+      ? tr('{0} non ha risposto in due minuti.', servizio)
+      : tr('non riesco a raggiungere {0}: controlla la connessione.', servizio));
   } finally {
     clearTimeout(timer);
   }
+}
 
-  const dati = await risposta.json().catch(() => null);
-  if (!risposta.ok) {
-    const perche = dati && dati.error && dati.error.message;
-    if (risposta.status === 401) throw new Error(tr('OpenAI non accetta la chiave: controllala.'));
-    if (risposta.status === 429) {
-      throw new Error(tr('OpenAI dice che i crediti sono finiti o che le richieste sono ' +
-                         'troppe: {0}', perche || risposta.status));
-    }
-    throw new Error(tr('OpenAI ha risposto con un errore: {0}', perche || risposta.status));
+/** Il testo della risposta, letto come JSON, o un errore da mostrare. */
+function leggiJsonIA(testo, servizio) {
+  try { return JSON.parse(testo); } catch (e) {
+    throw new Error(tr('la risposta di {0} non è un preset leggibile.', servizio));
   }
+}
+
+/** L'errore HTTP detto in parole: chiave sbagliata, crediti finiti, il resto. */
+function erroreIA(risposta, dati, servizio) {
+  const perche = (dati && dati.error && dati.error.message) || risposta.status;
+  if (risposta.status === 401) return new Error(tr('{0} non accetta la chiave: controllala.', servizio));
+  if (risposta.status === 429) {
+    return new Error(tr('{0} dice che le richieste sono troppe o che i crediti sono ' +
+                        'finiti: {1}', servizio, perche));
+  }
+  if (/credit|balance|quota/i.test(String(perche))) {
+    return new Error(tr('{0} dice che i crediti sono finiti: {1}', servizio, perche));
+  }
+  return new Error(tr('{0} ha risposto con un errore: {1}', servizio, perche));
+}
+
+/** La domanda a OpenAI (Responses API, risposta con lo schema). */
+async function chiediAOpenAI(descrizione, chiave, modello) {
+  const { risposta, dati } = await fetchIA('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + chiave },
+    body: JSON.stringify({
+      model: modello,
+      instructions: istruzioniIA(),
+      input: descrizione,
+      text: { format: { type: 'json_schema', name: 'preset_spark', strict: true,
+                        schema: schemaIA() } },
+    }),
+  }, 'OpenAI');
+  if (!risposta.ok) throw erroreIA(risposta, dati, 'OpenAI');
 
   // Il testo della risposta sta nei blocchi `output_text` dei messaggi in uscita.
   let testo = dati && dati.output_text;
@@ -185,9 +305,55 @@ async function chiediAllIA(descrizione, chiave) {
       }
     }
   }
-  try { return JSON.parse(testo); } catch (e) {
-    throw new Error(tr('la risposta di OpenAI non è un preset leggibile.'));
+  return leggiJsonIA(testo, 'OpenAI');
+}
+
+/**
+ * La domanda ad Anthropic (Messages API, risposta con lo schema in
+ * `output_config.format`). Dal browser serve l'intestazione apposta: senza,
+ * Anthropic rifiuta le chiamate che non vengono da un server.
+ *
+ * Su Opus e Sonnet è acceso il ripiego (`fallbacks: "default"`): se il
+ * modello rifiuta la richiesta — per un suono di chitarra è difficile, ma
+ * succede — la rifà un altro modello nella stessa chiamata. Haiku non ce l'ha.
+ */
+async function chiediAdAnthropic(descrizione, chiave, modello) {
+  const conRipiego = modello !== 'claude-haiku-5-5';
+  const headers = {
+    'Content-Type': 'application/json',
+    'x-api-key': chiave,
+    'anthropic-version': '2023-06-01',
+    'anthropic-dangerous-direct-browser-access': 'true',
+  };
+  if (conRipiego) headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+  const corpo = {
+    model: modello,
+    max_tokens: 16000,
+    system: istruzioniIA(),
+    messages: [{ role: 'user', content: descrizione }],
+    output_config: { effort: 'medium', format: { type: 'json_schema', schema: schemaIA() } },
+  };
+  if (conRipiego) corpo.fallbacks = 'default';
+
+  const { risposta, dati } = await fetchIA('https://api.anthropic.com/v1/messages', {
+    method: 'POST', headers, body: JSON.stringify(corpo),
+  }, 'Anthropic');
+  if (!risposta.ok) throw erroreIA(risposta, dati, 'Anthropic');
+
+  // Prima il motivo dello stop, poi il contenuto: un rifiuto arriva con 200.
+  if (dati.stop_reason === 'refusal') throw new Error(tr('Anthropic non ha voluto rispondere.'));
+  if (dati.stop_reason === 'max_tokens') {
+    throw new Error(tr('la risposta di Anthropic si è interrotta a metà: riprova.'));
   }
+  const testo = (dati.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  return leggiJsonIA(testo, 'Anthropic');
+}
+
+/** La domanda al servizio scelto. Torna l'oggetto della risposta, o lancia un errore da mostrare. */
+function chiediAllIA(descrizione) {
+  const servizio = servizioIA();
+  const chiedi = servizio === 'anthropic' ? chiediAdAnthropic : chiediAOpenAI;
+  return chiedi(descrizione, chiaveIA(servizio), modelloIA(servizio));
 }
 
 /** Lo scheletro: un preset della libreria uscito dall'ampli, meglio se sta in uno slot. */
@@ -286,7 +452,7 @@ function disegnaGenerato() {
   if (!generato) { box.hidden = true; return; }
   const { record, spiegazione } = generato;
   $('nomeIA').textContent = record.name;
-  $('spiegazioneIA').textContent = spiegazione || '';
+  $('motivoIA').textContent = spiegazione || '';
   const catena = $('catenaIA');
   catena.innerHTML = '';
   record.effects.forEach((effetto, posizione) => {
@@ -308,46 +474,76 @@ function disegnaGenerato() {
 
 async function generaConIA() {
   const descrizione = $('descrizioneIA').value.trim();
-  const chiave = $('chiaveIA').value.trim();
   if (!descrizione) { statoDelPannello(tr('scrivi prima che suono vuoi.')); return; }
-  if (!chiave) { statoDelPannello(tr('serve la chiave di OpenAI: la trovi qui sotto.')); return; }
+  if (!chiaveIA()) {
+    apriParteIA('impostazioniIA', true);
+    statoDelPannello(tr('serve la chiave di {0}: mettila in «Servizio e chiave», qui sotto.',
+                        SERVIZI_IA[servizioIA()].nome));
+    return;
+  }
   const scheletro = scheletroPerIA();
   if (!scheletro) {
     statoDelPannello(tr('serve almeno un preset in libreria da cui partire: collega ' +
                         'l\'ampli una volta, i suoi otto si leggono da soli.'));
     return;
   }
-  scriviChiaveIA(chiave);
 
   const tasto = $('btnGeneraIA');
   tasto.disabled = true;
-  logProgress(tr('chiedo a OpenAI…'));
+  tasto.classList.add('in-corso');
+  const chi = `${SERVIZI_IA[servizioIA()].nome} · ${nomeModelloIA(modelloIA())}`;
+  logProgress(tr('chiedo a {0}…', chi));
   try {
-    const risposta = await chiediAllIA(descrizione, chiave);
+    const risposta = await chiediAllIA(descrizione);
     const { record, avvisi } = presetDaIA(risposta, scheletro, descrizione);
     generato = { record, spiegazione: String(risposta.spiegazione || '') };
     disegnaGenerato();
-    logLine(tr('«{0}» pronto ({1}), partendo da «{2}».', record.name, modelloIA(), scheletro.name) +
+    $('risultatoIA').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    logLine(tr('«{0}» pronto ({1}), partendo da «{2}».', record.name, chi, scheletro.name) +
             (avvisi.length ? ' ' + avvisi.join('; ') : ''));
   } catch (e) {
     logLine(e.message, true);
   } finally {
     tasto.disabled = false;
+    tasto.classList.remove('in-corso');
   }
 }
 
+segnaSbloccoIA();
+$('btnSbloccaIA').addEventListener('click', sbloccaIA);
+$('btnBloccaIA').addEventListener('click', () => {
+  scriviIA(CHIAVE_SBLOCCO_IA, '');
+  segnaSbloccoIA();
+  statoDelPannello(tr('«Genera con l\'IA» di nuovo nascosta. Le chiavi restano salvate.'));
+});
 $('btnMenuGeneraIA').addEventListener('click', () => {
   apriPannello('pannelloGeneraIA');
-  $('chiaveIA').value = leggiChiaveIA();
-  segnaModelloIA();
+  segnaImpostazioniIA();
+  // Senza chiave le impostazioni si aprono da sole: è la prima cosa da fare.
+  apriParteIA('impostazioniIA', !chiaveIA());
+  apriParteIA('comeFunzionaIA', false);
   disegnaGenerato();
 });
-for (const tasto of document.querySelectorAll('#sceltaModelloIA [data-modello]')) {
+$('btnApriImpostazioniIA').addEventListener('click', () => apriParteIA('impostazioniIA'));
+$('btnApriSpiegazioneIA').addEventListener('click', () => apriParteIA('comeFunzionaIA'));
+for (const tasto of document.querySelectorAll('#sceltaServizioIA [data-servizio]')) {
   tasto.addEventListener('click', () => {
-    try { localStorage.setItem(CHIAVE_MODELLO_IA, tasto.dataset.modello); } catch (e) { /* resta com'era */ }
-    segnaModelloIA();
+    scriviIA(CHIAVE_SERVIZIO_IA, tasto.dataset.servizio);
+    segnaImpostazioniIA();
   });
 }
+for (const tasto of document.querySelectorAll('[data-modello]')) {
+  tasto.addEventListener('click', () => {
+    const servizio = tasto.closest('[data-modelli-di]').dataset.modelliDi;
+    scriviIA(SERVIZI_IA[servizio].chiaveModello, tasto.dataset.modello);
+    segnaImpostazioniIA();
+  });
+}
+// La chiave si salva appena la si incolla: niente tasto «Salva» da dimenticare.
+$('chiaveIA').addEventListener('input', () => {
+  scriviIA(SERVIZI_IA[servizioIA()].chiave, $('chiaveIA').value.trim());
+  segnaImpostazioniIA();
+});
 $('btnGeneraIA').addEventListener('click', generaConIA);
 $('btnSuonaIA').addEventListener('click', () => {
   if (!generato) return;
@@ -366,7 +562,7 @@ $('btnSalvaIA').addEventListener('click', async () => {
   disegnaPreset();
 });
 $('btnDimenticaIA').addEventListener('click', () => {
-  scriviChiaveIA('');
-  $('chiaveIA').value = '';
-  statoDelPannello(tr('chiave tolta da questo apparecchio.'));
+  scriviIA(SERVIZI_IA[servizioIA()].chiave, '');
+  segnaImpostazioniIA();
+  statoDelPannello(tr('chiave di {0} tolta da questo apparecchio.', SERVIZI_IA[servizioIA()].nome));
 });

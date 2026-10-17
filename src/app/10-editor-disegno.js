@@ -417,7 +417,7 @@ function finestra({ titolo, testo, azioni, campo }) {
     let ingresso = null;
     if (campo) {
       ingresso = document.createElement('input');
-      ingresso.type = 'text';
+      ingresso.type = campo.tipo || 'text';     // 'password' per lo sblocco
       ingresso.className = 'elenco-campo';
       ingresso.value = campo.valore || '';
       if (campo.invito) ingresso.placeholder = campo.invito;
