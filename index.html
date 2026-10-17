@@ -940,18 +940,21 @@
      basso che c'era dentro. Copre il pannello e sta ferma mentre si scorre. */
   #pannelloEditor { background:#07080b url('immagini/sfondo-editor.jpg') center top / cover no-repeat; }
   /* Su uno schermo largo (il PC) «cover» la ingrandiva più del doppio e
-     sgranava (l'utente). Lì è larga quanto lo schermo ma **mai più della sua
-     misura vera** (1440 punti), quindi non sgrana; se ne vede la fascia di mezzo,
-     quella con le strisce di luce. Oltre i 1440 punti i lati sfumano nel fondo,
-     che ha il colore dei suoi bordi. */
+     sgranava (l'utente). Lì sta alla sua altezza, al centro, quindi
+     rimpicciolita e nitida, e sfuma verso i lati nel fondo, che ha il colore
+     dei suoi bordi. **È la versione che l'utente ha scelto**: provata anche
+     quella larga quanto lo schermo alla misura vera, e a lui sgranava ancora.
+     `--largo` è la larghezza dell'immagine a quell'altezza (1440 / 2672 = 0,539). */
   @media (min-aspect-ratio: 3/4) {
     #pannelloEditor {
+      --largo:calc((100vh - var(--barra-sotto)) * 0.539);
+      --sfuma:calc(var(--largo) * 0.18);
       background:
         linear-gradient(90deg, #0b0b0e, rgba(11,11,14,0))
-          calc(50vw - 720px) 0 / 180px 100% no-repeat,
+          calc(50vw - var(--largo) / 2) 0 / var(--sfuma) 100% no-repeat,
         linear-gradient(270deg, #0b0b0e, rgba(11,11,14,0))
-          calc(50vw + 540px) 0 / 180px 100% no-repeat,
-        url('immagini/sfondo-editor.jpg') center 45% / min(100vw, 1440px) auto no-repeat,
+          calc(50vw + var(--largo) / 2 - var(--sfuma)) 0 / var(--sfuma) 100% no-repeat,
+        url('immagini/sfondo-editor.jpg') center top / auto 100% no-repeat,
         #0b0b0e;
     }
   }
