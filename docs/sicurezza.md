@@ -70,8 +70,9 @@ chiave»; OpenAI con una chiave finta dà errore di rete **anche senza CSP** (ri
 senza intestazioni CORS: è loro, non nostro); una `fetch` a `example.com` è bloccata con la
 violazione `connect-src`. Da `file://` il DOM dell'app è identico con e senza CSP. Le cinque
 suite verdi. **Il service worker** non si registra né nel riquadro né in Edge headless, **con
-o senza CSP** (stesso errore su una pagina di controllo senza regola): si verifica sull'app
-pubblicata.
+o senza CSP** (stesso errore su una pagina di controllo senza regola). **Sull'app pubblicata**
+(`mazzrelaz.github.io/SparklingTones`, dopo il push) la CSP c'è, il service worker si registra
+e si attiva con la cache `spark-v119`, e la console non ha errori.
 
 ### I commit vecchi con la license key — ancora aperti
 
