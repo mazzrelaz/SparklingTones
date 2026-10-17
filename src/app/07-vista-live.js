@@ -39,6 +39,51 @@ async function scambiaNelBanco(banco, da, a) {
           (idA === null ? '' : tr`, ${nome(perId(idA))} al ${da + 1}`));
 }
 
+/**
+ * Tenendo premuto un pulsantone per due secondi si apre l'editor di quel
+ * preset (chiesto dall'utente, 17 ottobre 2026). Mentre si tiene premuto una
+ * barra si riempie in fondo al pulsante: a metà si capisce che sta succedendo
+ * qualcosa, e lasciando prima non succede niente. Il tocco normale (quello che
+ * fa suonare) parte al rilascio, quindi una pressione lunga lo deve saltare:
+ * per questo torna una funzione che il `click` interroga.
+ *
+ * Funziona anche senza ampli: l'editor allora si apre sulla copia in libreria.
+ * Con l'ampli, aprire l'editor manda il preset per regolarlo, quindi lo fa
+ * anche suonare — come «Regola» nella vista Preset.
+ */
+const PRESSIONE_EDITOR_MS = 2000;
+
+function pressioneLunga(pad, record) {
+  let timer = null;
+  let fatta = false;
+  const lascia = () => {
+    clearTimeout(timer);
+    timer = null;
+    pad.classList.remove('carica');
+  };
+  pad.addEventListener('pointerdown', evento => {
+    if (evento.button > 0 || live.occupato) return;
+    fatta = false;
+    pad.classList.add('carica');
+    timer = setTimeout(() => {
+      lascia();
+      fatta = true;
+      if (navigator.vibrate) navigator.vibrate(25);
+      apriEditor(record);
+    }, PRESSIONE_EDITOR_MS);
+  });
+  for (const tipo of ['pointerup', 'pointercancel', 'pointerleave']) {
+    pad.addEventListener(tipo, lascia);
+  }
+  // Il menu del browser col dito fermo (copia, cerca…) si prenderebbe il gesto.
+  pad.addEventListener('contextmenu', evento => evento.preventDefault());
+  return () => {
+    if (!fatta) return false;
+    fatta = false;
+    return true;
+  };
+}
+
 function disegnaLive() {
   disegnaBanchi();
 
@@ -118,8 +163,18 @@ function disegnaLive() {
         pad.appendChild(presa);
       }
     } else {
-      pad.disabled = vuoto || !spark.connected || live.occupato;
-      if (!vuoto) pad.addEventListener('click', () => attiva(record, barra));
+      // Senza ampli il pulsante non è più `disabled`: un pulsante disabilitato
+      // non riceve il dito, e la pressione lunga per l'editor deve funzionare
+      // anche così. Il tocco normale lo ferma `attiva`, che senza ampli o
+      // durante un invio non fa niente.
+      pad.disabled = vuoto;
+      if (!vuoto) {
+        const eraLunga = pressioneLunga(pad, record);
+        pad.addEventListener('click', () => {
+          if (eraLunga()) return;
+          attiva(record, barra);
+        });
+      }
     }
     griglia.appendChild(pad);
   });

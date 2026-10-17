@@ -685,6 +685,15 @@
                                                   rgba(123,92,255,.35) 45%, rgba(43,228,255,0) 75%);
                                        animation:pulsaPadLuce 2.4s ease-in-out infinite; }
   body.vista-live .pad.attivo .nome { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(255,43,214,.7); }
+  /* Tenendo premuto due secondi si apre l'editor (17 ottobre 2026): la barretta
+     in fondo, la stessa dell'invio, si riempie nel tempo della pressione, e il
+     pulsante premuto si schiarisce. Lasciando prima torna indietro di colpo. Col
+     dito fermo il browser non deve selezionare il nome né aprire il suo menu. */
+  body.vista-live .pad { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  body.vista-live .pad .barra { z-index:2; background:linear-gradient(90deg, #2be4ff, #7b5cff 55%, #ff2bd6);
+                                box-shadow:0 0 8px rgba(123,92,255,.8); }
+  body.vista-live .pad.carica .barra { width:100%; transition:width 2s linear; }
+  body.vista-live .pad.carica { filter:none; }
   @keyframes pulsaPad {
     0%, 100% { box-shadow:inset 0 0 22px -8px rgba(123,92,255,.6),
                           0 0 10px -2px rgba(123,92,255,.8), 0 0 26px -8px rgba(43,228,255,.5); }
