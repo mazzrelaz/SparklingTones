@@ -370,6 +370,14 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v118` (17 ottobre): **«Genera con l'IA»** (`16-genera-ia.js`), **nascosta**: la voce del menu Altro compare solo dopo «Funzioni nascoste» in Impostazioni, con la password dell'utente (nel codice solo l'impronta SHA-256; la password **non si scrive mai** nel repository). Giudizio dell'utente: «non fa miracoli ma non è male». OpenAI (Luna/Sol/Astra, Sol predefinito; **misurato: Sol 1 centesimo, Astra 7-8**) o Anthropic (Haiku/Sonnet/Opus 5.5, Opus predefinito, `fallbacks: "default"`; **Anthropic mai provato con una chiave vera**), chiavi dell'utente in `localStorage`, spiegazione e disclaimer nel pannello. **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta), risposta a schema con `enum` dei MODELLI, preset costruito sopra uno vero della libreria come il Duplica, salvato solo con «Salva in libreria». **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro. **`guida.en.html`** è
 rimasta alle schermate vecchie.
 
+**Prossimo lavoro, chiesto dall'utente il 17 ottobre 2026**: aggiornare **sito**
+(`sparklingtones.com`) **e guida** (`guida.html`, `guida-pedale.html`) alla nuova interfaccia
+(editor con le immagini, Impostazioni a riquadri, pulsantoni live, pressione lunga, sfondo), con
+**«Genera con l'IA» segnalata come funzione in fase di sviluppo**. **In tutte e due le lingue**:
+per questo lavoro l'utente ha autorizzato a toccare anche la parte inglese (`guida.en.html`,
+`guida-pedale.en.html`, `sparklingtones-sito/en/`, `lingua-en.js` se serve). Grafica nuova del
+sito o della guida: prima la bozza.
+
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor
 con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
