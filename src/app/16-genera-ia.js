@@ -50,7 +50,7 @@ const CHIAVE_SERVIZIO_IA = 'ia-servizio';
 // l'impronta SHA-256 della password, non la password; ma il codice è pubblico,
 // quindi è una porta socchiusa, non una serratura: tiene lontano chi usa l'app,
 // non chi legge i sorgenti. Lo sblocco vale per questo apparecchio.
-const IMPRONTA_PASSWORD_IA = '6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba';
+const IMPRONTA_PASSWORD_IA = '523bdf4f3cb1ebf0d021a0a6265a8b4bf9a6d21da2f7545304b2aa14671df557';
 const CHIAVE_SBLOCCO_IA = 'ia-sbloccata';
 const TEMPO_MAX_IA_MS = 120000;
 
