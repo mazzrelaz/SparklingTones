@@ -663,7 +663,7 @@
   body.vista-live .pad .nome { position:relative; z-index:1; color:#eef0f3; font-size:1.08rem;
                                text-shadow:0 0 6px rgba(160,140,255,.35); }
   body.vista-live .pad:not(.attivo):not(.libero) {
-       background:linear-gradient(#050608, #050608) padding-box,
+       background:linear-gradient(rgba(5,6,8,.74), rgba(5,6,8,.74)) padding-box,
                   linear-gradient(#2e3036, #2e3036) border-box;
        box-shadow:0 0 8px -3px rgba(255,255,255,.15); }
   body.vista-live .pad:not(.attivo) { border-width:1px; filter:brightness(.62) saturate(.85);
@@ -675,7 +675,7 @@
   body.vista-live .pad.inModifica:not(.attivo):not(.libero) { background:#050608; border:1px dashed var(--gold); }
   body.vista-live .pad.inMano:not(.attivo):not(.libero) { background:#241f16; border:1px solid var(--gold); }
 
-  body.vista-live .pad.attivo { background:linear-gradient(#0a0912, #050608) padding-box,
+  body.vista-live .pad.attivo { background:linear-gradient(rgba(10,9,18,.82), rgba(5,6,8,.82)) padding-box,
                                            linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
                                 --piste:url('immagini/circuito-elettroni.svg') 0 0 / 120px 90px;
                                 animation:pulsaPad 2.4s ease-in-out infinite; }
@@ -694,6 +694,26 @@
                                 box-shadow:0 0 8px rgba(123,92,255,.8); }
   body.vista-live .pad.carica .barra { width:100%; transition:width 2s linear; }
   body.vista-live .pad.carica { filter:none; }
+  /* BOZZA del 17 ottobre 2026: nella vista Live lo stesso sfondo dell'editor
+     (l'immagine dell'utente). Sul telefono copre la pagina; su uno schermo largo
+     sta alla sua altezza al centro e sfuma verso i lati, come nell'editor. La
+     testata diventa trasparente, e il fondo dei pulsantoni un po' trasparente,
+     così lo sfondo si intravede anche lì. */
+  body.vista-live { background:#07080b url('immagini/sfondo-editor.jpg') center top / cover no-repeat; }
+  body.vista-live header { background:transparent; border-bottom-color:rgba(255,255,255,.06); }
+  @media (min-aspect-ratio: 3/4) {
+    body.vista-live {
+      --largo:calc((100vh - var(--barra-sotto)) * 0.539);
+      --sfuma:calc(var(--largo) * 0.18);
+      background:
+        linear-gradient(90deg, #0b0b0e, rgba(11,11,14,0))
+          calc(50vw - var(--largo) / 2) 0 / var(--sfuma) 100% no-repeat,
+        linear-gradient(270deg, #0b0b0e, rgba(11,11,14,0))
+          calc(50vw + var(--largo) / 2 - var(--sfuma)) 0 / var(--sfuma) 100% no-repeat,
+        url('immagini/sfondo-editor.jpg') center top / auto calc(100vh - var(--barra-sotto)) no-repeat,
+        #0b0b0e;
+    }
+  }
   @keyframes pulsaPad {
     0%, 100% { box-shadow:inset 0 0 22px -8px rgba(123,92,255,.6),
                           0 0 10px -2px rgba(123,92,255,.8), 0 0 26px -8px rgba(43,228,255,.5); }
