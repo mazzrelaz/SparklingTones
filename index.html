@@ -934,6 +934,11 @@
      scorrere come sempre, e l'accostamento in basso semplicemente non ha più
      spazio da mangiare. */
   #pannelloEditor.aperto { display:flex; flex-direction:column; }
+  /* BOZZA del 17 ottobre 2026: lo sfondo dell'editor è un'immagine dell'utente
+     (trama fine, luce blu in alto, strisce di luce in diagonale, la cassa di un
+     ampli appena accennata in basso), a piena risoluzione e senza la barra in
+     basso che c'era dentro. Copre il pannello e sta ferma mentre si scorre. */
+  #pannelloEditor { background:#07080b url('immagini/sfondo-editor.jpg') center top / cover no-repeat; }
   #pannelloEditor #catena { flex:1; display:flex; flex-direction:column; }
   /* La striscia non si restringe mai: su uno schermo basso il flex la
      schiaccerebbe invece di far scorrere il pannello. */
