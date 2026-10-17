@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v114';
+const VERSIONE = 'v115';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -62,6 +62,7 @@ const GUSCIO = [
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './immagini/circuito-elettroni.svg',
+  './immagini/sfondo-editor.jpg',
   './icons/favicon-32.png',
   './fonts/inter-latin.woff2',
   './fonts/space-grotesk-latin.woff2',
