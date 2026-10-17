@@ -939,6 +939,22 @@
      ampli appena accennata in basso), a piena risoluzione e senza la barra in
      basso che c'era dentro. Copre il pannello e sta ferma mentre si scorre. */
   #pannelloEditor { background:#07080b url('immagini/sfondo-editor.jpg') center top / cover no-repeat; }
+  /* Su uno schermo largo (il PC) «cover» la ingrandiva più del doppio e
+     sgranava (l'utente). Lì è larga quanto lo schermo ma **mai più della sua
+     misura vera** (1440 punti), quindi non sgrana; se ne vede la fascia di mezzo,
+     quella con le strisce di luce. Oltre i 1440 punti i lati sfumano nel fondo,
+     che ha il colore dei suoi bordi. */
+  @media (min-aspect-ratio: 3/4) {
+    #pannelloEditor {
+      background:
+        linear-gradient(90deg, #0b0b0e, rgba(11,11,14,0))
+          calc(50vw - 720px) 0 / 180px 100% no-repeat,
+        linear-gradient(270deg, #0b0b0e, rgba(11,11,14,0))
+          calc(50vw + 540px) 0 / 180px 100% no-repeat,
+        url('immagini/sfondo-editor.jpg') center 45% / min(100vw, 1440px) auto no-repeat,
+        #0b0b0e;
+    }
+  }
   #pannelloEditor #catena { flex:1; display:flex; flex-direction:column; }
   /* La striscia non si restringe mai: su uno schermo basso il flex la
      schiaccerebbe invece di far scorrere il pannello. */
