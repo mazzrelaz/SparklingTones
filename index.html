@@ -2,22 +2,21 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<!-- La Content-Security-Policy (17 ottobre 2026): la pagina carica solo i
+     suoi file e parla solo con Dropbox, OpenAI e Anthropic. Se un giorno un
+     testo arrivato da fuori riuscisse a infilare uno script nella pagina, non
+     partirebbe, e comunque non potrebbe mandare le chiavi da nessun'altra
+     parte. Per questo nell'HTML non c'è nessuno script né `onclick=`: lo
+     sfondo sta in `src/sfondo.js`. Gli stili in linea restano permessi (il
+     `<style>` unico, qualche `style=`): da lì non si ruba niente. Un indirizzo
+     nuovo da chiamare con `fetch` va aggiunto a `connect-src`, altrimenti il
+     browser lo blocca con un errore in console. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.dropboxapi.com https://content.dropboxapi.com https://api.openai.com https://api.anthropic.com; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>SparklingTones</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
-<script>
-  // Lo sfondo scelto, nero o grigio, va messo prima che la pagina si disegni:
-  // altrimenti a ogni apertura lampeggia l'altro. Senza una scelta: grigio.
-  (function () {
-    var sfondo = 'grigio';
-    try { sfondo = localStorage.getItem('sfondo') || 'grigio'; } catch (e) {}
-    if (sfondo === 'grigio') {
-      document.documentElement.classList.add('grigio');
-      document.querySelector('meta[name=theme-color]').setAttribute('content', '#101010');
-    }
-  })();
-</script>
+<script src="src/sfondo.js"></script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1572,15 +1571,14 @@
 
 <header>
   <div class="titlebar">
-    <!-- Il marchio lo mette l'utente: basta salvare il file in `icons/logo.svg`
-         (o `.png`) e compare qui, senza toccare il codice. Finché il file non
-         c'è, l'immagine si toglie da sola invece di lasciare l'icona rotta. -->
+    <!-- Il marchio sta in `icons/logo.svg` (nel guscio del service worker).
+         Il vecchio `onerror=` che ripiegava su `logo.png` è stato tolto il 17
+         ottobre 2026: la Content-Security-Policy non fa girare gli handler
+         scritti nell'HTML, e il file c'è da tempo. -->
     <!-- Il nome della vista non c'è: lo dicono già la barra in basso e quello
          che si ha davanti. Al suo posto solo il marchio, che sta in ogni
          schermata dell'app. -->
-    <img class="logo" src="icons/logo.svg" alt="SparklingTones" title="torna ai preset"
-         onerror="if (this.dataset.provato) { this.remove(); }
-                  else { this.dataset.provato = '1'; this.src = 'icons/logo.png'; }">
+    <img class="logo" src="icons/logo.svg" alt="SparklingTones" title="torna ai preset">
     <!-- Il bollino dell'ampli (14 ottobre 2026, al posto di «CONNETTI»): lo
          stato della connessione **è** il pulsante. Senza ampli dice «Collega» e
          collega; con l'ampli ne mostra il nome col pallino verde, e toccandolo

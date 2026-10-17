@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v118';
+const VERSIONE = 'v119';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -41,6 +41,7 @@ const GUSCIO = [
   './src/spark-backup.js',
   './src/pwa.js',
   './src/snake-pedali.js',
+  './src/sfondo.js',
   // lo script dell'app, diviso in pezzi il 7 ottobre 2026 (prima stava in index.html)
   './src/app/01-avvio.js',
   './src/app/02-stato.js',
