@@ -824,7 +824,11 @@
   #pannelloGeneraIA .parte-ia { box-shadow:0 -1px 0 var(--line); background:var(--incavo); }
   #statoChiaveIA.manca { color:var(--gold); }
   .modelli-ia .imp-nota, #pannelloGeneraIA .apribile .imp-nota { display:block; }
-  .modelli-ia .costo-ia { flex:none; font-size:0.74rem; color:var(--dim); white-space:nowrap; }
+  /* I modelli come una tabella senza righe: descrizione, costo stimato e il tondo
+     della scelta in tre colonne fisse, così i costi stanno uno sotto l'altro. */
+  .modelli-ia button.imp-voce { display:grid; grid-template-columns:minmax(0, 1fr) 92px 18px;
+                                column-gap:12px; align-items:center; }
+  .modelli-ia .costo-ia { font-size:0.74rem; color:var(--dim); line-height:1.3; }
   .modelli-ia button.imp-voce::after { border:none; transform:none; width:18px; height:18px;
                                        margin:0; border-radius:50%; box-sizing:border-box;
                                        border:1.6px solid var(--bordo-forte); }
@@ -1887,7 +1891,7 @@
         <button class="imp-voce" data-modello="gpt-6-luna">
           <span class="imp-testo"><span class="imp-etichetta">Luna</span>
             <span class="imp-nota">Economico e veloce: l'idea giusta, le manopole più a caso.</span></span>
-          <span class="costo-ia">meno di 0,1 cent</span></button>
+          <span class="costo-ia">&lt; 0,1 cent</span></button>
         <button class="imp-voce" data-modello="gpt-6.1-sol">
           <span class="imp-testo"><span class="imp-etichetta">Sol · consigliato</span>
             <span class="imp-nota">Equilibrato: conosce bene ampli e pedali.</span></span>
@@ -1901,7 +1905,7 @@
         <button class="imp-voce" data-modello="claude-haiku-5-5">
           <span class="imp-testo"><span class="imp-etichetta">Haiku</span>
             <span class="imp-nota">Economico e veloce, ma meno preciso.</span></span>
-          <span class="costo-ia">meno di 0,1 cent</span></button>
+          <span class="costo-ia">&lt; 0,1 cent</span></button>
         <button class="imp-voce" data-modello="claude-sonnet-5-5">
           <span class="imp-testo"><span class="imp-etichetta">Sonnet</span>
             <span class="imp-nota">Equilibrato: conosce bene ampli e pedali.</span></span>
