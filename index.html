@@ -781,14 +781,14 @@
   #dropboxQuando { color:var(--dim); }
   #pannelloAltro:has(#dropboxCollegato[hidden]) #dropboxQuando,
   #pannelloAltro:has(#dropboxDaCollegare[hidden]) .imp-solo-da-collegare { display:none; }
-  /* La scelta a due posizioni: quella attiva è chiara, come le pastiglie dei
-     filtri. Lo stato lo segna ancora `primary`, messo dallo script. */
+  /* La scelta a due posizioni: quella attiva è rossa, come prima (l'utente).
+     Lo stato lo segna ancora `primary`, messo dallo script. */
   .imp-scelta { display:inline-flex; flex:none; padding:3px; gap:2px; border-radius:10px;
                 background:var(--incavo); border:1px solid var(--line); }
   .imp-scelta button { background:none; border:none; border-radius:7px; padding:6px 12px;
                        font-size:0.8rem; color:var(--dim); box-shadow:none; }
   .imp-scelta button:hover { background:var(--rialzo); color:var(--text); }
-  .imp-scelta button.primary, .imp-scelta button.primary:hover { background:var(--text); color:#000; }
+  .imp-scelta button.primary, .imp-scelta button.primary:hover { background:var(--accent); color:#fff; }
   /* Le voci che fanno qualcosa: tutta la riga è il tasto, con la freccina. */
   button.imp-voce { width:100%; background:none; border:none; border-radius:0; text-align:left;
                     font-family:var(--font); font-size:0.92rem; font-weight:500; color:var(--text); }
@@ -1685,6 +1685,10 @@
 
 <!-- esporta, importa, diagnostica -->
 <div class="pannello" id="pannelloAltro">
+  <div class="barra-alta">
+    <!-- Solo il marchio, come nel Pedale: lo mette `marchioNeiPannelli()` (17
+         ottobre 2026, l'utente: «manca il logo in alto»). -->
+  </div>
   <!-- Le impostazioni a riquadri (17 ottobre 2026, l'utente: «incasinata»): una
        voce per riga, le scelte come interruttori a due posizioni, le
        spiegazioni piccole sotto il riquadro. I testi sono quelli di prima,
