@@ -44,6 +44,14 @@ const SERVIZI_IA = {
   },
 };
 const CHIAVE_SERVIZIO_IA = 'ia-servizio';
+
+// La funzione è nascosta finché non la si sblocca con una password (17 ottobre
+// 2026, scelta dell'utente: per ora resta in prova). Nel codice c'è solo
+// l'impronta SHA-256 della password, non la password; ma il codice è pubblico,
+// quindi è una porta socchiusa, non una serratura: tiene lontano chi usa l'app,
+// non chi legge i sorgenti. Lo sblocco vale per questo apparecchio.
+const IMPRONTA_PASSWORD_IA = '6258a5e0eb772911d4f92be5b5db0e14511edbe01d1d0ddd1d5a2cb9db9a56ba';
+const CHIAVE_SBLOCCO_IA = 'ia-sbloccata';
 const TEMPO_MAX_IA_MS = 120000;
 
 // I sette blocchi, nell'ordine di `Spark.CATENA`: sono le chiavi del JSON.
@@ -59,6 +67,44 @@ function scriviIA(chiave, valore) {
     if (valore) localStorage.setItem(chiave, valore);
     else localStorage.removeItem(chiave);
   } catch (e) { /* resta per questa volta */ }
+}
+
+function iaSbloccata() {
+  return leggiIA(CHIAVE_SBLOCCO_IA) === '1';
+}
+
+/** La voce del menu e le due righe di Impostazioni, secondo lo sblocco. */
+function segnaSbloccoIA() {
+  const sbloccata = iaSbloccata();
+  $('btnMenuGeneraIA').hidden = !sbloccata;
+  $('btnSbloccaIA').hidden = sbloccata;
+  $('btnBloccaIA').hidden = !sbloccata;
+}
+
+async function improntaIA(testo) {
+  const byte = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(testo));
+  return [...new Uint8Array(byte)].map(n => n.toString(16).padStart(2, '0')).join('');
+}
+
+async function sbloccaIA() {
+  const scritta = await finestra({
+    titolo: tr('Funzioni nascoste'),
+    testo: tr('Scrivi la password per sbloccare le funzioni in prova.'),
+    campo: { valore: '', invito: tr('password'), tipo: 'password' },
+    azioni: [
+      { testo: tr('Sblocca'), classe: 'primary', vuoleTesto: true },
+      { testo: tr('Annulla'), valore: null },
+    ],
+  });
+  if (scritta === null || scritta === undefined) return;
+  if (await improntaIA(String(scritta).trim()) !== IMPRONTA_PASSWORD_IA) {
+    await avvisa(tr('Password sbagliata'), tr('Non è quella giusta: niente è cambiato.'));
+    return;
+  }
+  scriviIA(CHIAVE_SBLOCCO_IA, '1');
+  segnaSbloccoIA();
+  await avvisa(tr('Sbloccata'), tr('«Genera con l\'IA» adesso sta nel menu <strong>Altro</strong>, ' +
+                                   'nel gruppo Libreria.'));
 }
 
 /** Il servizio scelto: 'openai' finché l'utente non sceglie altro. */
@@ -463,6 +509,13 @@ async function generaConIA() {
   }
 }
 
+segnaSbloccoIA();
+$('btnSbloccaIA').addEventListener('click', sbloccaIA);
+$('btnBloccaIA').addEventListener('click', () => {
+  scriviIA(CHIAVE_SBLOCCO_IA, '');
+  segnaSbloccoIA();
+  statoDelPannello(tr('«Genera con l\'IA» di nuovo nascosta. Le chiavi restano salvate.'));
+});
 $('btnMenuGeneraIA').addEventListener('click', () => {
   apriPannello('pannelloGeneraIA');
   segnaImpostazioniIA();
