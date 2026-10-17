@@ -158,6 +158,12 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
   scuro ed è più scuro; chi suona ha il bordo sfumato azzurro-viola-fucsia, un bagliore che pulsa e la
   corrente che scorre (`immagini/circuito-elettroni.svg`, nel guscio). Tutto in CSS: i pulsanti
   cambiano misura col telefono, un'immagine fissa non va. Niente riga di log sotto.
+- **Tenendo premuto 2 secondi un pulsantone si apre l'editor** di quel preset (17 ottobre 2026,
+  `pressioneLunga`, `PRESSIONE_EDITOR_MS`): la barretta in fondo si riempie, lasciando prima non
+  succede niente, e la pressione lunga non fa suonare il preset al rilascio. Va anche senza ampli
+  (editor sulla copia in libreria): **i pulsantoni non sono più `disabled`**, il tocco lo ferma
+  `attiva()`. Con l'ampli aprire l'editor manda il preset, quindi suona. Niente nei posti vuoti
+  né in «Modifica».
 - **Il banco «Ampli» si ricava da `slots`**, non è salvato. I banchi dell'utente
   (`settings.banchi`) **non scrivono mai sull'ampli**: niente «Prepara».
 
@@ -335,13 +341,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 16 ottobre 2026
-
-**Da fare per primo (chiesto dall'utente la sera del 16 ottobre, «per domani»)**: nella vista Live,
-**tenendo premuto 2 secondi su un pulsantone si entra direttamente nell'editor** di quel preset
-(`apriEditor`). Da pensare: la pressione lunga non deve far partire il preset come il tocco normale,
-un segno che la pressione sta caricando, i posti vuoti e la modalità «Modifica» dei banchi. È grafica
-e comportamento: prima la bozza.
+## Dove si riprende — 17 ottobre 2026
 
 **Pubblicato il 16 ottobre 2026 (sera): l'editor con le immagini dei blocchi** (ramo
 `bozza-editor-grafico` unito in `main`, guscio `v109`). Ogni modello ha la sua immagine (89, in
@@ -362,7 +362,7 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 `docs/decisioni-ui.md`, ultime sezioni; la versione lunga di questo paragrafo in `docs/diario.md`.
 
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
-14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v113` (16 ottobre, sera). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro. **`guida.en.html`** è
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v114` (17 ottobre). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro. **`guida.en.html`** è
 rimasta alle schermate vecchie.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale

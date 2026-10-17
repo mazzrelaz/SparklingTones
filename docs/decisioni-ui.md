@@ -1378,3 +1378,20 @@ Le regole stanno sotto `body.vista-live .pad`, che pesa abbastanza da vincere su
 `html.grigio .pad.attivo`. Il colore della famiglia resta su `--led` del pulsante, e il LED è solo
 nascosto: rimetterlo è una riga. I bordi oro della modifica dei banchi restano. Pubblicato col
 guscio `v112`. Nello stesso giro è sparita la riga di log sotto i pulsantoni (`#logLive`).
+
+## La pressione lunga apre l'editor — 17 ottobre 2026
+
+Chiesto dall'utente la sera prima: tenendo premuto **2 secondi** un pulsantone della vista Live si
+entra direttamente nell'editor di quel preset. Mentre si tiene premuto, la barretta in fondo al
+pulsante (la stessa dell'invio, ora azzurro-viola-fucsia) si riempie nei due secondi e il pulsante si
+schiarisce; arrivati in fondo il telefono vibra un attimo e si apre l'editor. Lasciando prima non
+succede niente. Il tocco normale fa suonare **al rilascio** (`click`), quindi una pressione lunga lo
+deve saltare: `pressioneLunga` torna una funzione che il `click` interroga. Il menu del browser col
+dito fermo e la selezione del nome sono spenti sui pulsantoni.
+
+Senza ampli i pulsantoni erano `disabled`, e un pulsante disabilitato non riceve il dito: adesso non
+lo sono più (tranne i posti vuoti), e il tocco senza ampli o durante un invio lo ferma `attiva()`,
+che lo faceva già. Così la pressione lunga apre l'editor anche senza ampli, sulla copia in libreria.
+Con l'ampli, aprire l'editor manda il preset per regolarlo, quindi suona: come «Regola». Chiudendo
+l'editor si resta in Live. Provato nel riquadro (senza ampli) e dall'utente sul telefono; pubblicato
+col guscio `v114`.
