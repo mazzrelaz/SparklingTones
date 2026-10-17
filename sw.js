@@ -57,6 +57,7 @@ const GUSCIO = [
   './src/app/13-dropbox.js',
   './src/app/14-pedale.js',
   './src/app/15-partenza.js',
+  './src/app/16-genera-ia.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
