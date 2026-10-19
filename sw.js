@@ -67,6 +67,7 @@ const GUSCIO = [
   './immagini/sfondo-editor.jpg',
   './immagini/guida/editor.webp',
   './immagini/guida/modelli.webp',
+  './immagini/guida/live.webp',
   './icons/favicon-32.png',
   './fonts/inter-latin.woff2',
   './fonts/space-grotesk-latin.woff2',

@@ -410,32 +410,12 @@
 
   <div class="due">
     <figure class="schermo">
-      <div class="telefono rel">
-        <span class="pin" style="left:-8px;top:68px">1</span>
-        <span class="pin" style="right:-8px;top:186px">2</span>
-        <span class="pin" style="left:128px;top:131px">3</span>
-        <span class="pin" style="right:-8px;top:269px">4</span>
-        <div class="m-barra">
-          <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
-          <span class="m-bollino ok">Spark 2</span>
-        </div>
-        <div class="m-banchi">
-          <span class="m-bancotab">Ampli</span><span class="m-bancotab attivo">Concerto</span>
-          <span class="m-bancotab">Prove</span><span class="m-bancotab piu">＋ banco</span><span class="m-bancotab piu">✎ Modifica</span>
-        </div>
-        <div class="m-pads circuito">
-          <div class="m-pad"><span class="sg">A1</span><span class="nm">Shine On clean</span></div>
-          <div class="m-pad"><span class="nm">Lead Gilmour</span></div>
-          <div class="m-pad"><span class="nm">Blues di casa</span></div>
-          <div class="m-pad"><span class="nm">Folk 12 corde</span></div>
-          <div class="m-pad attivo"><span class="sg">A2</span><span class="nm">Echoes</span></div>
-          <div class="m-pad premuto"><span class="nm">Crunch</span><span class="carica"></span></div>
-          <div class="m-pad vuoto"><span class="nm">vuoto</span></div>
-          <div class="m-pad vuoto"><span class="nm">vuoto</span></div>
-        </div>
-        <div class="m-barra-sotto">
-          <span><b>☰</b>Preset</span><span class="scelta"><b>▦</b>Live</span><span><b>⊙⊙</b>Pedale</span><span><b>···</b>Altro</span>
-        </div>
+      <div class="telefono rel con-foto">
+        <span class="pin" style="left:-14px;top:calc(3.4% - 11px)">1</span>
+        <span class="pin" style="right:-8px;top:calc(17.5% - 11px)">2</span>
+        <span class="pin" style="left:calc(37% - 11px);top:calc(8.8% - 11px)">3</span>
+        <div class="foto"><img src="immagini/guida/live.webp" width="520" height="957"
+          alt="La vista Live col banco Ampli: otto pulsantoni neri col disegno di un circuito, quattro a sinistra (A1–A4) e quattro a destra (B1–B4); quello che suona, B1, ha il bordo sfumato e la luce viola"></div>
       </div>
       <figcaption>Un banco da otto: quattro per piede, a sinistra e a destra</figcaption>
     </figure>
@@ -448,9 +428,9 @@
           scuri, col bordo sottile.</li>
         <li><strong>La sigla in alto</strong> (A1, A2…) vuol dire che quel preset è già nell'ampli:
           parte <strong>all'istante</strong>.</li>
-        <li><strong>Senza sigla</strong> il preset viene trasmesso per intero: ci mette circa un
-          secondo, e la barretta in fondo al pulsante mostra l'avanzamento.</li>
       </ol>
+      <p><strong>Senza sigla</strong> il preset viene trasmesso per intero: ci mette circa un
+        secondo, e la barretta in fondo al pulsante mostra l'avanzamento.</p>
       <h3>Tieni premuto per regolarlo</h3>
       <p><strong>Tieni il dito su un pulsantone per due secondi</strong>: la barretta in fondo si
         riempie e si apre l'<a href="#editor">editor</a> di quel preset, per girare le manopole senza
@@ -466,9 +446,9 @@
   </div>
 
   <h3>Comporre un banco</h3>
-  <div class="due">
+  <div>
     <ol class="passi">
-      <li>Scegli il banco in alto, poi tocca <strong>✎ Modifica</strong>, in fondo alla riga dei banchi.</li>
+      <li>Scegli il banco in alto, poi tocca <strong>✎ Modifica</strong>, a destra nella riga dei banchi.</li>
       <li><strong>Tocca un posto</strong> per scegliere il preset da metterci (c'è la ricerca, e
         <em>Svuota il posto</em> per liberarlo).</li>
       <li>Per spostare: tocca la presa <span style="color:var(--gold)">⇅</span> di un pulsante, poi il
@@ -476,17 +456,6 @@
       <li>Per rinominarlo o eliminarlo: in modifica, tocca il <strong>nome del banco</strong>.</li>
       <li>Tocca <strong>Fatto</strong>, lo stesso tasto, per tornare a suonare.</li>
     </ol>
-    <figure class="schermo">
-      <div class="telefono">
-        <div class="m-pads circuito" style="grid-template-rows:repeat(2, 74px)">
-          <div class="m-pad inModifica"><span class="nm">Shine On clean</span><span class="presa">⇅</span></div>
-          <div class="m-pad vuoto" style="border-color:#6b5a1e"><span class="nm" style="font-size:0.74rem">tocca per scegliere</span></div>
-          <div class="m-pad inMano"><span class="nm">Lead Gilmour</span><span class="presa">⇅</span></div>
-          <div class="m-pad inModifica"><span class="nm">Folk 12 corde</span><span class="presa">⇅</span></div>
-        </div>
-      </div>
-      <figcaption>In modifica: un tocco sceglie, ⇅ sposta</figcaption>
-    </figure>
   </div>
   <div class="nota">
     <p><strong>I tuoi banchi non scrivono mai sull'ampli</strong>: riordinali quanto vuoi, gli slot

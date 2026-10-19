@@ -399,10 +399,10 @@ footer { border-top:1px solid var(--line-soft); color:var(--faint); text-align:c
                white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* ---- le schermate dal 16-17 ottobre 2026 --------------------------------
-   La scheda coi tasti a icona e le righe che si aprono, i pulsantoni della
-   vista Live col circuito, e l'editor. L'editor è fatto delle immagini dei
-   blocchi: disegnarlo in HTML vorrebbe dire rifare le immagini, quindi è una
-   schermata vera (immagini/guida/, WebP, nella cache offline come il resto),
+   La scheda coi tasti a icona e le righe che si aprono. La vista Live e
+   l'editor sono schermate vere: l'editor è fatto delle immagini dei blocchi,
+   e i pulsantoni disegnati a mano non tornavano con l'app (l'utente, 19
+   ottobre 2026). Stanno in immagini/guida/, WebP, nella cache offline come il resto,
    coi numerini sopra in percentuale dell'immagine. */
 .m-foglio svg { width:12px; height:12px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8;
                 stroke-linecap:round; stroke-linejoin:round; }
@@ -420,38 +420,9 @@ footer { border-top:1px solid var(--line-soft); color:var(--faint); text-align:c
                color:var(--faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-apri .ant i { width:6px; height:6px; border-radius:50%; background:var(--fam); flex:none; }
 
-/* i pulsantoni col circuito: le piste ferme in tutti, la corrente su chi suona */
-.m-pads.circuito .m-pad { align-items:center; text-align:center; background:#050608; border:1px solid #2e3036;
-                          border-radius:12px; overflow:hidden; filter:brightness(.62) saturate(.85);
-                          box-shadow:0 0 8px -3px rgba(255,255,255,.15); }
-.m-pads.circuito .m-pad::before { content:''; position:absolute; inset:0; pointer-events:none;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='90'%3E%3Cg fill='none' stroke='%237b6cff' stroke-opacity='.16' stroke-width='1'%3E%3Cpath d='M0 20h30l10 10h40M120 70H90l-10-10H50l-8 8H0M60 0v14l8 8M20 90V76l10-10'/%3E%3C/g%3E%3Cg fill='%237b6cff' fill-opacity='.22'%3E%3Ccircle cx='80' cy='30' r='2'/%3E%3Ccircle cx='42' cy='68' r='2'/%3E%3Ccircle cx='68' cy='22' r='2'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 90px; }
-.m-pads.circuito .m-pad .nm { position:relative; z-index:1; color:#eef0f3; font-size:0.84rem;
-                              text-shadow:0 0 6px rgba(160,140,255,.35); }
-.m-pads.circuito .m-pad .sg { position:absolute; top:5px; right:8px; z-index:1; font:700 0.56rem var(--strumento);
-                              color:var(--dim); }
-.m-pads.circuito .m-pad.attivo { filter:none; border:2px solid transparent;
-  background:linear-gradient(rgba(10,9,18,.82), rgba(5,6,8,.82)) padding-box,
-             linear-gradient(135deg, #2be4ff, #7b5cff 55%, #ff2bd6) border-box;
-  box-shadow:0 0 12px rgba(123,92,255,.55), 0 0 26px rgba(255,43,214,.25); }
-.m-pads.circuito .m-pad.attivo::before { background:url('immagini/circuito-elettroni.svg') 0 0 / 120px 90px; }
-.m-pads.circuito .m-pad.attivo::after { content:''; position:absolute; left:10%; right:10%; top:28%; bottom:28%;
-  border-radius:50%; pointer-events:none; filter:blur(10px);
-  background:radial-gradient(ellipse at center, rgba(255,43,214,.55), rgba(123,92,255,.35) 45%, rgba(43,228,255,0) 75%); }
-.m-pads.circuito .m-pad.attivo .nm { color:#fff; text-shadow:0 0 6px #fff, 0 0 16px rgba(255,43,214,.7); }
-.m-pads.circuito .m-pad.vuoto { background:none; border-style:dashed; filter:none; }
-.m-pads.circuito .m-pad.vuoto::before { opacity:0.4; }
-.m-pads.circuito .m-pad.vuoto .nm { color:var(--faint); text-shadow:none; }
-.m-pads.circuito .m-pad .carica { z-index:2; background:linear-gradient(90deg, #2be4ff, #7b5cff 55%, #ff2bd6);
-                                  box-shadow:0 0 8px rgba(123,92,255,.8); }
-.m-pads.circuito .m-pad.premuto { filter:none; }
-.m-pads.circuito .m-pad.inModifica { border:1px dashed var(--gold); filter:none; }
-.m-pads.circuito .m-pad.inMano { background:#241f16; border:1px solid var(--gold); filter:none; }
-
 /* la schermata vera, coi numerini sopra */
 .telefono.con-foto { padding:0; }
 .telefono.con-foto.stretto { max-width:300px; }
 .con-foto .foto { border-radius:25px; overflow:hidden; }
 .con-foto .foto img { display:block; width:100%; height:auto; }
 
-.m-pads.circuito .m-pad .presa { z-index:1; }
