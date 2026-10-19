@@ -4,6 +4,14 @@ Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync D
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
 
+## «Genera con l'IA» tolta — 19 ottobre 2026
+
+La funzione è uscita dall'app (guscio `v122`): niente più chiamate a OpenAI e Anthropic, e i due
+indirizzi sono fuori dal `connect-src` della CSP, che torna a permettere solo Dropbox. Le chiavi
+API che chi l'aveva sbloccata teneva in `localStorage` (`openai-chiave`, `anthropic-chiave`, con
+le scelte `*-modello`, `ia-servizio`, `ia-sbloccata`) le cancella `15-partenza.js` a ogni avvio.
+Il ricontrollo del 17 ottobre qui sotto resta come storia.
+
 ## La voce dei video con OpenAI — 19 ottobre 2026
 
 `tools/video-demo/voce-openai.html` + `voce-openai.js`: uno strumento locale (non fa parte

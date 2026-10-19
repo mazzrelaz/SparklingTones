@@ -36,6 +36,14 @@
 
   }
 
+  // «Genera con l'IA» è stata tolta il 19 ottobre 2026: le chiavi API e le
+  // scelte che aveva salvato in questo browser non servono più, e una chiave
+  // non deve restare dove nessuno la vede.
+  try {
+    ['openai-chiave', 'openai-modello', 'anthropic-chiave', 'anthropic-modello',
+     'ia-servizio', 'ia-sbloccata'].forEach(k => localStorage.removeItem(k));
+  } catch (e) { /* senza localStorage non c'è niente da togliere */ }
+
   await store.open();
   await preparaDropbox();
   await applicaVista();

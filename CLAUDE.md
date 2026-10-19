@@ -31,7 +31,7 @@ ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 15 ot
 
 ```
 index.html                        HTML e l'unico <style>: Preset e Live nello stesso documento
-src/app/01-…16-*.js               lo script dell'app, in fila (16: Genera con l'IA)
+src/app/01-…15-*.js               lo script dell'app, in fila
 guida.html / guida.en.html        guida all'uso (guida.css, guida.js); guida-pedale(.en).html
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
 src/spark-protocol.js             encoder/decoder puro — il cuore del progetto
@@ -336,7 +336,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
   di un appuntamento fisso): una funzione che parla con l'esterno (chiavi, rete, Bluetooth, file
   importati, firmware del ponte) la ricontrollo io prima di chiudere la sessione, o propongo una
   sessione apposta se è lungo; l'esito va in `docs/sicurezza.md`, con la data. Ultimo audit intero
-  17 settembre 2026; **«Genera con l'IA» non è ancora ricontrollata a fondo**.
+  17 settembre 2026.
 - Italiano in commenti e UI; la UI ha anche l'inglese, secondario (vedi «L'inglese»). Byte
   in hex minuscolo separato da spazi.
 
@@ -366,15 +366,14 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 `docs/decisioni-ui.md`, ultime sezioni; la versione lunga di questo paragrafo in `docs/diario.md`.
 
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
-14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v118` (17 ottobre): **«Genera con l'IA»** (`16-genera-ia.js`), **nascosta**: la voce del menu Altro compare solo dopo «Funzioni nascoste» in Impostazioni, con la password dell'utente (nel codice solo l'impronta SHA-256; la password **non si scrive mai** nel repository). Giudizio dell'utente: «non fa miracoli ma non è male». OpenAI (Luna/Sol/Astra, Sol predefinito; **misurato: Sol 1 centesimo, Astra 7-8**) o Anthropic (Haiku/Sonnet/Opus 5.5, Opus predefinito, `fallbacks: "default"`; **Anthropic mai provato con una chiave vera**), chiavi dell'utente in `localStorage`, spiegazione e disclaimer nel pannello. **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta), risposta a schema con `enum` dei MODELLI, preset costruito sopra uno vero della libreria come il Duplica, salvato solo con «Salva in libreria». **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro.
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v118` (17 ottobre): **«Genera con l'IA» c'è stata dal 17 al 19 ottobre ed è tolta** (vedi sotto). **Trappola che resta**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta). **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro.
 
 **Pubblicati il 19 ottobre 2026: guida e sito della nuova interfaccia, in italiano e in inglese**
 (guscio `v120`; sito `e533608`). La vista Live e l'editor nella guida e sul sito sono **schermate
 vere** dell'app (`immagini/guida/`, `*-en.webp` per l'inglese; sul sito `media/app-live*.webp`): il
 disegno a mano dei pulsantoni «non è così che si vede», dice l'utente. Per rifarle: preset finti, la
 schermata dal riquadro, poi `ritaglia` con Edge headless (canvas → WebP) come `tools/togli-sfondo`.
-**«Genera con l'IA» non si nomina**, né in guida né sul sito: l'utente pensa di togliere la funzione.
-`lingua-en.js` allineato (81 frasi nuove, 47 tolte): restano in italiano solo le 73 dell'IA. Il
+`lingua-en.js` allineato (81 frasi nuove, 47 tolte). Il
 video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio. **Video demo inglese nuovo** (19 ottobre, 2:27,
 voce sintetica Kokoro): «SparklingTones demo English 2026-10-19.mp4» sul Desktop; copione rifatto in
 `tools/video-demo/registra.js` (doppio tocco entro 400 ms, pressione lunga), Kokoro nello scratchpad. **Video del pedale** (1:46, orizzontale; looper con battute libere e cambio di preset fra prima parte e sovraincisione): «SparklingTones pedal demo English
@@ -386,6 +385,12 @@ indirizzi non salva); il finale dice «voce generata con IA» (regola di OpenAI)
 (Kokoro Nicola/Sara, Windows Elsa, Piper Paola/Riccardo) bocciate tutte dall'utente**. **Su YouTube** (pubblicati il 19 ottobre, guscio
 `v121`): app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow` (shorts), pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`; nel sito
 e in cima alle quattro guide («Guarda il video», in un'altra scheda).
+
+**«Genera con l'IA» tolta il 19 ottobre 2026** (guscio `v122`; «mi crea solo problemi», l'utente):
+via `16-genera-ia.js`, la voce del menu, «Funzioni nascoste», il pannello e i suoi stili; OpenAI e
+Anthropic fuori dalla CSP. Alla partenza `15-partenza.js` cancella le chiavi API e le scelte che
+aveva lasciato in `localStorage`. In `lingua-en.js` resta «Funzioni nascoste», orfana e innocua.
+**Non si rimette** se non lo chiede lui; il codice è nella cronologia (`f86fb12`).
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor

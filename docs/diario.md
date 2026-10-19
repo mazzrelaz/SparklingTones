@@ -940,3 +940,7 @@ così che si vede». **In tutte e due le lingue**:
 per questo lavoro l'utente ha autorizzato a toccare anche la parte inglese (`guida.en.html`,
 `guida-pedale.en.html`, `sparklingtones-sito/en/`, `lingua-en.js` se serve). Grafica nuova del
 sito o della guida: prima la bozza.
+
+## Estratto da CLAUDE.md, 19 ottobre 2026 — «Genera con l'IA», tolta quel giorno
+
+Guscio `v118` (17 ottobre): **«Genera con l'IA»** (`16-genera-ia.js`), **nascosta**: la voce del menu Altro compare solo dopo «Funzioni nascoste» in Impostazioni, con la password dell'utente (nel codice solo l'impronta SHA-256; la password **non si scrive mai** nel repository). Giudizio dell'utente: «non fa miracoli ma non è male». OpenAI (Luna/Sol/Astra, Sol predefinito; **misurato: Sol 1 centesimo, Astra 7-8**) o Anthropic (Haiku/Sonnet/Opus 5.5, Opus predefinito, `fallbacks: "default"`; **Anthropic mai provato con una chiave vera**), chiavi dell'utente in `localStorage`, spiegazione e disclaimer nel pannello. **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta), risposta a schema con `enum` dei MODELLI, preset costruito sopra uno vero della libreria come il Duplica, salvato solo con «Salva in libreria».
