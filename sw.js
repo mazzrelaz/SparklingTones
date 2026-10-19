@@ -65,6 +65,8 @@ const GUSCIO = [
   './icons/apple-touch-icon.png',
   './immagini/circuito-elettroni.svg',
   './immagini/sfondo-editor.jpg',
+  './immagini/guida/editor.webp',
+  './immagini/guida/modelli.webp',
   './icons/favicon-32.png',
   './fonts/inter-latin.woff2',
   './fonts/space-grotesk-latin.woff2',
