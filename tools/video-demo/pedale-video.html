@@ -42,6 +42,39 @@ const telefono = new Image(); telefono.src = '/__uscita/telefono.jpg';
 const C = '#6fd6ff';                       // l'azzurro del display
 const ROSSO = '#ff3b47', VERDE = '#3ee06a';
 
+/* L'italiano (19 ottobre 2026): ?lang=it. Le scritte del display sono quelle
+   italiane del firmware (TESTO(it, en) in prova-ble); i nomi dei preset restano. */
+const LINGUA = new URLSearchParams(location.search).get('lang') === 'it' ? 'it' : 'en';
+const IT = {
+  'Switch it on: it finds your Spark by itself': 'Lo accendi: trova da solo il tuo Spark',
+  'Four footswitches, four sounds': 'Quattro footswitch, quattro suoni',
+  'The fifth switch flips between half A and half B': 'Il quinto passa dalla metà A alla metà B',
+  'Bank buttons: your banks, ready to play': 'I tasti banco: i tuoi banchi, pronti da suonare',
+  'Hold both bank buttons: the app sends your banks': "Tieni i due tasti banco: l'app manda i banchi",
+  'The looper: from 1 to 16 bars, or free length': 'Il looper: da 1 a 16 battute, o lunghezza libera',
+  'Change preset while the loop keeps playing': 'Cambi preset mentre il loop continua a suonare',
+  'Overdub the second part with the new sound': 'Sovraincidi la seconda parte col suono nuovo',
+  'Build it yourself': 'Costruiscilo da te', 'an ESP32, a display, five footswitches': 'un ESP32, un display, cinque footswitch',
+  'a battery inside, charged over USB-C': 'la batteria dentro, si carica via USB-C', 'the guide is free, step by step': 'la guida è gratuita, passo per passo',
+  'SparklingTones pedal': 'Il pedale SparklingTones', 'Your Spark presets, under your feet': 'I preset del tuo Spark, sotto i piedi',
+  'free guide · open-source firmware': 'guida gratuita · firmware open source', 'pedal and amp drawn, not filmed': 'pedale e ampli disegnati, non filmati',
+  'pedal  v2.23': 'pedale  v2.23', 'searching': 'lo sto cercando', 'searching…': 'cerco…', 'with the app': "con l'app",
+  'Spark to the app': "Spark all'app", 'looper mode': "modalita' looper", 'preset mode': "modalita' preset",
+  'free length': 'lunghezza libera', 'Looper  free': 'Looper  libero', 'Record': 'Registra', 'Undo': 'Annulla',
+  'Play': 'Suona', 'Stop/Clear': 'Ferma/Canc', 'Rec: close': 'Rec: chiudi', 'Overdub': 'Sovraincidi', 'Dub: close': 'Dub: chiudi',
+  'Gig': 'Concerto', 'Blues night': 'Serata blues', 'Rehearsal': 'Prove', '✓ «Rehearsal» sent': '✓ «Prove» mandato',
+};
+const IT_PEZZI = [[/^bridge /, 'ponte '], [/^Count  /, 'Conta  '], [/^(\d+) bars$/, '$1 battute'],
+  [/\bGig\b/, 'Concerto'], [/Blues night/, 'Serata blues'], [/\bRehearsal\b/, 'Prove'], [/loop playing/, 'loop in corso'],
+  [/looper · empty/, 'looper · vuoto'], [/looper · recording/, 'looper · registra'], [/^overdub/, 'sovraincisione'],
+  [/ on top of /, ' sopra '], [/rhythm \+ lead/, 'ritmo + assolo']];
+const T = s => {
+  if (LINGUA !== 'it' || !s) return s;
+  if (IT[s]) return IT[s];
+  return IT_PEZZI.reduce((x, [a, b]) => x.replace(a, b), s);
+};
+let VOCE_IA = false;                       // una voce di un servizio di IA: il finale lo dice
+
 /* ------------------------------------------------------------ le misure */
 
 const P = { w: 1400, h: 440, sponda: 22 };
@@ -101,7 +134,7 @@ function oled(x, sc) {
   // fondo nero, e il vetro un po' lucido sopra
   x.fillStyle = '#020304'; x.fillRect(0, 0, 256, 128);
   x.fillStyle = C; x.strokeStyle = C; x.textBaseline = 'alphabetic';
-  const titolo = (t) => { x.font = 'bold 16px Arial'; x.fillStyle = C; x.fillText(t, 2, 17); };
+  const titolo = (t) => { x.font = 'bold 16px Arial'; x.fillStyle = C; x.fillText(T(t), 2, 17); };
   const testa = (pieno, batteria = true) => {
     if (batteria) {
       x.lineWidth = 2; x.strokeRect(201, 5, 21, 11); x.fillRect(222, 8, 3, 5);
@@ -115,7 +148,7 @@ function oled(x, sc) {
   if (sc.tipo === 'avvio') {
     x.font = 'bold 26px Arial'; x.textAlign = 'center';
     x.fillText('SparklingTones', 128, 62);
-    x.font = '15px Arial'; x.fillText('pedal  v2.23', 128, 92);
+    x.font = '15px Arial'; x.fillText(T('pedal  v2.23'), 128, 92);
     x.textAlign = 'left';
     return;
   }
@@ -124,7 +157,7 @@ function oled(x, sc) {
     x.fillRect(0, 34, 124, 36); x.fillStyle = '#000'; x.font = 'bold 19px Arial'; x.textAlign = 'center';
     x.fillText('Spark 2', 62, 59); x.fillStyle = C; x.lineWidth = 2; x.strokeRect(134, 35, 120, 34);
     x.fillText('NEO', 194, 59);
-    x.font = '18px Arial'; x.fillText('searching', 110, 104); x.textAlign = 'left';
+    x.font = '18px Arial'; x.fillText(T('searching'), 110, 104); x.textAlign = 'left';
     for (let k = 0; k < sc.puntini; k++) x.fillRect(176 + k * 12, 100, 4, 4);
     return;
   }
@@ -147,7 +180,7 @@ function oled(x, sc) {
       if (su) { x.fillStyle = C; x.fillRect(0, y - 20, 168, 24); }
       x.fillStyle = su ? '#000' : C;
       x.font = 'bold 19px Arial'; x.fillText(String(r + 1), 2, y);
-      x.font = '19px Arial'; x.fillText(righe[r], 22, y);
+      x.font = '19px Arial'; x.fillText(T(righe[r]), 22, y);
     }
     // l'anello: uno spicchio per battuta, si riempie un tempo alla volta
     const cx = 214, cy = 78, R = 36, r2 = 22, n = sc.battute;
@@ -463,7 +496,7 @@ function fondo() {
 // lo Spark, sotto il pedale: un'etichetta con quello che suona
 function ampli(a) {
   if (!a) return;
-  const y = 975, testo = a.testo || '';
+  const y = 975, testo = T(a.testo || '');
   g.save();
   g.font = '600 30px Inter';
   const w = Math.max(360, g.measureText('Spark 2   ' + testo).width + 110), x = L / 2 - w / 2;
@@ -488,7 +521,7 @@ function telefonoDisegna(a, inviato) {
   if (inviato) {
     g.fillStyle = 'rgba(62,224,106,.95)'; tondo(g, x + 30, y + h - 120, w - 60, 60, 30); g.fill();
     g.fillStyle = '#04150a'; g.font = '700 28px Inter'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText('✓ «Rehearsal» sent', x + w / 2, y + h - 90);
+    g.fillText(T('✓ «Rehearsal» sent'), x + w / 2, y + h - 90);
   }
   g.restore();
 }
@@ -504,7 +537,7 @@ function disegna(tau, piano) {
   if (s.scena.testo) {
     const a = dolce(t / 0.35);
     g.save(); g.globalAlpha = a; g.fillStyle = '#e11d2e'; g.fillRect(L / 2 - 40, 78, 80, 6); g.restore();
-    testoCentrato(s.scena.testo, 150, '600 52px Inter', '#f4f4f5', a);
+    testoCentrato(T(s.scena.testo), 150, '600 52px Inter', '#f4f4f5', a);
   }
   // il pedale: al centro, o a sinistra quando c'è il telefono
   const tel = dolce(st.telefono || 0);
@@ -526,7 +559,7 @@ function disegna(tau, piano) {
     const a = Math.min(dolce(t / 0.5), dolce((fine - t) / 0.5));
     g.save(); g.globalAlpha = a * 0.95; g.fillStyle = '#060607'; g.fillRect(0, 0, L, H); g.restore();
     if (logo.naturalWidth) { g.save(); g.globalAlpha = a; g.drawImage(logo, L / 2 - 60, 230, 120, 120); g.restore(); }
-    const righe = s.scena.cartello;
+    const righe = s.scena.cartello.map(T);
     testoCentrato(righe[0], 430, '700 84px "Space Grotesk"', '#ffffff', a);
     righe.slice(1).forEach((r, k) => {
       const ak = a * dolce((t - 0.8 - k * 0.9) / 0.5);
@@ -541,13 +574,13 @@ function disegna(tau, piano) {
     g.save(); g.globalAlpha = velo * 0.94; g.fillStyle = '#060607'; g.fillRect(0, 0, L, H); g.restore();
     if (logo.naturalWidth) { g.save(); g.globalAlpha = velo; g.drawImage(logo, L / 2 - 80, 250, 160, 160); g.restore(); }
     if (quale === 'intro') {
-      testoCentrato('SparklingTones pedal', 500, '700 96px "Space Grotesk"', '#ffffff', velo);
-      testoCentrato('Your Spark presets, under your feet', 600, '500 46px Inter', '#d4d4d8', velo);
+      testoCentrato(T('SparklingTones pedal'), 500, '700 96px "Space Grotesk"', '#ffffff', velo);
+      testoCentrato(T('Your Spark presets, under your feet'), 600, '500 46px Inter', '#d4d4d8', velo);
     } else {
-      testoCentrato('SparklingTones pedal', 500, '700 96px "Space Grotesk"', '#ffffff', velo);
-      testoCentrato('free guide · open-source firmware', 600, '500 44px Inter', '#d4d4d8', velo);
+      testoCentrato(T('SparklingTones pedal'), 500, '700 96px "Space Grotesk"', '#ffffff', velo);
+      testoCentrato(T('free guide · open-source firmware'), 600, '500 44px Inter', '#d4d4d8', velo);
       testoCentrato('sparklingtones.com', 680, '600 42px Inter', '#f43f5e', velo);
-      testoCentrato('pedal and amp drawn, not filmed', 1010, '400 28px Inter', '#71717a', velo);
+      testoCentrato(T('pedal and amp drawn, not filmed') + (VOCE_IA ? (LINGUA === 'it' ? ' · voce generata con IA' : ' · AI-generated voice') : ''), 1010, '400 28px Inter', '#71717a', velo);
     }
   }
 }
@@ -562,6 +595,7 @@ async function gira() {
   LEGNO = legno();
   let voce = null;
   try { voce = await (await fetch('/__uscita/voce.json')).json(); } catch (_) { /* senza voce */ }
+  VOCE_IA = !!(voce && voce.modello);
   // ogni scena: quanto la sua animazione, o quanto la sua voce se è più lunga
   const PAUSA = 0.7, PRIMA = 0.3;
   const piano = [];

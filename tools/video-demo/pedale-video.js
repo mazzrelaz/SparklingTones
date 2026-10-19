@@ -1,6 +1,6 @@
 // Il video dimostrativo del pedale, disegnato (19 ottobre 2026).
 //
-//   node tools/video-demo/pedale-video.js <cartella di uscita>
+//   node tools/video-demo/pedale-video.js <cartella di uscita> [en|it]
 //
 // Nella cartella di uscita servono, se ci sono:
 //   voce.json + voce.wav  la voce a pezzi, da
@@ -20,6 +20,7 @@ const { spawn } = require('child_process');
 
 const RADICE = path.resolve(__dirname, '..', '..');
 const USCITA = path.resolve(process.argv[2] || path.join(require('os').tmpdir(), 'spark-video-pedale'));
+const LINGUA = process.argv[3] === 'it' ? 'it' : 'en';    // la lingua del video: scritte e display
 const PORTA_WEB = 8124, PORTA_CDP = 9334;
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const dorme = ms => new Promise(r => setTimeout(r, ms));
@@ -84,7 +85,7 @@ async function main() {
     });
     await manda('Page.enable');
     const carico = new Promise(r => ascolti.push(m => { if (m.method === 'Page.loadEventFired') r(); }));
-    await manda('Page.navigate', { url: `http://localhost:${PORTA_WEB}/tools/video-demo/pedale-video.html` });
+    await manda('Page.navigate', { url: `http://localhost:${PORTA_WEB}/tools/video-demo/pedale-video.html?lang=${LINGUA}` });
     await carico;
     const fatto = new Promise(r => { fine = r; });
     const r = await manda('Runtime.evaluate', { expression: 'gira()', awaitPromise: true, returnByValue: true });

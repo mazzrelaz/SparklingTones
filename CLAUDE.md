@@ -379,7 +379,11 @@ video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecc
 voce sintetica Kokoro): «SparklingTones demo English 2026-10-19.mp4» sul Desktop; copione rifatto in
 `tools/video-demo/registra.js` (doppio tocco entro 400 ms, pressione lunga), Kokoro nello scratchpad. **Video del pedale** (1:46, orizzontale; looper con battute libere e cambio di preset fra prima parte e sovraincisione): «SparklingTones pedal demo English
 2026-10-19.mp4», pedale disegnato da `tools/video-demo/pedale-video.html` (forma dalle foto,
-scritte del firmware), `pedale-video.js` lo registra; voce da `pedale-voce.en.json` (`--testo`).
+scritte del firmware), `pedale-video.js` lo registra; voce da `pedale-voce.en.json` (`--testo`). **In italiano** (19 ottobre): «SparklingTones demo Italiano»
+(2:31) e «SparklingTones pedale demo Italiano» (1:57) sul Desktop; **voce di OpenAI** (`gpt-4o-mini-tts`, alloy,
+chiave dell'utente) fatta con `tools/video-demo/voce-openai.html` + `voce-openai.js` (porta 8125; aperta da altri
+indirizzi non salva); il finale dice «voce generata con IA» (regola di OpenAI). **Le voci locali italiane
+(Kokoro Nicola/Sara, Windows Elsa, Piper Paola/Riccardo) bocciate tutte dall'utente**.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor

@@ -4,6 +4,21 @@ Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync D
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
 
+## La voce dei video con OpenAI — 19 ottobre 2026
+
+`tools/video-demo/voce-openai.html` + `voce-openai.js`: uno strumento locale (non fa parte
+dell'app pubblicata) dove l'utente incolla la sua chiave OpenAI per fare la voce italiana dei
+video. Controllato:
+- **La chiave** sta in un campo `password`; in `localStorage` solo se l'utente spunta «ricordala»,
+  e quell'archivio è dell'origine `localhost:8125`, separato da quello dell'app. Parte solo verso
+  `https://api.openai.com/v1/audio/speech`; il server locale non la vede mai. Non è nel repository.
+- **Il server** ascolta solo su `127.0.0.1` (niente rete di casa), serve solo i file della propria
+  cartella (`path.basename`, niente risalite di percorso), e accetta in scrittura solo
+  `app|pedale` × `voce.wav|voce.json` nella cartella data all'avvio.
+- Il testo mandato a OpenAI è il copione dei video, niente di personale. Il finale dei video dice
+  «voce generata con IA», come chiedono le regole d'uso di OpenAI.
+Niente da correggere.
+
 ## Ricontrollo del 17 ottobre 2026
 
 Un mese e ~390 commit dopo l'audit. La novità che parla con l'esterno è **«Genera con l'IA»**

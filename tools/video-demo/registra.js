@@ -188,6 +188,8 @@ const TESTI = {
   },
 };
 const T = TESTI[LINGUA] || TESTI.it;
+// Una voce fatta da un'IA di un servizio (OpenAI): le sue regole vogliono che il video lo dica.
+if (VOCE && VOCE.modello) T.nota += LINGUA === 'en' ? ' · AI-generated voice' : ' · voce generata con IA';
 
 async function main() {
   fs.mkdirSync(FOTO, { recursive: true });

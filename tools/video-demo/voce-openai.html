@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voce dei video — OpenAI</title>
+<style>
+  :root { --bg:#0b0b0d; --panel:#16171b; --line:#2a2c32; --text:#e8e8ea; --dim:#8a8f98; --accent:#e30613; --green:#3ee06a; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui, sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:24px 16px 60px; }
+  h1 { font-size:1.5rem; margin:0 0 4px; } h2 { font-size:1.05rem; margin:28px 0 8px; }
+  p.dim { color:var(--dim); margin:4px 0 14px; }
+  .box { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; }
+  input[type=password], textarea { width:100%; box-sizing:border-box; background:#0e0f12; color:var(--text);
+    border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:inherit; }
+  textarea { min-height:96px; }
+  .voci { display:flex; flex-wrap:wrap; gap:8px; }
+  button { font:inherit; border-radius:10px; border:1px solid var(--line); background:#1f2126; color:var(--text);
+           padding:9px 14px; cursor:pointer; }
+  button.scelta { border-color:var(--accent); background:#2a0d10; }
+  button.primary { background:var(--accent); border-color:var(--accent); font-weight:600; }
+  button:disabled { opacity:.5; cursor:default; }
+  label { display:flex; gap:8px; align-items:center; color:var(--dim); margin-top:10px; }
+  #registro { white-space:pre-wrap; font:13px Consolas, monospace; color:var(--dim); margin-top:12px; }
+  .ok { color:var(--green); }
+</style>
+</head>
+<body>
+<main>
+  <h1>La voce italiana dei video</h1>
+  <p class="dim">Voce di OpenAI (<code>gpt-4o-mini-tts</code>), con la tua chiave. La chiave resta in questa
+    pagina e parte solo verso api.openai.com; i file audio finiscono nella cartella dei video, sul PC.</p>
+
+  <div class="box">
+    <h2 style="margin-top:0">1 · La chiave</h2>
+    <input type="password" id="chiave" placeholder="incolla qui la chiave API di OpenAI (sk-…)" autocomplete="off">
+    <label><input type="checkbox" id="ricorda"> ricordala su questo computer (solo in questa pagina)</label>
+
+    <h2>2 · La voce</h2>
+    <div class="voci" id="voci"></div>
+    <h2>Come deve parlare</h2>
+    <textarea id="istruzioni"></textarea>
+
+    <h2>3 · Prova</h2>
+    <p class="dim" id="frase"></p>
+    <button id="prova">▶ Senti questa voce</button>
+    <audio id="audio" controls style="width:100%;margin-top:10px"></audio>
+
+    <h2>4 · Le voci dei due video</h2>
+    <p class="dim">Quando una voce ti piace: 16 pezzi per il video dell'app e 11 per quello del pedale.
+      Costa pochi centesimi.</p>
+    <button class="primary" id="tutto">Fai la voce dei due video con questa voce</button>
+    <div id="registro"></div>
+  </div>
+</main>
+<script>
+'use strict';
+const VOCI = ['marin', 'cedar', 'coral', 'sage', 'nova', 'shimmer', 'ballad', 'ash', 'echo', 'onyx', 'verse', 'alloy', 'fable'];
+const FRASE = 'Tieni premuto il quinto footswitch per tre secondi, e diventa un looper. Registra il ritmo con un preset, poi cambia suono mentre il loop continua a suonare.';
+const ISTRUZIONI = 'Parla in italiano, con accento italiano neutro, tono naturale e amichevole, come un chitarrista ' +
+  'che mostra il suo pedale a un amico. Ritmo tranquillo, senza enfasi da pubblicità. Le parole inglesi del mondo ' +
+  'della chitarra (footswitch, looper, loop, preset, overdub, Bluetooth, Spark, Sparkling Tones) pronunciale come ' +
+  'le dice un musicista italiano, all\'inglese ma senza accento americano marcato.';
+const $ = id => document.getElementById(id);
+let voce = 'marin';
+
+try { const k = localStorage.getItem('openai-chiave'); if (k) { $('chiave').value = k; $('ricorda').checked = true; } } catch (_) {}
+$('ricorda').onchange = $('chiave').onchange = () => {
+  try { $('ricorda').checked ? localStorage.setItem('openai-chiave', $('chiave').value.trim()) : localStorage.removeItem('openai-chiave'); } catch (_) {}
+};
+$('istruzioni').value = ISTRUZIONI;
+$('frase').textContent = '«' + FRASE + '»';
+for (const v of VOCI) {
+  const b = document.createElement('button');
+  b.textContent = v; b.className = v === voce ? 'scelta' : '';
+  b.onclick = () => { voce = v; [...$('voci').children].forEach(x => x.className = x === b ? 'scelta' : ''); };
+  $('voci').appendChild(b);
+}
+
+async function parla(testo, formato) {
+  const chiave = $('chiave').value.trim();
+  if (!chiave) throw new Error('manca la chiave');
+  const r = await fetch('https://api.openai.com/v1/audio/speech', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + chiave, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'gpt-4o-mini-tts', voice: voce, input: testo, instructions: $('istruzioni').value, response_format: formato }),
+  });
+  if (!r.ok) throw new Error('OpenAI risponde ' + r.status + ': ' + (await r.text()).slice(0, 300));
+  return r.arrayBuffer();
+}
+const scrivi = (t, classe) => { const d = document.createElement('div'); d.textContent = t; if (classe) d.className = classe; $('registro').appendChild(d); };
+
+$('prova').onclick = async () => {
+  $('prova').disabled = true;
+  try {
+    const mp3 = await parla(FRASE, 'mp3');
+    $('audio').src = URL.createObjectURL(new Blob([mp3], { type: 'audio/mpeg' }));
+    $('audio').play();
+  } catch (e) { scrivi('✗ ' + e.message); }
+  $('prova').disabled = false;
+};
+
+// Tutti i pezzi di un video in un WAV solo (24 kHz, mono), e voce.json coi
+// pezzi: dove sta ognuno e quanto dura. È il formato di voce-sintetica.mjs,
+// che registra.js e pedale-video.js sanno già usare.
+async function video(nome, fileTesti) {
+  const pezzi = await (await fetch(fileTesti)).json();
+  const SR = 24000, STACCO = 0.3;
+  const clip = [];
+  for (const [chiave, testo] of pezzi) {
+    // un pezzo molto più corto del testo è un pezzo tagliato: si rifà (fino a tre volte)
+    let buf;
+    for (let prova = 0; prova < 3; prova++) {
+      buf = await new OfflineAudioContext(1, 1, SR).decodeAudioData(await parla(testo, 'wav'));
+      if (buf.length / SR >= testo.length / 30) break;
+      scrivi(`${nome} · ${chiave}: troppo corto (${(buf.length / SR).toFixed(1)} s), lo rifaccio`);
+    }
+    clip.push({ chiave, dati: buf.getChannelData(0).slice() });
+    scrivi(`${nome} · ${chiave.padEnd(11)} ${(buf.length / SR).toFixed(1)} s`);
+  }
+  const totale = clip.reduce((s, c) => s + c.dati.length + STACCO * SR, 0);
+  const traccia = new Float32Array(Math.ceil(totale));
+  const info = {};
+  let pos = 0;
+  for (const c of clip) {
+    traccia.set(c.dati, pos);
+    info[c.chiave] = { da: +(pos / SR).toFixed(3), durata: +(c.dati.length / SR).toFixed(3) };
+    pos += c.dati.length + Math.round(STACCO * SR);
+  }
+  const wav = new DataView(new ArrayBuffer(44 + traccia.length * 2));
+  const s = (o, t) => [...t].forEach((ch, i) => wav.setUint8(o + i, ch.charCodeAt(0)));
+  s(0, 'RIFF'); wav.setUint32(4, 36 + traccia.length * 2, true); s(8, 'WAVEfmt ');
+  wav.setUint32(16, 16, true); wav.setUint16(20, 1, true); wav.setUint16(22, 1, true); wav.setUint32(24, SR, true);
+  wav.setUint32(28, SR * 2, true); wav.setUint16(32, 2, true); wav.setUint16(34, 16, true); s(36, 'data');
+  wav.setUint32(40, traccia.length * 2, true);
+  traccia.forEach((v, k) => wav.setInt16(44 + 2 * k, Math.round(Math.max(-1, Math.min(1, v)) * 32767), true));
+  // il salvataggio deve riuscire davvero: aperta da un altro indirizzo, la pagina non ha chi salva
+  const posta = async (file, corpo) => {
+    const r = await fetch(`/__salva?cartella=${nome}&nome=${file}`, { method: 'POST', body: corpo });
+    if (!r.ok) throw new Error(`non riesco a salvare ${file} (${r.status}): la pagina va aperta da http://localhost:8125/tools/video-demo/voce-openai.html`);
+  };
+  await posta('voce.wav', new Blob([wav.buffer]));
+  await posta('voce.json', JSON.stringify({ file: 'voce.wav', taglio: 0, pausa: 0.7, pezzi: info, tempi: {},
+    silenzi: [], voce, modello: 'gpt-4o-mini-tts', istruzioni: $('istruzioni').value }, null, 2));
+  scrivi(`✓ ${nome}: voce salvata (${(traccia.length / SR).toFixed(0)} s)`, 'ok');
+}
+
+$('tutto').onclick = async () => {
+  $('tutto').disabled = true;
+  try {
+    await video('app', 'app-voce.it.json');
+    await video('pedale', 'pedale-voce.it.json');
+    scrivi('✓ Fatto. Puoi chiudere la pagina e dirlo a Claude.', 'ok');
+  } catch (e) { scrivi('✗ ' + e.message); }
+  $('tutto').disabled = false;
+};
+if (location.port !== '8125') scrivi('✗ Questa pagina va aperta da http://localhost:8125/tools/video-demo/voce-openai.html, altrimenti la voce non si salva.');
+</script>
+</body>
+</html>

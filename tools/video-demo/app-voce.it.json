@@ -1,0 +1,18 @@
+[
+  ["titolo", "Questo è Sparkling Tones."],
+  ["connetti", "Un'app per comandare il tuo Spark dal telefono. Tocchi «Collega»… e in un attimo legge da sola gli otto preset salvati nell'ampli."],
+  ["libreria", "Sotto c'è la tua libreria, con tutti gli altri suoni. Tocchi il tasto play, e il preset va all'ampli e suona subito."],
+  ["scheda", "Ogni preset ha la sua scheda: lo suoni, lo regoli, lo duplichi, o lo scrivi in uno slot."],
+  ["editor", "«Regola» apre l'editor. Ogni pedale e ogni ampli è disegnato, e giri le manopole direttamente sul disegno, con l'ampli che cambia mentre suoni."],
+  ["modello", "Vuoi un altro overdrive? Tocchi due volte il blocco, e ne scegli un altro dall'elenco."],
+  ["salva", "Non si salva niente finché non lo decidi tu. Quando ti piace: «Salva»."],
+  ["live", "Poi c'è la vista live: pulsanti grandi, da premere mentre suoni. Quello che suona si accende."],
+  ["banco", "E ci sono i banchi: otto suoni scelti da te, nell'ordine che vuoi, presi da tutta la libreria."],
+  ["tieni", "Tieni premuto un pulsante per due secondi, e sei già nelle sue manopole."],
+  ["nuovoBanco", "Farne uno è un attimo. Tocchi «più banco», gli dai un nome, per esempio «Prove»… e riempi i posti uno alla volta: un tocco sul posto, un tocco sul preset. I banchi che crei non scrivono mai sull'ampli: i suoi otto preset restano come sono."],
+  ["cartello", "E poi c'è il pedale. Quattro footswitch per quattro suoni; il quinto passa dalla metà A alla metà B. Display e luci ti dicono cosa sta suonando."],
+  ["pedale", "I banchi li prepari qui, con calma, e li mandi al pedale via Bluetooth: basta tenere premuti insieme i due tasti banco del pedale."],
+  ["slotPedale", "Scegli quale banco, e in quale degli otto posti del pedale. Premi «Manda al pedale»… un paio di secondi, ed è dentro."],
+  ["inviato", "Lì resta, anche a pedale spento. Sul palco il pedale parla da solo con lo Spark: il telefono può restare a casa."],
+  ["finale", "Sparkling Tones: gratis, funziona anche offline, con lo Spark 2 e lo Spark NEO."]
+]
