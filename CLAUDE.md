@@ -383,7 +383,9 @@ scritte del firmware), `pedale-video.js` lo registra; voce da `pedale-voce.en.js
 (2:31) e «SparklingTones pedale demo Italiano» (1:57) sul Desktop; **voce di OpenAI** (`gpt-4o-mini-tts`, alloy,
 chiave dell'utente) fatta con `tools/video-demo/voce-openai.html` + `voce-openai.js` (porta 8125; aperta da altri
 indirizzi non salva); il finale dice «voce generata con IA» (regola di OpenAI). **Le voci locali italiane
-(Kokoro Nicola/Sara, Windows Elsa, Piper Paola/Riccardo) bocciate tutte dall'utente**.
+(Kokoro Nicola/Sara, Windows Elsa, Piper Paola/Riccardo) bocciate tutte dall'utente**. **Su YouTube** (pubblicati il 19 ottobre, guscio
+`v121`): app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow` (shorts), pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`; nel sito
+e in cima alle quattro guide («Guarda il video», in un'altra scheda).
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor
