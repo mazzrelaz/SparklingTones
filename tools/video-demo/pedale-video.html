@@ -166,6 +166,7 @@ function oled(x, sc) {
     if (sc.simbolo === 'rec') { x.arc(cx, cy, 8, 0, Math.PI * 2); x.fill(); }
     else if (sc.simbolo === 'play') { x.moveTo(cx - 6, cy - 9); x.lineTo(cx - 6, cy + 9); x.lineTo(cx + 9, cy); x.closePath(); x.fill(); }
     else if (sc.simbolo === 'stop') { x.fillRect(cx - 7, cy - 7, 14, 14); }
+    else if (sc.simbolo === 'dub') { x.arc(cx, cy, 9, 0, Math.PI * 2); x.stroke(); x.beginPath(); x.arc(cx, cy, 4, 0, Math.PI * 2); x.fill(); }
     else { x.arc(cx, cy, 8, 0, Math.PI * 2); x.stroke(); }
   }
 }
@@ -353,33 +354,90 @@ const SCENE = [
       if (t >= 10.8) st = stato(B.prove, 'A', 0, 'A');
       premi(st, t, 9.4, 1, 'tasto'); premi(st, t, 10.8, 0);
       return st; } },
-  { voce: 'looper', min: 15.0, testo: 'Hold the fifth switch: it’s a looper', fa: t => {
+  // Il looper in tre scene (19 ottobre 2026, chiesto dall'utente): le battute,
+  // fino a «libero»; il cambio di preset col loop che continua a suonare; la
+  // sovraincisione col suono nuovo. Il giro è quello del firmware: a loop
+  // vuoto i tasti banco scelgono 4, 8, 12, 16 battute o libero (gli avvisi in
+  // testa, «free length»); FS5 tenuto 3 s esce dal looper («preset mode») e il
+  // loop resta; FS1–4 cambiano preset; FS5 tenuto rientra («looper mode»), FS1
+  // sovraincide («Dub: close», ◉) e richiude.
+  { voce: 'looper', min: 17.0, testo: 'The looper: from 1 to 16 bars, or free length', fa: t => {
       const st = stato(B.prove, 'A', 0, 'A');
-      const dentro = tieni(st, t, 0.8, 3.8, 4);
-      if (!dentro) return st;
-      const bpm = 120, tempo = 60 / bpm;
+      if (!tieni(st, t, 0.8, 3.8, 4)) return st;
+      const tempo = 0.5;                                 // 120 bpm
       st.led = [null, null, null, null];
-      st.schermo = { tipo: 'looper', titolo: 'Looper  120 bpm', riga: -1, battute: 2, pieno: 0, simbolo: 'vuoto' };
+      const sc = st.schermo = { tipo: 'looper', titolo: 'Looper  120 bpm', riga: -1, battute: 4, pieno: 0, simbolo: 'vuoto' };
       st.ampli.testo = 'looper · empty';
-      premi(st, t, 5.0, 0);
-      if (t >= 5.0 && t < 5.0 + 4 * tempo) {           // il conteggio: un LED per tempo, da sinistra
-        const n = Math.floor((t - 5.0) / tempo);
-        st.schermo.titolo = `Count  ${n + 1}`;
-        for (let k = 0; k <= n; k++) st.led[k] = 'r';
-        st.tempo = (t - 5.0) % tempo < 0.12;
+      if (t < 5.0) sc.titolo = 'looper mode';
+      // i tasti banco: 8, 12, 16 battute, poi libero
+      const passi = [[5.0, 8, '8 bars'], [5.7, 12, '12 bars'], [6.4, 16, '16 bars'], [7.1, 0, 'free length']];
+      for (const [q, n, avviso] of passi) {
+        premi(st, t, q, 1, 'tasto');
+        if (t >= q) { sc.battute = n; sc.titolo = t < q + 1.4 ? avviso : n ? `Looper  120 bpm` : 'Looper  free'; }
       }
-      const r0 = 5.0 + 4 * tempo, r1 = r0 + 8 * tempo;  // due battute
+      // FS1: il conteggio, poi registra quanto vuoi, e FS1 chiude
+      const c0 = 9.0, r0 = c0 + 4 * tempo, r1 = r0 + 8 * tempo;
+      premi(st, t, c0, 0);
+      if (t >= c0 && t < r0) {
+        const n = Math.floor((t - c0) / tempo);
+        sc.titolo = `Count  ${n + 1}`;
+        for (let k = 0; k <= n; k++) st.led[k] = 'r';
+        st.tempo = (t - c0) % tempo < 0.12;
+      }
       if (t >= r0 && t < r1) {
-        st.schermo.riga = 0; st.schermo.righe = ['Rec: close', 'Undo', 'Play', 'Stop/Clear'];
-        st.schermo.simbolo = 'rec'; st.schermo.pieno = Math.floor((t - r0) / tempo + 1) / 8;
-        st.led[0] = 'r'; st.tempo = (t - r0) % tempo < 0.12; st.ampli.testo = 'looper · recording';
+        sc.titolo = 'Looper  free'; sc.riga = 0; sc.righe = ['Rec: close', 'Undo', 'Play', 'Stop/Clear'];
+        sc.simbolo = 'rec'; sc.pieno = Math.floor((t - r0) / tempo + 1) / 120;   // verso il massimo: 30 battute a 120
+        st.led[0] = 'r'; st.tempo = (t - r0) % tempo < 0.12; st.ampli.testo = 'looper · recording · A1 Funk Rhythm';
       }
       premi(st, t, r1, 0);
       if (t >= r1) {
-        st.schermo.riga = 2; st.schermo.righe = ['Overdub', 'Undo', 'Play', 'Stop/Clear'];
-        st.schermo.simbolo = 'play'; st.schermo.pieno = (Math.floor((t - r1) / tempo) % 8 + 1) / 8;
-        st.led[2] = 'g'; st.tempo = (t - r1) % tempo < 0.12; st.ampli.testo = 'looper · playing';
+        sc.titolo = 'Looper  free'; sc.riga = 2; sc.righe = ['Overdub', 'Undo', 'Play', 'Stop/Clear'];
+        sc.simbolo = 'play'; sc.pieno = ((t - r1) % 4) / 4;
+        st.led[2] = 'g'; st.tempo = (t - r1) % tempo < 0.12; st.ampli.testo = 'loop playing · A1 Funk Rhythm';
       }
+      return st; } },
+  { voce: 'cambio', min: 15.0, testo: 'Change preset while the loop keeps playing', fa: t => {
+      // si parte nel looper, col loop che suona
+      const looperSuona = (st, giro) => {
+        st.led = [null, null, null, null]; st.led[2] = 'g';
+        st.schermo = { tipo: 'looper', titolo: 'Looper  free', riga: 2, righe: ['Overdub', 'Undo', 'Play', 'Stop/Clear'],
+                       battute: 0, pieno: (giro % 4) / 4, simbolo: 'play' };
+        st.tempo = giro % 0.5 < 0.12;
+      };
+      let st = stato(B.prove, 'A', 0, 'A');
+      if (t < 3.8) {
+        looperSuona(st, t + 1.0);
+        st.ampli.testo = 'loop playing · A1 Funk Rhythm';
+        tieni(st, t, 0.8, 3.8, 4);
+        return st;
+      }
+      // fuori dal looper: i preset, e il loop va avanti
+      const suona = t >= 6.5 ? 2 : 0;
+      st = stato(B.prove, 'A', suona, 'A');
+      if (t < 5.3) st.schermo.titolo = 'preset mode';
+      st.ampli.testo = `loop playing · A${suona + 1} ${PROVE[suona]}`;
+      premi(st, t, 6.5, 2);
+      if (t < 12.5) { tieni(st, t, 9.5, 12.5, 4); return st; }
+      // di nuovo nel looper, col suono nuovo
+      looperSuona(st, t + 1.0);
+      if (t < 13.9) st.schermo.titolo = 'looper mode';
+      st.ampli.testo = 'loop playing · A3 Lead Hendrix';
+      return st; } },
+  { voce: 'overdub', min: 9.0, testo: 'Overdub the second part with the new sound', fa: t => {
+      const st = stato(B.prove, 'A', 2, 'A');
+      st.led = [null, null, null, null];
+      const sc = st.schermo = { tipo: 'looper', titolo: 'Looper  free', riga: 2, righe: ['Overdub', 'Undo', 'Play', 'Stop/Clear'],
+                                battute: 0, pieno: ((t + 2.5) % 4) / 4, simbolo: 'play' };
+      st.tempo = (t + 2.5) % 0.5 < 0.12;
+      st.led[2] = 'g'; st.ampli.testo = 'loop playing · A3 Lead Hendrix';
+      premi(st, t, 1.0, 0);
+      if (t >= 1.0 && t < 6.2) {
+        sc.riga = 0; sc.righe = ['Dub: close', 'Undo', 'Play', 'Stop/Clear']; sc.simbolo = 'dub';
+        st.led = [null, null, null, null]; st.led[0] = 'r';
+        st.ampli.testo = 'overdub · A3 Lead Hendrix on top of A1 Funk Rhythm';
+      }
+      premi(st, t, 6.2, 0);
+      if (t >= 6.2) st.ampli.testo = 'loop playing · rhythm + lead';
       return st; } },
   { voce: 'fine', min: 6.0, testo: null, cartello: ['Build it yourself', 'an ESP32, a display, five footswitches',
       'a battery inside, charged over USB-C', 'the guide is free, step by step'], fa: t => {
