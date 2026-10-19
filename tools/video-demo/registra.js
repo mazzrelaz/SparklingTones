@@ -139,12 +139,13 @@ const TESTI = {
     libreria: 'Sotto, la tua libreria: tutti gli altri suoni',
     suona: '▶ lo manda all\'ampli, e suona subito',
     scheda: 'Ogni preset: nome, famiglia, categorie, note',
-    editor: 'L\'editor: la catena effetti, blocco per blocco',
-    manopole: 'Giri le manopole e l\'ampli cambia mentre suoni',
-    modello: 'Cambi pedale o ampli da un elenco',
+    editor: 'L\'editor: ogni pedale e ogni ampli, disegnato',
+    manopole: 'Giri le manopole sul disegno e l\'ampli cambia mentre suoni',
+    modello: 'Due tocchi su un blocco: cambi pedale o ampli',
     salva: 'Salvi in libreria solo quando ti piace',
     live: 'La vista live: pulsantoni da toccare suonando',
     banco: 'I banchi: otto suoni a portata di piede',
+    tieni: 'Tieni premuto due secondi: sei nelle sue manopole',
     nuovoBanco: 'Un banco nuovo: gli dai un nome…',
     riempi: '…e ci metti i suoni della libreria',
     cartello: ['E poi c’è il pedale', 'quattro footswitch, quattro suoni',
@@ -165,12 +166,13 @@ const TESTI = {
     libreria: 'Below, your library: all your other sounds',
     suona: '▶ sends it to the amp, and it plays at once',
     scheda: 'Every preset: name, family, categories, notes',
-    editor: 'The editor: the effects chain, block by block',
-    manopole: 'Turn a knob and the amp changes as you play',
-    modello: 'Swap a pedal or an amp from a list',
+    editor: 'The editor: every pedal and every amp, drawn',
+    manopole: 'Turn the knobs on the drawing, the amp follows',
+    modello: 'Two taps on a block: swap the pedal or the amp',
     salva: 'Save to the library only when you like it',
     live: 'Live view: big buttons to hit while you play',
     banco: 'Banks: eight sounds at your feet',
+    tieni: 'Hold a button two seconds: straight into its knobs',
     nuovoBanco: 'A new bank: give it a name…',
     riempi: '…and fill it from your library',
     cartello: ['And then there’s the pedal', 'four footswitches, four sounds',
@@ -325,6 +327,21 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
       await cdp.js('__dito.premi(false)');
       await dorme(attesa);
     }
+    // Due tocchi ravvicinati: l'editor apre la scelta del modello solo se il
+    // secondo arriva entro 400 ms (DOPPIO_TOCCO_MS).
+    async function doppioTocco(p, attesa = 600) {
+      await muovi(p.x, p.y);
+      await dorme(140);
+      for (let i = 0; i < 2; i++) {
+        await cdp.js('__dito.premi(true)');
+        await mouse('mousePressed', p.x, p.y, { clickCount: i + 1, buttons: 1 });
+        await dorme(70);
+        await mouse('mouseReleased', p.x, p.y, { clickCount: i + 1 });
+        await cdp.js('__dito.premi(false)');
+        if (!i) await dorme(110);
+      }
+      await dorme(attesa);
+    }
     async function trascina(p, dy, ms = 900) {
       await muovi(p.x, p.y);
       await dorme(150);
@@ -379,45 +396,48 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await dorme(1600);
     await dici('letti');
     // La didascalia resta finché gli otto slot non si sono riempiti, e un po' oltre.
-    for (let i = 0; i < 100 && await cdp.js("[...document.querySelectorAll('.slotcard')].some(e => e.textContent.includes(tr('non ancora letto')))"); i++) {
+    // L'interfaccia del 14-17 ottobre 2026: barra in basso, scheda che sale dal
+    // basso, editor coi disegni dei blocchi (manopole `.manopola-img`, modello
+    // col doppio tocco sul tassello), pulsantoni col circuito e pressione lunga.
+    for (let i = 0; i < 100 && await cdp.js("[...document.querySelectorAll('.slotcard')].some(e => e.textContent.includes(tr('non letto')))"); i++) {
       await dorme(100);
     }
     await dorme(1800);
 
     await dici('libreria');
-    await scorri(560, 1100);
+    await scorri(420, 1100);
     await dorme(1200);
     await dici('suona');
     await tocca(await centro(`[...document.querySelectorAll('#listaLibreria .row')].find(r => r.textContent.includes('Blues Breaker')).querySelector('.via')`), 2400);
 
-    await scorri(-560, 900);
+    await scorri(-(await cdp.js('scrollY')), 900);
     await dici('scheda');
-    await tocca(await centro("document.querySelector('.slotcard')"), 600);
-    await scorri(330, 800);
-    await dorme(1800);
+    await tocca(await centro("document.querySelector('.slotcard')"), 2600);
 
     await dici('editor');
-    await tocca(await bottone('Regola'), 2200);
+    await tocca(await centro(`[...document.querySelectorAll('#foglioPreset button')].find(b => b.textContent.trim() === ${JSON.stringify(await tradotto('Regola'))})`), 2400);
     await dici('manopole');
-    await trascina(await centro("document.querySelectorAll('.pomello')[0]"), -70, 900);
+    await trascina(await centro("document.querySelectorAll('.manopola-img')[0]"), -70, 900);
     await dorme(300);
-    await trascina(await centro("document.querySelectorAll('.pomello')[3]"), 55, 800);
+    await trascina(await centro("document.querySelectorAll('.manopola-img')[3]"), 55, 800);
     await dorme(900);
 
     await dici('modello');
-    await tocca(await conTesto('button.tassello', await tradotto('Drive')), 700);
-    await tocca(await centro("document.querySelector('button.nome-effetto')"), 1100);
-    await tocca(await conTesto('.elenco-voce', 'Tube Drive'), 1400);
-    await trascina(await centro("document.querySelectorAll('.pomello')[0]"), -50, 700);
+    const drive = await conTesto('.tassello', await tradotto('Drive'));
+    await doppioTocco(drive, 1300);
+    // l'elenco si apre sul modello di adesso: Tube Drive sta più su, mezzo coperto
+    await cdp.js("[...document.querySelectorAll('.elenco-voce')].find(e => e.textContent.includes('Tube Drive')).scrollIntoView({ block: 'center', behavior: 'smooth' })");
+    await dorme(700);
+    await tocca(await conTesto('.elenco-voce', 'Tube Drive'), 1500);
+    await trascina(await centro("document.querySelectorAll('.manopola-img')[0]"), -50, 700);
     await dorme(700);
 
     await dici('salva');
     await tocca(await centro("document.getElementById('btnSalvaModifiche')"), 1500);
     await tocca(await centro("document.querySelector('[data-chiudi=pannelloEditor]')"), 1000);
 
-    await scorri(-(await cdp.js('scrollY')), 700);
     await dici('live');
-    await tocca(await centro("document.getElementById('btnVista')"), 1000);
+    await tocca(await centro("document.getElementById('tabLive')"), 1000);
     for (const s of ['A2', 'B1']) {
       await tocca(await conTesto('.pad', s), 1000);
     }
@@ -425,6 +445,22 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await tocca(await conTesto('#banchi .banco', T.bancoPronto), 1000);
     await tocca(await conTesto('.pad', 'Blues'), 1700);
     await tocca(await conTesto('.pad', 'Lead'), 1700);
+
+    // La pressione lunga: due secondi col dito fermo, la barretta si riempie e
+    // si apre l'editor di quel preset; poi Fatto, e si è di nuovo in Live.
+    await dici('tieni');
+    const funk = await conTesto('.pad', 'Funk');
+    await muovi(funk.x, funk.y);
+    await dorme(140);
+    await cdp.js('__dito.premi(true)');
+    await mouse('mousePressed', funk.x, funk.y, { clickCount: 1, buttons: 1 });
+    await dorme(2400);
+    await mouse('mouseReleased', funk.x, funk.y, { clickCount: 1 });
+    await cdp.js('__dito.premi(false)');
+    await dorme(1800);
+    // niente manopole qui: «Fatto» chiederebbe di salvare, e la scena si allunga
+    await dorme(600);
+    await tocca(await centro("document.querySelector('[data-chiudi=pannelloEditor]')"), 900);
 
     await dici('nuovoBanco');
     await tocca(await conTesto('#banchi .banco', '＋'), 900);
@@ -437,15 +473,13 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
       await tocca(await centro(`document.querySelectorAll('.pad')[${i}]`), 650);
       await tocca(await conTesto('#elencoScegli .voce', nome), 700);
     }
-    await tocca(await centro("document.getElementById('btnMenu')"), 500);
     await tocca(await centro("document.getElementById('btnModifica')"), 800);
 
     await cdp.js('__dito.nascondi()');
     await dici(null);
     await cartello(T.cartello, 12000, 'pedale');
     await dici('pedale');
-    await tocca(await centro("document.getElementById('btnMenu')"), 600);
-    await tocca(await centro("document.getElementById('btnPedale')"), 1300);
+    await tocca(await centro("document.getElementById('tabPedale')"), 1300);
     await tocca(await centro("document.getElementById('btnPedaleConnetti')"), 2600);
     await dici('slotPedale');
     await tocca(await centro("document.querySelectorAll('#pannelloPedale .tendina-finta')[1]"), 900);

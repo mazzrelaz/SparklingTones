@@ -375,7 +375,9 @@ disegno a mano dei pulsantoni «non è così che si vede», dice l'utente. Per r
 schermata dal riquadro, poi `ritaglia` con Edge headless (canvas → WebP) come `tools/togli-sfondo`.
 **«Genera con l'IA» non si nomina**, né in guida né sul sito: l'utente pensa di togliere la funzione.
 `lingua-en.js` allineato (81 frasi nuove, 47 tolte): restano in italiano solo le 73 dell'IA. Il
-video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio.
+video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio. **Video demo inglese nuovo** (19 ottobre, 2:27,
+voce sintetica Kokoro): «SparklingTones demo English 2026-10-19.mp4» sul Desktop; copione rifatto in
+`tools/video-demo/registra.js` (doppio tocco entro 400 ms, pressione lunga), Kokoro nello scratchpad.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor

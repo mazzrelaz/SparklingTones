@@ -25,27 +25,29 @@ const { KokoroTTS } = await import(pathToFileURL(richiedi.resolve('kokoro-js')).
 const PEZZI = [
   ['titolo', 'This is Sparkling Tones.'],
   ['connetti', 'An app to control your Spark from your phone. Tap "Connect"… and in a moment it reads the eight presets stored in the amp, all by itself.'],
-  ['libreria', 'Below is your library, with all your other sounds. Tap the red triangle, and the preset goes to the amp and plays straight away.'],
-  ['scheda', 'Every preset has its own card: name, sound family, categories and notes.'],
-  ['editor', '"Tweak" opens the editor: the whole effects chain, from noise gate to reverb. Turn a knob… and the amp changes while you play.'],
-  ['modello', 'Want a different overdrive, or another amp? Pick it from a list, and next to it you see which pedal or amp it\'s modelled on.'],
+  ['libreria', 'Below is your library, with all your other sounds. Tap the play button, and the preset goes to the amp and plays straight away.'],
+  ['scheda', 'Every preset has its own card: play it, tweak it, copy it, or write it into a slot.'],
+  ['editor', '"Tweak" opens the editor. Every pedal and every amp is drawn, and you turn the knobs right on the drawing… while the amp changes as you play.'],
+  ['modello', 'Want a different overdrive? Tap the block twice, and pick another one from the list.'],
   ['salva', 'Nothing is saved until you decide. When you like it: "Save".'],
-  ['live', 'Then there\'s the live view: big buttons you can hit while you play. The sound changes instantly.'],
+  ['live', 'Then there\'s the live view: big buttons you can hit while you play. The one that\'s playing lights up.'],
   ['banco', 'And there are banks: eight sounds of your choice, in any order, taken from your whole library.'],
+  ['tieni', 'Hold a button for two seconds, and you\'re straight into its knobs.'],
   ['nuovoBanco', 'Making one takes a moment. Tap "plus bank", give it a name, say "Rehearsal"… and fill the spots one at a time: one tap on the spot, one tap on the preset. The banks you make never write to the amp: its eight presets stay as they are.'],
   ['cartello', 'And then there\'s the pedal. Four footswitches for four sounds; the fifth flips between half A and half B. The display and the LEDs tell you what\'s playing.'],
   ['pedale', 'You build your banks here, at your own pace, and send them to the pedal over Bluetooth: just hold the pedal\'s two bank buttons together.'],
-  ['slotPedale', 'Choose which bank, and which of the pedal\'s eight spots. Press "Send"… a couple of seconds, and it\'s in.'],
+  ['slotPedale', 'Choose which bank, and which of the pedal\'s eight spots. Press "Send to the pedal"… a couple of seconds, and it\'s in.'],
   ['inviato', 'It stays there, even with the pedal switched off. On stage the pedal talks to the Spark on its own: your phone can stay at home.'],
   ['finale', 'Sparkling Tones: free, works offline, with the Spark 2 and the Spark NEO.'],
 ];
 
 // Quanto dura almeno ogni scena senza voce, misurato sulla registrazione
-// inglese del 5 ottobre 2026 (dalla didascalia alla successiva): la voce può
-// solo allungarla. Il cartello non ha un minimo suo: dura quanto la voce.
-const MINIMO = { connetti: 8.7, libreria: 9.4, scheda: 5.5, editor: 10.3, modello: 10.1,
-                 salva: 6.6, live: 7.5, banco: 8.0, nuovoBanco: 19.5, cartello: 6.0,
-                 pedale: 8.1, slotPedale: 7.8, inviato: 5.4, finale: 4.5 };
+// inglese del 19 ottobre 2026, l'interfaccia nuova (dalla didascalia con la voce
+// alla successiva): la voce può solo allungarla. Il cartello non ha un minimo
+// suo: dura quanto la voce.
+const MINIMO = { connetti: 8.5, libreria: 9.2, scheda: 3.8, editor: 10.6, modello: 9.7,
+                 salva: 5.0, live: 6.6, banco: 8.0, tieni: 10.4, nuovoBanco: 18.9, cartello: 6.0,
+                 pedale: 6.4, slotPedale: 8.0, inviato: 5.4, finale: 4.5 };
 const PAUSA = 0.7;         // fra la fine di un pezzo e l'inizio del successivo
 const MARGINE = 0.6;       // in più sul minimo della scena, perché le scene non sono al decimo
 
