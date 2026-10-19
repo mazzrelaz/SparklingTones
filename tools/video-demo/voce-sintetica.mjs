@@ -10,19 +10,26 @@
 //
 // Scrive nella cartella di uscita voce.wav e voce.json; poi
 //   node tools/video-demo/registra.js <cartella di uscita> en --voce voce.json
+//
+// Con `--testo <file.json>` i pezzi vengono da lì ([[chiave, testo], …]) invece
+// che dal copione dell'app qui sotto: è così che si fa la voce del video del
+// pedale (pedale-voce.en.json, pedale-video.js).
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
-const [, , dirKokoro, uscita, voce = 'am_michael'] = process.argv;
+const argomenti = process.argv.slice(2);
+const iTesto = argomenti.indexOf('--testo');
+const fileTesto = iTesto >= 0 ? argomenti.splice(iTesto, 2)[1] : null;
+const [dirKokoro, uscita, voce = 'am_michael'] = argomenti;
 const richiedi = createRequire(path.join(path.resolve(dirKokoro), 'package.json'));
 const { KokoroTTS } = await import(pathToFileURL(richiedi.resolve('kokoro-js')).href);
 
 // Il testo di testo-voce.en.md, scritto per la pronuncia: «Sparkling Tones»
 // staccato, le virgolette dritte.
-const PEZZI = [
+const PEZZI = fileTesto ? JSON.parse(fs.readFileSync(fileTesto, 'utf8')) : [
   ['titolo', 'This is Sparkling Tones.'],
   ['connetti', 'An app to control your Spark from your phone. Tap "Connect"… and in a moment it reads the eight presets stored in the amp, all by itself.'],
   ['libreria', 'Below is your library, with all your other sounds. Tap the play button, and the preset goes to the amp and plays straight away.'],

@@ -377,7 +377,9 @@ schermata dal riquadro, poi `ritaglia` con Edge headless (canvas → WebP) come 
 `lingua-en.js` allineato (81 frasi nuove, 47 tolte): restano in italiano solo le 73 dell'IA. Il
 video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio. **Video demo inglese nuovo** (19 ottobre, 2:27,
 voce sintetica Kokoro): «SparklingTones demo English 2026-10-19.mp4» sul Desktop; copione rifatto in
-`tools/video-demo/registra.js` (doppio tocco entro 400 ms, pressione lunga), Kokoro nello scratchpad.
+`tools/video-demo/registra.js` (doppio tocco entro 400 ms, pressione lunga), Kokoro nello scratchpad. **Video del pedale** (1:19, orizzontale): «SparklingTones pedal demo English
+2026-10-19.mp4», pedale disegnato da `tools/video-demo/pedale-video.html` (forma dalle foto,
+scritte del firmware), `pedale-video.js` lo registra; voce da `pedale-voce.en.json` (`--testo`).
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor

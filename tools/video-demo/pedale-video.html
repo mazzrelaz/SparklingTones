@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Video del pedale</title>
+<style>
+  @font-face { font-family:'Inter'; src:url('../../fonts/inter-latin.woff2') format('woff2'); font-weight:400 700; }
+  @font-face { font-family:'Space Grotesk'; src:url('../../fonts/space-grotesk-latin.woff2') format('woff2'); font-weight:500 700; }
+  body { margin:0; background:#000; }
+  canvas { width:960px; height:540px; }
+</style>
+</head>
+<body>
+<canvas id="tela" width="1920" height="1080"></canvas>
+<script>
+/* Il video dimostrativo del pedale (19 ottobre 2026, chiesto dall'utente:
+   «col pedale disegnato, la forma vera la conosci»).
+
+   Niente registrazione dello schermo: il pedale lo disegna questa pagina, sul
+   canvas, fotogramma per fotogramma (k/30 di secondo), e lo codifica con
+   WebCodecs come monta.html; pedale-video.js scrive l'MP4 con scrivi-mp4.js.
+
+   La forma è quella del prototipo nelle foto di foto/pedale/ (9 ottobre):
+   pannello di rovere scuro, sponde di mogano, display OLED azzurro al centro,
+   LED del tempo a sinistra del display, i due tasti banco in acciaio a destra,
+   quattro LED con la ghiera sopra FS1–FS4, cinque footswitch cromati, il quinto
+   staccato a destra. Le misure sono prese dalla foto vista da sopra
+   (banco-a.jpg) e riportate su un pannello di 1400 × 440. Le scritte del
+   display sono quelle inglesi del firmware (TESTO(it, en) in prova-ble).
+
+   Ogni scena dura quanto la sua animazione o quanto la sua voce, se è più
+   lunga (voce.json di voce-sintetica.mjs, coi pezzi): così la voce non resta
+   mai indietro. */
+'use strict';
+
+const L = 1920, H = 1080, FPS = 30;
+const tela = document.getElementById('tela');
+const g = tela.getContext('2d');
+const logo = new Image(); logo.src = '../../icons/icon-192.png';
+const telefono = new Image(); telefono.src = '/__uscita/telefono.jpg';
+
+const C = '#6fd6ff';                       // l'azzurro del display
+const ROSSO = '#ff3b47', VERDE = '#3ee06a';
+
+/* ------------------------------------------------------------ le misure */
+
+const P = { w: 1400, h: 440, sponda: 22 };
+const FS = [{ x: 74, y: 338 }, { x: 362, y: 338 }, { x: 655, y: 338 }, { x: 935, y: 338 }, { x: 1308, y: 338 }];
+const LEDP = [{ x: 104, y: 262 }, { x: 376, y: 262 }, { x: 655, y: 262 }, { x: 952, y: 262 }];
+const TEMPO = { x: 490, y: 122 };
+const TASTI = [{ x: 960, y: 122 }, { x: 1112, y: 122 }];
+const OLED = { x: 557, y: 58, w: 256, h: 128 };
+
+/* --------------------------------------------- il legno, disegnato una volta */
+
+function legno() {
+  const c = document.createElement('canvas'); c.width = P.w; c.height = P.h;
+  const x = c.getContext('2d');
+  // le sponde di mogano
+  const m = x.createLinearGradient(0, 0, 0, P.h);
+  m.addColorStop(0, '#8a4424'); m.addColorStop(0.5, '#a5562e'); m.addColorStop(1, '#7a3a1e');
+  x.fillStyle = m; tondo(x, 0, 0, P.w, P.h, 20); x.fill();
+  // il pannello di rovere, scuro, con le venature
+  const s = P.sponda;
+  x.save(); tondo(x, s, s, P.w - 2 * s, P.h - 2 * s, 8); x.clip();
+  x.fillStyle = '#2a221c'; x.fillRect(0, 0, P.w, P.h);
+  let seme = 7;
+  const caso = () => (seme = (seme * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 260; i++) {
+    const y0 = caso() * P.h, amp = 2 + caso() * 9, onda = 0.002 + caso() * 0.006, fase = caso() * 6;
+    x.strokeStyle = caso() < 0.5 ? `rgba(0,0,0,${0.15 + caso() * 0.3})` : `rgba(120,95,70,${0.06 + caso() * 0.12})`;
+    x.lineWidth = 0.6 + caso() * 1.6;
+    x.beginPath();
+    for (let px = 0; px <= P.w; px += 12) {
+      const py = y0 + Math.sin(px * onda + fase) * amp + Math.sin(px * onda * 3.1) * amp * 0.3;
+      px ? x.lineTo(px, py) : x.moveTo(px, py);
+    }
+    x.stroke();
+  }
+  // le "fiamme" del rovere
+  for (let i = 0; i < 14; i++) {
+    const cx = caso() * P.w, cy = caso() * P.h;
+    x.strokeStyle = 'rgba(130,105,80,0.10)'; x.lineWidth = 1.2;
+    for (let k = 0; k < 6; k++) { x.beginPath(); x.ellipse(cx, cy, 40 + k * 14, 8 + k * 4, 0, 0, Math.PI * 2); x.stroke(); }
+  }
+  x.restore();
+  // un filo di luce sul bordo interno
+  x.strokeStyle = 'rgba(0,0,0,0.6)'; x.lineWidth = 3; tondo(x, s, s, P.w - 2 * s, P.h - 2 * s, 8); x.stroke();
+  x.strokeStyle = 'rgba(255,200,160,0.18)'; x.lineWidth = 2; tondo(x, 2, 2, P.w - 4, P.h - 4, 19); x.stroke();
+  return c;
+}
+function tondo(x, a, b, w, h, r) {
+  x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r);
+  x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath();
+}
+let LEGNO = null;
+
+/* -------------------------------------------------------------- il display */
+
+function oled(x, sc) {
+  // fondo nero, e il vetro un po' lucido sopra
+  x.fillStyle = '#020304'; x.fillRect(0, 0, 256, 128);
+  x.fillStyle = C; x.strokeStyle = C; x.textBaseline = 'alphabetic';
+  const titolo = (t) => { x.font = 'bold 16px Arial'; x.fillStyle = C; x.fillText(t, 2, 17); };
+  const testa = (pieno, batteria = true) => {
+    if (batteria) {
+      x.lineWidth = 2; x.strokeRect(201, 5, 21, 11); x.fillRect(222, 8, 3, 5);
+      for (const bx of [204, 209, 214]) x.fillRect(bx, 8, 4, 5);
+    }
+    x.lineWidth = 2;
+    if (pieno) { x.fillRect(236, 0, 20, 20); x.fillStyle = '#000'; x.font = 'bold 15px Arial'; x.fillText('S', 241, 16); x.fillStyle = C; }
+    else x.strokeRect(237, 1, 18, 18);
+    x.fillRect(0, 24, 256, 2);
+  };
+  if (sc.tipo === 'avvio') {
+    x.font = 'bold 26px Arial'; x.textAlign = 'center';
+    x.fillText('SparklingTones', 128, 62);
+    x.font = '15px Arial'; x.fillText('pedal  v2.23', 128, 92);
+    x.textAlign = 'left';
+    return;
+  }
+  if (sc.tipo === 'cerca') {
+    titolo('Amp Preset'); testa(false, false);
+    x.fillRect(0, 34, 124, 36); x.fillStyle = '#000'; x.font = 'bold 19px Arial'; x.textAlign = 'center';
+    x.fillText('Spark 2', 62, 59); x.fillStyle = C; x.lineWidth = 2; x.strokeRect(134, 35, 120, 34);
+    x.fillText('NEO', 194, 59);
+    x.font = '18px Arial'; x.fillText('searching', 110, 104); x.textAlign = 'left';
+    for (let k = 0; k < sc.puntini; k++) x.fillRect(176 + k * 12, 100, 4, 4);
+    return;
+  }
+  if (sc.tipo === 'banco') {
+    titolo(sc.titolo); testa(sc.spark !== false);
+    for (let r = 0; r < 4; r++) {
+      const y = 50 + r * 24, su = r === sc.riga;
+      if (su) { x.fillStyle = C; x.fillRect(0, y - 20, 256, 24); }
+      x.fillStyle = su ? '#000' : C;
+      x.font = 'bold 19px Consolas, monospace'; x.fillText(sc.meta + (r + 1), 2, y);
+      x.font = '19px Consolas, monospace'; x.fillText(' ' + taglia(x, sc.nomi[r], 222), 24, y);
+    }
+    return;
+  }
+  if (sc.tipo === 'looper') {
+    titolo(sc.titolo); testa(true);
+    const righe = sc.righe || ['Record', 'Undo', 'Play', 'Stop/Clear'];
+    for (let r = 0; r < 4; r++) {
+      const y = 50 + r * 24, su = r === sc.riga;
+      if (su) { x.fillStyle = C; x.fillRect(0, y - 20, 168, 24); }
+      x.fillStyle = su ? '#000' : C;
+      x.font = 'bold 19px Arial'; x.fillText(String(r + 1), 2, y);
+      x.font = '19px Arial'; x.fillText(righe[r], 22, y);
+    }
+    // l'anello: uno spicchio per battuta, si riempie un tempo alla volta
+    const cx = 214, cy = 78, R = 36, r2 = 22, n = sc.battute;
+    x.fillStyle = C; x.strokeStyle = C; x.lineWidth = 2;
+    x.beginPath(); x.arc(cx, cy, R, 0, Math.PI * 2); x.stroke();
+    x.beginPath(); x.arc(cx, cy, r2, 0, Math.PI * 2); x.stroke();
+    for (let k = 0; k < n; k++) {
+      const a = -Math.PI / 2 + k * 2 * Math.PI / n;
+      x.beginPath(); x.moveTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2); x.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); x.stroke();
+    }
+    if (sc.pieno > 0) {
+      const a0 = -Math.PI / 2, a1 = a0 + sc.pieno * 2 * Math.PI;
+      x.beginPath(); x.arc(cx, cy, R, a0, a1); x.arc(cx, cy, r2, a1, a0, true); x.closePath(); x.fill();
+    }
+    x.beginPath();
+    if (sc.simbolo === 'rec') { x.arc(cx, cy, 8, 0, Math.PI * 2); x.fill(); }
+    else if (sc.simbolo === 'play') { x.moveTo(cx - 6, cy - 9); x.lineTo(cx - 6, cy + 9); x.lineTo(cx + 9, cy); x.closePath(); x.fill(); }
+    else if (sc.simbolo === 'stop') { x.fillRect(cx - 7, cy - 7, 14, 14); }
+    else { x.arc(cx, cy, 8, 0, Math.PI * 2); x.stroke(); }
+  }
+}
+function taglia(x, t, max) {
+  if (x.measureText(t).width <= max) return t;
+  while (t.length > 1 && x.measureText(t + '…').width > max) t = t.slice(0, -1);
+  return t;
+}
+
+/* ---------------------------------------------------------------- il pedale */
+
+function pedale(st) {
+  g.drawImage(LEGNO, 0, 0);
+  // la finestra del display: scavata nel legno
+  g.save();
+  g.fillStyle = '#0b0807'; tondo(g, OLED.x - 16, OLED.y - 14, OLED.w + 32, OLED.h + 28, 14); g.fill();
+  g.strokeStyle = 'rgba(0,0,0,.8)'; g.lineWidth = 4; g.stroke();
+  g.strokeStyle = 'rgba(150,120,90,.25)'; g.lineWidth = 1.5; tondo(g, OLED.x - 17, OLED.y - 15, OLED.w + 34, OLED.h + 30, 15); g.stroke();
+  g.translate(OLED.x, OLED.y);
+  g.beginPath(); g.rect(0, 0, OLED.w, OLED.h); g.clip();
+  oled(g, st.schermo);
+  // il bagliore dei pixel e il riflesso del vetro
+  const v = g.createLinearGradient(0, 0, OLED.w, OLED.h);
+  v.addColorStop(0, 'rgba(255,255,255,0.06)'); v.addColorStop(0.4, 'rgba(255,255,255,0)');
+  g.fillStyle = v; g.fillRect(0, 0, OLED.w, OLED.h);
+  g.restore();
+
+  // il LED del tempo: una cupoletta scura che si accende rossa
+  cupola(TEMPO.x, TEMPO.y, 9, st.tempo ? ROSSO : null, '#1a1a1c');
+  // i tasti banco, acciaio
+  TASTI.forEach((p, i) => tasto(p.x, p.y, 40, st.tasti && st.tasti[i]));
+  // i LED con la ghiera cromata
+  LEDP.forEach((p, i) => cupola(p.x, p.y, 13, st.led[i] === 'r' ? ROSSO : st.led[i] === 'g' ? VERDE : null, '#2c2a28', true));
+  // i footswitch
+  FS.forEach((p, i) => footswitch(p.x, p.y, st.piede && st.piede[i]));
+  // la pressione: un'onda che si allarga
+  for (const o of st.onde || []) {
+    const a = Math.max(0, 1 - o.k);
+    g.save(); g.strokeStyle = `rgba(255,255,255,${0.55 * a})`; g.lineWidth = 4;
+    g.beginPath(); g.arc(o.x, o.y, o.r0 + o.k * 70, 0, Math.PI * 2); g.stroke(); g.restore();
+  }
+  // la pressione lunga: un anello che si riempie attorno al pulsante
+  for (const t of st.tenuti || []) {
+    g.save(); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 6; g.lineCap = 'round';
+    g.beginPath(); g.arc(t.x, t.y, t.r, -Math.PI / 2, -Math.PI / 2 + Math.min(1, t.k) * Math.PI * 2); g.stroke(); g.restore();
+  }
+}
+function cupola(x, y, r, colore, spento, ghiera) {
+  g.save();
+  if (ghiera) {
+    const gh = g.createRadialGradient(x - r * .4, y - r * .5, 1, x, y, r + 7);
+    gh.addColorStop(0, '#f4f5f7'); gh.addColorStop(0.6, '#9da2aa'); gh.addColorStop(1, '#4a4d52');
+    g.fillStyle = gh; g.beginPath(); g.arc(x, y, r + 6, 0, Math.PI * 2); g.fill();
+  }
+  if (colore) {
+    g.shadowColor = colore; g.shadowBlur = 34;
+    const l = g.createRadialGradient(x - r * .3, y - r * .3, 1, x, y, r);
+    l.addColorStop(0, '#ffffff'); l.addColorStop(0.35, colore); l.addColorStop(1, colore);
+    g.fillStyle = l;
+  } else {
+    const l = g.createRadialGradient(x - r * .3, y - r * .4, 1, x, y, r);
+    l.addColorStop(0, '#6b6862'); l.addColorStop(1, spento);
+    g.fillStyle = l;
+  }
+  g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  if (colore) { g.shadowBlur = 70; g.globalAlpha = .5; g.fill(); }
+  g.restore();
+}
+function tasto(x, y, r, giu) {
+  g.save();
+  const a = g.createRadialGradient(x - r * .4, y - r * .5, 2, x, y, r);
+  a.addColorStop(0, '#ffffff'); a.addColorStop(0.5, '#c4c8ce'); a.addColorStop(1, '#6d7178');
+  g.fillStyle = a; g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 12; g.shadowOffsetY = 4;
+  g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  g.shadowColor = 'transparent';
+  const b = g.createRadialGradient(x + r * .2, y + r * .3, 2, x, y, r * .68);
+  b.addColorStop(0, giu ? '#8d9198' : '#dfe2e6'); b.addColorStop(1, giu ? '#5b5f66' : '#a3a7ae');
+  g.fillStyle = b; g.beginPath(); g.arc(x, y + (giu ? 2 : 0), r * .68, 0, Math.PI * 2); g.fill();
+  g.restore();
+}
+function footswitch(x, y, giu) {
+  g.save();
+  // il dado esagonale
+  g.shadowColor = 'rgba(0,0,0,.75)'; g.shadowBlur = 14; g.shadowOffsetY = 6;
+  const d = g.createLinearGradient(x - 36, y - 36, x + 36, y + 36);
+  d.addColorStop(0, '#f2f3f5'); d.addColorStop(0.5, '#8e9299'); d.addColorStop(1, '#4b4e53');
+  g.fillStyle = d; g.beginPath();
+  for (let k = 0; k < 6; k++) { const a = Math.PI / 6 + k * Math.PI / 3; g.lineTo(x + Math.cos(a) * 36, y + Math.sin(a) * 36); }
+  g.closePath(); g.fill();
+  g.shadowColor = 'transparent';
+  // la ghiera
+  const gh = g.createRadialGradient(x - 8, y - 10, 3, x, y, 28);
+  gh.addColorStop(0, '#ffffff'); gh.addColorStop(0.6, '#a7abb2'); gh.addColorStop(1, '#55585e');
+  g.fillStyle = gh; g.beginPath(); g.arc(x, y, 27, 0, Math.PI * 2); g.fill();
+  // il bottone: alto e lucido, giù quando lo si pesta
+  const off = giu ? 3 : -6;
+  g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = giu ? 4 : 10; g.shadowOffsetY = giu ? 1 : 6;
+  const c = g.createRadialGradient(x - 6, y + off - 7, 2, x, y + off, 19);
+  c.addColorStop(0, giu ? '#c9ccd1' : '#ffffff'); c.addColorStop(0.55, giu ? '#80848b' : '#b9bdc4'); c.addColorStop(1, '#5d6066');
+  g.fillStyle = c; g.beginPath(); g.arc(x, y + off, 18, 0, Math.PI * 2); g.fill();
+  g.restore();
+}
+
+/* --------------------------------------------------------------- le scene */
+
+const AMP = ['Clean Tube', 'Crunch Rock', 'Lead Solo', 'Ambient Swell', 'Nylon Reverb', 'Funk Rhythm', 'Blues Breaker', 'Jazz Clean'];
+const GIG = ['Funk Rhythm', 'Blues Breaker', 'Crunch Rock', 'Lead Hendrix', 'Jazz Clean', 'Ambient Swell', 'Acoustic Strum', 'Clean Tube'];
+const BLUES = ['Texas Shuffle', 'Slow Blues', 'Delta Slide', 'Chicago Lead', 'Clean Blues', 'Rhythm Grit', 'BB Lead', 'Outro Fuzz'];
+const PROVE = ['Funk Rhythm', 'Crunch Rock', 'Lead Hendrix', '—', '—', '—', '—', '—'];
+
+// uno stato del pedale, da cui ogni scena parte
+function stato(banco, meta, suona, metaSuona) {
+  const nomi = banco.nomi.slice(meta === 'A' ? 0 : 4, meta === 'A' ? 4 : 8);
+  const riga = metaSuona === meta ? suona : -1;
+  const led = [null, null, null, null];
+  if (riga >= 0) led[riga] = meta === 'A' ? 'r' : 'g';
+  return { schermo: { tipo: 'banco', titolo: banco.titolo, meta, nomi, riga }, led, piede: [], tasti: [], onde: [], tenuti: [],
+           ampli: { connesso: true, testo: suona >= 0 ? `${banco.titolo} · ${metaSuona}${suona + 1} ${banco.nomi[(metaSuona === 'A' ? 0 : 4) + suona]}` : '' } };
+}
+const B = { amp: { titolo: 'Amp Preset', nomi: AMP }, gig: { titolo: 'Gig', nomi: GIG },
+            blues: { titolo: 'Blues night', nomi: BLUES }, prove: { titolo: 'Rehearsal', nomi: PROVE } };
+
+// Una pressione dentro una scena: il footswitch giù per 0,22 s, e l'onda.
+function premi(st, t, quando, i, cosa = 'fs') {
+  const k = t - quando;
+  if (k < 0) return false;
+  const p = cosa === 'fs' ? FS[i] : TASTI[i];
+  if (k < 0.22) (cosa === 'fs' ? st.piede : st.tasti)[i] = true;
+  if (k < 0.8) st.onde.push({ x: p.x, y: p.y, r0: cosa === 'fs' ? 30 : 40, k: k / 0.8 });
+  return true;
+}
+function tieni(st, t, da, a, i, cosa = 'fs') {
+  if (t < da) return false;
+  const p = cosa === 'fs' ? FS[i] : TASTI[i];
+  if (t < a) { (cosa === 'fs' ? st.piede : st.tasti)[i] = true; st.tenuti.push({ x: p.x, y: p.y, r: cosa === 'fs' ? 50 : 54, k: (t - da) / (a - da) }); }
+  return t >= a;
+}
+
+const SCENE = [
+  { voce: 'titolo', min: 3.2, testo: null, fa: t => {
+      const st = stato(B.amp, 'A', -1, 'A'); st.schermo = { tipo: 'avvio' }; st.ampli = null; return st; } },
+  { voce: 'accende', min: 8.5, testo: 'Switch it on: it finds your Spark by itself', fa: t => {
+      const st = stato(B.amp, 'A', 0, 'A');
+      if (t < 1.3) { st.schermo = { tipo: 'avvio' }; st.led = [null, null, null, null]; st.ampli = { connesso: false, testo: '' }; }
+      else if (t < 5) { st.schermo = { tipo: 'cerca', puntini: Math.floor(t * 2.5) % 3 + 1 }; st.led = [null, null, null, null]; st.ampli = { connesso: false, testo: 'searching…' }; }
+      return st; } },
+  { voce: 'quattro', min: 8.0, testo: 'Four footswitches, four sounds', fa: t => {
+      let s = 0;
+      if (t > 1.0) s = 1;
+      if (t > 3.0) s = 2;
+      if (t > 5.0) s = 3;
+      const st = stato(B.amp, 'A', s, 'A');
+      premi(st, t, 1.0, 1); premi(st, t, 3.0, 2); premi(st, t, 5.0, 3);
+      return st; } },
+  { voce: 'meta', min: 8.5, testo: 'The fifth switch flips between half A and half B', fa: t => {
+      let meta = 'A', suona = 3, ms = 'A';
+      if (t > 1.0) meta = 'B';
+      if (t > 3.0) { suona = 1; ms = 'B'; }
+      if (t > 5.0) meta = 'A';
+      if (t > 6.6) meta = 'B';
+      const st = stato(B.amp, meta, suona, ms);
+      premi(st, t, 1.0, 4); premi(st, t, 3.0, 1); premi(st, t, 5.0, 4); premi(st, t, 6.6, 4);
+      return st; } },
+  { voce: 'banchi', min: 8.5, testo: 'Bank buttons: your banks, ready to play', fa: t => {
+      let st = stato(B.amp, 'B', 1, 'B');
+      if (t > 1.0) { st = stato(B.gig, 'A', -1, 'A'); st.ampli.testo = 'Amp Preset · B2 Funk Rhythm'; }
+      if (t > 2.6) st = stato(B.gig, 'A', 0, 'A');
+      if (t > 4.4) { st = stato(B.blues, 'A', -1, 'A'); st.ampli.testo = 'Gig · A1 Funk Rhythm'; }
+      if (t > 6.0) st = stato(B.blues, 'A', 2, 'A');
+      premi(st, t, 1.0, 1, 'tasto'); premi(st, t, 2.6, 0); premi(st, t, 4.4, 1, 'tasto'); premi(st, t, 6.0, 2);
+      return st; } },
+  { voce: 'ponte', min: 12.5, testo: 'Hold both bank buttons: the app sends your banks', fa: t => {
+      let st = stato(B.blues, 'A', 2, 'A');
+      tieni(st, t, 1.0, 2.5, 0, 'tasto');
+      tieni(st, t, 1.0, 2.5, 1, 'tasto');
+      if (t >= 2.5 && t < 9.4) {
+        const resto = 119 - Math.floor(t - 2.5);
+        st.schermo.titolo = t < 4.6 ? `bridge ${Math.floor(resto / 60)}:${String(resto % 60).padStart(2, '0')}` : 'Spark to the app';
+        if (t >= 4.6) { st.schermo.spark = false; st.led = [null, null, null, null]; st.ampli = { connesso: true, testo: 'with the app' }; }
+      }
+      // il telefono entra, manda il banco, esce
+      st.telefono = t < 3.0 ? 0 : t < 3.6 ? (t - 3.0) / 0.6 : t < 8.8 ? 1 : t < 9.4 ? 1 - (t - 8.8) / 0.6 : 0;
+      st.inviato = t > 6.4 && t < 9.4;
+      if (t >= 9.4) { st = stato(B.prove, 'A', -1, 'A'); st.ampli.testo = 'Blues night · A3 Delta Slide'; }
+      if (t >= 10.8) st = stato(B.prove, 'A', 0, 'A');
+      premi(st, t, 9.4, 1, 'tasto'); premi(st, t, 10.8, 0);
+      return st; } },
+  { voce: 'looper', min: 15.0, testo: 'Hold the fifth switch: it’s a looper', fa: t => {
+      const st = stato(B.prove, 'A', 0, 'A');
+      const dentro = tieni(st, t, 0.8, 3.8, 4);
+      if (!dentro) return st;
+      const bpm = 120, tempo = 60 / bpm;
+      st.led = [null, null, null, null];
+      st.schermo = { tipo: 'looper', titolo: 'Looper  120 bpm', riga: -1, battute: 2, pieno: 0, simbolo: 'vuoto' };
+      st.ampli.testo = 'looper · empty';
+      premi(st, t, 5.0, 0);
+      if (t >= 5.0 && t < 5.0 + 4 * tempo) {           // il conteggio: un LED per tempo, da sinistra
+        const n = Math.floor((t - 5.0) / tempo);
+        st.schermo.titolo = `Count  ${n + 1}`;
+        for (let k = 0; k <= n; k++) st.led[k] = 'r';
+        st.tempo = (t - 5.0) % tempo < 0.12;
+      }
+      const r0 = 5.0 + 4 * tempo, r1 = r0 + 8 * tempo;  // due battute
+      if (t >= r0 && t < r1) {
+        st.schermo.riga = 0; st.schermo.righe = ['Rec: close', 'Undo', 'Play', 'Stop/Clear'];
+        st.schermo.simbolo = 'rec'; st.schermo.pieno = Math.floor((t - r0) / tempo + 1) / 8;
+        st.led[0] = 'r'; st.tempo = (t - r0) % tempo < 0.12; st.ampli.testo = 'looper · recording';
+      }
+      premi(st, t, r1, 0);
+      if (t >= r1) {
+        st.schermo.riga = 2; st.schermo.righe = ['Overdub', 'Undo', 'Play', 'Stop/Clear'];
+        st.schermo.simbolo = 'play'; st.schermo.pieno = (Math.floor((t - r1) / tempo) % 8 + 1) / 8;
+        st.led[2] = 'g'; st.tempo = (t - r1) % tempo < 0.12; st.ampli.testo = 'looper · playing';
+      }
+      return st; } },
+  { voce: 'fine', min: 6.0, testo: null, cartello: ['Build it yourself', 'an ESP32, a display, five footswitches',
+      'a battery inside, charged over USB-C', 'the guide is free, step by step'], fa: t => {
+      const st = stato(B.prove, 'A', 0, 'A'); return st; } },
+  { voce: 'finale', min: 5.0, testo: null, fine: true, fa: t => stato(B.prove, 'A', 0, 'A') },
+];
+
+/* -------------------------------------------------------------- il quadro */
+
+const dolce = k => k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k);
+function testoCentrato(testo, y, font, colore, alfa = 1, x = L / 2) {
+  g.save(); g.globalAlpha = alfa; g.font = font; g.fillStyle = colore;
+  const largo = g.measureText(testo).width;
+  if (largo > L - 160) { const px = parseFloat(font.match(/(\d+)px/)[1]); g.font = font.replace(/\d+px/, Math.floor(px * (L - 160) / largo) + 'px'); }
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(testo, x, y); g.restore();
+}
+function fondo() {
+  g.fillStyle = '#060607'; g.fillRect(0, 0, L, H);
+  const r = g.createRadialGradient(L / 2, 80, 20, L / 2, 80, 1100);
+  r.addColorStop(0, 'rgba(230,30,45,.20)'); r.addColorStop(1, 'rgba(230,30,45,0)');
+  g.fillStyle = r; g.fillRect(0, 0, L, H);
+}
+// lo Spark, sotto il pedale: un'etichetta con quello che suona
+function ampli(a) {
+  if (!a) return;
+  const y = 975, testo = a.testo || '';
+  g.save();
+  g.font = '600 30px Inter';
+  const w = Math.max(360, g.measureText('Spark 2   ' + testo).width + 110), x = L / 2 - w / 2;
+  g.fillStyle = 'rgba(255,255,255,.06)'; g.strokeStyle = 'rgba(255,255,255,.14)'; g.lineWidth = 2;
+  tondo(g, x, y - 34, w, 68, 34); g.fill(); g.stroke();
+  g.fillStyle = a.connesso ? '#3ee06a' : '#ff5a64';
+  g.shadowColor = g.fillStyle; g.shadowBlur = a.connesso ? 14 : 0;
+  g.beginPath(); g.arc(x + 38, y, 9, 0, Math.PI * 2); g.fill(); g.shadowBlur = 0;
+  g.fillStyle = '#fff'; g.textBaseline = 'middle'; g.fillText('Spark 2', x + 62, y);
+  g.fillStyle = '#a1a1aa'; g.font = '500 30px Inter';
+  g.fillText(testo, x + 62 + g.measureText('Spark 2').width + 34, y);
+  g.restore();
+}
+function telefonoDisegna(a, inviato) {
+  if (a <= 0 || !telefono.naturalWidth) return;
+  const h = 760, w = h * telefono.naturalWidth / telefono.naturalHeight;
+  const x = L - 120 - w + (1 - dolce(a)) * 200, y = 205;
+  g.save(); g.globalAlpha = dolce(a);
+  g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = 40;
+  g.fillStyle = '#1b1b1f'; tondo(g, x - 8, y - 8, w + 16, h + 16, 40); g.fill(); g.shadowBlur = 0;
+  g.save(); tondo(g, x, y, w, h, 34); g.clip(); g.drawImage(telefono, x, y, w, h); g.restore();
+  if (inviato) {
+    g.fillStyle = 'rgba(62,224,106,.95)'; tondo(g, x + 30, y + h - 120, w - 60, 60, 30); g.fill();
+    g.fillStyle = '#04150a'; g.font = '700 28px Inter'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('✓ «Rehearsal» sent', x + w / 2, y + h - 90);
+  }
+  g.restore();
+}
+
+function disegna(tau, piano) {
+  // la scena di adesso
+  let s = piano[0];
+  for (const p of piano) if (p.da <= tau) s = p;
+  const t = tau - s.da;
+  const st = s.scena.fa(t);
+  fondo();
+  // la didascalia
+  if (s.scena.testo) {
+    const a = dolce(t / 0.35);
+    g.save(); g.globalAlpha = a; g.fillStyle = '#e11d2e'; g.fillRect(L / 2 - 40, 78, 80, 6); g.restore();
+    testoCentrato(s.scena.testo, 150, '600 52px Inter', '#f4f4f5', a);
+  }
+  // il pedale: al centro, o a sinistra quando c'è il telefono
+  const tel = dolce(st.telefono || 0);
+  const sc = 1.22 - tel * 0.34, cx = L / 2 - tel * 330, cy = 560;
+  g.save();
+  g.translate(cx - P.w * sc / 2, cy - P.h * sc / 2);
+  g.scale(sc, sc);
+  g.shadowColor = 'rgba(0,0,0,.85)'; g.shadowBlur = 60; g.shadowOffsetY = 30;
+  g.fillStyle = '#000'; tondo(g, 6, 10, P.w - 12, P.h - 10, 20); g.fill();
+  g.shadowColor = 'transparent';
+  pedale(st);
+  g.restore();
+  telefonoDisegna(st.telefono || 0, st.inviato);
+  ampli(st.ampli);
+
+  // il cartello
+  if (s.scena.cartello) {
+    const fine = s.durata;
+    const a = Math.min(dolce(t / 0.5), dolce((fine - t) / 0.5));
+    g.save(); g.globalAlpha = a * 0.95; g.fillStyle = '#060607'; g.fillRect(0, 0, L, H); g.restore();
+    if (logo.naturalWidth) { g.save(); g.globalAlpha = a; g.drawImage(logo, L / 2 - 60, 230, 120, 120); g.restore(); }
+    const righe = s.scena.cartello;
+    testoCentrato(righe[0], 430, '700 84px "Space Grotesk"', '#ffffff', a);
+    righe.slice(1).forEach((r, k) => {
+      const ak = a * dolce((t - 0.8 - k * 0.9) / 0.5);
+      testoCentrato(r, 545 + k * 72, '500 44px Inter', k === righe.length - 2 ? '#f43f5e' : '#d4d4d8', ak);
+    });
+  }
+  // titolo e finale
+  let velo = 0, quale = null;
+  if (s.scena.voce === 'titolo') { velo = 1 - dolce((t - (s.durata - 0.8)) / 0.8); quale = 'intro'; }
+  if (s.scena.fine) { velo = dolce(t / 0.7); quale = 'outro'; }
+  if (velo > 0) {
+    g.save(); g.globalAlpha = velo * 0.94; g.fillStyle = '#060607'; g.fillRect(0, 0, L, H); g.restore();
+    if (logo.naturalWidth) { g.save(); g.globalAlpha = velo; g.drawImage(logo, L / 2 - 80, 250, 160, 160); g.restore(); }
+    if (quale === 'intro') {
+      testoCentrato('SparklingTones pedal', 500, '700 96px "Space Grotesk"', '#ffffff', velo);
+      testoCentrato('Your Spark presets, under your feet', 600, '500 46px Inter', '#d4d4d8', velo);
+    } else {
+      testoCentrato('SparklingTones pedal', 500, '700 96px "Space Grotesk"', '#ffffff', velo);
+      testoCentrato('free guide · open-source firmware', 600, '500 44px Inter', '#d4d4d8', velo);
+      testoCentrato('sparklingtones.com', 680, '600 42px Inter', '#f43f5e', velo);
+      testoCentrato('pedal and amp drawn, not filmed', 1010, '400 28px Inter', '#71717a', velo);
+    }
+  }
+}
+
+/* ------------------------------------------------- il piano, e il montaggio */
+
+async function gira() {
+  await document.fonts.load('700 60px "Space Grotesk"');
+  await document.fonts.load('500 40px Inter');
+  await document.fonts.load('600 40px Inter');
+  for (const im of [logo, telefono]) await new Promise(r => { if (im.complete) r(); else im.onload = im.onerror = r; });
+  LEGNO = legno();
+  let voce = null;
+  try { voce = await (await fetch('/__uscita/voce.json')).json(); } catch (_) { /* senza voce */ }
+  // ogni scena: quanto la sua animazione, o quanto la sua voce se è più lunga
+  const PAUSA = 0.7, PRIMA = 0.3;
+  const piano = [];
+  let da = 0;
+  for (const scena of SCENE) {
+    const pz = voce && voce.pezzi[scena.voce];
+    const durata = Math.max(scena.min, pz ? PRIMA + pz.durata + PAUSA : 0);
+    piano.push({ scena, da, durata, voceDa: da + PRIMA, pezzo: pz });
+    da += durata;
+  }
+  const durata = da;
+  avvia(piano, durata, voce).catch(e =>
+    fetch('/__salva?nome=errore.txt', { method: 'POST', body: String((e && e.stack) || e) }));
+  return `${durata.toFixed(1)} s, ${piano.length} scene` + (voce ? ', con la voce' : '');
+}
+window.gira = gira;
+
+async function avvia(piano, durata, voce) {
+  const dorme = ms => new Promise(r => setTimeout(r, ms));
+  let guasto = null;
+  const video = { misure: [], chiavi: [], pezzi: [], tempi: [], descrizione: null };
+  const enc = new VideoEncoder({
+    output: (c, meta) => {
+      const d = meta && meta.decoderConfig && meta.decoderConfig.description;
+      if (d && !video.descrizione) video.descrizione = Array.from(new Uint8Array(d.buffer || d));
+      const byte = new Uint8Array(c.byteLength); c.copyTo(byte);
+      video.pezzi.push(byte); video.misure.push(byte.length); video.chiavi.push(c.type === 'key'); video.tempi.push(c.timestamp);
+    },
+    error: e => { guasto = e; },
+  });
+  enc.configure({ codec: 'avc1.640028', width: L, height: H, bitrate: 10_000_000, framerate: FPS,
+                  hardwareAcceleration: 'prefer-software', avc: { format: 'avc' } });
+  const N = Math.round(durata * FPS);
+  for (let k = 0; k < N; k++) {
+    if (guasto) throw guasto;
+    disegna(k / FPS, piano);
+    const f = new VideoFrame(tela, { timestamp: Math.round(k * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
+    enc.encode(f, { keyFrame: k % (FPS * 2) === 0 }); f.close();
+    while (enc.encodeQueueSize > 6) await dorme(2);
+    if (k % 150 === 0) fetch('/__salva?nome=passo', { method: 'POST', body: k + '/' + N });
+  }
+  await enc.flush(); enc.close();
+  if (guasto) throw guasto;
+
+  // la voce: ogni pezzo all'inizio della sua scena
+  let audio = null;
+  if (voce) {
+    const ctx = new OfflineAudioContext(2, 1, 48000);
+    const buf = await ctx.decodeAudioData(await (await fetch('/__uscita/' + voce.file)).arrayBuffer());
+    const sr = 48000, ch = 2, n = Math.round(durata * sr);
+    const pcm = [new Float32Array(n), new Float32Array(n)];
+    for (let c = 0; c < ch; c++) {
+      const sorgente = buf.getChannelData(Math.min(c, buf.numberOfChannels - 1));
+      for (const p of piano) {
+        if (!p.pezzo) continue;
+        const x = Math.round(p.pezzo.da * sr), y = Math.round((p.pezzo.da + p.pezzo.durata) * sr), dove = Math.round(p.voceDa * sr);
+        pcm[c].set(sorgente.subarray(x, Math.min(y, x + n - dove)), dove);
+      }
+    }
+    audio = { sr, ch, misure: [], pezzi: [], descrizione: null };
+    const aenc = new AudioEncoder({
+      output: (c, meta) => {
+        const d = meta && meta.decoderConfig && meta.decoderConfig.description;
+        if (d && !audio.descrizione) audio.descrizione = Array.from(new Uint8Array(d.buffer || d));
+        const byte = new Uint8Array(c.byteLength); c.copyTo(byte);
+        audio.pezzi.push(byte); audio.misure.push(byte.length);
+      },
+      error: e => { guasto = e; },
+    });
+    aenc.configure({ codec: 'mp4a.40.2', sampleRate: sr, numberOfChannels: ch, bitrate: 192000 });
+    for (let j = 0; j < n; j += 4800) {
+      const m = Math.min(4800, n - j), dati = new Float32Array(m * ch);
+      for (let c = 0; c < ch; c++) dati.set(pcm[c].subarray(j, j + m), c * m);
+      aenc.encode(new AudioData({ format: 'f32-planar', sampleRate: sr, numberOfFrames: m, numberOfChannels: ch,
+                                  timestamp: Math.round(j * 1e6 / sr), data: dati }));
+      while (aenc.encodeQueueSize > 20) await dorme(2);
+    }
+    await aenc.flush(); aenc.close();
+    if (guasto) throw guasto;
+    if (!audio.descrizione) audio.descrizione = [0x11, 0x90];
+  }
+  const posta = (nome, corpo) => fetch('/__salva?nome=' + nome, { method: 'POST', body: corpo });
+  await posta('video.bin', new Blob(video.pezzi));
+  if (audio) await posta('audio.bin', new Blob(audio.pezzi));
+  await posta('fatto.json', JSON.stringify({
+    fps: FPS, larghezza: L, altezza: H,
+    video: { misure: video.misure, chiavi: video.chiavi, descrizione: video.descrizione },
+    audio: audio && { sr: audio.sr, ch: audio.ch, misure: audio.misure, descrizione: audio.descrizione },
+  }));
+}
+
+// Per guardare un istante senza fare il video: ?t=12.5 disegna quel momento.
+const q = new URLSearchParams(location.search);
+if (q.has('t')) (async () => {
+  await document.fonts.load('700 60px "Space Grotesk"'); await document.fonts.load('500 40px Inter');
+  for (const im of [logo, telefono]) await new Promise(r => { if (im.complete) r(); else im.onload = im.onerror = r; });
+  LEGNO = legno();
+  let da = 0; const piano = SCENE.map(scena => { const p = { scena, da, durata: scena.min }; da += scena.min; return p; });
+  disegna(+q.get('t'), piano);
+  document.title = 'pronto';
+})();
+</script>
+</body>
+</html>
