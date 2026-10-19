@@ -927,3 +927,16 @@ no spariscono effetti e preset Hendrix e il wah è l'Auto Wah gratuito. **Gli ot
 dell'ampli e i banchi live** mostrano comunque i loro preset: va bene così (l'utente, 16 ottobre). Dal telefono si guarda in rete di casa (`node
 tools/server-rete.js <bozza> 8096` → `http://192.168.0.223:8096`). Tutto in
 `docs/decisioni-ui.md`, ultima sezione.
+
+## Estratto da CLAUDE.md, 19 ottobre 2026 — il promemoria di sito e guida, prima della pubblicazione
+
+**Prossimo lavoro, chiesto dall'utente il 17 ottobre 2026**: aggiornare **sito**
+(`sparklingtones.com`) **e guida** (`guida.html`, `guida-pedale.html`) alla nuova interfaccia
+(editor con le immagini, Impostazioni a riquadri, pulsantoni live, pressione lunga, sfondo).
+**«Genera con l'IA» non si nomina** (19 ottobre: l'utente pensa di togliere la funzione). Bozza
+sul ramo `bozza-guida-sito` (worktree nello scratchpad, anche in `sparklingtones-sito`); la vista
+Live e l'editor sono **schermate vere** (`immagini/guida/`): il disegno a mano dei pulsantoni «non è
+così che si vede». **In tutte e due le lingue**:
+per questo lavoro l'utente ha autorizzato a toccare anche la parte inglese (`guida.en.html`,
+`guida-pedale.en.html`, `sparklingtones-sito/en/`, `lingua-en.js` se serve). Grafica nuova del
+sito o della guida: prima la bozza.

@@ -346,14 +346,13 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 17 ottobre 2026
+## Dove si riprende — 19 ottobre 2026
 
 **Pubblicato il 16 ottobre 2026 (sera): l'editor con le immagini dei blocchi** (ramo
 `bozza-editor-grafico` unito in `main`, guscio `v109`). Ogni modello ha la sua immagine (89, in
 `immagini/blocchi/`; tabella e misure in `src/spark-immagini.js`; i riverberi una per tipo, voce
 `'bias.reverb:<tipo>'`); le manopole si girano sull'immagine, il modello si sceglie col doppio tocco
-sul tassello; «Pacchetto Jimi Hendrix: sì/no» in Impostazioni (`haHendrix()`). **L'utente lo prova
-per un po': la guida non si tocca finché non lo dice lui** (è rimasta all'editor vecchio). **Da
+sul tassello; «Pacchetto Jimi Hendrix: sì/no» in Impostazioni (`haHendrix()`). **Da
 verificare a orecchio**: quale posizione della levetta sia Limit (LA Comp), -15 dB (Optical Comp), HP
 (SAB Driver) e Chorus (UniVibe); nel wah, 1/2 = 0,5 e il tempo lineare. Il Silver 120 forse da rifare
 nello stile nuovo. **Un'immagine nuova o rifatta** arriva senza manopole, col puntino bianco al centro
@@ -367,16 +366,16 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 `docs/decisioni-ui.md`, ultime sezioni; la versione lunga di questo paragrafo in `docs/diario.md`.
 
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
-14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v118` (17 ottobre): **«Genera con l'IA»** (`16-genera-ia.js`), **nascosta**: la voce del menu Altro compare solo dopo «Funzioni nascoste» in Impostazioni, con la password dell'utente (nel codice solo l'impronta SHA-256; la password **non si scrive mai** nel repository). Giudizio dell'utente: «non fa miracoli ma non è male». OpenAI (Luna/Sol/Astra, Sol predefinito; **misurato: Sol 1 centesimo, Astra 7-8**) o Anthropic (Haiku/Sonnet/Opus 5.5, Opus predefinito, `fallbacks: "default"`; **Anthropic mai provato con una chiave vera**), chiavi dell'utente in `localStorage`, spiegazione e disclaimer nel pannello. **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta), risposta a schema con `enum` dei MODELLI, preset costruito sopra uno vero della libreria come il Duplica, salvato solo con «Salva in libreria». **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro. **`guida.en.html`** è
-rimasta alle schermate vecchie.
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v118` (17 ottobre): **«Genera con l'IA»** (`16-genera-ia.js`), **nascosta**: la voce del menu Altro compare solo dopo «Funzioni nascoste» in Impostazioni, con la password dell'utente (nel codice solo l'impronta SHA-256; la password **non si scrive mai** nel repository). Giudizio dell'utente: «non fa miracoli ma non è male». OpenAI (Luna/Sol/Astra, Sol predefinito; **misurato: Sol 1 centesimo, Astra 7-8**) o Anthropic (Haiku/Sonnet/Opus 5.5, Opus predefinito, `fallbacks: "default"`; **Anthropic mai provato con una chiave vera**), chiavi dell'utente in `localStorage`, spiegazione e disclaimer nel pannello. **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta), risposta a schema con `enum` dei MODELLI, preset costruito sopra uno vero della libreria come il Duplica, salvato solo con «Salva in libreria». **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro.
 
-**Prossimo lavoro, chiesto dall'utente il 17 ottobre 2026**: aggiornare **sito**
-(`sparklingtones.com`) **e guida** (`guida.html`, `guida-pedale.html`) alla nuova interfaccia
-(editor con le immagini, Impostazioni a riquadri, pulsantoni live, pressione lunga, sfondo), con
-**«Genera con l'IA» segnalata come funzione in fase di sviluppo**. **In tutte e due le lingue**:
-per questo lavoro l'utente ha autorizzato a toccare anche la parte inglese (`guida.en.html`,
-`guida-pedale.en.html`, `sparklingtones-sito/en/`, `lingua-en.js` se serve). Grafica nuova del
-sito o della guida: prima la bozza.
+**Pubblicati il 19 ottobre 2026: guida e sito della nuova interfaccia, in italiano e in inglese**
+(guscio `v120`; sito `e533608`). La vista Live e l'editor nella guida e sul sito sono **schermate
+vere** dell'app (`immagini/guida/`, `*-en.webp` per l'inglese; sul sito `media/app-live*.webp`): il
+disegno a mano dei pulsantoni «non è così che si vede», dice l'utente. Per rifarle: preset finti, la
+schermata dal riquadro, poi `ritaglia` con Edge headless (canvas → WebP) come `tools/togli-sfondo`.
+**«Genera con l'IA» non si nomina**, né in guida né sul sito: l'utente pensa di togliere la funzione.
+`lingua-en.js` allineato (81 frasi nuove, 47 tolte): restano in italiano solo le 73 dell'IA. Il
+video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor
