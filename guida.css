@@ -454,8 +454,4 @@ footer { border-top:1px solid var(--line-soft); color:var(--faint); text-align:c
 .con-foto .foto { border-radius:25px; overflow:hidden; }
 .con-foto .foto img { display:block; width:100%; height:auto; }
 
-/* una funzione che sta arrivando */
-.in-arrivo { display:inline-block; margin-left:8px; vertical-align:middle; font:700 0.62rem var(--strumento);
-             letter-spacing:0.08em; text-transform:uppercase; color:#ffd21e; border:1px solid #6b5a1e;
-             background:#1d1806; border-radius:6px; padding:2px 7px; }
 .m-pads.circuito .m-pad .presa { z-index:1; }
