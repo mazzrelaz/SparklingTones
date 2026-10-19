@@ -10,6 +10,8 @@
   La guida all'uso in inglese (8 ottobre 2026): la traduzione di guida.html,
   con la stessa grafica (guida.css) e lo stesso comportamento (guida.js).
   I nomi dei pulsanti sono quelli dell'inglese dell'app, in src/lingua-en.js.
+  Rifatta il 19 ottobre 2026 sulla guida italiana dell'interfaccia nuova, con
+  le schermate dell'app in inglese (immagini/guida/*-en.webp).
   Si cambia guida.html in italiano; questa resta indietro finché l'utente non
   chiede di aggiornarla (la regola sull'inglese è in CLAUDE.md).
 -->
@@ -95,13 +97,13 @@
       <h3>Putting it on your phone</h3>
       <ol class="passi">
         <li>Open the app in Chrome on your phone.</li>
-        <li>If the <span class="tasto rosso">Install</span> banner appears, tap it. Otherwise: Chrome's
+        <li>If the <span class="tasto rosso">Install</span> strip appears, tap it. Otherwise: Chrome's
           menu <kbd>⋮</kbd> → <em>Add to Home screen</em> / <em>Install app</em>.</li>
         <li>From then on it opens like a real app, full screen, and <strong>works without a
-          connection</strong>: at a gig you don't need Wi-Fi.</li>
+          network</strong>: at a gig you don't need Wi-Fi.</li>
       </ol>
       <div class="nota">
-        <p>When a new version comes out, the app tells you itself with a banner at the bottom.</p>
+        <p>When a new version comes out, the app tells you by itself with a strip at the bottom.</p>
       </div>
     </div>
   </div>
@@ -116,27 +118,32 @@
     <figure class="schermo">
       <div class="telefono rel">
         <span class="pin" style="left:4px;top:-8px">1</span>
-        <span class="pin" style="left:150px;top:-8px">2</span>
-        <span class="pin" style="left:232px;top:-8px">3</span>
-        <span class="pin" style="right:6px;top:-8px">4</span>
+        <span class="pin" style="right:6px;top:-8px">2</span>
+        <span class="pin" style="left:124px;top:140px">3</span>
+        <span class="pin" style="left:304px;top:140px">4</span>
         <div class="m-barra">
           <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
-          <span class="m-tasto conn">CONNECT</span>
-          <span class="m-tasto vista">Live →</span>
-          <span class="m-tasto">⋯</span>
+          <span class="m-bollino">Connect</span>
         </div>
-        <div class="m-cerca"><span class="campo">search presets…</span><span class="ordina">name ▾</span></div>
+        <div class="m-campo"><b>⌕</b><span class="testo">search 24 presets</span><b>≡</b></div>
+        <div style="height:46px"></div>
+        <div class="m-barra-sotto">
+          <span class="scelta"><b>☰</b>Presets</span><span><b>▦</b>Live</span><span><b>⊙⊙</b>Pedal</span><span><b>···</b>More</span>
+        </div>
       </div>
-      <figcaption>The top bar, always within thumb's reach</figcaption>
+      <figcaption>The amp badge at the top, the bar at the bottom</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
         <li><strong>The logo</strong>: from anywhere in the app, one tap here takes you back to the presets.</li>
-        <li><strong>Connect</strong>: red when the amp is missing, <span style="color:var(--green)">green</span>
-          when it's there.</li>
-        <li><strong>Live →</strong> switches to the view for playing; from there, <strong>← Presets</strong>
-          comes back here. Android's back button also returns to the presets.</li>
-        <li><strong>The ⋯ menu</strong>: all the other actions, this guide included.</li>
+        <li><strong>The amp badge</strong>: it says <span style="color:#ff5a64">Connect</span> when the
+          amp isn't there; when it is, it shows its name with a <span style="color:var(--green)">green</span>
+          dot. Tap it to <strong>reread the slots</strong>, <strong>import the sound that's
+          playing</strong> or <strong>disconnect</strong>.</li>
+        <li><strong>Presets, Live and Pedal</strong>, in the bar at the bottom, which is on every page:
+          you leave a page by tapping another item. Android's back button also takes you back to the
+          presets.</li>
+        <li><strong>More</strong>: the menu with everything else, including this guide.</li>
       </ol>
     </div>
   </div>
@@ -144,75 +151,82 @@
   <h3>How to connect</h3>
   <ol class="passi">
     <li>Switch on the amp and your phone's Bluetooth.</li>
-    <li>Tap <span class="tasto rosso">CONNECT</span>. The browser opens a small window with the devices
-      nearby: choose <strong>Spark 2</strong> and confirm.</li>
-    <li>The button turns green, and the app <strong>reads the eight presets</strong> from the amp by
-      itself. In the log at the bottom of the page you can watch the names arrive one by one.</li>
+    <li>Tap <span class="tasto pericolo">Connect</span>. The browser opens a small window with the
+      nearby devices: choose <strong>Spark 2</strong> and confirm.</li>
+    <li>The badge turns green with the amp's name, and the app <strong>reads the amp's presets by
+      itself</strong>. In the log at the bottom of the page you see the names arrive one by one.</li>
   </ol>
   <div class="nota att">
     <p><strong>One master at a time.</strong> If the amp is connected to Positive Grid's official app
-      (or to the pedal), it won't show up here. Close the other app, or switch the amp off and on
-      again, and try again.</p>
+      (or to the pedal), it won't show up here. Close the other app, or switch the amp off and on, and
+      try again.</p>
   </div>
   <div class="nota">
     <p>The log at the bottom of the presets screen tells you everything that happens: what was sent,
-      what the amp replied, what went wrong. It's the first place to look.</p>
+      what the amp answered, what went wrong. It's the first place to look.</p>
   </div>
 </section>
 
 <!-- ===================================================================== -->
 <section class="cap" id="preset">
   <div class="cap-testa"><span class="cap-num">3</span><h2>The presets screen</h2></div>
-  <p class="sotto">What's in the amp at the top, everything else below.</p>
+  <p class="sotto">What's inside the amp on top, everything else below.</p>
 
   <div class="due">
     <figure class="schermo">
       <div class="telefono rel">
-        <span class="pin" style="left:-8px;top:40px">1</span>
-        <span class="pin" style="left:-8px;top:291px">2</span>
-        <span class="pin" style="left:-8px;top:379px">3</span>
-        <span class="pin" style="right:-8px;top:327px">4</span>
-        <div class="m-sez" style="margin-top:0">Hardware presets</div>
-        <div class="m-slots">
-          <div class="m-colonna">
-            <span class="m-banco a">BANK A</span>
-            <div class="m-slot"><div class="alto"><span class="led a"></span>A1</div><div class="nome">Shine On clean</div></div>
-            <div class="m-slot"><div class="alto"><span class="led a"></span>A2</div><div class="nome">Echoes</div></div>
-            <div class="m-slot"><div class="alto"><span class="led a"></span>A3</div><div class="nome">Crunch Marshall</div></div>
-            <div class="m-slot"><div class="alto"><span class="led a"></span>A4</div><div class="nome">Poles Apart</div></div>
-          </div>
-          <div class="m-colonna">
-            <span class="m-banco b">BANK B</span>
-            <div class="m-slot"><div class="alto"><span class="led b"></span>B1</div><div class="nome">Nylon Reverb</div></div>
-            <div class="m-slot"><div class="alto"><span class="led b"></span>B2</div><div class="nome">Europa</div></div>
-            <div class="m-slot"><div class="alto"><span class="led b"></span>B3</div><div class="nome">Clean Tube</div></div>
-            <div class="m-slot"><div class="alto"><span class="led b"></span>B4<span class="bollo-jh">JH</span></div><div class="nome">Hey Jimi Solo</div></div>
-          </div>
+        <span class="pin" style="left:-8px;top:113px">1</span>
+        <span class="pin" style="left:-8px;top:191px">2</span>
+        <span class="pin" style="left:-8px;top:259px">3</span>
+        <span class="pin" style="right:-8px;top:269px">4</span>
+        <div class="m-barra">
+          <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
+          <span class="m-bollino ok">Spark 2</span>
         </div>
-        <div class="m-sez">In the library <b>4</b></div>
-        <div class="m-riga" style="--fam:#0a84ff"><span class="n">Home blues</span><span class="m-play">▶</span></div>
-        <div class="m-riga" style="--fam:#ff3b30"><span class="n">Gilmour lead</span><span class="m-play">▶</span></div>
-        <div class="m-riga"><span class="n">Clean funk</span><span class="m-play">▶</span></div>
-        <div class="m-riga" style="--fam:#ffd21e"><span class="n">12-string folk</span><span class="m-play">▶</span></div>
+        <div class="m-sez2"><span>HW PRESETS</span></div>
+        <div class="m-slots4">
+          <div class="m-slot4"><div class="s a">A1</div><div class="nome">Shine On clean</div></div>
+          <div class="m-slot4"><div class="s a">A2</div><div class="nome">Echoes</div></div>
+          <div class="m-slot4"><div class="s a">A3</div><div class="nome">Crunch Marshall</div></div>
+          <div class="m-slot4"><div class="s a">A4</div><div class="nome">Poles Apart</div></div>
+          <div class="m-slot4"><div class="s b">B1</div><div class="nome">Nylon Reverb</div></div>
+          <div class="m-slot4"><div class="s b">B2</div><div class="nome">Europa</div></div>
+          <div class="m-slot4"><div class="s b">B3</div><div class="nome">Clean Tube</div></div>
+          <div class="m-slot4"><div class="s b">B4<span class="bollo-jh">JH</span></div><div class="nome">Hey Jimi Solo</div></div>
+        </div>
+        <div class="m-campo"><b>⌕</b><span class="testo">search 4 presets</span><b>≡</b></div>
+        <div class="m-pastiglie">
+          <span class="m-pastiglia attiva">all</span>
+          <span class="m-pastiglia" style="--fam:#0a84ff"><span class="pf"></span>Clean</span>
+          <span class="m-pastiglia" style="--fam:#ff3b30"><span class="pf"></span>Drive</span>
+          <span class="m-pastiglia">blues<i>4</i></span>
+        </div>
+        <div class="m-riga2 banda" style="--fam:#0a84ff"><span class="n">Blues at home</span><span class="m-tondo">▶</span></div>
+        <div class="m-riga2 banda" style="--fam:#ff3b30"><span class="n">Gilmour lead</span><span class="m-tondo">▶</span></div>
+        <div class="m-riga2"><span class="n">Clean funk</span><span class="m-tondo">▶</span></div>
+        <div class="m-barra-sotto">
+          <span class="scelta"><b>☰</b>Presets</span><span><b>▦</b>Live</span><span><b>⊙⊙</b>Pedal</span><span><b>···</b>More</span>
+        </div>
       </div>
-      <figcaption>The eight slots laid out as on the amp, and the library below</figcaption>
+      <figcaption>The amp's slots, the search, and the library below</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
-        <li><strong>Hardware presets</strong>: the eight presets stored in the amp. <strong>Bank A red,
-          bank B green</strong>, like the LEDs on the device. A slot the app hasn't read yet is shown
-          dashed and says <em>not read yet</em>.</li>
-        <li><strong>In the library</strong>: all your other presets, with no limit. A preset sits either
-          above <em>or</em> below, never in both places.</li>
-        <li><strong>The coloured edge on the left</strong> is the sound family (blue clean, red drive…):
-          you can tell at a glance without reading.</li>
+        <li><strong>HW PRESETS</strong>: the eight presets saved in the amp, four per row. <strong>Bank
+          A on top, in red; bank B below, in green</strong>, like the LEDs on the amp. A slot the app
+          hasn't read yet says <em>not read</em>; if you've never connected the amp, there's
+          <span class="tasto pericolo">Connect</span> instead of the slots.</li>
+        <li><strong>Search and filters</strong>: see below.</li>
+        <li><strong>The library</strong>: all your other presets, with no limit. A preset is either on
+          top <em>or</em> below, never in both places. The coloured stripe on the left is the
+          <strong>sound family</strong> (blue clean, red drive…): you recognise it without reading.</li>
         <li><strong>▶</strong> plays that preset on the amp straight away, <strong>without touching any
-          slot</strong>. It's the quickest way to try one out.</li>
+          slot</strong>. It's the quickest way to try one.</li>
       </ol>
-      <p>Tap a preset's name — above or below — to open its <a href="#scheda">card</a>.</p>
+      <p>Tap a preset — on top or below — to open its <a href="#scheda">card</a>.</p>
       <div class="nota">
-        <p>If you write a new preset into a slot, the one that was there <strong>is not lost</strong>: it
-          moves down into the library with its tags and notes.</p>
+        <p>If you write a new preset into a slot, the one that was there <strong>isn't lost</strong>: it
+          moves down to the library with its tags and notes.</p>
       </div>
     </div>
   </div>
@@ -221,23 +235,24 @@
   <div class="due">
     <figure class="schermo">
       <div class="telefono">
-        <div class="m-cerca" style="margin-top:0"><span class="campo">gilmour delay</span><span class="ordina">name ▾</span></div>
+        <div class="m-campo" style="margin-top:0"><b>⌕</b><span class="testo scritto">gilmour delay</span><b>≡</b></div>
         <div class="m-pastiglie">
           <span class="m-pastiglia">all</span>
+          <span class="m-pastiglia attiva" style="--fam:#ff3b30"><span class="pf"></span>Drive</span>
           <span class="m-pastiglia attiva">Pink Floyd<i>6</i></span>
-          <span class="m-pastiglia">blues<i>4</i></span>
           <span class="m-pastiglia">rehearsal<i>2</i></span>
         </div>
       </div>
     </figure>
     <div>
       <ul>
-        <li><strong>Search</strong> looks at the name, notes, categories and even the effects:
-          “gilmour delay” finds the presets that have both words somewhere.</li>
-        <li><strong>The menu next to it</strong> sorts by name, recently added, recently modified, or
-          sound family.</li>
-        <li><strong>The pills</strong> below filter by category; the number says how many presets are in
-          it. They appear as soon as you create your first category.</li>
+        <li><strong>The search</strong> looks at name, notes, categories and the effects too: «gilmour
+          delay» finds the presets that have both words somewhere.</li>
+        <li><strong>The icon at the end of the box</strong> sorts by name, recently added, recently
+          changed, or sound family.</li>
+        <li><strong>The chips</strong> below filter by <strong>sound family</strong> (the ones with a dot)
+          and by <strong>category</strong>; the number says how many presets there are. A family and a
+          category together add up: «Drive» and «Pink Floyd» are the Pink Floyd drives.</li>
       </ul>
     </div>
   </div>
@@ -251,71 +266,68 @@
   <div class="due">
     <figure class="schermo">
       <div class="telefono rel">
-        <span class="pin" style="left:-8px;top:327px">1</span>
-        <span class="pin" style="left:-8px;top:365px">2</span>
-        <span class="pin" style="left:-8px;top:403px">3</span>
-        <div class="m-scheda">
-          <div class="titolo">Home blues <span class="m-play">▶</span></div>
-          <div class="m-eti">Name</div>
-          <div class="m-input">Home blues</div>
-          <div class="m-eti">Sound family</div>
-          <div class="m-scelte">
-            <span class="m-scelta fam dentro" style="--fam:#0a84ff">Clean</span>
-            <span class="m-scelta">Drive</span><span class="m-scelta">Acoustic</span><span class="m-scelta">Bass</span>
+        <span class="pin" style="left:-8px;top:140px">1</span>
+        <span class="pin" style="left:-8px;top:189px">2</span>
+        <span class="pin" style="left:-8px;top:236px">3</span>
+        <div class="m-velo">
+          <div class="m-riga2"><span class="n">Gilmour lead</span><span class="m-tondo">▶</span></div>
+        </div>
+        <div class="m-foglio" style="--fam:#0a84ff">
+          <div class="testa"><span class="x">✕</span></div>
+          <div class="nome">Blues at home<small>✎</small></div>
+          <div class="m-grandi">
+            <span class="primary"><svg viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z"/></svg>Play</span>
+            <span><svg viewBox="0 0 20 20"><path d="M5 3v14M10 3v14M15 3v14"/><circle cx="5" cy="12" r="2"/><circle cx="10" cy="7" r="2"/><circle cx="15" cy="13" r="2"/></svg>Tweak</span>
           </div>
-          <div class="m-eti">Categories</div>
-          <div class="m-scelte">
-            <span class="m-scelta dentro">✓ blues</span><span class="m-scelta">＋ Pink Floyd</span>
-            <span class="m-scelta">＋ new…</span>
+          <div class="m-piccole2">
+            <span><svg viewBox="0 0 20 20"><rect x="6" y="6" width="11" height="11" rx="2"/><path d="M3 13V4a1 1 0 0 1 1-1h9"/></svg>Copy</span>
+            <span><svg viewBox="0 0 20 20"><path d="M10 3v10M6 9l4 4 4-4"/><rect x="3" y="14" width="14" height="3" rx="1"/></svg>Put in a slot</span>
+            <span><svg viewBox="0 0 20 20"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><path d="M14 11v6M11 14h6"/></svg>Add to live bank</span>
+            <span class="pericolo"><svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V4h4v2M6 6l1 11h6l1-11"/></svg>Delete</span>
           </div>
-          <div class="m-eti">Notes</div>
-          <div class="m-input note">capo on 3, volume at half</div>
-          <div class="m-azioni">
-            <span class="m-az primary">Play</span><span class="m-az">Tweak</span>
-            <span class="m-az">Copy</span><span class="m-az pericolo">Delete</span>
-          </div>
-          <div class="m-azioni coppia">
-            <span class="m-az oro">Send to HW preset</span><span class="m-az tendina">A1 — red LED ▾</span>
-          </div>
-          <div class="m-azioni coppia">
-            <span class="m-az blu">Add to bank</span><span class="m-az tendina">Gig ▾</span>
-          </div>
+          <div class="m-apri"><svg viewBox="0 0 20 20"><circle cx="7" cy="8" r="3.5"/><circle cx="13" cy="8" r="3.5"/><circle cx="10" cy="13" r="3.5"/></svg>Family<span class="ant"><i></i>Clean</span>⌄</div>
+          <div class="m-apri"><svg viewBox="0 0 20 20"><path d="M3 4v5l8 8 6-6-8-8H4a1 1 0 0 0-1 1z"/><circle cx="7" cy="7" r="1.2"/></svg>Categories<span class="ant">blues</span>⌄</div>
+          <div class="m-apri"><svg viewBox="0 0 20 20"><path d="M5 3h7l3 3v11H5z"/><path d="M8 10h5M8 13h4"/></svg>Notes<span class="ant">capo on 3, volume halfway</span>⌄</div>
+        </div>
+        <div class="m-barra-sotto" style="margin-top:0">
+          <span class="scelta"><b>☰</b>Presets</span><span><b>▦</b>Live</span><span><b>⊙⊙</b>Pedal</span><span><b>···</b>More</span>
         </div>
       </div>
-      <figcaption>Name, family, categories, notes — and the actions</figcaption>
+      <figcaption>The card slides up from the bottom; the bar stays below</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
-        <li><strong>Play · Tweak · Copy · Delete</strong>.
-          <em>Play</em> makes the preset sound (like ▶). <em>Tweak</em> opens the
-          <a href="#editor">knobs</a>. <em>Copy</em> makes a duplicate to modify — it's the right way to
-          create a new preset. <em>Delete</em> removes it from the library (it asks first, and the amp
-          is not touched).</li>
-        <li><strong>Send to HW preset</strong> <strong>writes</strong> it into the slot chosen in the menu
-          next to it: from then on it's in the amp, even with the phone off.</li>
-        <li><strong>Add to bank</strong> puts it in the first free place of a
-          <a href="#live">live bank</a>. It doesn't touch the amp. It appears once you have at least one
-          bank.</li>
+        <li><strong>Play · Tweak</strong>, the two you use most. <em>Play</em> makes the preset sound
+          (like ▶). <em>Tweak</em> opens the <a href="#editor">knobs</a>.</li>
+        <li><strong>The other actions.</strong> <em>Copy</em> makes a copy to change — it's the right way
+          to create a new preset. <em>Put in a slot</em> <strong>writes</strong> it into the amp: choose
+          the slot from the list, and from then on it's in the amp, even with the phone off.
+          <em>Add to live bank</em> adds it to the first free place in a <a href="#live">live bank</a>,
+          without touching the amp (it appears once you have at least one bank). <em>Delete</em>
+          removes it from the library (it asks first, and the amp is not touched).</li>
+        <li><strong>Family, categories and notes</strong> stay closed, and each row says what's inside.
+          Tap one to open it: family and categories go on and off with a tap, notes you type.</li>
       </ol>
-      <p>When you open one of the eight slots at the top there's also <strong>Select A1</strong> (or
-        whichever slot it is): it tells the amp to switch to that slot, without writing anything.</p>
-      <p>You change the name by typing in the field. Note: the amp keeps the old name until you write
-        the preset into a slot again.</p>
+      <p>When you open one of the slots on top there's also <strong>Select A1</strong> (or whichever
+        slot it is): it tells the amp to switch to that slot, without writing anything.</p>
+      <p>You change the name with the pencil ✎ next to it. Careful: the amp keeps the old name until
+        you write the preset into a slot again.</p>
+      <p>The card closes with the ✕, by tapping outside it, or with another tap on Presets.</p>
     </div>
   </div>
 
   <div class="confronto">
     <div>
       <h4>▶ / Play — <span class="si">trying</span></h4>
-      <p>The preset plays, but <strong>no slot changes</strong>. The amp's LED blinks: that means it's
+      <p>The preset plays, but <strong>no slot changes</strong>. The amp's LED blinks: it means it's
         playing a preset that came from the phone.</p>
       <p>Switch the amp off and everything is back as it was. Use it as much as you like.</p>
     </div>
     <div>
-      <h4>Send to HW preset — <span class="no">writing</span></h4>
-      <p>The preset goes <strong>into the amp</strong>, in the chosen slot, and replaces what was there.
-        The app asks for confirmation and tells you what you're overwriting.</p>
-      <p>The old one isn't lost: it stays in the library and reappears in the list below.</p>
+      <h4>Put in a slot — <span class="no">writing</span></h4>
+      <p>The preset goes <strong>into the amp</strong>, in the chosen slot, and replaces what was
+        there. The app asks for confirmation and tells you which one you're overwriting.</p>
+      <p>The old one isn't lost: it stays in the library and shows up again in the list below.</p>
     </div>
   </div>
 </section>
@@ -332,9 +344,9 @@
         <span style="--fam:#0a84ff">Clean</span><span style="--fam:#ff3b30">Drive</span>
         <span style="--fam:#ffd21e">Acoustic</span><span style="--fam:#bf5af2">Bass</span>
       </div>
-      <p><strong>One per preset</strong>, chosen on the card. Its colour shows on the library row, on the
-        editor's sign and on the LED of the live buttons. A preset without a family stays uncoloured.
-        The colours are yours to change: <kbd>⋯</kbd> → <strong>Categories</strong>, tap the colour.</p>
+      <p><strong>One per preset</strong>, chosen on the card. Its colour is the stripe to the left of the
+        name in the library and the dot in the filters. A preset with no family has no colour. The
+        colours are yours to change: <kbd>More</kbd> → <strong>Categories</strong>, tap the colour.</p>
     </div>
     <div>
       <h3>Categories — <em>the style</em>, or the song</h3>
@@ -342,40 +354,39 @@
         <span class="m-pastiglia attiva">Pink Floyd<i>6</i></span><span class="m-pastiglia">jazz<i>3</i></span>
         <span class="m-pastiglia">rehearsal<i>2</i></span><span class="m-pastiglia">wedding<i>9</i></span>
       </div>
-      <p><strong>As many as you like per preset.</strong> You create them from the card
-        (<em>＋ new…</em>) or from <kbd>⋯</kbd> → <strong>Categories</strong>, and they become the pills
-        that filter the library. Deleting a category removes it from the presets; the presets stay.</p>
+      <p><strong>As many as you like per preset.</strong> You create them from the card (<em>＋ new…</em>)
+        or from <kbd>More</kbd> → <strong>Categories</strong>, and they become the chips that filter the
+        library. Deleting a category removes it from the presets; the presets stay.</p>
     </div>
   </div>
 
   <h3>How presets get into the library</h3>
   <div class="confronto">
     <div>
-      <h4>📡 Read from the amp</h4>
-      <p><kbd>⋯</kbd> menu. Reads the eight slots again. It already happens by itself every time you
-        connect.</p>
+      <h4>📡 Reread the slots</h4>
+      <p>Tap the amp badge at the top. It rereads the slots. It already happens by itself every time
+        you connect.</p>
     </div>
     <div>
-      <h4>🎛️ Import current preset</h4>
-      <p><kbd>⋯</kbd> menu. Takes the sound the amp is making <em>right now</em> — even if you changed it
-        by turning the real knobs — and saves it to the library.</p>
+      <h4>🎛️ Import the sound that's playing</h4>
+      <p>From the amp badge at the top. It takes the sound the amp is making <em>right now</em> — even
+        if you changed it by turning the real knobs — and saves it in the library.</p>
     </div>
     <div>
       <h4>📦 Import a file</h4>
-      <p><kbd>⋯</kbd> → <strong>More</strong>. The official app's <code>preset_backup.zip</code>, a single
-        preset exported from there, or a backup from this app.</p>
+      <p><kbd>More</kbd> → <strong>Settings and backup</strong>. The official app's
+        <code>preset_backup.zip</code>, a single preset exported from there, or a backup of this app.</p>
     </div>
     <div>
       <h4>📄 Copy</h4>
-      <p>From a preset's card: a duplicate to bend as you please, starting from a sound that
-        works.</p>
+      <p>From a preset's card: a copy to bend however you like, starting from a sound that works.</p>
     </div>
   </div>
   <div class="nota">
-    <p><strong>Your work is never lost.</strong> If a preset you already have comes back in (the same
-      preset read again from the amp, or imported again), only its sound is updated: the library
-      name, family, categories and notes stay yours. And a preset with the same name as one you
-      already have doesn't get in twice.</p>
+    <p><strong>Your work isn't lost.</strong> If a preset you already have comes in again (the same
+      preset reread from the amp, or imported again), only its sound is updated: the library name,
+      family, categories and notes stay yours. And a preset with the same name as one you already have
+      doesn't come in twice.</p>
   </div>
 </section>
 
@@ -386,85 +397,60 @@
 
   <div class="due">
     <figure class="schermo">
-      <div class="telefono rel">
-        <span class="pin" style="left:-8px;top:68px">1</span>
-        <span class="pin" style="left:-8px;top:213px">2</span>
-        <span class="pin" style="right:-8px;top:141px">3</span>
-        <span class="pin" style="right:-8px;top:248px">4</span>
-        <div class="m-barra">
-          <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
-          <span class="m-tasto conn ok">SPARK 2</span>
-          <span class="m-tasto vista">← Presets</span>
-          <span class="m-tasto">⋯</span>
-        </div>
-        <div class="m-banchi">
-          <span class="m-bancotab">Amp</span><span class="m-bancotab attivo">Gig</span>
-          <span class="m-bancotab">Rehearsal</span><span class="m-bancotab piu">＋ bank</span>
-        </div>
-        <div class="m-pads">
-          <div class="m-pad" style="--led:#0a84ff"><span class="ledpad"></span><span class="np">1</span><span class="nm">Shine On clean</span><span class="sb">A1</span></div>
-          <div class="m-pad attivo" style="--led:#ff3b30"><span class="ledpad"></span><span class="np">2</span><span class="nm">Gilmour lead</span></div>
-          <div class="m-pad" style="--led:#0a84ff"><span class="ledpad"></span><span class="np">3</span><span class="nm">Home blues</span></div>
-          <div class="m-pad" style="--led:#ffd21e"><span class="ledpad"></span><span class="np">4</span><span class="nm">12-string folk</span></div>
-          <div class="m-pad"><span class="ledpad"></span><span class="np">5</span><span class="nm">Echoes</span><span class="sb">A2</span></div>
-          <div class="m-pad" style="--led:#ff3b30"><span class="ledpad"></span><span class="np">6</span><span class="nm">Crunch</span><span class="carica"></span></div>
-          <div class="m-pad vuoto"><span class="ledpad"></span><span class="np">7</span><span class="nm">empty</span></div>
-          <div class="m-pad vuoto"><span class="ledpad"></span><span class="np">8</span><span class="nm">empty</span></div>
-        </div>
+      <div class="telefono rel con-foto">
+        <span class="pin" style="left:-14px;top:calc(3.4% - 11px)">1</span>
+        <span class="pin" style="right:-8px;top:calc(17.5% - 11px)">2</span>
+        <span class="pin" style="left:calc(37% - 11px);top:calc(8.8% - 11px)">3</span>
+        <div class="foto"><img src="immagini/guida/live-en.webp" width="520" height="957"
+          alt="The Live view with the Amp bank: eight black buttons with a circuit drawing, four on the left (A1–A4) and four on the right (B1–B4); the one playing, B1, has a gradient border and a purple glow"></div>
       </div>
       <figcaption>A bank of eight: four per foot, left and right</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
-        <li><strong>The banks.</strong> <em>Amp</em> is the amp's eight slots, always up to date. The others
-          are yours: <em>＋ bank</em> creates a new one, with eight places.</li>
-        <li><strong>The lit button</strong> (light blue) is the preset that's playing. The dot at the top
-          has its family's colour (green if it has none), and lights up on the one that's
-          playing.</li>
-        <li><strong>The label under the name</strong> (A1, A2…) means that preset is already in the amp: it
+        <li><strong>The banks.</strong> <em>Amp</em> is the amp's eight slots, always up to date. The
+          others are yours: <em>＋ bank</em> creates a new one, with eight places.</li>
+        <li><strong>The button that's playing</strong> lights up: a blue, purple and pink gradient
+          border, a pulsing glow and current running along the circuit tracks. The others stay darker,
+          with a thin border.</li>
+        <li><strong>The label at the top</strong> (A1, A2…) means that preset is already in the amp: it
           starts <strong>instantly</strong>.</li>
-        <li><strong>Without a label</strong> the whole preset is sent over: it takes about a second, and the
-          thin bar at the bottom of the button shows the progress.</li>
       </ol>
+      <p><strong>Without a label</strong> the whole preset is sent: it takes about a second, and the
+        bar at the bottom of the button shows the progress.</p>
+      <h3>Hold to tweak it</h3>
+      <p><strong>Keep your finger on a button for two seconds</strong>: the bar at the bottom fills up
+        and the <a href="#editor">editor</a> for that preset opens, to turn the knobs without going
+        through the library. If you let go earlier nothing happens, and the long press doesn't change
+        the sound when you release. With the amp connected, opening the editor sends that preset: you
+        hear it while you tweak it. Close the editor and you're back in Live.</p>
       <div class="nota">
-        <p>For the moments where you can't wait even a second, put those presets into the amp's slots
-          with <strong>Send to HW preset</strong>: from there they start instantly, from your banks
-          too.</p>
+        <p>For the moments when you can't wait even a second, put those presets in the amp's slots
+          with <strong>Put in a slot</strong>: from there they start instantly, from your banks too.</p>
       </div>
     </div>
   </div>
 
   <h3>Building a bank</h3>
-  <div class="due">
+  <div>
     <ol class="passi">
-      <li>Pick the bank at the top, then <kbd>⋯</kbd> → <strong>Edit</strong>.</li>
+      <li>Choose the bank at the top, then tap <strong>✎ Edit</strong>, on the right of the row of banks.</li>
       <li><strong>Tap a place</strong> to choose the preset to put there (there's a search, and
-        <em>Empty the slot</em> to clear it).</li>
-      <li>To move one: tap the <span style="color:var(--gold)">⇅</span> handle on a button, then the place
-        you want it. The two swap.</li>
-      <li>To rename or delete it: in edit mode, tap the <strong>bank's name</strong>.</li>
-      <li><kbd>⋯</kbd> → <strong>Done</strong> to go back to playing.</li>
+        <em>Empty the slot</em> to free it).</li>
+      <li>To move one: tap the <span style="color:var(--gold)">⇅</span> handle on a button, then the
+        place where you want it. The two swap.</li>
+      <li>To rename or delete the bank: while editing, tap the <strong>bank's name</strong>.</li>
+      <li>Tap <strong>Done</strong>, the same button, to go back to playing.</li>
     </ol>
-    <figure class="schermo">
-      <div class="telefono">
-        <div class="m-pads" style="grid-template-rows:repeat(2, 74px)">
-          <div class="m-pad" style="--led:#0a84ff;border-color:#6b5a1e"><span class="ledpad"></span><span class="np">1</span><span class="nm">Shine On clean</span><span class="presa">⇅</span></div>
-          <div class="m-pad vuoto" style="border-color:#6b5a1e"><span class="ledpad"></span><span class="np">2</span><span class="nm" style="font-size:0.74rem">tap to choose</span></div>
-          <div class="m-pad" style="--led:#ff3b30;border-color:var(--gold);box-shadow:0 0 16px rgba(240,192,64,0.35)"><span class="ledpad"></span><span class="np">3</span><span class="nm">Gilmour lead</span><span class="presa">⇅</span></div>
-          <div class="m-pad" style="--led:#ffd21e;border-color:#6b5a1e"><span class="ledpad"></span><span class="np">4</span><span class="nm">12-string folk</span><span class="presa">⇅</span></div>
-        </div>
-      </div>
-      <figcaption>In edit mode: one tap chooses, ⇅ moves</figcaption>
-    </figure>
   </div>
   <div class="nota">
     <p><strong>Your banks never write to the amp</strong>: reorder them as much as you like, the slots
-      stay as they are. The <em>Amp</em> bank, on the other hand, can't be edited from here: it mirrors
-      the slots, and to change it you write a preset into a slot from the presets screen.</p>
+      stay as they are. The <em>Amp</em> bank can't be edited from here: it mirrors the slots, and to
+      change it you write a preset into a slot from the presets screen.</p>
   </div>
   <div class="nota">
-    <p>The Live view's menu also has <strong>Pedal</strong>: it's for the SparklingTones pedal, the Live view
-      taken off the phone and put under your foot. How to build it and how to use it:
+    <p>In the bottom bar there's also <strong>Pedal</strong>: it's for the SparklingTones pedal, the
+      Live view taken off the phone and put under your foot. How to build it and use it:
       <a href="guida-pedale.en.html"><strong>the pedal guide →</strong></a></p>
   </div>
 </section>
@@ -472,70 +458,68 @@
 <!-- ===================================================================== -->
 <section class="cap" id="editor" style="--c:#ffd21e">
   <div class="cap-testa"><span class="cap-num" style="color:#000">7</span><h2>Tweaking the sound</h2></div>
-  <p class="sotto">The knobs on your phone, and the amp answering while you play.</p>
+  <p class="sotto">The effects and the amp drawn on screen, knobs to turn with your finger, and the amp answering while you play.</p>
 
   <div class="due">
     <figure class="schermo">
-      <div class="telefono rel" style="--cat:#ffd21e">
-        <span class="pin" style="left:-8px;top:77px">1</span>
-        <span class="pin" style="left:-8px;top:124px">2</span>
-        <span class="pin" style="left:-8px;top:186px">3</span>
-        <span class="pin" style="left:-8px;top:272px">4</span>
-        <span class="pin" style="left:-8px;top:318px">5</span>
-        <span class="pin" style="right:-8px;top:400px">6</span>
-        <div class="m-barra">
-          <img class="m-logo" src="icons/logo.svg" alt="" onerror="this.style.visibility='hidden'">
-          <span class="m-tasto">Save</span>
-          <span class="m-tasto conn">Done</span>
-          <span class="m-tasto">⋯</span>
-        </div>
-        <div class="m-insegna" style="border-color:#0a84ff;box-shadow:0 0 14px rgba(10,132,255,0.7), inset 0 0 10px rgba(10,132,255,0.25)">Home blues</div>
-        <div class="m-tempo">
-          <span class="eti">TEMPO</span><span class="p">−</span>
-          <span class="bpm">96<small>bpm</small></span><span class="p">+</span><span class="tap">TAP</span>
-        </div>
-        <div class="m-catena">
-          <div class="m-tassello" style="--cat:#ff3040"><span class="acceso"></span><div class="cat">Drive</div><div class="mod">Tube Drive</div><div class="barre"><i style="height:60%"></i><i style="height:40%"></i><i style="height:70%"></i><i style="height:20%"></i></div></div>
-          <span class="m-filo"></span>
-          <div class="m-tassello fuoco" style="--cat:#ffd21e"><span class="acceso"></span><div class="cat">Amp</div><div class="mod">SwitchAxe</div><div class="barre"><i style="height:50%"></i><i style="height:60%"></i><i style="height:44%"></i><i style="height:50%"></i><i style="height:80%"></i></div></div>
-          <span class="m-filo"></span>
-          <div class="m-tassello spento" style="--cat:#17e39b"><span class="acceso"></span><div class="cat">Modulation</div><div class="mod">Chorus</div><div class="barre"><i style="height:30%"></i><i style="height:60%"></i><i style="height:40%"></i></div></div>
-          <span class="m-filo"></span>
-          <div class="m-tassello" style="--cat:#3aa0ff"><span class="acceso"></span><div class="cat">Delay</div><div class="mod">Digital</div></div>
-        </div>
-        <div class="m-blocco">
-          <div class="riga1"><span class="freccia">‹</span><span class="catn">AMP</span><span class="freccia">›</span></div>
-          <div class="m-modello">SwitchAxe — H&amp;K Switch Blade</div>
-          <div class="m-inter">on</div>
-          <div class="m-manopole">
-            <div class="manopola" data-v="0.5"><span class="nm">Gain</span><div class="vl">5.0</div></div>
-            <div class="manopola" data-v="0.6"><span class="nm">Bass</span><div class="vl">6.0</div></div>
-            <div class="manopola" data-v="0.44"><span class="nm">Middle</span><div class="vl">4.4</div></div>
-            <div class="manopola" data-v="0.5"><span class="nm">Treble</span><div class="vl">5.0</div></div>
-            <div class="manopola" data-v="0.79"><span class="nm tuo">Volume</span><div class="vl">7.9</div></div>
-          </div>
-        </div>
+      <div class="telefono rel con-foto">
+        <span class="pin" style="right:-8px;top:calc(4.3% - 11px)">1</span>
+        <span class="pin" style="left:-8px;top:calc(14.9% - 11px)">2</span>
+        <span class="pin" style="left:-8px;top:calc(27.4% - 11px)">3</span>
+        <span class="pin" style="left:-8px;top:calc(40% - 11px)">4</span>
+        <span class="pin" style="right:-8px;top:calc(69.6% - 11px)">5</span>
+        <span class="pin" style="left:-8px;top:calc(70.7% - 11px)">6</span>
+        <div class="foto"><img src="immagini/guida/editor-en.webp" width="560" height="1077"
+          alt="The editor: Save, Done and the question mark at the top; the sign with the preset's name; the tempo; the chain with the Drive, Amp and Modulation blocks; below, the Blackface Duo amp drawn with its knobs"></div>
       </div>
-      <figcaption>The editor: the chain in a row, and the chosen block below</figcaption>
+      <figcaption>The editor: the chain in a row, and the chosen block drawn below</figcaption>
     </figure>
     <div>
       <ol class="pin-elenco">
-        <li><strong>The sign</strong> with the preset's name, in its family's colour. If it says
-          <span style="color:var(--gold)">OFFLINE</span> underneath, you're tweaking without the amp
-          (see below).</li>
+        <li><strong>Save · Done · ?</strong> <em>Save</em> writes to the library, and turns red when
+          there's something to save. <em>Done</em> closes the editor. The <em>?</em> opens a short
+          reminder.</li>
+        <li><strong>The sign</strong> with the preset's name. If it says
+          <span style="color:var(--blu)">OFFLINE</span> underneath, you're tweaking without the amp (see
+          below).</li>
         <li><strong>The tempo</strong> of the preset, the one delays and modulations follow:
           <kbd>−</kbd> <kbd>+</kbd> for one bpm at a time, or <strong>TAP</strong> in time — two taps are
           enough, and the button blinks in time.</li>
-        <li><strong>The chain</strong>: the seven blocks in signal order, each in its own colour. The lit
-          dot tells you whether the block is active; the ones switched off are faded. It scrolls
-          sideways: tap a block to open it.</li>
-        <li><strong>‹ ›</strong> move to the previous or next block without going back to the chain. The
-          <strong>model name</strong> is a menu: from there you change amp, pedal or reverb type.</li>
-        <li><strong>on / off</strong>: switches the block on or bypasses it.</li>
-        <li><strong>The knobs</strong>: you turn them by <strong>dragging up or down</strong>, not in a
-          circle. Values from 0 to 10, like the real ones.</li>
+        <li><strong>The chain</strong>: the seven blocks in signal order, each with its own colour and
+          the drawing of its effect. The lit dot says whether the block is on; one that's off sits a
+          little higher, faded. It scrolls sideways: <strong>one tap</strong> opens the block below,
+          <strong>two taps</strong> change the model.</li>
+        <li><strong>The knobs</strong> turn on the drawing, <strong>by dragging up or down</strong>, not
+          in a circle. While you turn, the value shows up big above your finger.</li>
+        <li><strong>On or off</strong>: tap the switch on the drawing, an amp's ON/OFF toggle or a
+          pedal's footswitch. The light comes on with the block.</li>
       </ol>
     </div>
+  </div>
+
+  <h3>Changing the model</h3>
+  <div class="due">
+    <div>
+      <p><strong>Two taps on a block of the chain</strong> open the list of models for that block, each
+        with its drawing: choose one, and the chain and the big drawing change. On or off stays as it
+        was.</p>
+      <ul>
+        <li>For the <strong>reverb</strong> the list is the types (Room, Hall, Plate…), and each type
+          has its own drawing.</li>
+        <li>The <strong>noise gate</strong> has only one model, and two taps open nothing.</li>
+        <li>Some drawings also have <strong>toggles</strong> (on the compressors, for example): one tap
+          flips them.</li>
+        <li>The <strong>wah</strong> doesn't move with your finger: the expression pedal moves it. On the
+          drawing there are <em>Power</em> and <em>Auto</em>, which opens the six Auto Wah modes.</li>
+      </ul>
+    </div>
+    <figure class="schermo">
+      <div class="telefono con-foto stretto">
+        <div class="foto"><img src="immagini/guida/modelli-en.webp" width="440" height="481"
+          alt="The list of modulation models, each with its drawing: Tremolo, Chorus, Flanger, Phaser, Vibrato, UniVibe, Cloner Chorus"></div>
+      </div>
+      <figcaption>Two taps on Modulation: the models, with their drawings</figcaption>
+    </figure>
   </div>
 
   <h3>The seven blocks, always in the same colours</h3>
@@ -553,34 +537,33 @@
   <div class="due">
     <div>
       <ul>
-        <li><strong>You hear it straight away.</strong> With <strong>Tweak</strong> the app sends the
-          preset to the amp and reads the real state back from the amp: whatever you turn, you hear
-          while you play.</li>
-        <li><strong>Nothing is saved until you press <span class="tasto">Save</span>.</strong> Save
-          writes to the library, over that preset. If you want to keep the original too,
-          <strong>Copy first</strong> and tweak the copy.</li>
+        <li><strong>You hear it straight away.</strong> With <strong>Tweak</strong> (or by holding a
+          button in Live) the app sends the preset to the amp and reads the real state back from the amp:
+          what you turn, you hear while you play.</li>
+        <li><strong>Nothing is saved until you press <span class="tasto">Save</span>.</strong> Save writes
+          to the library, over that preset. If you want to keep the original too, <strong>Copy it
+          first</strong> and tweak the copy.</li>
         <li><strong>The amp's slot doesn't change</strong> when you save: to put the new version in the
-          amp, use <strong>Send to HW preset</strong> on the card.</li>
-        <li>If you leave with <span class="tasto conn" style="background:var(--accent)">Done</span> and
-          have unsaved changes, the app asks: <em>Save and leave</em>, <em>Leave without saving</em> or
-          <em>Back to the editor</em>.</li>
+          amp, use <strong>Put in a slot</strong> from the card.</li>
+        <li>If you leave with <span class="tasto">Done</span> and have unsaved changes, the app asks:
+          <em>Save and leave</em>, <em>Leave without saving</em> or <em>Back to the editor</em>.</li>
       </ul>
     </div>
     <div>
       <ul>
-        <li><strong>Without the amp</strong> the editor opens anyway, on the library copy: you won't hear
-          anything, but you can look at the chain, change models and knobs, and save. Handy on the
-          sofa.</li>
-        <li><strong>Knob names in italics</strong> are suggestions taken from a catalogue: the amp doesn't
-          send them. <strong>Tap the name to change it</strong>: it applies to that model in every
-          preset. The ones in plain text are the ones you named yourself.</li>
-        <li>In the editor's <kbd>⋯</kbd> menu: <strong>Re-read from the amp</strong> (if you turned the
-          real knobs on the device) and <strong>How it works</strong>, the short reminder.</li>
+        <li><strong>Without the amp</strong> the editor opens anyway, on the copy in the library: you
+          don't hear anything, but you can look at the chain, change models and knobs, and save. Handy
+          from the sofa.</li>
+        <li><strong>Turned the real knobs on the amp?</strong> To keep them, tap the amp badge at the top
+          → <strong>Import the sound that's playing</strong>.</li>
+        <li>If you don't have the Jimi Hendrix pack, tell the app in <strong>Settings and
+          backup</strong>: the models your amp can't play disappear from the list, and the wah becomes
+          the free Auto Wah.</li>
       </ul>
     </div>
   </div>
   <div class="nota att">
-    <p>Turn the knobs calmly: if too many commands arrive at once, the amp can freeze and needs to be
+    <p>Turn the knobs calmly: if too many commands arrive all at once, the amp can freeze and has to be
       switched off and on again. The library isn't affected.</p>
   </div>
 </section>
@@ -588,10 +571,10 @@
 <!-- ===================================================================== -->
 <section class="cap" id="sicuro" style="--c:#17a85a">
   <div class="cap-testa"><span class="cap-num">8</span><h2>Keeping it safe, and taking it elsewhere</h2></div>
-  <p class="sotto">The library lives in this device's browser. Here's how not to lose it.</p>
+  <p class="sotto">The library lives in the browser on this device. Here's how not to lose it.</p>
 
   <div class="nota att">
-    <p><strong>Each device has its own library.</strong> Phone and computer don't talk to each other by
+    <p><strong>Every device has its own library.</strong> Phone and computer don't talk to each other by
       themselves, and neither do two browsers on the same computer. To have the same presets
       everywhere: export and import, or Dropbox.</p>
   </div>
@@ -599,17 +582,17 @@
   <div class="confronto">
     <div>
       <h4>💾 Export / Import</h4>
-      <p><kbd>⋯</kbd> → <strong>More</strong> → <strong>Export the library</strong> downloads a
-        <code>.json</code> file with everything: presets, families, categories, notes, banks.</p>
+      <p><kbd>More</kbd> → <strong>Settings and backup</strong> → <strong>Export the library</strong>
+        downloads a <code>.json</code> file with everything: presets, families, categories, notes, banks.</p>
       <p>On the other device: <strong>Import a file</strong> and choose that file. The app asks for
         confirmation before merging it.</p>
     </div>
     <div>
       <h4>☁️ Dropbox</h4>
       <p>The same library on phone and computer, with two buttons: <strong>Send to Dropbox</strong> and
-        <strong>Get from Dropbox</strong>. Never automatic.</p>
+        <strong>Get from Dropbox</strong>. Never automatically.</p>
       <p>What comes in is <strong>merged</strong> with what you have: it updates, adds, and removes the
-        presets deleted on the other device — unless you touched them afterwards.</p>
+        presets deleted on the other device — unless you've touched them since.</p>
     </div>
   </div>
 
@@ -619,45 +602,55 @@
       <em>App folder</em>, with any name you like.</li>
     <li>In the <em>Permissions</em> tab tick <code>files.content.write</code> and
       <code>files.content.read</code>, and save.</li>
-    <li>In the <em>Settings</em> tab copy the <strong>App key</strong> (the app secret isn't needed).</li>
-    <li>In the app: <kbd>⋯</kbd> → <strong>More</strong> → paste the key → <span class="tasto rosso">Connect</span>.</li>
+    <li>In the <em>Settings</em> tab copy the <strong>App key</strong> (you don't need the app secret).</li>
+    <li>In the app: <kbd>More</kbd> → <strong>Settings and backup</strong> → paste the key →
+      <span class="tasto rosso">Connect</span>.</li>
     <li>Dropbox opens: authorise, copy the code it shows you, paste it into the app and press
-      <strong>Done</strong>. If the page doesn't open by itself, there's the <em>open it from here</em>
-      link.</li>
+      <strong>Done</strong>. If the page doesn't open by itself, there's the link <em>open it from
+      here</em>.</li>
   </ol>
 
-  <h3>The other things in “More”</h3>
+  <h3>The other things in «Settings and backup»</h3>
   <ul>
     <li><strong>Lingua · Language</strong>: Italian or English.</li>
-    <li><strong>Find duplicates</strong>: the presets with the same name, one under the other, with a
-      letter that tells you which ones sound the same. You choose which to remove.</li>
-    <li><strong>Delete all presets</strong>: empties the library <strong>except the eight in the
-      amp</strong>. The amp is not touched.</li>
+    <li><strong>Background</strong>: dark grey or black. It applies to the device you choose it on.</li>
+    <li><strong>Jimi Hendrix pack</strong>: <em>Yes</em> if you've unlocked it on the amp. With
+      <em>No</em> the Hendrix effects and the presets that use them disappear, and the wah becomes the
+      free Auto Wah. The amp's eight slots stay visible anyway: they're what's inside it.</li>
+    <li><strong>Find duplicates</strong>, in two ways. <strong>By sound</strong>: presets with the same
+      settings (effects, knobs, tempo), whatever their name. <strong>By name</strong>: the ones with the
+      same name, with a letter saying which ones sound the same. You choose which to remove. You can
+      also get there from <kbd>More</kbd> → <strong>Duplicates</strong>.</li>
+    <li><strong>Delete all presets</strong>: empties the library <strong>except the amp's
+      eight</strong>. The amp is not touched.</li>
   </ul>
   <div class="nota">
     <p>The official app's <code>preset_backup.zip</code> is in Positive Grid's folder on your Dropbox.
       Positive Grid has announced the end of that backup in 2027: <strong>copy it somewhere of your
-      own</strong> while it's still there, and import it here.</p>
+      own</strong> while it's there, and import it here.</p>
   </div>
 </section>
 
 <!-- ===================================================================== -->
 <section class="cap" id="bolli" style="--c:#c02030">
   <div class="cap-testa"><span class="cap-num">9</span><h2>The JH and Spark LIVE badges</h2></div>
-  <p class="sotto">Two small warnings, shown before you pick a preset.</p>
+  <p class="sotto">Two small warnings, which show up before you choose a preset.</p>
 
   <div class="confronto">
     <div>
       <h4><span class="bollo-jh" style="font-size:0.8rem;padding:1px 7px;margin-right:6px">JH</span> Jimi Hendrix</h4>
       <p>The preset uses an effect from the paid <strong>Jimi Hendrix</strong> pack.</p>
       <p>It works, but only <strong>after Positive Grid's official app has connected to the amp at
-        least once since it was switched on</strong>: that's what unlocks it. Until then, that effect
-        stays silent without any error.</p>
+        least once since it was switched on</strong>: that's what unlocks it. Before then, that effect
+        stays silent without giving any error.</p>
+      <p>Don't have the pack? Choose <em>No</em> for <strong>Jimi Hendrix pack</strong> in
+        <strong>Settings and backup</strong>: you won't see those presets and effects any more, and the
+        badges disappear.</p>
     </div>
     <div>
       <h4><span class="bollo-live" style="font-size:0.8rem;padding:1px 7px;margin-right:6px">Spark LIVE</span> another amp</h4>
-      <p>The preset is made for the <strong>Spark LIVE</strong>: it comes with the official app's backup,
-        but uses microphone-channel effects that the Spark 2 and the NEO don't have.</p>
+      <p>The preset is made for the <strong>Spark LIVE</strong>: it comes with the official app's
+        backup, but uses effects from the microphone channel that the Spark 2 and the NEO don't have.</p>
       <p>It stays in the library, but <strong>can't be sent</strong> to this amp.</p>
     </div>
   </div>
@@ -670,12 +663,12 @@
 
   <div class="due">
     <ul>
-      <li>The NEO has <strong>four slots, CH1–CH4</strong>, and no LEDs: at the top you see four of them,
-        two per row.</li>
+      <li>The NEO has <strong>four slots, CH1–CH4</strong>, and no LEDs: at the top you see four, two
+        per row.</li>
       <li>The app works out by itself which amp you've connected, and remembers the last one even when
-        it's switched off.</li>
-      <li>The slots shown are always those of <strong>the last amp connected</strong>: switching from the
-        Spark 2 to the NEO, the presets in B1–B4 move down into the library.</li>
+        it's off.</li>
+      <li>The slots shown are always those of <strong>the last amp connected</strong>: switching from
+        the Spark 2 to the NEO, the presets in B1–B4 move down to the library.</li>
     </ul>
     <figure class="schermo">
       <div class="telefono">
@@ -694,26 +687,26 @@
 <!-- ===================================================================== -->
 <section class="cap" id="problemi" style="--c:#3a3d45">
   <div class="cap-testa"><span class="cap-num">?</span><h2>Troubleshooting</h2></div>
-  <p class="sotto">The questions that really come up. First of all, look at the log at the bottom of the presets screen.</p>
+  <p class="sotto">The questions that really come up. First of all, look at the log at the bottom of the presets.</p>
 
   <details class="faq">
-    <summary>I tap Connect but the amp doesn't appear in the list</summary>
+    <summary>I tap Connect but the amp isn't in the list</summary>
     <div class="dentro">
       <ol>
-        <li>Is the amp already connected to someone else? Positive Grid's official app or the pedal
-          keep hold of it: close them.</li>
-        <li>Is your phone's Bluetooth on? On some Android phones Chrome also asks for permission for
-          nearby devices or location: allow it.</li>
+        <li>Is the amp already connected to something else? Positive Grid's official app or the pedal
+          hold on to it: close them.</li>
+        <li>Is the phone's Bluetooth on? On some Androids Chrome also asks for permission for nearby
+          devices or location: grant it.</li>
         <li>Are you on Chrome, Edge or Opera? Firefox and Safari don't have Bluetooth for web pages.</li>
         <li>Still nothing: switch the amp off and on again.</li>
       </ol>
     </div>
   </details>
   <details class="faq">
-    <summary>The amp no longer responds</summary>
+    <summary>The amp doesn't respond any more</summary>
     <div class="dentro">
-      <p>It can happen, especially when turning lots of knobs quickly. Unplug the amp, plug it back
-        in, and reconnect. The library loses nothing.</p>
+      <p>It can happen, especially when turning lots of knobs quickly. Unplug the amp's power, plug it
+        back in, and connect again. The library loses nothing.</p>
     </div>
   </details>
   <details class="faq">
@@ -727,40 +720,42 @@
   <details class="faq">
     <summary>On the computer I don't have the presets I have on my phone</summary>
     <div class="dentro">
-      <p>Each device, and each browser, has its own library. Carry it over with <strong>Export /
-        Import</strong> or keep them in step with <strong>Dropbox</strong>: see
+      <p>Every device, and every browser, has its own library. Take it across with
+        <strong>Export / Import</strong> or keep them in step with <strong>Dropbox</strong>: see
         <a href="#sicuro">Keeping it safe</a>.</p>
     </div>
   </details>
   <details class="faq">
-    <summary>I imported a preset but it didn't appear</summary>
+    <summary>I imported a preset but it didn't show up</summary>
     <div class="dentro">
       <p>If the library already has a preset with the same name (spaces and capitals don't count), it
-        doesn't get in a second time: the log says so. Rename the one you have, or import again.</p>
+        doesn't come in a second time: the log says so. Rename the one you have, or import again.</p>
     </div>
   </details>
   <details class="faq">
-    <summary>I turned the real knobs on the amp: how do I keep that?</summary>
+    <summary>I turned the real knobs on the amp: how do I keep them?</summary>
     <div class="dentro">
-      <p><kbd>⋯</kbd> → <strong>Import current preset</strong>: it takes the sound the amp is making right
-        now and saves it to the library (or updates the one you have, if it's the same preset).</p>
+      <p>Tap the amp badge at the top → <strong>Import the sound that's playing</strong>: it takes the
+        sound the amp is making now and saves it in the library (or updates the one that's there, if
+        it's the same preset).</p>
     </div>
   </details>
   <details class="faq">
-    <summary>A button in the Live view is off and doesn't respond</summary>
+    <summary>I tap a button in the Live view and nothing happens</summary>
     <div class="dentro">
-      <p>The buttons only light up with the amp connected, and stay still for a moment while the app
-        reads the slots right after connecting, or while another preset is still on its way.</p>
+      <p>Without the amp connected a tap doesn't play anything: the two-second long press still opens
+        the editor. With the amp, the buttons stay still for a moment while the app reads the slots
+        right after connecting, or while another preset is still being sent.</p>
     </div>
   </details>
   <details class="faq">
     <summary>I need a break</summary>
     <div class="dentro">
-      <p><kbd>⋯</kbd> → <strong>Take a break</strong>. 🐍</p>
+      <p><kbd>More</kbd> → <strong>Take a break</strong>. 🐍</p>
     </div>
   </details>
   <div class="nota">
-    <p><strong>Can't find the answer, or found a bug?</strong> <kbd>⋯</kbd> → <strong>Report a
+    <p><strong>Can't find the answer, or found a bug?</strong> <kbd>More</kbd> → <strong>Report a
       problem</strong>: write what happened and the message goes out from your email, with the app
       version and the last lines of the log attached, which help to understand it.</p>
   </div>
@@ -770,7 +765,7 @@
 
 <footer>
   SparklingTones — an independent project, with no connection to Positive Grid.<br>
-  Licences and liability: <kbd>⋯</kbd> → More → <em>About, licences and liability</em>.
+  Licences and liability: <kbd>More</kbd> → Settings and backup → <em>About, licences and liability</em>.
 </footer>
 
 <script src="guida.js"></script>

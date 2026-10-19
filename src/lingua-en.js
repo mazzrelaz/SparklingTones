@@ -15,18 +15,8 @@ window.LINGUA_EN = {
     "back to presets",
   "SparklingTones":
     "SparklingTones",
-  "CONNETTI":
-    "CONNECT",
-  "Live →":
-    "Live →",
-  "le altre azioni":
-    "more actions",
-  "Leggi dall'ampli":
-    "Read from the amp",
   "prende in libreria il suono che l'ampli sta facendo adesso; l'ampli non viene toccato":
     "adds the sound the amp is making right now to the library; the amp is not touched",
-  "Importa preset attuale":
-    "Import current preset",
   "Categorie":
     "Categories",
   "Altro":
@@ -43,10 +33,6 @@ window.LINGUA_EN = {
     "Take a break",
   "cerca un preset…":
     "search presets…",
-  "Preset hardware":
-    "Hardware presets",
-  "In libreria <span class=\"nota\" id=\"quantiLibreria\"></span>":
-    "In the library <span class=\"nota\" id=\"quantiLibreria\"></span>",
   "Fatto":
     "Done",
   "Famiglia di suono":
@@ -67,8 +53,6 @@ window.LINGUA_EN = {
     "Export the library",
   "Importa un file":
     "Import a file",
-  "Si importano i backup di quest'app (.json), il <code>preset_backup.zip</code> dell'app ufficiale e <strong>un preset singolo</strong> esportato da lì. Se ce l'hai già, se ne aggiorna il suono: tag, note e famiglia restano. Un suono che l'ampli sta già facendo non ha bisogno di nessun file: si prende con <strong>«Importa preset attuale»</strong>, nel menu «⋯».":
-    "You can import backups from this app (.json), the official app's <code>preset_backup.zip</code> and <strong>a single preset</strong> exported from there. If you already have it, its sound is updated: tags, notes and family stay. A sound the amp is already playing doesn't need any file: grab it with <strong>«Import current preset»</strong>, in the «⋯» menu.",
   "Dropbox":
     "Dropbox",
   "Due gesti espliciti, mai in automatico. Quello che arriva si <strong>fonde</strong>: aggiorna i preset che riconosce, aggiunge quelli che non ci sono, e quelli cancellati sull'altro apparecchio spariscono anche qui — a meno che tu non li abbia toccati dopo.":
@@ -89,8 +73,6 @@ window.LINGUA_EN = {
     "code from Dropbox",
   "Serve un'app tua, una volta sola: su <code>dropbox.com/developers</code>, «Create app», <em>Scoped access</em> e <em>App folder</em>; nella scheda «Permissions» spunta <code>files.content.write</code> e <code>files.content.read</code>. L'app key sta nella scheda «Settings». L'app secret non serve: una pagina come questa non potrebbe tenerlo nascosto, ed è il motivo per cui si usa PKCE.":
     "You need an app of your own, just once: on <code>dropbox.com/developers</code>, «Create app», <em>Scoped access</em> and <em>App folder</em>; in the «Permissions» tab tick <code>files.content.write</code> and <code>files.content.read</code>. The app key is in the «Settings» tab. The app secret isn't needed: a page like this one couldn't keep it hidden, which is why PKCE is used.",
-  "Fare piazza pulita":
-    "Clean slate",
   "Toglie dalla libreria tutti i preset <strong>tranne gli otto caricati sull'ampli</strong>, che restano coi loro tag e le loro note. L'ampli non viene toccato. Se usi Dropbox, al prossimo «Manda su» spariranno anche di là.":
     "Removes from the library every preset <strong>except the eight loaded on the amp</strong>, which keep their tags and notes. The amp is not touched. If you use Dropbox, at the next «Send to» they will disappear from there too.",
   "Elimina tutti i preset":
@@ -137,10 +119,6 @@ window.LINGUA_EN = {
     "<strong>paulhamsh/Spark</strong> — <em>Apache 2.0 licence</em>. The working reference from which the structure of the messages was understood. Copies of its sources are in the repository, in <code>reference/paulhamsh/</code>, with the licence alongside. <a href=\"https://github.com/paulhamsh/Spark\" target=\"_blank\" rel=\"noopener noreferrer\">github.com/paulhamsh/Spark</a>",
   "I nomi dei tipi di riverbero e dei modelli sono quelli che si leggono nell'app ufficiale, trascritti a mano per poterli riconoscere: sono citazioni, non codice.":
     "The names of the reverb types and of the models are the ones shown in the official app, copied by hand so they can be recognised: they are quotations, not code.",
-  "Salva<span class=\"solo-largo\"> in libreria</span>":
-    "Save<span class=\"solo-largo\"> to library</span>",
-  "Rileggi dall'ampli":
-    "Re-read from the amp",
   "Come funziona":
     "How it works",
   "Regola il suono":
@@ -159,10 +137,6 @@ window.LINGUA_EN = {
     "tap the tempo: two taps are enough",
   "tap":
     "tap",
-  "Si sente <strong>subito</strong>; in libreria non si salva niente finché non premi «Salva». Tocca un blocco della catena per aprirlo: dentro ci sono il modello, l'interruttore e le sue manopole.":
-    "You hear it <strong>right away</strong>; nothing is saved to the library until you press «Save». Tap a block of the chain to open it: inside are the model, the switch and its knobs.",
-  "L'ampli i nomi dei parametri non li manda: quelli <em>in corsivo</em> arrivano da una tabella e sono proposte da verificare a orecchio, quelli in chiaro li hai messi tu, i numeri sono ancora da battezzare. <strong>Tocca il nome di una manopola per cambiarlo</strong>: vale per quel modello, in ogni preset che lo usa.":
-    "The amp doesn't send the names of the parameters: the ones <em>in italics</em> come from a table and are suggestions to check by ear, the plain ones are yours, and the numbers are still waiting for a name. <strong>Tap a knob's name to change it</strong>: it applies to that model, in every preset that uses it.",
   "Scegli un preset":
     "Choose a preset",
   "Annulla":
@@ -171,30 +145,14 @@ window.LINGUA_EN = {
     "search…",
   "Svuota il posto":
     "Empty the slot",
-  "Cerca il pedale":
-    "Find the pedal",
   "non collegato":
     "not connected",
-  "Copia il log":
-    "Copy the log",
   "Stacca":
     "Disconnect",
-  "<strong>Prima apri il ponte sul pedale</strong>: tieni premuti insieme i due tasti banco per un secondo e mezzo. Resta aperto due minuti, e il display lo dice. Finché è chiuso il pedale non si annuncia, e qui non compare: serve a non far collegare chiunque passi, che gli farebbe mollare l'ampli.":
-    "<strong>First open the bridge on the pedal</strong>: hold both bank buttons together for a second and a half. It stays open for two minutes, and the display says so. While it's closed the pedal doesn't advertise itself and doesn't show up here: that way nobody passing by can connect to it and make it drop the amp.",
   "Mentre sei collegato al pedale, <em>il pedale ha mollato l'ampli</em> e non suona: è così per scelta, un padrone alla volta. Appena stacchi se lo riprende da solo. I banchi restano nel pedale anche a corrente staccata.":
     "While you're connected to the pedal, <em>the pedal has let go of the amp</em> and doesn't play: that's by design, one master at a time. As soon as you disconnect it takes the amp back by itself. Banks stay in the pedal even with the power off.",
-  "Invia":
-    "Send",
-  "Cosa c'è nel pedale":
-    "What's in the pedal",
-  "Sposta e togli quanto vuoi: qui non succede niente finché non premi <em>Aggiorna il pedale</em>. Caricare un banco invece è immediato.":
-    "Move and remove as much as you like: nothing happens until you press <em>Update the pedal</em>. Loading a bank, on the other hand, is immediate.",
   "Aggiorna il pedale":
     "Update the pedal",
-  "CONNESSO":
-    "CONNECTED",
-  "connesso":
-    "connected",
   "collega l'amplificatore via Bluetooth":
     "connect the amplifier over Bluetooth",
   "(senza nome)":
@@ -203,22 +161,12 @@ window.LINGUA_EN = {
     "red",
   "verde":
     "green",
-  "← Preset":
-    "← Presets",
-  "banco {0}":
-    "bank {0}",
   "{0} di {1}":
     "{0} of {1}",
-  "Nessun preset oltre a quelli sull'ampli. Connetti e premi «Leggi dall'ampli», oppure importa un backup da «Altro».":
-    "No presets besides the ones on the amp. Connect and press «Read from the amp», or import a backup from «More».",
   "Nessun preset corrisponde alla ricerca.":
     "No preset matches the search.",
-  "tutte":
-    "all",
   "slot {0} — LED {1} numero {2}":
     "slot {0} — LED {1} number {2}",
-  "non ancora letto":
-    "not read yet",
   "{0} — pacchetto Jimi Hendrix. Suonano solo dopo che l'app ufficiale si è connessa all'ampli almeno una volta da quando è acceso: prima restano muti, senza dare nessun errore.":
     "{0} — Jimi Hendrix pack. They only sound after the official app has connected to the amp at least once since it was switched on: until then they stay silent, without any error.",
   "manda il preset all'ampli senza sovrascrivere nessuno slot":
@@ -229,14 +177,8 @@ window.LINGUA_EN = {
     "renamed to «{0}». On the amp the name stays the old one until you write it to a slot again.",
   "famiglia di suono":
     "sound family",
-  "senza famiglia: resta senza colore.":
-    "no family: it stays without a colour.",
-  "categorie":
-    "categories",
   "＋ nuova…":
     "＋ new…",
-  "Come si chiama? La userai per filtrare la libreria dalle pastiglie in alto.":
-    "What's it called? You'll use it to filter the library with the pills at the top.",
   "Crea e assegna":
     "Create and assign",
   "blues, prove, casa…":
@@ -253,8 +195,6 @@ window.LINGUA_EN = {
     "selects the slot on the amp, without writing anything",
   "selezionato {0}":
     "selected {0}",
-  "Attiva":
-    "Play",
   "Regola":
     "Tweak",
   "manda il preset all'ampli e apri le manopole":
@@ -265,8 +205,6 @@ window.LINGUA_EN = {
     "{0} — LED {1} {2}",
   "dove scriverlo sull'ampli":
     "where to write it on the amp",
-  "Invia a preset HW":
-    "Send to HW preset",
   "sovrascrive il preset presente in quello slot":
     "overwrites the preset in that slot",
   "Scrivere <strong>{0}</strong> in {1} sull'ampli?":
@@ -285,8 +223,6 @@ window.LINGUA_EN = {
     " — full",
   "in quale banco live":
     "which live bank",
-  "Metti nel banco":
-    "Add to bank",
   "aggiunge il preset al banco live, senza toccare l'ampli":
     "adds the preset to the live bank, without touching the amp",
   "«{0}» era già in «{1}», al posto {2}":
@@ -413,10 +349,6 @@ window.LINGUA_EN = {
     "«{0}» is on the amp: go ahead and turn.",
   "posizione {0}":
     "position {0}",
-  "il blocco prima":
-    "the previous block",
-  "il blocco dopo":
-    "the next block",
   "Acustico":
     "Acoustic",
   "Basso":
@@ -429,22 +361,16 @@ window.LINGUA_EN = {
     "Got it",
   "Salva":
     "Save",
-  "tocca per mettere un altro modello in questa posizione":
-    "tap to put another model in this position",
   "{0} — serve l'ampli: la tua libreria non l'ha mai visto, quindi non sappiamo quante manopole abbia":
     "{0} — needs the amp: your library has never seen it, so we don't know how many knobs it has",
   "fuori dall'elenco Positive Grid":
     "not in the Positive Grid list",
-  "senza ampli si può mettere solo un modello che la libreria ha già visto: di quello sappiamo quante manopole ha":
-    "without the amp you can only use a model the library has already seen: for that one we know how many knobs it has",
   "non si sente finché l'app ufficiale non lo sblocca":
     "silent until the official app unlocks it",
   "acceso":
     "on",
   "spento":
     "off",
-  "tocca per cambiare tipo":
-    "tap to change type",
   "valore dell'ampli ({0})":
     "amp value ({0})",
   "«{0}», nome tuo — tocca per cambiarlo":
@@ -507,18 +433,6 @@ window.LINGUA_EN = {
     "the command went out but that block still reports {0}: the model may not exist under this name.",
   "cambio modello fallito: {0}":
     "model change failed: {0}",
-  "stai regolando la copia in libreria: non c'è nessun ampli da rileggere.":
-    "you're adjusting the library copy: there's no amp to re-read.",
-  "ampli non connesso: non c'è niente da rileggere.":
-    "amp not connected: there's nothing to re-read.",
-  "rileggo la catena dall'ampli…":
-    "re-reading the chain from the amp…",
-  "catena riletta: adesso sullo schermo c'è quello che ha l'ampli.":
-    "chain re-read: the screen now shows what the amp has.",
-  "non riesco a rileggere la catena: quello che vedi è l'ultima cosa vista.":
-    "I can't re-read the chain: what you see is the last thing seen.",
-  "✓ Salvato":
-    "✓ Saved",
   " in libreria":
     " to library",
   "il preset non è più in libreria.":
@@ -573,8 +487,6 @@ window.LINGUA_EN = {
     "The page reloads and the amp disconnects.",
   "Cambia":
     "Change",
-  "per {0} serve l'amplificatore: premi CONNETTI in alto e riprova.":
-    "to {0} you need the amplifier: press CONNECT at the top and try again.",
   "leggere gli otto slot":
     "read the eight slots",
   "lettura slot {0} di {1}…":
@@ -743,8 +655,6 @@ window.LINGUA_EN = {
     "update the pedal first",
   "fai suonare questo banco":
     "play this bank",
-  "Togli":
-    "Remove",
   "Ci sono spostamenti non ancora applicati al pedale.":
     "There are moves not yet applied to the pedal.",
   "niente da applicare":
@@ -779,8 +689,6 @@ window.LINGUA_EN = {
     "selected, copy it by hand",
   "in quale slot del pedale":
     "which pedal slot",
-  "prima apri il ponte sul pedale: tieni premuti insieme i due tasti banco per un secondo e mezzo. Resta aperto due minuti, e il display lo dice":
-    "first open the bridge on the pedal: hold both bank buttons together for a second and a half. It stays open for two minutes, and the display says so",
   "questo browser non può parlare col Bluetooth":
     "this browser can't talk to Bluetooth",
   "Su iPhone e iPad <strong>nessun browser può usare il Bluetooth</strong>: su iOS anche Chrome e Firefox girano sul motore di Apple, che non lo prevede — quindi l'amplificatore da qui non si connette. La libreria però funziona tutta: sfogliare, cercare, organizzare, importare ed esportare. Per suonare serve un telefono o un computer con Chrome, Edge o Opera.":
@@ -1132,6 +1040,167 @@ window.LINGUA_EN = {
     "Subject: {0}",
   "non riesco a copiare":
     "can't copy",
-  "☕ Offrimi un caffè":
-    "☕ Buy me a coffee",
+  // 19 ottobre 2026: l'interfaccia del 14-17 ottobre (barra in basso, scheda, Impostazioni, pedale, editor)
+  "Rileggi gli slot":
+    "Reread the slots",
+  "Importa il suono che sta suonando":
+    "Import the sound that's playing",
+  "HW PRESET":
+    "HW PRESETS",
+  "cerca un preset":
+    "search presets",
+  "modifica il banco":
+    "edit the bank",
+  "Libreria":
+    "Library",
+  "Impostazioni e backup":
+    "Settings and backup",
+  "Aiuto":
+    "Help",
+  "Offrimi un caffè":
+    "Buy me a coffee",
+  "Preset":
+    "Presets",
+  "Live":
+    "Live",
+  "Sfondo":
+    "Background",
+  "Grigio":
+    "Grey",
+  "Nero":
+    "Black",
+  "Pacchetto Jimi Hendrix":
+    "Jimi Hendrix pack",
+  "Ce l'hai sbloccato sull'ampli? Se no, gli effetti Hendrix e i preset che li usano non si vedono, e il wah è l'Auto Wah gratuito.":
+    "Have you unlocked it on the amp? If not, the Hendrix effects and the presets that use them are hidden, and the wah is the free Auto Wah.",
+  "Sì":
+    "Yes",
+  "No":
+    "No",
+  "Backup":
+    "Backup",
+  "Si importano i backup di quest'app (.json), il <code>preset_backup.zip</code> dell'app ufficiale e <strong>un preset singolo</strong> esportato da lì. Se ce l'hai già, se ne aggiorna il suono: tag, note e famiglia restano. Un suono che l'ampli sta già facendo non ha bisogno di nessun file: si prende con <strong>«Importa il suono che sta suonando»</strong>, toccando il bollino dell'ampli in alto.":
+    "You can import backups from this app (.json), the official app's <code>preset_backup.zip</code> and <strong>a single preset</strong> exported from there. If you already have it, only its sound is updated: tags, notes and family stay. A sound the amp is already making needs no file: take it with <strong>«Import the sound that's playing»</strong>, by tapping the amp badge at the top.",
+  "Funzioni nascoste":
+    "Hidden features",
+  "Per suono":
+    "By sound",
+  "Per nome":
+    "By name",
+  "Preset con <strong>le stesse impostazioni</strong>, qualunque nome abbiano: stessi effetti nello stesso ordine, accesi e spenti uguali, stesse manopole e stesso tempo. Tag, note e banchi sono di ciascuno: guarda prima di togliere.":
+    "Presets with <strong>the same settings</strong>, whatever their name: the same effects in the same order, switched on and off the same way, the same knobs and the same tempo. Tags, notes and banks belong to each one: look before you remove.",
+  "Si sente <strong>subito</strong>; in libreria non si salva niente finché non premi «Salva». Un tocco su un blocco della catena lo apre qui sotto; <strong>due tocchi</strong> cambiano il modello.":
+    "You hear it <strong>straight away</strong>; nothing is saved to the library until you press «Save». One tap on a block of the chain opens it below; <strong>two taps</strong> change the model.",
+  "Le manopole si girano sul disegno <strong>trascinando in su o in giù</strong>, non in cerchio. L'interruttore del disegno, la levetta ON/OFF o il footswitch, accende e spegne il blocco.":
+    "Turn the knobs on the drawing by <strong>dragging up or down</strong>, not in a circle. The switch on the drawing, the ON/OFF toggle or the footswitch, turns the block on and off.",
+  "Pedale SparklingTones":
+    "SparklingTones pedal",
+  "Cerca":
+    "Search",
+  "Prima apri il ponte sul pedale: tieni premuti insieme i due tasti banco per un secondo e mezzo.":
+    "First open the bridge on the pedal: hold both bank buttons together for a second and a half.",
+  "Il ponte resta aperto due minuti, e il display lo dice. Finché è chiuso il pedale non si annuncia, e qui non compare: serve a non far collegare chiunque passi, che gli farebbe mollare l'ampli.":
+    "The bridge stays open for two minutes, and the display says so. While it's closed the pedal doesn't advertise itself and doesn't show up here: that stops anyone passing by from connecting and making it let go of the amp.",
+  "Manda un banco":
+    "Send a bank",
+  "Manda al pedale":
+    "Send to the pedal",
+  "Nel pedale":
+    "In the pedal",
+  "Aggiorna tutti":
+    "Update all",
+  "▶ fa suonare subito quel banco. Spostare e togliere, dal ⋯ di ogni banco, cambiano il pedale solo quando premi «Aggiorna il pedale».":
+    "▶ plays that bank straight away. Moving and removing, from each bank's ⋯, only change the pedal when you press «Update the pedal».",
+  "Copia il log del pedale":
+    "Copy the pedal log",
+  "tocca per rileggere gli slot, importare il suono o scollegarti":
+    "tap to reread the slots, import the sound or disconnect",
+  "ordine: {0}":
+    "order: {0}",
+  "cerca fra {0} preset":
+    "search {0} presets",
+  "Nessun preset oltre a quelli sull'ampli. Collega l'ampli e i suoi si leggono da soli, oppure importa un backup da «Altro» → «Impostazioni e backup».":
+    "No presets besides the ones on the amp. Connect the amp and its presets are read automatically, or import a backup from «More» → «Settings and backup».",
+  "tutti":
+    "all",
+  "Collega l'ampli per vedere i suoi preset":
+    "Connect the amp to see its presets",
+  "suona":
+    "play",
+  "rinomina":
+    "rename",
+  "Il nuovo nome del preset.":
+    "The preset's new name.",
+  "Rinomina":
+    "Rename",
+  "Metti in uno slot":
+    "Put in a slot",
+  "Nel banco live":
+    "Add to live bank",
+  "Famiglia":
+    "Family",
+  "nessuna":
+    "none",
+  "Come si chiama? La userai per filtrare la libreria dalle pastiglie sopra l'elenco.":
+    "What's it called? You'll use it to filter the library with the chips above the list.",
+  "Note":
+    "Notes",
+  "Auto Wah":
+    "Auto Wah",
+  "spegni":
+    "switch off",
+  "accendi":
+    "switch on",
+  "Auto Wah Mode":
+    "Auto Wah Mode",
+  "Auto Detect":
+    "Auto Detect",
+  "Salvato":
+    "Saved",
+  "per {0} serve l'amplificatore: tocca «Collega» in alto e riprova.":
+    "{0} needs the amp: tap «Connect» at the top and try again.",
+  "Nessun doppione: non ci sono due preset con le stesse impostazioni.":
+    "No duplicates: there are no two presets with the same settings.",
+  "Stesso suono, {0} preset":
+    "Same sound, {0} presets",
+  "(tutti gli effetti spenti)":
+    "(all effects off)",
+  " Sta sull'ampli in {0}: l'ampli non viene toccato, e alla prossima lettura tornerà in libreria.":
+    " It's on the amp in {0}: the amp is not touched, and it will come back to the library the next time the slots are read.",
+  "Eliminare <strong>{0}</strong>, entrato il {1}? Gli altri con lo stesso suono restano.":
+    "Delete <strong>{0}</strong>, added on {1}? The others with the same sound stay.",
+  "da aggiornare sul pedale: {0}":
+    "to update on the pedal: {0}",
+  "«{0}» è cambiato nell'app: collegati al pedale e aggiornalo.":
+    "«{0}» has changed in the app: connect to the pedal and update it.",
+  "{0} banchi sono cambiati nell'app ({1}): collegati al pedale e aggiornali.":
+    "{0} banks have changed in the app ({1}): connect to the pedal and update them.",
+  "collegato: {0}":
+    "connected: {0}",
+  "cambiato nell'app":
+    "changed in the app",
+  "rimanda «{0}» al pedale, così com'è adesso nell'app":
+    "send «{0}» to the pedal again, as it is in the app now",
+  "altre azioni":
+    "more actions",
+  "Sposta su":
+    "Move up",
+  "Sposta giù":
+    "Move down",
+  "Togli dal pedale":
+    "Remove from the pedal",
+  "banco {0} del pedale — {1}":
+    "pedal bank {0} — {1}",
+  "{0} banchi sono cambiati nell'app":
+    "{0} banks have changed in the app",
+  "Scrivi la password per sbloccare le funzioni in prova.":
+    "Type the password to unlock the features being tested.",
+  "password":
+    "password",
+  "Sblocca":
+    "Unlock",
+  "Password sbagliata":
+    "Wrong password",
+  "Non è quella giusta: niente è cambiato.":
+    "That's not the right one: nothing has changed.",
 };
