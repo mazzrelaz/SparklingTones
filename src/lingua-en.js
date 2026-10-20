@@ -691,8 +691,10 @@ window.LINGUA_EN = {
     "which pedal slot",
   "questo browser non può parlare col Bluetooth":
     "this browser can't talk to Bluetooth",
-  "Su iPhone e iPad <strong>nessun browser può usare il Bluetooth</strong>: su iOS anche Chrome e Firefox girano sul motore di Apple, che non lo prevede — quindi l'amplificatore da qui non si connette. La libreria però funziona tutta: sfogliare, cercare, organizzare, importare ed esportare. Per suonare serve un telefono o un computer con Chrome, Edge o Opera.":
-    "On iPhone and iPad <strong>no browser can use Bluetooth</strong>: on iOS even Chrome and Firefox run on Apple's engine, which doesn't support it — so the amplifier can't connect from here. The library still works fully: browsing, searching, organising, importing and exporting. To play you need a phone or computer with Chrome, Edge or Opera.",
+  "Su iPhone e iPad <strong>Safari e Chrome non possono usare il Bluetooth</strong>, quindi l'amplificatore da qui non si connette. Si connette invece da <strong>Bluefy</strong>, un browser gratuito dell'App Store: aprila lì, a questo stesso indirizzo. Qui la libreria funziona lo stesso: sfogliare, cercare, organizzare, importare ed esportare.":
+    "On iPhone and iPad <strong>Safari and Chrome can't use Bluetooth</strong>, so the amplifier can't connect from here. It does connect from <strong>Bluefy</strong>, a free browser on the App Store: open the app there, at this same address. Here the library still works: browsing, searching, organising, importing and exporting.",
+  "il browser non ha detto perché":
+    "the browser didn't say why",
   "Questo browser non ha il Bluetooth per le pagine web, quindi l'amplificatore da qui non si connette. La libreria funziona tutta lo stesso. Con Chrome, Edge o Opera aggiornati, su Android o su computer, si connette.":
     "This browser doesn't offer Bluetooth to web pages, so the amplifier can't connect from here. The library still works fully. With an up-to-date Chrome, Edge or Opera, on Android or on a computer, it connects.",
   "Web Bluetooth non disponibile: la libreria resta consultabile, ma non si può leggere dall'ampli.":

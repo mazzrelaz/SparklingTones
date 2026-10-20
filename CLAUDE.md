@@ -379,8 +379,7 @@ estratti del 20 ottobre.
 **iPhone e iPad con Bluefy (20 ottobre 2026)**: si collega e, dice l'utente su iPad, «sembra
 funzionare tutto». Servivano gli **UUID interi** dello Spark (quelli corti li prende solo Chrome).
 Bluefy non usa il service worker: il nuovo arriva dopo i 10 minuti di cache di GitHub. App, guida,
-README e sito (italiano) consigliano Bluefy; **la parte inglese è rimasta indietro** finché l'utente
-non dice di aggiornarla. Dettaglio: `docs/decisioni-ui.md`, «Su iPhone e iPad».
+README e sito consigliano Bluefy, in italiano e in inglese (aggiornato su richiesta dell'utente). Dettaglio: `docs/decisioni-ui.md`, «Su iPhone e iPad».
 
 **Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
 **solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,
