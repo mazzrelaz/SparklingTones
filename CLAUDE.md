@@ -310,6 +310,8 @@ i quattro suoni della metà corrente, il quinto cambia metà senza toccare il su
 - **Il formato del banco sta in `src/pedale-ponte.js` e `banchi.h`, che cambiano insieme**, impronta
   compresa (FNV-1a 32 bit, `bancoImpronta` / `impronta`). `banchi.h` legge byte non nostri:
   offset e lunghezze vanno verificati.
+- **Il tasto banco cambia banco al rilascio** (2.24): tenuto due secondi da solo apre il tuner, che
+  si chiude con un tasto qualunque (`12-tuner.ino`, `docs/pedale-lavoro.md`). **Da provare sul pedale.**
 - **La mappa di pulsanti e LED non si scrive a mente** (mappatura guidata di `prova-espansore`, e
   si chiede la foto). **I nomi dei pezzi sono fissi** (basetta, XIAO, espansore, pista, pettine,
   linea, pannello, scatola, cavo, piastrina LED, footswitch, tasti banco, pulsanti; vietati

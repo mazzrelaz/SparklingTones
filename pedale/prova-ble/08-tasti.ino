@@ -12,6 +12,15 @@ static void annuncia();                    // sta col ponte, piu' giu'
 static void cambiaModo() {
   modo = modo == MODO_MIDI ? MODO_SPARK : MODO_MIDI;
   looper = false;
+  // Il tuner si chiude, e l'ampli torna a suonare prima che il pedale lo lasci.
+  if (tunerAcceso && chScrittura) {
+    const uint8_t c2 = 0xc2;
+    uint8_t frame[16];
+    manda(frame, costruisci(0x01, 0x65, &c2, 1, frame));
+    tunerAcceso = false;
+  }
+  tuner = false;
+  bancoInAttesa = -1;
   ricordaModo();
   inCoda = -1;
   if (modo == MODO_MIDI) {
@@ -70,6 +79,16 @@ static void leggiTasto() {
     const uint8_t bit = (uint8_t)(1 << LINEA_PULSANTE[k]);
     const bool giuPrima = !(prima & bit);
     const bool giuOra   = !(ingressi & bit);
+    // Il rilascio conta solo per il tasto banco: cambia banco quando si lascia,
+    // se non e' stato tenuto per il tuner o usato con l'altro per il ponte.
+    if (giuPrima && !giuOra) {
+      if ((int8_t)k == bancoInAttesa) {
+        bancoInAttesa = -1;
+        if (!bancoAnnullato && !tuner && !looper && modo == MODO_SPARK && chScrittura)
+          cambiaBanco(k == BANCO_DX ? +1 : -1);
+      }
+      continue;
+    }
     if (!giuOra || giuPrima) continue;                     // solo le pressioni
     pressioniViste++;
 
@@ -83,6 +102,9 @@ static void leggiTasto() {
       continue;
     }
 
+    // Nel tuner un tasto qualunque esce, e non fa altro.
+    if (tuner) { esciTuner(); continue; }
+
     // FS5 tenuto tre secondi entra nel looper (lo guarda il loop): la meta'
     // cambiata alla pressione allora si rimette com'era.
     if (k == FS5) {
@@ -91,13 +113,17 @@ static void leggiTasto() {
       continue;
     }
     // I due tasti banco insieme sono la combinazione che apre il ponte:
-    // mentre l'altro e' premuto, questo non cambia banco.
+    // mentre l'altro e' premuto, questo non cambia banco, e nemmeno l'altro.
     if (k == BANCO_SX || k == BANCO_DX) {
       const uint8_t altro = (k == BANCO_SX) ? BANCO_DX : BANCO_SX;
-      if (!(ingressi & (uint8_t)(1 << LINEA_PULSANTE[altro]))) continue;
+      if (!(ingressi & (uint8_t)(1 << LINEA_PULSANTE[altro]))) { bancoAnnullato = true; continue; }
       if (!chScrittura && !sganciato) { scegliAmpli(k == BANCO_DX ? AMPLI_NEO : AMPLI_SPARK2); continue; }
       if (looper) { looperBattute(k == BANCO_DX ? +1 : -1); continue; }
-      cambiaBanco(k == BANCO_DX ? +1 : -1);
+      // Il banco cambia al rilascio (qui sopra); tenuto due secondi, il loop
+      // apre invece il tuner (20 ottobre 2026).
+      bancoInAttesa = (int8_t)k;
+      bancoPremutoDa = millis();
+      bancoAnnullato = false;
       continue;
     }
     if (looper) { looperPremuto(k); continue; }

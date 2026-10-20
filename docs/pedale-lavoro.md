@@ -182,6 +182,26 @@ datasheet MCP23017): 0 errori. DRC con `kicad-cli`: pulito. Anteprime PNG in `pc
   10 pezzi, blu, FR4 TG135, 1,6 mm, LeadFree HASL, 1 oz, Tented, Remove Mark, niente assemblaggio
   (la promo è solo SMT). **Non provata sull'hardware.**
 
+## Il tuner sul pedale — 20 ottobre 2026 (firmware 2.24, da provare)
+
+Chiesto dall'utente dopo quello dell'app. **Un tasto banco, l'uno o l'altro, tenuto da solo due
+secondi** entra nel tuner; **un tasto qualunque** esce (e non fa altro). Per questo **il tasto banco
+cambia banco al rilascio**, non piu' alla pressione: tenuto, o premuto insieme all'altro (ponte), al
+rilascio non cambia niente. Senza Spark e nel looper i tasti banco fanno quello di prima (scelta
+dell'ampli, battute) e il tuner non si apre. Solo modalita' Spark.
+
+Comandi come nell'app: `0x0165 c3`/`c2` senza `0x00`, letture `0x0364` copiate nel callback e
+smussate nel loop (`12-tuner.ino`: nota nuova dopo due letture uguali, 0,75 di smussatura, intonata
+entro ±2 cent, silenzio dopo 4 letture a -1). L'ampli muto solo a tuner aperto; se cade col tuner
+acceso, al ritorno lo si spegne; passando in MIDI si spegne prima di lasciare l'ampli.
+
+**Display** (128×64): «Tuner» nella riga in alto, sotto un arco di 21 tacche (una ogni 5 cent, ±60°),
+quella dove sta la corda lunga e spessa (due se sta in mezzo), quella del centro piu' lunga; la nota
+in `logisoso24` (il diesis piccolo accanto), **in negativo quando e' intonata**; i cent in basso a
+destra. Si ridisegna solo se cambia, al massimo 10 volte al secondo. **LED**: tutti verdi a corda
+intonata; rosso su FS1 (calante oltre 15 cent), FS2 (calante), FS3 (crescente), FS4 (crescente oltre
+15). **Compilato e caricato, non ancora provato col pedale e l'ampli.**
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni

@@ -210,6 +210,12 @@ void loop() {
       insiemeDa = 0;
     }
   }
+  /* Un tasto banco tenuto da solo per due secondi apre il tuner: al rilascio
+   * non cambiera' banco (bancoAnnullato). */
+  if (bancoInAttesa >= 0 && !bancoAnnullato && millis() - bancoPremutoDa > TUNER_TENUTO_MS) {
+    bancoAnnullato = true;
+    entraTuner();
+  }
   /* FS1 e FS4 tenuti insieme per un secondo e mezzo cambiano modalita'. */
   {
     static uint32_t insiemeDa = 0;
@@ -315,6 +321,8 @@ void loop() {
     daLeggere = false;
     leggiAmpli();
   }
+
+  sbrigaTuner();
 
   // Il looper: prima com'e' messo (0x0275, la risposta e' un 0x0375), poi il
   // comando del footswitch. Un frame da nove byte, 0x0175 senza 0x00 in coda.

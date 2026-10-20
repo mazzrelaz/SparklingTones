@@ -93,6 +93,20 @@ static void aggiornaLed() {
     mcpScrivi(MCP_OLATB, maschera);
     return;
   }
+  /* Nel tuner i LED fanno da lancetta, per chi guarda in giu': tutti verdi a
+   * corda intonata; rosso a sinistra se cala (FS1 lontano, FS2 vicino), a
+   * destra se cresce (FS3 vicino, FS4 lontano). Spenti senza suono. */
+  if (tuner) {
+    if (tunerNota >= 0 && tunerSilenzi < 4) {
+      const float c = tunerCent;
+      if (c >= -TUNER_INTONATA && c <= TUNER_INTONATA)
+        for (uint8_t led = 0; led < 4; led++) maschera |= (uint8_t)(1 << LINEA_VERDE[led]);
+      else
+        maschera = (uint8_t)(1 << LINEA_ROSSO[c < -15 ? 0 : c < 0 ? 1 : c <= 15 ? 2 : 3]);
+    }
+    mcpScrivi(MCP_OLATB, maschera);
+    return;
+  }
   /* Nel looper: rosso su FS1 mentre registra o sovraincide, verde su FS3 mentre
    * il loop suona, verde su FS4 da fermo col loop pronto. */
   if (looper) {

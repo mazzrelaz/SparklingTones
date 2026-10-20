@@ -304,6 +304,8 @@ static void disegnaSchermo() {
                              ? (pontefino - millis()) / 1000 : 0;
     snprintf(testa, sizeof(testa), TESTO("ponte %lu:%02lu", "bridge %lu:%02lu"),
              (unsigned long)(restano / 60), (unsigned long)(restano % 60));
+  } else if (tuner) {
+    snprintf(testa, sizeof(testa), "Tuner");   // come nell'app, nelle due lingue
   } else if (looper) {
     // Il bpm, e «libero» quando la lunghezza non e' fissata in battute.
     if (!loopBpm)        snprintf(testa, sizeof(testa), "Looper");
@@ -367,6 +369,12 @@ static void disegnaSchermo() {
       const uint8_t quanti = (uint8_t)((millis() / 400) % 4);
       for (uint8_t k = 0; k < quanti; k++) schermo.drawBox(x + largo - 16 + k * 6, 50, 2, 2);
     }
+    schermo.sendBuffer();
+    return;
+  }
+
+  if (tuner) {
+    disegnaTuner();
     schermo.sendBuffer();
     return;
   }

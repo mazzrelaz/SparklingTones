@@ -125,6 +125,20 @@ static void messaggioIntero(const uint8_t* m, size_t n) {
       impostazioniNuove = true;
     }
   }
+  // Il tuner (0x0364): nota 0-11 e scostamento float 0xca, ~13 al secondo.
+  // Qui si copiano e basta: le smussa e le disegna il loop (12-tuner.ino).
+  if (n >= 8 && m[4] == 0x03 && m[5] == 0x64) {
+    uint8_t d[8];
+    if (spacchetta(m + 6, n - 7, d, sizeof(d)) >= 6 && d[0] < 12 && d[1] == 0xca) {
+      const uint32_t b = (uint32_t)d[2] << 24 | (uint32_t)d[3] << 16 | (uint32_t)d[4] << 8 | d[5];
+      float f;
+      memcpy(&f, &b, 4);
+      tunerNotaGrezza = d[0];
+      tunerScostGrezzo = f;
+      tunerLetture++;
+    }
+    return;                                // tredici al secondo: niente seriale
+  }
   // La posizione nel loop (0x0377): un float 0xca.
   if (n >= 8 && m[4] == 0x03 && m[5] == 0x77) {
     uint8_t d[8];
