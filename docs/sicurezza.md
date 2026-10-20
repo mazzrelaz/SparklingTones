@@ -4,6 +4,13 @@ Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync D
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
 
+## Il tuner sul pedale — 20 ottobre 2026 (firmware 2.24)
+
+`0x0364` si legge nel callback con `spacchetta` in un buffer da 8 byte (il limite e' passato), e
+si accetta solo con almeno 6 byte, nota sotto 12 e `ca` davanti al float; il loop scarta scostamenti
+negativi o NaN e taglia oltre 1. Il disegno usa la nota come indice di una tabella fissa da 12. Verso
+l'ampli parte solo `0x0165` col booleano. Niente da correggere.
+
 ## Il tuner — 20 ottobre 2026
 
 `src/app/16-accordatore.js` e `Spark.letturaAccordatore`. Verso l'ampli parte solo `0x0165` con un
