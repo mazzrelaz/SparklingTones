@@ -408,7 +408,7 @@ collegato e pagina in vista** (`seguiAccordatore`). Grafica in sei giri di bozza
 arco di 21 tacche al neon sul fondo della pagina, nota, cent fra i due, niente scritte
 (`docs/decisioni-ui.md`, «Il tuner»). Provato sull'ampli dall'utente. Sonda: `tools/accordatore-sonda.html`. **Nelle quattro guide** dal 20 ottobre
 (capitolo «Accordare»/«Il tuner», `immagini/guida/tuner.webp`, una per le due lingue; guscio `v132`; inglese
-aggiornato su richiesta dell'utente).
+aggiornato su richiesta dell'utente) e **sul sito** (sito `1a84ced`).
 
 **Collaudi ancora aperti** (editor
 con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
