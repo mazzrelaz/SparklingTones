@@ -363,7 +363,8 @@ function comandoPedale(...byte) {
 }
 
 function rispostaPedale(e) {
-  const v = new Uint8Array(e.target.value.buffer);
+  const dv = e.target.value;
+  const v = new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength);
   const testo = new TextDecoder().decode(v.subarray(1));
   if (v[0] === 0x83) {                       // l'impronta di un banco, prima dell'elenco
     const { slot, impronta } = PedalePonte.leggiImpronta(testo);
@@ -424,8 +425,8 @@ async function collegaPedale() {
     statoPedale(false, tr('non collegato'));
     // Il caso più probabile non è un guasto: il ponte del pedale è chiuso, e
     // un pedale che non si annuncia non compare nell'elenco del browser.
-    const scelto = /cancell|chosen|user/i.test(err.message || '');
-    logPedale(tr('connessione fallita: {0}', err.message) +
+    const scelto = /cancell|chosen|user/i.test(testoErrore(err));
+    logPedale(tr('connessione fallita: {0}', testoErrore(err)) +
               (scelto ? tr(' — se nell\'elenco non c\'era nessun pedale, apri il ponte: ' +
                         'due tasti banco insieme per un secondo e mezzo') : ''));
   }

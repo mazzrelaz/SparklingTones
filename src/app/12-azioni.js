@@ -205,7 +205,7 @@ $('status').addEventListener('click', async () => {
     // dell'utente, quindi farlo in automatico non costa niente.
     await leggiDallAmpli();
   } catch (err) {
-    logLine(tr('errore: {0}', err.message));
+    logLine(tr('errore: {0}', testoErrore(err)));
   }
 });
 

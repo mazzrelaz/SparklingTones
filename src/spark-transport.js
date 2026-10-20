@@ -116,7 +116,10 @@ window.SparkTransport = (function () {
 
       await this.notifyChar.startNotifications();
       this.notifyChar.addEventListener('characteristicvaluechanged', e => {
-        this.assembler.feed(new Uint8Array(e.target.value.buffer));
+        // Con offset e lunghezza: un DataView può guardare solo un pezzo del
+        // suo buffer (non in Chrome, ma non è garantito dagli altri browser).
+        const dv = e.target.value;
+        this.assembler.feed(new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength));
       });
 
       this._connessoDa = Date.now();
@@ -160,15 +163,28 @@ window.SparkTransport = (function () {
       }
 
       this.sendChain = this.sendChain.then(async () => {
-        await this.writeChar.writeValueWithoutResponse(bytes);
+        await this._scrivi(bytes);
         this._ultimoTx = Date.now();
         this.onLog(`TX 0x${hex(command.cmd)}${hex(command.sub)} seq=0x${hex(seq)} ${bytes.length}B`);
         await sleep(SEND_GAP_MS);
       }).catch(err => {
-        this.onLog(tr('errore invio: {0}', err.message));
+        this.onLog(tr('errore invio: {0}', (err && err.message) || String(err)));
       });
 
       return this.sendChain.then(() => seq);
+    },
+
+    /**
+     * Una write BLE. La caratteristica accetta solo writeWithoutResponse; un
+     * browser che non ha `writeValueWithoutResponse` (Bluefy su iPhone, forse)
+     * ripiega su `writeValue`, che sceglie da sé il tipo che la caratteristica
+     * dichiara. In Chrome non cambia niente.
+     */
+    _scrivi(bytes) {
+      if (typeof this.writeChar.writeValueWithoutResponse === 'function') {
+        return this.writeChar.writeValueWithoutResponse(bytes);
+      }
+      return this.writeChar.writeValue(bytes);
     },
 
     /**
@@ -193,7 +209,7 @@ window.SparkTransport = (function () {
 
       this.sendChain = this.sendChain.then(async () => {
         for (let i = 0; i < bytes.length; i += passo) {
-          await this.writeChar.writeValueWithoutResponse(bytes.subarray(i, i + passo));
+          await this._scrivi(bytes.subarray(i, i + passo));
         }
         this._ultimoTx = Date.now();
         const pezzi = Math.ceil(bytes.length / passo);
@@ -201,7 +217,7 @@ window.SparkTransport = (function () {
                    `${bytes.length}B in ${pezzi} scritture da ${passo}`);
         await sleep(SEND_GAP_MS);
       }).catch(err => {
-        this.onLog(tr('errore invio: {0}', err.message));
+        this.onLog(tr('errore invio: {0}', (err && err.message) || String(err)));
       });
 
       return this.sendChain.then(() => seq);

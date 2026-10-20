@@ -32,6 +32,19 @@ function logLine(msg, risposta) {
   statoDelPannello(msg, risposta);
 }
 
+/* Il testo di un errore qualunque. Non tutti i browser rifiutano con un Error:
+ * Bluefy su iPhone (20 ottobre 2026) rifiuta con qualcos'altro, e `err.message`
+ * scriveva «undefined» senza dire niente. */
+function testoErrore(err) {
+  if (err === undefined || err === null || err === '') return tr('il browser non ha detto perché');
+  if (err && typeof err.message === 'string' && err.message) return err.message;
+  if (err && err.name) return String(err.name);
+  if (err && typeof err === 'object') {
+    try { return JSON.stringify(err); } catch (e) { /* si ripiega sotto */ }
+  }
+  return String(err);
+}
+
 /** Riga di avanzamento: la successiva la sostituisce invece di accodarsi. */
 function logProgress(msg) {
   if (logProvvisorio) righeLog.pop();
