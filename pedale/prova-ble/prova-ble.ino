@@ -455,12 +455,13 @@ static uint8_t tunerSilenzi = 0;
  * tiene acceso il pedale), non a uno spegnimento. 'N' dal seriale le stampa.
  * Le letture del tuner (0x0364) e la posizione del loop (0x0377) non ci entrano,
  * sono troppe: si contano. */
-static const uint8_t SCATOLA_RIGHE = 120;
+static const uint16_t SCATOLA_RIGHE = 400;
 static char          scatola[SCATOLA_RIGHE][60];
 static volatile uint32_t scatolaPos = 0;
 static portMUX_TYPE  scatolaMux = portMUX_INITIALIZER_UNLOCKED;
 static volatile uint32_t ackPreset = 0;        // gli ack veri dei pezzi di un preset (04 01 / 05 01)
 static volatile uint32_t ack0138 = 0;          // gli ack del cambio preset (04 38)
+static uint32_t atteso0138 = 0, atteso0138Da = 0;  // un 0x0138 mandato, che aspetta il suo ack
 static int8_t   bancoInAttesa = -1;            // il tasto banco premuto, che cambia al rilascio
 static uint32_t bancoPremutoDa = 0;
 static bool     bancoAnnullato = false;        // combinazione o tuner: al rilascio niente

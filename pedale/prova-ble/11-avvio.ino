@@ -324,6 +324,17 @@ void loop() {
   }
 
   sbrigaTuner();
+  /* Il segno che l'ampli si sta inceppando (20 ottobre 2026): un cambio di
+   * preset che in un secondo non riceve il suo 04 38. Prima di piantarsi del
+   * tutto l'ampli conferma ancora i pezzi del preset ma non il cambio. */
+  if (atteso0138Da) {
+    if (ack0138 >= atteso0138) atteso0138Da = 0;
+    else if (millis() - atteso0138Da > 1000) {
+      atteso0138Da = 0;
+      annota("!! cambio preset senza conferma (rx totali %lu)", (unsigned long)rxTotali);
+      Serial.println(F("!! cambio preset senza conferma dall'ampli"));
+    }
+  }
 
   // Il looper: prima com'e' messo (0x0275, la risposta e' un 0x0375), poi il
   // comando del footswitch. Un frame da nove byte, 0x0175 senza 0x00 in coda.
@@ -442,6 +453,8 @@ void loop() {
     // La scatola nera, e il tuner aperto e chiuso dal PC per le prove (2.26).
     else if (c == 'N') stampaScatola();
     else if (c == 'T') { if (tuner) esciTuner(); else entraTuner(); }
+    else if (c == 'L') cambiaLooper();               // il looper dal PC, per le prove
+    else if (c == 'Y') { if (looper) looperTap(); }  // un colpo di tap tempo
     else if (c == '?') elenco();
   }
   // 2 ms, non 10: una battuta secca su un tattile puo' durare pochi

@@ -302,6 +302,8 @@ static bool cambiaPreset(uint8_t slot) {
   uint8_t dati[2] = { 0x00, slot };
   uint8_t frame[32];
   size_t n = costruisci(0x01, 0x38, dati, sizeof(dati), frame);
+  atteso0138 = ack0138 + 1;              // il loop guarda che arrivi (scatola nera)
+  atteso0138Da = millis() | 1;
   return manda(frame, n);
 }
 
