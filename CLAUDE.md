@@ -374,17 +374,9 @@ vere** dell'app (`immagini/guida/`, `*-en.webp` per l'inglese; sul sito `media/a
 disegno a mano dei pulsantoni «non è così che si vede», dice l'utente. Per rifarle: preset finti, la
 schermata dal riquadro, poi `ritaglia` con Edge headless (canvas → WebP) come `tools/togli-sfondo`.
 `lingua-en.js` allineato (81 frasi nuove, 47 tolte). Il
-video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio. **Video demo inglese nuovo** (19 ottobre, 2:27,
-voce sintetica Kokoro): «SparklingTones demo English 2026-10-19.mp4» sul Desktop; copione rifatto in
-`tools/video-demo/registra.js` (doppio tocco entro 400 ms, pressione lunga), Kokoro nello scratchpad. **Video del pedale** (1:46, orizzontale; looper con battute libere e cambio di preset fra prima parte e sovraincisione): «SparklingTones pedal demo English
-2026-10-19.mp4», pedale disegnato da `tools/video-demo/pedale-video.html` (forma dalle foto,
-scritte del firmware), `pedale-video.js` lo registra; voce da `pedale-voce.en.json` (`--testo`). **In italiano** (19 ottobre): «SparklingTones demo Italiano»
-(2:31) e «SparklingTones pedale demo Italiano» (1:57) sul Desktop; **voce di OpenAI** (`gpt-4o-mini-tts`, alloy,
-chiave dell'utente) fatta con `tools/video-demo/voce-openai.html` + `voce-openai.js` (porta 8125; aperta da altri
-indirizzi non salva); il finale dice «voce generata con IA» (regola di OpenAI). **Le voci locali italiane
-(Kokoro Nicola/Sara, Windows Elsa, Piper Paola/Riccardo) bocciate tutte dall'utente**. **Su YouTube** (pubblicati il 19 ottobre, guscio
-`v121`): app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow` (shorts), pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`; nel sito
-e in cima alle quattro guide («Guarda il video», in un'altra scheda).
+video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio. **Video**: quattro su YouTube (19 ottobre, guscio `v121`: app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow`,
+pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`), nel sito e in cima alle guide; come si rifanno
+(`tools/video-demo/`, voce OpenAI per l'italiano, voci locali bocciate) in `docs/diario.md`.
 
 **«Genera con l'IA» tolta il 19 ottobre 2026** (guscio `v122`; «mi crea solo problemi», l'utente):
 via `16-genera-ia.js`, la voce del menu, «Funzioni nascoste», il pannello e i suoi stili; OpenAI e

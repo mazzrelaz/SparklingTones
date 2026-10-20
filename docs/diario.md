@@ -944,3 +944,17 @@ sito o della guida: prima la bozza.
 ## Estratto da CLAUDE.md, 19 ottobre 2026 — «Genera con l'IA», tolta quel giorno
 
 Guscio `v118` (17 ottobre): **«Genera con l'IA»** (`16-genera-ia.js`), **nascosta**: la voce del menu Altro compare solo dopo «Funzioni nascoste» in Impostazioni, con la password dell'utente (nel codice solo l'impronta SHA-256; la password **non si scrive mai** nel repository). Giudizio dell'utente: «non fa miracoli ma non è male». OpenAI (Luna/Sol/Astra, Sol predefinito; **misurato: Sol 1 centesimo, Astra 7-8**) o Anthropic (Haiku/Sonnet/Opus 5.5, Opus predefinito, `fallbacks: "default"`; **Anthropic mai provato con una chiave vera**), chiavi dell'utente in `localStorage`, spiegazione e disclaimer nel pannello. **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta), risposta a schema con `enum` dei MODELLI, preset costruito sopra uno vero della libreria come il Duplica, salvato solo con «Salva in libreria».
+
+## Estratto da CLAUDE.md, 20 ottobre 2026 — i video del 19 ottobre
+
+**Video demo inglese nuovo** (19 ottobre, 2:27,
+voce sintetica Kokoro): «SparklingTones demo English 2026-10-19.mp4» sul Desktop; copione rifatto in
+`tools/video-demo/registra.js` (doppio tocco entro 400 ms, pressione lunga), Kokoro nello scratchpad. **Video del pedale** (1:46, orizzontale; looper con battute libere e cambio di preset fra prima parte e sovraincisione): «SparklingTones pedal demo English
+2026-10-19.mp4», pedale disegnato da `tools/video-demo/pedale-video.html` (forma dalle foto,
+scritte del firmware), `pedale-video.js` lo registra; voce da `pedale-voce.en.json` (`--testo`). **In italiano** (19 ottobre): «SparklingTones demo Italiano»
+(2:31) e «SparklingTones pedale demo Italiano» (1:57) sul Desktop; **voce di OpenAI** (`gpt-4o-mini-tts`, alloy,
+chiave dell'utente) fatta con `tools/video-demo/voce-openai.html` + `voce-openai.js` (porta 8125; aperta da altri
+indirizzi non salva); il finale dice «voce generata con IA» (regola di OpenAI). **Le voci locali italiane
+(Kokoro Nicola/Sara, Windows Elsa, Piper Paola/Riccardo) bocciate tutte dall'utente**. **Su YouTube** (pubblicati il 19 ottobre, guscio
+`v121`): app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow` (shorts), pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`; nel sito
+e in cima alle quattro guide («Guarda il video», in un'altra scheda).
