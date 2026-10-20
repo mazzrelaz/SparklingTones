@@ -398,8 +398,9 @@ mai a mano), DRC pulito con `kicad-cli`, anteprime PNG accanto. Scheda **generic
 tutto a foro passante, XIAO e **MCP23017 DIP-28** su zoccolo, resistenze dei LED sulla scheda, JST-XH con
 **G sul piedino 1**, morsetto cella + presa «BAT XIAO», pettine LIBERI. Linee nuove: FS1..FS4 = GPA6..GPA3,
 FS5 = GPA2, SX = GPA1, DX = GPA0, **GPA7 libera** (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =
-GPB(2n-2)/GPB(2n-1). **Aspetta il sì dell'utente sulle anteprime**; poi: zip Gerber + foratura per JLCPCB
-(non JLC3DP, che è la stampa 3D) e passi d'ordine; a scheda arrivata, firmware con le tabelle nuove (non
+GPB(2n-2)/GPB(2n-1). **Approvata e pronta il 20 ottobre**: zip in `pcb/basetta/jlcpcb/` (copia sul Desktop), da ordinare
+su JLCPCB (non JLC3DP, che è la stampa 3D); `tools/verifica-basetta.py` confronta le piazzole coi collegamenti
+attesi. **Non provata sull'hardware.** A scheda arrivata, firmware con le tabelle nuove (non
 toccate ancora) e mappatura guidata.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
