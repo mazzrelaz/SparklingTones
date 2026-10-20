@@ -402,8 +402,8 @@ toccate ancora) e mappatura guidata.
 Ignitron, **mai provati sullo Spark 2** (`0x0165` + `c3`/`c2`; l'ampli manda `0x0364` nota + float e
 `0x0365` acceso/spento); con l'accordatore acceso l'ampli tace. **Misurato il 20 ottobre: `0x0165 c3`/`c2`
 funziona** (senza `0x00`), `0x0364` arriva ~13 volte al secondo, -1 = nessun suono; `0x0365` mai visto.
-**Prossimo passo: seconda prova** con `tools/accordatore-sonda.html` (chitarra accordata, corde segnate)
-per la numerazione delle note e la scala dello scostamento.
+**Seconda prova**: nota 0–11 da Do, 0,5 = intonata, scala
+probabile ±50 cent (da confermare). **Prossimo passo: la bozza grafica.**
 Poi la bozza grafica. Dettaglio in `docs/protocollo-spark2.md`, ultima sezione. **Collaudi ancora aperti** (editor
 con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
 preset vero, il NEO), **discussi e non aperti**, e il resto del pedale: `docs/diario.md`, estratto

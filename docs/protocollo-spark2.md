@@ -611,3 +611,23 @@ scostamento è **-1** (`ca bf 80 00 00`) e la nota resta l'ultima letta. Con una
 toccati ad accordatore già spento, quindi **numerazione delle note e scala dello scostamento sono
 ancora da misurare**: la sonda adesso accende quei tasti solo ad accordatore acceso, e chiede di
 accordare prima la chitarra con un altro accordatore.
+
+**Seconda prova, 20 ottobre 2026** (chitarra accordata prima con un altro accordatore, corde
+segnate ad accordatore acceso; registro `accordatore-sonda-2026-10-20 (1).json`): **la nota è
+0–11 da Do (C = 0), senza ottava**. Mediana delle letture stabili, corda per corda:
+
+| corda | nota | scostamento |
+|---|---|---|
+| Mi basso (E2) | 4 | 0,460 |
+| La (A2) | 9 | 0,492 |
+| Re (D3) | 2 | 0,512 |
+| Sol (G3) | 7 | 0,509 |
+| Si (B3) | 11 | 0,569 |
+| Mi cantino (E4) | 4 | 0,608 |
+
+Quindi **0,5 = intonata**. La scala più probabile è **0–1 = da -50 a +50 cent**: la nota è quella
+più vicina, quindi lo scarto non può superare mezzo semitono, e le sei corde danno da -4 a +11 cent
+(con ±100 cent il cantino sarebbe a +22, troppo per una chitarra appena accordata). Da confermare
+nella bozza, a confronto con un accordatore sul telefono. All'attacco della nota le prime 2-3
+letture saltano (nota vicina, scostamento lontano da 0,5): l'app le deve smussare, non mostrare
+crude. Ancora nessun `0x0365`.
