@@ -400,8 +400,10 @@ toccate ancora) e mappatura guidata.
 
 **L'accordatore (20 ottobre 2026)**: il fork promesso non è arrivato, si fa da noi. Comandi da
 Ignitron, **mai provati sullo Spark 2** (`0x0165` + `c3`/`c2`; l'ampli manda `0x0364` nota + float e
-`0x0365` acceso/spento); con l'accordatore acceso l'ampli tace. **Prossimo passo: la prova
-dell'utente** con `tools/accordatore-sonda.html` sull'app pubblicata, registro JSON da leggere.
+`0x0365` acceso/spento); con l'accordatore acceso l'ampli tace. **Misurato il 20 ottobre: `0x0165 c3`/`c2`
+funziona** (senza `0x00`), `0x0364` arriva ~13 volte al secondo, -1 = nessun suono; `0x0365` mai visto.
+**Prossimo passo: seconda prova** con `tools/accordatore-sonda.html` (chitarra accordata, corde segnate)
+per la numerazione delle note e la scala dello scostamento.
 Poi la bozza grafica. Dettaglio in `docs/protocollo-spark2.md`, ultima sezione. **Collaudi ancora aperti** (editor
 con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
 preset vero, il NEO), **discussi e non aperti**, e il resto del pedale: `docs/diario.md`, estratto

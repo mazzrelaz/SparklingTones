@@ -601,3 +601,13 @@ se vuole lo `0x00` in coda come `0x0115` (variante B della sonda), come è numer
 da C?) e che scala ha lo scostamento (0–1 con 0,5 intonato?). La sonda è
 `tools/accordatore-sonda.html` (sull'app pubblicata, da Chrome o Edge): accende con A o B, mostra
 la lettura, segna quale corda si sta suonando e scarica un registro JSON coi byte grezzi.
+
+**Prima prova dell'utente, 20 ottobre 2026** (registro `accordatore-sonda-2026-10-20.json`, nei
+suoi Download): **la variante A funziona** — `0x0165 c3` riceve l'ack `0x0465` e l'ampli comincia a
+mandare `0x0364`; `0x0165 c2` lo ferma. Niente `0x00` in coda. **Nessun `0x0365`**, né accendendo
+né spegnendo. Le letture arrivano ogni ~37 o ~75 ms (~13 al secondo), anche senza suono: allora lo
+scostamento è **-1** (`ca bf 80 00 00`) e la nota resta l'ultima letta. Con una corda suonata: nota
+10 con scostamento ~0,90, che a tratti salta a nota 11 con 0,33–0,55. I tasti delle corde li ha
+toccati ad accordatore già spento, quindi **numerazione delle note e scala dello scostamento sono
+ancora da misurare**: la sonda adesso accende quei tasti solo ad accordatore acceso, e chiede di
+accordare prima la chitarra con un altro accordatore.

@@ -75,8 +75,10 @@
 
 <h1 style="margin-top:14px">2 — Le corde</h1>
 <div class="sub">
-  Con l'accordatore acceso: tocca la corda che stai per suonare, poi suonala qualche volta, lasciandola
-  suonare. Poi la prossima. Serve a capire come l'ampli numera le note.
+  <b>Prima accorda bene la chitarra con un altro accordatore</b> (anche un'app sul telefono). Poi
+  «Accendi A»: i tasti qui sotto si accendono solo con l'accordatore acceso. Tocca la corda che stai
+  per suonare, suonala qualche volta lasciandola suonare, poi la prossima. Serve a capire come l'ampli
+  numera le note e quale numero vuol dire «intonata».
 </div>
 <div class="row" id="corde"></div>
 <div class="row">
@@ -111,6 +113,12 @@ let registro = nuovoRegistro();
 let variante = null;      // 'A' o 'B': quella dell'ultima accensione
 let corda = null;         // la corda che l'utente dice di suonare adesso
 let righeNota = 0;        // quante righe 0x0364 sono già finite nel log a schermo
+let acceso = false;       // l'accordatore, secondo l'ultimo comando mandato
+
+/** I tasti delle corde servono solo con l'accordatore acceso (la prima prova li ha usati da spento). */
+function aggiornaCorde() {
+  document.querySelectorAll('#corde button').forEach(b => { b.disabled = !(spark.connected && acceso); });
+}
 
 function nuovoRegistro() {
   return { quando: new Date().toISOString(), dispositivo: null, nome: null,
@@ -147,6 +155,14 @@ function mostraNota(msg) {
     return;
   }
   const { nota, scostamento } = letta;
+  // Misurato il 20 ottobre 2026: senza suono lo scostamento è -1 (`bf 80 00 00`)
+  // e la nota resta l'ultima.
+  if (scostamento < 0) {
+    $('nota').style.opacity = 0.3;
+    $('dettaglio').textContent = `nessun suono · ${hex(msg.data)}`;
+    return;
+  }
+  $('nota').style.opacity = 1;
   // Ipotesi da verificare: nota 0–11 da C, scostamento 0–1 con 0,5 = intonato.
   $('nota').textContent = nota < 12 ? NOMI[nota] : '#' + nota;
   const s = Math.max(0, Math.min(1, scostamento));
@@ -162,7 +178,8 @@ const spark = new SparkTransport({
     const on = stato === 'connected';
     $('btnConnetti').disabled = on;
     for (const id of ['btnStacca', 'btnAccendiA', 'btnAccendiB', 'btnSpegni']) $(id).disabled = !on;
-    document.querySelectorAll('#corde button').forEach(b => { b.disabled = !on; });
+    if (!on) acceso = false;
+    aggiornaCorde();
   },
   onLog: msg => scrivi(msg),
   onMessage: msg => {
@@ -213,9 +230,9 @@ function comando(acceso, v) {
   return { cmd: Spark.CMD_ACTION, sub: 0x65, data };
 }
 
-async function manda(acceso, v) {
-  const c = comando(acceso, v);
-  scrivi(`— ${acceso ? 'accendo' : 'spengo'}, variante ${v}: 0x0165 ${hex(c.data)}`, 'fuori');
+async function manda(accendi, v) {
+  const c = comando(accendi, v);
+  scrivi(`— ${accendi ? 'accendo' : 'spengo'}, variante ${v}: 0x0165 ${hex(c.data)}`, 'fuori');
   const prima = registro.note.length;
   let ack = false;
   try {
@@ -223,9 +240,11 @@ async function manda(acceso, v) {
   } catch (e) {
     ack = false;
   }
-  registro.invii.push({ t: Math.round(performance.now()), acceso, variante: v, dati: hex(c.data), ack });
+  acceso = accendi;
+  aggiornaCorde();
+  registro.invii.push({ t: Math.round(performance.now()), acceso: accendi, variante: v, dati: hex(c.data), ack });
   scrivi(ack ? 'ack ricevuto (vuol dire solo che è arrivato)' : 'nessun ack', ack ? '' : 'fuori');
-  if (acceso) {
+  if (accendi) {
     setTimeout(() => {
       const nuove = registro.note.length - prima;
       scrivi(`letture arrivate nei 4 secondi dopo: ${nuove}` +
