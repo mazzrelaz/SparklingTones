@@ -161,6 +161,27 @@ footswitch si misura col piede.
 **Stato**: il pedale fa il pedale (2 settembre 2026: footswitch, ampli che cambia, display),
 ~424 ms per un preset intero sull'S3. **Non verificati**: l'autonomia, i pull-up I²C.
 
+## La basetta stampata — 20 ottobre 2026
+
+Chiesta dall'utente: una scheda **generica, da riusare per altri pedali**, al posto della millefori.
+**`tools/genera-basetta.py` è la sorgente** (Python di KiCad 10: piazza, tira le piste con un A* suo,
+massa sui due lati, serigrafia, logo da `pcb/basetta/logo-serigrafia.png`); si rigenera, non si tocca
+in KiCad. `tools/verifica-basetta.py` confronta le 115 piazzole con i collegamenti attesi (XIAO e
+datasheet MCP23017): 0 errori. DRC con `kicad-cli`: pulito. Anteprime PNG in `pcb/basetta/`.
+
+- **86 × 70**, quattro fori M3, tutto a foro passante. XIAO su due file femmina 1×7 con l'USB a
+  sinistra sul lato corto; **MCP23017-E/SP su zoccolo DIP-28 stretto** (7,62); resistenze dei LED
+  sulla scheda (sulla piastrina LED vanno sostituite con un filo); pull-up I²C 4k7, RESET 10k,
+  100n + 10µ; partitore 100k/100k su D0, 330 su D1 (TEMPO) e D3 (PIEZO); morsetto CELLA sul lato
+  destro, presa BAT XIAO per i fili delle piazzole BAT; pettine LIBERI (D2, D8, D9, D10, TX, RX).
+- **Prese JST-XH con G sul piedino 1**: i cavi di adesso vanno controllati, il contatto si sposta.
+- **Linee nuove, il firmware non è ancora cambiato**: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
+  DX = GPA0, GPA7 libera (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =
+  GPB(2n-2)/GPB(2n-1). A scheda arrivata: tabelle in `prova-ble`, poi mappatura guidata.
+- **Ordine su JLCPCB** (zip `pcb/basetta/jlcpcb/`, copia sul Desktop), scelte riviste con l'utente:
+  10 pezzi, blu, FR4 TG135, 1,6 mm, LeadFree HASL, 1 oz, Tented, Remove Mark, niente assemblaggio
+  (la promo è solo SMT). **Non provata sull'hardware.**
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni
