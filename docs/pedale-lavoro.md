@@ -182,7 +182,7 @@ datasheet MCP23017): 0 errori. DRC con `kicad-cli`: pulito. Anteprime PNG in `pc
   10 pezzi, blu, FR4 TG135, 1,6 mm, LeadFree HASL, 1 oz, Tented, Remove Mark, niente assemblaggio
   (la promo è solo SMT). **Non provata sull'hardware.**
 
-## Il tuner sul pedale — 20 ottobre 2026 (firmware 2.24, da provare)
+## Il tuner sul pedale — 20 ottobre 2026 (firmware 2.24, verificato)
 
 Chiesto dall'utente dopo quello dell'app. **Un tasto banco, l'uno o l'altro, tenuto da solo due
 secondi** entra nel tuner; **un tasto qualunque** esce (e non fa altro). Per questo **il tasto banco
@@ -200,7 +200,7 @@ quella dove sta la corda lunga e spessa (due se sta in mezzo), quella del centro
 in `logisoso24` (il diesis piccolo accanto), **in negativo quando e' intonata**; i cent in basso a
 destra. Si ridisegna solo se cambia, al massimo 10 volte al secondo. **LED**: tutti verdi a corda
 intonata; rosso su FS1 (calante oltre 15 cent), FS2 (calante), FS3 (crescente), FS4 (crescente oltre
-15). **Compilato e caricato, non ancora provato col pedale e l'ampli.**
+15). **Provato dall'utente col pedale e lo Spark 2 il 20 ottobre: «funziona tutto».**
 
 ## Dove si riprende col pedale — 24 settembre 2026
 
