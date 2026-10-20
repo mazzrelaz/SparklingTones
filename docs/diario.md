@@ -958,3 +958,13 @@ indirizzi non salva); il finale dice «voce generata con IA» (regola di OpenAI)
 (Kokoro Nicola/Sara, Windows Elsa, Piper Paola/Riccardo) bocciate tutte dall'utente**. **Su YouTube** (pubblicati il 19 ottobre, guscio
 `v121`): app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow` (shorts), pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`; nel sito
 e in cima alle quattro guide («Guarda il video», in un'altra scheda).
+
+## Estratto da CLAUDE.md, 20 ottobre 2026 — guida e sito del 19 ottobre
+
+**Pubblicati il 19 ottobre 2026: guida e sito della nuova interfaccia, in italiano e in inglese**
+(guscio `v120`; sito `e533608`). La vista Live e l'editor nella guida e sul sito sono **schermate
+vere** dell'app (`immagini/guida/`, `*-en.webp` per l'inglese; sul sito `media/app-live*.webp`): il
+disegno a mano dei pulsantoni «non è così che si vede», dice l'utente. Per rifarle: preset finti, la
+schermata dal riquadro, poi `ritaglia` con Edge headless (canvas → WebP) come `tools/togli-sfondo`.
+`lingua-en.js` allineato (81 frasi nuove, 47 tolte). Il
+video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio.

@@ -372,13 +372,8 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
 14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v118` (17 ottobre): **«Genera con l'IA» c'è stata dal 17 al 19 ottobre ed è tolta** (vedi sotto). **Trappola che resta**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta). **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro.
 
-**Pubblicati il 19 ottobre 2026: guida e sito della nuova interfaccia, in italiano e in inglese**
-(guscio `v120`; sito `e533608`). La vista Live e l'editor nella guida e sul sito sono **schermate
-vere** dell'app (`immagini/guida/`, `*-en.webp` per l'inglese; sul sito `media/app-live*.webp`): il
-disegno a mano dei pulsantoni «non è così che si vede», dice l'utente. Per rifarle: preset finti, la
-schermata dal riquadro, poi `ritaglia` con Edge headless (canvas → WebP) come `tools/togli-sfondo`.
-`lingua-en.js` allineato (81 frasi nuove, 47 tolte). Il
-video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio. **Video**: quattro su YouTube (19 ottobre, guscio `v121`: app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow`,
+**Guida e sito della nuova interfaccia pubblicati il 19 ottobre** (guscio `v120`): schermate vere
+dell'app in `immagini/guida/` (come si rifanno: `docs/diario.md`, estratto del 20 ottobre). **Video**: quattro su YouTube (19 ottobre, guscio `v121`: app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow`,
 pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`), nel sito e in cima alle guide; come si rifanno
 (`tools/video-demo/`, voce OpenAI per l'italiano, voci locali bocciate) in `docs/diario.md`.
 
