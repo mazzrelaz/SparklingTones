@@ -394,7 +394,7 @@ aveva lasciato in `localStorage`. In `lingua-en.js` resta «Funzioni nascoste»,
 
 **Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
 **solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,
-mai a mano), DRC pulito con `kicad-cli`, anteprime PNG accanto. Scheda **generica, per altri pedali**: 100 × 72,
+mai a mano), DRC pulito con `kicad-cli`, anteprime PNG accanto. Scheda **generica, per altri pedali**: 100 × 80, XIAO con l'USB a sinistra sul lato corto, logo in serigrafia (`logo-serigrafia.png`),
 tutto a foro passante, XIAO e **MCP23017 DIP-28** su zoccolo, resistenze dei LED sulla scheda, JST-XH con
 **G sul piedino 1**, morsetto cella + presa «BAT XIAO», pettine LIBERI. Linee nuove: FS1..FS4 = GPA6..GPA3,
 FS5 = GPA2, SX = GPA1, DX = GPA0, **GPA7 libera** (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =
