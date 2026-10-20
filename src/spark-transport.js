@@ -24,9 +24,12 @@ window.SparkTransport = (function () {
   const tr = window.tr || ((s, ...v) => Array.isArray(s)
     ? s.reduce((a, p, i) => a + v[i - 1] + p) : s.replace(/\{(\d+)\}/g, (m, i) => v[i]));
 
-  const SERVICE_UUID     = 0xffc0;
-  const CHAR_WRITE_UUID  = 0xffc1;
-  const CHAR_NOTIFY_UUID = 0xffc2;
+  // 0xffc0, 0xffc1, 0xffc2 scritti per intero: Chrome accetta anche il numero
+  // corto, i browser Bluetooth per iPhone e iPad (Bluefy) forse no
+  // (20 ottobre 2026: lì il collegamento falliva subito, alla ricerca).
+  const SERVICE_UUID     = '0000ffc0-0000-1000-8000-00805f9b34fb';
+  const CHAR_WRITE_UUID  = '0000ffc1-0000-1000-8000-00805f9b34fb';
+  const CHAR_NOTIFY_UUID = '0000ffc2-0000-1000-8000-00805f9b34fb';
 
   const SEND_GAP_MS        = 30;    // pausa fra invii consecutivi
   const DEFAULT_TIMEOUT    = 2500;
