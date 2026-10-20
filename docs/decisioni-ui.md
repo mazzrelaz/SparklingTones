@@ -370,6 +370,23 @@ licenza accanto a chi la ridistribuisce, e adesso c'è
 
 ## Su iPhone e iPad non si connette, e non è un difetto
 
+**Aggiornamento del 20 ottobre 2026: con Bluefy si connette.** Bluefy («Bluefy – Web BLE
+Browser», gratuito, per iPhone e iPad) dà Web Bluetooth alle pagine. Al primo tentativo
+falliva subito alla ricerca con «errore: undefined»: due cause corrette insieme.
+1. Rifiuta con qualcosa che non è un `Error`, e `err.message` era `undefined`:
+   adesso `testoErrore()` (`04-log.js`).
+2. **Gli UUID corti (`0xffc0`) non li prende**: con le stringhe intere
+   (`0000ffc0-0000-1000-8000-00805f9b34fb`) si collega.
+
+In più, per prudenza, `_scrivi()` ripiega su `writeValue` se manca
+`writeValueWithoutResponse`, e le notifiche si leggono con offset e lunghezza del DataView.
+**Provato dall'utente su iPad: lettura, live, editor, tuner, «sembra funzionare tutto».**
+Su iPhone non provato. **BLE Link**, l'altro browser provato, va ma è solo per iPhone: sull'iPad
+gira in compatibilità, con bande enormi sopra e sotto. Bluefy non usa il service worker,
+quindi una versione nuova arriva solo quando scade la cache di GitHub (10 minuti).
+La libreria di Bluefy è un'altra origine rispetto a Safari: si esporta e si reimporta.
+Su Safari l'avviso adesso consiglia Bluefy. Quello che segue è il ragionamento di prima.
+
 **Nessun browser su iOS/iPadOS ha Web Bluetooth.** Non è Safari a essere indietro: su iOS
 ogni browser è obbligato a usare il motore di Apple, quindi anche Chrome e Firefox lì non
 ce l'hanno. `navigator.bluetooth` non esiste e il pulsante «Connetti» resta spento.

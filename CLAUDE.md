@@ -372,16 +372,15 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 **Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
 14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v118` (17 ottobre): **«Genera con l'IA» c'è stata dal 17 al 19 ottobre ed è tolta** (vedi sotto). **Trappola che resta**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta). **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro.
 
-**Guida e sito della nuova interfaccia pubblicati il 19 ottobre** (guscio `v120`): schermate vere
-dell'app in `immagini/guida/` (come si rifanno: `docs/diario.md`, estratto del 20 ottobre). **Video**: quattro su YouTube (19 ottobre, guscio `v121`: app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow`,
-pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`), nel sito e in cima alle guide; come si rifanno
-(`tools/video-demo/`, voce OpenAI per l'italiano, voci locali bocciate) in `docs/diario.md`.
+**Guida, sito e quattro video** pubblicati il 19 ottobre. **«Genera con l'IA» tolta il 19 ottobre**
+(«mi crea solo problemi»): **non si rimette** se non lo chiede lui. Tutti e due in `docs/diario.md`,
+estratti del 20 ottobre.
 
-**«Genera con l'IA» tolta il 19 ottobre 2026** (guscio `v122`; «mi crea solo problemi», l'utente):
-via `16-genera-ia.js`, la voce del menu, «Funzioni nascoste», il pannello e i suoi stili; OpenAI e
-Anthropic fuori dalla CSP. Alla partenza `15-partenza.js` cancella le chiavi API e le scelte che
-aveva lasciato in `localStorage`. In `lingua-en.js` resta «Funzioni nascoste», orfana e innocua.
-**Non si rimette** se non lo chiede lui; il codice è nella cronologia (`f86fb12`).
+**iPhone e iPad con Bluefy (20 ottobre 2026)**: si collega e, dice l'utente su iPad, «sembra
+funzionare tutto». Servivano gli **UUID interi** dello Spark (quelli corti li prende solo Chrome).
+Bluefy non usa il service worker: il nuovo arriva dopo i 10 minuti di cache di GitHub. App, guida,
+README e sito (italiano) consigliano Bluefy; **la parte inglese è rimasta indietro** finché l'utente
+non dice di aggiornarla. Dettaglio: `docs/decisioni-ui.md`, «Su iPhone e iPad».
 
 **Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
 **solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,

@@ -968,3 +968,18 @@ disegno a mano dei pulsantoni «non è così che si vede», dice l'utente. Per r
 schermata dal riquadro, poi `ritaglia` con Edge headless (canvas → WebP) come `tools/togli-sfondo`.
 `lingua-en.js` allineato (81 frasi nuove, 47 tolte). Il
 video dell'app su YouTube (`media/app.jpg` nel sito) mostra ancora l'editor vecchio.
+
+## Estratto da CLAUDE.md, 20 ottobre 2026 (sera) — guida, video e «Genera con l'IA»
+
+Spostato parola per parola per stare sotto i 30 KB, quando è entrato iPhone e iPad con Bluefy.
+
+**Guida e sito della nuova interfaccia pubblicati il 19 ottobre** (guscio `v120`): schermate vere
+dell'app in `immagini/guida/` (come si rifanno: `docs/diario.md`, estratto del 20 ottobre). **Video**: quattro su YouTube (19 ottobre, guscio `v121`: app IT `YJGi3e1FOtg`, app EN `qkUkf3J58Ow`,
+pedale EN `KNga-DOCWO4`, pedale IT `xD-E_A-fAxE`), nel sito e in cima alle guide; come si rifanno
+(`tools/video-demo/`, voce OpenAI per l'italiano, voci locali bocciate) in `docs/diario.md`.
+
+**«Genera con l'IA» tolta il 19 ottobre 2026** (guscio `v122`; «mi crea solo problemi», l'utente):
+via `16-genera-ia.js`, la voce del menu, «Funzioni nascoste», il pannello e i suoi stili; OpenAI e
+Anthropic fuori dalla CSP. Alla partenza `15-partenza.js` cancella le chiavi API e le scelte che
+aveva lasciato in `localStorage`. In `lingua-en.js` resta «Funzioni nascoste», orfana e innocua.
+**Non si rimette** se non lo chiede lui; il codice è nella cronologia (`f86fb12`).
