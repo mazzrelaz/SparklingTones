@@ -42,7 +42,7 @@ src/spark-backup.js · dropbox-sync.js · pedale-ponte.js · pwa.js · snake-ped
 src/lingua.js / lingua-en.js      le lingue (lingua-en.js NON si legge: vedi «L'inglese»)
 pedale/prova-ble/                 firmware del pedale (prova-ble.ino + 01-…11-*.ino, banchi.h)
 pedale/prova-espansore|usb|display|midi/   sketch di prova (mappatura guidata di pulsanti e LED)
-pcb/                              scheda in KiCad, ACCANTONATA: non si tocca e non si propone
+pcb/basetta/                      basetta stampata v1 (20 ottobre 2026), sorgente tools/genera-basetta.py; pcb/*.kicad_* vecchio, fermo
 tools/                            serve.ps1, server-rete.js, togli-sfondo/, segna-manopole.html, video-demo/
 test/*.html                       protocol 147, transport 64, store 151, backup 41, dropbox 38
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
@@ -391,6 +391,16 @@ via `16-genera-ia.js`, la voce del menu, «Funzioni nascoste», il pannello e i 
 Anthropic fuori dalla CSP. Alla partenza `15-partenza.js` cancella le chiavi API e le scelte che
 aveva lasciato in `localStorage`. In `lingua-en.js` resta «Funzioni nascoste», orfana e innocua.
 **Non si rimette** se non lo chiede lui; il codice è nella cronologia (`f86fb12`).
+
+**Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
+**solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,
+mai a mano), DRC pulito con `kicad-cli`, anteprime PNG accanto. Scheda **generica, per altri pedali**: 100 × 72,
+tutto a foro passante, XIAO e **MCP23017 DIP-28** su zoccolo, resistenze dei LED sulla scheda, JST-XH con
+**G sul piedino 1**, morsetto cella + presa «BAT XIAO», pettine LIBERI. Linee nuove: FS1..FS4 = GPA6..GPA3,
+FS5 = GPA2, SX = GPA1, DX = GPA0, **GPA7 libera** (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =
+GPB(2n-2)/GPB(2n-1). **Aspetta il sì dell'utente sulle anteprime**; poi: zip Gerber + foratura per JLCPCB
+(non JLC3DP, che è la stampa 3D) e passi d'ordine; a scheda arrivata, firmware con le tabelle nuove (non
+toccate ancora) e mappatura guidata.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso; **l'accordatore** (20 ottobre 2026:
