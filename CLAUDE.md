@@ -404,9 +404,13 @@ attesi. **Non provata sull'hardware.** A scheda arrivata, firmware con le tabell
 toccate ancora) e mappatura guidata.
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
-(niente altre funzioni MIDI); il tap tempo con l'ampli acceso; **l'accordatore** (20 ottobre 2026:
-l'utente aspetta il fork di un utente che dice di averlo fatto, poi si guarda quello; mai misurato
-da noi; con l'accordatore acceso l'ampli si zittisce, l'ha visto lui con l'app ufficiale). **Collaudi ancora aperti** (editor
+(niente altre funzioni MIDI); il tap tempo con l'ampli acceso.
+
+**L'accordatore (20 ottobre 2026)**: il fork promesso non è arrivato, si fa da noi. Comandi da
+Ignitron, **mai provati sullo Spark 2** (`0x0165` + `c3`/`c2`; l'ampli manda `0x0364` nota + float e
+`0x0365` acceso/spento); con l'accordatore acceso l'ampli tace. **Prossimo passo: la prova
+dell'utente** con `tools/accordatore-sonda.html` sull'app pubblicata, registro JSON da leggere.
+Poi la bozza grafica. Dettaglio in `docs/protocollo-spark2.md`, ultima sezione. **Collaudi ancora aperti** (editor
 con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
 preset vero, il NEO), **discussi e non aperti**, e il resto del pedale: `docs/diario.md`, estratto
 del 15 ottobre (sera), e `docs/pedale-lavoro.md`.

@@ -584,3 +584,20 @@ dalla nostra app (Regola) e confrontati i valori (0–10 sullo schermo = 0–1 n
 ufficiale scrive anche l'indice 2, ma i valori non tornano coi millisecondi della nota al bpm del
 preset: lì conta l'indice 3. **Dopo un aggiornamento di Positive Grid il wah non si muove più a
 mano**: solo auto, o con un pedale d'espressione esterno (l'utente, 16 ottobre 2026).
+
+## L'accordatore — 20 ottobre 2026, da misurare
+
+L'utente lo vuole nell'app; il fork che doveva averlo fatto non è arrivato, quindi si parte da noi.
+L'unica fonte è **Ignitron** (`stangreg/Ignitron`, `SparkMessage.cpp` e `SparkStreamReader.cpp`),
+scritto per gli altri Spark:
+
+- verso l'ampli **`0x0165` + booleano** (`c3` acceso, `c2` spento), nient'altro;
+- dall'ampli **`0x0364`** = nota (un byte) + scostamento (float `ca` + 4 byte), a raffica;
+- dall'ampli **`0x0365`** = accordatore acceso/spento (booleano).
+
+**Niente di questo è verificato sullo Spark 2.** Già visto dall'utente con l'app ufficiale: con
+l'accordatore acceso l'ampli tace, quindi il silenzio dice che il comando è arrivato. Non si sa:
+se vuole lo `0x00` in coda come `0x0115` (variante B della sonda), come è numerata la nota (0–11
+da C?) e che scala ha lo scostamento (0–1 con 0,5 intonato?). La sonda è
+`tools/accordatore-sonda.html` (sull'app pubblicata, da Chrome o Edge): accende con A o B, mostra
+la lettura, segna quale corda si sta suonando e scarica un registro JSON coi byte grezzi.

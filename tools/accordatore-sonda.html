@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — sonda accordatore</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:#14161a; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; }
+  h1 { font-size:1.15rem; margin:0 0 2px; }
+  .sub { color:#8a8f98; font-size:0.85rem; margin-bottom:14px; line-height:1.45; }
+  .status { display:inline-block; padding:4px 10px; border-radius:12px;
+            font-size:0.8rem; font-weight:600; }
+  .status.disconnected { background:#3a2020; color:#ff8080; }
+  .status.connected    { background:#1f3a24; color:#7fe08a; }
+  .status.connecting   { background:#3a3520; color:#f0d060; }
+  button { background:#ff6a3d; color:#fff; border:none; padding:12px 16px;
+           border-radius:9px; font-size:0.95rem; font-weight:600; cursor:pointer;
+           margin:0 6px 8px 0; }
+  button:disabled { background:#3a3d42; color:#7a7d82; cursor:not-allowed; }
+  button.secondary { background:#2a2d33; }
+  button.scelta { background:#2f6fd0; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  #lettura { background:#181a1f; border:1px solid #24272c; border-radius:10px;
+             padding:14px; margin:10px 0; text-align:center; }
+  #nota { font-size:3rem; font-weight:700; line-height:1.1; }
+  #dettaglio { color:#8a8f98; font-size:0.85rem; margin-top:4px; font-family:Consolas,monospace; }
+  #barra { position:relative; height:14px; background:#0e0f12; border-radius:7px; margin:12px 0 4px; }
+  #barra::after { content:''; position:absolute; left:50%; top:-3px; bottom:-3px; width:2px; background:#555; }
+  #ago { position:absolute; top:0; bottom:0; width:6px; margin-left:-3px; border-radius:3px;
+         background:#7fe08a; left:50%; }
+  #riassunto { background:#181a1f; border:1px solid #24272c; border-radius:10px;
+               padding:12px 14px; margin:10px 0; font-size:0.9rem; line-height:1.6;
+               white-space:pre-wrap; }
+  #riassunto:empty { display:none; }
+  .fuori { color:#ffb070; }
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         max-height:40vh; overflow-y:auto; margin-top:12px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.72rem; line-height:1.5;
+         color:#8a8f98; word-break:break-all; }
+</style>
+</head>
+<body>
+
+<h1>Sonda accordatore</h1>
+<div class="sub">
+  Accende e spegne l'accordatore dell'ampli e registra cosa l'ampli racconta. Non tocca preset,
+  slot né manopole. Prima chiudi l'app ufficiale Spark e SparklingTones, sennò l'ampli non si lascia
+  trovare. <b>Con l'accordatore acceso l'ampli tace</b>: è il segno che il comando è arrivato.
+</div>
+
+<div class="row">
+  <button id="btnConnetti">Connetti</button>
+  <button id="btnStacca" class="secondary" disabled>Spegni e disconnetti</button>
+  <span class="status disconnected" id="stato">Disconnesso</span>
+</div>
+
+<h1 style="margin-top:14px">1 — Accendi</h1>
+<div class="sub">
+  Prova <b>A</b>. Suona una corda: se l'ampli tace e qui sotto compaiono note, è fatta. Se non
+  succede niente, «Spegni», poi prova <b>B</b>.
+</div>
+<div class="row">
+  <button id="btnAccendiA" disabled>Accendi A</button>
+  <button id="btnAccendiB" disabled>Accendi B</button>
+  <button id="btnSpegni" class="secondary" disabled>Spegni</button>
+</div>
+
+<div id="lettura">
+  <div id="nota">—</div>
+  <div id="barra"><div id="ago"></div></div>
+  <div id="dettaglio">nessuna lettura</div>
+</div>
+
+<h1 style="margin-top:14px">2 — Le corde</h1>
+<div class="sub">
+  Con l'accordatore acceso: tocca la corda che stai per suonare, poi suonala qualche volta, lasciandola
+  suonare. Poi la prossima. Serve a capire come l'ampli numera le note.
+</div>
+<div class="row" id="corde"></div>
+<div class="row">
+  <button id="btnScarica" class="secondary" disabled>Scarica il registro</button>
+</div>
+
+<div id="riassunto"></div>
+<div id="log"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script>
+'use strict';
+
+/* Sonda dell'accordatore (20 ottobre 2026).
+   Da Ignitron (stangreg/Ignitron, SparkMessage.cpp e SparkStreamReader.cpp):
+     verso l'ampli   0x0165 + booleano (c3 acceso, c2 spento)
+     dall'ampli      0x0364 = nota (un byte) + scostamento (float)
+                     0x0365 = accordatore acceso/spento (booleano)
+   Mai provato sullo Spark 2. Due varianti, una alla volta: A come Ignitron,
+   B con lo 0x00 in coda che sullo Spark 2 vogliono 0x0115, 0x0104 e 0x0106.
+   Come si leggono nota e scostamento è un'ipotesi: il registro tiene i byte
+   grezzi, e l'interpretazione si fa dopo. Il seriale (0x0223) resta mascherato. */
+
+const $ = id => document.getElementById(id);
+const hex = bytes => Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(' ');
+const NOMI = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const CORDE = [['E2', 'Mi basso (6ª)'], ['A2', 'La (5ª)'], ['D3', 'Re (4ª)'],
+               ['G3', 'Sol (3ª)'], ['B3', 'Si (2ª)'], ['E4', 'Mi cantino (1ª)']];
+
+let registro = nuovoRegistro();
+let variante = null;      // 'A' o 'B': quella dell'ultima accensione
+let corda = null;         // la corda che l'utente dice di suonare adesso
+let righeNota = 0;        // quante righe 0x0364 sono già finite nel log a schermo
+
+function nuovoRegistro() {
+  return { quando: new Date().toISOString(), dispositivo: null, nome: null,
+           invii: [], messaggi: [], note: [], righe: [] };
+}
+
+function scrivi(testo, classe) {
+  const riga = `[${new Date().toTimeString().slice(0, 8)}] ${testo}`;
+  registro.righe.push(riga);
+  const div = document.createElement('div');
+  if (classe) div.className = classe;
+  div.textContent = riga;
+  $('log').appendChild(div);
+  $('log').scrollTop = $('log').scrollHeight;
+}
+
+/** La lettura come la intende Ignitron: un byte e un float. Se non torna, null. */
+function leggiNota(data) {
+  try {
+    const r = new Spark.Reader(data);
+    const nota = r.int();
+    const scostamento = r.float();
+    return { nota, scostamento };
+  } catch (e) {
+    return null;
+  }
+}
+
+function mostraNota(msg) {
+  const letta = leggiNota(msg.data);
+  if (!letta) {
+    $('nota').textContent = '?';
+    $('dettaglio').textContent = 'non la so leggere: ' + hex(msg.data);
+    return;
+  }
+  const { nota, scostamento } = letta;
+  // Ipotesi da verificare: nota 0–11 da C, scostamento 0–1 con 0,5 = intonato.
+  $('nota').textContent = nota < 12 ? NOMI[nota] : '#' + nota;
+  const s = Math.max(0, Math.min(1, scostamento));
+  $('ago').style.left = (s * 100) + '%';
+  $('ago').style.background = Math.abs(scostamento - 0.5) < 0.03 ? '#7fe08a' : '#ffb070';
+  $('dettaglio').textContent = `nota ${nota} · scostamento ${scostamento.toFixed(4)} · ${hex(msg.data)}`;
+}
+
+const spark = new SparkTransport({
+  onStatus: (stato, etichetta) => {
+    $('stato').className = 'status ' + stato;
+    $('stato').textContent = stato === 'connected' ? 'Connesso: ' + etichetta : etichetta;
+    const on = stato === 'connected';
+    $('btnConnetti').disabled = on;
+    for (const id of ['btnStacca', 'btnAccendiA', 'btnAccendiB', 'btnSpegni']) $(id).disabled = !on;
+    document.querySelectorAll('#corde button').forEach(b => { b.disabled = !on; });
+  },
+  onLog: msg => scrivi(msg),
+  onMessage: msg => {
+    const codice = '0x' + msg.cmd.toString(16).padStart(2, '0') + msg.sub.toString(16).padStart(2, '0');
+    const dati = msg.sub === 0x23 ? '(seriale, mascherato)' : hex(msg.data);
+    const t = Math.round(performance.now());
+    if (msg.cmd === Spark.CMD_NOTIFY && msg.sub === 0x64) {
+      // Le letture arrivano a raffica: tutte nel registro, solo le prime a schermo.
+      registro.note.push({ t, corda, variante, dati, letta: leggiNota(msg.data) });
+      mostraNota(msg);
+      if (righeNota++ < 12) scrivi(`RX ${codice} ${dati}`);
+      else if (righeNota % 50 === 0) scrivi(`… ${registro.note.length} letture 0x0364 finora`);
+      return;
+    }
+    registro.messaggi.push({ t, cmd: msg.cmd, sub: msg.sub, seq: msg.seq, dati });
+    let nota = '';
+    if (msg.cmd === Spark.CMD_NOTIFY && msg.sub === 0x65) {
+      try { nota = new Spark.Reader(msg.data).bool() ? '  ← accordatore ACCESO' : '  ← accordatore SPENTO'; }
+      catch (e) { nota = '  ← 0x0365, ma non è un booleano'; }
+    }
+    scrivi(`RX ${codice} seq=0x${msg.seq.toString(16)} ${msg.data.length}B: ${dati.slice(0, 120)}${nota}`,
+           nota ? 'fuori' : '');
+  },
+});
+
+$('btnConnetti').addEventListener('click', async () => {
+  registro = nuovoRegistro();
+  righeNota = 0;
+  $('log').innerHTML = '';
+  $('riassunto').textContent = '';
+  try {
+    await spark.connect();
+    registro.dispositivo = spark.device.name || null;
+    await spark.request(Spark.commands.getName(),
+      m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x11).catch(() => null);
+    registro.nome = spark.state.name || null;
+    scrivi(`ampli: ${registro.nome || '?'}`);
+    $('btnScarica').disabled = false;
+  } catch (err) {
+    scrivi('errore: ' + err.message, 'fuori');
+  }
+});
+
+/** 0x0165 col booleano; la variante B aggiunge lo 0x00 in coda. */
+function comando(acceso, v) {
+  const data = [acceso ? 0xc3 : 0xc2];
+  if (v === 'B') data.push(0x00);
+  return { cmd: Spark.CMD_ACTION, sub: 0x65, data };
+}
+
+async function manda(acceso, v) {
+  const c = comando(acceso, v);
+  scrivi(`— ${acceso ? 'accendo' : 'spengo'}, variante ${v}: 0x0165 ${hex(c.data)}`, 'fuori');
+  const prima = registro.note.length;
+  let ack = false;
+  try {
+    ack = !!(await spark.sendAndAwaitAck(c, 1500));
+  } catch (e) {
+    ack = false;
+  }
+  registro.invii.push({ t: Math.round(performance.now()), acceso, variante: v, dati: hex(c.data), ack });
+  scrivi(ack ? 'ack ricevuto (vuol dire solo che è arrivato)' : 'nessun ack', ack ? '' : 'fuori');
+  if (acceso) {
+    setTimeout(() => {
+      const nuove = registro.note.length - prima;
+      scrivi(`letture arrivate nei 4 secondi dopo: ${nuove}` +
+             (nuove ? '' : ' — suona una corda; se ancora niente, Spegni e prova l\'altra variante'), 'fuori');
+      riassumi();
+    }, 4000);
+  }
+  riassumi();
+}
+
+$('btnAccendiA').addEventListener('click', () => { variante = 'A'; manda(true, 'A'); });
+$('btnAccendiB').addEventListener('click', () => { variante = 'B'; manda(true, 'B'); });
+$('btnSpegni').addEventListener('click', () => manda(false, variante || 'A'));
+
+$('btnStacca').addEventListener('click', async () => {
+  // Non lasciare l'ampli muto: si spegne l'accordatore prima di staccarsi.
+  if (variante) await manda(false, variante);
+  spark.disconnect();
+});
+
+for (const [codice, nome] of CORDE) {
+  const b = document.createElement('button');
+  b.className = 'secondary';
+  b.textContent = nome;
+  b.disabled = true;
+  b.addEventListener('click', () => {
+    corda = codice;
+    document.querySelectorAll('#corde button').forEach(x => x.classList.toggle('scelta', x === b));
+    scrivi(`— adesso suono: ${nome} (${codice})`, 'fuori');
+  });
+  $('corde').appendChild(b);
+}
+
+function riassumi() {
+  const r = registro;
+  const perCorda = {};
+  for (const n of r.note) {
+    if (!n.letta) continue;
+    const k = n.corda || 'senza corda';
+    (perCorda[k] = perCorda[k] || new Set()).add(n.letta.nota);
+  }
+  const accesi = r.messaggi.filter(m => m.cmd === 3 && m.sub === 0x65).length;
+  $('riassunto').textContent = [
+    `Ampli: ${r.nome || '?'}`,
+    `Invii: ${r.invii.map(i => `${i.acceso ? 'acceso' : 'spento'} ${i.variante} (${i.ack ? 'ack' : 'niente ack'})`).join(', ') || 'nessuno'}`,
+    `Messaggi 0x0365 (acceso/spento): ${accesi}`,
+    `Letture 0x0364: ${r.note.length}`,
+    ...Object.entries(perCorda).map(([k, s]) => `  ${k}: note ${[...s].join(', ')}`),
+  ].join('\n');
+}
+setInterval(() => { if (registro.note.length) riassumi(); }, 1000);
+
+$('btnScarica').addEventListener('click', () => {
+  riassumi();
+  const blob = new Blob([JSON.stringify(registro, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `accordatore-sonda-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>
