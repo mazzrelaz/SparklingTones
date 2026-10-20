@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v131';
+const VERSIONE = 'v132';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -68,6 +68,7 @@ const GUSCIO = [
   './immagini/guida/editor.webp',
   './immagini/guida/modelli.webp',
   './immagini/guida/live.webp',
+  './immagini/guida/tuner.webp',
   './immagini/guida/editor-en.webp',
   './immagini/guida/modelli-en.webp',
   './immagini/guida/live-en.webp',

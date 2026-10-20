@@ -406,7 +406,9 @@ manda `0x0364` ~13 volte al secondo: nota 0–11 da Do **senza ottava** (niente 
 con 0,5 intonata, -1 = silenzio; `0x0365` mai visto. **L'ampli muto solo a scheda aperta, ampli
 collegato e pagina in vista** (`seguiAccordatore`). Grafica in sei giri di bozza, scelta dall'utente:
 arco di 21 tacche al neon sul fondo della pagina, nota, cent fra i due, niente scritte
-(`docs/decisioni-ui.md`, «Il tuner»). Provato sull'ampli dall'utente. Sonda: `tools/accordatore-sonda.html`.
+(`docs/decisioni-ui.md`, «Il tuner»). Provato sull'ampli dall'utente. Sonda: `tools/accordatore-sonda.html`. **Nelle quattro guide** dal 20 ottobre
+(capitolo «Accordare»/«Il tuner», `immagini/guida/tuner.webp`, una per le due lingue; guscio `v132`; inglese
+aggiornato su richiesta dell'utente).
 
 **Collaudi ancora aperti** (editor
 con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un

@@ -119,6 +119,7 @@
     <a href="#suonare">Playing</a>
     <a href="#banchi">Banks from the app</a>
     <a href="#looper">Looper</a>
+    <a href="#tuner">Tuner</a>
     <a href="#midi">MIDI</a>
     <a href="#problemi">Troubleshooting</a>
   </div>
@@ -852,7 +853,8 @@
     <tbody>
       <tr><td><span class="tasto">FS1</span>…<span class="tasto">FS4</span></td><td>plays the preset on that row. The row is highlighted, and the LED above lights up: <strong style="color:var(--led-a)">red</strong> for half A, <strong style="color:var(--led-b)">green</strong> for half B.</td></tr>
       <tr><td><span class="tasto">FS5</span></td><td>shows the other half of the bank (A1–A4 ↔ B1–B4) <strong>without changing the sound</strong>. If the half on screen isn't the one playing, the LEDs are off.</td></tr>
-      <tr><td><span class="tasto">bank L</span> <span class="tasto">bank R</span></td><td>previous and next bank. Its name appears at the top; a new bank starts from half A. When switched off, the pedal remembers where you were.</td></tr>
+      <tr><td><span class="tasto">bank L</span> <span class="tasto">bank R</span></td><td>previous and next bank, <strong>when you let go of the button</strong>. Its name appears at the top; a new bank starts from half A. When switched off, the pedal remembers where you were.</td></tr>
+      <tr><td><span class="tasto">bank L</span> or <span class="tasto">bank R</span> held 2 s</td><td>opens the <a href="#tuner">tuner</a>; any button closes it.</td></tr>
       <tr><td><span class="tasto">FS5</span> held 3 s</td><td>enters the looper, and leaves it (Spark 2 only).</td></tr>
       <tr><td><span class="tasto">bank L</span> + <span class="tasto">bank R</span> held 1.5 s</td><td>opens the bridge to the app for two minutes: it's for sending banks.</td></tr>
       <tr><td><span class="tasto">FS1</span> + <span class="tasto">FS4</span> held 1.5 s</td><td>switches to MIDI mode, and back.</td></tr>
@@ -966,8 +968,74 @@
 </section>
 
 <!-- ===================================================================== -->
+<section class="cap" id="tuner" style="--c:#7b5cff">
+  <div class="cap-testa"><span class="cap-num">13</span><h2>Tuner</h2></div>
+  <p class="sotto">The Spark's tuner, on the pedal's display and its LEDs.</p>
+
+  <div class="oled-fila">
+    <figure class="oled">
+      <svg viewBox="0 0 256 128" role="img" aria-label="The tuner on the display: Tuner at the top, below it an arc of marks with two thick marks just left of centre, a big letter A and -7 at the bottom right.">
+        <rect width="256" height="128" fill="#000"/>
+        <text x="2" y="17" font-size="16" font-weight="700" fill="#cfe8ff" style="font-family:Arial,sans-serif">Tuner</text>
+        <rect x="200" y="4" width="22" height="12" fill="none" stroke="#cfe8ff" stroke-width="2"/>
+        <rect x="222" y="7" width="3" height="6" fill="#cfe8ff"/>
+        <rect x="203" y="7" width="4" height="6" fill="#cfe8ff"/><rect x="208" y="7" width="4" height="6" fill="#cfe8ff"/><rect x="213" y="7" width="4" height="6" fill="#cfe8ff"/>
+        <rect x="236" y="0" width="20" height="20" fill="#cfe8ff"/>
+        <text x="241" y="16" font-size="15" fill="#000" font-weight="700">S</text>
+        <line x1="0" y1="25" x2="256" y2="25" stroke="#cfe8ff" stroke-width="2"/>
+        <g stroke="#cfe8ff"><line x1="48.3" y1="102.0" x2="41.4" y2="98.0" stroke-width="2"/><line x1="53.6" y1="93.9" x2="47.1" y2="89.2" stroke-width="2"/><line x1="59.6" y1="86.4" x2="53.7" y2="81.1" stroke-width="2"/><line x1="66.4" y1="79.6" x2="61.1" y2="73.7" stroke-width="2"/><line x1="73.9" y1="73.6" x2="69.2" y2="67.1" stroke-width="2"/><line x1="82.0" y1="68.3" x2="78.0" y2="61.4" stroke-width="2"/><line x1="90.6" y1="64.0" x2="87.3" y2="56.6" stroke-width="2"/><line x1="99.6" y1="60.5" x2="97.1" y2="52.9" stroke-width="2"/><line x1="112.2" y1="73.7" x2="105.1" y2="40.4" stroke-width="6"/><line x1="120.1" y1="72.4" x2="116.5" y2="38.6" stroke-width="6"/><line x1="128" y1="58" x2="128" y2="38" stroke-width="2"/><line x1="137.6" y1="56.5" x2="138.5" y2="48.5" stroke-width="2"/><line x1="147.1" y1="58.0" x2="148.8" y2="50.2" stroke-width="2"/><line x1="156.4" y1="60.5" x2="158.9" y2="52.9" stroke-width="2"/><line x1="165.4" y1="64.0" x2="168.7" y2="56.6" stroke-width="2"/><line x1="174.0" y1="68.3" x2="178.0" y2="61.4" stroke-width="2"/><line x1="182.1" y1="73.6" x2="186.8" y2="67.1" stroke-width="2"/><line x1="189.6" y1="79.6" x2="194.9" y2="73.7" stroke-width="2"/><line x1="196.4" y1="86.4" x2="202.3" y2="81.1" stroke-width="2"/><line x1="202.4" y1="93.9" x2="208.9" y2="89.2" stroke-width="2"/><line x1="207.7" y1="102.0" x2="214.6" y2="98.0" stroke-width="2"/></g>
+        
+        <text x="128" y="124" font-size="52" font-weight="700" text-anchor="middle" fill="#cfe8ff" style="font-family:Arial,sans-serif">A</text>
+        <text x="254" y="124" font-size="22" text-anchor="end" fill="#cfe8ff">-7</text>
+      </svg>
+      <figcaption>An A seven cents low: the marks left of centre light up. Red LED on FS2.</figcaption>
+    </figure>
+    <figure class="oled">
+      <svg viewBox="0 0 256 128" role="img" aria-label="The tuner with the string in tune: the centre mark thick, the A inverted and 0 at the bottom right.">
+        <rect width="256" height="128" fill="#000"/>
+        <text x="2" y="17" font-size="16" font-weight="700" fill="#cfe8ff" style="font-family:Arial,sans-serif">Tuner</text>
+        <rect x="200" y="4" width="22" height="12" fill="none" stroke="#cfe8ff" stroke-width="2"/>
+        <rect x="222" y="7" width="3" height="6" fill="#cfe8ff"/>
+        <rect x="203" y="7" width="4" height="6" fill="#cfe8ff"/><rect x="208" y="7" width="4" height="6" fill="#cfe8ff"/><rect x="213" y="7" width="4" height="6" fill="#cfe8ff"/>
+        <rect x="236" y="0" width="20" height="20" fill="#cfe8ff"/>
+        <text x="241" y="16" font-size="15" fill="#000" font-weight="700">S</text>
+        <line x1="0" y1="25" x2="256" y2="25" stroke="#cfe8ff" stroke-width="2"/>
+        <g stroke="#cfe8ff"><line x1="48.3" y1="102.0" x2="41.4" y2="98.0" stroke-width="2"/><line x1="53.6" y1="93.9" x2="47.1" y2="89.2" stroke-width="2"/><line x1="59.6" y1="86.4" x2="53.7" y2="81.1" stroke-width="2"/><line x1="66.4" y1="79.6" x2="61.1" y2="73.7" stroke-width="2"/><line x1="73.9" y1="73.6" x2="69.2" y2="67.1" stroke-width="2"/><line x1="82.0" y1="68.3" x2="78.0" y2="61.4" stroke-width="2"/><line x1="90.6" y1="64.0" x2="87.3" y2="56.6" stroke-width="2"/><line x1="99.6" y1="60.5" x2="97.1" y2="52.9" stroke-width="2"/><line x1="108.9" y1="58.0" x2="107.2" y2="50.2" stroke-width="2"/><line x1="118.4" y1="56.5" x2="117.5" y2="48.5" stroke-width="2"/><line x1="128.0" y1="72.0" x2="128.0" y2="38.0" stroke-width="6"/><line x1="137.6" y1="56.5" x2="138.5" y2="48.5" stroke-width="2"/><line x1="147.1" y1="58.0" x2="148.8" y2="50.2" stroke-width="2"/><line x1="156.4" y1="60.5" x2="158.9" y2="52.9" stroke-width="2"/><line x1="165.4" y1="64.0" x2="168.7" y2="56.6" stroke-width="2"/><line x1="174.0" y1="68.3" x2="178.0" y2="61.4" stroke-width="2"/><line x1="182.1" y1="73.6" x2="186.8" y2="67.1" stroke-width="2"/><line x1="189.6" y1="79.6" x2="194.9" y2="73.7" stroke-width="2"/><line x1="196.4" y1="86.4" x2="202.3" y2="81.1" stroke-width="2"/><line x1="202.4" y1="93.9" x2="208.9" y2="89.2" stroke-width="2"/><line x1="207.7" y1="102.0" x2="214.6" y2="98.0" stroke-width="2"/></g>
+        <rect x="102" y="70" width="52" height="58" rx="6" fill="#cfe8ff"/>
+        <text x="128" y="124" font-size="52" font-weight="700" text-anchor="middle" fill="#000" style="font-family:Arial,sans-serif">A</text>
+        <text x="254" y="124" font-size="22" text-anchor="end" fill="#cfe8ff">0</text>
+      </svg>
+      <figcaption>In tune: the centre mark, the note inverted, all LEDs green.</figcaption>
+    </figure>
+  </div>
+
+  <ol class="passi">
+    <li>With the Spark connected, <strong>hold a bank button</strong> — left or right — <strong>for two
+      seconds</strong>. <em>Tuner</em> appears at the top and the Spark goes silent.</li>
+    <li>Play one string at a time and let it ring.</li>
+    <li><strong>Press any button</strong> to leave: the Spark plays again, and that button does nothing else.</li>
+  </ol>
+  <ul>
+    <li><strong>The display</strong>: one mark every 5 cents; the one where the string is lights up long and thick (two,
+      if it's in between). Below is the nearest note, at the bottom right the cents. In tune (within 2 cents), the
+      note turns inverted.</li>
+    <li><strong>The LEDs work as a needle</strong>, to tune looking down: all <strong style="color:var(--led-b)">green</strong>
+      when in tune; <strong style="color:var(--led-a)">red</strong> above FS1 if it's very flat (more than 15 cents), FS2 if
+      it's flat, FS3 if it's sharp, FS4 if it's very sharp.</li>
+    <li>The note has no octave: the low E and the high E are both <strong>E</strong>. A sharp is the small
+      <strong>#</strong> next to it.</li>
+    <li>The tuner only opens with the Spark connected, not from the looper or in MIDI mode. It needs firmware
+      <strong>2.24</strong> or later.</li>
+  </ul>
+  <div class="nota">
+    <p>So that it can be held, <strong>the bank button changes bank when you let go</strong>, not when you press it.
+      The same tuner is in the app too: <a href="guida.en.html#tuner"><strong>the app guide →</strong></a></p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
 <section class="cap" id="midi" style="--c:#7a5af0">
-  <div class="cap-testa"><span class="cap-num">13</span><h2>MIDI mode</h2></div>
+  <div class="cap-testa"><span class="cap-num">14</span><h2>MIDI mode</h2></div>
   <p class="sotto">The same pedal for a program on a computer (AmpliTube, for example) or on an iPad (BIAS FX).</p>
 
   <p><span class="tasto">FS1</span> + <span class="tasto">FS4</span> held for a second and a half: the pedal switches to MIDI, lets go of the Spark,
@@ -998,6 +1066,7 @@
   <div class="tab"><table>
     <thead><tr><th>what happens</th><th>what to do</th></tr></thead>
     <tbody>
+      <tr><td>The Spark is silent, the display says <em>Tuner</em></td><td>You're in the tuner: press any button.</td></tr>
       <tr><td>The footswitches do nothing</td><td>First suspect: <strong>the app is still connected to the pedal</strong>. Disconnect from the Pedal panel, or close the app.</td></tr>
       <tr><td>It can't find the Spark</td><td>Is the Spark connected to a phone? Close the app. Is the right amp chosen (S or N)? Switch the Spark off and on.</td></tr>
       <tr><td>Sometimes it doesn't connect</td><td>The <strong>antenna</strong>: the u.FL connector has come off, or the antenna is near metal. Without the antenna the signal collapses.</td></tr>
