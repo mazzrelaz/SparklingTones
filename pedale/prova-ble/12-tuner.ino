@@ -65,6 +65,25 @@ static void sbrigaTuner() {
   }
   if (!tuner) return;
 
+  /* La diagnosi: una riga al secondo sul seriale finche' il tuner e' aperto. */
+  {
+    static uint32_t ultimaRiga = 0, arrivatiPrima = 0, lettePrima = 0;
+    if (millis() - ultimaRiga >= 1000) {
+      ultimaRiga = millis();
+      const uint32_t a = tunerArrivati, l = tunerLetture;
+      Serial.printf("tuner: %lu messaggi 0x0364 in un secondo, %lu letti; nota mostrata %d, cent %.1f, silenzi %u, rx totali %lu\n",
+                    (unsigned long)(a - arrivatiPrima), (unsigned long)(l - lettePrima),
+                    tunerNota, tunerCent, tunerSilenzi, (unsigned long)rxTotali);
+      if (a != arrivatiPrima) {
+        Serial.print(F("  ultimo grezzo: "));
+        for (uint8_t i = 0; i < tunerGrezzi; i++) Serial.printf("%02x ", tunerUltimo[i]);
+        Serial.printf(" | nota %u scost %.4f\n", tunerNotaGrezza, tunerScostGrezzo);
+      }
+      arrivatiPrima = a;
+      lettePrima = l;
+    }
+  }
+
   static uint32_t viste = 0;
   const uint32_t arrivate = tunerLetture;
   if (arrivate == viste) return;

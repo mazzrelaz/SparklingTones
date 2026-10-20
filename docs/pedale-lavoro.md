@@ -202,6 +202,20 @@ destra. Si ridisegna solo se cambia, al massimo 10 volte al secondo. **LED**: tu
 intonata; rosso su FS1 (calante oltre 15 cent), FS2 (calante), FS3 (crescente), FS4 (crescente oltre
 15). **Provato dall'utente col pedale e lo Spark 2 il 20 ottobre: «funziona tutto».**
 
+**Lo stesso giorno, l'ampli piantato** (l'utente): tuner che funziona, preset, looper dentro e fuori
+due volte, poi il tuner «si apre, ferma il suono ma non fa nulla» e l'ampli e' bloccato, da
+riavviare. Al riavvio del pedale la lettura dei nomi degli slot 6 e 7 dava «risposta incompleta»:
+**l'ampli era gia' piantato prima**, e un tuner senza letture ne e' la conseguenza, non la causa
+(il silenzio lo da' il `c3`, arrivato). **2.25**: una riga al secondo sul seriale a tuner aperto
+(quanti `0x0364` arrivano e quanti se ne leggono, l'ultimo grezzo). Ripetuta la sequenza col cavo
+attaccato, 6 minuti: **non si e' piantato**. Sette aperture del tuner fra giri di looper (registra,
+sovraincidi, ferma, cancella), letture regolari (15-16 al secondo, ~1 s per partire), ack a ogni
+`0x0165`; nella stessa prova una raffica di tap tempo (una `0x0176` a ogni colpo di FS5, battute
+fino a 58 in «libero»), anche quella senza danni. Causa non trovata; sospetti, non verificati: le
+raffiche di `0x0176` del tap, o il blocco gia' noto dell'ampli. Registro nello scratchpad della
+sessione. **Il seriale del pedale muore se si stacca il cavo**: va riaperto lo script, dopo aver
+staccato e riattaccato.
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni

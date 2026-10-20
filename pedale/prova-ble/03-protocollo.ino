@@ -129,6 +129,10 @@ static void messaggioIntero(const uint8_t* m, size_t n) {
   // Qui si copiano e basta: le smussa e le disegna il loop (12-tuner.ino).
   if (n >= 8 && m[4] == 0x03 && m[5] == 0x64) {
     uint8_t d[8];
+    // Per la diagnosi (2.25): l'ultimo messaggio com'e' arrivato, lo stampa il loop.
+    tunerGrezzi = (uint8_t)(n < sizeof(tunerUltimo) ? n : sizeof(tunerUltimo));
+    memcpy(tunerUltimo, m, tunerGrezzi);
+    tunerArrivati++;
     if (spacchetta(m + 6, n - 7, d, sizeof(d)) >= 6 && d[0] < 12 && d[1] == 0xca) {
       const uint32_t b = (uint32_t)d[2] << 24 | (uint32_t)d[3] << 16 | (uint32_t)d[4] << 8 | d[5];
       float f;
