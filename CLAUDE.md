@@ -376,7 +376,7 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 («mi crea solo problemi»): **non si rimette** se non lo chiede lui. Tutti e due in `docs/diario.md`,
 estratti del 20 ottobre.
 
-**iPhone e iPad con Bluefy (20 ottobre 2026)**: si collega e, dice l'utente su iPad, «sembra
+**iPhone e iPad con Bluefy (20 ottobre 2026)**: si collega e, dice l'utente su iPad e poi su iPhone, «sembra
 funzionare tutto». Servivano gli **UUID interi** dello Spark (quelli corti li prende solo Chrome).
 Bluefy non usa il service worker: il nuovo arriva dopo i 10 minuti di cache di GitHub. App, guida,
 README e sito consigliano Bluefy, in italiano e in inglese (aggiornato su richiesta dell'utente). Dettaglio: `docs/decisioni-ui.md`, «Su iPhone e iPad».

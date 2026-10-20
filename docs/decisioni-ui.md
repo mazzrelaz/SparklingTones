@@ -381,7 +381,7 @@ falliva subito alla ricerca con «errore: undefined»: due cause corrette insiem
 In più, per prudenza, `_scrivi()` ripiega su `writeValue` se manca
 `writeValueWithoutResponse`, e le notifiche si leggono con offset e lunghezza del DataView.
 **Provato dall'utente su iPad: lettura, live, editor, tuner, «sembra funzionare tutto».**
-Su iPhone non provato. **BLE Link**, l'altro browser provato, va ma è solo per iPhone: sull'iPad
+Provato anche su iPhone, lo stesso giorno: funziona. **BLE Link**, l'altro browser provato, va ma è solo per iPhone: sull'iPad
 gira in compatibilità, con bande enormi sopra e sotto. Bluefy non usa il service worker,
 quindi una versione nuova arriva solo quando scade la cache di GitHub (10 minuti).
 La libreria di Bluefy è un'altra origine rispetto a Safari: si esporta e si reimporta.

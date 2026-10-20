@@ -42,7 +42,7 @@ at a gig there's no network.
 A browser with **Web Bluetooth**: Chrome or Edge on a computer and on Android.
 **On iPhone and iPad you need Bluefy** («Bluefy – Web BLE Browser» on the App Store),
 a free browser that does have Web Bluetooth: Safari and the others don't, because on iOS every
-browser has to use Apple's engine. Tested on iPad: everything works.
+browser has to use Apple's engine. Tested on iPhone and iPad: everything works.
 The library stored in Safari doesn't move to Bluefy by itself: export it and import it again.
 
 Nothing else. No account, no server: the library lives in your browser and never

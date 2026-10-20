@@ -42,7 +42,7 @@ a un concerto la rete non c'è.
 Un browser con **Web Bluetooth**: Chrome o Edge su computer e Android.
 **Su iPhone e iPad serve Bluefy** («Bluefy – Web BLE Browser» nell'App Store),
 un browser gratuito che Web Bluetooth ce l'ha: Safari e gli altri no, perché su iOS ogni
-browser è obbligato a usare il motore di Apple. Provato su iPad: va tutto.
+browser è obbligato a usare il motore di Apple. Provato su iPhone e iPad: va tutto.
 La libreria che sta in Safari non passa da sola in Bluefy: si esporta e si reimporta.
 
 Niente altro. Niente account, niente server: la libreria sta nel tuo browser e non
