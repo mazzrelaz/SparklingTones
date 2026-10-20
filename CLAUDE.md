@@ -393,7 +393,9 @@ aveva lasciato in `localStorage`. In `lingua-en.js` resta «Funzioni nascoste»,
 **Non si rimette** se non lo chiede lui; il codice è nella cronologia (`f86fb12`).
 
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
-(niente altre funzioni MIDI); il tap tempo con l'ampli acceso. **Collaudi ancora aperti** (editor
+(niente altre funzioni MIDI); il tap tempo con l'ampli acceso; **l'accordatore** (20 ottobre 2026:
+l'utente aspetta il fork di un utente che dice di averlo fatto, poi si guarda quello; mai misurato
+da noi; con l'accordatore acceso l'ampli si zittisce, l'ha visto lui con l'app ufficiale). **Collaudi ancora aperti** (editor
 con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
 preset vero, il NEO), **discussi e non aperti**, e il resto del pedale: `docs/diario.md`, estratto
 del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
