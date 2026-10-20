@@ -25,6 +25,7 @@ static void entraTuner() {
   tuner = true;
   tunerAzzera();
   Serial.println(F("tuner: dentro"));
+  annota("tuner dentro");
   aggiornaLed();
   schermoSporco = true;
 }
@@ -33,6 +34,7 @@ static void entraTuner() {
 static void esciTuner() {
   tuner = false;
   Serial.println(F("tuner: fuori"));
+  annota("tuner fuori (letture %lu)", (unsigned long)tunerLetture);
   aggiornaLed();
   schermoSporco = true;
 }

@@ -155,6 +155,7 @@ void loop() {
 
   if (client && !client->isConnected() && chScrittura) {
     Serial.println(F("connessione persa"));
+    annota("connessione persa (rx totali %lu)", (unsigned long)rxTotali);
     // Quello che suonava non c'e' piu': riacceso, lo Spark suona il suo.
     nomeSuona[0] = 0;
     // Del looper non sappiamo piu' niente: lo richiede al prossimo aggancio.
@@ -438,6 +439,9 @@ void loop() {
                          Serial.printf("display: VCOMH 0x%02x\n", VCOMH[vcomh]); }
     else if (c == 'W') { provaSchermo = (uint8_t)((provaSchermo + 1) % N_PROVE); schermoSporco = true;
                          Serial.printf("prova del display: %u\n", provaSchermo); }
+    // La scatola nera, e il tuner aperto e chiuso dal PC per le prove (2.26).
+    else if (c == 'N') stampaScatola();
+    else if (c == 'T') { if (tuner) esciTuner(); else entraTuner(); }
     else if (c == '?') elenco();
   }
   // 2 ms, non 10: una battuta secca su un tattile puo' durare pochi

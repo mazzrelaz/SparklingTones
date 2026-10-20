@@ -175,6 +175,7 @@ static void cambiaLooper() {
   if (looper) { looperChiedi = true; tempoDa = millis(); }       // com'e' messo adesso: lo dice l'ampli
   avvisa(looper ? TESTO("modalita' looper", "looper mode") : TESTO("modalita' preset", "preset mode"));
   Serial.printf("looper %s\n", looper ? "acceso" : "spento");
+  annota(looper ? "looper dentro" : "looper fuori");
   aggiornaLed();
   schermoSporco = true;
 }

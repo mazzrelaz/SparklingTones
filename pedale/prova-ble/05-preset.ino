@@ -142,6 +142,7 @@ static void mandaPreset(uint8_t n) {
   inTrasferimento = true;
   silenzioso = true;
   const uint32_t t0 = millis();
+  const uint32_t ackVeriPrima = ackPreset;
   uint32_t ack = 0, persi = 0;
 
   for (uint8_t i = 0; i < quanti; i++) {
@@ -164,6 +165,12 @@ static void mandaPreset(uint8_t n) {
   silenzioso = false;
   inTrasferimento = false;
 
+  // Nella scatola nera gli ack **veri** dei pezzi (04 01 / 05 01): il conto qui
+  // sopra prende qualunque messaggio, e con l'ampli che si inceppa (20 ottobre)
+  // diceva 16/16 a preset che non partivano. Se l'ampli conferma il cambio, lo
+  // dice la riga «RX 0438» che segue.
+  annota("preset %u %.20s: %lu ms, ack veri %lu/%u", n + 1, nomePosto(n),
+         (unsigned long)(millis() - t0), (unsigned long)(ackPreset - ackVeriPrima), quanti);
   cambiaPreset(0x7f);                    // fa suonare il buffer software
   const uint32_t tTotale = millis() - t0;
 

@@ -77,9 +77,56 @@ static void ascoltaRisposta(const uint8_t* m, size_t n) {
   if (indice + 1 >= tutti) rispostaFinita = true;
 }
 
+/** Una riga nella scatola nera (vedi prova-ble.ino), col tempo in decimi di
+ *  secondo. Si chiama anche dal callback delle notifiche: la riga si scrive
+ *  tutta dentro la sezione critica, cosi' due scritture non si mescolano. */
+static void annota(const char* formato, ...) {
+  char riga[60];
+  const uint32_t ds = millis() / 100;
+  int k = snprintf(riga, sizeof(riga), "%5lu.%lu ", (unsigned long)(ds / 10), (unsigned long)(ds % 10));
+  va_list a;
+  va_start(a, formato);
+  vsnprintf(riga + k, sizeof(riga) - k, formato, a);
+  va_end(a);
+  taskENTER_CRITICAL(&scatolaMux);
+  memcpy(scatola[scatolaPos % SCATOLA_RIGHE], riga, sizeof(riga));
+  scatolaPos++;
+  taskEXIT_CRITICAL(&scatolaMux);
+}
+
+/** 'N' dal seriale: la scatola nera, dalla riga piu' vecchia. */
+static void stampaScatola() {
+  const uint32_t fine = scatolaPos;
+  const uint32_t inizio = fine > SCATOLA_RIGHE ? fine - SCATOLA_RIGHE : 0;
+  Serial.printf("scatola nera: %lu righe in tutto, le ultime %lu (adesso %lu.%lu s)\n",
+                (unsigned long)fine, (unsigned long)(fine - inizio),
+                (unsigned long)(millis() / 1000), (unsigned long)(millis() / 100 % 10));
+  for (uint32_t i = inizio; i < fine; i++) {
+    char riga[60];
+    taskENTER_CRITICAL(&scatolaMux);
+    memcpy(riga, scatola[i % SCATOLA_RIGHE], sizeof(riga));
+    taskEXIT_CRITICAL(&scatolaMux);
+    riga[sizeof(riga) - 1] = 0;
+    Serial.println(riga);
+  }
+}
+
 static void messaggioIntero(const uint8_t* m, size_t n) {
   rxTotali++;
   ultimoRx = millis();
+  // La scatola nera: tutto tranne le letture del tuner e la posizione del loop.
+  if (n >= 6) {
+    if (m[4] == 0x04 && m[5] == 0x38) ack0138++;
+    if ((m[4] == 0x04 || m[4] == 0x05) && m[5] == 0x01) ackPreset++;
+    // I pezzi dei preset letti all'aggancio (0x0301, 16 per slot) riempivano la
+    // scatola da soli: restano fuori, come le letture del tuner e il loop.
+    else if (!(m[4] == 0x03 && (m[5] == 0x64 || m[5] == 0x77 || m[5] == 0x01))) {
+      char dati[25] = "";
+      for (size_t i = 6, k = 0; i + 1 < n && k + 3 < sizeof(dati); i++, k += 3)
+        snprintf(dati + k, sizeof(dati) - k, "%02x ", m[i]);
+      annota("RX %02x%02x %s", m[4], m[5], dati);
+    }
+  }
   ascoltaRisposta(m, n);
   // Lo stato del looper (0x0375, un byte): in coda per il loop.
   if (n >= 8 && m[4] == 0x03 && m[5] == 0x75) {
@@ -233,7 +280,13 @@ static size_t costruisci(uint8_t cmd, uint8_t sub,
 }
 
 static bool manda(const uint8_t* frame, size_t n) {
-  if (!chScrittura) { Serial.println(F("non connesso")); return false; }
+  if (!chScrittura) { Serial.println(F("non connesso")); annota("TX senza ampli"); return false; }
+  {
+    char dati[25] = "";
+    for (size_t i = 6, k = 0; i + 1 < n && k + 3 < sizeof(dati); i++, k += 3)
+      snprintf(dati + k, sizeof(dati) - k, "%02x ", frame[i]);
+    annota("TX %02x%02x %s", n > 5 ? frame[4] : 0, n > 5 ? frame[5] : 0, dati);
+  }
   Serial.print(F("  TX "));
   for (size_t i = 0; i < n; i++) Serial.printf("%02x ", frame[i]);
   Serial.println();

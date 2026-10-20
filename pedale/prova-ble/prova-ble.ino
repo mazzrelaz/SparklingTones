@@ -76,7 +76,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.25";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo; 2.19: «libero» fino a 60 s; 2.20: cerchio in «libero» e click per tutta la registrazione; 2.21: niente doppio click sull'«uno»; 2.22: l'impronta dei banchi, per «Aggiorna» nell'app; 2.23: il ponte si chiude quando l'app si stacca; 2.24: il tuner, tasto banco al rilascio; 2.25: diagnosi del tuner sul seriale
+static const char* VERSIONE = "2.26";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo; 2.19: «libero» fino a 60 s; 2.20: cerchio in «libero» e click per tutta la registrazione; 2.21: niente doppio click sull'«uno»; 2.22: l'impronta dei banchi, per «Aggiorna» nell'app; 2.23: il ponte si chiude quando l'app si stacca; 2.24: il tuner, tasto banco al rilascio; 2.25: diagnosi del tuner sul seriale; 2.26: la scatola nera
 
 /* La lingua delle scritte del display (9 ottobre 2026, chiesta dall'utente per chi
  * costruisce il pedale fuori dall'Italia): 0 italiano, 1 inglese. Si sceglie qui,
@@ -446,6 +446,21 @@ static float   tunerCent = 0;
 static int8_t  tunerCandidata = -1;            // una nota nuova si mostra dopo due letture uguali
 static uint8_t tunerRipetute = 0;
 static uint8_t tunerSilenzi = 0;
+/* --- La scatola nera (2.26, 20 ottobre 2026) --------------------------------
+ *
+ * L'ampli si e' piantato due volte in un pomeriggio di tuner, looper e preset, e
+ * sempre col pedale staccato dal PC: il seriale non c'era. Qui restano le ultime
+ * SCATOLA_RIGHE cose successe (comandi mandati, risposte, tuner, connessione),
+ * col tempo; in RAM, quindi sopravvivono a un cavo attaccato dopo (la batteria
+ * tiene acceso il pedale), non a uno spegnimento. 'N' dal seriale le stampa.
+ * Le letture del tuner (0x0364) e la posizione del loop (0x0377) non ci entrano,
+ * sono troppe: si contano. */
+static const uint8_t SCATOLA_RIGHE = 120;
+static char          scatola[SCATOLA_RIGHE][60];
+static volatile uint32_t scatolaPos = 0;
+static portMUX_TYPE  scatolaMux = portMUX_INITIALIZER_UNLOCKED;
+static volatile uint32_t ackPreset = 0;        // gli ack veri dei pezzi di un preset (04 01 / 05 01)
+static volatile uint32_t ack0138 = 0;          // gli ack del cambio preset (04 38)
 static int8_t   bancoInAttesa = -1;            // il tasto banco premuto, che cambia al rilascio
 static uint32_t bancoPremutoDa = 0;
 static bool     bancoAnnullato = false;        // combinazione o tuner: al rilascio niente
