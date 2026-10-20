@@ -38,8 +38,8 @@ NOME = "basetta-pedale"
 # Coordinate della scheda in mm, origine in alto a sinistra, Y in giu'.
 # Sul foglio di KiCad la scheda sta spostata di (OX, OY).
 OX, OY = 100.0, 100.0
-W, H = 100.0, 80.0     # dentro i 100 x 100 della fascia piu economica di JLCPCB
-LOGO = (50.0, 6.2, 50.0)  # centro e larghezza del logo, in alto
+W, H = 86.0, 70.0      # stretta attorno ai pezzi (chiesto dall'utente)
+LOGO = (78.5, 24.0, 32.0)  # centro e lunghezza del logo, in verticale a destra
 FORI = [(4, 4), (W - 4, 4), (4, H - 4), (W - 4, H - 4)]   # M3
 RAGGIO_VITE = 3.6        # niente rame dove appoggia la testa della vite
 
@@ -73,7 +73,7 @@ def xh(n):
 # Il chip: piedino 1 in basso a sinistra (rotazione 90), riga 1-14 verso
 # destra (GPB0..GPB7, VDD, VSS, NC, SCL, SDA, NC), sopra la riga 28..15
 # letta da sinistra (GPA7..GPA0, INTA, INTB, RESET, A2, A1, A0).
-MCP_X, MCP_Y = 32.0, 41.0
+MCP_X, MCP_Y = 32.0, 34.0
 MCP_RETI = {9: "+3V3", 10: "GND", 12: "SCL", 13: "SDA",
             15: "GND", 16: "GND", 17: "GND", 18: "RESET"}
 for i in range(8):
@@ -93,7 +93,7 @@ LED_USCITE = ["LR1", "LV1", "LR2", "LV2", "LR3", "LV3", "LR4", "LV4"]
 # La XIAO, vista dall'alto con l'USB in su: a sinistra D0..D6, a destra
 # 5V, GND, 3V3, D10, D9, D8, D7. Numeri dei piedini come Seeed: 1..7 a
 # sinistra dall'alto, 8 = D7 in basso a destra, 14 = 5V in alto a destra.
-XIAO_C = (12.0, 36.0)     # USB a sinistra, fuori dal bordo
+XIAO_C = (12.0, 29.0)     # USB a sinistra, fuori dal bordo
 XIAO_SX = [("1", "VSENSE", "D0"), ("2", "LED_T", "D1"), ("3", "D2", "D2"),
            ("4", "CLIC", "D3"), ("5", "SDA", "SDA"), ("6", "SCL", "SCL"),
            ("7", "TX", "TX")]
@@ -101,7 +101,7 @@ XIAO_DX = [("14", None, "5V"), ("13", "GND", "G"), ("12", "+3V3", "3V3"),
            ("11", "D10", "D10"), ("10", "D9", "D9"), ("9", "D8", "D8"),
            ("8", "RX", "RX")]
 
-BASSO = 72.0             # la riga delle prese in basso
+BASSO = 63.0             # la riga delle prese in basso
 
 PEZZI = []  # (rif, impronta, valore, x, y, rot, {piazzola: rete})
 
@@ -117,40 +117,40 @@ def connettore(rif, reti, x, y):
 
 pezzo("U2", ("Package_DIP", "DIP-28_W7.62mm_Socket"), "MCP23017",
       MCP_X, MCP_Y, 90, {str(k): v for k, v in MCP_RETI.items()})
-connettore("J1", J_FS, 31.0, 15.0)
-connettore("J2", J_TASTI, 48.0, 15.0)
+connettore("J1", J_FS, 31.0, 9.0)
+connettore("J2", J_TASTI, 48.0, 9.0)
 connettore("J3", J_LED12, 31.0, BASSO)
 connettore("J4", J_LED34, 47.5, BASSO)
 connettore("J5", ["GND", "+3V3", "SCL", "SDA"], 64.0, BASSO)
 connettore("J6", ["GND", "LED_T_R"], 11.0, BASSO)
 connettore("J7", ["GND", "CLIC_R"], 20.5, BASSO)
-connettore("J8", ["GND", "VBAT"], 5.5, 50.0)      # sotto la XIAO: i fili delle piazzole BAT
-# il morsetto: i fili entrano dal lato del bordo
+connettore("J8", ["GND", "VBAT"], 5.5, 42.0)      # sotto la XIAO: i fili delle piazzole BAT
+# il morsetto sul lato destro, girato: i fili entrano dal bordo
 pezzo("J9", ("TerminalBlock_Phoenix",
              "TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal"),
-      "", 84.0, BASSO + 0.5, 0, {"1": "GND", "2": "VBAT"})
+      "", 80.0, 53.0, 90, {"1": "GND", "2": "VBAT"})
 # i piedini liberi della XIAO, su un pettine sopra di lei
 pezzo("J10", ("Connector_PinHeader_2.54mm", "PinHeader_1x08_P2.54mm_Vertical"),
-      "", 4.0, 21.0, 90,
+      "", 4.0, 13.0, 90,
       {str(i + 1): r for i, r in enumerate(
           ["GND", "+3V3", "D2", "D8", "D9", "D10", "TX", "RX"])})
 
 # Le otto resistenze dei LED, in piedi sul foglio (piazzola 1 in alto).
 for i, rete in enumerate(LED_USCITE):
     pezzo("R%d" % (8 + i), RES, "330" if i % 2 == 0 else "560",
-          30.5 + i * 3.81, 47.0, 270, {"1": "PB%d" % i, "2": rete})
-pezzo("R1", RES, "4k7", 74.0, 46.0, 0, {"1": "+3V3", "2": "SDA"})
-pezzo("R2", RES, "4k7", 74.0, 49.5, 0, {"1": "+3V3", "2": "SCL"})
-pezzo("R3", RES, "10k", 60.0, 27.0, 0, {"1": "+3V3", "2": "RESET"})
+          30.5 + i * 3.81, 40.0, 270, {"1": "PB%d" % i, "2": rete})
+pezzo("R1", RES, "4k7", 62.5, 38.5, 0, {"1": "+3V3", "2": "SDA"})
+pezzo("R2", RES, "4k7", 62.5, 42.0, 0, {"1": "+3V3", "2": "SCL"})
+pezzo("R3", RES, "10k", 60.0, 20.0, 0, {"1": "+3V3", "2": "RESET"})
 # vicino alla XIAO: partitore della batteria (D0), LED del tempo (D1), piezo (D3)
-pezzo("R4", RES, "100k", 3.5, 58.0, 0, {"1": "VBAT", "2": "VSENSE"})
-pezzo("R5", RES, "100k", 3.5, 61.5, 0, {"1": "VSENSE", "2": "GND"})
-pezzo("R6", RES, "330", 22.0, 47.0, 270, {"1": "LED_T", "2": "LED_T_R"})
-pezzo("R7", RES, "330", 25.5, 47.0, 270, {"1": "CLIC", "2": "CLIC_R"})
+pezzo("R4", RES, "100k", 3.5, 49.0, 0, {"1": "VBAT", "2": "VSENSE"})
+pezzo("R5", RES, "100k", 3.5, 52.2, 0, {"1": "VSENSE", "2": "GND"})
+pezzo("R6", RES, "330", 22.0, 40.0, 270, {"1": "LED_T", "2": "LED_T_R"})
+pezzo("R7", RES, "330", 25.5, 40.0, 270, {"1": "CLIC", "2": "CLIC_R"})
 pezzo("C1", ("Capacitor_THT", "C_Disc_D5.0mm_W2.5mm_P2.50mm"), "100n",
-      69.0, 38.0, 0, {"1": "+3V3", "2": "GND"})
+      69.0, 31.0, 0, {"1": "+3V3", "2": "GND"})
 pezzo("C2", ("Capacitor_THT", "CP_Radial_D5.0mm_P2.00mm"), "10u",
-      70.0, 59.0, 0, {"1": "+3V3", "2": "GND"})
+      61.5, 49.0, 0, {"1": "+3V3", "2": "GND"})
 
 # Scritte accanto alle prese: nome, nomi dei piedini sotto o sopra (in
 # piedi se lunghi), e dove va il nome ("destra": accanto alla presa).
@@ -284,7 +284,7 @@ def xiao(b, reti):
     return f
 
 
-def logo(b, x, y, larghezza):
+def logo(b, x, y, larghezza, verticale=False):
     """Il logotipo dell'app in serigrafia, centrato in (x, y). Viene da
     `logo-serigrafia.png` (icons/logo.svg reso in nero da Edge): i pixel scuri
     diventano rettangoli, uniti in un poligono solo."""
@@ -294,7 +294,7 @@ def logo(b, x, y, larghezza):
     im = im.crop(bbox)
     px = larghezza / im.width                     # mm per pixel
     alto = im.height * px
-    x0, y0 = x - larghezza / 2, y - alto / 2
+    u0, v0 = -larghezza / 2, -alto / 2      # nel riferimento del logo
     dati = im.load()
     corse_prima = {}
     rett = []                                     # (i0, i1, j0, j1)
@@ -325,7 +325,9 @@ def logo(b, x, y, larghezza):
     for i0, i1, j0, j1 in rett:
         ps.NewOutline()
         for a, c in ((i0, j0), (i1, j0), (i1, j1), (i0, j1)):
-            p = V(x0 + a * px, y0 + c * px)
+            u, v = u0 + a * px, v0 + c * px
+            # in verticale si legge dal basso in alto: il "sotto" va a destra
+            p = V(x + v, y - u) if verticale else V(x + u, y + v)
             ps.Append(p.x, p.y)
     ps.Simplify()
     ps.Fracture()       # i buchi delle lettere diventano parte del contorno
@@ -400,18 +402,20 @@ def etichette(b, fps):
         else:
             testo(b, nome, (xs[0] + xs[-1]) / 2, y + 6.8 if s > 0 else y - 6.8, 1.1)
     # morsetto della cella
-    x1, y1 = da_iu(fps["J9"].Pads()[0].GetPosition())
-    testo(b, "CELLA", x1 + 2.54, y1 - 9.4, 1.1)
-    testo(b, "-", x1, y1 - 7.0, 1.6)
-    testo(b, "+", x1 + 5.08, y1 - 7.0, 1.6)
-    logo(b, LOGO[0], LOGO[1], LOGO[2])
+    # (girato: il - in basso, il + in alto, i segni a sinistra del corpo)
+    pads = sorted(fps["J9"].Pads(), key=lambda p: int(p.GetNumber()))
+    (xm, ym), (xp, yp) = [da_iu(p.GetPosition()) for p in pads]
+    testo(b, "-", xm - 7.2, ym, 1.6)
+    testo(b, "+", xp - 7.2, yp, 1.6)
+    testo(b, "CELLA", xm, yp - 4.2, 1.1)
+    alto = logo(b, LOGO[0], LOGO[1], LOGO[2], verticale=True)
+    testo(b, "by Massimo Togni 2026", LOGO[0] + alto / 2 + 1.6, LOGO[1], 1.1, ang=90)
     # il chip
     testo(b, "MCP23017", MCP_X + 16.5, MCP_Y + 2.8, 1.0)
     # titolo, sul retro
-    testo(b, "SPARKLINGTONES", 83, 18, 1.6, lato=pcbnew.B_SilkS)
-    testo(b, "basetta del pedale v1", 83, 21.2, 1.2, lato=pcbnew.B_SilkS)
-    testo(b, "ottobre 2026", 83, 23.6, 1.2, lato=pcbnew.B_SilkS)
-    testo(b, "sparklingtones.com", 83, 26, 1.2, lato=pcbnew.B_SilkS)
+    testo(b, "basetta del pedale v1 - ottobre 2026", 78.5, 24, 1.1, ang=90,
+          lato=pcbnew.B_SilkS)
+    testo(b, "sparklingtones.com", 81.5, 24, 1.1, ang=90, lato=pcbnew.B_SilkS)
 
 
 # ---------------------------------------------------------------- router --
