@@ -61,6 +61,10 @@ static void elenco() {
     "  x     molla l'ampli (cosi' l'app nel browser lo trova)\n"
     "  r     riprendi l'ampli\n"
     "  W     prova del display: tutto acceso, meta' sopra, meta' a sinistra, bande, normale\n"
-    "  K P V luminosita', precarica, VCOMH del display (a giro)\n"));
+    "  K P V luminosita', precarica, VCOMH del display (a giro)\n"
+    "  N     la scatola nera: le ultime 400 cose successe\n"
+    "  M     le due scatole salvate quando l'ampli si e' inceppato\n"
+    "  S     salva adesso la scatola (prova)\n"
+    "  T     apri/chiudi il tuner;  L  dentro/fuori dal looper;  Y  un colpo di tap\n"));
 }
 

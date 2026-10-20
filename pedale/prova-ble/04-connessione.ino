@@ -93,6 +93,7 @@ static bool agganciaAmpli() {
   client->updateConnParams(6, 6, 0, 400);
   momentoConnesso = millis();
   annota("collegato all'ampli");
+  scatolaSalvata = false;                  // un aggancio nuovo: la scatola si riarma
   ripetizioniIntervallo = 0;
   Serial.printf("connesso, MTU %d, chiesto intervallo 7,5 ms\n", client->getMTU());
   schermoSporco = true;

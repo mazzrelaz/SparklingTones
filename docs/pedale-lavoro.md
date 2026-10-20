@@ -216,6 +216,25 @@ raffiche di `0x0176` del tap, o il blocco gia' noto dell'ampli. Registro nello s
 sessione. **Il seriale del pedale muore se si stacca il cavo**: va riaperto lo script, dopo aver
 staccato e riattaccato.
 
+**Dopo, lo stesso pomeriggio**: l'ampli si e' inceppato di nuovo, e il registro ha mostrato come
+**si inceppa per gradi**: i preset dei banchi passano da ~330 a ~600 ms e il `0x0138` non riceve piu'
+il suo `04 38` (sul display il nome cambia, sull'ampli no; i `slot selezionato` con `0x0138` da soli
+funzionavano ancora), poi l'ampli smette di mandare qualunque cosa e il tuner resta muto. Il conto
+«15/15 ack» del pedale contava **qualunque** messaggio, non gli ack dei pezzi: ingannevole.
+**Prove dal PC** col 2.26 (comandi `T` tuner, `L` looper, `Y` tap): 15 aperture e chiusure del
+tuner, e 30 tap di fila nel looper, **non inceppano niente**. Non riprodotto con l'uso normale (un'ora,
+col cavo attaccato). Causa ancora ignota.
+
+**La scatola nera (2.26-2.27), lasciata dentro su richiesta dell'utente**: le ultime 400 cose
+successe (TX, RX tranne `0x0364`/`0x0377`/`0x0301`, preset con gli **ack veri** dei pezzi, tuner,
+looper, connessione) in RAM; `N` le stampa. **Quando l'ampli da' il primo segno di essersi inceppato
+la scatola si salva in LittleFS** (`/scatola1.txt`, la volta prima in `/scatola2.txt`), resta anche a
+pedale spento, e il display dice *ampli inceppato: salvato*. I segni: un `0x0138` senza `04 38` entro un
+secondo, o il tuner acceso senza nessuna lettura per 5 s. Una volta per episodio (si riarma a un
+cambio confermato o a un nuovo aggancio). **Si rilegge con `M`** dal seriale (`S` la salva a mano,
+per prova: `/scatola1.txt` contiene ora una prova del 20 ottobre). Quando ricapita: l'utente riavvia
+l'ampli, attacca il pedale al PC, e si legge `M`.
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni

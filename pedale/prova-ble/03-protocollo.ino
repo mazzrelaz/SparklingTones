@@ -94,20 +94,62 @@ static void annota(const char* formato, ...) {
   taskEXIT_CRITICAL(&scatolaMux);
 }
 
-/** 'N' dal seriale: la scatola nera, dalla riga piu' vecchia. */
-static void stampaScatola() {
+/** La scatola nera, dalla riga piu' vecchia, sul seriale o in un file. */
+static void scriviScatola(Print& fuori) {
   const uint32_t fine = scatolaPos;
   const uint32_t inizio = fine > SCATOLA_RIGHE ? fine - SCATOLA_RIGHE : 0;
-  Serial.printf("scatola nera: %lu righe in tutto, le ultime %lu (adesso %lu.%lu s)\n",
-                (unsigned long)fine, (unsigned long)(fine - inizio),
-                (unsigned long)(millis() / 1000), (unsigned long)(millis() / 100 % 10));
+  fuori.printf("scatola nera: %lu righe in tutto, le ultime %lu (adesso %lu.%lu s)\n",
+               (unsigned long)fine, (unsigned long)(fine - inizio),
+               (unsigned long)(millis() / 1000), (unsigned long)(millis() / 100 % 10));
   for (uint32_t i = inizio; i < fine; i++) {
     char riga[60];
     taskENTER_CRITICAL(&scatolaMux);
     memcpy(riga, scatola[i % SCATOLA_RIGHE], sizeof(riga));
     taskEXIT_CRITICAL(&scatolaMux);
     riga[sizeof(riga) - 1] = 0;
-    Serial.println(riga);
+    fuori.println(riga);
+  }
+}
+
+/** 'N' dal seriale: quella che c'e' adesso in RAM. */
+static void stampaScatola() { scriviScatola(Serial); }
+
+/* La scatola salvata (2.27, chiesta dall'utente il 20 ottobre 2026: «lascia
+ * qualcosa dentro in modo che venga memorizzato quando capita»). Quando l'ampli
+ * da' il primo segno di essersi inceppato, la scatola nera finisce in memoria e
+ * resta anche a pedale spento; la volta prima passa in un secondo file. Si
+ * rilegge con 'M' dal seriale. Una volta per episodio: si riarma quando l'ampli
+ * torna a confermare un cambio di preset, o al prossimo aggancio. */
+static const char* VIA_SCATOLA  = "/scatola1.txt";
+static const char* VIA_SCATOLA2 = "/scatola2.txt";
+static bool scatolaSalvata = false;
+
+static void salvaScatola(const char* perche) {
+  if (scatolaSalvata) return;
+  scatolaSalvata = true;
+  annota("salvo la scatola: %s", perche);
+  if (LittleFS.exists(VIA_SCATOLA)) {
+    LittleFS.remove(VIA_SCATOLA2);
+    LittleFS.rename(VIA_SCATOLA, VIA_SCATOLA2);
+  }
+  File f = LittleFS.open(VIA_SCATOLA, "w");
+  if (!f) { Serial.println(F("scatola nera: non riesco a salvarla")); return; }
+  f.printf("perche': %s\nfirmware %s, acceso da %lu s, ampli %s\n", perche, VERSIONE,
+           (unsigned long)(millis() / 1000), ampliScelto == AMPLI_NEO ? "NEO" : "Spark 2");
+  scriviScatola(f);
+  f.close();
+  Serial.printf("scatola nera salvata: %s\n", perche);
+  avvisa(TESTO("ampli inceppato: salvato", "amp stuck: saved"));
+}
+
+/** 'M' dal seriale: le due scatole salvate, la piu' recente prima. */
+static void stampaScatoleSalvate() {
+  for (const char* via : { VIA_SCATOLA, VIA_SCATOLA2 }) {
+    File f = LittleFS.open(via, "r");
+    if (!f) { Serial.printf("%s: nessuna\n", via); continue; }
+    Serial.printf("===== %s =====\n", via);
+    while (f.available()) Serial.write(f.read());
+    f.close();
   }
 }
 

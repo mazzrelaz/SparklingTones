@@ -63,6 +63,8 @@ static void sbrigaTuner() {
     tunerAcceso = tuner;
     tunerSpegniAlRitorno = false;
     mandaTuner(tuner);
+    tunerAccesoDa = tuner ? (millis() | 1) : 0;
+    tunerArrivatiAllAccensione = tunerArrivati;
     tunerAzzera();
   }
   if (!tuner) return;
@@ -84,6 +86,14 @@ static void sbrigaTuner() {
       arrivatiPrima = a;
       lettePrima = l;
     }
+  }
+
+  /* Il primo sintomo visto il 20 ottobre: tuner acceso, ampli muto, e nessuna
+   * lettura. Le letture arrivano entro un secondo (anche senza suonare: -1):
+   * dopo cinque secondi senza niente l'ampli e' inceppato, e la scatola si salva. */
+  if (tunerAccesoDa && millis() - tunerAccesoDa > 5000) {
+    if (tunerArrivati == tunerArrivatiAllAccensione) salvaScatola("tuner acceso senza letture");
+    tunerAccesoDa = 0;
   }
 
   static uint32_t viste = 0;

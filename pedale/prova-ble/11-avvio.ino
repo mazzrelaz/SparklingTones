@@ -328,11 +328,12 @@ void loop() {
    * preset che in un secondo non riceve il suo 04 38. Prima di piantarsi del
    * tutto l'ampli conferma ancora i pezzi del preset ma non il cambio. */
   if (atteso0138Da) {
-    if (ack0138 >= atteso0138) atteso0138Da = 0;
+    if (ack0138 >= atteso0138) { atteso0138Da = 0; scatolaSalvata = false; }   // sano: si riarma
     else if (millis() - atteso0138Da > 1000) {
       atteso0138Da = 0;
       annota("!! cambio preset senza conferma (rx totali %lu)", (unsigned long)rxTotali);
       Serial.println(F("!! cambio preset senza conferma dall'ampli"));
+      salvaScatola("cambio preset senza conferma");
     }
   }
 
@@ -452,6 +453,8 @@ void loop() {
                          Serial.printf("prova del display: %u\n", provaSchermo); }
     // La scatola nera, e il tuner aperto e chiuso dal PC per le prove (2.26).
     else if (c == 'N') stampaScatola();
+    else if (c == 'M') stampaScatoleSalvate();      // quelle salvate quando l'ampli s'inceppa
+    else if (c == 'S') { scatolaSalvata = false; salvaScatola("prova dal seriale"); }
     else if (c == 'T') { if (tuner) esciTuner(); else entraTuner(); }
     else if (c == 'L') cambiaLooper();               // il looper dal PC, per le prove
     else if (c == 'Y') { if (looper) looperTap(); }  // un colpo di tap tempo
