@@ -4,6 +4,16 @@ Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync D
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
 
+## Il tuner — 20 ottobre 2026
+
+`src/app/16-accordatore.js` e `Spark.letturaAccordatore`. Verso l'ampli parte solo `0x0165` con un
+booleano, costruito da noi. Da fuori entra `0x0364`: `letturaAccordatore` accetta una nota 0–11 e uno
+scostamento finito, controlla la lunghezza prima di leggere il float (il `Reader` da solo non lo fa:
+un payload monco dava zeri, c'è un test) e torna `null` per tutto il resto. Sulla pagina finiscono
+solo le lettere di una tabella fissa e numeri: niente testo dell'ampli in `innerHTML`. L'ampli
+resta muto solo mentre la scheda è aperta; se cade col tuner acceso, al ritorno lo si spegne.
+Niente da correggere.
+
 ## «Genera con l'IA» tolta — 19 ottobre 2026
 
 La funzione è uscita dall'app (guscio `v122`): niente più chiamate a OpenAI e Anthropic, e i due

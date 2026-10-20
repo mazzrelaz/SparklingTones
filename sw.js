@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v122';
+const VERSIONE = 'v131';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -58,6 +58,7 @@ const GUSCIO = [
   './src/app/13-dropbox.js',
   './src/app/14-pedale.js',
   './src/app/15-partenza.js',
+  './src/app/16-accordatore.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',

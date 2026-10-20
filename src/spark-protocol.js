@@ -283,6 +283,13 @@ window.Spark = (function () {
     getLooperSettings: () => ({ cmd: CMD_QUERY,  sub: 0x76, data: [] }),
     setLooperSettings: d  => ({ cmd: CMD_ACTION, sub: 0x76, data: Array.from(d) }),
 
+    /**
+     * L'accordatore (20 ottobre 2026, misurato sullo Spark 2): `0x0165` col
+     * booleano, **senza** lo `0x00` in coda. Acceso, l'ampli tace e manda
+     * `0x0364` circa 13 volte al secondo (vedi `letturaAccordatore`).
+     */
+    tuner: on => ({ cmd: CMD_ACTION, sub: 0x65, data: [...encOnOff(on)] }),
+
     getPreset:        n  => ({ cmd: CMD_QUERY, sub: 0x01, data: [0x00, n & 0xff] }),
     getLiveState:     () => ({ cmd: CMD_QUERY, sub: 0x01, data: [0x01, 0x00] }),
     getCurrentPreset: () => ({ cmd: CMD_QUERY, sub: 0x10, data: [] }),
@@ -337,6 +344,26 @@ window.Spark = (function () {
   function encode(command, seq, withBlockHeader) {
     const chunk = buildChunk(command.cmd, command.sub, command.data, seq);
     return withBlockHeader ? wrapBlock(chunk) : chunk;
+  }
+
+  /**
+   * Una lettura dell'accordatore (`0x0364`): la nota, 0–11 da Do e senza
+   * ottava, e lo scostamento, 0–1 con 0,5 intonata (probabilmente ±50 cent).
+   * Senza suono lo scostamento è -1 e la nota resta l'ultima: allora torna
+   * `scostamento: null`. Un payload che non torna dà `null`.
+   * Misurato con la chitarra accordata il 20 ottobre 2026.
+   */
+  function letturaAccordatore(data) {
+    try {
+      const r = new Reader(data);
+      const nota = r.int();
+      if (r.remaining < 5) return null;   // il Reader non controlla la fine
+      const s = r.float();
+      if (nota > 11 || !isFinite(s)) return null;
+      return { nota, scostamento: s < 0 ? null : Math.min(1, s) };
+    } catch (e) {
+      return null;
+    }
   }
 
   /* ======================================================================
@@ -738,7 +765,7 @@ window.Spark = (function () {
     presetChecksum, PARAM_MARKER, PRESET_CHUNK_SIZE,
     LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET, CATENA,
     slotLabel, SLOTS_PER_BANK, profiloAmpli,
-    bpmDaImpostazioni, impostazioniConBpm, BPM_MIN, BPM_MAX,
+    bpmDaImpostazioni, impostazioniConBpm, BPM_MIN, BPM_MAX, letturaAccordatore,
     CMD_ACTION, CMD_QUERY, CMD_NOTIFY, CMD_ACK, TYPE,
   };
 })();

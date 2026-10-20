@@ -631,3 +631,8 @@ più vicina, quindi lo scarto non può superare mezzo semitono, e le sei corde d
 nella bozza, a confronto con un accordatore sul telefono. All'attacco della nota le prime 2-3
 letture saltano (nota vicina, scostamento lontano da 0,5): l'app le deve smussare, non mostrare
 crude. Ancora nessun `0x0365`.
+
+**Nell'app dal 20 ottobre 2026** (guscio `v131`, `src/app/16-accordatore.js`): `Spark.commands.tuner`
+e `Spark.letturaAccordatore`, con sei test. **Provato dall'utente sull'ampli vero** (dal PC, bozza
+su localhost): accende, legge, spegne uscendo dalla scheda. **Non verificato**: cosa succede se la
+scheda è già aperta mentre l'app si collega e legge gli otto slot (il tuner parte subito).

@@ -1395,3 +1395,30 @@ che lo faceva già. Così la pressione lunga apre l'editor anche senza ampli, su
 Con l'ampli, aprire l'editor manda il preset per regolarlo, quindi suona: come «Regola». Chiudendo
 l'editor si resta in Live. Provato nel riquadro (senza ampli) e dall'utente sul telefono; pubblicato
 col guscio `v114`.
+
+## Il tuner — 20 ottobre 2026
+
+Chiesto dall'utente («penso che l'app originale legga i dati dall'ampli»): l'ampli fa tutto,
+noi accendiamo e mostriamo (`docs/protocollo-spark2.md`, ultima sezione). **Una voce sempre presente
+nella barra in basso**, fra Pedale e Altro, che si chiama **«Tuner» in tutte e due le lingue**
+(l'utente; prima «Accorda»). È una scheda come il Pedale: si apre sopra la vista in cui si è, se ne
+esce toccando un'altra voce. `16-accordatore.js`: l'accordatore dell'ampli è acceso **solo** mentre
+la scheda è aperta, l'ampli collegato e la pagina in vista (`seguiAccordatore`, chiamata da
+`segnaSchede`, dal bollino e da `visibilitychange`); se l'ampli cade col tuner acceso, al ritorno
+lo si spegne una volta.
+
+La grafica, in sei giri di bozza col tuner provato dall'utente sull'ampli vero dal PC
+(`http://localhost:8097`, il Bluetooth va su localhost):
+1. quadrante con lancetta, nota, nome italiano, cent e consigli («calante: tendi la corda»):
+   «funziona ma la grafica non mi piace»; **niente scritte**;
+2. stile neon della vista Live: sfondo dell'editor, piastra coi circuiti, arco di 21 tacche dal
+   ciano al fucsia; **via sfondo e circuiti**;
+3. piastra accesa solo a corda intonata → **sempre accesa**, bordo più tenue;
+4. «troppo»: fondo nero pieno, molto più contrasto nell'arco, quasi niente bagliore dentro;
+5. più sensibile (lancetta più pronta, la luce che scivola fra due tacche, intonata entro ±2 cent)
+   e bordo che pulsa;
+6. **niente piastra**: arco e nota sul fondo della pagina, bagliore solo sulla tacca accesa e sulla
+   nota; **i cent** (la frequenza chiesta dall'utente non si può: l'ampli non manda l'ottava),
+   colorati come il loro lato dell'arco e bianchi a 0, **a metà fra l'arco e la nota**.
+
+Pubblicato col guscio `v131`.

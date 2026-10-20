@@ -31,7 +31,7 @@ ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 15 ot
 
 ```
 index.html                        HTML e l'unico <style>: Preset e Live nello stesso documento
-src/app/01-…15-*.js               lo script dell'app, in fila
+src/app/01-…16-*.js               lo script dell'app, in fila (16: il tuner)
 guida.html / guida.en.html        guida all'uso (guida.css, guida.js); guida-pedale(.en).html
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
 src/spark-protocol.js             encoder/decoder puro — il cuore del progetto
@@ -398,13 +398,15 @@ toccate ancora) e mappatura guidata.
 **Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
 (niente altre funzioni MIDI); il tap tempo con l'ampli acceso.
 
-**L'accordatore (20 ottobre 2026)**: il fork promesso non è arrivato, si fa da noi. Comandi da
-Ignitron, **mai provati sullo Spark 2** (`0x0165` + `c3`/`c2`; l'ampli manda `0x0364` nota + float e
-`0x0365` acceso/spento); con l'accordatore acceso l'ampli tace. **Misurato il 20 ottobre: `0x0165 c3`/`c2`
-funziona** (senza `0x00`), `0x0364` arriva ~13 volte al secondo, -1 = nessun suono; `0x0365` mai visto.
-**Seconda prova**: nota 0–11 da Do, 0,5 = intonata, scala
-probabile ±50 cent (da confermare). **Prossimo passo: la bozza grafica.**
-Poi la bozza grafica. Dettaglio in `docs/protocollo-spark2.md`, ultima sezione. **Collaudi ancora aperti** (editor
+**Il tuner, pubblicato il 20 ottobre 2026** (guscio `v131`): voce **«Tuner»** nella barra in basso (il
+nome in tutte e due le lingue), scheda come il Pedale. `0x0165 c3`/`c2` (senza `0x00`); l'ampli tace e
+manda `0x0364` ~13 volte al secondo: nota 0–11 da Do **senza ottava** (niente hertz), scostamento 0–1
+con 0,5 intonata, -1 = silenzio; `0x0365` mai visto. **L'ampli muto solo a scheda aperta, ampli
+collegato e pagina in vista** (`seguiAccordatore`). Grafica in sei giri di bozza, scelta dall'utente:
+arco di 21 tacche al neon sul fondo della pagina, nota, cent fra i due, niente scritte
+(`docs/decisioni-ui.md`, «Il tuner»). Provato sull'ampli dall'utente. Sonda: `tools/accordatore-sonda.html`.
+
+**Collaudi ancora aperti** (editor
 con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
 preset vero, il NEO), **discussi e non aperti**, e il resto del pedale: `docs/diario.md`, estratto
 del 15 ottobre (sera), e `docs/pedale-lavoro.md`.

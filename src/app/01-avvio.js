@@ -45,6 +45,7 @@ const spark = new SparkTransport({
     }
     disegnaPreset();
     disegnaLive();
+    if (typeof seguiAccordatore === 'function') seguiAccordatore();
   },
   /**
    * Il trasporto racconta anche ogni singola scrittura (`TX 0x0104 seq=…`).

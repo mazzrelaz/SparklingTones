@@ -910,6 +910,57 @@
   #tabPedale.da-aggiornare::before { content:''; position:absolute; top:9px; left:calc(50% + 8px);
                                      width:8px; height:8px; border-radius:50%;
                                      background:var(--gold); box-shadow:0 0 6px var(--gold); }
+  /* --- l'accordatore (20 ottobre 2026) --------------------------------
+     Nello stile neon della vista Live (l'utente), dopo cinque giri di bozze:
+     niente piastra, niente scritte, direttamente sul fondo della pagina. Un arco
+     di 21 tacche, una ogni 5 cent, dal ciano (calante) al viola al fucsia
+     (crescente), e sotto la nota. Brillano solo la tacca dove sta la corda e la
+     nota; intonata, la nota diventa bianca. Provati e tolti: le scritte, lo
+     sfondo dell'editor, le piste del circuito, la piastra coi bordi che pulsano. */
+  #pannelloAccordatore.aperto { display:flex; flex-direction:column; }
+  .accordatore { flex:1; display:flex; flex-direction:column; align-items:center;
+                 justify-content:center; padding:8px 0 16px; }
+  .piastra-accordatore { position:relative; width:min(88vw, 420px);
+       display:flex; flex-direction:column; align-items:center; }
+  /* Il bagliore dietro la nota, appena accennato. */
+  .piastra-accordatore::after { content:''; position:absolute;
+       left:18%; right:18%; top:48%; bottom:-6%; border-radius:50%; pointer-events:none;
+       filter:blur(14px);
+       background:radial-gradient(ellipse at center, rgba(255,43,214,.16),
+                  rgba(123,92,255,.08) 45%, rgba(43,228,255,0) 75%);
+       animation:pulsaPadLuce 2.4s ease-in-out infinite; }
+  .piastra-accordatore .quadrante { position:relative; width:100%; height:auto; overflow:visible; }
+  .quadrante .tacca { stroke-width:7; stroke-linecap:round; opacity:.09;
+                      transition:opacity .08s linear; }
+  .quadrante .tacca.accesa { opacity:1; stroke-width:8; filter:drop-shadow(0 0 3px currentColor) drop-shadow(0 0 7px currentColor); }
+  .quadrante .segno { fill:#5a5f68; font-size:20px; text-anchor:middle; }
+  .piastra-accordatore .nota-grande { position:relative; z-index:1; font-family:var(--strumento);
+       font-size:min(30vw, 140px); font-weight:700; line-height:1; margin-top:-8px;
+       min-height:1em; color:#cfd2ff;
+       text-shadow:0 0 6px rgba(160,140,255,.5), 0 0 22px rgba(123,92,255,.45);
+       transition:color .15s, text-shadow .15s, opacity .15s; }
+  .nota-grande .diesis { font-size:0.45em; vertical-align:0.9em; margin-left:2px; }
+  .accordatore #btnCollegaAccordatore { margin-top:18px; }
+  /* I cent col colore del loro lato dell'arco: ciano calante, fucsia crescente. */
+  /* Dentro il riquadro dell'arco, a metà fra le tacche (y 60 su 168) e la nota:
+     y 118, cioè il 30 % dal fondo. */
+  .arco-accordatore { position:relative; width:100%; }
+  .cent-accordatore { position:absolute; z-index:1; left:50%; bottom:30%;
+       transform:translate(-50%, 50%); white-space:nowrap; font-family:var(--strumento);
+       font-size:1.5rem; font-weight:700;
+       font-variant-numeric:tabular-nums; color:#cfd2ff;
+       text-shadow:0 0 8px rgba(123,92,255,.6); transition:color .1s; }
+  .cent-accordatore small { font-size:0.55em; font-weight:500; margin-left:4px; opacity:.7; }
+  .cent-accordatore.calante { color:#2be4ff; text-shadow:0 0 8px rgba(43,228,255,.6); }
+  .cent-accordatore.crescente { color:#ff2bd6; text-shadow:0 0 8px rgba(255,43,214,.6); }
+  #pannelloAccordatore.intonata .cent-accordatore { color:#fff; text-shadow:0 0 8px #fff; }
+  #pannelloAccordatore.intonata .nota-grande { color:#fff;
+       text-shadow:0 0 8px #fff, 0 0 24px rgba(255,43,214,.8), 0 0 48px rgba(123,92,255,.6); }
+  #pannelloAccordatore.tace .nota-grande { opacity:.35; }
+  #pannelloAccordatore.senza-ampli .piastra-accordatore { filter:brightness(.6) saturate(.8); }
+  @media (prefers-reduced-motion: reduce) {
+    .piastra-accordatore::after { animation:none; }
+  }
   .modifiche-pedale { display:flex; align-items:center; gap:8px; flex-wrap:wrap;
                       background:var(--panel); border-radius:12px; padding:10px 12px;
                       margin-top:12px; font-size:0.82rem; color:var(--gold); }
@@ -1652,6 +1703,8 @@
     <svg viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="12" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="12" width="7" height="7" rx="1.5"/><rect x="12" y="12" width="7" height="7" rx="1.5"/></svg>Live</button>
   <button id="tabPedale">
     <svg viewBox="0 0 22 22" aria-hidden="true"><rect x="1.5" y="4.5" width="19" height="13" rx="2.5"/><circle cx="7" cy="12.8" r="2.1"/><circle cx="15" cy="12.8" r="2.1"/><circle cx="7" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="8" r="1" fill="currentColor" stroke="none"/></svg>Pedale</button>
+  <button id="tabAccordatore">
+    <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M8 2.5v7a3 3 0 0 0 6 0v-7M11 12.5v7"/></svg>Tuner</button>
   <button id="tabAltro" aria-haspopup="true" aria-expanded="false">
     <svg viewBox="0 0 22 22" aria-hidden="true"><path d="M5 11h.01M11 11h.01M17 11h.01"/></svg>Altro</button>
 </nav>
@@ -2002,6 +2055,32 @@
 <!-- il pedale ESP32: gli otto slot che tiene in memoria, e l'invio di un banco.
      Mentre l'app è collegata al pedale, il pedale ha mollato l'ampli: è una
      scelta di disegno, non un difetto, e il pannello lo dice. -->
+<!-- L'accordatore (20 ottobre 2026): una scheda della barra in basso, come il
+     Pedale. Aperta con l'ampli collegato, l'ampli tace e manda la nota; se ne esce
+     toccando un'altra scheda, e l'ampli torna a suonare (16-accordatore.js). -->
+<div class="pannello" id="pannelloAccordatore">
+  <div class="barra-alta">
+    <!-- Solo il marchio, lo mette `marchioNeiPannelli()`. -->
+  </div>
+  <div class="accordatore">
+    <div class="piastra-accordatore">
+      <!-- Le 21 tacche le mette 16-accordatore.js: una ogni 5 cent, ±50. -->
+      <div class="arco-accordatore">
+        <svg class="quadrante" id="quadranteAccordatore" viewBox="0 0 300 168" aria-hidden="true">
+          <text x="24" y="122" class="segno">♭</text>
+          <text x="276" y="122" class="segno">♯</text>
+        </svg>
+        <!-- I cent, al posto della frequenza: l'ampli non manda l'ottava, quindi
+             gli hertz non si possono sapere (l'utente li aveva chiesti). Stanno a
+             metà fra l'arco e la nota (l'utente). -->
+        <div class="cent-accordatore" id="centAccordatore"></div>
+      </div>
+      <div class="nota-grande" id="notaAccordatore"></div>
+    </div>
+    <button id="btnCollegaAccordatore" class="neon blu" hidden>Collega l'ampli</button>
+  </div>
+</div>
+
 <div class="pannello" id="pannelloPedale">
   <div class="barra-alta">
     <!-- Niente titolo né «Fatto»: il Pedale è una scheda della barra in basso, e se ne
@@ -2102,5 +2181,6 @@
 <script src="src/app/13-dropbox.js"></script>
 <script src="src/app/14-pedale.js"></script>
 <script src="src/app/15-partenza.js"></script>
+<script src="src/app/16-accordatore.js"></script>
 </body>
 </html>

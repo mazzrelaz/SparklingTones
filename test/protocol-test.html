@@ -505,6 +505,22 @@ check('bpm letto dalla cattura del 28 agosto (fixint nudo)',
 check('payload vuoto: nessun bpm da leggere',
       Spark.bpmDaImpostazioni([]), null);
 
+/* L'accordatore, dalle catture del 20 ottobre 2026 (tools/accordatore-sonda.html). */
+check('accordatore acceso: 0x0165 c3, senza 0x00 in coda',
+      Spark.commands.tuner(true), { cmd: 0x01, sub: 0x65, data: [0xc3] });
+check('accordatore spento: 0x0165 c2',
+      Spark.commands.tuner(false).data, [0xc2]);
+check('lettura del Mi basso accordato (nota 4, 0,46)',
+      Spark.letturaAccordatore([0x04, 0xca, 0x3e, 0xeb, 0x95, 0x80]),
+      { nota: 4, scostamento: 0.4601249694824219 });
+check('senza suono lo scostamento è -1: torna null',
+      Spark.letturaAccordatore([0x0b, 0xca, 0xbf, 0x80, 0x00, 0x00]),
+      { nota: 11, scostamento: null });
+check('una lettura monca non è una lettura',
+      Spark.letturaAccordatore([0x04, 0xca, 0x3e]), null);
+check('una nota oltre il Si non è una nota',
+      Spark.letturaAccordatore([0x0c, 0xca, 0x3f, 0x00, 0x00, 0x00]), null);
+
 check('scendere sotto 128 toglie il prefisso e non tocca gli altri campi',
       Spark.impostazioniConBpm(IMP_133, 100),
       [0x64, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0xcd, 0xea, 0x60]);

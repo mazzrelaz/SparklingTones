@@ -39,9 +39,14 @@ window.addEventListener('hashchange', () => { applicaVista(); });
  */
 function segnaSchede() {
   const pedaleAperto = $('pannelloPedale').classList.contains('aperto');
+  const accordaAperto = $('pannelloAccordatore').classList.contains('aperto');
+  const scheda = pedaleAperto || accordaAperto;
   $('tabPedale').classList.toggle('scelta', pedaleAperto);
-  $('tabPreset').classList.toggle('scelta', !pedaleAperto && !inLive());
-  $('tabLive').classList.toggle('scelta', !pedaleAperto && inLive());
+  $('tabAccordatore').classList.toggle('scelta', accordaAperto);
+  $('tabPreset').classList.toggle('scelta', !scheda && !inLive());
+  $('tabLive').classList.toggle('scelta', !scheda && inLive());
+  // L'accordatore dell'ampli si accende e si spegne con la sua scheda.
+  if (typeof seguiAccordatore === 'function') seguiAccordatore();
 }
 
 $('tabPreset').addEventListener('click', () => {
