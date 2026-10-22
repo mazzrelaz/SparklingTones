@@ -386,6 +386,10 @@ testa, largo, led; chi non ce l'ha prende l'ampli), generate dall'utente col pro
 manopole con la corona dentata, levette dei pedali, spia finta sul LED. Lavoro lungo: **le immagini
 arrivano a gruppi**, e non si chiede di pubblicare finché non è finito. Scelte e scartati:
 `docs/decisioni-ui.md`, «L'editor classico».
+**Fermi al 22 ottobre (sera)**: sul ramo `bozza-editor-classico`, **non ancora pubblicati**, la spia sul LED,
+l'immagine che non fa scorrere, i quattro compressori e le miniature dell'elenco. Fatte: ampli
+(predefinito), Tube Drive (luce vecchia, da rifare), Over Drive (un Tube Screamer per prova), LA Comp,
+Sustain/Optical/Bass/Red Comp. Si riprende con le immagini che manda l'utente.
 
 **Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
 **solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,
