@@ -376,10 +376,16 @@ tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre b
 («mi crea solo problemi»): **non si rimette** se non lo chiede lui. Tutti e due in `docs/diario.md`,
 estratti del 20 ottobre.
 
-**iPhone e iPad con Bluefy (20 ottobre 2026)**: si collega e, dice l'utente su iPad e poi su iPhone, «sembra
-funzionare tutto». Servivano gli **UUID interi** dello Spark (quelli corti li prende solo Chrome).
-Bluefy non usa il service worker: il nuovo arriva dopo i 10 minuti di cache di GitHub. App, guida,
-README e sito consigliano Bluefy, in italiano e in inglese (aggiornato su richiesta dell'utente). Dettaglio: `docs/decisioni-ui.md`, «Su iPhone e iPad».
+**iPhone e iPad con Bluefy (20 ottobre 2026)**: funziona; servivano gli UUID interi. In `docs/diario.md`.
+
+**L'editor classico (22 ottobre 2026, pubblicato, guscio `v137`)**: Impostazioni → «Editor: Neon /
+Classico» (`editorClassico()`, di serie neon). **Il neon è quello di prima e i ritocchi al classico non
+lo toccano mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
+`17-editor-classico.js` dietro `editorClassico()`. Un'immagine per modello (`SFONDI_CLASSICI`: taglio,
+testa, largo, led; chi non ce l'ha prende l'ampli), generate dall'utente col prompt dei pedali vintage;
+manopole con la corona dentata, levette dei pedali, spia finta sul LED. Lavoro lungo: **le immagini
+arrivano a gruppi**, e non si chiede di pubblicare finché non è finito. Scelte e scartati:
+`docs/decisioni-ui.md`, «L'editor classico».
 
 **Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
 **solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,

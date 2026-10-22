@@ -1439,3 +1439,35 @@ La grafica, in sei giri di bozza col tuner provato dall'utente sull'ampli vero d
    colorati come il loro lato dell'arco e bianchi a 0, **a metà fra l'arco e la nota**.
 
 Pubblicato col guscio `v131`.
+
+## L'editor classico — 22 ottobre 2026
+
+**Chiesto dall'utente**: un'interfaccia alternativa dell'editor, «più classica», da scegliere in
+Impostazioni, sul modello della pagina dell'ampli dell'app ufficiale (ha mandato uno screenshot e
+un'immagine sua di un ampli). L'editor di prima l'ha chiamato **«neon»**; la regola è che **niente
+di quello che si fa sul classico deve toccare il neon**.
+
+**Com'è**: dietro il blocco a fuoco l'immagine del modello (`SFONDI_CLASSICI` in
+`17-editor-classico.js`, file in `immagini/classico/`; chi non ce l'ha prende l'ampli), sfumata nel
+nero; tasselli con l'icona colorata, il posto e il modello; il nome del modello in grande, che si
+tocca per cambiarlo, col tasto d'accensione tondo; manopole a corona dentata con l'arco color crema,
+senza numero (c'è la bolla mentre si gira). OFFLINE e bpm in rosso (nel neon blu). Testa più stretta
+che nel neon (OFFLINE attaccato al nome, catena più in alto), e lo spazio va all'immagine.
+
+**Le immagini** le genera l'utente (1024 × 1536, 2:3), col prompt «pedale vintage» costruito insieme:
+il pedale vero ricavato dal nome, **solo il logo della marca** sostituito col suo (il nome del modello
+resta), usurato, stanza buia con la luce da una finestra lontana a sinistra, **4500 K** (scelta fra
+una calda e una neutra), pavimento di legno molto vissuto. Il generatore non rispetta le posizioni
+chieste: per ogni immagine si regolano a mano `taglio` (muro vuoto tolto in alto), `testa` (quanta
+immagine sopra il titolo), `largo` (quante volte il pannello può essere larga: un pedale esce dai
+lati, che sono buio) e `led` (misurato dai pixel rossi). Sopra il LED una spia finta segue
+l'acceso/spento del blocco.
+
+**I comandi**: fino a quattro in una fila, poi due file con la più piena sopra. Le levette dei pedali
+veri (Limit/Compress del LA Comp, Chorus/Vibrato, Pad, HP/LP: `LEVETTE_CLASSICHE`) sono levette senza
+scritta sotto; in una fila stanno in mezzo alle manopole.
+
+**Provato e scartato** (stesso giorno): **due file sempre, col titolo alla stessa altezza in ogni
+blocco**. Coi comandi fermi l'immagine o rimpiccioliva (non chiesto, e all'utente non è andato) o, alla
+misura di prima, finiva sotto titolo e manopole. Si è tornati alla fila sola; se un giorno l'immagine
+non ci sta, **sale sotto la catena invece di rimpicciolire** (indicazione dell'utente).

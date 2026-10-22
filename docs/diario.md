@@ -983,3 +983,10 @@ via `16-genera-ia.js`, la voce del menu, «Funzioni nascoste», il pannello e i 
 Anthropic fuori dalla CSP. Alla partenza `15-partenza.js` cancella le chiavi API e le scelte che
 aveva lasciato in `localStorage`. In `lingua-en.js` resta «Funzioni nascoste», orfana e innocua.
 **Non si rimette** se non lo chiede lui; il codice è nella cronologia (`f86fb12`).
+
+## Estratto da CLAUDE.md, 22 ottobre 2026 — iPhone e iPad con Bluefy
+
+**iPhone e iPad con Bluefy (20 ottobre 2026)**: si collega e, dice l'utente su iPad e poi su iPhone, «sembra
+funzionare tutto». Servivano gli **UUID interi** dello Spark (quelli corti li prende solo Chrome).
+Bluefy non usa il service worker: il nuovo arriva dopo i 10 minuti di cache di GitHub. App, guida,
+README e sito consigliano Bluefy, in italiano e in inglese (aggiornato su richiesta dell'utente). Dettaglio: `docs/decisioni-ui.md`, «Su iPhone e iPad».
