@@ -37,6 +37,14 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.4995, y: 0.2692, r: 0.0122 } },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
+  BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,
+                   led: { x: 0.5018, y: 0.2654, r: 0.0098 } },
+  BBEOpticalComp: { src: 'immagini/classico/optical-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.5,
+                   led: { x: 0.499, y: 0.2905, r: 0.0127 } },
+  BassComp:       { src: 'immagini/classico/bass-comp.webp', taglio: 0.20, testa: 0.28, largo: 1.4,
+                   led: { x: 0.5059, y: 0.2554, r: 0.0098 } },
+  Compressor:     { src: 'immagini/classico/red-comp.webp', taglio: 0.18, testa: 0.28, largo: 1.5,
+                   led: { x: 0.499, y: 0.4766, r: 0.0156 } },
 };
 
 /**
