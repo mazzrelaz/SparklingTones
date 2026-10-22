@@ -101,6 +101,9 @@ const SFONDI_CLASSICI = {
   // la targhetta della cassa sale tutta sopra il titolo invece di toccarlo.
   Hammer500:     { src: 'immagini/classico/hammer-500.webp', taglio: 0.24, testa: 0.30, largo: 1, ampli: true,
                    led: { x: 0.6919, y: 0.278, r: 0.0068, blu: true } },
+  // Gli ampli Hendrix.
+  'JH.JTM45':    { src: 'immagini/classico/jh-45-100.webp', taglio: 0.22, testa: 0.23, largo: 1, ampli: true,
+                   led: { x: 0.3306, y: 0.3932, r: 0.009 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
