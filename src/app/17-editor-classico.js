@@ -54,6 +54,8 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.7456, y: 0.2923, r: 0.008 } },
   Deluxe65:      { src: 'immagini/classico/american-deluxe.webp', taglio: 0.26, testa: 0.20, largo: 1, ampli: true,
                    led: { x: 0.7646, y: 0.3327, r: 0.009 } },
+  BluesJrTweed:  { src: 'immagini/classico/blues-boy.webp', taglio: 0.26, testa: 0.20, largo: 1, ampli: true,
+                   led: { x: 0.8018, y: 0.3434, r: 0.008 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
