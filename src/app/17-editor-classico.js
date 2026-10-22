@@ -146,7 +146,7 @@ const SFONDI_CLASSICI = {
   MaestroBassmaster: { src: 'immagini/classico/bassmaster.webp', taglio: 0.21, testa: 0.30, largo: 1.6,
                    led: { x: 0.5024, y: 0.2865, r: 0.0115 } },
   GuitarMuff:    { src: 'immagini/classico/guitar-muff.webp', taglio: 0.23, testa: 0.32, largo: 1.6,
-                   led: { x: 0.4146, y: 0.5342, r: 0.0085 } },
+                   led: { x: 0.5146, y: 0.446, r: 0.0075 } },
   BassBigMuff:   { src: 'immagini/classico/bass-muff.webp', taglio: 0.21, testa: 0.30, largo: 1.6,
                    led: { x: 0.5039, y: 0.4095, r: 0.0122 } },
   ProCoRat:      { src: 'immagini/classico/black-op.webp', taglio: 0.24, testa: 0.28, largo: 1.6 },
