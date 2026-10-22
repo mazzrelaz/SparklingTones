@@ -1391,7 +1391,8 @@ function apriAutoWah(effetto) {
   velo.className = 'velo-elenco';
   const box = document.createElement('div');
   box.className = 'elenco-scelta autowah';
-  box.style.setProperty('--cat', coloreDi(inModifica.effetti.indexOf(effetto)));
+  // Nel classico color crema, come il resto del suo editor.
+  box.style.setProperty('--cat', editorClassico() ? CREMA : coloreDi(inModifica.effetti.indexOf(effetto)));
   const testa = document.createElement('div');
   testa.className = 'elenco-testa';
   testa.textContent = tr('Auto Wah Mode');

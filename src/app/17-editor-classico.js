@@ -190,7 +190,7 @@ function bloccoClassico(effetto, posizione) {
   riga.querySelector('.interruttore').remove();
   if (riga.childElementCount) blocco.appendChild(riga);
 
-  const comandi = griglia(effetto, posizione);
+  const comandi = effetto.name === 'JH.Vox846' ? comandiWah(effetto) : griglia(effetto, posizione);
   blocco.appendChild(comandi);
   // Un nome lungo va su due righe: dopo la barra (LIMIT/COMPRESS) si può
   // andare a capo (uno spazio largo zero), invece di spezzare la parola a metà.
@@ -202,6 +202,54 @@ function bloccoClassico(effetto, posizione) {
   blocco.style.setProperty('--righe',
     comandi.classList.contains('cursori') ? 2 : comandi.querySelectorAll('.riga-pomelli').length);
   return blocco;
+}
+
+/**
+ * I comandi dei wah, come nel neon (l'utente, 22 ottobre 2026: «niente
+ * manopole»). Il Legendary Wah non si muove più a mano: oltre all'acceso e
+ * spento del titolo ha solo il tasto **Auto**, che apre il pannellino delle
+ * forme d'onda, Auto Detect, BPM e nota del neon (`apriAutoWah`); il tasto
+ * mostra la forma scelta e il tempo, e si ridisegna a ogni tocco nel
+ * pannellino. Senza il pacchetto Hendrix è l'Auto Wah gratuito, che come nel
+ * neon ha la sola Sensitivity (parametro 4).
+ */
+function comandiWah(effetto) {
+  const par = i => effetto.params.find(p => p.index === i);
+  const box = document.createElement('div');
+  box.className = 'pomelli';
+  const riga = document.createElement('div');
+  riga.className = 'riga-pomelli';
+  box.appendChild(riga);
+  if (!haHendrix()) {
+    if (par(4)) riga.appendChild(cella(effetto, par(4)));
+    return box;
+  }
+
+  const tasto = document.createElement('button');
+  tasto.type = 'button';
+  tasto.className = 'auto-wah';
+  const disegna = () => {
+    const modo = Math.round(((par(0) || {}).value || 0) * 5);   // 0…4 le onde, 5 Auto Detect
+    const v = i => (par(i) || {}).value || 0;
+    let tempo;
+    if (modo === 5) tempo = tr('Auto Detect');
+    else if (v(1) >= 0.5) {
+      tempo = NOTE_WAH.reduce((a, b) => Math.abs(b[1] - v(3)) < Math.abs(a[1] - v(3)) ? b : a)[0] + ' · BPM';
+    } else tempo = Math.round(125 + v(2) * 875) + ' ms';
+    tasto.innerHTML = '<span class="scritta">AUTO</span>' +
+      (modo < 5 ? `<svg viewBox="0 0 36 20" aria-hidden="true"><path d="${ONDE_WAH[modo]}"/></svg>` : '') +
+      '<span class="tempo"></span>';
+    tasto.querySelector('.tempo').textContent = tempo;
+  };
+  disegna();
+  tasto.addEventListener('click', () => {
+    apriAutoWah(effetto);
+    const veli = document.querySelectorAll('.velo-elenco');
+    const velo = veli[veli.length - 1];
+    if (velo) velo.addEventListener('click', () => setTimeout(disegna));
+  });
+  riga.appendChild(tasto);
+  return box;
 }
 
 /**

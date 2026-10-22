@@ -1625,6 +1625,18 @@
   #pannelloEditor.classico .pomello.leva.modo .pallino { fill:#c9c4bc; }
   #pannelloEditor.classico .pomello.leva .val,
   #pannelloEditor.classico .pomello.scelta .val { display:block; }
+  /* Il tasto Auto del Legendary Wah (`comandiWah`): al posto delle manopole,
+     scritta, forma d'onda scelta e tempo; apre il pannellino del neon. */
+  #pannelloEditor.classico .auto-wah {
+      flex:0 1 220px; height:96px; padding:8px 14px; border-radius:16px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+      background:rgba(0,0,0,0.6); border:1.5px solid var(--crema); color:var(--crema);
+      box-shadow:0 0 14px -4px var(--crema); font-family:var(--sans); }
+  #pannelloEditor.classico .auto-wah .scritta { font-size:1.05rem; font-weight:700; letter-spacing:0.14em; }
+  #pannelloEditor.classico .auto-wah svg { width:54px; height:30px; fill:none; stroke:currentColor;
+      stroke-width:1.8; stroke-linejoin:round; stroke-linecap:round; }
+  #pannelloEditor.classico .auto-wah .tempo { font-size:0.85rem; color:#d8d2c8; }
+  #pannelloEditor.classico .blocco.classico.spento .auto-wah { opacity:0.45; }
 
   /* I tasselli: l'icona nel quadratino, il posto e il modello accanto. */
   #pannelloEditor.classico .tassello.classico { flex:0 0 158px; flex-direction:row; align-items:center;
