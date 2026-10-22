@@ -1537,8 +1537,20 @@
   #pannelloEditor.classico .pomello .nome { font-family:var(--sans); font-size:0.95rem; font-weight:500;
                                             color:#fff; text-transform:uppercase; letter-spacing:0.03em; font-style:normal;
                                             text-shadow:0 1px 6px #000; }
+  /* Un nome lungo (PEAK REDUCTION, LIMIT/COMPRESS) va su due righe invece di
+     troncarsi: le file di tre lasciano 120 px a manopola. */
+  #pannelloEditor.classico .pomello .nome { white-space:normal; line-height:1.15;
+                                            display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
   #pannelloEditor.classico .riga-pomelli:has(> :nth-child(4)) .pomello .nome { font-size:0.75rem; }
   #pannelloEditor.classico .pomello .val { display:none; }
+  /* Le levette (BPM dei delay, Limit/Compress…): una levetta di metallo, la
+     scritta sotto sempre leggibile, perché tutte e due le posizioni valgono. */
+  #pannelloEditor.classico .pomello.leva .pista-leva { fill:#121212; stroke:#8f8a84; stroke-width:2.5; }
+  #pannelloEditor.classico .pomello.leva .pallino { fill:#c9c4bc; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.8)); }
+  #pannelloEditor.classico .pomello.leva.acceso .pista-leva { stroke:var(--crema); }
+  #pannelloEditor.classico .pomello.leva.acceso .pallino { fill:var(--crema); }
+  #pannelloEditor.classico .pomello.leva .val { color:#d8d2c8; text-shadow:0 1px 6px #000;
+                                               font-family:var(--sans); font-size:0.78rem; }
   #pannelloEditor.classico .pomello.leva .val,
   #pannelloEditor.classico .pomello.scelta .val { display:block; }
 

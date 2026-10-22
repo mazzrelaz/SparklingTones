@@ -29,7 +29,26 @@ const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, 
 const SFONDI_CLASSICI = {
   DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35, largo: 1 },
   Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.22, testa: 0.30, largo: 1.6 },
+  LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4 },
 };
+
+/**
+ * I parametri che sul pedale vero sono una **levetta a due posizioni**, non un
+ * potenziometro (l'utente, 22 ottobre 2026, sul LA Comp): nel neon stanno come
+ * levette sull'immagine (`levette` di `spark-immagini.js`), qui diventano la
+ * levetta di `cellaInterruttore`, con le due scritte [a 0, a 1] al posto di
+ * OFF/ON. I «BPM» dei delay sono già interruttori e non stanno qui. Quale
+ * valore sia quale posizione è quello assunto in `spark-immagini.js`: per
+ * LA Comp, Optical Comp e SAB Driver **da verificare a orecchio**.
+ */
+const LEVETTE_CLASSICHE = {
+  LA2AComp:       { 0: ['COMP', 'LIMIT'] },
+  UniVibe:        { 1: ['VIBRATO', 'CHORUS'] },
+  BBEOpticalComp: { 2: ['0 dB', '-15 dB'] },
+  SABdriver:      { 3: ['LP', 'HP'] },
+};
+const scritteLevetta = (effetto, param) =>
+  (LEVETTE_CLASSICHE[effetto.name] || {})[param.index] || null;
 
 /** Il raggio dell'arco sottile attorno alla manopola classica (viewBox 100). */
 const RAGGIO_CLASSICO = 47;
@@ -141,6 +160,11 @@ function bloccoClassico(effetto, posizione) {
 
   const comandi = griglia(effetto, posizione);
   blocco.appendChild(comandi);
+  // Un nome lungo va su due righe: dopo la barra (LIMIT/COMPRESS) si può
+  // andare a capo, invece di spezzare la parola a metà.
+  comandi.querySelectorAll('.pomello .nome').forEach(nome => {
+    nome.textContent = nome.textContent.replace(/\//g, '/​');
+  });
   // Le file di manopole dicono quanto posto resta all'immagine (vedi le
   // regole di `.blocco.classico`); i cursori degli equalizzatori ne valgono due.
   blocco.style.setProperty('--righe',

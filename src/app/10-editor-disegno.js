@@ -860,6 +860,9 @@ function cella(effetto, param) {
   // riverbero è l'unico che conosciamo. Con un pomello azzeccare la posizione
   // sarebbe un terno al lotto, quindi lì ci va un elenco.
   if (SparkEffetti.interruttore(effetto.name, param.index)) return cellaInterruttore(effetto, param);
+  // Nel classico anche le levette dei pedali veri (`LEVETTE_CLASSICHE`).
+  const scritte = editorClassico() && scritteLevetta(effetto, param);
+  if (scritte) return cellaInterruttore(effetto, param, scritte);
   const quante = SparkEffetti.posizioni(effetto.name, param.index);
   return quante ? cellaScelta(effetto, param, quante) : pomello(effetto, param);
 }
@@ -872,7 +875,7 @@ function cella(effetto, param) {
  * valore letto si considera acceso da 0,5 in su, come gli altri interruttori
  * dell'ampli.
  */
-function cellaInterruttore(effetto, param) {
+function cellaInterruttore(effetto, param, scritte = ['OFF', 'ON']) {
   // Una levetta della taglia di un pomello, nella stessa fila (l'utente, 7
   // ottobre 2026: il tasto di prima «fa cagare»): una pista verticale col
   // pallino in alto e illuminato quando segue il tempo, in basso e grigio
@@ -904,7 +907,7 @@ function cellaInterruttore(effetto, param) {
     box.classList.toggle('acceso', acceso);
     box.setAttribute('aria-checked', acceso ? 'true' : 'false');
     pallino.setAttribute('cy', acceso ? 29 : 71);
-    valore.textContent = acceso ? 'ON' : 'OFF';
+    valore.textContent = scritte[acceso ? 1 : 0];
   };
   const scatta = () => {
     param.value = param.value >= 0.5 ? 0 : 1;
