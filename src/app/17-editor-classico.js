@@ -60,6 +60,8 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.3716, y: 0.3278, r: 0.0075 } },
   OverDrivenJM45: { src: 'immagini/classico/jm45.webp', taglio: 0.16, testa: 0.22, largo: 1, ampli: true,
                    led: { x: 0.3809, y: 0.3236, r: 0.0075 } },
+  OverDrivenLuxVerb: { src: 'immagini/classico/lux-verb.webp', taglio: 0.29, testa: 0.20, largo: 1, ampli: true,
+                   led: { x: 0.835, y: 0.4098, r: 0.0093 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
