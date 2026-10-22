@@ -31,6 +31,10 @@
 const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, testa: 0.25, largo: 1,
                              led: { x: 0.2969, y: 0.3356, r: 0.0078 } };
 const SFONDI_CLASSICI = {
+  // Gli ampli (22 ottobre 2026): come l'ampli predefinito, largo quanto il
+  // pannello (`largo: 1`) e non rimpiccioliti (`ampli`: niente `.pedale`).
+  RolandJC120:   { src: 'immagini/classico/silver-120.webp', taglio: 0.25, testa: 0.21, largo: 1, ampli: true,
+                   led: { x: 0.8516, y: 0.3796, r: 0.006 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
@@ -175,7 +179,7 @@ function bloccoClassico(effetto, posizione) {
   blocco.style.setProperty('--cat', CREMA);
   const sfondo = sfondoClassico(effetto.name) || SFONDO_PREDEFINITO;
   // Un pedale sta più piccolo dell'ampli (`.pedale` nelle regole).
-  if (sfondo !== SFONDO_PREDEFINITO) blocco.classList.add('pedale');
+  if (sfondo !== SFONDO_PREDEFINITO && !sfondo.ampli) blocco.classList.add('pedale');
   blocco.style.setProperty('--sfondo', `url('${sfondo.src}')`);
   blocco.style.setProperty('--taglio', sfondo.taglio);
   blocco.style.setProperty('--testa', sfondo.testa);
