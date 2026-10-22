@@ -298,9 +298,15 @@ function apriElenco(titolo, voci, scelto, quando) {
     // immagine; quando qualcuna ce l'ha, le altre tengono il posto vuoto, così
     // i nomi restano in colonna.
     if (conMiniature) {
-      const mini = document.createElement(voce.immagine ? 'img' : 'span');
-      mini.className = 'elenco-mini';
-      if (voce.immagine) { mini.src = voce.immagine; mini.alt = ''; mini.loading = 'lazy'; }
+      // Nel classico la miniatura è un ritaglio dell'immagine grande
+      // (`miniaturaClassica`): arriva come oggetto invece che come indirizzo.
+      const ritaglio = voce.immagine && typeof voce.immagine === 'object';
+      const mini = document.createElement(voce.immagine && !ritaglio ? 'img' : 'span');
+      mini.className = 'elenco-mini' + (ritaglio ? ' ritaglio' : '');
+      if (ritaglio) {
+        mini.style.backgroundImage = `url('${voce.immagine.src}')`;
+        mini.style.backgroundPosition = voce.immagine.posizione;
+      } else if (voce.immagine) { mini.src = voce.immagine; mini.alt = ''; mini.loading = 'lazy'; }
       const nome = document.createElement('span');
       nome.textContent = voce.testo;
       riga.append(mini, nome);
@@ -601,7 +607,8 @@ function apriSceltaModello(posizione) {
       testo: nomeBlocco(modello) + (reale ? ' — ' + reale : ''),
       gruppo: gruppo || null,
       spento: spento(modello),
-      immagine: (immagineBlocco(modello) || {}).src,
+      immagine: (editorClassico() && miniaturaClassica(modello)) ||
+                (immagineBlocco(modello) || {}).src,
       title: spento(modello)
         ? tr('{0} — serve l\'ampli: la tua libreria non l\'ha mai visto, ' +
           'quindi non sappiamo quante manopole abbia', modello)

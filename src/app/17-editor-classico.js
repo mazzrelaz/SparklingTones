@@ -190,6 +190,22 @@ function bloccoClassico(effetto, posizione) {
 }
 
 /**
+ * La miniatura di un modello nell'elenco del classico (l'utente, 22 ottobre
+ * 2026): un quadrato ritagliato dall'immagine grande, il 56% centrale della
+ * larghezza a partire dal taglio, cioè la parte alta del pedale (manopole e
+ * nome). L'immagine è 2:3, quindi è alta 1,5 / 0,56 = 2,68 volte il riquadro,
+ * e il taglio in percentuale di `background-position` è taglio × 2,68 / 1,68.
+ * I modelli senza immagine classica tengono quella del neon (`null` qui).
+ */
+function miniaturaClassica(modello) {
+  const sfondo = SFONDI_CLASSICI[modello];
+  if (!sfondo) return null;
+  const alta = 1.5 / 0.56;
+  return { src: sfondo.src,
+           posizione: `50% ${(sfondo.taglio * alta / (alta - 1) * 100).toFixed(1)}%` };
+}
+
+/**
  * La spia finta sopra il LED dell'immagine (l'utente, 22 ottobre 2026): spenta
  * col blocco spento — un tondo scuro che copre il rosso disegnato — e col
  * blocco acceso un alone rosso attorno. Sta dietro i comandi, come
