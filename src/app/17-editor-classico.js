@@ -9,7 +9,7 @@
    L'editor classico (22 ottobre 2026, chiesto dall'utente)
 
    Un secondo vestito dell'editor, da scegliere in Impostazioni: invece dei
-   blocchi disegnati, l'ampli sullo sfondo e manopole grandi con la corona
+   blocchi disegnati dell'editor «neon» (quello di prima), l'ampli sullo sfondo e manopole grandi con la corona
    dentata, come la pagina dell'ampli dell'app ufficiale. Cambia **solo il
    disegno**: catena, tocchi, invio dei parametri e salvataggio restano quelli
    di `10-editor-disegno.js`, che chiama di qui `tasselloClassico`,
@@ -113,7 +113,7 @@ function bloccoClassico(effetto, posizione) {
   titolo.append(testi, accendi);
   blocco.appendChild(titolo);
 
-  // La nota Hendrix, se serve, è quella dell'editor coi disegni; il suo
+  // La nota Hendrix, se serve, è quella dell'editor neon; il suo
   // interruttore qui è il tasto tondo, e non si ripete.
   const riga = intestazioneBlocco(effetto);
   riga.querySelector('.interruttore').remove();

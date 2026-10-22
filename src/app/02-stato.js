@@ -38,7 +38,7 @@ function haHendrix() {
 /**
  * **L'editor classico** (22 ottobre 2026, chiesto dall'utente): al posto dei
  * blocchi disegnati, l'ampli sullo sfondo e manopole grandi, come l'app
- * ufficiale. Si sceglie in Impostazioni; di serie i disegni, com'era prima.
+ * ufficiale. Si sceglie in Impostazioni; di serie il neon, com'era prima.
  * Vale per questo apparecchio, come lo sfondo. Vedi `17-editor-classico.js`.
  */
 function editorClassico() {

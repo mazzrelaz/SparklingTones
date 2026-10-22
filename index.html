@@ -1438,6 +1438,11 @@
                              --sans:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif; }
   #pannelloEditor.classico #riquadroPreset { background:none; border-color:transparent;
                                              box-shadow:none; padding:4px 12px; }
+  /* OFFLINE e il numero dei bpm in rosso (l'utente, 22 ottobre 2026): il blu
+     resta all'editor neon. */
+  #pannelloEditor.classico .modo-editor,
+  #pannelloEditor.classico #valoreTempo { color:#ff3b30; text-shadow:0 0 10px rgba(255,59,48,0.45); }
+  #pannelloEditor.classico #valoreTempo .un { text-shadow:none; }
   #pannelloEditor.classico #titoloEditor { font-family:var(--sans); font-weight:700;
                                            text-shadow:0 2px 12px rgba(0,0,0,0.8); }
   /* L'ampli: sta dietro il blocco a fuoco, tagliato in alto del muro vuoto
@@ -1884,14 +1889,14 @@
         <button data-sfondo="nero">Nero</button>
       </div>
     </div>
-    <!-- L'editor: coi disegni dei blocchi, o classico (22 ottobre 2026). -->
+    <!-- L'editor: neon (coi disegni dei blocchi), o classico (22 ottobre 2026). -->
     <div class="imp-voce">
       <div class="imp-testo">
         <span class="imp-etichetta">Editor</span>
-        <p class="imp-nota">Coi disegni dei pedali, o classico: l'ampli sullo sfondo e le manopole grandi.</p>
+        <p class="imp-nota">Neon, coi disegni dei pedali, o classico: l'ampli sullo sfondo e le manopole grandi.</p>
       </div>
       <div class="imp-scelta" id="sceltaEditor">
-        <button data-editor="disegni">Disegni</button>
+        <button data-editor="neon">Neon</button>
         <button data-editor="classico">Classico</button>
       </div>
     </div>
