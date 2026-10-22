@@ -112,6 +112,8 @@ const SFONDI_CLASSICI = {
   // Il LED del Sunn è un puntino scuro accanto a POWER.
   'JH.Sunn100':  { src: 'immagini/classico/jh-sun-100s.webp', taglio: 0.22, testa: 0.23, largo: 1, ampli: true,
                    led: { x: 0.7974, y: 0.4089, r: 0.0065 } },
+  'JH.Bassman50Silver': { src: 'immagini/classico/jh-bass-master.webp', taglio: 0.21, testa: 0.22, largo: 1, ampli: true,
+                   led: { x: 0.8027, y: 0.2839, r: 0.0075 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
