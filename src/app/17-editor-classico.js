@@ -191,6 +191,22 @@ const SFONDI_CLASSICI = {
   // Gli equalizzatori non hanno LED: le luci blu sono quelle dei cursori.
   GuitarEQ6:     { src: 'immagini/classico/guitar-eq.webp', taglio: 0.25, testa: 0.34, largo: 1.6 },
   BassEQ6:       { src: 'immagini/classico/bass-eq.webp', taglio: 0.28, testa: 0.32, largo: 1.6 },
+  // I delay (22 ottobre 2026).
+  DelayMono:     { src: 'immagini/classico/digital-delay.webp', taglio: 0.21, testa: 0.34, largo: 1.6,
+                   led: { x: 0.498, y: 0.2568, r: 0.0083 } },
+  // L'Echohead non ha LED.
+  DelayEchoFilt: { src: 'immagini/classico/echo-filt.webp', taglio: 0.27, testa: 0.36, largo: 1.6 },
+  VintageDelay:  { src: 'immagini/classico/vintage-delay.webp', taglio: 0.29, testa: 0.34, largo: 1.6,
+                   led: { x: 0.5189, y: 0.3453, r: 0.0068 } },
+  DelayReverse:  { src: 'immagini/classico/reverse-delay.webp', taglio: 0.23, testa: 0.38, largo: 1.6,
+                   led: { x: 0.5029, y: 0.2906, r: 0.013 } },
+  // Lo Space Echo è largo e basso: la spia sta sulla lampadina di POWER, non
+  // su quella del PEAK LEVEL.
+  DelayMultiHead: { src: 'immagini/classico/multi-head.webp', taglio: 0.35, testa: 0.28, largo: 1.6,
+                   led: { x: 0.7692, y: 0.5566, r: 0.0062 } },
+  // L'Echoplex nella sua valigia: la spia sulla lampadina rossa a sinistra.
+  DelayRe201:    { src: 'immagini/classico/echo-tape.webp', taglio: 0.22, testa: 0.40, largo: 1.6,
+                   led: { x: 0.2522, y: 0.5732, r: 0.0088 } },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
   BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,
