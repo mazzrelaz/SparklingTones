@@ -169,6 +169,9 @@ const SFONDI_CLASSICI = {
   // Sul pedale arancione il LED si misura a vista.
   Phaser:        { src: 'immagini/classico/phaser.webp', taglio: 0.26, testa: 0.38, largo: 1.6,
                    led: { x: 0.5078, y: 0.4492, r: 0.0098 } },
+  // Il Mind Bender ha due LED, verde e giallo: la spia sta su quello verde.
+  Vibrato01:     { src: 'immagini/classico/vibrato.webp', taglio: 0.25, testa: 0.38, largo: 1.6,
+                   led: { x: 0.3564, y: 0.4792, r: 0.0075, verde: true } },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
   BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,
