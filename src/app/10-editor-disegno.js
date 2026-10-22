@@ -840,7 +840,8 @@ function griglia(effetto, posizione) {
   const frontale = èFrontale(effetto, vere);
   // Gain, Bass, Middle, Treble, Master: l'ordine del frontale, non quello
   // degli indici.
-  const ordine = frontale ? [0, 3, 2, 1, 4] : vere.map((_, i) => i);
+  let ordine = frontale ? [0, 3, 2, 1, 4] : vere.map((_, i) => i);
+  if (editorClassico()) ordine = ordineClassico(effetto, vere, ordine);
 
   const box = document.createElement('div');
   box.className = 'pomelli';
@@ -861,8 +862,11 @@ function cella(effetto, param) {
   // sarebbe un terno al lotto, quindi lì ci va un elenco.
   if (SparkEffetti.interruttore(effetto.name, param.index)) return cellaInterruttore(effetto, param);
   // Nel classico anche le levette dei pedali veri (`LEVETTE_CLASSICHE`).
-  const scritte = editorClassico() && scritteLevetta(effetto, param);
-  if (scritte) return cellaInterruttore(effetto, param, scritte);
+  if (editorClassico() && levettaClassica(effetto, param)) {
+    const leva = cellaInterruttore(effetto, param);
+    leva.classList.add('modo');
+    return leva;
+  }
   const quante = SparkEffetti.posizioni(effetto.name, param.index);
   return quante ? cellaScelta(effetto, param, quante) : pomello(effetto, param);
 }
@@ -875,7 +879,7 @@ function cella(effetto, param) {
  * valore letto si considera acceso da 0,5 in su, come gli altri interruttori
  * dell'ampli.
  */
-function cellaInterruttore(effetto, param, scritte = ['OFF', 'ON']) {
+function cellaInterruttore(effetto, param) {
   // Una levetta della taglia di un pomello, nella stessa fila (l'utente, 7
   // ottobre 2026: il tasto di prima «fa cagare»): una pista verticale col
   // pallino in alto e illuminato quando segue il tempo, in basso e grigio
@@ -907,7 +911,7 @@ function cellaInterruttore(effetto, param, scritte = ['OFF', 'ON']) {
     box.classList.toggle('acceso', acceso);
     box.setAttribute('aria-checked', acceso ? 'true' : 'false');
     pallino.setAttribute('cy', acceso ? 29 : 71);
-    valore.textContent = scritte[acceso ? 1 : 0];
+    valore.textContent = acceso ? 'ON' : 'OFF';
   };
   const scatta = () => {
     param.value = param.value >= 0.5 ? 0 : 1;
@@ -980,8 +984,8 @@ function etichettaDi(effetto, param, quante) {
  * lasciarlo uscire (`overflow:visible`), o il bagliore viene tagliato di netto
  * e attorno a ogni manopola compare un quadrato.
  */
-const RAGGIO = 34;                                       // l'arco fa 270 gradi di corsa
-const CORSA_PX = 300;                                   // pixel da zero a uno
+const RAGGIO = 34;                                       // 270 gradi di corsa
+const CORSA_PX = 300;                                    // pixel da zero a uno
 
 function pomello(effetto, param, formato = mostraValore) {
   const box = document.createElement('div');

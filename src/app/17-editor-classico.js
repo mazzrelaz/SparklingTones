@@ -36,19 +36,20 @@ const SFONDI_CLASSICI = {
  * I parametri che sul pedale vero sono una **levetta a due posizioni**, non un
  * potenziometro (l'utente, 22 ottobre 2026, sul LA Comp): nel neon stanno come
  * levette sull'immagine (`levette` di `spark-immagini.js`), qui diventano la
- * levetta di `cellaInterruttore`, con le due scritte [a 0, a 1] al posto di
- * OFF/ON. I «BPM» dei delay sono già interruttori e non stanno qui. Quale
- * valore sia quale posizione è quello assunto in `spark-immagini.js`: per
- * LA Comp, Optical Comp e SAB Driver **da verificare a orecchio**.
+ * levetta di `cellaInterruttore`, **senza scritta sotto** (l'utente: «è solo
+ * limit/compress»): il nome dice le due posizioni, la prima in alto. I «BPM»
+ * dei delay sono già interruttori e non stanno qui. Quale valore sia quale
+ * posizione è quello assunto in `spark-immagini.js`: per LA Comp, Optical
+ * Comp e SAB Driver **da verificare a orecchio**.
  */
 const LEVETTE_CLASSICHE = {
-  LA2AComp:       { 0: ['COMP', 'LIMIT'] },
-  UniVibe:        { 1: ['VIBRATO', 'CHORUS'] },
-  BBEOpticalComp: { 2: ['0 dB', '-15 dB'] },
-  SABdriver:      { 3: ['LP', 'HP'] },
+  LA2AComp:       [0],   // Limit (su) / Compress
+  UniVibe:        [1],   // Chorus (su) / Vibrato
+  BBEOpticalComp: [2],   // Pad: -15 dB (su) / 0 dB
+  SABdriver:      [3],   // HP (su) / LP
 };
-const scritteLevetta = (effetto, param) =>
-  (LEVETTE_CLASSICHE[effetto.name] || {})[param.index] || null;
+const levettaClassica = (effetto, param) =>
+  (LEVETTE_CLASSICHE[effetto.name] || []).includes(param.index);
 
 /** Il raggio dell'arco sottile attorno alla manopola classica (viewBox 100). */
 const RAGGIO_CLASSICO = 47;
@@ -161,33 +162,34 @@ function bloccoClassico(effetto, posizione) {
   const comandi = griglia(effetto, posizione);
   blocco.appendChild(comandi);
   // Un nome lungo va su due righe: dopo la barra (LIMIT/COMPRESS) si può
-  // andare a capo, invece di spezzare la parola a metà.
+  // andare a capo (uno spazio largo zero), invece di spezzare la parola a metà.
   comandi.querySelectorAll('.pomello .nome').forEach(nome => {
-    nome.textContent = nome.textContent.replace(/\//g, '/​');
+    nome.textContent = nome.textContent.replace(/\//g, '/\u200b');
   });
-  // Le file di manopole dicono quanto posto resta all'immagine (vedi le
-  // regole di `.blocco.classico`); i cursori degli equalizzatori ne valgono due.
-  blocco.style.setProperty('--righe',
-    comandi.classList.contains('cursori') ? 2 : comandi.querySelectorAll('.riga-pomelli').length);
   return blocco;
 }
 
 /**
- * Le file di manopole del classico: fino a quattro in una fila sola, poi due
- * file con la più piena sopra (cinque fanno 3 e 2, come l'app ufficiale). Una
- * fila in meno è spazio che va all'immagine: un pedale da tre manopole su due
- * file restava una striscia stretta. L'editor neon resta a `righeDi`.
+ * Le file dei comandi del classico: **sempre due** (l'utente, 22 ottobre
+ * 2026), la più piena sopra; uno o due comandi stanno nella fila di sopra, e
+ * il posto della seconda resta (il titolo non si sposta: vedi le regole di
+ * `.blocco.classico`). L'editor neon resta a `righeDi`.
  */
 function righeClassiche(quante) {
-  if (quante <= 4) return [quante];
-  const righe = Math.ceil(quante / 4), fuori = [];
-  let restano = quante;
-  for (let r = righe; r > 0; r--) {
-    const quanti = Math.ceil(restano / r);
-    fuori.push(quanti);
-    restano -= quanti;
-  }
-  return fuori;
+  if (quante <= 2) return [quante];
+  const sopra = Math.ceil(quante / 2);
+  return [sopra, quante - sopra];
+}
+
+/**
+ * L'ordine dei comandi nel classico: prima le manopole, **in fondo le levette**
+ * (l'utente: sul LA Comp la levetta sotto e in centro), quelle dei pedali e i
+ * «BPM» dei delay. `ordine` è quello di `griglia`, indici in `vere`.
+ */
+function ordineClassico(effetto, vere, ordine) {
+  const leva = i => SparkEffetti.interruttore(effetto.name, vere[i].index) ||
+                    levettaClassica(effetto, vere[i]);
+  return [...ordine.filter(i => !leva(i)), ...ordine.filter(leva)];
 }
 
 /**
