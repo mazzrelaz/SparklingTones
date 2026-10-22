@@ -91,6 +91,8 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.7759, y: 0.377, r: 0.006 } },
   FatAcousticV2: { src: 'immagini/classico/jumbo.webp', taglio: 0.26, testa: 0.23, largo: 1, ampli: true,
                    led: { x: 0.7017, y: 0.4036, r: 0.006 } },
+  FlatAcoustic:  { src: 'immagini/classico/flat-acoustic.webp', taglio: 0.24, testa: 0.19, largo: 1, ampli: true,
+                   led: { x: 0.7808, y: 0.3285, r: 0.0065 } },
   // Il Fishman Loudbox non ha una spia disegnata.
   AcousticAmpV2: { src: 'immagini/classico/fishboy.webp', taglio: 0.23, testa: 0.22, largo: 1, ampli: true },
   // Il GK 800RB non ha un LED: la spia sta sulla parte rossa dell'interruttore.
