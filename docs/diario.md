@@ -1001,3 +1001,182 @@ testa, largo, led; chi non ce l'ha prende l'ampli), generate dall'utente col pro
 manopole con la corona dentata, levette dei pedali, spia finta sul LED. Lavoro lungo: **le immagini
 arrivano a gruppi**, e non si chiede di pubblicare finché non è finito. Scelte e scartati:
 `docs/decisioni-ui.md`, «L'editor classico».
+
+## Estratto di CLAUDE.md del 22 ottobre 2026 (sera): «Dove si riprende» com'era
+
+Spostato parola per parola quando l'utente ha chiesto di ottimizzare il consumo di token; in CLAUDE.md ne
+resta un riassunto a punti.
+
+**Pubblicato il 16 ottobre 2026 (sera): l'editor con le immagini dei blocchi** (ramo
+`bozza-editor-grafico` unito in `main`, guscio `v109`). Ogni modello ha la sua immagine (89, in
+`immagini/blocchi/`; tabella e misure in `src/spark-immagini.js`; i riverberi una per tipo, voce
+`'bias.reverb:<tipo>'`); le manopole si girano sull'immagine, il modello si sceglie col doppio tocco
+sul tassello; «Pacchetto Jimi Hendrix: sì/no» in Impostazioni (`haHendrix()`). **Da
+verificare a orecchio**: quale posizione della levetta sia Limit (LA Comp), -15 dB (Optical Comp), HP
+(SAB Driver) e Chorus (UniVibe); nel wah, 1/2 = 0,5 e il tempo lineare. Il Silver 120 forse da rifare
+nello stile nuovo. **Un'immagine nuova o rifatta** arriva senza manopole, col puntino bianco al centro
+e lo sfondo nero: `tools/togli-sfondo/misura.ps1` (centri, spia, anelli) ed `esegui.ps1` (sfondo, 900
+px, WebP), misure spostate del taglio e per la scala, cerchi controllati sull'originale, voce in
+`TABELLA`, prova nell'editor. Le genera l'utente con `tools/genera-immagini.html` (API OpenAI; una
+copia generica sta sul suo Desktop, «Genera immagini.html»). Copia delle finite in `Progetti
+Claude\Spark immagini finite` (fuori dal repository, non si aggiorna da sola). **Provato e
+scartato**: un colore solo per la catena (restano i colori per famiglia, con l'alone più piccolo del
+tassello scelto). Tempo e OFFLINE in blu; l'insegna col nome del preset sempre bianca (non segue più la famiglia). Il worktree della bozza non serve più. Dettaglio in
+`docs/decisioni-ui.md`, ultime sezioni; la versione lunga di questo paragrafo in `docs/diario.md`.
+
+**Provato dall'utente il 15 ottobre col pedale e l'ampli veri: «funziona tutto»** (interfaccia del
+14, banchi da aggiornare, firmware **2.23** sulla XIAO). Guscio `v118` (17 ottobre): **«Genera con l'IA» c'è stata dal 17 al 19 ottobre ed è tolta** (vedi sotto). **Trappola che resta**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte (regola apposta). **Impostazioni a riquadri** (classi `imp-*`, una voce per riga, scelte a due posizioni rosse, logo in cima), **la scheda del preset senza l'elenco degli effetti** sotto il nome (tolte `pastiglieCatena` e `.chips`); **lo sfondo dell'editor e della vista Live è un'immagine dell'utente** (`immagini/sfondo-editor.jpg`; sul PC alla sua altezza, al centro, sfumata ai lati: «cover» sgranava). **Niente «trascina in giù per ricaricare»** (`overscroll-behavior-y:none` su `html, body`): una strisciata per sbaglio ricaricava e faceva cadere l'ampli. **Nella vista Live non c'è più la riga di log** sotto i pulsantoni (`#logLive`, tolta su richiesta dell'utente): i messaggi stanno solo nel registro.
+
+**Guida, sito e quattro video** pubblicati il 19 ottobre. **«Genera con l'IA» tolta il 19 ottobre**
+(«mi crea solo problemi»): **non si rimette** se non lo chiede lui. Tutti e due in `docs/diario.md`,
+estratti del 20 ottobre.
+
+**iPhone e iPad con Bluefy (20 ottobre 2026)**: funziona; servivano gli UUID interi. In `docs/diario.md`.
+
+**L'editor classico** (pubblicato il 22 ottobre 2026, guscio `v137`): Impostazioni → «Editor: Neon /
+Classico». **Il neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`,
+codice in `17-editor-classico.js`. Versione lunga in `docs/diario.md`, estratto del 22 ottobre (notte).
+**Fermi al 22 ottobre (notte)**, sul ramo `bozza-editor-classico`, **non pubblicato**: **tutte le immagini
+fatte** (80 modelli e i 9 tipi di riverbero). Si pubblica solo su suo comando. Stato e
+regole in `docs/decisioni-ui.md`, «L'editor classico», ultima sezione.
+
+**Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
+**solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,
+mai a mano), DRC pulito con `kicad-cli`, anteprime PNG accanto. Scheda **generica, per altri pedali**: 86 × 70, XIAO con l'USB a sinistra sul lato corto, logo verticale a destra con «by Massimo Togni 2026» (`logo-serigrafia.png`), morsetto sul lato destro,
+tutto a foro passante, XIAO e **MCP23017 DIP-28** su zoccolo, resistenze dei LED sulla scheda, JST-XH con
+**G sul piedino 1**, morsetto cella + presa «BAT XIAO», pettine LIBERI. Linee nuove: FS1..FS4 = GPA6..GPA3,
+FS5 = GPA2, SX = GPA1, DX = GPA0, **GPA7 libera** (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =
+GPB(2n-2)/GPB(2n-1). **Approvata e pronta il 20 ottobre**: zip in `pcb/basetta/jlcpcb/` (copia sul Desktop), da ordinare
+su JLCPCB (non JLC3DP, che è la stampa 3D); `tools/verifica-basetta.py` confronta le piazzole coi collegamenti
+attesi. **Non provata sull'hardware.** A scheda arrivata, firmware con le tabelle nuove (non
+toccate ancora) e mappatura guidata.
+
+**Ferme per scelta dell'utente, non riaprirle finché non lo fa lui**: la modalità MIDI del pedale
+(niente altre funzioni MIDI); il tap tempo con l'ampli acceso.
+
+**Il tuner, pubblicato il 20 ottobre 2026** (guscio `v131`): voce **«Tuner»** nella barra in basso (il
+nome in tutte e due le lingue), scheda come il Pedale. `0x0165 c3`/`c2` (senza `0x00`); l'ampli tace e
+manda `0x0364` ~13 volte al secondo: nota 0–11 da Do **senza ottava** (niente hertz), scostamento 0–1
+con 0,5 intonata, -1 = silenzio; `0x0365` mai visto. **L'ampli muto solo a scheda aperta, ampli
+collegato e pagina in vista** (`seguiAccordatore`). Grafica in sei giri di bozza, scelta dall'utente:
+arco di 21 tacche al neon sul fondo della pagina, nota, cent fra i due, niente scritte
+(`docs/decisioni-ui.md`, «Il tuner»). Provato sull'ampli dall'utente. Sonda: `tools/accordatore-sonda.html`. **Nelle quattro guide** dal 20 ottobre
+(capitolo «Accordare»/«Il tuner», `immagini/guida/tuner.webp`, una per le due lingue; guscio `v132`; inglese
+aggiornato su richiesta dell'utente) e **sul sito** (sito `1a84ced`).
+
+**Collaudi ancora aperti** (editor
+con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un file» con un
+preset vero, il NEO), **discussi e non aperti**, e il resto del pedale: `docs/diario.md`, estratto
+del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
+
+**La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key). **Mai più
+catture o strumenti con la chiave `0x0170` nel repository.** I progetti stanno in
+`C:\Users\massi\Progetti Claude` (copia ogni ora in `Desktop\Cloud Backup`, su Google Drive).
+
+## Estratto di CLAUDE.md del 22 ottobre 2026 (sera): Live, editor, segnalazioni, bollo JH
+
+### Sezione Live
+
+- **Preset già in uno slot: istantaneo con `0x0138`; altrimenti invio intero, ~1 s.**
+- **Banchi da otto, quattro a sinistra e quattro a destra** (`grid-auto-flow: column`, quattro
+  righe). **Il vestito dei pulsantoni** (16 ottobre 2026, scelto dall'utente in tre giri di bozze):
+  fondo nero con le piste di un circuito, **niente LED**; chi non suona ha il bordo sottile grigio
+  scuro ed è più scuro; chi suona ha il bordo sfumato azzurro-viola-fucsia, un bagliore che pulsa e la
+  corrente che scorre (`immagini/circuito-elettroni.svg`, nel guscio). Tutto in CSS: i pulsanti
+  cambiano misura col telefono, un'immagine fissa non va. Niente riga di log sotto.
+- **Tenendo premuto 2 secondi un pulsantone si apre l'editor** di quel preset (17 ottobre 2026,
+  `pressioneLunga`, `PRESSIONE_EDITOR_MS`): la barretta in fondo si riempie, lasciando prima non
+  succede niente, e la pressione lunga non fa suonare il preset al rilascio. Va anche senza ampli
+  (editor sulla copia in libreria): **i pulsantoni non sono più `disabled`**, il tocco lo ferma
+  `attiva()`. Con l'ampli aprire l'editor manda il preset, quindi suona. Niente nei posti vuoti
+  né in «Modifica».
+- **Il banco «Ampli» si ricava da `slots`**, non è salvato. I banchi dell'utente
+  (`settings.banchi`) **non scrivono mai sull'ampli**: niente «Prepara».
+
+### Editor della catena effetti
+
+- **Le manopole agiscono sul suono che sta suonando.** Con l'ampli, «Regola» manda il preset
+  (`loadPreset`) e rilegge lo stato **dall'ampli** (`readLiveState`); **se la rilettura
+  fallisce l'editor non si apre**. Niente è salvato fino a «Salva in libreria».
+- **Senza ampli si apre sulla copia in libreria** (`inModifica.offline`): niente parte né si
+  accoda alla radio; il modello si cambia comunque; **la modalità non cambia più** anche se
+  l'ampli arriva dopo.
+- **Cambio di modello: prima si copia** (`campioneModello`, da un blocco uscito dall'ampli),
+  **poi si costruisce** dalla tabella. Acceso/spento resta com'era.
+- **Il tempo sta solo qui**: `preset.bpm`, tap o tasti; con l'ampli parte `0x0176`. Il
+  riscontro del tap è il lampeggio del tasto.
+- **Invio dei parametri autocadenzato**: il prossimo parte a precedente finito +
+  `PAUSA_PARAMETRO` (90 ms). Probabile causa dell'ampli che si pianta, **correzione non
+  verificata**; se ricapita: `PAUSA_PARAMETRO`, poi `SEND_GAP_MS`.
+- **Lavoro non salvato**: `inModifica.toccato` (da `segnaModificato()`); «Fatto» e il logo
+  chiedono con `chiediPrimaDiUscire()` a **tre vie**. **Se il salvataggio fallisce non si chiude
+  niente.** Il segno di salvato lo dà il tasto, mai un messaggio; il tasto non si disabilita.
+- La nota Hendrix **è uno stato**: una `.elenco-nota` nella tendina e una `.nota-jh` nel blocco
+  a fuoco.
+- **Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`**;
+  `pulisciStatoPannelli()` le nasconde e chi ci scrive la rimostra (`statoDelPannello`).
+
+### Segnala un problema e donazioni
+
+Menu Altro: **mailto a `mazzbackup@gmail.com`** (solo email, scelta dell'utente) con versione,
+browser, ampli e le ultime righe del registro, mostrate prima. «☕ Offrimi un caffè» apre
+`buymeacoffee.com/mazzgear` con `window.open`: lasciare la pagina farebbe cadere l'ampli.
+
+- **Il bollo «JH»** (effetto Hendrix in catena) sta in **quattro posti, e quattro restano**:
+  schede, tendina dei modelli, blocco a fuoco dell'editor, riga di log in `mandaPreset`. Non
+  nella vista live (decisione dell'utente) né sul pedale. Nella bozza (16 ottobre): **col
+  pacchetto Hendrix dichiarato «no» i bolli spariscono**, perché i preset Hendrix non si vedono.
+
+## Estratto di CLAUDE.md del 22 ottobre 2026 (sera): convenzioni e due regole del pedale
+
+## Convenzioni
+
+- **I commit li faccio io**, quando un pezzo sta in piedi e le suite sono verdi; messaggi in
+  italiano su cosa cambia e perché. **I commit visibili si pushano senza chiedere**: l'utente
+  guarda l'app pubblicata. **Eccezione, la grafica** (colori, sfondo, disposizione; 14 ottobre
+  2026): prima una bozza da guardare, si pubblica solo dopo il suo sì.
+- **All'utente: cosa è successo e cosa cambia per lui**, istruzioni passo passo; il racconto va
+  in `docs/`.
+- **In locale la libreria è vuota** (altra origine): preset finti con
+  `store.importFromAmp([...])`.
+- **Questa memoria la aggiorno io**, sempre a fine sessione; si registrano anche le ipotesi
+  escluse da misure. Si segna sempre cosa è verificato sull'hardware.
+- **Controllo di sicurezza dopo ogni novità grossa** (17 ottobre 2026, scelta dell'utente al posto
+  di un appuntamento fisso): una funzione che parla con l'esterno (chiavi, rete, Bluetooth, file
+  importati, firmware del ponte) la ricontrollo io prima di chiudere la sessione, o propongo una
+  sessione apposta se è lungo; l'esito va in `docs/sicurezza.md`, con la data. Ultimo audit intero
+  17 settembre 2026.
+- Italiano in commenti e UI; la UI ha anche l'inglese, secondario (vedi «L'inglese»). Byte
+  in hex minuscolo separato da spazi.
+
+- **Il tasto banco cambia banco al rilascio** (2.24): tenuto due secondi da solo apre il tuner, che
+  si chiude con un tasto qualunque (`12-tuner.ino`, `docs/pedale-lavoro.md`). **Verificato sul pedale il 20 ottobre.**
+- **L'ampli si e' inceppato** (20 ottobre, due volte, causa ignota): sul pedale c'e' una **scatola nera** che
+  si salva da sola quando succede; si legge col pedale attaccato al PC, comando `M` (`docs/pedale-lavoro.md`).
+
+## Estratto di CLAUDE.md del 22 ottobre 2026 (sera): le suite e le trappole del browser
+
+**Dopo ogni modifica a `src/`, le suite in `test/` devono restare verdi.** Girano con Edge
+headless (poi si cerca `id="summary"`):
+
+```
+& 'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe' --headless=new --disable-gpu `
+  --no-first-run --user-data-dir="$env:TEMP\claude\edge-prof" --virtual-time-budget=20000 `
+  --dump-dom 'file:///C:/Users/massi/Progetti%20Claude/spark/test/protocol-test.html'
+```
+
+- **`store-test` e `backup-test` no**: si passa da `localhost` (`tools/serve.ps1`), come per
+  provare l'app. **Un `file://` nel browser del riquadro non carica gli script.**
+- **Lo stdout di Edge headless non torna alla shell**: `Start-Process … -RedirectStandardOutput`,
+  anche per `--screenshot`.
+- **`requestAnimationFrame` non gira** né nel riquadro né in headless: ciò che si muove usa
+  `setInterval`.
+- **Il service worker serve a Edge i file vecchi**: query in coda all'url, o profilo nuovo.
+- **Nelle schede in secondo piano i timer sono strozzati.**
+- **L'avvio dell'app chiude i pannelli** (`applicaVista()` → `chiudiPannelli()`): una prova che
+  ne apre uno troppo presto sembra un difetto.
+
+**ESP32**: compilare, caricare (`prova-ble` vuole il giro a 1200 baud) e le trappole della
+XIAO stanno in **`docs/pedale-lavoro.md`**. **Il firmware lo compilo e lo carico io, senza
+chiedere.** **Lingua del display**: `#define INGLESE` in `prova-ble.ino` (0 italiano, 1 inglese;
+2.17, 9 ottobre 2026); ogni scritta nuova del display passa da `TESTO(it, en)`.
