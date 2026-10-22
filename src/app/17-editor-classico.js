@@ -47,8 +47,9 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.5049, y: 0.2611, r: 0.009 } },
   KlonCentaurSilver: { src: 'immagini/classico/clone-drive.webp', taglio: 0.30, testa: 0.28, largo: 1.6,
                    led: { x: 0.2495, y: 0.4395, r: 0.007 } },
-  SABdriver:     { src: 'immagini/classico/sab-driver.webp', taglio: 0.21, testa: 0.30, largo: 1.6,
-                   led: { x: 0.5, y: 0.2663, r: 0.011 } },
+  // Il SAB Driver è un Wampler Plexi-Drive, col LED blu (`blu`).
+  SABdriver:     { src: 'immagini/classico/sab-driver-plexi.webp', taglio: 0.18, testa: 0.32, largo: 1.6,
+                   led: { x: 0.5005, y: 0.3037, r: 0.0107, blu: true } },
   MaestroBassmaster: { src: 'immagini/classico/bassmaster.webp', taglio: 0.21, testa: 0.30, largo: 1.6,
                    led: { x: 0.5024, y: 0.2865, r: 0.0115 } },
   GuitarMuff:    { src: 'immagini/classico/guitar-muff.webp', taglio: 0.23, testa: 0.32, largo: 1.6,
@@ -97,6 +98,10 @@ const LEVETTE_CLASSICHE = {
 };
 const levettaClassica = (effetto, param) =>
   (LEVETTE_CLASSICHE[effetto.name] || []).includes(param.index);
+
+/** I modelli con la levetta **prima** delle manopole, a sinistra (l'utente, 22
+ * ottobre 2026, sul SAB Driver). Gli altri la tengono in mezzo. */
+const LEVETTA_A_SINISTRA = ['SABdriver'];
 
 /** Il raggio dell'arco sottile attorno alla manopola classica (viewBox 100). */
 const RAGGIO_CLASSICO = 47;
@@ -290,12 +295,13 @@ function miniaturaClassica(modello) {
 /**
  * La spia finta sopra il LED dell'immagine (l'utente, 22 ottobre 2026): spenta
  * col blocco spento — un tondo scuro che copre il rosso disegnato — e col
- * blocco acceso un alone rosso attorno. Sta dietro i comandi, come
- * l'immagine; le misure le fanno le regole di `.spia-classica`.
+ * blocco acceso un alone rosso attorno (blu, per un LED blu: `led.blu`). Sta
+ * dietro i comandi, come l'immagine; le misure le fanno le regole di
+ * `.spia-classica`.
  */
 function spiaClassica(led, acceso) {
   const spia = document.createElement('span');
-  spia.className = 'spia-classica' + (acceso ? ' accesa' : '');
+  spia.className = 'spia-classica' + (acceso ? ' accesa' : '') + (led.blu ? ' blu' : '');
   spia.style.setProperty('--lx', led.x);
   spia.style.setProperty('--ly', led.y);
   spia.style.setProperty('--lr', led.r);
@@ -331,6 +337,7 @@ function ordineClassico(effetto, vere, ordine) {
   const leva = i => SparkEffetti.interruttore(effetto.name, vere[i].index) ||
                     levettaClassica(effetto, vere[i]);
   const manopole = ordine.filter(i => !leva(i)), levette = ordine.filter(leva);
+  if (LEVETTA_A_SINISTRA.includes(effetto.name)) return [...levette, ...manopole];
   if (righeClassiche(ordine.length).length > 1) return [...manopole, ...levette];
   const meta = Math.ceil(manopole.length / 2);
   return [...manopole.slice(0, meta), ...levette, ...manopole.slice(meta)];

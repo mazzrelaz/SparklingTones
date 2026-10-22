@@ -1551,6 +1551,11 @@
       background:radial-gradient(circle, rgba(255,120,100,0.55), rgba(255,40,30,0) 70%);
       box-shadow:0 0 calc(var(--lr) * 0.9 * var(--img)) calc(var(--lr) * 0.35 * var(--img)) rgba(255,40,30,0.55);
       mix-blend-mode:screen; }
+  /* Un LED blu (il SAB Driver): stesso tondo e stesso alone, in blu. */
+  #pannelloEditor.classico .spia-classica.blu { background:radial-gradient(circle at 40% 35%, #2b3550, #0e1220 65%, #070910); }
+  #pannelloEditor.classico .spia-classica.blu.accesa {
+      background:radial-gradient(circle, rgba(120,170,255,0.55), rgba(40,100,255,0) 70%);
+      box-shadow:0 0 calc(var(--lr) * 0.9 * var(--img)) calc(var(--lr) * 0.35 * var(--img)) rgba(40,110,255,0.55); }
   #pannelloEditor.classico .blocco.classico.spento { opacity:1; }
   #pannelloEditor.classico .blocco.classico.spento .pomelli { opacity:0.45; }
 
