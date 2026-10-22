@@ -1563,16 +1563,24 @@
      in grande (si tocca per cambiarlo), il tasto d'accensione a destra. */
   .titolo-classico { display:flex; align-items:flex-end; gap:12px; padding:0 4px 10px;
                      margin:0 4px; border-bottom:1px solid rgba(255,255,255,0.16); }
-  .titolo-classico .testi { flex:1; min-width:0; }
+  .titolo-classico .testi { flex:1; min-width:0; container-type:inline-size; }
   .titolo-classico .cat { display:inline-block; font-family:var(--sans); font-size:1rem;
                           font-weight:600; color:#fff; padding:3px 34px 3px 10px; margin-left:-8px;
                           background:linear-gradient(90deg, rgba(0,0,0,0.7), rgba(0,0,0,0));
                           text-shadow:0 1px 6px #000; }
   .titolo-classico .nome-modello { display:block; max-width:100%; background:none; border:none;
                                    padding:2px 0 0; color:#fff; font-family:var(--sans);
-                                   font-size:2rem; font-weight:600; line-height:1.15; text-align:left;
+                                   font-size:max(1.15rem, min(2rem, calc(100cqw / (var(--lettere, 10) * 0.58 + 0.9))));
+                                   font-weight:600; line-height:1.15; text-align:left;
                                    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
                                    text-shadow:0 2px 14px rgba(0,0,0,0.9); cursor:pointer; }
+  /* **Un nome lungo rimpicciolisce invece di troncarsi** (l'utente, 22 ottobre
+     2026: «J.H. Octave Fu…», «Two Stone SP5…»): la misura viene dalla
+     larghezza del posto (`cqw`, `.testi` è il contenitore) diviso il numero
+     di lettere (`--lettere`, da `bloccoClassico`). Una lettera è larga 0,47–
+     0,57 volte il carattere (misurato), si conta 0,58 per stare larghi, più
+     0,9 per la freccia; mai più di 2rem, come prima, né meno di 1,15rem. Sotto
+     quella misura restano i puntini. */
   .titolo-classico .nome-modello:disabled { cursor:default; color:#fff; opacity:1; }
   .titolo-classico .freccia { display:inline-block; width:0.36em; height:0.36em; margin:0 0 0.22em 0.4em;
                               border-right:3px solid currentColor; border-bottom:3px solid currentColor;

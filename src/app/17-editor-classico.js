@@ -214,6 +214,8 @@ function bloccoClassico(effetto, posizione) {
   nome.type = 'button';
   nome.className = 'nome-modello';
   nome.textContent = titoloModello(effetto, posizione);
+  // Le lettere decidono la misura del nome (le regole di `.nome-modello`).
+  nome.style.setProperty('--lettere', nome.textContent.length);
   if (candidatiModello(effetto, posizione).length > 1 || paramScelta(effetto)) {
     const freccia = document.createElement('span');
     freccia.className = 'freccia';
