@@ -80,6 +80,8 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.814, y: 0.3392, r: 0.0085 } },
   '6505Plus':    { src: 'immagini/classico/insane-6508.webp', taglio: 0.17, testa: 0.20, largo: 1, ampli: true,
                    led: { x: 0.7236, y: 0.3242, r: 0.0065 } },
+  SwitchAxeLead: { src: 'immagini/classico/switchaxe.webp', taglio: 0.14, testa: 0.22, largo: 1, ampli: true,
+                   led: { x: 0.645, y: 0.2962, r: 0.0065 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
