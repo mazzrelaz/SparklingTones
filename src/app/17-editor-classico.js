@@ -26,7 +26,8 @@
  */
 const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, testa: 0.25 };
 const SFONDI_CLASSICI = {
-  DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.12, testa: 0.35 },
+  DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35 },
+  Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.14, testa: 0.35 },
 };
 
 /** Il raggio dell'arco sottile attorno alla manopola classica (viewBox 100). */
