@@ -88,6 +88,9 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.353, y: 0.4115, r: 0.0085 } },
   // Il Fishman Loudbox non ha una spia disegnata.
   AcousticAmpV2: { src: 'immagini/classico/fishboy.webp', taglio: 0.23, testa: 0.22, largo: 1, ampli: true },
+  // Il GK 800RB non ha un LED: la spia sta sulla parte rossa dell'interruttore.
+  GK800:         { src: 'immagini/classico/rb-800.webp', taglio: 0.20, testa: 0.24, largo: 1, ampli: true,
+                   led: { x: 0.8164, y: 0.3486, r: 0.0075 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
