@@ -31,6 +31,8 @@
 const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, testa: 0.25, largo: 1,
                              led: { x: 0.2969, y: 0.3356, r: 0.0078 } };
 const SFONDI_CLASSICI = {
+  'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
+                   led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35, largo: 1,
                    led: { x: 0.4999, y: 0.1834, r: 0.0107 } },
   Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
