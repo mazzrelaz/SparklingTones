@@ -86,6 +86,9 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.3364, y: 0.3493, r: 0.0085 } },
   BE101:         { src: 'immagini/classico/be-101.webp', taglio: 0.22, testa: 0.23, largo: 1, ampli: true,
                    led: { x: 0.353, y: 0.4115, r: 0.0085 } },
+  // Ampli acustico inventato da Positive Grid: un combo verde col display.
+  Acoustic:      { src: 'immagini/classico/pure-acoustic.webp', taglio: 0.27, testa: 0.19, largo: 1, ampli: true,
+                   led: { x: 0.7759, y: 0.377, r: 0.006 } },
   // Il Fishman Loudbox non ha una spia disegnata.
   AcousticAmpV2: { src: 'immagini/classico/fishboy.webp', taglio: 0.23, testa: 0.22, largo: 1, ampli: true },
   // Il GK 800RB non ha un LED: la spia sta sulla parte rossa dell'interruttore.
