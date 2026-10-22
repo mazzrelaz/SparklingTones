@@ -70,6 +70,8 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.3477, y: 0.3665, r: 0.009 } },
   AmericanHighGain: { src: 'immagini/classico/american-high-gain.webp', taglio: 0.13, testa: 0.22, largo: 1, ampli: true,
                    led: { x: 0.7783, y: 0.1885, r: 0.007 } },
+  SLO100:        { src: 'immagini/classico/slo-100.webp', taglio: 0.22, testa: 0.22, largo: 1, ampli: true,
+                   led: { x: 0.6709, y: 0.4007, r: 0.0085 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
