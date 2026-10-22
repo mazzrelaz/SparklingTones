@@ -114,6 +114,9 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.7974, y: 0.4089, r: 0.0065 } },
   'JH.Bassman50Silver': { src: 'immagini/classico/jh-bass-master.webp', taglio: 0.21, testa: 0.22, largo: 1, ampli: true,
                    led: { x: 0.8027, y: 0.2839, r: 0.0075 } },
+  // LED verde acqua (`verde`).
+  'JH.SoundCity100': { src: 'immagini/classico/jh-tone-city.webp', taglio: 0.19, testa: 0.21, largo: 1, ampli: true,
+                   led: { x: 0.6191, y: 0.3558, r: 0.0063, verde: true } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
@@ -385,13 +388,13 @@ function miniaturaClassica(modello) {
 /**
  * La spia finta sopra il LED dell'immagine (l'utente, 22 ottobre 2026): spenta
  * col blocco spento — un tondo scuro che copre il rosso disegnato — e col
- * blocco acceso un alone rosso attorno (blu, per un LED blu: `led.blu`). Sta
- * dietro i comandi, come l'immagine; le misure le fanno le regole di
- * `.spia-classica`.
+ * blocco acceso un alone rosso attorno (blu o verde, per quei LED: `led.blu`,
+ * `led.verde`). Sta dietro i comandi, come l'immagine; le misure le fanno le
+ * regole di `.spia-classica`.
  */
 function spiaClassica(led, acceso) {
   const spia = document.createElement('span');
-  spia.className = 'spia-classica' + (acceso ? ' accesa' : '') + (led.blu ? ' blu' : '');
+  spia.className = 'spia-classica' + (acceso ? ' accesa' : '') + (led.blu ? ' blu' : '') + (led.verde ? ' verde' : '');
   spia.style.setProperty('--lx', led.x);
   spia.style.setProperty('--ly', led.y);
   spia.style.setProperty('--lr', led.r);
