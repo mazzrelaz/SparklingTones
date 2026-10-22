@@ -164,6 +164,8 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.5044, y: 0.278, r: 0.0078 } },
   ChorusAnalog:  { src: 'immagini/classico/chorus.webp', taglio: 0.21, testa: 0.34, largo: 1.6,
                    led: { x: 0.499, y: 0.2601, r: 0.0073 } },
+  Flanger:       { src: 'immagini/classico/flanger.webp', taglio: 0.22, testa: 0.38, largo: 1.6,
+                   led: { x: 0.5215, y: 0.4271, r: 0.011 } },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
   BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,
