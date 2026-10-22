@@ -62,6 +62,10 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.3809, y: 0.3236, r: 0.0075 } },
   OverDrivenLuxVerb: { src: 'immagini/classico/lux-verb.webp', taglio: 0.29, testa: 0.20, largo: 1, ampli: true,
                    led: { x: 0.835, y: 0.4098, r: 0.0093 } },
+  // Testa bassa: il logo della cassa scende sotto la riga del titolo invece di
+  // finire dietro il nome.
+  Bogner:        { src: 'immagini/classico/rb-101.webp', taglio: 0.23, testa: 0.17, largo: 1, ampli: true,
+                   led: { x: 0.4844, y: 0.4154, r: 0.005 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
