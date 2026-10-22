@@ -93,6 +93,10 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.8164, y: 0.3486, r: 0.0075 } },
   Sunny3000:     { src: 'immagini/classico/sunny-3000.webp', taglio: 0.21, testa: 0.25, largo: 1, ampli: true,
                    led: { x: 0.77, y: 0.4212, r: 0.006 } },
+  // L'Eden: la spia sta sull'interruttore rosso, che non ha un LED a parte;
+  // testa bassa perché la targhetta della cassa scenda sotto il nome.
+  W600:          { src: 'immagini/classico/w600.webp', taglio: 0.19, testa: 0.17, largo: 1, ampli: true,
+                   led: { x: 0.7212, y: 0.3174, r: 0.0075 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
