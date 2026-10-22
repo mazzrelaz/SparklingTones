@@ -1515,6 +1515,15 @@
       --alta:calc(var(--img) * 1.5);
       --sotto:calc(var(--scena) * 1.5 * var(--testa) + var(--alta) * var(--taglio));
       --sopra:calc(var(--taglio) * 100%);
+      /* In alto sfuma morbido e lungo (l'utente, 22 ottobre 2026: «tagli troppo»):
+         dal taglio in su l'immagine si spegne piano dietro catena e tempo, a
+         gradini che seguono una curva, invece di un taglio netto in 11 punti.
+         I gradini sono frazioni del taglio: il bordo vero dell'immagine resta
+         trasparente, e non si vede una riga. */
+      --alto:linear-gradient(180deg, transparent calc(var(--sopra) * 0.2),
+                  rgba(0,0,0,0.06) calc(var(--sopra) * 0.4), rgba(0,0,0,0.2) calc(var(--sopra) * 0.6),
+                  rgba(0,0,0,0.45) calc(var(--sopra) * 0.75), rgba(0,0,0,0.75) calc(var(--sopra) * 0.9),
+                  #000 calc(var(--sopra) + 2%));
       content:''; position:absolute; z-index:-1; left:50%; bottom:0;
       top:calc(var(--p) - var(--scena) * 1.5 * var(--testa) - var(--alta) * var(--taglio));
       width:var(--img);
@@ -1523,10 +1532,10 @@
                                          rgba(10,8,7,0.82) calc(var(--sotto) + var(--alta) * 0.36), #0a0807 100%)
                    center top / var(--img) var(--alta) no-repeat,
                  var(--sfondo) center top / var(--img) var(--alta) no-repeat;
-      -webkit-mask-image:linear-gradient(180deg, transparent calc(var(--sopra) - 9%), #000 calc(var(--sopra) + 2%)),
+      -webkit-mask-image:var(--alto),
                          linear-gradient(90deg, transparent var(--nero, 0%), #000 var(--lati, 10%), #000 calc(100% - var(--lati, 10%)), transparent calc(100% - var(--nero, 0%)));
       -webkit-mask-composite:source-in;
-      mask-image:linear-gradient(180deg, transparent calc(var(--sopra) - 9%), #000 calc(var(--sopra) + 2%)),
+      mask-image:var(--alto),
                  linear-gradient(90deg, transparent var(--nero, 0%), #000 var(--lati, 10%), #000 calc(100% - var(--lati, 10%)), transparent calc(100% - var(--nero, 0%)));
       mask-composite:intersect;
       -webkit-mask-size:var(--img) var(--alta); mask-size:var(--img) var(--alta);
