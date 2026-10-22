@@ -371,8 +371,24 @@ function bloccoClassico(effetto, posizione) {
   });
   // Le file di comandi dicono quanto posto resta all'immagine (vedi le
   // regole di `.blocco.classico`); i cursori degli equalizzatori ne valgono due.
-  blocco.style.setProperty('--righe',
-    comandi.classList.contains('cursori') ? 2 : comandi.querySelectorAll('.riga-pomelli').length);
+  const file = comandi.classList.contains('cursori') ? 2 : comandi.querySelectorAll('.riga-pomelli').length;
+  blocco.style.setProperty('--righe', file);
+  // Una fila può venire più alta dei suoi 125 px: nei delay la levetta BPM
+  // con «ON» sotto e i nomi su due righe (MODE SELECTOR) facevano scorrere
+  // l'editor di 10–13 px (l'utente, 22 ottobre 2026: «togli lo scorrimento»).
+  // Appena il blocco è nella pagina (chi lo chiama lo inserisce e apre il
+  // pannello subito, e il microtask gira prima del disegno) si guarda se il
+  // pannello scorre: se sì, e i comandi sono più alti del loro posto, immagine
+  // e titolo salgono di quel tanto. **Solo se scorre**: dove c'è aria (gli
+  // ampli, un telefono più alto) non si sposta niente.
+  queueMicrotask(() => {
+    const pannello = $('pannelloEditor');
+    if (!blocco.isConnected || !pannello) return;
+    const scorre = pannello.scrollHeight - pannello.clientHeight;
+    const oltre = comandi.offsetHeight - file * 125;
+    if (scorre > 0 && oltre > 0)
+      blocco.style.setProperty('--righe', (file + Math.min(scorre, oltre) / 125).toFixed(3));
+  });
   return blocco;
 }
 
