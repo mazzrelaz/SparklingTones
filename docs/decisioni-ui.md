@@ -1471,3 +1471,24 @@ scritta sotto; in una fila stanno in mezzo alle manopole.
 blocco**. Coi comandi fermi l'immagine o rimpiccioliva (non chiesto, e all'utente non è andato) o, alla
 misura di prima, finiva sotto titolo e manopole. Si è tornati alla fila sola; se un giorno l'immagine
 non ci sta, **sale sotto la catena invece di rimpicciolire** (indicazione dell'utente).
+
+### Le immagini, la sera e la notte del 22 ottobre 2026
+
+- **I pedali stanno più piccoli dell'ampli** (`.pedale`, `--riduci` 0,75, l'utente: «troppo grossi»), col
+  posto del titolo invariato. **Sul telefono niente bande nere ai lati** (l'utente, deciso): l'immagine è
+  larga almeno quanto lo schermo e sfuma solo fuori; dal PC sfuma ai lati. Il formato quadrato non serve.
+- **Gli ampli** (`ampli: true`) non si rimpiccioliscono. Prompt degli ampli scritto con l'utente: foto di
+  tre quarti, campo un po' largo, logo SparklingTones al posto del marchio, nome del modello tenuto.
+  **Il logo sulla cassa** finisce spesso dietro il nome: per i prossimi «logo solo sulla testata».
+  Si sposta l'immagine con `testa` e `taglio`; col poco spazio del telefono (riga JH) spesso non basta.
+- **Wah senza manopole** (l'utente): il Legendary ha solo il tasto AUTO che apre il pannellino del neon;
+  l'Auto Wah (pacchetto Hendrix «no») ha la sua immagine e la sola Sensitivity.
+- **Nomi lunghi**: rimpiccioliscono (`--lettere`, container query) invece dei puntini; provati tutti gli 80.
+- **Spie**: rossa, `blu` (SAB Driver, Hammer 500), `verde` (Tone City 100, Vibrato). Se non c'è LED, sulla
+  parte rossa dell'interruttore. Sui pedali arancioni il LED si trova a vista o dall'anello scuro.
+- **Pedali veri delle modulazioni**: la lista ufficiale è quella di BIAS FX 2 (help.positivegrid.com,
+  «Effect List»), da cui viene lo Spark. Quella dice anche SAB Driver = Fulltone OCD, Booster = Xotic RC
+  Boost, Sustain Comp = Boss CS-1: le immagini fatte usano Plexi-Drive, Micro Amp e CS-3, tenute così.
+- **Restano**: J.H. Legendary Vibe (Voodoo-Vibe Jr.), Cloner Chorus (Small Clone), Classic Vibe (Micro
+  Vibe), Tremolator (Demeter TRM-1), Tremolo Square (TC Pipeline), Guitar EQ (MXR M109, a cursori), Bass EQ
+  (originale PG); i 6 delay; i riverberi (nel neon uno per tipo).

@@ -990,3 +990,14 @@ aveva lasciato in `localStorage`. In `lingua-en.js` resta «Funzioni nascoste»,
 funzionare tutto». Servivano gli **UUID interi** dello Spark (quelli corti li prende solo Chrome).
 Bluefy non usa il service worker: il nuovo arriva dopo i 10 minuti di cache di GitHub. App, guida,
 README e sito consigliano Bluefy, in italiano e in inglese (aggiornato su richiesta dell'utente). Dettaglio: `docs/decisioni-ui.md`, «Su iPhone e iPad».
+
+## Estratto di CLAUDE.md del 22 ottobre 2026 (notte): l'editor classico
+
+**L'editor classico (22 ottobre 2026, pubblicato, guscio `v137`)**: Impostazioni → «Editor: Neon /
+Classico» (`editorClassico()`, di serie neon). **Il neon è quello di prima e i ritocchi al classico non
+lo toccano mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
+`17-editor-classico.js` dietro `editorClassico()`. Un'immagine per modello (`SFONDI_CLASSICI`: taglio,
+testa, largo, led; chi non ce l'ha prende l'ampli), generate dall'utente col prompt dei pedali vintage;
+manopole con la corona dentata, levette dei pedali, spia finta sul LED. Lavoro lungo: **le immagini
+arrivano a gruppi**, e non si chiede di pubblicare finché non è finito. Scelte e scartati:
+`docs/decisioni-ui.md`, «L'editor classico».

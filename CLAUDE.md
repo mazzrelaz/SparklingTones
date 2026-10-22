@@ -378,18 +378,12 @@ estratti del 20 ottobre.
 
 **iPhone e iPad con Bluefy (20 ottobre 2026)**: funziona; servivano gli UUID interi. In `docs/diario.md`.
 
-**L'editor classico (22 ottobre 2026, pubblicato, guscio `v137`)**: Impostazioni → «Editor: Neon /
-Classico» (`editorClassico()`, di serie neon). **Il neon è quello di prima e i ritocchi al classico non
-lo toccano mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
-`17-editor-classico.js` dietro `editorClassico()`. Un'immagine per modello (`SFONDI_CLASSICI`: taglio,
-testa, largo, led; chi non ce l'ha prende l'ampli), generate dall'utente col prompt dei pedali vintage;
-manopole con la corona dentata, levette dei pedali, spia finta sul LED. Lavoro lungo: **le immagini
-arrivano a gruppi**, e non si chiede di pubblicare finché non è finito. Scelte e scartati:
-`docs/decisioni-ui.md`, «L'editor classico».
-**Fermi al 22 ottobre (sera)**: sul ramo `bozza-editor-classico`, **non ancora pubblicati**, la spia sul LED,
-l'immagine che non fa scorrere, i quattro compressori e le miniature dell'elenco. Fatte: ampli
-(predefinito), Tube Drive (luce vecchia, da rifare), Over Drive (un Tube Screamer per prova), LA Comp,
-Sustain/Optical/Bass/Red Comp. Si riprende con le immagini che manda l'utente.
+**L'editor classico** (pubblicato il 22 ottobre 2026, guscio `v137`): Impostazioni → «Editor: Neon /
+Classico». **Il neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`,
+codice in `17-editor-classico.js`. Versione lunga in `docs/diario.md`, estratto del 22 ottobre (notte).
+**Fermi al 22 ottobre (notte)**, sul ramo `bozza-editor-classico`, **non pubblicato**: immagini di noise
+gate, comp, wah, drive, i 39 ampli e 6 modulazioni; mancano 7 mod, i delay, i riverberi. Stato e regole in
+`docs/decisioni-ui.md`, «L'editor classico», ultima sezione.
 
 **Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
 **solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,
