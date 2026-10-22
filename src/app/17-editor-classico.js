@@ -33,8 +33,10 @@ const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, 
 const SFONDI_CLASSICI = {
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
-  // Il wah non ha LED. Lo stesso modello è anche l'«Auto Wah» gratuito.
+  // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
+  // che ha la sua immagine (`sfondoClassico`).
   'JH.Vox846':   { src: 'immagini/classico/legendary-wah.webp', taglio: 0.20, testa: 0.30, largo: 1.6 },
+  AutoWah:       { src: 'immagini/classico/auto-wah.webp', taglio: 0.21, testa: 0.30, largo: 1.6 },
   DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35, largo: 1,
                    led: { x: 0.4999, y: 0.1834, r: 0.0107 } },
   Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
@@ -50,6 +52,13 @@ const SFONDI_CLASSICI = {
   Compressor:     { src: 'immagini/classico/red-comp.webp', taglio: 0.18, testa: 0.28, largo: 1.5,
                    led: { x: 0.499, y: 0.4766, r: 0.0156 } },
 };
+
+/**
+ * L'immagine di un modello. Il wah, senza il pacchetto Hendrix, è l'Auto Wah
+ * gratuito e ha la sua, come nel neon (`immagineBlocco`).
+ */
+const sfondoClassico = modello =>
+  SFONDI_CLASSICI[modello === 'JH.Vox846' && !haHendrix() ? 'AutoWah' : modello];
 
 /**
  * I parametri che sul pedale vero sono una **levetta a due posizioni**, non un
@@ -135,7 +144,7 @@ function bloccoClassico(effetto, posizione) {
   const blocco = document.createElement('div');
   blocco.className = 'blocco aFuoco classico' + (effetto.enabled ? '' : ' spento');
   blocco.style.setProperty('--cat', CREMA);
-  const sfondo = SFONDI_CLASSICI[effetto.name] || SFONDO_PREDEFINITO;
+  const sfondo = sfondoClassico(effetto.name) || SFONDO_PREDEFINITO;
   // Un pedale sta più piccolo dell'ampli (`.pedale` nelle regole).
   if (sfondo !== SFONDO_PREDEFINITO) blocco.classList.add('pedale');
   blocco.style.setProperty('--sfondo', `url('${sfondo.src}')`);
@@ -204,7 +213,7 @@ function bloccoClassico(effetto, posizione) {
  * I modelli senza immagine classica tengono quella del neon (`null` qui).
  */
 function miniaturaClassica(modello) {
-  const sfondo = SFONDI_CLASSICI[modello];
+  const sfondo = sfondoClassico(modello);
   if (!sfondo) return null;
   const alta = 1.5 / 0.56;
   return { src: sfondo.src,
