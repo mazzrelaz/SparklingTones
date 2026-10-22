@@ -132,6 +132,8 @@ function bloccoClassico(effetto, posizione) {
   blocco.className = 'blocco aFuoco classico' + (effetto.enabled ? '' : ' spento');
   blocco.style.setProperty('--cat', CREMA);
   const sfondo = SFONDI_CLASSICI[effetto.name] || SFONDO_PREDEFINITO;
+  // Un pedale sta più piccolo dell'ampli (`.pedale` nelle regole).
+  if (sfondo !== SFONDO_PREDEFINITO) blocco.classList.add('pedale');
   blocco.style.setProperty('--sfondo', `url('${sfondo.src}')`);
   blocco.style.setProperty('--taglio', sfondo.taglio);
   blocco.style.setProperty('--testa', sfondo.testa);
