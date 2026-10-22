@@ -189,8 +189,8 @@ const SFONDI_CLASSICI = {
   TremoloSquare: { src: 'immagini/classico/tremolo-square.webp', taglio: 0.20, testa: 0.38, largo: 1.6,
                    led: { x: 0.4995, y: 0.486, r: 0.017 } },
   // Gli equalizzatori non hanno LED: le luci blu sono quelle dei cursori.
-  GuitarEQ6:     { src: 'immagini/classico/guitar-eq.webp', taglio: 0.28, testa: 0.32, largo: 1.6 },
-  BassEQ6:       { src: 'immagini/classico/bass-eq.webp', taglio: 0.25, testa: 0.34, largo: 1.6 },
+  GuitarEQ6:     { src: 'immagini/classico/guitar-eq.webp', taglio: 0.25, testa: 0.34, largo: 1.6 },
+  BassEQ6:       { src: 'immagini/classico/bass-eq.webp', taglio: 0.28, testa: 0.32, largo: 1.6 },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
   BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,

@@ -1605,6 +1605,10 @@
      non c'è: compare nella bolla mentre si gira. */
   #pannelloEditor.classico .pomelli { gap:10px; padding:12px 4px 8px; min-height:0;
                                       justify-content:flex-start; }
+  /* I cursori degli equalizzatori valgono due file (`--righe`) ma ne occupano
+     una: stanno in fondo, vicino alla barra in basso (l'utente, 22 ottobre
+     2026), e l'immagine resta dov'è. */
+  #pannelloEditor.classico .pomelli.cursori { justify-content:flex-end; }
   #pannelloEditor.classico .riga-pomelli { gap:6px; }
   #pannelloEditor.classico .riga-pomelli > * { flex:0 1 120px; }
   #pannelloEditor.classico .riga-pomelli + .riga-pomelli { border-top:1px solid rgba(255,255,255,0.12);
