@@ -1459,18 +1459,19 @@
      **Il titolo e i comandi stanno sempre alla stessa altezza** (l'utente, 22
      ottobre 2026), per ogni blocco: sopra il titolo c'è `--p`, quello che
      avanza dello schermo tolti testa, tempo e catena (~357 px con la barra in
-     basso), il titolo (~65) e due file di comandi (~110 l'una), che nel classico
-     sono sempre due (`righeClassiche`; ~18 px in più per i nomi su due righe).
-     L'immagine è grande quanto serve
-     perché `--testa` della sua altezza riempia `--p`; se non può (al più larga
-     quanto il pannello per `--largo` — 1 l'ampli, di più un pedale, i cui lati
-     bui escono dallo schermo — e 700 px) scende, e sopra resta il buio. Le
-     immagini sono 2:3, quindi l'altezza è 1,5 volte la larghezza. */
+     basso), il titolo (~75) e due file di comandi (~125 l'una, ~18 px in più
+     per i nomi su due righe), che nel classico sono sempre due (`righeClassiche`).
+     **L'immagine invece ha la misura che aveva prima delle due file** (l'utente:
+     «non rimpicciolirla»): grande quanto ci sta sopra il titolo e le file che
+     avrebbe con quattro comandi per fila (`--righe-img`), al più larga quanto
+     il pannello per `--largo` (1 l'ampli; di più un pedale, i cui lati bui
+     escono dallo schermo) e 700 px; comincia in cima al blocco, e il titolo la
+     copre dove cade. Le immagini sono 2:3: l'altezza è 1,5 volte la larghezza. */
   #pannelloEditor.classico { overflow-x:hidden; }
   #pannelloEditor.classico .blocco.classico {
-      --p:max(110px, calc(100dvh - 665px));
+      --p:max(110px, calc(100dvh - 700px));
       --scena:min(calc((100% + 28px) * var(--largo, 1)), 700px,
-                  calc(var(--p) / (1.5 * var(--testa))));
+                  max(250px, calc((100dvh - 427px - var(--righe-img, 2) * 125px) / (1.5 * var(--testa)))));
       position:relative; isolation:isolate; overflow:visible;
       width:100%; max-width:560px; margin:0 auto;
       padding-top:var(--p); border:none; border-radius:0;
@@ -1478,8 +1479,7 @@
   #pannelloEditor.classico .blocco.classico::before {
       --sotto:calc((var(--taglio) + var(--testa)) * 100%);
       --sopra:calc(var(--taglio) * 100%);
-      content:''; position:absolute; z-index:-1; left:50%;
-      top:calc(var(--p) - var(--scena) * 1.5 * var(--testa));
+      content:''; position:absolute; z-index:-1; left:50%; top:0;
       width:var(--scena); aspect-ratio:2 / 3;
       transform:translate(-50%, calc(var(--taglio) * -100%)); pointer-events:none;
       background:linear-gradient(180deg, rgba(10,8,7,0) calc(var(--sotto) + 10%),
@@ -1505,7 +1505,7 @@
                           text-shadow:0 1px 6px #000; }
   .titolo-classico .nome-modello { display:block; max-width:100%; background:none; border:none;
                                    padding:2px 0 0; color:#fff; font-family:var(--sans);
-                                   font-size:1.75rem; font-weight:600; line-height:1.15; text-align:left;
+                                   font-size:2rem; font-weight:600; line-height:1.15; text-align:left;
                                    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
                                    text-shadow:0 2px 14px rgba(0,0,0,0.9); cursor:pointer; }
   .titolo-classico .nome-modello:disabled { cursor:default; color:#fff; opacity:1; }
@@ -1530,7 +1530,7 @@
   #pannelloEditor.classico .riga-pomelli > * { flex:0 1 120px; }
   #pannelloEditor.classico .riga-pomelli + .riga-pomelli { border-top:1px solid rgba(255,255,255,0.12);
                                                            padding-top:12px; }
-  #pannelloEditor.classico .pomello svg { width:70px; height:70px; margin-bottom:5px;
+  #pannelloEditor.classico .pomello svg { width:78px; height:78px; margin-bottom:6px;
                                           filter:drop-shadow(0 6px 8px rgba(0,0,0,0.75)); }
   #pannelloEditor.classico .riga-pomelli:has(> :nth-child(4)) .pomello svg { width:64px; height:64px; }
   #pannelloEditor.classico .pomello .guida { stroke:rgba(255,255,255,0.13); stroke-width:3; }
@@ -1540,7 +1540,7 @@
                                             stroke-linejoin:round; }
   #pannelloEditor.classico .pomello .anello { fill:#121212; stroke:#4a4744; stroke-width:1; }
   #pannelloEditor.classico .pomello .tacca { stroke:#fff; stroke-width:3.5; filter:none; }
-  #pannelloEditor.classico .pomello .nome { font-family:var(--sans); font-size:0.85rem; font-weight:500;
+  #pannelloEditor.classico .pomello .nome { font-family:var(--sans); font-size:0.95rem; font-weight:500;
                                             color:#fff; text-transform:uppercase; letter-spacing:0.03em; font-style:normal;
                                             text-shadow:0 1px 6px #000; }
   /* Un nome lungo (PEAK REDUCTION, LIMIT/COMPRESS) va su due righe invece di

@@ -166,6 +166,12 @@ function bloccoClassico(effetto, posizione) {
   comandi.querySelectorAll('.pomello .nome').forEach(nome => {
     nome.textContent = nome.textContent.replace(/\//g, '/\u200b');
   });
+  // La misura dell'immagine resta quella di quando le file erano fino a
+  // quattro comandi (vedi le regole di `.blocco.classico`); i cursori degli
+  // equalizzatori valgono due file.
+  const quanti = comandi.querySelectorAll('.riga-pomelli > *').length;
+  blocco.style.setProperty('--righe-img',
+    comandi.classList.contains('cursori') || quanti > 4 ? 2 : 1);
   return blocco;
 }
 
