@@ -381,9 +381,9 @@ estratti del 20 ottobre.
 **L'editor classico** (pubblicato il 22 ottobre 2026, guscio `v137`): Impostazioni → «Editor: Neon /
 Classico». **Il neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`,
 codice in `17-editor-classico.js`. Versione lunga in `docs/diario.md`, estratto del 22 ottobre (notte).
-**Fermi al 22 ottobre (notte)**, sul ramo `bozza-editor-classico`, **non pubblicato**: immagini di noise
-gate, comp, wah, drive, i 39 ampli e 6 modulazioni; mancano 7 mod, i delay, i riverberi. Stato e regole in
-`docs/decisioni-ui.md`, «L'editor classico», ultima sezione.
+**Fermi al 22 ottobre (notte)**, sul ramo `bozza-editor-classico`, **non pubblicato**: **tutte le immagini
+fatte** (80 modelli e i 9 tipi di riverbero). Si pubblica solo su suo comando. Stato e
+regole in `docs/decisioni-ui.md`, «L'editor classico», ultima sezione.
 
 **Basetta stampata (20 ottobre 2026, chiesta dall'utente: riapre `pcb/`)**: `pcb/basetta/`, generata
 **solo** da `tools/genera-basetta.py` (Python di KiCad 10: pezzi, router A* suo, massa, scritte; si rigenera,

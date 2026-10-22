@@ -1489,6 +1489,14 @@ non ci sta, **sale sotto la catena invece di rimpicciolire** (indicazione dell'u
 - **Pedali veri delle modulazioni**: la lista ufficiale è quella di BIAS FX 2 (help.positivegrid.com,
   «Effect List»), da cui viene lo Spark. Quella dice anche SAB Driver = Fulltone OCD, Booster = Xotic RC
   Boost, Sustain Comp = Boss CS-1: le immagini fatte usano Plexi-Drive, Micro Amp e CS-3, tenute così.
-- **Restano**: J.H. Legendary Vibe (Voodoo-Vibe Jr.), Cloner Chorus (Small Clone), Classic Vibe (Micro
-  Vibe), Tremolator (Demeter TRM-1), Tremolo Square (TC Pipeline), Guitar EQ (MXR M109, a cursori), Bass EQ
-  (originale PG); i 6 delay; i riverberi (nel neon uno per tipo).
+- **Fatte anche le altre** (22 ottobre, sera tardi): le 7 modulazioni che mancavano, i 6 delay e i 9 tipi di
+  riverbero; il Guitar Muff rifatto (Little Big Muff). Gli EQ: **il blu è il Guitar EQ, il nero il Bass EQ**
+  (l'utente), e i cursori stanno in fondo, vicino alla barra (`.pomelli.cursori`). Il riverbero ha un'immagine
+  per tipo come nel neon (`'bias.reverb:<tipo>'` in `SFONDI_CLASSICI`, `sfondoClassico(modello, effetto)`),
+  anche nelle miniature dell'elenco dei tipi. Spie misurate ingrandendo l'immagine; lo Space Echo sulla
+  lampadina POWER, il Tremulator sul portaLED spento, Echohead ed EQ senza spia.
+- **In alto l'immagine sfuma lunga e a curva** (l'utente: «tagli troppo»): cinque gradini dal 20% del taglio al
+  taglio, dietro catena e tempo; il bordo vero dell'immagine resta trasparente.
+- **L'editor non scorre**: se una fila di comandi viene più alta dei suoi 125 px (la levetta BPM con «ON», i nomi
+  su due righe) e il pannello scorre, `--righe` cresce di quel tanto (microtask in `bloccoClassico`). Solo se
+  scorre: provati gli 80 modelli, cambiano i delay a due file e il Tremolator.

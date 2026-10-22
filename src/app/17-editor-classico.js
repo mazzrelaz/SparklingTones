@@ -207,6 +207,28 @@ const SFONDI_CLASSICI = {
   // L'Echoplex nella sua valigia: la spia sulla lampadina rossa a sinistra.
   DelayRe201:    { src: 'immagini/classico/echo-tape.webp', taglio: 0.22, testa: 0.40, largo: 1.6,
                    led: { x: 0.2522, y: 0.5732, r: 0.0088 } },
+  // Il riverbero, un'immagine per tipo come nel neon: la voce è il modello più
+  // il nome del tipo (`sfondoClassico` con l'effetto). Classic Plate, Holy
+  // Grail e Reflection sono Plate Rich, Hall Medium e Plate Long
+  // (abbinamento dell'utente, lo stesso del neon).
+  'bias.reverb:Room Studio A': { src: 'immagini/classico/reverb-room-studio-a.webp', taglio: 0.26, testa: 0.36, largo: 1.6,
+                   led: { x: 0.4961, y: 0.319, r: 0.0093 } },
+  'bias.reverb:Chamber':       { src: 'immagini/classico/reverb-chamber.webp', taglio: 0.23, testa: 0.38, largo: 1.6,
+                   led: { x: 0.5088, y: 0.2967, r: 0.014 } },
+  'bias.reverb:Hall Natural':  { src: 'immagini/classico/reverb-hall-natural.webp', taglio: 0.23, testa: 0.36, largo: 1.6,
+                   led: { x: 0.5, y: 0.2962, r: 0.013 } },
+  'bias.reverb:Plate Short':   { src: 'immagini/classico/reverb-plate-short.webp', taglio: 0.22, testa: 0.38, largo: 1.6,
+                   led: { x: 0.503, y: 0.2802, r: 0.0137 } },
+  'bias.reverb:Hall Ambient':  { src: 'immagini/classico/reverb-hall-ambient.webp', taglio: 0.22, testa: 0.38, largo: 1.6,
+                   led: { x: 0.5017, y: 0.2831, r: 0.0142 } },
+  'bias.reverb:Plate Rich':    { src: 'immagini/classico/reverb-plate-rich.webp', taglio: 0.26, testa: 0.36, largo: 1.6,
+                   led: { x: 0.499, y: 0.3302, r: 0.0168 } },
+  'bias.reverb:Hall Medium':   { src: 'immagini/classico/reverb-hall-medium.webp', taglio: 0.25, testa: 0.36, largo: 1.6,
+                   led: { x: 0.4998, y: 0.3092, r: 0.0146 } },
+  'bias.reverb:Plate Long':    { src: 'immagini/classico/reverb-plate-long.webp', taglio: 0.23, testa: 0.36, largo: 1.6,
+                   led: { x: 0.5037, y: 0.3073, r: 0.0146 } },
+  'bias.reverb:Room Studio B': { src: 'immagini/classico/reverb-room-studio-b.webp', taglio: 0.22, testa: 0.38, largo: 1.6,
+                   led: { x: 0.5003, y: 0.2949, r: 0.015 } },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
   BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,
@@ -221,10 +243,14 @@ const SFONDI_CLASSICI = {
 
 /**
  * L'immagine di un modello. Il wah, senza il pacchetto Hendrix, è l'Auto Wah
- * gratuito e ha la sua, come nel neon (`immagineBlocco`).
+ * gratuito e ha la sua, come nel neon (`immagineBlocco`). Con l'effetto si
+ * guarda anche il tipo (il riverbero): prima `modello:tipo`, poi il modello.
  */
-const sfondoClassico = modello =>
-  SFONDI_CLASSICI[modello === 'JH.Vox846' && !haHendrix() ? 'AutoWah' : modello];
+const sfondoClassico = (modello, effetto) => {
+  if (modello === 'JH.Vox846' && !haHendrix()) return SFONDI_CLASSICI.AutoWah;
+  const tipo = effetto && nomeTipo(effetto);
+  return (tipo && SFONDI_CLASSICI[modello + ':' + tipo]) || SFONDI_CLASSICI[modello];
+};
 
 /**
  * I parametri che sul pedale vero sono una **levetta a due posizioni**, non un
@@ -314,7 +340,7 @@ function bloccoClassico(effetto, posizione) {
   const blocco = document.createElement('div');
   blocco.className = 'blocco aFuoco classico' + (effetto.enabled ? '' : ' spento');
   blocco.style.setProperty('--cat', CREMA);
-  const sfondo = sfondoClassico(effetto.name) || SFONDO_PREDEFINITO;
+  const sfondo = sfondoClassico(effetto.name, effetto) || SFONDO_PREDEFINITO;
   // Un pedale sta più piccolo dell'ampli (`.pedale` nelle regole).
   if (sfondo !== SFONDO_PREDEFINITO && !sfondo.ampli) blocco.classList.add('pedale');
   blocco.style.setProperty('--sfondo', `url('${sfondo.src}')`);
@@ -447,6 +473,7 @@ function comandiWah(effetto) {
  * nome). L'immagine è 2:3, quindi è alta 1,5 / 0,56 = 2,68 volte il riquadro,
  * e il taglio in percentuale di `background-position` è taglio × 2,68 / 1,68.
  * I modelli senza immagine classica tengono quella del neon (`null` qui).
+ * Un tipo di riverbero si chiede con la sua voce, `'bias.reverb:Chamber'`.
  */
 function miniaturaClassica(modello) {
   const sfondo = sfondoClassico(modello);

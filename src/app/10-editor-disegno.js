@@ -766,7 +766,8 @@ function apriSceltaTipo(effetto, param) {
   for (let n = 0; n < quante; n++) {
     voci.push({ valore: String(SparkEffetti.valorePosizione(n)),
                 testo: nomi ? nomi[n] : tr('posizione {0}', n + 1),
-                immagine: nomi && (SparkImmagini.di(effetto.name, nomi[n]) || {}).src });
+                immagine: nomi && ((editorClassico() && miniaturaClassica(effetto.name + ':' + nomi[n])) ||
+                                   (SparkImmagini.di(effetto.name, nomi[n]) || {}).src) });
   }
   const dove = SparkEffetti.posizioneDi(param.value, quante);
   // L'ampli riporta un valore che non è nessuna delle posizioni note: si
