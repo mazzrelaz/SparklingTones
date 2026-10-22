@@ -329,6 +329,10 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   approvata, da ordinare su JLCPCB, **non provata**. Linee nuove: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
   DX = GPA0, **GPA7 libera**; LED*n* rosso/verde = GPB(2n-2)/GPB(2n-1). A scheda arrivata: firmware con le
   tabelle nuove e mappatura guidata.
+- **Il wah al posto del LA Comp** (22 ottobre, sera): non è un difetto. Il test del wah del 16 ottobre negli slot
+  A1–A4 ha riscritto, per UUID, quattro preset (Nylon Reverb, Jazz tone, PF comfortably numb, prova); l'omonimo del
+  NEO non li ha corretti. Rimedio dato all'utente: `Dropbox\ripristino-la-comp.json` da «Importa». **Da sentire
+  se ha funzionato**, e se gli slot A1–A4 dello Spark 2 hanno ancora il wah (rileggendoli tornerebbe).
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Ferme per sua scelta**: la
   modalità MIDI del pedale, il tap tempo con l'ampli acceso.
 - **iPhone e iPad**: Bluefy, con gli UUID interi (`docs/decisioni-ui.md`, «Su iPhone e iPad»).
