@@ -97,6 +97,10 @@ const SFONDI_CLASSICI = {
   // testa bassa perché la targhetta della cassa scenda sotto il nome.
   W600:          { src: 'immagini/classico/w600.webp', taglio: 0.19, testa: 0.17, largo: 1, ampli: true,
                    led: { x: 0.7212, y: 0.3174, r: 0.0075 } },
+  // LED blu: la spia sta su quello di destra (Operate). Taglio e testa alti:
+  // la targhetta della cassa sale tutta sopra il titolo invece di toccarlo.
+  Hammer500:     { src: 'immagini/classico/hammer-500.webp', taglio: 0.24, testa: 0.30, largo: 1, ampli: true,
+                   led: { x: 0.6919, y: 0.278, r: 0.0068, blu: true } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
