@@ -159,6 +159,9 @@ const SFONDI_CLASSICI = {
   // Il Fuzz-Tone ha l'interruttore in cima e le manopole sul fianco: più testa.
   'JH.FuzzTone': { src: 'immagini/classico/fuzz-zone.webp', taglio: 0.25, testa: 0.35, largo: 1.6 },
   'JH.SupaFuzz': { src: 'immagini/classico/super-fuzz.webp', taglio: 0.24, testa: 0.30, largo: 1.6 },
+  // Le modulazioni: pedali come i drive (22 ottobre 2026).
+  Tremolo:       { src: 'immagini/classico/tremolo.webp', taglio: 0.23, testa: 0.25, largo: 1.6,
+                   led: { x: 0.5044, y: 0.278, r: 0.0078 } },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
   BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,
