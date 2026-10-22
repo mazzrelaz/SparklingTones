@@ -1495,18 +1495,28 @@
      ferma sotto la catena e la parte che avanza sopra il titolo mostra più
      pedale. Ai lati sfumano verso il nero più dell'ampli: nero fino a `--nero`,
      pieno da `--lati`, un po' prima dei fianchi del pedale (al 27–73%
-     delle immagini; al 30% li tagliava, l'utente). */
+     delle immagini; al 30% li tagliava, l'utente). **Sul telefono niente
+     bande nere ai lati** (l'utente, 22 ottobre 2026): l'immagine è larga
+     almeno quanto lo schermo e sfuma solo nella parte che ne esce, cioè non
+     si vede sfumare; dal PC resta com'è. La sfumatura in fondo è in pixel
+     dalla riga del titolo, così non dipende da quanto è larga l'immagine. */
   #pannelloEditor.classico .blocco.classico.pedale { --riduci:0.75; --nero:2%; --lati:20%; }
+  @media (max-width: 588px) {
+    #pannelloEditor.classico .blocco.classico,
+    #pannelloEditor.classico .blocco.classico.pedale {
+        --img:max(calc(var(--scena) * var(--riduci, 1)), 100vw);
+        --nero:0px; --lati:max(0px, calc((var(--img) - 100vw) / 2)); }
+  }
   #pannelloEditor.classico .blocco.classico::before {
       --alta:calc(var(--img) * 1.5);
-      --sotto:calc((var(--taglio) + var(--testa) / var(--riduci, 1)) * 100%);
+      --sotto:calc(var(--scena) * 1.5 * var(--testa) + var(--alta) * var(--taglio));
       --sopra:calc(var(--taglio) * 100%);
       content:''; position:absolute; z-index:-1; left:50%; bottom:0;
       top:calc(var(--p) - var(--scena) * 1.5 * var(--testa) - var(--alta) * var(--taglio));
       width:var(--img);
       transform:translateX(-50%); pointer-events:none;
-      background:linear-gradient(180deg, rgba(10,8,7,0) calc(var(--sotto) + 10%),
-                                         rgba(10,8,7,0.82) calc(var(--sotto) + 36%), #0a0807 100%)
+      background:linear-gradient(180deg, rgba(10,8,7,0) calc(var(--sotto) + var(--alta) * 0.10),
+                                         rgba(10,8,7,0.82) calc(var(--sotto) + var(--alta) * 0.36), #0a0807 100%)
                    center top / var(--img) var(--alta) no-repeat,
                  var(--sfondo) center top / var(--img) var(--alta) no-repeat;
       -webkit-mask-image:linear-gradient(180deg, transparent calc(var(--sopra) - 9%), #000 calc(var(--sopra) + 2%)),
