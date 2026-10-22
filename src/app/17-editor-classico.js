@@ -33,8 +33,8 @@ const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, 
 const SFONDI_CLASSICI = {
   // Gli ampli (22 ottobre 2026): come l'ampli predefinito, largo quanto il
   // pannello (`largo: 1`) e non rimpiccioliti (`ampli`: niente `.pedale`).
-  RolandJC120:   { src: 'immagini/classico/silver-120.webp', taglio: 0.25, testa: 0.21, largo: 1, ampli: true,
-                   led: { x: 0.8516, y: 0.3796, r: 0.006 } },
+  RolandJC120:   { src: 'immagini/classico/silver-120-jc.webp', taglio: 0.24, testa: 0.21, largo: 1, ampli: true,
+                   led: { x: 0.7871, y: 0.3617, r: 0.0055 } },
   Twin:          { src: 'immagini/classico/black-duo.webp', taglio: 0.26, testa: 0.21, largo: 1, ampli: true,
                    led: { x: 0.8477, y: 0.3646, r: 0.0083 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
