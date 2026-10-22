@@ -1451,13 +1451,15 @@
      sotto la catena. Sfuma nel fondo da tutti i lati, e in basso si scurisce
      sotto le manopole. Sopra il titolo resta `--testa` dell'altezza: per l'ampli
      un quarto, cioè la testata.
-     **La misura la decide lo spazio in altezza**: largo quanto il pannello (al
-     più 560 px), ma su uno schermo basso si stringe finché sotto ci stanno il
-     titolo (~70 px) e le file di manopole (~125 px l'una, `--righe`); sopra il
-     blocco ce ne sono ~385 fra testa, tempo, catena e barra in basso. Le
-     immagini sono 2:3, quindi l'altezza è 1,5 volte la larghezza. */
+     **La misura la decide lo spazio in altezza**: tanto grande quanto ci sta
+     sopra il titolo (~70 px) e le file di manopole (~125 px l'una, `--righe`);
+     sopra il blocco ce ne sono ~385 fra testa, tempo, catena e barra in basso.
+     Al più larga quanto il pannello per `--largo` (1 l'ampli; un pedale, che
+     sta in mezzo a tanto buio, anche di più: i lati escono dallo schermo) e
+     700 px. Le immagini sono 2:3, quindi l'altezza è 1,5 volte la larghezza. */
+  #pannelloEditor.classico { overflow-x:hidden; }
   #pannelloEditor.classico .blocco.classico {
-      --scena:min(calc(100% + 28px), 560px,
+      --scena:min(calc((100% + 28px) * var(--largo, 1)), 700px,
                   max(250px, calc((100dvh - 455px - var(--righe, 2) * 125px) / (1.5 * var(--testa)))));
       position:relative; isolation:isolate; overflow:visible;
       width:100%; max-width:560px; margin:0 auto;

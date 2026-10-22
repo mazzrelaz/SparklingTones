@@ -21,13 +21,14 @@
  * 1024 × 1536, col prompt dei pedali vintage). Un modello senza immagine
  * prende l'ampli. `taglio` è quanto muro vuoto si toglie in alto, `testa`
  * quanta immagine resta sopra il titolo: tutti e due in frazioni dell'altezza,
+ * `largo` quante volte il pannello può essere larga (i lati bui escono),
  * presi a occhio sull'immagine (il soggetto comincia al taglio; il titolo
  * e le manopole coprono la parte bassa, come le casse dell'ampli).
  */
-const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, testa: 0.25 };
+const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, testa: 0.25, largo: 1 };
 const SFONDI_CLASSICI = {
-  DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35 },
-  Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.14, testa: 0.35 },
+  DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35, largo: 1 },
+  Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.22, testa: 0.30, largo: 1.6 },
 };
 
 /** Il raggio dell'arco sottile attorno alla manopola classica (viewBox 100). */
@@ -99,6 +100,7 @@ function bloccoClassico(effetto, posizione) {
   blocco.style.setProperty('--sfondo', `url('${sfondo.src}')`);
   blocco.style.setProperty('--taglio', sfondo.taglio);
   blocco.style.setProperty('--testa', sfondo.testa);
+  blocco.style.setProperty('--largo', sfondo.largo);
 
   const titolo = document.createElement('div');
   titolo.className = 'titolo-classico';
