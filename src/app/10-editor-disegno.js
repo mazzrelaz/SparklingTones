@@ -845,7 +845,7 @@ function griglia(effetto, posizione) {
   const box = document.createElement('div');
   box.className = 'pomelli';
   let da = 0;
-  for (const quanti of righeDi(ordine.length)) {
+  for (const quanti of (editorClassico() ? righeClassiche : righeDi)(ordine.length)) {
     const riga = document.createElement('div');
     riga.className = 'riga-pomelli';
     ordine.slice(da, da + quanti).forEach(i => riga.appendChild(cella(effetto, vere[i])));

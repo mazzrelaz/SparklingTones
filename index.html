@@ -1445,30 +1445,37 @@
   #pannelloEditor.classico #valoreTempo .un { text-shadow:none; }
   #pannelloEditor.classico #titoloEditor { font-family:var(--sans); font-weight:700;
                                            text-shadow:0 2px 12px rgba(0,0,0,0.8); }
-  /* L'ampli: sta dietro il blocco a fuoco, tagliato in alto del muro vuoto
-     (17% dell'altezza) così la testata comincia sotto la catena. Sfuma nel
-     fondo da tutti i lati, e in basso si scurisce sotto le manopole.
+  /* L'immagine del blocco (l'ampli, o il pedale se ce n'è una per quel
+     modello: `SFONDI_CLASSICI`): sta dietro il blocco a fuoco, tagliata in alto
+     del muro vuoto (`--taglio`, frazione dell'altezza) così il soggetto comincia
+     sotto la catena. Sfuma nel fondo da tutti i lati, e in basso si scurisce
+     sotto le manopole. Sopra il titolo resta `--testa` dell'altezza: per l'ampli
+     un quarto, cioè la testata.
      **La misura la decide lo spazio in altezza**: largo quanto il pannello (al
      più 560 px), ma su uno schermo basso si stringe finché sotto ci stanno il
-     titolo e due file di manopole (~320 px; sopra il blocco ce ne sono ~370 fra
-     testa, tempo, catena e barra in basso). Sopra il titolo resta la testata,
-     cioè un quarto dell'altezza dell'immagine: 0,375 della larghezza. */
+     titolo (~70 px) e le file di manopole (~125 px l'una, `--righe`); sopra il
+     blocco ce ne sono ~385 fra testa, tempo, catena e barra in basso. Le
+     immagini sono 2:3, quindi l'altezza è 1,5 volte la larghezza. */
   #pannelloEditor.classico .blocco.classico {
-      --scena:min(calc(100% + 28px), 560px, max(250px, calc((100dvh - 705px) * 2.67)));
+      --scena:min(calc(100% + 28px), 560px,
+                  max(250px, calc((100dvh - 455px - var(--righe, 2) * 125px) / (1.5 * var(--testa)))));
       position:relative; isolation:isolate; overflow:visible;
       width:100%; max-width:560px; margin:0 auto;
-      padding-top:calc(var(--scena) * 0.375); border:none; border-radius:0;
+      padding-top:calc(var(--scena) * 1.5 * var(--testa)); border:none; border-radius:0;
       background:transparent; }
   #pannelloEditor.classico .blocco.classico::before {
+      --sotto:calc((var(--taglio) + var(--testa)) * 100%);
+      --sopra:calc(var(--taglio) * 100%);
       content:''; position:absolute; z-index:-1; left:50%; top:0;
       width:var(--scena); aspect-ratio:2 / 3;
-      transform:translate(-50%, -17%); pointer-events:none;
-      background:linear-gradient(180deg, rgba(10,8,7,0) 52%, rgba(10,8,7,0.82) 78%, #0a0807 100%),
-                 url('immagini/sfondo-classico.webp') center / cover no-repeat;
-      -webkit-mask-image:linear-gradient(180deg, transparent 8%, #000 19%),
+      transform:translate(-50%, calc(var(--taglio) * -100%)); pointer-events:none;
+      background:linear-gradient(180deg, rgba(10,8,7,0) calc(var(--sotto) + 10%),
+                                         rgba(10,8,7,0.82) calc(var(--sotto) + 36%), #0a0807 100%),
+                 var(--sfondo) center / cover no-repeat;
+      -webkit-mask-image:linear-gradient(180deg, transparent calc(var(--sopra) - 9%), #000 calc(var(--sopra) + 2%)),
                          linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
       -webkit-mask-composite:source-in;
-      mask-image:linear-gradient(180deg, transparent 8%, #000 19%),
+      mask-image:linear-gradient(180deg, transparent calc(var(--sopra) - 9%), #000 calc(var(--sopra) + 2%)),
                  linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
       mask-composite:intersect; }
   #pannelloEditor.classico .blocco.classico.spento { opacity:1; }

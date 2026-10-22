@@ -60,7 +60,7 @@ const GUSCIO = [
   './src/app/15-partenza.js',
   './src/app/16-accordatore.js',
   './src/app/17-editor-classico.js',
-  './immagini/sfondo-classico.webp',
+  './immagini/classico/ampli.webp',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',

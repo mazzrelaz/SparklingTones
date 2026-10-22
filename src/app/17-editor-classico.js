@@ -16,6 +16,19 @@
    `bloccoClassico` e `coronaClassica` quando `editorClassico()` dice sì.
    ==================================================================== */
 
+/**
+ * Le immagini dietro il blocco a fuoco, per modello (le genera l'utente, 2:3,
+ * 1024 × 1536, col prompt dei pedali vintage). Un modello senza immagine
+ * prende l'ampli. `taglio` è quanto muro vuoto si toglie in alto, `testa`
+ * quanta immagine resta sopra il titolo: tutti e due in frazioni dell'altezza,
+ * presi a occhio sull'immagine (il soggetto comincia al taglio; il titolo
+ * e le manopole coprono la parte bassa, come le casse dell'ampli).
+ */
+const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, testa: 0.25 };
+const SFONDI_CLASSICI = {
+  DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.15, testa: 0.35 },
+};
+
 /** Il raggio dell'arco sottile attorno alla manopola classica (viewBox 100). */
 const RAGGIO_CLASSICO = 47;
 
@@ -81,6 +94,10 @@ function bloccoClassico(effetto, posizione) {
   const blocco = document.createElement('div');
   blocco.className = 'blocco aFuoco classico' + (effetto.enabled ? '' : ' spento');
   blocco.style.setProperty('--cat', CREMA);
+  const sfondo = SFONDI_CLASSICI[effetto.name] || SFONDO_PREDEFINITO;
+  blocco.style.setProperty('--sfondo', `url('${sfondo.src}')`);
+  blocco.style.setProperty('--taglio', sfondo.taglio);
+  blocco.style.setProperty('--testa', sfondo.testa);
 
   const titolo = document.createElement('div');
   titolo.className = 'titolo-classico';
@@ -119,8 +136,31 @@ function bloccoClassico(effetto, posizione) {
   riga.querySelector('.interruttore').remove();
   if (riga.childElementCount) blocco.appendChild(riga);
 
-  blocco.appendChild(griglia(effetto, posizione));
+  const comandi = griglia(effetto, posizione);
+  blocco.appendChild(comandi);
+  // Le file di manopole dicono quanto posto resta all'immagine (vedi le
+  // regole di `.blocco.classico`); i cursori degli equalizzatori ne valgono due.
+  blocco.style.setProperty('--righe',
+    comandi.classList.contains('cursori') ? 2 : comandi.querySelectorAll('.riga-pomelli').length);
   return blocco;
+}
+
+/**
+ * Le file di manopole del classico: fino a quattro in una fila sola, poi due
+ * file con la più piena sopra (cinque fanno 3 e 2, come l'app ufficiale). Una
+ * fila in meno è spazio che va all'immagine: un pedale da tre manopole su due
+ * file restava una striscia stretta. L'editor neon resta a `righeDi`.
+ */
+function righeClassiche(quante) {
+  if (quante <= 4) return [quante];
+  const righe = Math.ceil(quante / 4), fuori = [];
+  let restano = quante;
+  for (let r = righe; r > 0; r--) {
+    const quanti = Math.ceil(restano / r);
+    fuori.push(quanti);
+    restano -= quanti;
+  }
+  return fuori;
 }
 
 /**
