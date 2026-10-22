@@ -175,6 +175,22 @@ const SFONDI_CLASSICI = {
   // L'Uni-Vibe è una scatola larga e bassa, più in basso nell'inquadratura.
   UniVibe:       { src: 'immagini/classico/univibe.webp', taglio: 0.34, testa: 0.26, largo: 1.6,
                    led: { x: 0.7959, y: 0.4655, r: 0.0105 } },
+  // Il Voodoo-Vibe Jr. è largo e basso come l'Uni-Vibe.
+  'JH.VoodooVibeJr': { src: 'immagini/classico/voodoo-vibe.webp', taglio: 0.35, testa: 0.30, largo: 1.6,
+                   led: { x: 0.4268, y: 0.4421, r: 0.0075 } },
+  Cloner:        { src: 'immagini/classico/cloner.webp', taglio: 0.21, testa: 0.38, largo: 1.6,
+                   led: { x: 0.6274, y: 0.3379, r: 0.013 } },
+  MiniVibe:      { src: 'immagini/classico/classic-vibe.webp', taglio: 0.22, testa: 0.36, largo: 1.6,
+                   led: { x: 0.502, y: 0.3232, r: 0.014 } },
+  // Il Tremulator ha il portaLED spento fra le manopole: la spia va lì.
+  Tremolator:    { src: 'immagini/classico/tremolator.webp', taglio: 0.29, testa: 0.36, largo: 1.6,
+                   led: { x: 0.4658, y: 0.3086, r: 0.009 } },
+  // Sul Pipeline il LED è la cupola chiara sotto le manopole.
+  TremoloSquare: { src: 'immagini/classico/tremolo-square.webp', taglio: 0.20, testa: 0.38, largo: 1.6,
+                   led: { x: 0.4995, y: 0.486, r: 0.017 } },
+  // Gli equalizzatori non hanno LED: le luci blu sono quelle dei cursori.
+  GuitarEQ6:     { src: 'immagini/classico/guitar-eq.webp', taglio: 0.28, testa: 0.32, largo: 1.6 },
+  BassEQ6:       { src: 'immagini/classico/bass-eq.webp', taglio: 0.25, testa: 0.34, largo: 1.6 },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
   BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,
