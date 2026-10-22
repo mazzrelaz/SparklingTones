@@ -62,6 +62,7 @@ function accendiInsegna(record) {
 function disegnaCatena() {
   const catena = $('catena');
   catena.innerHTML = '';
+  $('pannelloEditor').classList.toggle('classico', editorClassico());
   if (!inModifica) return;
 
   const quanti = inModifica.effetti.length;
@@ -134,7 +135,9 @@ function tassello(effetto, posizione) {
 
   // Con un'immagine il tassello mostra quella, al posto del nome e delle barrette.
   const immagine = immagineBlocco(effetto.name, effetto);
-  if (immagine) {
+  if (editorClassico()) {
+    tasselloClassico(t, effetto, posizione);
+  } else if (immagine) {
     t.classList.add('con-immagine');
     const mini = document.createElement('img');
     mini.className = 'miniatura';
@@ -198,6 +201,7 @@ const manopoleVere = effetto =>
 /* ------------------------------------------------------------------ */
 
 function bloccoAFuoco(effetto, posizione) {
+  if (editorClassico()) return bloccoClassico(effetto, posizione);
   const blocco = document.createElement('div');
   blocco.className = 'blocco aFuoco' + (effetto.enabled ? '' : ' spento');
   blocco.style.setProperty('--cat', coloreDi(posizione));
@@ -973,8 +977,8 @@ function etichettaDi(effetto, param, quante) {
  * lasciarlo uscire (`overflow:visible`), o il bagliore viene tagliato di netto
  * e attorno a ogni manopola compare un quadrato.
  */
-const RAGGIO = 34, GIRO = 2 * Math.PI * RAGGIO * 0.75;   // 270 gradi di corsa
-const CORSA_PX = 300;                                    // pixel da zero a uno
+const RAGGIO = 34;                                       // l'arco fa 270 gradi di corsa
+const CORSA_PX = 300;                                   // pixel da zero a uno
 
 function pomello(effetto, param, formato = mostraValore) {
   const box = document.createElement('div');
@@ -991,21 +995,29 @@ function pomello(effetto, param, formato = mostraValore) {
     return c;
   };
 
-  const guida = cerchio(RAGGIO, 'guida');
-  guida.setAttribute('fill', 'none');
-  guida.setAttribute('stroke-dasharray', `${GIRO} 999`);
+  // Nell'editor classico la manopola è grande, con la corona dentata e
+  // l'arco sottile fuori (`17-editor-classico.js`): stessi gesti, altro disegno.
+  const classico = editorClassico();
+  const raggio = classico ? RAGGIO_CLASSICO : RAGGIO;
+  const giro = 2 * Math.PI * raggio * 0.75;
 
-  const arco = cerchio(RAGGIO, 'arco');
+  const guida = cerchio(raggio, 'guida');
+  guida.setAttribute('fill', 'none');
+  guida.setAttribute('stroke-dasharray', `${giro} 999`);
+
+  const arco = cerchio(raggio, 'arco');
   arco.setAttribute('fill', 'none');
 
-  const corpo = cerchio(24, 'corpo');
+  const corpo = cerchio(classico ? 39 : 24, 'corpo');
 
   const tacca = document.createElementNS(ns, 'line');
   tacca.setAttribute('class', 'tacca');
-  tacca.setAttribute('x1', 50); tacca.setAttribute('y1', 32);
-  tacca.setAttribute('x2', 50); tacca.setAttribute('y2', 46);
+  tacca.setAttribute('x1', 50); tacca.setAttribute('y1', classico ? 25 : 32);
+  tacca.setAttribute('x2', 50); tacca.setAttribute('y2', classico ? 41 : 46);
 
-  svg.append(guida, arco, corpo, tacca);
+  svg.append(guida, arco, corpo);
+  if (classico) svg.append(...coronaClassica(cerchio));
+  svg.append(tacca);
 
   const valore = document.createElement('div');
   valore.className = 'val';
@@ -1017,7 +1029,7 @@ function pomello(effetto, param, formato = mostraValore) {
      l'alto, quindi il suo zero è ore 12. Da lì i **−135°**: la corsa va da ore
      7:30 a ore 4:30, con la zona morta in basso, come su un ampli vero. */
   const disegna = () => {
-    arco.setAttribute('stroke-dasharray', `${GIRO * param.value} 999`);
+    arco.setAttribute('stroke-dasharray', `${giro * param.value} 999`);
     tacca.setAttribute('transform', `rotate(${-135 + param.value * 270} 50 50)`);
     valore.textContent = formato(param.value);
   };
