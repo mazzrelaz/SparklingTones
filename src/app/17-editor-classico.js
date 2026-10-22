@@ -61,6 +61,8 @@ const SFONDI_CLASSICI = {
   // I fuzz Hendrix. Sul pedale arancione il LED si trova dal suo anello scuro.
   'JH.AxisFuzz': { src: 'immagini/classico/axle-fuzz.webp', taglio: 0.27, testa: 0.30, largo: 1.6,
                    led: { x: 0.501, y: 0.5417, r: 0.012 } },
+  'JH.Octavia':  { src: 'immagini/classico/octave-fuzz.webp', taglio: 0.32, testa: 0.28, largo: 1.6,
+                   led: { x: 0.5068, y: 0.3949, r: 0.0085 } },
   LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
                    led: { x: 0.5, y: 0.526, r: 0.0117 } },
   BlueComp:       { src: 'immagini/classico/sustain-comp.webp', taglio: 0.23, testa: 0.28, largo: 1.4,
