@@ -37,6 +37,8 @@ const SFONDI_CLASSICI = {
   // che ha la sua immagine (`sfondoClassico`).
   'JH.Vox846':   { src: 'immagini/classico/legendary-wah.webp', taglio: 0.20, testa: 0.30, largo: 1.6 },
   AutoWah:       { src: 'immagini/classico/auto-wah.webp', taglio: 0.21, testa: 0.30, largo: 1.6 },
+  Booster:       { src: 'immagini/classico/booster.webp', taglio: 0.22, testa: 0.32, largo: 1.6,
+                   led: { x: 0.4961, y: 0.5091, r: 0.0122 } },
   DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35, largo: 1,
                    led: { x: 0.4999, y: 0.1834, r: 0.0107 } },
   Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
