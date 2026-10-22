@@ -45,6 +45,9 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.833, y: 0.3776, r: 0.0083 } },
   Bassman:       { src: 'immagini/classico/tweed-bass.webp', taglio: 0.26, testa: 0.21, largo: 1, ampli: true,
                    led: { x: 0.8311, y: 0.3783, r: 0.0075 } },
+  // L'AC30 ha i comandi in cima: si vedono il coperchio e la fascia col logo.
+  'AC Boost':    { src: 'immagini/classico/ac-boost.webp', taglio: 0.24, testa: 0.22, largo: 1, ampli: true,
+                   led: { x: 0.7686, y: 0.3167, r: 0.008 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
