@@ -1460,7 +1460,11 @@
      un quarto, cioè la testata.
      **La misura la decide lo spazio in altezza** (`--spazio`): quello che
      avanza dello schermo tolti testa, tempo e catena (~357 px con la barra in
-     basso), il titolo (~70) e le file di comandi (~125 l'una, `--righe`).
+     basso), il titolo (~70), le file di comandi (~125 l'una, `--righe`) e
+     la riga della nota Hendrix, se c'è (~32, `--nota`: senza, l'editor dei
+     modelli JH scorreva di 29 px). Sopra il titolo restano almeno 100 px
+     d'immagine (110 facevano scorrere ancora di 6 px il Legendary Wah, cinque
+     comandi e la nota, su un telefono alto 812).
      L'immagine è grande quanto serve perché `--testa` della sua altezza lo
      riempia, al più larga quanto il pannello per `--largo` (1 l'ampli; di più
      un pedale, i cui lati bui escono dallo schermo) e 700 px, e mai meno di
@@ -1472,10 +1476,10 @@
   #pannelloEditor.classico { overflow-x:hidden; }
   #pannelloEditor.classico .striscia { position:relative; z-index:1; }
   #pannelloEditor.classico .blocco.classico {
-      --spazio:calc(100dvh - 427px - var(--righe, 2) * 125px);
+      --spazio:calc(100dvh - 427px - var(--righe, 2) * 125px - var(--nota, 0px));
       --scena:min(calc(min(100vw, 588px) * var(--largo, 1)), 700px,
                   max(250px, calc(var(--spazio) / (1.5 * var(--testa)))));
-      --p:min(calc(var(--scena) * 1.5 * var(--testa)), max(110px, var(--spazio)));
+      --p:min(calc(var(--scena) * 1.5 * var(--testa)), max(100px, var(--spazio)));
       --img:calc(var(--scena) * var(--riduci, 1));
       position:relative; isolation:isolate; overflow:visible;
       width:100%; max-width:560px; margin:0 auto;
@@ -1576,6 +1580,7 @@
   .titolo-classico .accendi.acceso { border-color:var(--crema); box-shadow:0 0 12px -2px var(--crema); }
   .titolo-classico .accendi.acceso svg { stroke:var(--crema); }
   #pannelloEditor.classico .nota-jh { margin:10px 4px 0; }
+  #pannelloEditor.classico .blocco.classico:has(.nota-jh) { --nota:32px; }
 
   /* Le manopole: grandi, la corona dentata grigia, il centro scuro, la tacca
      bianca e fuori l'arco sottile color crema che dice il valore. Il numero
