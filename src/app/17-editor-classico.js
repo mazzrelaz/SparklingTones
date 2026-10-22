@@ -35,6 +35,8 @@ const SFONDI_CLASSICI = {
   // pannello (`largo: 1`) e non rimpiccioliti (`ampli`: niente `.pedale`).
   RolandJC120:   { src: 'immagini/classico/silver-120.webp', taglio: 0.25, testa: 0.21, largo: 1, ampli: true,
                    led: { x: 0.8516, y: 0.3796, r: 0.006 } },
+  Twin:          { src: 'immagini/classico/black-duo.webp', taglio: 0.26, testa: 0.21, largo: 1, ampli: true,
+                   led: { x: 0.8477, y: 0.3646, r: 0.0083 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
