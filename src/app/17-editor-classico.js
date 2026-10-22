@@ -86,6 +86,8 @@ const SFONDI_CLASSICI = {
                    led: { x: 0.3364, y: 0.3493, r: 0.0085 } },
   BE101:         { src: 'immagini/classico/be-101.webp', taglio: 0.22, testa: 0.23, largo: 1, ampli: true,
                    led: { x: 0.353, y: 0.4115, r: 0.0085 } },
+  // Il Fishman Loudbox non ha una spia disegnata.
+  AcousticAmpV2: { src: 'immagini/classico/fishboy.webp', taglio: 0.23, testa: 0.22, largo: 1, ampli: true },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
