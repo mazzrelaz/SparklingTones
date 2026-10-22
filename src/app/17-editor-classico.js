@@ -91,6 +91,8 @@ const SFONDI_CLASSICI = {
   // Il GK 800RB non ha un LED: la spia sta sulla parte rossa dell'interruttore.
   GK800:         { src: 'immagini/classico/rb-800.webp', taglio: 0.20, testa: 0.24, largo: 1, ampli: true,
                    led: { x: 0.8164, y: 0.3486, r: 0.0075 } },
+  Sunny3000:     { src: 'immagini/classico/sunny-3000.webp', taglio: 0.21, testa: 0.25, largo: 1, ampli: true,
+                   led: { x: 0.77, y: 0.4212, r: 0.006 } },
   'bias.noisegate': { src: 'immagini/classico/noise-gate.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
                    led: { x: 0.5171, y: 0.2858, r: 0.0098 } },
   // I wah non hanno LED. Lo stesso modello è anche l'«Auto Wah» gratuito,
