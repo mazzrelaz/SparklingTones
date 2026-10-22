@@ -1456,22 +1456,23 @@
      sotto la catena. Sfuma nel fondo da tutti i lati, e in basso si scurisce
      sotto le manopole. Sopra il titolo resta `--testa` dell'altezza: per l'ampli
      un quarto, cioè la testata.
-     **Il titolo e i comandi stanno sempre alla stessa altezza** (l'utente, 22
-     ottobre 2026), per ogni blocco: sopra il titolo c'è `--p`, quello che
+     **La misura la decide lo spazio in altezza** (`--spazio`): quello che
      avanza dello schermo tolti testa, tempo e catena (~357 px con la barra in
-     basso), il titolo (~75) e due file di comandi (~125 l'una, ~18 px in più
-     per i nomi su due righe), che nel classico sono sempre due (`righeClassiche`).
-     **L'immagine invece ha la misura che aveva prima delle due file** (l'utente:
-     «non rimpicciolirla»): grande quanto ci sta sopra il titolo e le file che
-     avrebbe con quattro comandi per fila (`--righe-img`), al più larga quanto
-     il pannello per `--largo` (1 l'ampli; di più un pedale, i cui lati bui
-     escono dallo schermo) e 700 px; comincia in cima al blocco, e il titolo la
-     copre dove cade. Le immagini sono 2:3: l'altezza è 1,5 volte la larghezza. */
+     basso), il titolo (~70) e le file di comandi (~125 l'una, `--righe`).
+     L'immagine è grande quanto serve perché `--testa` della sua altezza lo
+     riempia, al più larga quanto il pannello per `--largo` (1 l'ampli; di più
+     un pedale, i cui lati bui escono dallo schermo) e 700 px, e mai meno di
+     250 px: **se non ci sta, sale sotto la catena** invece di rimpicciolire
+     (l'utente, 22 ottobre 2026), e il titolo (`--p`) resta dove i comandi
+     stanno sopra la barra. Le immagini sono 2:3: l'altezza è 1,5 volte la
+     larghezza. */
   #pannelloEditor.classico { overflow-x:hidden; }
+  #pannelloEditor.classico .striscia { position:relative; z-index:1; }
   #pannelloEditor.classico .blocco.classico {
-      --p:max(110px, calc(100dvh - 700px));
+      --spazio:calc(100dvh - 427px - var(--righe, 2) * 125px);
       --scena:min(calc((100% + 28px) * var(--largo, 1)), 700px,
-                  max(250px, calc((100dvh - 427px - var(--righe-img, 2) * 125px) / (1.5 * var(--testa)))));
+                  max(250px, calc(var(--spazio) / (1.5 * var(--testa)))));
+      --p:min(calc(var(--scena) * 1.5 * var(--testa)), max(110px, var(--spazio)));
       position:relative; isolation:isolate; overflow:visible;
       width:100%; max-width:560px; margin:0 auto;
       padding-top:var(--p); border:none; border-radius:0;
@@ -1479,7 +1480,8 @@
   #pannelloEditor.classico .blocco.classico::before {
       --sotto:calc((var(--taglio) + var(--testa)) * 100%);
       --sopra:calc(var(--taglio) * 100%);
-      content:''; position:absolute; z-index:-1; left:50%; top:0;
+      content:''; position:absolute; z-index:-1; left:50%;
+      top:calc(var(--p) - var(--scena) * 1.5 * var(--testa));
       width:var(--scena); aspect-ratio:2 / 3;
       transform:translate(-50%, calc(var(--taglio) * -100%)); pointer-events:none;
       background:linear-gradient(180deg, rgba(10,8,7,0) calc(var(--sotto) + 10%),

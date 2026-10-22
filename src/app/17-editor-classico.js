@@ -166,36 +166,45 @@ function bloccoClassico(effetto, posizione) {
   comandi.querySelectorAll('.pomello .nome').forEach(nome => {
     nome.textContent = nome.textContent.replace(/\//g, '/\u200b');
   });
-  // La misura dell'immagine resta quella di quando le file erano fino a
-  // quattro comandi (vedi le regole di `.blocco.classico`); i cursori degli
-  // equalizzatori valgono due file.
-  const quanti = comandi.querySelectorAll('.riga-pomelli > *').length;
-  blocco.style.setProperty('--righe-img',
-    comandi.classList.contains('cursori') || quanti > 4 ? 2 : 1);
+  // Le file di comandi dicono quanto posto resta all'immagine (vedi le
+  // regole di `.blocco.classico`); i cursori degli equalizzatori ne valgono due.
+  blocco.style.setProperty('--righe',
+    comandi.classList.contains('cursori') ? 2 : comandi.querySelectorAll('.riga-pomelli').length);
   return blocco;
 }
 
 /**
- * Le file dei comandi del classico: **sempre due** (l'utente, 22 ottobre
- * 2026), la più piena sopra; uno o due comandi stanno nella fila di sopra, e
- * il posto della seconda resta (il titolo non si sposta: vedi le regole di
- * `.blocco.classico`). L'editor neon resta a `righeDi`.
+ * Le file dei comandi del classico: fino a quattro in una fila sola, poi due
+ * file con la più piena sopra (cinque fanno 3 e 2, come l'app ufficiale). Una
+ * fila in meno è spazio che va all'immagine. Provate e scartate dall'utente
+ * (22 ottobre 2026) le due file sempre, col titolo fermo: l'immagine o
+ * rimpiccioliva o finiva sotto i comandi. L'editor neon resta a `righeDi`.
  */
 function righeClassiche(quante) {
-  if (quante <= 2) return [quante];
-  const sopra = Math.ceil(quante / 2);
-  return [sopra, quante - sopra];
+  if (quante <= 4) return [quante];
+  const righe = Math.ceil(quante / 4), fuori = [];
+  let restano = quante;
+  for (let r = righe; r > 0; r--) {
+    const quanti = Math.ceil(restano / r);
+    fuori.push(quanti);
+    restano -= quanti;
+  }
+  return fuori;
 }
 
 /**
- * L'ordine dei comandi nel classico: prima le manopole, **in fondo le levette**
- * (l'utente: sul LA Comp la levetta sotto e in centro), quelle dei pedali e i
- * «BPM» dei delay. `ordine` è quello di `griglia`, indici in `vere`.
+ * L'ordine dei comandi nel classico. In una fila sola **le levette stanno in
+ * mezzo alle manopole** (l'utente, 22 ottobre 2026: sul LA Comp la levetta fra
+ * Gain e Peak Reduction); su due file vanno in fondo, come il «BPM» dei delay.
+ * `ordine` è quello di `griglia`, indici in `vere`.
  */
 function ordineClassico(effetto, vere, ordine) {
   const leva = i => SparkEffetti.interruttore(effetto.name, vere[i].index) ||
                     levettaClassica(effetto, vere[i]);
-  return [...ordine.filter(i => !leva(i)), ...ordine.filter(leva)];
+  const manopole = ordine.filter(i => !leva(i)), levette = ordine.filter(leva);
+  if (righeClassiche(ordine.length).length > 1) return [...manopole, ...levette];
+  const meta = Math.ceil(manopole.length / 2);
+  return [...manopole.slice(0, meta), ...levette, ...manopole.slice(meta)];
 }
 
 /**
