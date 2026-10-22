@@ -24,12 +24,19 @@
  * `largo` quante volte il pannello può essere larga (i lati bui escono),
  * presi a occhio sull'immagine (il soggetto comincia al taglio; il titolo
  * e le manopole coprono la parte bassa, come le casse dell'ampli).
+ * `led`: centro e raggio della spia disegnata, in frazioni della larghezza
+ * (x, r) e dell'altezza (y), misurati dai pixel rossi; sopra ci va la spia
+ * finta che segue l'acceso/spento del blocco (`spiaClassica`).
  */
-const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, testa: 0.25, largo: 1 };
+const SFONDO_PREDEFINITO = { src: 'immagini/classico/ampli.webp', taglio: 0.17, testa: 0.25, largo: 1,
+                             led: { x: 0.2969, y: 0.3356, r: 0.0078 } };
 const SFONDI_CLASSICI = {
-  DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35, largo: 1 },
-  Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.22, testa: 0.30, largo: 1.6 },
-  LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4 },
+  DistortionTS9: { src: 'immagini/classico/tube-drive.webp', taglio: 0.14, testa: 0.35, largo: 1,
+                   led: { x: 0.4999, y: 0.1834, r: 0.0107 } },
+  Overdrive:     { src: 'immagini/classico/over-drive.webp', taglio: 0.22, testa: 0.30, largo: 1.6,
+                   led: { x: 0.4995, y: 0.2692, r: 0.0122 } },
+  LA2AComp:      { src: 'immagini/classico/la-comp.webp', taglio: 0.24, testa: 0.26, largo: 1.4,
+                   led: { x: 0.5, y: 0.526, r: 0.0117 } },
 };
 
 /**
@@ -121,6 +128,7 @@ function bloccoClassico(effetto, posizione) {
   blocco.style.setProperty('--taglio', sfondo.taglio);
   blocco.style.setProperty('--testa', sfondo.testa);
   blocco.style.setProperty('--largo', sfondo.largo);
+  if (sfondo.led) blocco.appendChild(spiaClassica(sfondo.led, effetto.enabled));
 
   const titolo = document.createElement('div');
   titolo.className = 'titolo-classico';
@@ -171,6 +179,21 @@ function bloccoClassico(effetto, posizione) {
   blocco.style.setProperty('--righe',
     comandi.classList.contains('cursori') ? 2 : comandi.querySelectorAll('.riga-pomelli').length);
   return blocco;
+}
+
+/**
+ * La spia finta sopra il LED dell'immagine (l'utente, 22 ottobre 2026): spenta
+ * col blocco spento — un tondo scuro che copre il rosso disegnato — e col
+ * blocco acceso un alone rosso attorno. Sta dietro i comandi, come
+ * l'immagine; le misure le fanno le regole di `.spia-classica`.
+ */
+function spiaClassica(led, acceso) {
+  const spia = document.createElement('span');
+  spia.className = 'spia-classica' + (acceso ? ' accesa' : '');
+  spia.style.setProperty('--lx', led.x);
+  spia.style.setProperty('--ly', led.y);
+  spia.style.setProperty('--lr', led.r);
+  return spia;
 }
 
 /**
