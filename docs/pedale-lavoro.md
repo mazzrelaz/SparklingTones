@@ -267,6 +267,20 @@ dell'iPad) e chiude con sei PC817 la punta sul gradino giusto.
   rilascio. **Giro pedale → adattatore verificato** lo stesso giorno: la C6 si collega (rssi -44) e ogni
   tasto chiude e riapre il pulsante giusto; FS2 tenuto ~2,9 s resta chiuso fino al rilascio. Manca la prova
   sul Play Acoustic vero, coi PC817 montati (in arrivo).
+- **2.29, le schermate rifatte** (stesso giorno: quelle della 2.28 «fanno cagare», l'utente: si leggono male,
+  disposizione e aspetto). **Prima le bozze sul PC**: `..\MIdiAdapter\tools\oled\oled.js` disegna 128×64 coi
+  font veri di U8g2 (decodificati da `u8g2_fonts.c`, stesse funzioni di U8g2) e salva PNG; controllato
+  rifacendo la schermata del looper, uguale alla foto. Due proposte per schermata (`bozze.js`); scelte le
+  «B», viste sul pedale e approvate:
+  - **Play Acoustic**: sotto cinque colonne a icone nell'ordine dei footswitch (● REC, ■ STOP, ↺ UNDO,
+    ≡ MENU, HIT), in alto a destra «PRESET» con i riquadri − e + vicino ai tasti banco; il premuto in
+    negativo. Le scritte di prima (su due colonne) sono andate.
+  - **Menu**: una modalità alla volta, grande (helvB14, helvB10 per «Play Acoustic»), fra due triangoli
+    che sono i tasti banco (sinistro indietro, destro avanti), tre puntini sotto, «attiva» in basso a
+    sinistra se è quella di adesso, «FS5 = OK» in basso a destra. Titolo «Modalità» con la à vera
+    (`"Modalit\xe0"`: i font `_tf` hanno il Latin-1).
+  - Scartate: la «A» di Play Acoustic (lista 1–4 come il looper, PRESET e HIT a destra) e la «A» del menu
+    (lista grande col riquadro). PNG in `..\MIdiAdapter\bozze\`.
 
 ## Dove si riprende col pedale — 24 settembre 2026
 

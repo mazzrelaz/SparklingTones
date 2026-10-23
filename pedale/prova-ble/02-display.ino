@@ -137,51 +137,82 @@ static void disegnaMidi(const char* avviso) {
   schermo.sendBuffer();
 }
 
-/** Play Acoustic: cosa fa ogni tasto, su due colonne (a sinistra FS1-FS4, a
- *  destra FS5 e i tasti banco), in negativo quello premuto. I nomi sono quelli
- *  del Play Acoustic, uguali nelle due lingue. Il quadratino con la M e' pieno
- *  quando l'adattatore e' collegato. */
+static void centrato(int cx, int y, const char* s) {
+  schermo.drawStr(cx - schermo.getStrWidth(s) / 2, y, s);
+}
+
+/** L'icona di un footswitch in Play Acoustic, centrata in (cx, cy). */
+static void iconaPlay(uint8_t k, int cx, int cy) {
+  if (k == 0) schermo.drawDisc(cx, cy, 7);                       // Rec/Play
+  if (k == 1) schermo.drawBox(cx - 6, cy - 6, 13, 13);           // Stop/Clear
+  if (k == 2) {                                                  // Undo: la freccia che torna
+    for (int a = -60; a <= 200; a += 2) {
+      const float t = a * (float)M_PI / 180;
+      for (int r = 5; r <= 6; r++)
+        schermo.drawPixel(cx + lroundf(r * cosf(t)), cy - lroundf(r * sinf(t)));
+    }
+    schermo.drawTriangle(cx - 10, cy - 1, cx - 2, cy - 1, cx - 6, cy + 4);
+  }
+  if (k == 3) for (int j = -4; j <= 4; j += 4) schermo.drawBox(cx - 6, cy + j - 1, 13, 2);   // menu
+  if (k == 4) { schermo.setFont(u8g2_font_helvB10_tf); centrato(cx, cy + 5, "HIT"); }
+}
+
+/** Play Acoustic, scelta dall'utente il 23 ottobre fra due bozze (la «B»):
+ *  sotto cinque colonne a icone nell'ordine dei footswitch (REC, STOP, UNDO,
+ *  MENU, HIT), in alto a destra PRESET - + vicino ai due tasti banco; quello
+ *  premuto in negativo. Il quadratino con la M e' pieno con l'adattatore
+ *  collegato. Disegnata prima sul PC (MIdiAdapter/tools/oled/bozze.js). */
 static void disegnaPlay(const char* avviso) {
   disegnaTestaMidi(avviso ? avviso : "Play Acoustic", midiCentrale);
-  // tasto -> colonna e riga; FS4 e' vuoto e prende la riga in fondo per intero
-  static const char* const NOMI[N_PULSANTI] = {
-    "1 Rec/Play", "2 Stop/Clr", "3 Undo", nullptr, "5 HIT", "< Preset -", "> Preset +" };
-  static const uint8_t COLONNA[N_PULSANTI] = {0, 0, 0, 0, 1, 1, 1};
-  static const uint8_t RIGA[N_PULSANTI]    = {0, 1, 2, 3, 0, 1, 2};
-  schermo.setFont(u8g2_font_6x10_tf);
-  for (uint8_t k = 0; k < N_PULSANTI; k++) {
-    if (!NOMI[k]) continue;
-    const int x = COLONNA[k] ? 66 : 0;
-    const int y = 15 + RIGA[k] * 12;
-    const bool giu = playPremuti & (1 << k);
-    if (giu) { schermo.setDrawColor(1); schermo.drawBox(x, y, 62, 12); }
+  schermo.setFont(u8g2_font_5x7_tf);
+  schermo.drawStr(52, 24, "PRESET");
+  const uint8_t banchi[2] = { BANCO_SX, BANCO_DX };
+  for (uint8_t i = 0; i < 2; i++) {
+    const int x = i ? 109 : 88;
+    const bool giu = playPremuti & (1 << banchi[i]);
+    if (giu) schermo.drawRBox(x, 14, 19, 14, 2); else schermo.drawRFrame(x, 14, 19, 14, 2);
     schermo.setDrawColor(giu ? 0 : 1);
-    schermo.drawStr(x + 1, y + 9, NOMI[k]);
+    schermo.setFont(u8g2_font_7x14B_tf);
+    centrato(x + 10, 26, i ? "+" : "-");
+    schermo.setDrawColor(1);
   }
-  schermo.setDrawColor(1);
-  schermo.drawStr(1, 15 + 3 * 12 + 9, TESTO("4 tenuto 2 s: menu", "4 hold 2 s: menu"));
+  static const char* const ETICHETTE[5] = { "REC", "STOP", "UNDO", "MENU", "" };
+  for (uint8_t k = 0; k < 5; k++) {                 // FS1..FS5, da sinistra
+    const int x = k * 25 + 2, cx = x + 12;
+    const bool giu = playPremuti & (1 << k);
+    if (giu) schermo.drawRBox(x, 31, 24, 33, 3);
+    schermo.setDrawColor(giu ? 0 : 1);
+    iconaPlay(k, cx, k == 4 ? 44 : 42);
+    schermo.setFont(u8g2_font_5x7_tf);
+    centrato(cx, 61, ETICHETTE[k]);
+    schermo.setDrawColor(1);
+  }
   schermo.sendBuffer();
 }
 
-/** Il menu delle modalita' (FS4 tenuto): le tre una per riga, in negativo
- *  quella su cui si sta, un pallino su quella di adesso; in fondo come si usa. */
+/** Il menu delle modalita' (FS4 tenuto), scelto dall'utente il 23 ottobre fra
+ *  due bozze (la «B»): una modalita' alla volta, grande, fra due frecce che sono
+ *  i tasti banco (sinistro indietro, destro avanti); sotto tre puntini per dove
+ *  si e', «attiva» se e' quella di adesso, e FS5 = OK in basso a destra. */
 static void disegnaMenu() {
   schermo.setFont(u8g2_font_helvB08_tf);
-  schermo.drawStr(0, 8, TESTO("Modalita'", "Mode"));
+  schermo.drawStr(0, 8, TESTO("Modalit\xe0", "Mode"));
   disegnaBatteria();
   schermo.drawHLine(0, 12, 128);
+  schermo.drawTriangle(2, 32, 9, 25, 9, 39);
+  schermo.drawTriangle(125, 32, 118, 25, 118, 39);
+  const char* nome = nomeModo(menuScelta);
+  const bool lungo = strlen(nome) > 8;
+  schermo.setFont(lungo ? u8g2_font_helvB10_tf : u8g2_font_helvB14_tf);
+  centrato(64, lungo ? 37 : 39, nome);
   for (uint8_t m = 0; m < 3; m++) {
-    const int y = 14 + m * 12;
-    const bool qui = m == menuScelta;
-    if (qui) { schermo.setDrawColor(1); schermo.drawBox(0, y, 128, 12); }
-    schermo.setDrawColor(qui ? 0 : 1);
-    schermo.setFont(u8g2_font_6x13_tf);
-    schermo.drawStr(4, y + 10, nomeModo(m));
-    if (m == modo) schermo.drawDisc(120, y + 6, 2);
+    const int x = 56 + m * 8;
+    if (m == menuScelta) schermo.drawDisc(x, 48, 2); else schermo.drawFrame(x - 2, 46, 5, 5);
   }
-  schermo.setDrawColor(1);
   schermo.setFont(u8g2_font_5x7_tf);
-  schermo.drawStr(0, 63, TESTO("banco su/giu'  FS5 ok", "bank up/down  FS5 ok"));
+  if (menuScelta == modo) schermo.drawStr(0, 63, TESTO("attiva", "active"));
+  const char* ok = "FS5 = OK";
+  schermo.drawStr(128 - schermo.getStrWidth(ok), 63, ok);
   schermo.sendBuffer();
 }
 

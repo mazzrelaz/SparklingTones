@@ -341,8 +341,10 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   se ha funzionato**, e se gli slot A1–A4 dello Spark 2 hanno ancora il wah (rileggendoli tornerebbe).
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
-- **Pedale 2.28 caricato e verificato il 23 ottobre**: partenza in Spark, menu, CC 21–26 a 127/0 in Play
-  Acoustic letti dall'USB. **Da provare**: il giro completo con l'adattatore (PC817 in arrivo). `guida-pedale.html` dice ancora FS1+FS4 (riga ~899): si aggiorna dopo la
+- **Pedale 2.29 caricato e verificato il 23 ottobre**: partenza in Spark, menu, CC 21–26 a 127/0 in Play
+  Acoustic, giro fino all'adattatore. **Schermate di menu e Play Acoustic scelte dall'utente fra due bozze**
+  (disegnate sul PC coi font veri: `..\MIdiAdapter\tools\oled\`, `node bozze.js <cartella>`), viste sul
+  pedale e approvate. Manca la prova sul Play Acoustic vero (PC817 in arrivo). `guida-pedale.html` dice ancora FS1+FS4 (riga ~899): si aggiorna dopo la
   prova (l'inglese no, per la regola sull'inglese).
 - **iPhone e iPad**: Bluefy, con gli UUID interi (`docs/decisioni-ui.md`, «Su iPhone e iPad»).
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
