@@ -275,15 +275,16 @@ window.SparkEffetti = (function () {
        il 13 agosto 2026 con la stessa prova fatta sul gate — stessa soglia a
        0.50. Da qui `quante: 7`. */
     /* I nomi dei nove tipi li ha dettati l'utente il 13 agosto 2026, letti
-       dall'app ufficiale. **L'ordine è da confermare a orecchio**: che
-       l'elenco dell'app segua i valori del parametro è verosimile, non
-       misurato. Per questo l'editor mostra sempre anche il numero della
-       posizione — se sono sfasati si vede subito e si correggono senza
-       indovinare. */
+       dall'app ufficiale, in un ordine che **non era quello dei valori**: il
+       23 ottobre 2026 l'utente ha visto «Room» nell'app ufficiale e «Ambient»
+       da noi. **Verificato quel giorno** con cinque preset della sua libreria,
+       letti nell'app ufficiale: 1 = Room Studio B, 4 = Hall Medium, 5 = Hall
+       Ambient, 6 = Plate Short, 8 = Plate Long. L'ordine è per famiglie (Room,
+       Chamber, Hall, Plate); 0, 2, 3 e 7 ne seguono, non misurati uno a uno. */
     'bias.reverb': { nome: tr('Riverbero'), quante: 7,
-      scelte: { 6: ['Room Studio A', 'Chamber', 'Hall Natural', 'Plate Short',
-                    'Hall Ambient', 'Plate Rich', 'Hall Medium', 'Plate Long',
-                    'Room Studio B'] },
+      scelte: { 6: ['Room Studio A', 'Room Studio B', 'Chamber', 'Hall Natural',
+                    'Hall Medium', 'Hall Ambient', 'Plate Short', 'Plate Rich',
+                    'Plate Long'] },
       manopole: ['Level', 'Damping', 'Low Cut', 'High Cut', 'Dwell', 'Time', tr('Tipo')] },
   };
 

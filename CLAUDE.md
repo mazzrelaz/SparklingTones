@@ -325,6 +325,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   modello in `immagini/classico/` (`SFONDI_CLASSICI`; il riverbero per tipo, `'bias.reverb:<tipo>'`). Neon:
   `immagini/blocchi/` e `src/spark-immagini.js`; come entra un'immagine nuova del neon: `docs/diario.md`,
   estratto del 22 ottobre (sera). Scelte e scartati: `docs/decisioni-ui.md`, «L'editor classico».
+- **I tipi di riverbero** (`bias.reverb` parametro 6) sono in ordine per famiglie: Room A, Room B, Chamber,
+  Hall Natural/Medium/Ambient, Plate Short/Rich/Long. Il 23 ottobre l'utente ne ha verificati cinque (1, 4, 5,
+  6, 8) nell'app ufficiale: il vecchio ordine «dettato» era sbagliato (guscio `v139`).
 - **Da verificare a orecchio**: quale posizione della levetta sia Limit (LA Comp), -15 dB (Optical Comp), HP
   (SAB Driver) e Chorus (UniVibe); nel wah, 1/2 = 0,5 e il tempo lineare.
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
