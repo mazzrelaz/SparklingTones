@@ -1180,3 +1180,15 @@ headless (poi si cerca `id="summary"`):
 XIAO stanno in **`docs/pedale-lavoro.md`**. **Il firmware lo compilo e lo carico io, senza
 chiedere.** **Lingua del display**: `#define INGLESE` in `prova-ble.ino` (0 italiano, 1 inglese;
 2.17, 9 ottobre 2026); ogni scritta nuova del display passa da `TESTO(it, en)`.
+
+## Il «fork» Tone Studio — 23 ottobre 2026, guardato e lasciato
+
+`gp5-tone-studio.payam-danesh-7987.chatgpt.site` (si apre solo con un account ChatGPT; su GitHub nessun fork).
+È la nostra app del 7–10 ottobre, in inglese, dentro una pagina che le parla con `postMessage`.
+Aggiunge: Bluetooth più prudente (sonda prima dell'invio, stop se i primi due pezzi non hanno ack,
+ma stacca tutto se uno slot non risponde: sul NEO cadrebbe sempre), tuner, preset che suona al tocco
+della scheda; un looper con i nostri stessi comandi e un metronomo dal computer (il conteggio col click
+resta non comandabile); un pedale AIRSTEP via MIDI; un Tone Builder che prepara una richiesta per
+ChatGPT (copia e incolla a mano, senza chiave) da una «Spark Tone Guide v2.3» per ruolo e pickup, col
+nostro catalogo copiato — vecchio ordine dei riverberi compreso. Segnala, non verificato, uno «schiocco»
+che si ripete nel loop quando la registrazione parte da remoto. **L'utente: niente di interessante.**
