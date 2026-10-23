@@ -277,10 +277,9 @@ window.SparkEffetti = (function () {
     /* I nomi dei nove tipi li ha dettati l'utente il 13 agosto 2026, letti
        dall'app ufficiale, in un ordine che **non era quello dei valori**: il
        23 ottobre 2026 l'utente ha visto «Room» nell'app ufficiale e «Ambient»
-       da noi. **Verificato quel giorno** con cinque preset della sua libreria,
-       letti nell'app ufficiale: 1 = Room Studio B, 4 = Hall Medium, 5 = Hall
-       Ambient, 6 = Plate Short, 8 = Plate Long. L'ordine è per famiglie (Room,
-       Chamber, Hall, Plate); 0, 2, 3 e 7 ne seguono, non misurati uno a uno. */
+       da noi. **Verificati quel giorno tutti e nove**, ognuno su un preset
+       della sua libreria letto nell'app ufficiale: l'ordine è per famiglie
+       (Room, Chamber, Hall, Plate). */
     'bias.reverb': { nome: tr('Riverbero'), quante: 7,
       scelte: { 6: ['Room Studio A', 'Room Studio B', 'Chamber', 'Hall Natural',
                     'Hall Medium', 'Hall Ambient', 'Plate Short', 'Plate Rich',
