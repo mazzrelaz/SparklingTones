@@ -108,11 +108,11 @@ void setup() {
       break;
     }
   }
-  modo = modoRicordato();
+  modo = MODO_SPARK;                     // sempre: regola dell'utente, 23 ottobre 2026
   ampliScelto = ampliRicordato();
   sceltaFino = millis() + AVVIO_MS + SCELTA_MS;   // dopo il logo, tre secondi per cambiare ampli
   Serial.printf("ampli: %s\n", ampliScelto == AMPLI_NEO ? "Spark NEO" : "Spark 2");
-  Serial.printf("modalita' %s\n", modo == MODO_MIDI ? "MIDI" : "Spark");
+  Serial.printf("modalita' %s\n", nomeModo(modo));
   aggiornaLed();   // spenti: finche' non si preme un tasto non suona niente di nostro
   BLEDevice::init("SparkPedale");
   avviaPonte();          // prima il server: cosi' l'app lo trova sempre
@@ -203,7 +203,10 @@ void loop() {
     static uint32_t insiemeDa = 0;
     const uint8_t sx = (uint8_t)(1 << LINEA_PULSANTE[BANCO_SX]);
     const uint8_t dx = (uint8_t)(1 << LINEA_PULSANTE[BANCO_DX]);
-    const bool tuttiEDue = !(ingressiFermi & sx) && !(ingressiFermi & dx);
+    // In Play Acoustic i tasti banco sono Preset Down e Up, e col menu aperto
+    // scorrono: li' la combinazione non apre il ponte.
+    const bool tuttiEDue = !(ingressiFermi & sx) && !(ingressiFermi & dx)
+                           && modo != MODO_PLAY && !menuAperto;
     if (tuttiEDue) {
       if (insiemeDa == 0) insiemeDa = millis() | 1;
       else if (millis() - insiemeDa > 1500 && !ponteAperto()) { insiemeDa = 0; apriPonte(); }
@@ -217,19 +220,25 @@ void loop() {
     bancoAnnullato = true;
     entraTuner();
   }
-  /* FS1 e FS4 tenuti insieme per un secondo e mezzo cambiano modalita'. */
+  /* FS4 tenuto due secondi apre il menu delle modalita' (23 ottobre 2026; prima
+   * era FS1+FS4). Nel looper dello Spark FS4 tenuto cancella il loop (qui
+   * sotto), e il menu non si apre. Tenendolo ancora non si riapre: va lasciato. */
   {
-    static uint32_t insiemeDa = 0;
-    static bool     cambiato  = false;     // tenendoli ancora non si ricambia: vanno lasciati
-    const uint8_t uno     = (uint8_t)(1 << LINEA_PULSANTE[0]);
+    static uint32_t tenutoDa = 0;
+    static bool     fatto    = false;
     const uint8_t quattro = (uint8_t)(1 << LINEA_PULSANTE[3]);
-    if (!(ingressiFermi & uno) && !(ingressiFermi & quattro)) {
-      if (insiemeDa == 0) insiemeDa = millis() | 1;
-      else if (!cambiato && millis() - insiemeDa > 1500) { cambiato = true; cambiaModo(); }
-    } else {
-      insiemeDa = 0;
-      cambiato = false;
+    if (ingressiFermi & quattro) {
+      tenutoDa = 0;
+      fatto = false;
+    } else if (!looper && !menuAperto) {
+      if (tenutoDa == 0) tenutoDa = millis() | 1;
+      else if (!fatto && millis() - tenutoDa > MENU_TENUTO_MS) { fatto = true; apriMenu(); }
     }
+  }
+  // Il menu senza tocchi si chiude da solo, e non cambia niente.
+  if (menuAperto && (int32_t)(millis() - menuFino) >= 0) {
+    Serial.println(F("menu chiuso senza cambiare"));
+    chiudiMenu();
   }
   /* FS5 tenuto da solo per tre secondi: dentro o fuori dal looper. */
   {
@@ -311,7 +320,7 @@ void loop() {
       if (t != contaTempo && t <= 4) { contaTempo = t; aggiornaLed(); schermoSporco = true; }
     }
   }
-  if ((bool)USB != usbMontato) { usbMontato = (bool)USB; if (modo == MODO_MIDI) schermoSporco = true; }
+  if ((bool)USB != usbMontato) { usbMontato = (bool)USB; if (modo != MODO_SPARK) schermoSporco = true; }
 
   // La richiesta resta in coda **finche' non c'e' l'ampli**, invece di essere
   // buttata via. Mentre il pedale si sta riagganciando una pressione andava

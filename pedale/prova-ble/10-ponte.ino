@@ -301,9 +301,10 @@ class Collegamenti : public BLEServerCallbacks {
     // A ponte chiuso non si molla l'ampli: si alza solo la bandiera, e il
     // loop lo scollega. Mai operazioni BLE dentro un callback BLE.
     if (pontefino == 0) {
-      // A ponte chiuso, in modalita' MIDI chi arriva e' l'iPad per il MIDI:
-      // non tocca l'ampli (in MIDI non c'e') e non puo' scrivere banchi.
-      if (modo == MODO_MIDI) { midiCentrale = true; return; }
+      // A ponte chiuso, in modalita' MIDI chi arriva e' l'iPad per il MIDI (in
+      // Play Acoustic l'adattatore): non tocca l'ampli (li' non c'e') e non
+      // puo' scrivere banchi.
+      if (modo != MODO_SPARK) { midiCentrale = true; return; }
       cacciaApp = true;
       return;
     }
@@ -320,15 +321,16 @@ class Collegamenti : public BLEServerCallbacks {
 /** Cosa annunciare, deciso in un posto solo. Due UUID da 128 bit non stanno
  *  insieme nei 31 byte dell'annuncio, e comunque servono in momenti diversi:
  *  col ponte aperto quello del ponte (l'app lo cerca per servizio), in
- *  modalita' MIDI quello del MIDI (l'iPad lo cerca cosi'), altrimenti niente. */
+ *  modalita' MIDI e Play Acoustic quello del MIDI (l'iPad e l'adattatore lo
+ *  cercano cosi'), altrimenti niente. */
 static void annuncia() {
   BLEAdvertising* adv = BLEDevice::getAdvertising();
   BLEDevice::stopAdvertising();
   adv->removeServiceUUID(BLEUUID(UUID_PONTE));
   adv->removeServiceUUID(BLEUUID(UUID_MIDI));
   if (appCollegata || midiCentrale) return;          // c'e' gia' qualcuno
-  if (pontefino)             { adv->addServiceUUID(UUID_PONTE); BLEDevice::startAdvertising(); }
-  else if (modo == MODO_MIDI) { adv->addServiceUUID(UUID_MIDI);  BLEDevice::startAdvertising(); }
+  if (pontefino)               { adv->addServiceUUID(UUID_PONTE); BLEDevice::startAdvertising(); }
+  else if (modo != MODO_SPARK) { adv->addServiceUUID(UUID_MIDI);  BLEDevice::startAdvertising(); }
 }
 
 static void apriPonte() {

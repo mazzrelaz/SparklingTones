@@ -199,6 +199,7 @@
     <li><strong>LED sopra i footswitch</strong>: dicono cosa suona, rosso per la metà A e verde per la B.</li>
     <li><strong>LED del tempo</strong> e <strong>click</strong>: battono il tempo del looper e contano prima di registrare.</li>
     <li><strong>Modalità MIDI</strong>: lo stesso pedale comanda un programma sul computer o sull'iPad.</li>
+    <li><strong>Modalità Play Acoustic</strong>: comanda un TC-Helicon Play Acoustic (looper, HIT, preset) attraverso un adattatore Bluetooth.</li>
   </ul>
 
   <h3>I nomi dei pezzi</h3>
@@ -896,7 +897,7 @@
       <tr><td><span class="tasto">banco SX</span> o <span class="tasto">banco DX</span> tenuto 2 s</td><td>apre il <a href="#tuner">tuner</a>; un tasto qualunque lo chiude.</td></tr>
       <tr><td><span class="tasto">FS5</span> tenuto 3 s</td><td>entra nel looper, ed esce (solo Spark 2).</td></tr>
       <tr><td><span class="tasto">banco SX</span> + <span class="tasto">banco DX</span> tenuti 1,5 s</td><td>apre il ponte verso l'app per due minuti: serve a mandare i banchi.</td></tr>
-      <tr><td><span class="tasto">FS1</span> + <span class="tasto">FS4</span> tenuti 1,5 s</td><td>passa alla modalità MIDI, e torna.</td></tr>
+      <tr><td><span class="tasto">FS4</span> tenuto 2 s</td><td>apre il menu delle modalità: <a href="#midi">Spark, MIDI, Play Acoustic</a>. Nel looper invece cancella il loop.</td></tr>
     </tbody>
   </table></div>
 
@@ -1077,8 +1078,11 @@
   <div class="cap-testa"><span class="cap-num">14</span><h2>Modalità MIDI</h2></div>
   <p class="sotto">Lo stesso pedale per un programma sul computer (AmpliTube, ad esempio) o sull'iPad (BIAS FX).</p>
 
-  <p><span class="tasto">FS1</span> + <span class="tasto">FS4</span> tenuti un secondo e mezzo: il pedale passa in MIDI, lascia lo Spark,
-    e in alto a destra compare una <strong>M</strong>. Stessa combinazione per tornare. Il pedale ricorda in quale modalità era.</p>
+  <p><span class="tasto">FS4</span> tenuto due secondi apre il <strong>menu delle modalità</strong>: <strong>Spark</strong>, <strong>MIDI</strong>,
+    <strong>Play Acoustic</strong>. I tasti banco salgono e scendono (sinistro su, destro giù), <span class="tasto">FS5</span> conferma;
+    FS1–FS4 escono senza cambiare, e dopo dieci secondi senza tocchi il menu si chiude da solo. In MIDI e in Play Acoustic il pedale
+    lascia lo Spark, e in alto a destra compare una <strong>M</strong>, piena quando qualcuno è collegato.
+    <strong>All'accensione il pedale parte sempre in Spark.</strong></p>
 
   <div class="tab"><table>
     <thead><tr><th>pagina</th><th>footswitch 1–4</th><th>LED</th></tr></thead>
@@ -1095,6 +1099,24 @@
     <li><strong>Dall'iPad, in Bluetooth</strong>: BIAS FX non ha un menu per collegarlo; si collega da <strong>GarageBand</strong>
       (ingranaggio → Avanzate → Dispositivi MIDI Bluetooth) o da midimittr, e resta collegato per tutto l'iPad.</li>
   </ul>
+
+  <h3>Play Acoustic</h3>
+  <p>Per un <strong>TC-Helicon Play Acoustic</strong>: un adattatore Bluetooth (una XIAO ESP32-C6) si collega al pedale e, sulla
+    presa <strong>PEDAL</strong> del Play Acoustic, fa la parte di un <strong>Switch-6</strong>. Sul Play Acoustic: Setup → Switch-6,
+    con i pulsanti 1 Loop Rec/Play, 2 Loop Stop/Clear, 3 HIT, 4 Preset Down, 5 Preset Up, 6 Loop Undo.</p>
+  <div class="tab"><table>
+    <thead><tr><th>tasto</th><th>sul Play Acoustic</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tasto">FS1</span></td><td>Loop Rec/Play</td></tr>
+      <tr><td><span class="tasto">FS2</span></td><td>Loop Stop/Clear: un tocco ferma, tenuto cancella</td></tr>
+      <tr><td><span class="tasto">FS3</span></td><td>Loop Undo</td></tr>
+      <tr><td><span class="tasto">FS4</span></td><td>niente (tenuto 2 s: il menu)</td></tr>
+      <tr><td><span class="tasto">FS5</span></td><td>HIT</td></tr>
+      <tr><td><span class="tasto">banco SX</span> <span class="tasto">banco DX</span></td><td>preset giù e su</td></tr>
+    </tbody>
+  </table></div>
+  <p>Il display mostra cosa fa ogni tasto, e in negativo quello premuto; il LED sopra FS1–FS3 è rosso finché lo tieni giù.
+    Il pedale manda Control Change 21–26 (canale 1), a 127 quando premi e a 0 quando lasci.</p>
 </section>
 
 <!-- ===================================================================== -->

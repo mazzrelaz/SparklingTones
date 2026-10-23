@@ -79,6 +79,16 @@ static uint8_t  corrente       = 0;        // quale preset del banco sta suonand
 static void aggiornaLed() {
   if (mcp == 0) return;
   uint8_t maschera = 0;
+  // Col menu aperto spenti: i piedi non comandano niente finche' non si sceglie.
+  if (menuAperto) { mcpScrivi(MCP_OLATB, 0); return; }
+  /* In Play Acoustic il rosso sul footswitch mentre e' premuto: il Play Acoustic
+   * non ci dice niente del suo stato, quindi il pedale mostra solo cosa manda. */
+  if (modo == MODO_PLAY) {
+    for (uint8_t led = 0; led < 4; led++)
+      if (playPremuti & (1 << led)) maschera |= (uint8_t)(1 << LINEA_ROSSO[led]);
+    mcpScrivi(MCP_OLATB, maschera);
+    return;
+  }
   /* In MIDI: nella pagina preset il rosso (verde per 5-8, come le due meta'
    * in modalita' Spark) sul footswitch dell'ultimo preset
    * mandato, se e' nel gruppo mostrato; nella pagina stomp il verde su ogni

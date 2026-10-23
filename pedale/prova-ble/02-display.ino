@@ -87,19 +87,16 @@ static void disegnaBatteria() {
   for (uint8_t k = 0; k < t; k++) schermo.drawBox(x + 2 + k * 3, 3, 2, 4);
 }
 
-static void disegnaMidi(const char* avviso) {
-  char testa[20];
-  if (avviso) snprintf(testa, sizeof(testa), "%s", avviso);
-  else if (paginaMidi == 0) snprintf(testa, sizeof(testa), "MIDI preset %u-%u",
-                                     gruppoMidi * 4 + 1, gruppoMidi * 4 + 4);
-  else snprintf(testa, sizeof(testa), "MIDI stomp");
+/** La riga in alto delle modalita' senza Spark: il testo, la batteria e il
+ *  quadratino con la M (pieno quando qualcuno ha la pedaliera), poi la linea. */
+static void disegnaTestaMidi(const char* testa, bool pieno) {
   schermo.setFont(u8g2_font_helvB08_tf);
   schermo.setClipWindow(0, 0, 96, 11);   // a destra stanno la batteria e il quadratino
   schermo.drawStr(0, 8, testa);
   schermo.setMaxClipWindow();
   disegnaBatteria();
 
-  if (usbMontato || midiCentrale) {
+  if (pieno) {
     schermo.drawBox(118, 0, 10, 10);
     schermo.setDrawColor(0);
     schermo.setFont(u8g2_font_5x7_tf);
@@ -109,6 +106,15 @@ static void disegnaMidi(const char* avviso) {
     schermo.drawFrame(118, 0, 10, 10);
   }
   schermo.drawHLine(0, 12, 128);
+}
+
+static void disegnaMidi(const char* avviso) {
+  char testa[20];
+  if (avviso) snprintf(testa, sizeof(testa), "%s", avviso);
+  else if (paginaMidi == 0) snprintf(testa, sizeof(testa), "MIDI preset %u-%u",
+                                     gruppoMidi * 4 + 1, gruppoMidi * 4 + 4);
+  else snprintf(testa, sizeof(testa), "MIDI stomp");
+  disegnaTestaMidi(testa, usbMontato || midiCentrale);
 
   for (uint8_t i = 0; i < 4; i++) {
     const int y = 15 + i * 12;
@@ -128,6 +134,54 @@ static void disegnaMidi(const char* avviso) {
     schermo.drawStr(17, y + 10, riga);
   }
   schermo.setDrawColor(1);
+  schermo.sendBuffer();
+}
+
+/** Play Acoustic: cosa fa ogni tasto, su due colonne (a sinistra FS1-FS4, a
+ *  destra FS5 e i tasti banco), in negativo quello premuto. I nomi sono quelli
+ *  del Play Acoustic, uguali nelle due lingue. Il quadratino con la M e' pieno
+ *  quando l'adattatore e' collegato. */
+static void disegnaPlay(const char* avviso) {
+  disegnaTestaMidi(avviso ? avviso : "Play Acoustic", midiCentrale);
+  // tasto -> colonna e riga; FS4 e' vuoto e prende la riga in fondo per intero
+  static const char* const NOMI[N_PULSANTI] = {
+    "1 Rec/Play", "2 Stop/Clr", "3 Undo", nullptr, "5 HIT", "< Preset -", "> Preset +" };
+  static const uint8_t COLONNA[N_PULSANTI] = {0, 0, 0, 0, 1, 1, 1};
+  static const uint8_t RIGA[N_PULSANTI]    = {0, 1, 2, 3, 0, 1, 2};
+  schermo.setFont(u8g2_font_6x10_tf);
+  for (uint8_t k = 0; k < N_PULSANTI; k++) {
+    if (!NOMI[k]) continue;
+    const int x = COLONNA[k] ? 66 : 0;
+    const int y = 15 + RIGA[k] * 12;
+    const bool giu = playPremuti & (1 << k);
+    if (giu) { schermo.setDrawColor(1); schermo.drawBox(x, y, 62, 12); }
+    schermo.setDrawColor(giu ? 0 : 1);
+    schermo.drawStr(x + 1, y + 9, NOMI[k]);
+  }
+  schermo.setDrawColor(1);
+  schermo.drawStr(1, 15 + 3 * 12 + 9, TESTO("4 tenuto 2 s: menu", "4 hold 2 s: menu"));
+  schermo.sendBuffer();
+}
+
+/** Il menu delle modalita' (FS4 tenuto): le tre una per riga, in negativo
+ *  quella su cui si sta, un pallino su quella di adesso; in fondo come si usa. */
+static void disegnaMenu() {
+  schermo.setFont(u8g2_font_helvB08_tf);
+  schermo.drawStr(0, 8, TESTO("Modalita'", "Mode"));
+  disegnaBatteria();
+  schermo.drawHLine(0, 12, 128);
+  for (uint8_t m = 0; m < 3; m++) {
+    const int y = 14 + m * 12;
+    const bool qui = m == menuScelta;
+    if (qui) { schermo.setDrawColor(1); schermo.drawBox(0, y, 128, 12); }
+    schermo.setDrawColor(qui ? 0 : 1);
+    schermo.setFont(u8g2_font_6x13_tf);
+    schermo.drawStr(4, y + 10, nomeModo(m));
+    if (m == modo) schermo.drawDisc(120, y + 6, 2);
+  }
+  schermo.setDrawColor(1);
+  schermo.setFont(u8g2_font_5x7_tf);
+  schermo.drawStr(0, 63, TESTO("banco su/giu'  FS5 ok", "bank up/down  FS5 ok"));
   schermo.sendBuffer();
 }
 
@@ -283,11 +337,18 @@ static void disegnaSchermo() {
     return;
   }
   schermo.clearBuffer();
-  if (modo == MODO_MIDI) {
+  if (menuAperto) {
+    schermo.setFontMode(1);
+    schermo.setDrawColor(1);
+    disegnaMenu();
+    return;
+  }
+  if (modo == MODO_MIDI || modo == MODO_PLAY) {
     schermo.setFontMode(1);
     schermo.setDrawColor(1);
     const bool avviso = avvisoTesto[0] && (int32_t)(avvisoFino - millis()) > 0;
-    disegnaMidi(avviso ? avvisoTesto : nullptr);
+    if (modo == MODO_MIDI) disegnaMidi(avviso ? avvisoTesto : nullptr);
+    else                   disegnaPlay(avviso ? avvisoTesto : nullptr);
     return;
   }
   schermo.setFontMode(1);                      // trasparente: serve al testo in negativo

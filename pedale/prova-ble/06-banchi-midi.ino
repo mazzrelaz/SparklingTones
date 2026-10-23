@@ -137,3 +137,26 @@ static void midiPremuto(uint8_t k) {
   schermoSporco = true;
 }
 
+/** Un tasto in modalita' Play Acoustic, premuto (giu' = true) o lasciato. Al
+ *  rilascio parte lo 0 solo se era partito il 127: un tasto premuto prima di
+ *  entrare in Play Acoustic non lascia niente di appeso. */
+static void playTasto(uint8_t k, bool giu) {
+  const uint8_t pulsante = PLAY_PULSANTE[k];
+  if (!pulsante) return;                           // FS4: vuoto
+  const uint8_t bit = (uint8_t)(1 << k);
+  if (giu == ((playPremuti & bit) != 0)) return;   // gia' detto
+  if (giu) playPremuti |= bit; else playPremuti &= (uint8_t)~bit;
+  mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), (uint8_t)(PLAY_CC + pulsante), giu ? 127 : 0);
+  Serial.printf("Play Acoustic: pulsante %u %s (CC %u)\n", pulsante, giu ? "giu'" : "su",
+                PLAY_CC + pulsante);
+  aggiornaLed();
+  schermoSporco = true;
+}
+
+/** Uscendo da Play Acoustic, o perdendo l'adattatore, nessun pulsante resta
+ *  premuto: un Loop Stop/Clear appeso cancellerebbe il loop. */
+static void playLasciaTutti() {
+  for (uint8_t k = 0; k < N_PULSANTI; k++)
+    if (playPremuti & (1 << k)) playTasto(k, false);
+}
+

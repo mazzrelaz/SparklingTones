@@ -76,7 +76,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.27";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo; 2.19: «libero» fino a 60 s; 2.20: cerchio in «libero» e click per tutta la registrazione; 2.21: niente doppio click sull'«uno»; 2.22: l'impronta dei banchi, per «Aggiorna» nell'app; 2.23: il ponte si chiude quando l'app si stacca; 2.24: il tuner, tasto banco al rilascio; 2.25: diagnosi del tuner sul seriale; 2.26: la scatola nera; 2.27: la scatola salvata quando l'ampli si inceppa
+static const char* VERSIONE = "2.28";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo; 2.19: «libero» fino a 60 s; 2.20: cerchio in «libero» e click per tutta la registrazione; 2.21: niente doppio click sull'«uno»; 2.22: l'impronta dei banchi, per «Aggiorna» nell'app; 2.23: il ponte si chiude quando l'app si stacca; 2.24: il tuner, tasto banco al rilascio; 2.25: diagnosi del tuner sul seriale; 2.26: la scatola nera; 2.27: la scatola salvata quando l'ampli si inceppa; 2.28: menu delle modalita' su FS4 tenuto, Play Acoustic, si parte sempre in Spark
 
 /* La lingua delle scritte del display (9 ottobre 2026, chiesta dall'utente per chi
  * costruisce il pedale fuori dall'Italia): 0 italiano, 1 inglese. Si sceglie qui,
@@ -268,23 +268,32 @@ static bool ponteAperto() { return pontefino != 0; }
 static char    avvisoTesto[26] = "";
 static uint32_t avvisoFino = 0;
 
-/* --- Le due modalita' --------------------------------------------------------
+/* --- Le tre modalita' --------------------------------------------------------
  *
  * **Spark**: quello di sempre. **MIDI**: il pedale si presenta al computer come
- * pedaliera USB-MIDI (nessun driver) e lascia stare lo Spark. Decise
- * dall'utente il 29 agosto e il 24 settembre 2026:
- *  - si passa dall'una all'altra tenendo **FS1 e FS4 insieme** per un secondo e
- *    mezzo: i due piu' lontani, che un piede non prende per sbaglio;
+ * pedaliera USB-MIDI (nessun driver) e lascia stare lo Spark. **Play Acoustic**
+ * (23 ottobre 2026): comanda un TC-Helicon Play Acoustic attraverso
+ * l'adattatore (progetto `MIdiAdapter`, una XIAO C6 che finge un Switch-6).
+ * Decise dall'utente il 29 agosto, il 24 settembre e il 23 ottobre 2026:
+ *  - **FS4 tenuto due secondi apre un menu** con le tre modalita': tasti banco
+ *    su e giu', FS5 conferma (prima era FS1+FS4 fra due sole: «troppe
+ *    combinazioni»). In Play Acoustic FS4 e' vuoto, quindi tenerlo non manda
+ *    niente; altrove FS4 fa prima il suo lavoro, come faceva con FS1+FS4.
+ *    Nel looper dello Spark FS4 tenuto resta «cancella», e il menu non si apre;
+ *  - **all'accensione si parte sempre in Spark**: la modalita' non si ricorda
+ *    piu' (fino al 23 ottobre stava in /modo.txt);
  *  - in MIDI ci sono due pagine, e **il quinto footswitch passa dall'una
  *    all'altra**: *preset* (otto Program Change: 1-4 col tasto banco sinistro,
- *    5-8 col destro) e *stomp* (quattro Control Change acceso/spento);
- *  - la modalita' **si ricorda allo spegnimento**, come il banco.
+ *    5-8 col destro) e *stomp* (quattro Control Change acceso/spento).
  *
- * La mappa e' fissa nel firmware (canale 1, preset = Program Change, stomp =
+ * La mappa MIDI e' fissa nel firmware (canale 1, preset = Program Change, stomp =
  * CC 80-83 a 127/0): i programmi sul PC hanno il MIDI learn, quindi basta che
  * i comandi siano diversi fra loro. Farla scrivere dall'app e' il passo dopo. */
-static const uint8_t MODO_SPARK = 0, MODO_MIDI = 1;
+static const uint8_t MODO_SPARK = 0, MODO_MIDI = 1, MODO_PLAY = 2;
 static uint8_t modo = MODO_SPARK;
+static const char* nomeModo(uint8_t m) {
+  return m == MODO_MIDI ? "MIDI" : m == MODO_PLAY ? "Play Acoustic" : "Spark";
+}
 static USBMIDI midi("SparkPedale MIDI");
 static const uint8_t MIDI_CANALE = 1;
 static const uint8_t MIDI_CC_STOMP = 80;       // 80..83: liberi nello standard
@@ -293,6 +302,26 @@ static uint8_t gruppoMidi  = 0;                // i quattro preset mostrati: gru
 static int16_t programmaMidi = -1;             // l'ultimo Program Change mandato
 static uint8_t stompAccesi = 0;                // un bit per footswitch
 static bool    usbMontato  = false;
+
+/* Play Acoustic: ogni tasto e' un pulsante del Switch-6 finto dall'adattatore,
+ * e il pedale lo dice con un Control Change **a 127 quando si preme e a 0 quando
+ * si lascia** (Loop Stop/Clear tenuto cancella: serve il rilascio vero). CC 21-26
+ * = pulsanti 1-6 del Switch-6; la funzione la decide la pagina Switch-6 del Play
+ * Acoustic: 1 Loop Rec/Play, 2 Loop Stop/Clear, 3 HIT, 4 Preset Down, 5 Preset
+ * Up, 6 Loop Undo. Tasti scelti dall'utente il 23 ottobre: FS1 Rec/Play, FS2
+ * Stop/Clear, FS3 Undo, FS4 vuoto, FS5 HIT, banco sinistro Preset Down, destro
+ * Preset Up. Il numero del CC cambia insieme all'adattatore. */
+static const uint8_t PLAY_CC = 20;             // CC 20 + pulsante (1-6)
+static const uint8_t PLAY_PULSANTE[N_PULSANTI] = {1, 2, 6, 0, 3, 4, 5};   // 0 = vuoto
+static uint8_t playPremuti = 0;                // un bit per tasto: mandato 127, non ancora 0
+
+/* Il menu delle modalita', aperto da FS4 tenuto. Si chiude da solo dopo
+ * MENU_MS senza tocchi, senza cambiare niente. */
+static const uint32_t MENU_TENUTO_MS = 2000;
+static const uint32_t MENU_MS = 10000;
+static bool     menuAperto = false;
+static uint8_t  menuScelta = MODO_SPARK;
+static uint32_t menuFino   = 0;
 
 /* --- Il looper dello Spark 2 -------------------------------------------------
  *
@@ -478,23 +507,6 @@ static BLECharacteristic* chMidi = nullptr;
 static volatile bool midiCentrale = false;     // un iPad (o altro) collegato per il MIDI
 static volatile bool midiUscito   = false;     // bandiera per il loop: riannunciarsi
 
-static const char* VIA_MODO = "/modo.txt";
-
-static void ricordaModo() {
-  File f = LittleFS.open(VIA_MODO, "w");
-  if (!f) { Serial.println(F("non riesco a ricordare la modalita'")); return; }
-  f.write(modo);
-  f.close();
-}
-
-static uint8_t modoRicordato() {
-  if (!LittleFS.exists(VIA_MODO)) return MODO_SPARK;
-  File f = LittleFS.open(VIA_MODO, "r");
-  if (!f) return MODO_SPARK;
-  const int v = f.read();
-  f.close();
-  return v == MODO_MIDI ? MODO_MIDI : MODO_SPARK;
-}
 
 static const char* VIA_AMPLI = "/ampli.txt";
 

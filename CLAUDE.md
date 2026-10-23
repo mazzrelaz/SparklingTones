@@ -282,6 +282,12 @@ i quattro suoni della metà corrente, il quinto cambia metà senza toccare il su
   compresa (FNV-1a 32 bit, `bancoImpronta` / `impronta`). `banchi.h` legge byte non nostri:
   offset e lunghezze vanno verificati.
 - **Il tasto banco cambia banco al rilascio**; tenuto 2 s apre il tuner (2.24, verificato).
+- **Tre modalità, scelte da un menu: FS4 tenuto 2 s** (2.28, 23 ottobre 2026; FS1+FS4 non fa più niente):
+  Spark / MIDI / **Play Acoustic**, tasti banco su e giù, FS5 conferma. **All'accensione sempre Spark**
+  (regola dell'utente: `/modo.txt` non si usa più). Play Acoustic = il pedale comanda un TC-Helicon Play
+  Acoustic attraverso l'adattatore di `..\MIdiAdapter` (XIAO C6 che finge un Switch-6): **CC 20+n a 127
+  alla pressione e a 0 al rilascio**, n = pulsante 1–6 del Switch-6; numero del CC e adattatore cambiano
+  insieme. Nel looper FS4 tenuto resta «cancella». Dettaglio in `docs/pedale-lavoro.md`.
 - **Scatola nera** sul pedale per l'ampli che s'inceppa (causa ignota): comando `M` col pedale al PC.
 - **La mappa di pulsanti e LED non si scrive a mente** (mappatura guidata di `prova-espansore`, e
   si chiede la foto). **I nomi dei pezzi sono fissi** (basetta, XIAO, espansore, pista, pettine,
@@ -333,8 +339,11 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   A1–A4 ha riscritto, per UUID, quattro preset (Nylon Reverb, Jazz tone, PF comfortably numb, prova); l'omonimo del
   NEO non li ha corretti. Rimedio dato all'utente: `Dropbox\ripristino-la-comp.json` da «Importa». **Da sentire
   se ha funzionato**, e se gli slot A1–A4 dello Spark 2 hanno ancora il wah (rileggendoli tornerebbe).
-- **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Ferme per sua scelta**: la
-  modalità MIDI del pedale, il tap tempo con l'ampli acceso.
+- **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
+  tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
+- **Pedale 2.28 caricato e verificato il 23 ottobre**: partenza in Spark, menu, CC 21–26 a 127/0 in Play
+  Acoustic letti dall'USB. **Da provare**: il giro completo con l'adattatore (PC817 in arrivo). `guida-pedale.html` dice ancora FS1+FS4 (riga ~899): si aggiorna dopo la
+  prova (l'inglese no, per la regola sull'inglese).
 - **iPhone e iPad**: Bluefy, con gli UUID interi (`docs/decisioni-ui.md`, «Su iPhone e iPad»).
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.

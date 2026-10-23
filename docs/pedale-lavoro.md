@@ -235,6 +235,39 @@ cambio confermato o a un nuovo aggancio). **Si rilegge con `M`** dal seriale (`S
 per prova: `/scatola1.txt` contiene ora una prova del 20 ottobre). Quando ricapita: l'utente riavvia
 l'ampli, attacca il pedale al PC, e si legge `M`.
 
+## Il menu delle modalità e il Play Acoustic — 23 ottobre 2026 (firmware 2.28, da provare)
+
+Chiesto dall'utente, lavorato nella sessione del progetto **`..\MIdiAdapter`** (la sua `CLAUDE.md` ha tutto
+il ragionamento e le misure). L'utente ha un **TC-Helicon Play Acoustic** e vuole comandarne looper, HIT e
+preset col pedale, via Bluetooth. Il Play Acoustic via USB è una porta MIDI ma **non esegue** Program
+Change né CC in ingresso (provato); la strada è la sua presa **PEDAL**, dove si finge un **Switch-6**
+(scala di sette 10 kΩ fra anello e manica, la punta su uno dei sei gradini = un pulsante; verificato a mano
+su breadboard). L'adattatore è una XIAO C6 che si collega al pedale come centrale BLE-MIDI (al posto
+dell'iPad) e chiude con sei PC817 la punta sul gradino giusto.
+
+**Cosa cambia nel pedale (2.28)**:
+- **FS4 tenuto 2 s apre un menu** Spark / MIDI / Play Acoustic: tasti banco su (sinistro) e giù (destro),
+  **FS5 conferma**, FS1–FS4 escono senza cambiare, dieci secondi senza tocchi lo chiudono. Sostituisce
+  FS1+FS4 («troppe combinazioni», l'utente). FS4 fa prima il suo lavoro in Spark e MIDI (come prima con
+  FS1+FS4, un comando in meno). Nel looper FS4 tenuto resta «cancella» e il menu non si apre.
+- **All'accensione sempre Spark** (regola dell'utente): `ricordaModo`/`modoRicordato` e `/modo.txt` tolti.
+- **Play Acoustic**: ogni tasto manda **CC 20+n a 127 alla pressione e 0 al rilascio** (canale 1, USB e
+  BLE), n = pulsante del Switch-6. Tasti scelti dall'utente: FS1 = 1 Loop Rec/Play, FS2 = 2 Loop
+  Stop/Clear (tenuto cancella: per questo il rilascio), FS3 = 6 Loop Undo, **FS4 vuoto**, FS5 = 3 HIT,
+  banco sinistro = 4 Preset Down, destro = 5 Preset Up (`PLAY_PULSANTE`). Si annuncia come in MIDI e
+  accetta la centrale (`midiCentrale`); niente ponte coi due tasti banco (sono Preset Down/Up). Uscendo, o
+  aprendo il menu, nessun pulsante resta premuto (`playLasciaTutti`). LED: rosso sul footswitch premuto.
+  Display: «Play Acoustic», il quadratino M pieno con l'adattatore collegato, i sette tasti su due colonne
+  (in negativo quello premuto), in fondo «4 tenuto 2 s: menu».
+- Compilato e **caricato il 23 ottobre** (1200 baud su COM3, upload su COM13). **Verificato sul pedale lo
+  stesso giorno**: avvio con «v2.28» e in Spark; FS4 tenuto apre il menu, i tasti banco scorrono, FS5 entra
+  in Play Acoustic e il display è quello descritto. Letti dall'USB col `midiIn` (script
+  `..\MIdiAdapter\tools\midi.ps1 -Secondi 90 -Filtro SparkPedale`): FS1 `b0 15 7f`/`b0 15 00`, FS2 CC 22,
+  FS3 CC 26, FS4 niente, FS5 CC 23, banco sinistro CC 24, destro CC 25, ognuno 127 alla pressione e 0 al
+  rilascio. **Giro pedale → adattatore verificato** lo stesso giorno: la C6 si collega (rssi -44) e ogni
+  tasto chiude e riapre il pulsante giusto; FS2 tenuto ~2,9 s resta chiuso fino al rilascio. Manca la prova
+  sul Play Acoustic vero, coi PC817 montati (in arrivo).
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni
