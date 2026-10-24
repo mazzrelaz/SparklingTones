@@ -41,9 +41,9 @@ src/spark-effetti.js              nomi di effetti e manopole + MODELLI
 src/spark-backup.js · dropbox-sync.js · pedale-ponte.js · pwa.js · snake-pedali.js
 src/lingua.js / lingua-en.js      le lingue (lingua-en.js NON si legge: vedi «L'inglese»)
 pedale/prova-ble/                 firmware del pedale (prova-ble.ino + 01-…11-*.ino, banchi.h)
-pedale/prova-espansore|usb|display|midi/   sketch di prova (mappatura guidata di pulsanti e LED)
+pedale/prova-espansore|usb|display|midi|controlx/   sketch di prova (mappatura guidata; Control X finto)
 pcb/basetta/                      basetta stampata v1 (20 ottobre 2026), sorgente tools/genera-basetta.py; pcb/*.kicad_* vecchio, fermo
-tools/                            serve.ps1, server-rete.js, togli-sfondo/, segna-manopole.html, video-demo/
+tools/                            serve.ps1, server-rete.js, wah-ponte.ps1 + wah.html, togli-sfondo/, video-demo/
 test/*.html                       protocol 147, transport 64, store 151, backup 41, dropbox 38
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
 ```
@@ -317,7 +317,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 22 ottobre 2026
+## Dove si riprende — 24 ottobre 2026
 
 - **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
   neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
@@ -329,12 +329,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   Hall Natural/Medium/Ambient, Plate Short/Rich/Long. Il 23 ottobre l'utente li ha verificati tutti e nove
   nell'app ufficiale: il vecchio ordine «dettato» era sbagliato (guscio `v139`). Nello stesso controllo,
   sette preset confrontati blocco per blocco: nomi dei modelli e acceso/spento tutti giusti.
-- **Da verificare a orecchio**: quale posizione della levetta sia Limit (LA Comp), -15 dB (Optical Comp), HP
-  (SAB Driver) e Chorus (UniVibe); nel wah, 1/2 = 0,5 e il tempo lineare.
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
-- **Tuner** (20 ottobre, `v131`): `0x0165 c3`/`c2` (senza `0x00`); l'ampli tace e manda `0x0364` (nota 0–11
-  senza ottava, scostamento 0–1 con 0,5 intonata, -1 silenzio). Muto solo a scheda aperta, ampli collegato e
-  pagina in vista (`seguiAccordatore`). `docs/decisioni-ui.md`, «Il tuner».
 - **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano;
   approvata, da ordinare su JLCPCB, **non provata**. Linee nuove: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
   DX = GPA0, **GPA7 libera**; LED*n* rosso/verde = GPB(2n-2)/GPB(2n-1). A scheda arrivata: firmware con le
@@ -350,7 +345,12 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   (disegnate sul PC coi font veri: `..\MIdiAdapter\tools\oled\`, `node bozze.js <cartella>`), viste sul
   pedale e approvate. Manca la prova sul Play Acoustic vero (PC817 in arrivo). `guida-pedale.html` dice ancora FS1+FS4 (riga ~899): si aggiorna dopo la
   prova (l'inglese no, per la regola sull'inglese).
-- **iPhone e iPad**: Bluefy, con gli UUID interi (`docs/decisioni-ui.md`, «Su iPhone e iPad»).
+- **Pedale d'espressione** (24 ottobre, prove): volume col Master liscio; il wah manuale **non è un parametro** di
+  `JH.Vox846`. Lo fa l'ampli se il pedale **si finge uno Spark Control X** (servizio FFC8, l'ampli si collega lui,
+  mappa 0x70 wah / 0x72 volume, posizione con 0x0C): `pedale/prova-controlx/` ha comandato wah e volume, il wah «in
+  modo anomalo», da capire. Attrezzi: `tools/wah-ponte.ps1` + `tools/wah.html`. **Trappola**: chiusa l'app l'ampli
+  suona lo slot, i 0x0104 cambiano 0x7f senza suonare finché non arriva `0x0138 7f`. Tutto in
+  `docs/pedale-lavoro.md`, «Il pedale d'espressione».
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
 - **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key): **mai più catture o

@@ -403,6 +403,7 @@ void loop() {
 
   while (Serial.available()) {
     char c = Serial.read();
+    if (rigaSeriale(c)) continue;                    // «#indice valore»: il wah dal PC (2.30)
     if (c >= '0' && c <= '7') cambiaPreset(c - '0');
     else if (c == 'p') { if (bancoHaQualcosa()) richiedi(prossimoPieno(bersaglio));
                          else Serial.println(F("banco vuoto")); }
@@ -467,8 +468,17 @@ void loop() {
     else if (c == 'T') { if (tuner) esciTuner(); else entraTuner(); }
     else if (c == 'L') cambiaLooper();               // il looper dal PC, per le prove
     else if (c == 'Y') { if (looper) looperTap(); }  // un colpo di tap tempo
+    else if (c == 'J' || c == 'X' || c == 'Z') avviaSpazzata(c); // il pedale d'espressione finto (2.30)
+    else if (c == 'j') { indiceWah = (uint8_t)((indiceWah + 1) % 6);
+                         Serial.printf("wah: la prossima spazzata va sull'indice %u\n", indiceWah); }
+    // Lo stato che suona, coi pezzi grezzi sul seriale: per vedere dal PC cosa
+    // c'e' davvero nella catena (2.30, la prova del wah).
+    else if (c == 'Q') { const uint8_t dati[2] = { 0x01, 0x00 };
+                         Serial.printf("stato che suona: %s\n",
+                                       chiediEAspetta(0x02, 0x01, dati, 2, 0x01, 1500) ? "letto" : "incompleto"); }
     else if (c == '?') elenco();
   }
+  passoSpazzata();
   // 2 ms, non 10: una battuta secca su un tattile puo' durare pochi
   // millisecondi, e con un polling lento la si perde e basta.
   delay(2);

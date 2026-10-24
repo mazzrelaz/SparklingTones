@@ -245,3 +245,19 @@ scollegamento se la chiamata fallisce.
   viene salvato.
 - **Nessuna dipendenza esterna**: font e codice in casa, niente CDN, niente rischio di
   catena di fornitura.
+
+## 24 ottobre 2026 — gli attrezzi del pedale d'espressione
+
+Controllo dopo le prove del pedale d'espressione (`docs/pedale-lavoro.md`, «Il pedale d'espressione»):
+
+- **`tools/wah-ponte.ps1`** ascolta solo `http://localhost:8095/` e non ha autenticazione: **finché è
+  acceso, una pagina web qualunque aperta nel browser può mandare righe al pedale** con una POST
+  semplice a `/manda` (la risposta non la legge, ma il comando arriva) e, attraverso il pedale,
+  parametri all'ampli. Rischio basso: il ponte si accende a mano solo durante le prove e si chiude
+  con `/basta`. Se dovesse restare acceso a lungo: un segreto nell'URL della pagina, o il controllo
+  dell'intestazione `Origin`.
+- **`tools/wah.html`**: il nome del preset riletto dall'ampli entrava nell'HTML così com'era; adesso
+  passa dalle entità. Il resto usa `textContent`.
+- **`pedale/prova-controlx/`** si annuncia come un Control X e accetta chiunque si colleghi; chi si
+  collega riceve le posizioni dei pedali e le risposte di un Control X; quello che scrive il firmware lo
+  stampa e basta. È una prova, non va sul pedale vero così.

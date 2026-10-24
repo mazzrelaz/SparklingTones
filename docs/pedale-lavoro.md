@@ -282,6 +282,64 @@ dell'iPad) e chiude con sei PC817 la punta sul gradino giusto.
   - Scartate: la «A» di Play Acoustic (lista 1–4 come il looper, PRESET e HIT a destra) e la «A» del menu
     (lista grande col riquadro). PNG in `..\MIdiAdapter\bozze\`.
 
+## Il pedale d'espressione — 24 ottobre 2026 (prove, niente di definitivo)
+
+L'utente vorrebbe attaccare al pedale un pedale d'espressione: **volume e wah in Spark, un CC in MIDI**
+(AmpliTube: whammy, volume). Non ce l'ha: prima di comprarlo ha voluto capire se ha senso. **Il posto
+c'è senza toccare la basetta**: il pettine J10 ha G, 3V3 e D2 (analogico, libero). Jack stereo 6,35:
+manica → G, anello → 3V3, punta → D2, 100 nF fra D2 e massa; punta e anello invertiti su alcuni pedali,
+si rimedia con la taratura nel firmware.
+
+**Cosa è stato provato, in ordine:**
+1. **Volume col Master dell'ampli** (0x0104, manopola dell'editor dell'app): sale e scende liscio, l'ampli
+   non si pianta (l'utente). È la stessa strada che userebbe il pedale.
+2. **Il wah come parametro del preset: strada chiusa.** `JH.Vox846` ha sei parametri (docs/protocollo, 16
+   ottobre); provati dal pedale tutti gli indici 0–5, in tutte e sei le modalità, a mano col cursore: niente
+   posizione manuale. **Attenzione, le prime prove non valevano**: vedi la trappola qui sotto. Rifatte
+   dopo, con lo stato giusto che suonava: l'indice 2 (tempo, BPM spento) cambia la velocità dell'onda,
+   l'indice 5 e gli altri non danno un wah manuale (l'utente, «ho provato tutti gli indici»).
+3. **La strada vera: lo Spark Control X** (pagina di Positive Grid trovata dall'utente; protocollo da
+   `paulhamsh/Spark-Control-X`, README e `SparkControl.cpp`). **Con lo Spark 2 il Control X non passa
+   dall'app: è l'ampli che si collega a lui** (tasto di accoppiamento dell'ampli tenuto premuto), servizio
+   **FFC8**, FFC9 scritto dall'ampli, FFCA notify verso l'ampli. Messaggi `id 00 00 00 …`. L'ampli chiede
+   firmware (0x0B), pedali inseriti (0x0D), profilo (0x08), batteria (0x0F), mappa del profilo (0x14: sei
+   pulsanti + i due pedali d'espressione), nome (0x12), più 0x10, 0x11, 0x15, 0x04 ignoti. **La mappa
+   decide cosa fa ogni pedale: 0x70 «Expression Wah LFO», 0x72 «Expression Volume», 0x75 volume della
+   musica.** La posizione: `0c 00 00 00 01 <lo> <hi> 02 <lo> <hi>`, 0–65535 ciascuno. Annuncio copiato byte
+   per byte: costruttore 0x0122 `00 12`, UUID del servizio MIDI, nome «SparkX v4.1.23 bae3», indirizzo
+   casuale statico.
+4. **`pedale/prova-controlx/`** (sketch a parte, niente FFC0, niente display né footswitch) fa **solo** il
+   Control X finto. **L'ampli si è collegato, e i due cursori della pagina hanno comandato wah e volume**
+   (l'utente, 24 ottobre, sera): «il wah in un modo anomalo, ma è un passo avanti». **Da capire alla
+   prossima: cosa ha di anomalo il wah** (direzione? escursione? scatti? 0–65535 forse va ristretto alla
+   taratura, messaggio 0x0E). Il primo aggancio non c'era stato: nel registro nessuna domanda dell'ampli,
+   poi sì (forse il tasto tenuto meglio). Una volta il pedale si è riavviato da solo durante la prova,
+   causa ignota.
+
+**Trappola, verificata: chiusa l'app, l'ampli suona lo slot, non 0x7f.** Dopo «Regola» dall'app e l'app
+chiusa (col pedale che si ricollega), i 0x0104 del pedale cambiavano lo stato in 0x7f — riletto con
+0x0201 `[01 00]` — ma il suono restava quello dello slot. Con `0x0138 7f` («Fai suonare questo preset»
+nella pagina) i parametri tornano a suonare. Non è chiaro quale dei due momenti (l'app che si stacca o il
+pedale che si collega e legge gli slot) faccia tornare allo slot.
+
+**Gli attrezzi della prova** (restano, servono alla prossima):
+- **`tools/wah-ponte.ps1`**: tiene la seriale del pedale (DTR e RTS alti, chiusura giusta, si riaggancia
+  se il pedale riparte) e serve **`tools/wah.html`** su `http://localhost:8095/`; si chiude con `/basta`.
+  Web Serial in Chrome non si era collegato: la pagina adesso passa solo dal ponte. Il ponte ascolta solo
+  `localhost`; una pagina web qualunque aperta nello stesso momento potrebbe però mandargli comandi
+  (POST semplice): si tiene acceso solo durante le prove.
+- **Firmware 2.30** (prova-ble): dal seriale `J` (rampa sul wah), `Z` (sei modalità), `X` (CC 11 a
+  triangolo), `Q` (rilegge lo stato che suona, pezzi grezzi), righe `#i v` (parametro di JH.Vox846),
+  `#on`, `#suona` (0x0138 7f), `#cc v` (CC 11, mai provato con AmpliTube). La pagina li manda e
+  decodifica la rilettura.
+- **`prova-controlx`**: `#x a b` (0x0C), `#ins n` (0x0D), `#mappa a b`, `i` (annuncio, indirizzo, ampli).
+- **Sul pedale a fine sessione c'è di nuovo prova-ble 2.30** (verificato: risponde e cerca l'ampli).
+
+**Cosa resta, se l'utente vuole andare avanti:** capire il wah «anomalo»; poi decidere se il pedale vero
+fa anche il Control X. Il dubbio grosso: **due collegamenti con l'ampli in ruoli opposti** (il pedale
+centrale su FFC0 per i preset, periferica su FFC8 per l'espressione) — l'indirizzo casuale del Control X
+potrebbe bastare a farli sembrare due dispositivi. Il MIDI (AmpliTube) non è stato provato.
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni

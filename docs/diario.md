@@ -1192,3 +1192,12 @@ resta non comandabile); un pedale AIRSTEP via MIDI; un Tone Builder che prepara 
 ChatGPT (copia e incolla a mano, senza chiave) da una «Spark Tone Guide v2.3» per ruolo e pickup, col
 nostro catalogo copiato — vecchio ordine dei riverberi compreso. Segnala, non verificato, uno «schiocco»
 che si ripete nel loop quando la registrazione parte da remoto. **L'utente: niente di interessante.**
+
+## Estratto di CLAUDE.md del 24 ottobre 2026: tre voci di «Dove si riprende»
+
+- **Da verificare a orecchio**: quale posizione della levetta sia Limit (LA Comp), -15 dB (Optical Comp), HP
+  (SAB Driver) e Chorus (UniVibe); nel wah, 1/2 = 0,5 e il tempo lineare.
+- **Tuner** (20 ottobre, `v131`): `0x0165 c3`/`c2` (senza `0x00`); l'ampli tace e manda `0x0364` (nota 0–11
+  senza ottava, scostamento 0–1 con 0,5 intonata, -1 silenzio). Muto solo a scheda aperta, ampli collegato e
+  pagina in vista (`seguiAccordatore`). `docs/decisioni-ui.md`, «Il tuner».
+- **iPhone e iPad**: Bluefy, con gli UUID interi (`docs/decisioni-ui.md`, «Su iPhone e iPad»).
