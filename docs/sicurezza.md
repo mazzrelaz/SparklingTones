@@ -261,3 +261,7 @@ Controllo dopo le prove del pedale d'espressione (`docs/pedale-lavoro.md`, «Il 
 - **`pedale/prova-controlx/`** si annuncia come un Control X e accetta chiunque si colleghi; chi si
   collega riceve le posizioni dei pedali e le risposte di un Control X; quello che scrive il firmware lo
   stampa e basta. È una prova, non va sul pedale vero così.
+- **25 ottobre**: `tools/wah.html` si collega anche **direttamente all'ampli** col Bluetooth del PC e manda
+  comandi interi (0x0104, 0x0115, 0x0128, 0x01a0, 0x019f): solo da pulsanti fissi della pagina, nessun campo
+  libero. Il btsnoop dell'app ufficiale (con la chiave 0x0170) è rimasto nello scratchpad, fuori dal
+  repository.

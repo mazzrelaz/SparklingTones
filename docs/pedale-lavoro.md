@@ -335,10 +335,53 @@ pedale che si collega e legge gli slot) faccia tornare allo slot.
 - **`prova-controlx`**: `#x a b` (0x0C), `#ins n` (0x0D), `#mappa a b`, `i` (annuncio, indirizzo, ampli).
 - **Sul pedale a fine sessione c'è di nuovo prova-ble 2.30** (verificato: risponde e cerca l'ampli).
 
-**Cosa resta, se l'utente vuole andare avanti:** capire il wah «anomalo»; poi decidere se il pedale vero
-fa anche il Control X. Il dubbio grosso: **due collegamenti con l'ampli in ruoli opposti** (il pedale
-centrale su FFC0 per i preset, periferica su FFC8 per l'espressione) — l'indirizzo casuale del Control X
-potrebbe bastare a farli sembrare due dispositivi. Il MIDI (AmpliTube) non è stato provato.
+### 25 ottobre: **il wah col Control X finto funziona** — l'«onda» era il chorus del preset
+
+Il wah «anomalo» del 24: il pedale 1 apriva e chiudeva il tono ma sotto restava un'onda; col Control X
+vero, in un video (GotoAndPlay, «Unlock the J.H. Legendary Wah (Control X Setup)»), l'onda non c'è.
+**Era il chorus**: nel preset «prova» `ChorusAnalog` acceso con tutte e quattro le manopole a 1.
+Spento il chorus (0x0115 dalla pagina), **il pedale 1 muove solo il wah** (l'utente, 25 ottobre). Prima
+di arrivarci, escluse una per una (tutte provate, nessuna toglie un'onda che non era del wah): Auto Wah
+e Legendary Wah, Auto Detect con sensibilità 0, Wah LFO assegnato dall'app ufficiale, «jack inserito»
+(0x0D) mandato dal finto, 0x0128 sì, 0x019f. **Lezione: prima di cercare nel protocollo, guardare il
+resto della catena che suona.**
+
+**L'app ufficiale prende il finto per un Control X vero.** Collegato all'ampli, l'app chiede (attraverso
+l'ampli, che gira tutto al pedale su FFC9) nomi e mappe degli otto profili, propone «Transfer Control X
+Profiles», e il menu dei pedali (icona a sinistra di ToneCloud) lo gestisce. Il Transfer arriva come
+`0x13` (nome del profilo: «Preset Mode 1», «Stompbox Mode 1», «Music/Preset 1»…) e `0x03 00 00 00
+<profilo> <tasto 1–8> 80 <09 tasti, 01 pedali, 02 alcuni> 05 01 <funzione>`; di serie i pedali sono
+`72` e `75`. «Control Wah LFO» su EXP1 arriva come `… 07 80 01 05 01 70`. Nell'Auto Wah l'app scrive
+«Parameter Controlled by Spark Control» e spegne le regolazioni.
+
+**Btsnoop dell'app ufficiale** (bugreport del telefono, 25 ottobre; grezzo **fuori dal repository**: c'è la
+chiave 0x0170, l'ampli ha risposto `0x0470 00 00`). Comandi nuovi app → ampli su FFC0:
+- `0x019a`: scrive nell'ampli un profilo del Control X (nome «Profile #1», poi `08 00 00 01 0c 02 03 08 70
+  72` — i sei tasti e i due pedali, quello che il finto aveva detto); otto volte, ack `0x049a`.
+- `0x019f [01 nn]`: **la calibrazione del pedale d'espressione**. Mandato dalla pagina, l'ampli lo gira al
+  pedale come `0e 00 00 00 <passo> 01` (nn 00→passo 01, 01→00, 02→02, 03→03); ack `0x049f`. Il finto la ignora.
+- `0x0128 [JH.Vox846, bool, 00]`: l'app manda sì e 6 ms dopo no, appena collegata; **l'ampli non lo
+  conferma mai** (né all'app né a noi), e da solo non cambia niente di udibile. Significato ignoto.
+- `0x01a0 [bool]` dopo la domanda `0x029c` (risposta no): l'app manda no, ack `0x04a0`. Ignoto.
+- Ampli → app: `0x03a1 [n, bool]` pedale d'espressione n inserito (arriva dopo il nostro 0x0D 03),
+  `0x039e [00 01]`, `0x0328` di continuo nei primi secondi (un float minuscolo: livello d'ingresso?).
+- Cambiando fra Auto Wah e Legendary Wah l'app manda `0x0106` JH.Vox846 → JH.Vox846, `0x0115`, il preset
+  intero e `0x0138 7f`, con il wah in Auto Detect (1, 1, 0,5, 0,25, 0,5) e **cinque** parametri, non sei.
+
+**Gli attrezzi, aggiornati**: `tools/wah.html` ha anche «Ampli diretto»: col Bluetooth del PC (Chrome,
+`localhost:8095`) si collega all'ampli su FFC0, manda 0x0128, 0x01a0, 0x019f, chorus spento/acceso, e
+quando è collegato i pulsanti e il cursore del wah vanno all'ampli invece che al pedale. Le notifiche si
+riassemblano con `Spark.MessageAssembler` (arrivano con l'intestazione di blocco davanti). **L'app
+ufficiale va chiusa**: l'ampli regge un solo FFC0. `prova-controlx`: dopo l'aggancio manda da solo
+«jack inserito» (0x0D 03), stampa una 0x0C al secondo; **una volta si è bloccato** dopo minuti di cursore
+(USB viva, programma fermo; causa ignota). **L'indirizzo casuale cambia a ogni accensione**: si riaggancia
+col tasto dell'ampli. Caricando, due volte la XIAO è rimasta in COM13: **un secondo `upload` la fa
+ripartire**.
+
+**Cosa resta, se l'utente vuole andare avanti:** decidere se il pedale vero fa anche il Control X. Il
+dubbio grosso: **due collegamenti con l'ampli in ruoli opposti** (il pedale centrale su FFC0 per i preset,
+periferica su FFC8 per l'espressione) — l'indirizzo casuale del Control X potrebbe bastare a farli
+sembrare due dispositivi. Poi l'hardware (jack su J10/D2, taratura) e il MIDI (AmpliTube, mai provato).
 
 ## Dove si riprende col pedale — 24 settembre 2026
 

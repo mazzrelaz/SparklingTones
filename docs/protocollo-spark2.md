@@ -636,3 +636,19 @@ crude. Ancora nessun `0x0365`.
 e `Spark.letturaAccordatore`, con sei test. **Provato dall'utente sull'ampli vero** (dal PC, bozza
 su localhost): accende, legge, spegne uscendo dalla scheda. **Non verificato**: cosa succede se la
 scheda è già aperta mentre l'app si collega e legge gli otto slot (il tuner parte subito).
+
+
+## Lo Spark Control X e i comandi che lo riguardano — 24–25 ottobre 2026
+
+**Con lo Spark 2 il Control X è una periferica a cui si collega l'ampli** (tasto di accoppiamento tenuto
+premuto), servizio **FFC8**: FFC9 lo scrive l'ampli, FFCA notifica verso l'ampli. Messaggi `id 00 00 00 …`
+(protocollo da `paulhamsh/Spark-Control-X`). **Il pedale d'espressione non è un parametro del preset**: il
+wah (`0x70`, «Expression Wah LFO») e il volume (`0x72`) li fa l'ampli con la posizione `0c 00 00 00 01
+<lo> <hi> 02 <lo> <hi>`, e cosa fa ogni pedale lo dice la mappa del profilo (`0x14`). Il nostro Control X
+finto (`pedale/prova-controlx/`) comanda wah e volume, e l'app ufficiale lo prende per vero.
+
+Comandi FFC0 nuovi, visti nel btsnoop dell'app ufficiale col Control X finto agganciato (25 ottobre):
+`0x019a` scrive un profilo del Control X nell'ampli; `0x019f [01 nn]` è la calibrazione (l'ampli la gira
+al pedale come `0x0E`); `0x0128 [nome, bool, 00]` mai confermato, ignoto; `0x01a0 [bool]` dopo
+`0x029c`, ignoto; `0x03a1 [n, bool]` pedale n inserito. Dettaglio, byte e prove in
+`docs/pedale-lavoro.md`, «Il pedale d'espressione».

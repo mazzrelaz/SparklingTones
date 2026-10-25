@@ -74,7 +74,14 @@ class Collegamenti : public BLEServerCallbacks {
 };
 
 static void manda(const uint8_t* d, size_t n) {
-  stampaHex("  al-ampli ", d, n);
+  // Le posizioni dei pedali (0x0C) arrivano venti volte al secondo: sul
+  // seriale una ogni secondo basta (25 ottobre: il programma si e' bloccato
+  // dopo qualche minuto di cursore, causa da capire; meno stampa, meno dubbi).
+  static uint32_t ultima0c = 0;
+  if (d[0] != 0x0c || millis() - ultima0c > 1000) {
+    stampaHex("  al-ampli ", d, n);
+    if (d[0] == 0x0c) ultima0c = millis();
+  }
   if (!chVersoAmpli || !ampliDentro) { Serial.println(F("  (nessun ampli collegato)")); return; }
   chVersoAmpli->setValue((uint8_t*)d, n);
   chVersoAmpli->notify();
@@ -226,7 +233,16 @@ void loop() {
     rispondi(coda[testa], codaN[testa]);
     testa = (uint8_t)((testa + 1) % CODA);
   }
-  if (ampliEntrato) { ampliEntrato = false; Serial.println(F("l'ampli si e' collegato")); }
+  // Il Control X vero avvisa quando si infila il jack (0x0D): il nostro lo
+  // diceva solo se chiesto, e l'onda dell'Auto Wah restava (25 ottobre).
+  // Si prova a dirlo da soli, un attimo dopo l'aggancio.
+  static uint32_t avvisoJack = 0;
+  if (ampliEntrato) { ampliEntrato = false; avvisoJack = millis() + 3000;
+                      Serial.println(F("l'ampli si e' collegato")); }
+  if (avvisoJack && (int32_t)(millis() - avvisoJack) > 0) {
+    avvisoJack = 0;
+    if (ampliDentro) { const uint8_t d[5] = { 0x0d, 0, 0, 0, 0x03 }; manda(d, 5); }
+  }
   if (ampliUscito)  { ampliUscito = false;  Serial.println(F("l'ampli se n'e' andato: mi riannuncio"));
                       BLEDevice::startAdvertising(); }
   leggiSeriale();

@@ -84,6 +84,30 @@
   </div>
 
   <div class="passo">
+    <h2>Ampli diretto · 0x0128</h2>
+    <button id="ampliBt">Collega l'ampli (Bluetooth del PC)</button>
+    <span id="statoBt" class="nota">non collegato</span>
+    <div>
+      <button class="c128" data-si="1" disabled>Wah comandato dal pedale: sì</button>
+      <button class="c128" data-si="0" disabled>no</button>
+    </div>
+    <div>
+      <button class="cgrezzo" data-cmd="15" data-dati="0c ac 43 68 6f 72 75 73 41 6e 61 6c 6f 67 c2 00" disabled>Spegni il chorus</button>
+      <button class="cgrezzo" data-cmd="15" data-dati="0c ac 43 68 6f 72 75 73 41 6e 61 6c 6f 67 c3 00" disabled>Riaccendi il chorus</button>
+    </div>
+    <div>
+      <button class="cgrezzo" data-cmd="a0" data-dati="c3" disabled>0x01a0 sì</button>
+      <button class="cgrezzo" data-cmd="a0" data-dati="c2" disabled>0x01a0 no</button>
+      <button class="cgrezzo" data-cmd="9f" data-dati="01 00" disabled>0x019f 01 00</button>
+      <button class="cgrezzo" data-cmd="9f" data-dati="01 01" disabled>01 01</button>
+      <button class="cgrezzo" data-cmd="9f" data-dati="01 02" disabled>01 02</button>
+      <button class="cgrezzo" data-cmd="9f" data-dati="01 03" disabled>01 03</button>
+    </div>
+    <p class="nota">Altri due comandi nuovi della cattura: 0x01a0 (sì/no, l'app manda «no» dopo aver chiesto 0x029c) e 0x019f (l'app ha mandato 01 00, 01 02, 01 03).</p>
+    <p class="nota">L'app ufficiale, appena collegata, ha mandato 0x0128 «JH.Vox846» sì e subito no (btsnoop del 25 ottobre). Prima chiudi l'app ufficiale: l'ampli ne regge una sola.</p>
+  </div>
+
+  <div class="passo">
     <h2>MIDI · AmpliTube</h2>
     <div class="pedale">
       <input id="cursoreCC" type="range" min="0" max="127" value="0" disabled>
@@ -129,7 +153,13 @@ async function manda(testo) {
   try { await fetch('/manda', { method: 'POST', body: testo }); }
   catch (e) { log('Il ponte non risponde: ' + e.message); }
 }
-const riga = r => manda('#' + r + '\n');
+/* Le righe del wah vanno al pedale (prova-ble le gira all'ampli). Se pero'
+ * l'ampli e' collegato direttamente col Bluetooth del PC (sezione 0x0128),
+ * vanno a lui: col Control X finto sul pedale non c'e' altra strada. */
+const riga = r => {
+  if (scrittura && !r.startsWith('x ') && !r.startsWith('cc ')) return rigaDiretta(r);
+  return manda('#' + r + '\n');
+};
 
 /* ---- i pulsanti ---- */
 
@@ -185,6 +215,75 @@ setInterval(() => {
   riga('x ' + $('exp1').value + ' ' + $('exp2').value);
   cxDaMandare = false;
 }, 10);
+
+/* ---- l'ampli diretto, col Bluetooth del PC: solo per 0x0128 ----
+ * Stesse regole dell'app: scrittura senza risposta su FFC1, pezzi da 20 byte,
+ * una operazione GATT per volta. */
+let scrittura = null, seqBt = 1;
+async function comandoDiretto(sub, dati, descrizione) {
+  const frame = Array.from(Spark.encode({ cmd: 0x01, sub, data: dati }, seqBt, false));
+  seqBt = seqBt >= 0x3e ? 1 : seqBt + 1;
+  if (descrizione) log('→ all\'ampli: ' + descrizione);
+  try { await mandaAmpli(frame); } catch (e) { log('Ampli: ' + e.message); }
+}
+/** «on», «suona», «<indice> <valore>»: gli stessi comandi del pedale, diretti. */
+function rigaDiretta(r) {
+  const nome = Spark.encPrefixedString('JH.Vox846');
+  if (r === 'on') return comandoDiretto(0x15, [...nome, 0xc3, 0x00], 'accendi il wah');
+  if (r === 'suona') return comandoDiretto(0x38, [0x00, 0x7f], 'suona 0x7f');
+  const [i, v] = r.split(' ');
+  return Spark.commands && comandoDiretto(0x04, Spark.commands.changeParam('JH.Vox846', +i, +v).data,
+                                          /^[01]$/.test(i) ? 'wah indice ' + i + ' = ' + v : null);
+}
+async function mandaAmpli(frame) {
+  for (let i = 0; i < frame.length; i += 20)
+    await scrittura.writeValueWithoutResponse(new Uint8Array(frame.slice(i, i + 20)));
+}
+$('ampliBt').addEventListener('click', async () => {
+  try {
+    const dev = await navigator.bluetooth.requestDevice({ filters: [{ namePrefix: 'Spark' }], optionalServices: [0xffc0] });
+    const srv = await (await dev.gatt.connect()).getPrimaryService(0xffc0);
+    scrittura = await srv.getCharacteristic(0xffc1);
+    const notifiche = await srv.getCharacteristic(0xffc2);
+    // Le notifiche arrivano a pezzi: si riassemblano fra f0 e f7 come fa l'app.
+    // Si mostra tutto tranne 0x0328 (arriva di continuo) e i pezzi dei preset.
+    const assemblatore = new Spark.MessageAssembler(m => {
+      const id = (m.cmd.toString(16).padStart(2, '0') + m.sub.toString(16).padStart(2, '0'));
+      if (id === '0328' || id === '0301') return;
+      log('← l\'ampli: 0x' + id + (m.data.length ? '  ' + m.data.map(x => x.toString(16).padStart(2, '0')).join(' ') : ''));
+    });
+    notifiche.addEventListener('characteristicvaluechanged', ev =>
+      assemblatore.feed(new Uint8Array(ev.target.value.buffer, ev.target.value.byteOffset, ev.target.value.byteLength)));
+    await notifiche.startNotifications();
+    $('statoBt').textContent = 'collegato: ' + dev.name;
+    document.querySelectorAll('.c128, .cgrezzo').forEach(b => { b.disabled = false; });
+    dev.addEventListener('gattserverdisconnected', () => {
+      scrittura = null;
+      $('statoBt').textContent = 'scollegato';
+      document.querySelectorAll('.c128, .cgrezzo').forEach(b => { b.disabled = true; });
+    });
+  } catch (e) { log('Ampli: ' + e.message); }
+});
+document.querySelectorAll('.c128').forEach(b => b.addEventListener('click', async () => {
+  if (!scrittura) return;
+  const si = b.dataset.si === '1';
+  // [nome con lunghezza, vero/falso, 0x00]: come 0x0115, byte per byte quello dell'app.
+  const dati = [...Spark.encPrefixedString('JH.Vox846'), si ? 0xc3 : 0xc2, 0x00];
+  const frame = Array.from(Spark.encode({ cmd: 0x01, sub: 0x28, data: dati }, seqBt, false));
+  seqBt = seqBt >= 0x3e ? 1 : seqBt + 1;
+  log('→ all\'ampli: 0x0128 JH.Vox846 ' + (si ? 'sì' : 'no'));
+  try { await mandaAmpli(frame); } catch (e) { log('Ampli: ' + e.message); }
+}));
+
+// 0x01a0 e 0x019f: i dati sono quelli della cattura, gia' spacchettati.
+document.querySelectorAll('.cgrezzo').forEach(b => b.addEventListener('click', async () => {
+  if (!scrittura) return;
+  const dati = b.dataset.dati.split(' ').map(h => parseInt(h, 16));
+  const frame = Array.from(Spark.encode({ cmd: 0x01, sub: parseInt(b.dataset.cmd, 16), data: dati }, seqBt, false));
+  seqBt = seqBt >= 0x3e ? 1 : seqBt + 1;
+  log('→ all\'ampli: 0x01' + b.dataset.cmd + ' ' + b.dataset.dati);
+  try { await mandaAmpli(frame); } catch (e) { log('Ampli: ' + e.message); }
+}));
 
 // Il CC non passa dall'ampli: va al PC, e puo' andare piu' fitto (30 ms).
 let ccDaMandare = null, ultimoCC = 0;

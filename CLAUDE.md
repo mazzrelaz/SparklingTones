@@ -347,10 +347,10 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   prova (l'inglese no, per la regola sull'inglese).
 - **Pedale d'espressione** (24 ottobre, prove): volume col Master liscio; il wah manuale **non è un parametro** di
   `JH.Vox846`. Lo fa l'ampli se il pedale **si finge uno Spark Control X** (servizio FFC8, l'ampli si collega lui,
-  mappa 0x70 wah / 0x72 volume, posizione con 0x0C): `pedale/prova-controlx/` ha comandato wah e volume, il wah «in
-  modo anomalo», da capire. Attrezzi: `tools/wah-ponte.ps1` + `tools/wah.html`. **Trappola**: chiusa l'app l'ampli
-  suona lo slot, i 0x0104 cambiano 0x7f senza suonare finché non arriva `0x0138 7f`. Tutto in
-  `docs/pedale-lavoro.md`, «Il pedale d'espressione».
+  mappa 0x70 wah / 0x72 volume, posizione con 0x0C): `pedale/prova-controlx/` comanda wah e volume
+  (25 ottobre: l'«onda» che restava era il chorus del preset), e l'app ufficiale lo prende per un Control X
+  vero. Attrezzi: `tools/wah-ponte.ps1` + `tools/wah.html`. **Trappola**: chiusa l'app l'ampli suona lo slot,
+  i 0x0104 cambiano 0x7f senza suonare finché non arriva `0x0138 7f`. Tutto in `docs/pedale-lavoro.md`.
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
 - **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key): **mai più catture o
