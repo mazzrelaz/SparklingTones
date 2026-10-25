@@ -24,6 +24,17 @@
  *   #x a b    manda 0x0C: pedale 1 = a, pedale 2 = b (0..65535)
  *   #ins n    manda 0x0D: pedali inseriti (0 nessuno, 1, 2, 3 tutti e due)
  *   #mappa a b   il profilo dice: pedale 1 fa a, pedale 2 fa b (hex, 70 72 75)
+ *   #ampli    il doppio ruolo (25 ottobre): si collega anche lui all'ampli su
+ *             FFC0, come prova-ble, per suonare i preset
+ *   #slot n   0x0138 sullo slot n (0..7), col collegamento di #ampli
+ *
+ * Il doppio ruolo: per i preset il pedale e' il centrale e si collega
+ * all'ampli; per il Control X e' l'ampli a collegarsi al pedale. Due
+ * collegamenti fra gli stessi due apparecchi: si tengono distinti con due
+ * indirizzi, **quello vero per i preset, il casuale per il Control X**. La
+ * libreria del core ha un interruttore solo (m_ownAddrType), letto quando la
+ * connessione o l'annuncio partono: si mette a pubblico prima di scansione e
+ * connessione e si rimette a casuale subito dopo, prima di ogni annuncio.
  */
 
 #include <BLEDevice.h>
@@ -118,6 +129,106 @@ static void rispondi(const uint8_t* m, size_t n) {
   }
 }
 
+/* ---- il doppio ruolo: l'ampli su FFC0, come prova-ble ---- */
+
+static BLEUUID UUID_SPARK((uint16_t)0xFFC0), UUID_SCRIVI((uint16_t)0xFFC1), UUID_ASCOLTA((uint16_t)0xFFC2);
+static BLEClient*               client = nullptr;
+static BLERemoteCharacteristic* chPreset = nullptr;     // FFC1 dell'ampli
+static BLEAdvertisedDevice*     trovato = nullptr;
+static volatile bool            cercaAmpli = false, scansioneFinita = false;
+static uint8_t                  seq = 1;
+static volatile uint32_t        notificheFFC0 = 0;
+
+class TrovaAmpli : public BLEAdvertisedDeviceCallbacks {
+  void onResult(BLEAdvertisedDevice d) override {
+    if (trovato || !d.haveServiceUUID() || !d.isAdvertisingService(UUID_SPARK)) return;
+    Serial.printf("trovato: %s [%s] rssi %d\n", d.getName().c_str(), d.getAddress().toString().c_str(), d.getRSSI());
+    trovato = new BLEAdvertisedDevice(d);
+    BLEDevice::getScan()->stop();
+  }
+};
+static void fineScansione(BLEScanResults) { scansioneFinita = true; }
+
+static void dallAmpliFFC0(BLERemoteCharacteristic*, uint8_t* d, size_t n, bool) {
+  notificheFFC0++;
+  // Solo gli ack corti: i pezzi dei preset sarebbero rumore.
+  if (n <= 10) stampaHex("  ffc0<- ", d, n);
+}
+
+static void indirizzoPubblico(bool si) {
+  if (!BLEDevice::setOwnAddrType(si ? BLE_OWN_ADDR_PUBLIC : BLE_OWN_ADDR_RANDOM))
+    Serial.println(F("cambio di indirizzo rifiutato"));
+}
+
+static void avviaRicercaAmpli() {
+  if (client && client->isConnected()) { Serial.println(F("ampli FFC0 gia' collegato")); return; }
+  if (trovato) { delete trovato; trovato = nullptr; }
+  indirizzoPubblico(true);                       // scansione e connessione: l'indirizzo vero
+  BLEScan* scan = BLEDevice::getScan();
+  scan->setAdvertisedDeviceCallbacks(new TrovaAmpli());
+  scan->setActiveScan(true);
+  scansioneFinita = false;
+  if (!scan->start(6, fineScansione, false)) { Serial.println(F("scansione non partita")); indirizzoPubblico(false); return; }
+  cercaAmpli = true;
+  Serial.println(F("cerco l'ampli per i preset (indirizzo vero)..."));
+}
+
+/** Dal loop: a ricerca finita si aggancia, poi si torna all'indirizzo casuale. */
+static void sbrigaRicercaAmpli() {
+  if (!cercaAmpli || (!trovato && !scansioneFinita)) return;
+  if (trovato && !scansioneFinita) { BLEDevice::getScan()->stop(); }
+  cercaAmpli = false;
+  BLEDevice::getScan()->clearResults();
+  bool ok = false;
+  if (!trovato) Serial.println(F("ampli non trovato (FFC0)"));
+  else {
+    if (!client) client = BLEDevice::createClient();
+    if (!client->connect(trovato)) Serial.println(F("connessione FFC0 fallita"));
+    else {
+      BLERemoteService* s = client->getService(UUID_SPARK);
+      chPreset = s ? s->getCharacteristic(UUID_SCRIVI) : nullptr;
+      BLERemoteCharacteristic* n = s ? s->getCharacteristic(UUID_ASCOLTA) : nullptr;
+      if (!chPreset || !n) { Serial.println(F("FFC0 senza caratteristiche")); client->disconnect(); chPreset = nullptr; }
+      else { n->registerForNotify(dallAmpliFFC0); ok = true; }
+    }
+  }
+  indirizzoPubblico(false);                      // da qui in poi l'annuncio e' del Control X
+  Serial.printf("FFC0: %s; Control X: %s\n", ok ? "COLLEGATO" : "no",
+                ampliDentro ? "collegato" : "non collegato");
+  if (!ampliDentro && !BLEDevice::getAdvertising()->isAdvertising()) BLEDevice::startAdvertising();
+}
+
+static size_t impacchetta(const uint8_t* dati, size_t n, uint8_t* fuori) {
+  size_t out = 0;
+  for (size_t base = 0; base < n; base += 7) {
+    const size_t quanti = (n - base < 7) ? (n - base) : 7;
+    const size_t posMsb = out++;
+    uint8_t msb = 0;
+    for (size_t k = 0; k < quanti; k++) {
+      if (dati[base + k] & 0x80) msb |= (1 << k);
+      fuori[out++] = dati[base + k] & 0x7f;
+    }
+    fuori[posMsb] = msb;
+  }
+  return out;
+}
+
+/** 0x0138 [banco 0, slot], come cambiaPreset di prova-ble (niente 0x00 in coda). */
+static void cambiaSlot(uint8_t slot) {
+  if (!chPreset || !client || !client->isConnected()) { Serial.println(F("FFC0 non collegato: prima #ampli")); return; }
+  const uint8_t dati[2] = { 0x00, slot };
+  uint8_t packed[8];
+  const size_t np = impacchetta(dati, 2, packed);
+  uint8_t f[16], n = 0, cs = 0;
+  for (size_t i = 0; i < np; i++) cs ^= packed[i];
+  f[n++] = 0xf0; f[n++] = 0x01; f[n++] = seq; f[n++] = cs; f[n++] = 0x01; f[n++] = 0x38;
+  for (size_t i = 0; i < np; i++) f[n++] = packed[i];
+  f[n++] = 0xf7;
+  if (++seq > 0x3e) seq = 1;
+  stampaHex("  ffc0-> ", f, n);
+  chPreset->writeValue(f, n, false);
+}
+
 /* ---- il seriale ---- */
 
 static char riga[40];
@@ -136,6 +247,8 @@ static void eseguiRiga() {
   else if (sscanf(riga, "ins %u", &a) == 1 && a <= 3) { const uint8_t d[5] = { 0x0d, 0, 0, 0, (uint8_t)a }; manda(d, 5); }
   else if (sscanf(riga, "mappa %x %x", &a, &b) == 2) { mappa[6] = a; mappa[7] = b;
                                                        Serial.printf("mappa: pedale 1 = %02x, pedale 2 = %02x\n", a, b); }
+  else if (!strcmp(riga, "ampli")) avviaRicercaAmpli();
+  else if (sscanf(riga, "slot %u", &a) == 1 && a <= 7) cambiaSlot((uint8_t)a);
   else Serial.printf("riga non capita: \"%s\"\n", riga);
 }
 
@@ -146,10 +259,13 @@ static void leggiSeriale() {
       if (c == '#') lungRiga = 0;
       else if (c == 'r') Serial.println(F("prova-controlx: sono il Control X finto"));
       // Lo stato: i messaggi dell'avvio si perdono prima che il ponte apra la porta.
-      else if (c == 'i') Serial.printf("annuncio %s, indirizzo %s (casuale %s), ampli %s, %u domande ricevute\n",
+      else if (c == 'i') Serial.printf("annuncio %s, indirizzo %s (casuale %s), Control X %s, %u domande; "
+                                       "FFC0 %s, %u notifiche\n",
                                        BLEDevice::getAdvertising()->isAdvertising() ? "acceso" : "SPENTO",
                                        BLEDevice::getAddress().toString().c_str(), indirizzoCasuale,
-                                       ampliDentro ? "collegato" : "non collegato", domande);
+                                       ampliDentro ? "collegato" : "non collegato", domande,
+                                       (client && client->isConnected()) ? "collegato" : "non collegato",
+                                       notificheFFC0);
       continue;
     }
     if (c == '\n' || c == '\r') { riga[lungRiga] = 0; lungRiga = -1; eseguiRiga(); continue; }
@@ -245,6 +361,10 @@ void loop() {
   }
   if (ampliUscito)  { ampliUscito = false;  Serial.println(F("l'ampli se n'e' andato: mi riannuncio"));
                       BLEDevice::startAdvertising(); }
+  sbrigaRicercaAmpli();
+  static bool ffc0Prima = false;                 // il collegamento FFC0 che cade, detto una volta
+  const bool ffc0 = client && client->isConnected();
+  if (ffc0 != ffc0Prima) { ffc0Prima = ffc0; if (!ffc0) { chPreset = nullptr; Serial.println(F("FFC0: l'ampli si e' staccato")); } }
   leggiSeriale();
   delay(2);
 }

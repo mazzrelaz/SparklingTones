@@ -392,7 +392,21 @@ lettura grezza al passo 1 e al passo 2 e da lì in poi riportarla su 0…32767. 
 collegata** — con `#ins 0` e `#ins 3` è partita. Il pedale vero lo manderà a ogni inserimento e
 disinserimento del jack (e lo ripeterà all'aggancio).
 
-**Cosa resta, se l'utente vuole andare avanti:** decidere se il pedale vero fa anche il Control X. Il
+**Funziona anche con l'Auto Wah normale**, quello senza pacchetto Hendrix (l'utente, 25 ottobre).
+
+**Il doppio ruolo è scritto ma non provato** (25 ottobre, sera): `prova-controlx` con `#ampli` si collega
+anche lui all'ampli su FFC0, come prova-ble, e `#slot n` manda `0x0138`; nella pagina «Collega i preset» e
+A1…B4. Due indirizzi: **quello vero per i preset, il casuale per il Control X**. Nella libreria del core
+connessione, scansione e annuncio leggono tutti lo stesso `BLEDevice::m_ownAddrType` (privato), ma solo
+quando partono: `setOwnAddrType(PUBLIC)` prima di scansione e connessione, `setOwnAddrType(RANDOM)` subito
+dopo e prima di ogni annuncio. Il server riceve solo i collegamenti nati dal suo annuncio (callback
+dell'annuncio), quindi il client non si confonde col Control X. Compila; **sull'ampli non è mai partito**.
+Da provare in tutti e due gli ordini (prima il Control X, poi `#ampli`, e viceversa).
+
+**A fine sessione la XIAO è rimasta in COM13** anche dopo tre `upload` riusciti (prova-ble 2.30 scritta e
+verificata): non riparte dal PC, va spenta e riaccesa.
+
+**Cosa resta, se l'utente vuole andare avanti:** la prova del doppio ruolo, qui sopra. Il
 dubbio grosso: **due collegamenti con l'ampli in ruoli opposti** (il pedale centrale su FFC0 per i preset,
 periferica su FFC8 per l'espressione) — l'indirizzo casuale del Control X potrebbe bastare a farli
 sembrare due dispositivi. Poi l'hardware (jack su J10/D2, taratura) e il MIDI (AmpliTube, mai provato).

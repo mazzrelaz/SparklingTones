@@ -89,6 +89,18 @@
       <button class="fondo" data-v="segno">con segno (−32768…32767)</button>
     </div>
     <div>
+      <span class="nota">Doppio ruolo (preset dal pedale):</span>
+      <button class="cmd" data-riga="ampli">Collega i preset</button>
+      <button class="cmd slot" data-riga="slot 0">A1</button>
+      <button class="cmd slot" data-riga="slot 1">A2</button>
+      <button class="cmd slot" data-riga="slot 2">A3</button>
+      <button class="cmd slot" data-riga="slot 3">A4</button>
+      <button class="cmd slot" data-riga="slot 4">B1</button>
+      <button class="cmd slot" data-riga="slot 5">B2</button>
+      <button class="cmd slot" data-riga="slot 6">B3</button>
+      <button class="cmd slot" data-riga="slot 7">B4</button>
+    </div>
+    <div>
       <button id="spazzataCX" disabled>Leva automatica: avvia</button>
       <span class="nota" id="spazzataCXstato"></span>
     </div>
@@ -171,7 +183,7 @@ async function manda(testo) {
  * l'ampli e' collegato direttamente col Bluetooth del PC (sezione 0x0128),
  * vanno a lui: col Control X finto sul pedale non c'e' altra strada. */
 const riga = r => {
-  if (scrittura && !r.startsWith('x ') && !r.startsWith('cc ')) return rigaDiretta(r);
+  if (scrittura && !/^(x |cc |slot |ampli$|ins )/.test(r)) return rigaDiretta(r);
   return manda('#' + r + '\n');
 };
 
