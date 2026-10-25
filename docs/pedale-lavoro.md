@@ -378,6 +378,20 @@ ufficiale va chiusa**: l'ampli regge un solo FFC0. `prova-controlx`: dopo l'agga
 col tasto dell'ampli. Caricando, due volte la XIAO è rimasta in COM13: **un secondo `upload` la fa
 ripartire**.
 
+**La scala della posizione (25 ottobre, a orecchio con la leva automatica della pagina): 0…32767.** Con
+0…65535 il wah si apriva fino a metà corsa e poi si richiudeva; «con segno» (−32768…32767) partiva aperto,
+chiudeva a metà e riapriva. È la stessa curva: **tutto chiuso a 0 (e a 65535), tutto aperto a
+32767–32768**. Quindi il firmware manda 0…32767, e 0 è già il fondo chiuso. Anche i valori di un Control X
+vero nel README di paulhamsh stanno sotto 0x8000. Il volume (pedale 2) era pieno a 65535.
+
+**La calibrazione la fa il pedale, l'ampli la comanda soltanto.** Dall'app ufficiale (menu dei pedali →
+EXP1 → Calibrate) arrivano al pedale `0e 00 00 00 01 01` (tallone), `0e 00 00 00 02 01` (punta), `0e 00 00
+00 03 01` (fatto: «calibrazione effettuata»); l'ultimo byte è il pedale. Il pedale deve ricordarsi la
+lettura grezza al passo 1 e al passo 2 e da lì in poi riportarla su 0…32767. **Prima, l'app diceva
+«Please Connect EXP Pedal»**: vuole l'avviso «jack inserito» (0x0D) mandato dal pedale **mentre lei è
+collegata** — con `#ins 0` e `#ins 3` è partita. Il pedale vero lo manderà a ogni inserimento e
+disinserimento del jack (e lo ripeterà all'aggancio).
+
 **Cosa resta, se l'utente vuole andare avanti:** decidere se il pedale vero fa anche il Control X. Il
 dubbio grosso: **due collegamenti con l'ampli in ruoli opposti** (il pedale centrale su FFC0 per i preset,
 periferica su FFC8 per l'espressione) — l'indirizzo casuale del Control X potrebbe bastare a farli

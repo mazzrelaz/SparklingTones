@@ -75,11 +75,25 @@
   <div class="passo">
     <h2>Control X finto · pedale/prova-controlx</h2>
     <div class="pedale">
-      <input id="exp1" class="cx" type="range" min="0" max="65535" value="0" disabled>
+      <input id="exp1" class="cx" type="range" min="0" max="1000" value="0" disabled>
       <div><div class="cxValore" id="exp1v">0</div><div class="nota">pedale 1 · wah (0x70)</div></div>
-      <input id="exp2" class="cx" type="range" min="0" max="65535" value="65535" disabled>
-      <div><div class="cxValore" id="exp2v">65535</div><div class="nota">pedale 2 · volume (0x72)</div></div>
+      <input id="exp2" class="cx" type="range" min="0" max="1000" value="1000" disabled>
+      <div><div class="cxValore" id="exp2v">–</div><div class="nota">pedale 2 · volume (0x72)</div></div>
     </div>
+    <div>
+      <span class="nota">Fondo scala (il valore mandato col cursore tutto su):</span>
+      <button class="fondo" data-v="65535">65535</button>
+      <button class="fondo scelto" data-v="32767">32767</button>
+      <button class="fondo" data-v="16383">16383</button>
+      <button class="fondo" data-v="4095">4095</button>
+      <button class="fondo" data-v="segno">con segno (−32768…32767)</button>
+    </div>
+    <div>
+      <button id="spazzataCX" disabled>Leva automatica: avvia</button>
+      <span class="nota" id="spazzataCXstato"></span>
+    </div>
+    <p class="nota">La leva del wah (pedale 1) va su e giù da sola, di continuo: 4 secondi a salire, 4 a scendere,
+      col fondo scala scelto sopra (si può cambiare mentre va). Il volume (pedale 2) resta pieno. Ripremi per fermarla.</p>
     <p class="nota">Solo col programma di prova del Control X sul pedale, e l'ampli collegato a lui col tasto di accoppiamento.</p>
   </div>
 
@@ -204,15 +218,53 @@ setInterval(() => {
 
 // I due pedali del Control X finto: si mandano sempre insieme, come il vero
 // (0x0C li porta tutti e due), non piu' di uno ogni 50 ms.
-let cxDaMandare = false, ultimoCX = 0;
-for (const id of ['exp1', 'exp2']) $(id).addEventListener('input', () => {
-  $(id + 'v').textContent = $(id).value;
+// Il fondo scala (25 ottobre): con 0..65535 il wah si apriva fino a meta' corsa
+// e poi si richiudeva, come se l'ampli leggesse il numero col segno; i valori
+// di un Control X vero (README di paulhamsh) stanno tutti sotto 0x8000. Il
+// cursore va da 0 a 1000 e si scala qui.
+let cxDaMandare = false, ultimoCX = 0, fondoScala = 32767;
+/** Da 0..1 al numero da mandare. «segno»: da -32768 a +32767, mandato come
+ *  16 bit in complemento a due (-32768 = 32768, -1 = 65535). */
+const scala = f => fondoScala === 'segno'
+  ? (Math.round(f * 65535) - 32768) & 0xffff
+  : Math.round(f * fondoScala);
+const valoreCX = id => scala($(id).value / 1000);
+const mostraCX = () => { for (const id of ['exp1', 'exp2']) $(id + 'v').textContent = valoreCX(id); };
+for (const id of ['exp1', 'exp2']) $(id).addEventListener('input', () => { mostraCX(); cxDaMandare = true; });
+document.querySelectorAll('.fondo').forEach(b => b.addEventListener('click', () => {
+  fondoScala = b.dataset.v === 'segno' ? 'segno' : +b.dataset.v;
+  document.querySelectorAll('.fondo').forEach(x => x.classList.toggle('scelto', x === b));
+  mostraCX();
   cxDaMandare = true;
+}));
+mostraCX();
+
+/* La leva automatica (chiesta dall'utente: chitarra e cursore insieme non si
+ * fa): su e giù di continuo, il fondo scala lo cambia lui coi pulsanti mentre
+ * va. Ogni 50 ms un 0x0C; il pedale 2 a 65535, il volume pieno (provato il 24). */
+let spazzataCX = null;
+$('spazzataCX').addEventListener('click', () => {
+  if (spazzataCX) {
+    clearInterval(spazzataCX); spazzataCX = null;
+    $('spazzataCX').textContent = 'Leva automatica: avvia';
+    $('spazzataCXstato').textContent = 'ferma';
+    return;
+  }
+  const parte = Date.now(), MEZZO = 4000;
+  $('spazzataCX').textContent = 'Leva automatica: ferma';
+  spazzataCX = setInterval(() => {
+    const t = (Date.now() - parte) % (2 * MEZZO);
+    const f = t < MEZZO ? t / MEZZO : 2 - t / MEZZO;     // 0 -> 1 -> 0
+    const v = scala(f);
+    const mostrato = fondoScala === 'segno' ? (v > 32767 ? v - 65536 : v) + ' (con segno)' : v + ' / ' + fondoScala;
+    $('spazzataCXstato').textContent = (t < MEZZO ? 'sale ' : 'scende ') + mostrato;
+    riga('x ' + v + ' 65535');
+  }, 50);
 });
 setInterval(() => {
   if (!cxDaMandare || !collegato || Date.now() - ultimoCX < 50) return;
   ultimoCX = Date.now();
-  riga('x ' + $('exp1').value + ' ' + $('exp2').value);
+  riga('x ' + valoreCX('exp1') + ' ' + valoreCX('exp2'));
   cxDaMandare = false;
 }, 10);
 
@@ -361,7 +413,7 @@ function segnaCollegato(si) {
   collegato = si;
   $('stato').textContent = si ? 'collegato al pedale' : 'il ponte non risponde';
   $('stato').className = si ? 'on' : '';
-  for (const id of ['cursore', 'cursoreCC', 'exp1', 'exp2', 'rileggi']) $(id).disabled = !si;
+  for (const id of ['cursore', 'cursoreCC', 'exp1', 'exp2', 'rileggi', 'spazzataCX']) $(id).disabled = !si;
   document.querySelectorAll('.cmd').forEach(b => { b.disabled = !si; });
 }
 
