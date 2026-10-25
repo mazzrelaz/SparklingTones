@@ -427,10 +427,12 @@ sembrare due dispositivi. Poi l'hardware (jack su J10/D2, taratura) e il MIDI (A
   (senza toccare il formato del banco). Passando al wah, il volume torna pieno: col pedale giù si
   resterebbe muti. Da sentire: col wah presente ma spento, se EXP1 lo accende o resta muto.
 - **Senza pedale d'espressione infilato, niente Control X**: niente annuncio FFC8. Serve sapere se il
-  jack c'è (con D2 da sola, tallone e jack vuoto danno tutti e due 0). Due strade, da scegliere: una
-  presa col contatto di rilevamento (un filo in più verso un ingresso libero, GPA7 dell'espansore), o
-  senza cambiare niente pull-up e pull-down interni alternati su D2 (jack vuoto: la lettura salta da un
-  capo all'altro; col pedale si sposta poco; mai provato sull'S3). Altro aperto: se l'ampli si
+  jack c'è (con D2 da sola, tallone e jack vuoto danno tutti e due 0). **Scelta dell'utente: presa
+  stereo col contatto di commutazione e un filo in più verso D8** (GPIO 7: libero sulla millefori e sul
+  pettine J10 della basetta stampata; non GPA7, che sulla millefori è FS5 e sui chip nuovi non è
+  ingresso garantito). Idea, da confermare con la foto della presa comprata: il contatto che tocca
+  l'anello a jack vuoto va su D8 col pull-down interno — vuoto = alto (3V3 dall'anello), infilato =
+  basso. Scartata la prova coi pull interni alternati su D2. Altro aperto: se l'ampli si
   riaggancia da solo quando l'annuncio riparte; con l'indirizzo casuale nuovo a ogni accensione no di
   sicuro, quindi va tenuto fisso (salvato in flash).
 
