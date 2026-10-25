@@ -1201,3 +1201,12 @@ che si ripete nel loop quando la registrazione parte da remoto. **L'utente: nien
   senza ottava, scostamento 0–1 con 0,5 intonata, -1 silenzio). Muto solo a scheda aperta, ampli collegato e
   pagina in vista (`seguiAccordatore`). `docs/decisioni-ui.md`, «Il tuner».
 - **iPhone e iPad**: Bluefy, con gli UUID interi (`docs/decisioni-ui.md`, «Su iPhone e iPad»).
+
+## Estratto di CLAUDE.md del 25 ottobre 2026: il riverbero e due incisi del pedale d'espressione
+
+- **I tipi di riverbero** (`bias.reverb` parametro 6) sono in ordine per famiglie: Room A, Room B, Chamber,
+  Hall Natural/Medium/Ambient, Plate Short/Rich/Long. Il 23 ottobre l'utente li ha verificati tutti e nove
+  nell'app ufficiale: il vecchio ordine «dettato» era sbagliato (guscio `v139`). Nello stesso controllo,
+  sette preset confrontati blocco per blocco: nomi dei modelli e acceso/spento tutti giusti.
+- Dalla voce del pedale d'espressione, dopo «`pedale/prova-controlx/` comanda wah e volume»: "(25 ottobre: l'«onda»
+  che restava era il chorus del preset), e l'app ufficiale lo prende per un Control X vero."

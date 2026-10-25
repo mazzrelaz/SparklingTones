@@ -325,10 +325,6 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   modello in `immagini/classico/` (`SFONDI_CLASSICI`; il riverbero per tipo, `'bias.reverb:<tipo>'`). Neon:
   `immagini/blocchi/` e `src/spark-immagini.js`; come entra un'immagine nuova del neon: `docs/diario.md`,
   estratto del 22 ottobre (sera). Scelte e scartati: `docs/decisioni-ui.md`, «L'editor classico».
-- **I tipi di riverbero** (`bias.reverb` parametro 6) sono in ordine per famiglie: Room A, Room B, Chamber,
-  Hall Natural/Medium/Ambient, Plate Short/Rich/Long. Il 23 ottobre l'utente li ha verificati tutti e nove
-  nell'app ufficiale: il vecchio ordine «dettato» era sbagliato (guscio `v139`). Nello stesso controllo,
-  sette preset confrontati blocco per blocco: nomi dei modelli e acceso/spento tutti giusti.
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
 - **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano;
   approvata, da ordinare su JLCPCB, **non provata**. Linee nuove: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
@@ -347,9 +343,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   prova (l'inglese no, per la regola sull'inglese).
 - **Pedale d'espressione** (24 ottobre, prove): volume col Master liscio; il wah manuale **non è un parametro** di
   `JH.Vox846`. Lo fa l'ampli se il pedale **si finge uno Spark Control X** (servizio FFC8, l'ampli si collega lui,
-  mappa 0x70 wah / 0x72 volume, posizione con 0x0C): `pedale/prova-controlx/` comanda wah e volume
-  (25 ottobre: l'«onda» che restava era il chorus del preset), e l'app ufficiale lo prende per un Control X
-  vero. Attrezzi: `tools/wah-ponte.ps1` + `tools/wah.html`. **Trappola**: chiusa l'app l'ampli suona lo slot,
+  mappa 0x70 wah / 0x72 volume, posizione con 0x0C): `pedale/prova-controlx/` comanda wah e volume.
+  Attrezzi: `tools/wah-ponte.ps1` + `tools/wah.html`. **Trappola**: chiusa l'app l'ampli suona lo slot,
   i 0x0104 cambiano 0x7f senza suonare finché non arriva `0x0138 7f`. Scala 0…32767, calibrazione nel pedale.
   **Deciso dall'utente** (25 ottobre): wah se nel preset c'è `JH.Vox846`, altrimenti volume, lo sceglie il pedale;
   senza jack infilato niente Control X (presa Neutrik/Rean NYS215 col contatto dell'anello su **D8**, 1 kΩ fra 3V3
