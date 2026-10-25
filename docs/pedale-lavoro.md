@@ -34,6 +34,9 @@ così, **verificato**: aprire la seriale del pedale a **1200 baud** e chiuderla
 (`New-Object System.IO.Ports.SerialPort 'COM3',1200`, `Open()`; l'errore «dispositivo
 inesistente» è normale, la porta sparisce perché la XIAO si riavvia) → ricompare **COM13**, il
 caricatore → `upload -p COM13`. **Finché non si carica, il pedale è fermo** in download mode.
+**Un `upload` vale solo con uscita 0 e la riga «Wrote … at 0x00010000»** (25 ottobre 2026: con uscita
+255 lo spazio del programma è rimasto vuoto e il pedale non si accendeva più; vedi «Il pedale
+d'espressione»). Se resta in COM13, a volte basta un secondo `upload`.
 
 ## Ferramenta, cablaggi, scatola
 
@@ -403,8 +406,13 @@ dopo e prima di ogni annuncio. Il server riceve solo i collegamenti nati dal suo
 dell'annuncio), quindi il client non si confonde col Control X. Compila; **sull'ampli non è mai partito**.
 Da provare in tutti e due gli ordini (prima il Control X, poi `#ampli`, e viceversa).
 
-**A fine sessione la XIAO è rimasta in COM13** anche dopo tre `upload` riusciti (prova-ble 2.30 scritta e
-verificata): non riparte dal PC, va spenta e riaccesa.
+**A fine sessione il pedale è rimasto spento: il firmware non c'era.** Gli `upload` di quel momento erano
+usciti con **codice 255**, e io guardavo solo la prima riga «Hash of data verified» (quella del
+bootloader). Il registro di avvio su COM13 diceva `image at 0x10000 has invalid magic byte` e `No bootable
+app partitions`: la XIAO si riavviava in tondo, display spento, e restava su COM13 anche dopo spenta e
+riaccesa. Un `upload` rifatto per intero (uscita 0, «Wrote 812736 bytes … at 0x00010000») l'ha rimessa a
+posto. **Regola: dopo ogni caricamento si guarda il codice d'uscita e la riga «Wrote … at 0x00010000»; se
+la XIAO resta su COM13, si legge il suo registro di avvio prima di dare la colpa alla corrente.**
 
 **Cosa resta, se l'utente vuole andare avanti:** la prova del doppio ruolo, qui sopra. Il
 dubbio grosso: **due collegamenti con l'ampli in ruoli opposti** (il pedale centrale su FFC0 per i preset,
