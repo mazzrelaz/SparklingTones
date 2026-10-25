@@ -419,6 +419,21 @@ dubbio grosso: **due collegamenti con l'ampli in ruoli opposti** (il pedale cent
 periferica su FFC8 per l'espressione) — l'indirizzo casuale del Control X potrebbe bastare a farli
 sembrare due dispositivi. Poi l'hardware (jack su J10/D2, taratura) e il MIDI (AmpliTube, mai provato).
 
+**Decise dall'utente (25 ottobre, sera), da scrivere dopo la prova del doppio ruolo:**
+- **Wah o volume si sceglie da solo, preset per preset**: se nella catena c'è `JH.Vox846` (l'unico wah,
+  Legendary o Auto) il pedale d'espressione va su EXP1 (0x70, wah), altrimenti su EXP2 (0x72, volume).
+  Lo cerca il pedale, non l'app: negli slot dell'ampli mentre li legge (i pezzi arrivano già spacchettati;
+  `pezzi` ne tiene sei, il nome va cercato al volo su tutti), nei banchi spacchettando i frame `0x0101`
+  (senza toccare il formato del banco). Passando al wah, il volume torna pieno: col pedale giù si
+  resterebbe muti. Da sentire: col wah presente ma spento, se EXP1 lo accende o resta muto.
+- **Senza pedale d'espressione infilato, niente Control X**: niente annuncio FFC8. Serve sapere se il
+  jack c'è (con D2 da sola, tallone e jack vuoto danno tutti e due 0). Due strade, da scegliere: una
+  presa col contatto di rilevamento (un filo in più verso un ingresso libero, GPA7 dell'espansore), o
+  senza cambiare niente pull-up e pull-down interni alternati su D2 (jack vuoto: la lettura salta da un
+  capo all'altro; col pedale si sposta poco; mai provato sull'S3). Altro aperto: se l'ampli si
+  riaggancia da solo quando l'annuncio riparte; con l'indirizzo casuale nuovo a ogni accensione no di
+  sicuro, quindi va tenuto fisso (salvato in flash).
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni
