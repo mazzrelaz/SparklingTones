@@ -333,7 +333,7 @@ pedale che si collega e legge gli slot) faccia tornare allo slot.
   (POST semplice): si tiene acceso solo durante le prove.
 - **Firmware 2.30** (prova-ble): dal seriale `J` (rampa sul wah), `Z` (sei modalità), `X` (CC 11 a
   triangolo), `Q` (rilegge lo stato che suona, pezzi grezzi), righe `#i v` (parametro di JH.Vox846),
-  `#on`, `#suona` (0x0138 7f), `#cc v` (CC 11, mai provato con AmpliTube). La pagina li manda e
+  `#on`, `#suona` (0x0138 7f), `#cc v` (CC 11, provato con AmpliTube il 25 ottobre, vedi sotto). La pagina li manda e
   decodifica la rilettura.
 - **`prova-controlx`**: `#x a b` (0x0C), `#ins n` (0x0D), `#mappa a b`, `i` (annuncio, indirizzo, ampli).
 - **Sul pedale a fine sessione c'è di nuovo prova-ble 2.30** (verificato: risponde e cerca l'ampli).
@@ -417,7 +417,13 @@ la XIAO resta su COM13, si legge il suo registro di avvio prima di dare la colpa
 **Cosa resta, se l'utente vuole andare avanti:** la prova del doppio ruolo, qui sopra. Il
 dubbio grosso: **due collegamenti con l'ampli in ruoli opposti** (il pedale centrale su FFC0 per i preset,
 periferica su FFC8 per l'espressione) — l'indirizzo casuale del Control X potrebbe bastare a farli
-sembrare due dispositivi. Poi l'hardware (jack su J10/D2, taratura) e il MIDI (AmpliTube, mai provato).
+sembrare due dispositivi. Poi l'hardware (jack su J10/D2, taratura).
+
+**Il MIDI verso AmpliTube funziona (25 ottobre, sera).** Pedale sull'USB della XIAO, firmware 2.30, ponte
+e cursore di `tools/wah.html`: sette `#cc` (0, 32, 64, 96, 127, 64, 0) arrivati tutti a Windows come
+`b0 0b …`, letti con `..\MIdiAdapter\tools\midi.ps1 -Filtro SparkPedale` ad AmpliTube chiuso (una porta
+MIDI la apre un programma alla volta). Poi in AmpliTube 5, «SparkPedale MIDI» fra gli ingressi e MIDI
+Learn: **il pedale di AmpliTube segue il cursore** (l'utente). Manca solo la lettura vera da D2.
 
 **Decise dall'utente (25 ottobre, sera), da scrivere dopo la prova del doppio ruolo:**
 - **Wah o volume si sceglie da solo, preset per preset**: se nella catena c'è `JH.Vox846` (l'unico wah,
