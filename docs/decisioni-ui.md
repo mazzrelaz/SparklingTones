@@ -1517,6 +1517,10 @@ dall'editor, con un trimmer accanto a Salva**. Il bianco e nero puro non l'ha co
 - **Il «?» dell'editor è tolto, con la spiegazione che apriva** (l'utente: «è abbastanza
   intuitivo»). Era comune ai due editor, quindi è sparito anche dal neon. Le due frasi della
   spiegazione restano in `lingua-en.js` come non più usate, finché non si aggiorna l'inglese.
+- **Il contrasto dietro le scritte** (stesso giorno, guscio `v142`): la sfumatura del cartellino
+  «Drive» anche dietro il nome del preset, i nomi dei comandi e le scritte delle levette, e una
+  fascia scura sotto i comandi, larga ben oltre lo schermo. Fra tre varianti; scartati gli aloni
+  rotondi dietro ogni manopola.
 - **Aperto, dallo stesso messaggio**: sul telefono basso le manopole finiscono sotto lo schermo; e
   il preset «verde 3» che ne seleziona altri tre (probabili preset diversi con lo stesso UUID: chiesto
   il backup all'utente).

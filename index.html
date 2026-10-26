@@ -1594,6 +1594,24 @@
   #pannelloEditor .trimmer-sfondo input { flex:1; accent-color:#e8dcc0; }
   #pannelloEditor .trimmer-sfondo output { min-width:4ch; text-align:right; color:#e8dcc0;
                                            font-variant-numeric:tabular-nums; }
+  /* **Il contrasto dietro le scritte** (26 ottobre 2026, scelto dall'utente
+     in bozza fra tre varianti): la sfumatura scura del cartellino «Drive»
+     anche dietro il nome del preset, i nomi dei comandi e le scritte delle
+     levette, e una fascia scura sotto tutti i comandi. La fascia è molto più
+     larga dello schermo (l'utente: fuori dall'immagine il fondo è nero e non
+     si vede dove finisce) e sale di 40 px sopra le manopole, sfumando.
+     Scartati gli aloni rotondi dietro ogni manopola. */
+  #pannelloEditor.classico #riquadroPreset { padding:2px 40px;
+      background:linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.7) 22%, rgba(0,0,0,0.7) 78%, rgba(0,0,0,0)); }
+  #pannelloEditor.classico .pomello .nome,
+  #pannelloEditor.classico .pomello.leva .val {
+      width:fit-content; margin-inline:auto; padding:2px 16px;
+      background:linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.7) 20%, rgba(0,0,0,0.7) 80%, rgba(0,0,0,0)); }
+  #pannelloEditor.classico .pomelli { position:relative; }
+  #pannelloEditor.classico .pomelli::before {
+      content:''; position:absolute; z-index:-1; pointer-events:none;
+      top:-40px; bottom:0; left:-50vw; right:-50vw;
+      background:linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.6) 70px, rgba(0,0,0,0.6) 100%); }
   #pannelloEditor.classico .blocco.classico.spento { opacity:1; }
   #pannelloEditor.classico .blocco.classico.spento .pomelli { opacity:0.45; }
 
