@@ -1521,6 +1521,13 @@ dall'editor, con un trimmer accanto a Salva**. Il bianco e nero puro non l'ha co
   «Drive» anche dietro il nome del preset, i nomi dei comandi e le scritte delle levette, e una
   fascia scura sotto i comandi, larga ben oltre lo schermo. Fra tre varianti; scartati gli aloni
   rotondi dietro ogni manopola.
-- **Aperto, dallo stesso messaggio**: sul telefono basso le manopole finiscono sotto lo schermo; e
-  il preset «verde 3» che ne seleziona altri tre (probabili preset diversi con lo stesso UUID: chiesto
+- **L'editor classico non scorre mai** (stesso giorno, guscio `v143`, l'utente: «la pagina non
+  dovrebbe mai scrollare»). Restavano sempre 100 px d'immagine sopra il titolo, misurati per 812 px:
+  a 629 (iPhone 13 mini in Safari) scorrevano tutti gli 80 modelli, gli ampli di 115–170 px.
+  `adattaClassico` misura dopo il disegno e cede, in ordine, l'immagine sopra il titolo (fino a
+  niente), le manopole (`--stringi`, fino a 26 px), spazi e scritte (`stretto` sul pannello, e
+  manopole fino a 36 px); poi restituisce quello che avanza. Rifà i conti quando cambia l'altezza.
+  Provati gli 80 modelli a 568, 629, 667, 700, 780 e 812 px: zero scorrimenti; a 812 invariato.
+  Nome del preset e tempo sopra l'immagine, che ora sale fin dietro di loro.
+- **Aperto, dallo stesso messaggio**: il preset «verde 3» che ne seleziona altri tre (probabili preset diversi con lo stesso UUID: chiesto
   il backup all'utente).

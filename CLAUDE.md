@@ -325,6 +325,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   modello in `immagini/classico/` (`SFONDI_CLASSICI`; il riverbero per tipo, `'bias.reverb:<tipo>'`). Neon:
   `immagini/blocchi/` e `src/spark-immagini.js`; come entra un'immagine nuova del neon: `docs/diario.md`,
   estratto del 22 ottobre (sera). Scelte e scartati: `docs/decisioni-ui.md`, «L'editor classico».
+  Il 26 ottobre (`v141`–`v143`): trimmer dello sfondo accanto a Salva, fascia scura sotto i comandi, «?» tolto
+  dai due editor, e **il classico non scorre mai** (`adattaClassico`).
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
 - **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano;
   approvata, da ordinare su JLCPCB, **non provata**. Linee nuove: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,

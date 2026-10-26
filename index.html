@@ -1462,9 +1462,10 @@
      avanza dello schermo tolti testa, tempo e catena (~357 px con la barra in
      basso), il titolo (~70), le file di comandi (~125 l'una, `--righe`) e
      la riga della nota Hendrix, se c'è (~32, `--nota`: senza, l'editor dei
-     modelli JH scorreva di 29 px). Sopra il titolo restano almeno 100 px
-     d'immagine (110 facevano scorrere ancora di 6 px il Legendary Wah, cinque
-     comandi e la nota, su un telefono alto 812).
+     modelli JH scorreva di 29 px). **L'editor non scorre mai** (l'utente, 26
+     ottobre 2026): sopra il titolo l'immagine può ridursi a niente, e se non
+     basta le manopole si stringono (`--stringi`, `adattaClassico`). Prima ne
+     restavano almeno 100 px, e su un telefono basso scorreva tutto.
      L'immagine è grande quanto serve perché `--testa` della sua altezza lo
      riempia, al più larga quanto il pannello per `--largo` (1 l'ampli; di più
      un pedale, i cui lati bui escono dallo schermo) e 700 px, e mai meno di
@@ -1475,11 +1476,14 @@
      servono anche in `top`, dove un `%` sarebbe dell'altezza. */
   #pannelloEditor.classico { overflow-x:hidden; }
   #pannelloEditor.classico .striscia { position:relative; z-index:1; }
+  /* Il nome del preset e il tempo stanno sopra l'immagine come la catena: quando
+     l'editor non ci sta, l'immagine sale fin dietro di loro (`adattaClassico`). */
+  #pannelloEditor.classico .testa-editor, #pannelloEditor.classico .riga-tempo { position:relative; z-index:1; }
   #pannelloEditor.classico .blocco.classico {
       --spazio:calc(100dvh - 427px - var(--righe, 2) * 125px - var(--nota, 0px));
       --scena:min(calc(min(100vw, 588px) * var(--largo, 1)), 700px,
                   max(250px, calc(var(--spazio) / (1.5 * var(--testa)))));
-      --p:min(calc(var(--scena) * 1.5 * var(--testa)), max(100px, var(--spazio)));
+      --p:min(calc(var(--scena) * 1.5 * var(--testa)), max(0px, var(--spazio)));
       --img:calc(var(--scena) * var(--riduci, 1));
       position:relative; isolation:isolate; overflow:visible;
       width:100%; max-width:560px; margin:0 auto;
@@ -1612,6 +1616,23 @@
       content:''; position:absolute; z-index:-1; pointer-events:none;
       top:-40px; bottom:0; left:-50vw; right:-50vw;
       background:linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.6) 70px, rgba(0,0,0,0.6) 100%); }
+  /* **Stretto**: l'ultimo passo di `adattaClassico`, quando nemmeno senza
+     immagine sopra il titolo e con le manopole strette l'editor ci sta (un
+     telefono basso, i delay a tre file). Spazi e scritte più piccoli, nella
+     testa e nei comandi. */
+  #pannelloEditor.classico.stretto > .barra-alta { margin-bottom:6px; }
+  #pannelloEditor.classico.stretto #riquadroPreset { margin-bottom:2px; }
+  #pannelloEditor.classico.stretto #titoloEditor { font-size:1.5rem; }
+  #pannelloEditor.classico.stretto .modo-editor { margin-bottom:4px; }
+  #pannelloEditor.classico.stretto .striscia { padding-top:2px; }
+  #pannelloEditor.classico.stretto .titolo-classico { padding-bottom:4px; }
+  #pannelloEditor.classico.stretto .titolo-classico .cat { font-size:0.85rem; padding-top:1px; padding-bottom:1px; }
+  #pannelloEditor.classico.stretto .titolo-classico .nome-modello {
+      font-size:max(1.1rem, min(1.5rem, calc(100cqw / (var(--lettere, 10) * 0.58 + 0.9)))); }
+  #pannelloEditor.classico.stretto .titolo-classico .accendi { width:36px; height:36px; }
+  #pannelloEditor.classico.stretto .pomelli { padding:6px 4px 2px; gap:4px; }
+  #pannelloEditor.classico.stretto .riga-pomelli + .riga-pomelli { padding-top:6px; }
+  #pannelloEditor.classico.stretto .pomello svg { margin-bottom:2px; }
   #pannelloEditor.classico .blocco.classico.spento { opacity:1; }
   #pannelloEditor.classico .blocco.classico.spento .pomelli { opacity:0.45; }
 
@@ -1664,9 +1685,11 @@
   #pannelloEditor.classico .riga-pomelli > * { flex:0 1 120px; }
   #pannelloEditor.classico .riga-pomelli + .riga-pomelli { border-top:1px solid rgba(255,255,255,0.12);
                                                            padding-top:12px; }
-  #pannelloEditor.classico .pomello svg { width:78px; height:78px; margin-bottom:6px;
+  #pannelloEditor.classico .pomello svg { width:calc(78px - var(--stringi, 0px));
+                                          height:calc(78px - var(--stringi, 0px)); margin-bottom:6px;
                                           filter:drop-shadow(0 6px 8px rgba(0,0,0,0.75)); }
-  #pannelloEditor.classico .riga-pomelli:has(> :nth-child(4)) .pomello svg { width:64px; height:64px; }
+  #pannelloEditor.classico .riga-pomelli:has(> :nth-child(4)) .pomello svg {
+      width:calc(64px - var(--stringi, 0px) * 0.8); height:calc(64px - var(--stringi, 0px) * 0.8); }
   #pannelloEditor.classico .pomello .guida { stroke:rgba(255,255,255,0.13); stroke-width:3; }
   #pannelloEditor.classico .pomello .arco { stroke:var(--crema); stroke-width:3.5; filter:none; }
   #pannelloEditor.classico .pomello .corpo { fill:#2c2b2a; stroke:#8f8a84; stroke-width:1.5; }

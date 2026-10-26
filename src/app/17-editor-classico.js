@@ -399,24 +399,89 @@ function bloccoClassico(effetto, posizione) {
   // regole di `.blocco.classico`); i cursori degli equalizzatori ne valgono due.
   const file = comandi.classList.contains('cursori') ? 2 : comandi.querySelectorAll('.riga-pomelli').length;
   blocco.style.setProperty('--righe', file);
-  // Una fila può venire più alta dei suoi 125 px: nei delay la levetta BPM
-  // con «ON» sotto e i nomi su due righe (MODE SELECTOR) facevano scorrere
-  // l'editor di 10–13 px (l'utente, 22 ottobre 2026: «togli lo scorrimento»).
   // Appena il blocco è nella pagina (chi lo chiama lo inserisce e apre il
   // pannello subito, e il microtask gira prima del disegno) si guarda se il
-  // pannello scorre: se sì, e i comandi sono più alti del loro posto, immagine
-  // e titolo salgono di quel tanto. **Solo se scorre**: dove c'è aria (gli
-  // ampli, un telefono più alto) non si sposta niente.
-  queueMicrotask(() => {
-    const pannello = $('pannelloEditor');
-    if (!blocco.isConnected || !pannello) return;
-    const scorre = pannello.scrollHeight - pannello.clientHeight;
-    const oltre = comandi.offsetHeight - file * 125;
-    if (scorre > 0 && oltre > 0)
-      blocco.style.setProperty('--righe', (file + Math.min(scorre, oltre) / 125).toFixed(3));
-  });
+  // pannello scorre, e se sì si stringe (`adattaClassico`).
+  queueMicrotask(() => adattaClassico(blocco, comandi, file));
   return blocco;
 }
+
+/**
+ * **L'editor classico non scorre mai** (l'utente, 26 ottobre 2026: su un
+ * telefono basso, un iPhone 13 mini, scorrevano tutti gli 80 modelli, gli
+ * ampli di 115–170 px). Le regole di `.blocco.classico` fanno una stima
+ * (125 px a fila); qui si misura davvero e si cede spazio in quest'ordine:
+ * 1. l'immagine sopra il titolo, fino a niente: `--righe` cresce, `--spazio`
+ *    cala e il titolo sale sotto la catena (l'immagine resta dietro);
+ * 2. le manopole, fino a 26 px più piccole (`--stringi`);
+ * 3. spazi e scritte, nella testa e nei comandi (`stretto` sul pannello),
+ *    e le manopole fino a 36 px più piccole.
+ * I passi sono a grana grossa e cedono più del necessario (a 629 px restavano
+ * 90 px vuoti sotto le manopole): alla fine **si restituisce quello che
+ * avanza**, all'inverso — via `stretto`, poi le manopole, poi l'immagine —
+ * finché il pannello non scorrerebbe di nuovo.
+ * **Solo se scorre**: dove c'è aria non si sposta niente. Ogni lettura di
+ * `scrollHeight` ridisegna subito, quindi i passi si vedono già misurati.
+ */
+function adattaClassico(blocco, comandi, file) {
+  const pannello = $('pannelloEditor');
+  if (!blocco.isConnected || !pannello) return;
+  pannello.classList.remove('stretto');      // vale per il blocco di prima
+  const scorre = () => pannello.scrollHeight - pannello.clientHeight;
+  let righe = file;
+  for (let giro = 0; giro < 4 && scorre() > 0; giro++) {
+    if (parseFloat(getComputedStyle(blocco).paddingTop) < 1) break;   // immagine già tutta su
+    righe += scorre() / 125;
+    blocco.style.setProperty('--righe', righe.toFixed(3));
+  }
+  const file2 = Math.max(1, comandi.querySelectorAll('.riga-pomelli').length);
+  let stringi = 0;
+  const stringiFino = massimo => {
+    while (stringi < massimo && scorre() > 0) {
+      stringi = Math.min(massimo, stringi + Math.max(2, Math.ceil(scorre() / file2)));
+      blocco.style.setProperty('--stringi', stringi + 'px');
+    }
+  };
+  stringiFino(26);
+  if (scorre() > 0) {
+    pannello.classList.add('stretto');
+    stringiFino(36);
+  }
+  if (righe === file && stringi === 0) return;     // non si è toccato niente
+
+  // Si restituisce: ogni prova si tiene solo se il pannello non scorre.
+  const prova = (fai, disfai) => { fai(); if (scorre() > 0) { disfai(); return false; } return true; };
+  if (pannello.classList.contains('stretto'))
+    prova(() => pannello.classList.remove('stretto'), () => pannello.classList.add('stretto'));
+  while (stringi > 0) {
+    const prima = stringi;
+    if (!prova(() => blocco.style.setProperty('--stringi', (stringi = Math.max(0, stringi - 2)) + 'px'),
+               () => blocco.style.setProperty('--stringi', (stringi = prima) + 'px'))) break;
+  }
+  // L'immagine: quanto spazio resta sotto il blocco, e `--righe` torna giù di
+  // quel tanto (`--spazio` cresce, e con lui l'immagine sopra il titolo).
+  const avanza = () => pannello.getBoundingClientRect().top + pannello.clientHeight
+                       - parseFloat(getComputedStyle(pannello).paddingBottom)
+                       - blocco.getBoundingClientRect().bottom;
+  for (let giro = 0; giro < 6 && righe > file && avanza() > 1; giro++) {
+    const prima = righe;
+    if (!prova(() => blocco.style.setProperty('--righe', (righe = Math.max(file, righe - avanza() / 125)).toFixed(3)),
+               () => blocco.style.setProperty('--righe', (righe = prima).toFixed(3)))) break;
+  }
+}
+
+// Cambia l'altezza (la barra di Safari che compare e sparisce, il telefono
+// girato): si ridisegna il blocco, e `adattaClassico` rifà i conti.
+let altezzaClassico = innerHeight, timerClassico = null;
+addEventListener('resize', () => {
+  clearTimeout(timerClassico);
+  timerClassico = setTimeout(() => {
+    if (innerHeight === altezzaClassico) return;
+    altezzaClassico = innerHeight;
+    if (inModifica && editorClassico() && $('pannelloEditor').classList.contains('aperto'))
+      scegliBlocco(inModifica.scelto);
+  }, 150);
+});
 
 /**
  * I comandi dei wah, come nel neon (l'utente, 22 ottobre 2026: «niente
