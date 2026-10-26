@@ -1083,8 +1083,6 @@ window.LINGUA_EN = {
     "Backup",
   "Si importano i backup di quest'app (.json), il <code>preset_backup.zip</code> dell'app ufficiale e <strong>un preset singolo</strong> esportato da lì. Se ce l'hai già, se ne aggiorna il suono: tag, note e famiglia restano. Un suono che l'ampli sta già facendo non ha bisogno di nessun file: si prende con <strong>«Importa il suono che sta suonando»</strong>, toccando il bollino dell'ampli in alto.":
     "You can import backups from this app (.json), the official app's <code>preset_backup.zip</code> and <strong>a single preset</strong> exported from there. If you already have it, only its sound is updated: tags, notes and family stay. A sound the amp is already making needs no file: take it with <strong>«Import the sound that's playing»</strong>, by tapping the amp badge at the top.",
-  "Funzioni nascoste":
-    "Hidden features",
   "Per suono":
     "By sound",
   "Per nome":
@@ -1195,14 +1193,20 @@ window.LINGUA_EN = {
     "pedal bank {0} — {1}",
   "{0} banchi sono cambiati nell'app":
     "{0} banks have changed in the app",
-  "Scrivi la password per sbloccare le funzioni in prova.":
-    "Type the password to unlock the features being tested.",
-  "password":
-    "password",
-  "Sblocca":
-    "Unlock",
-  "Password sbagliata":
-    "Wrong password",
-  "Non è quella giusta: niente è cambiato.":
-    "That's not the right one: nothing has changed.",
+  "Tuner":
+    "Tuner",
+  "accordatore acceso: l'ampli tace finché non esci":
+    "tuner on: the amp stays silent until you leave",
+  "accordatore spento":
+    "tuner off",
+  "Collega l'ampli":
+    "Connect the amp",
+  "Editor":
+    "Editor",
+  "Neon, coi disegni dei pedali, o classico: l'ampli sullo sfondo e le manopole grandi.":
+    "Neon, with drawings of the pedals, or classic: the amp in the background and big knobs.",
+  "Neon":
+    "Neon",
+  "Classico":
+    "Classic",
 };
