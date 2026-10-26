@@ -574,3 +574,45 @@ for (const tasto of document.querySelectorAll('#sceltaEditor [data-editor]')) {
   });
 }
 segnaEditor();
+
+/* Quanto si vede lo sfondo (26 ottobre 2026). Un utente su Facebook trovava
+   le immagini troppo presenti; fra cinque varianti l'utente ha scelto «tenue»
+   (più scura, coi colori smorzati) e la vuole regolabile dall'editor, col
+   trimmer accanto a Salva. Un numero solo, 0–100, vale per tutte le immagini
+   e resta in questo browser: a 100 l'immagine è piena, scendendo si scurisce
+   e perde il colore insieme, fino al grigio scuro a 0. Il 60 di partenza è
+   la «tenue» provata (opacità 0,72, colore 0,36). */
+const LIVELLO_SFONDO = 60;
+
+function livelloSfondo() {
+  try {
+    const scritto = localStorage.getItem('sfondoClassico');
+    const v = Number(scritto);
+    return scritto !== null && v >= 0 && v <= 100 ? v : LIVELLO_SFONDO;
+  } catch (e) { return LIVELLO_SFONDO; }
+}
+
+function applicaLivelloSfondo(v) {
+  const pannello = $('pannelloEditor');
+  pannello.style.setProperty('--sfondo-opacita', (0.3 + 0.7 * v / 100).toFixed(3));
+  pannello.style.setProperty('--sfondo-colore', ((v / 100) ** 2).toFixed(3));
+  $('btnTrimmerSfondo').style.setProperty('--giro', `${-135 + 270 * v / 100}deg`);
+  $('livelloSfondo').value = v;
+  $('valoreSfondo').textContent = v + '%';
+}
+
+$('btnTrimmerSfondo').addEventListener('click', e => {
+  e.stopPropagation();
+  $('trimmerSfondo').hidden = !$('trimmerSfondo').hidden;
+});
+$('livelloSfondo').addEventListener('input', () => {
+  const v = Number($('livelloSfondo').value);
+  applicaLivelloSfondo(v);
+  try { localStorage.setItem('sfondoClassico', String(v)); } catch (e) { /* vale finché resta aperta */ }
+});
+// Si chiude toccando fuori, come le tendine dell'app.
+document.addEventListener('click', e => {
+  const trimmer = $('trimmerSfondo');
+  if (!trimmer.hidden && !trimmer.contains(e.target)) trimmer.hidden = true;
+});
+applicaLivelloSfondo(livelloSfondo());

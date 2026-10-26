@@ -1356,7 +1356,7 @@
      Acceso e con un pallino quando c'è del lavoro non salvato; spento e con
      la spunta subito dopo aver salvato. */
   /* Salva e Fatto: arrotondati, icona e scritta, piccoli e uguali, col bordo e
-     senza rosso (l'utente, 15 ottobre 2026); il «?» tondo accanto. Il rosso
+     senza rosso (l'utente, 15 ottobre 2026). Tondo, accanto, il trimmer dello sfondo. Il rosso
      resta solo su Salva quando c'è lavoro da salvare. */
   #pannelloEditor .tasto-testa { height:34px; border-radius:11px; padding:0 11px;
                                  font-size:0.85rem; font-weight:700;
@@ -1570,6 +1570,30 @@
   #pannelloEditor.classico .spia-classica.verde.accesa {
       background:radial-gradient(circle, rgba(120,255,220,0.55), rgba(30,220,180,0) 70%);
       box-shadow:0 0 calc(var(--lr) * 0.9 * var(--img)) calc(var(--lr) * 0.35 * var(--img)) rgba(30,220,180,0.55); }
+  /* **Quanto si vede lo sfondo** (26 ottobre 2026: un utente su Facebook lo
+     trovava troppo presente; l'utente ha scelto fra cinque varianti «tenue»,
+     più scura e coi colori smorzati, e la vuole regolabile dall'editor). Il
+     trimmer accanto a Salva mette `--sfondo-opacita` e `--sfondo-colore`
+     (`applicaLivelloSfondo`); la spia spenta segue l'immagine, perché copre il
+     LED disegnato, mentre accesa resta piena: dice se il blocco suona. */
+  #pannelloEditor.classico .blocco.classico::before,
+  #pannelloEditor.classico .spia-classica:not(.accesa) {
+      opacity:var(--sfondo-opacita, 0.72); filter:saturate(var(--sfondo-colore, 0.36)); }
+  #pannelloEditor.classico > .barra-alta { position:relative; z-index:6; }
+  #pannelloEditor .tasto-trimmer { display:none; }
+  #pannelloEditor.classico .tasto-trimmer { display:inline-flex; align-items:center; justify-content:center; }
+  #pannelloEditor .tasto-trimmer svg { width:20px; height:20px; fill:none; stroke:#e8dcc0;
+                                       stroke-width:1.6; stroke-linecap:round; }
+  #pannelloEditor .tasto-trimmer .lancetta { transform-origin:10px 10px; transform:rotate(var(--giro, 27deg)); }
+  #pannelloEditor .trimmer-sfondo { position:absolute; z-index:5; top:calc(100% + 6px); right:12px;
+      width:min(280px, calc(100vw - 24px)); display:flex; align-items:center; gap:10px;
+      padding:10px 12px; border-radius:12px; border:1px solid var(--bordo-forte);
+      background:rgba(18,14,12,0.96); box-shadow:0 8px 24px rgba(0,0,0,0.6);
+      font-size:0.85rem; font-weight:700; color:var(--dim); }
+  #pannelloEditor .trimmer-sfondo[hidden] { display:none; }
+  #pannelloEditor .trimmer-sfondo input { flex:1; accent-color:#e8dcc0; }
+  #pannelloEditor .trimmer-sfondo output { min-width:4ch; text-align:right; color:#e8dcc0;
+                                           font-variant-numeric:tabular-nums; }
   #pannelloEditor.classico .blocco.classico.spento { opacity:1; }
   #pannelloEditor.classico .blocco.classico.spento .pomelli { opacity:0.45; }
 
@@ -2238,12 +2262,21 @@
     <span style="flex:1"></span>
     <!-- Salva e Fatto come i tasti grandi della scheda del preset (Regola e
          Suona): icona e scritta, arrotondati (l'utente, 15 ottobre 2026). Il
-         menu ⋯ non c'è più: «Rileggi dall'ampli» è tolto (non serviva), e
-         «Come funziona» è il «?» qui accanto. Sul telefono resta «Salva»:
+         menu ⋯ non c'è più: «Rileggi dall'ampli» è tolto (non serviva), e il
+         «?» di «Come funziona» pure (26 ottobre 2026: «è abbastanza intuitivo»,
+         l'utente). Sul telefono resta «Salva»:
          quelle due parole in più mandano la barra a capo. -->
+    <!-- Il trimmer dello sfondo, solo nel classico (26 ottobre 2026): un tocco
+         apre il cursore, che dice quanto si vede l'immagine dietro i comandi. -->
+    <button id="btnTrimmerSfondo" class="tasto-aiuto tasto-trimmer" title="Sfondo" aria-label="Sfondo"
+            aria-controls="trimmerSfondo"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path class="lancetta" d="M10 10V4"/></svg></button>
+    <div id="trimmerSfondo" class="trimmer-sfondo" hidden>
+      <span>Sfondo</span>
+      <input id="livelloSfondo" type="range" min="0" max="100" step="1" aria-label="Sfondo">
+      <output id="valoreSfondo"></output>
+    </div>
     <button id="btnSalvaModifiche" class="tasto-testa"></button>
     <button class="tasto-testa" data-chiudi="pannelloEditor"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg><span>Fatto</span></button>
-    <button id="btnAiutoEditor" class="tasto-aiuto" title="Come funziona">?</button>
   </div>
   <!-- Il nome del preset, dentro un'insegna al neon del colore della sua
        famiglia di suono: clean, drive, acoustic, bass. Chi non ne ha resta bianco —
@@ -2266,14 +2299,6 @@
     <span id="valoreTempo">120<span class="un">bpm</span></span>
     <button class="passo" id="btnTempoSu" title="un bpm in più">+</button>
     <button id="btnTap" title="batti il tempo: due tocchi bastano">tap</button>
-  </div>
-  <div id="aiutoEditor" hidden>
-    <p class="spiega">Si sente <strong>subito</strong>; in libreria non si salva niente
-      finché non premi «Salva». Un tocco su un blocco della catena lo apre qui sotto;
-      <strong>due tocchi</strong> cambiano il modello.</p>
-    <p class="spiega">Le manopole si girano sul disegno <strong>trascinando in su o in
-      giù</strong>, non in cerchio. L'interruttore del disegno, la levetta ON/OFF o il
-      footswitch, accende e spegne il blocco.</p>
   </div>
   <!-- Qui c'era la riga di stato del pannello. Tolta il 26 agosto 2026 su
        richiesta: in questo pannello non deve comparire **nessun messaggio**.

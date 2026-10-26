@@ -49,7 +49,6 @@ async function apriEditor(record) {
     disegnaTempo();
     accendiInsegna(record);
     $('modoEditor').hidden = false;   // lo stato sta sotto il nome, non nel log
-    $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
     disegnaCatena();
     apriPannello('pannelloEditor');
     aggiornaTastoSalva();   // editor appena aperto: niente in sospeso
@@ -85,7 +84,6 @@ async function apriEditor(record) {
   disegnaTempo();
   accendiInsegna(record);
   $('modoEditor').hidden = true;
-  $('aiutoEditor').hidden = true;   // chi riapre vuole girare, non rileggere
   disegnaCatena();
   apriPannello('pannelloEditor');
   aggiornaTastoSalva();   // editor appena aperto: niente in sospeso

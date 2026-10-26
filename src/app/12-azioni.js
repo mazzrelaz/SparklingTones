@@ -184,11 +184,6 @@ $('btnCaffe').addEventListener('click', () => {
   window.open(PAGINA_CAFFE, '_blank', 'noopener');
 });
 
-$('btnAiutoEditor').addEventListener('click', () => {
-  const guida = $('aiutoEditor');
-  guida.hidden = !guida.hidden;
-});
-
 $('status').addEventListener('click', async () => {
   // Connesso, il tocco apre il pannellino dell'ampli (`collegaMenu`).
   if ($('status').disabled || spark.connected) return;

@@ -1500,3 +1500,23 @@ non ci sta, **sale sotto la catena invece di rimpicciolire** (indicazione dell'u
 - **L'editor non scorre**: se una fila di comandi viene più alta dei suoi 125 px (la levetta BPM con «ON», i nomi
   su due righe) e il pannello scorre, `--righe` cresce di quel tanto (microtask in `bloccoClassico`). Solo se
   scorre: provati gli 80 modelli, cambiano i delay a due file e il Tremolator.
+
+### Lo sfondo regolabile e il «?» tolto — 26 ottobre 2026 (pubblicato, guscio `v141`)
+
+Un utente su Facebook (iPhone 13 mini) trovava le immagini del classico troppo presenti e chiedeva
+un «100% / 50%» in grigio. In bozza cinque varianti (100%, 50%, bianco e nero, 50% in bianco e nero,
+«tenue»): **l'utente ha scelto «tenue»** (opacità 0,72, colore 0,36) e l'ha voluta **regolabile
+dall'editor, con un trimmer accanto a Salva**. Il bianco e nero puro non l'ha convinto.
+
+- **Il trimmer** (`btnTrimmerSfondo`, solo nel classico): un tondo con la lancetta che gira; un
+  tocco apre il cursore «Sfondo» 0–100, si chiude toccando fuori. Un numero solo per tutte le
+  immagini, in `localStorage` (`sfondoClassico`), 60 di partenza: opacità 0,3 + 0,7·v, colore v²
+  (`applicaLivelloSfondo`), cioè a 100 l'immagine piena e a 0 grigio scuro.
+- **La spia spenta segue l'immagine** (copre il LED disegnato); **accesa resta piena**: dice se il
+  blocco suona anche con lo sfondo basso.
+- **Il «?» dell'editor è tolto, con la spiegazione che apriva** (l'utente: «è abbastanza
+  intuitivo»). Era comune ai due editor, quindi è sparito anche dal neon. Le due frasi della
+  spiegazione restano in `lingua-en.js` come non più usate, finché non si aggiorna l'inglese.
+- **Aperto, dallo stesso messaggio**: sul telefono basso le manopole finiscono sotto lo schermo; e
+  il preset «verde 3» che ne seleziona altri tre (probabili preset diversi con lo stesso UUID: chiesto
+  il backup all'utente).
