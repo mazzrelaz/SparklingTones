@@ -341,8 +341,11 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Pedale 2.29 caricato e verificato il 23 ottobre**: partenza in Spark, menu, CC 21–26 a 127/0 in Play
   Acoustic, giro fino all'adattatore. **Schermate di menu e Play Acoustic scelte dall'utente fra due bozze**
   (disegnate sul PC coi font veri: `..\MIdiAdapter\tools\oled\`, `node bozze.js <cartella>`), viste sul
-  pedale e approvate. Manca la prova sul Play Acoustic vero (PC817 in arrivo). `guida-pedale.html` dice ancora FS1+FS4 (riga ~899): si aggiorna dopo la
-  prova (l'inglese no, per la regola sull'inglese).
+  pedale e approvate. **27 ottobre: l'adattatore saldato funziona sul Play Acoustic vero, tutte le funzioni**
+  (HIT, preset su/giù, Rec/Play/Overdub, Stop, cancella tenendo FS2, Undo). Guida italiana già aggiornata;
+  l'inglese no, per la regola sull'inglese. **Trappola**: se un iPad ricorda il pedale da GarageBand, gli
+  si ricollega da solo appena si annuncia e occupa il posto dell'adattatore (quadratino M pieno, C6 che
+  non trova niente): Bluetooth dell'iPad spento.
 - **Pedale d'espressione** (24 ottobre, prove): volume col Master liscio; il wah manuale **non è un parametro** di
   `JH.Vox846`. Lo fa l'ampli se il pedale **si finge uno Spark Control X** (servizio FFC8, l'ampli si collega lui,
   mappa 0x70 wah / 0x72 volume, posizione con 0x0C): `pedale/prova-controlx/` comanda wah e volume.
