@@ -464,6 +464,29 @@ firmware 2.31** (comando seriale `I`, non `E`: le maiuscole A–H scelgono un pr
 ~3040 mV**, liscio nei due versi; **jack: tolto → «vuoto», rimesso → «infilato»**, entro 250 ms. A jack
 vuoto D2 resta appesa e scende piano (il condensatore si scarica): va ignorata, la presenza la dice D8.
 
+### 30 ottobre: **il pedale d'espressione vero comanda wah e volume** (col Control X finto)
+
+`prova-controlx` legge D2 e D8 (venti volte al secondo, manda 0x0C solo se la posizione si è mossa di
+300 passi) e dice all'ampli il jack con 0x0D (03 infilato, 00 tolto; tolto → prima wah chiuso e volume
+pieno). `#modo w` / `#modo v`, `#pedale`, `#curva c`, `#scala n`. **Il wah si muove col piede** (l'utente).
+Tre cose imparate, tutte provate:
+- **All'aggancio il jack dev'essere già dentro.** Agganciato con lo spinotto non entrato del tutto, il
+  finto ha risposto 0x0D 00 e poi le 0x0C non muovevano niente (anche dopo uno 0x0D 03 mandato dopo).
+  Nel firmware vero non si pone: senza jack niente annuncio.
+- **`JH.Vox846` vuole lo sblocco dell'app ufficiale** in quella sessione dell'ampli: senza, il wah non
+  suona e il pedale sembra rotto. Con l'app collegata, insieme al finto, funziona.
+- **Il volume va su 0..32767, come il wah.** Misurato a gradini (uno alla volta, l'utente dice cosa
+  sente): 8192 basso, 16384 medio, 24576 uguale, **32767 pieno**, 40960…65535 uguale. Con 0..65535
+  «faceva quasi tutto vicino al tallone»; con la posizione al quadrato su 0..32767 «muto fino a fine
+  corsa e poi di colpo». **Dritto su 0..32767: «meglio», l'utente lo tiene così.**
+- **Dopo un caricamento l'ampli si è riagganciato da solo**, con l'indirizzo casuale nuovo: il tasto
+  di accoppiamento non è servito (da riconfermare, una volta sola).
+- Per gli sketch col CDC del chip (`CDCOnBoot=default` senza TinyUSB) la seriale si apre con **DTR e
+  RTS bassi** (scratchpad `ascolta-c13.ps1`, porta COM13), non con `ascolta-pedale.ps1`.
+
+**Sul pedale a fine prova c'è di nuovo prova-ble 2.31** (COM3). Prossimo: il firmware vero in prova-ble
+(doppio ruolo, wah o volume secondo il preset, niente annuncio senza jack).
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni

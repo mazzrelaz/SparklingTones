@@ -27,6 +27,10 @@
  *   #ampli    il doppio ruolo (25 ottobre): si collega anche lui all'ampli su
  *             FFC0, come prova-ble, per suonare i preset
  *   #slot n   0x0138 sullo slot n (0..7), col collegamento di #ampli
+ *   #modo w   il pedale d'espressione vero sul wah (EXP1); #modo v sul volume (EXP2)
+ *   #pedale   la lettura del pedale vero: mV, posizione, jack, modo
+ *   #curva c  il volume segue la posizione elevata a c (di serie 1)
+ *   #scala n  il volume a punta (di serie 32767)
  *
  * Il doppio ruolo: per i preset il pedale e' il centrale e si collega
  * all'ampli; per il Control X e' l'ampli a collegarsi al pedale. Due
@@ -47,6 +51,7 @@ static BLECharacteristic* chVersoAmpli = nullptr; // FFCA: notify, dal pedale al
 static volatile bool ampliDentro = false, ampliEntrato = false, ampliUscito = false;
 static char     indirizzoCasuale[18] = "?";
 static uint32_t domande = 0;                    // messaggi arrivati dall'ampli
+static bool     jackDentro = false;              // il pedale d'espressione vero (D8)
 
 /* La mappa del profilo 1 (SparkControl.cpp): sei pulsanti, poi i due pedali
  * d'espressione. Di serie 0x72 e 0x75 (volume, volume della musica): qui il
@@ -109,7 +114,7 @@ static void rispondi(const uint8_t* m, size_t n) {
       memcpy(r + 5, FIRMWARE, strlen(FIRMWARE));
       manda(r, 6 + strlen(FIRMWARE));
       break;
-    case 0x0d: r[4] = 0x03; manda(r, 5); break;          // pedali inseriti: tutti e due
+    case 0x0d: r[4] = jackDentro ? 0x03 : 0x00; manda(r, 5); break;   // pedali inseriti: dal jack
     case 0x08: r[4] = 0x01; manda(r, 5); break;          // profilo corrente: 1
     case 0x0f: r[4] = 0x60; manda(r, 5); break;          // batteria 96%
     case 0x10: case 0x11: r[4] = 0x00; manda(r, 5); break;   // ignoti, si risponde 0
@@ -241,12 +246,96 @@ static void mandaEspressione(uint16_t a, uint16_t b) {
   manda(d, sizeof(d));
 }
 
+/* ---- il pedale d'espressione vero (30 ottobre 2026) ----
+ * M-Audio EX-P sulla presa H: il cursore su D2, da 0 mV a tallone a ~3040 a
+ * punta (misurato il 29 ottobre con prova-ble 2.31); il jack su D8, la
+ * lamella della manica col pull-up: basso = presa vuota, alto = infilato.
+ * Venti letture al secondo, come i 0x0C del Control X vero; si manda solo
+ * se la posizione si e' mossa. Due modi, dal seriale: «#modo w» il wah su
+ * EXP1 (0..32767: oltre si richiude, misurato il 25 ottobre) col volume
+ * pieno su EXP2; «#modo v» il volume su EXP2 (0..32767, oltre resta pieno) col
+ * wah chiuso. La scelta per preset verra' dopo, in prova-ble. */
+static const uint8_t  PIN_ESPRESSIONE = D2;
+static const uint8_t  PIN_JACK        = D8;
+static const uint32_t ESPR_OGNI       = 50;
+static const uint16_t ESPR_FERMO      = 300;     // passi della scala: sotto, non si manda
+static uint16_t esprTallone = 40, esprPunta = 3000;   // mV, si allargano da soli se serve
+static char     modo = 'w';
+/* Il volume (30 ottobre): dritto su 0..65535 «fa quasi tutto vicino al
+ * tallone» (l'utente). Misurato a gradini: basso a 8192, medio a 16384, pieno
+ * a 32767, e oltre non cambia: la scala e' 0..32767 come il wah. Dritto, senza
+ * curva, «meglio» e l'utente lo tiene cosi'. Curva e fondo scala restano
+ * regolabili dal seriale. */
+static float    curvaVolume = 1.0f;
+static uint16_t scalaVolume = 32767;
+static int32_t  ultimaMandata = -1;
+
+/** La lettura di D2 riportata su 0..1. */
+static float posizionePedale(uint16_t* mv) {
+  uint32_t somma = 0;
+  for (uint8_t i = 0; i < 16; i++) somma += analogReadMilliVolts(PIN_ESPRESSIONE);
+  *mv = (uint16_t)(somma / 16);
+  if (*mv < esprTallone) esprTallone = *mv;
+  if (*mv > esprPunta) esprPunta = *mv;
+  return (*mv - esprTallone) / (float)(esprPunta - esprTallone);
+}
+
+static void mandaPedale(float p, bool sempre) {
+  const uint16_t wah = (uint16_t)(p * 32767 + 0.5f), volume = (uint16_t)(powf(p, curvaVolume) * scalaVolume + 0.5f);
+  const int32_t v = modo == 'w' ? wah : volume;
+  const int32_t soglia = modo == 'w' ? ESPR_FERMO : 2 * ESPR_FERMO;
+  if (!sempre && ultimaMandata >= 0 && abs(v - ultimaMandata) < soglia) return;
+  ultimaMandata = v;
+  if (modo == 'w') mandaEspressione(wah, 65535);
+  else mandaEspressione(0, volume);
+}
+
+static void passoPedale() {
+  static uint32_t da = 0;
+  if (millis() - da < ESPR_OGNI) return;
+  da = millis();
+  // Il jack: deve restare uguale per due letture di fila (100 ms).
+  static bool grezzoPrima = false;
+  const bool grezzo = digitalRead(PIN_JACK);
+  if (grezzo == grezzoPrima && grezzo != jackDentro) {
+    jackDentro = grezzo;
+    Serial.printf("jack %s\n", jackDentro ? "infilato" : "tolto");
+    if (ampliDentro) {
+      if (!jackDentro) mandaEspressione(0, 65535);        // tolto il pedale: wah chiuso, volume pieno
+      const uint8_t d[5] = { 0x0d, 0, 0, 0, (uint8_t)(jackDentro ? 0x03 : 0x00) };
+      manda(d, 5);
+    }
+    ultimaMandata = -1;
+  }
+  grezzoPrima = grezzo;
+  if (!jackDentro || !ampliDentro) return;
+  uint16_t mv;
+  mandaPedale(posizionePedale(&mv), false);
+}
+
 static void eseguiRiga() {
   unsigned a, b;
   if (sscanf(riga, "x %u %u", &a, &b) == 2 && a <= 65535 && b <= 65535) mandaEspressione(a, b);
   else if (sscanf(riga, "ins %u", &a) == 1 && a <= 3) { const uint8_t d[5] = { 0x0d, 0, 0, 0, (uint8_t)a }; manda(d, 5); }
   else if (sscanf(riga, "mappa %x %x", &a, &b) == 2) { mappa[6] = a; mappa[7] = b;
                                                        Serial.printf("mappa: pedale 1 = %02x, pedale 2 = %02x\n", a, b); }
+  else if (!strcmp(riga, "modo w") || !strcmp(riga, "modo v")) {
+    modo = riga[5];
+    Serial.printf("pedale d'espressione: %s\n", modo == 'w' ? "wah (EXP1), volume pieno" : "volume (EXP2), wah chiuso");
+    if (jackDentro && ampliDentro) { uint16_t mv; mandaPedale(posizionePedale(&mv), true); }
+  }
+  else if (sscanf(riga, "curva %f", &curvaVolume) == 1 || sscanf(riga, "scala %u", &a) == 1) {
+    if (sscanf(riga, "scala %u", &a) == 1 && a >= 1000 && a <= 65535) scalaVolume = (uint16_t)a;
+    if (curvaVolume < 0.2f || curvaVolume > 6.0f) curvaVolume = 1.0f;
+    Serial.printf("volume: curva %.2f, fondo scala %u\n", curvaVolume, scalaVolume);
+    if (jackDentro && ampliDentro) { uint16_t mv; mandaPedale(posizionePedale(&mv), true); }
+  }
+  else if (!strcmp(riga, "pedale")) {
+    uint16_t mv;
+    const float p = posizionePedale(&mv);
+    Serial.printf("pedale: %u mV, %.0f%% (tallone %u, punta %u), jack %s, modo %c\n", mv, p * 100,
+                  esprTallone, esprPunta, jackDentro ? "infilato" : "vuoto", modo);
+  }
   else if (!strcmp(riga, "ampli")) avviaRicercaAmpli();
   else if (sscanf(riga, "slot %u", &a) == 1 && a <= 7) cambiaSlot((uint8_t)a);
   else Serial.printf("riga non capita: \"%s\"\n", riga);
@@ -341,6 +430,8 @@ void setup() {
   Serial.setTxTimeoutMs(0);
   delay(600);
   Serial.println(F("\nprova-controlx — il pedale che si finge uno Spark Control X"));
+  pinMode(PIN_JACK, INPUT_PULLUP);
+  jackDentro = digitalRead(PIN_JACK);
   avviaControlX();
 }
 
@@ -357,11 +448,13 @@ void loop() {
                       Serial.println(F("l'ampli si e' collegato")); }
   if (avvisoJack && (int32_t)(millis() - avvisoJack) > 0) {
     avvisoJack = 0;
-    if (ampliDentro) { const uint8_t d[5] = { 0x0d, 0, 0, 0, 0x03 }; manda(d, 5); }
+    if (ampliDentro) { const uint8_t d[5] = { 0x0d, 0, 0, 0, (uint8_t)(jackDentro ? 0x03 : 0x00) }; manda(d, 5);
+                       ultimaMandata = -1; }
   }
   if (ampliUscito)  { ampliUscito = false;  Serial.println(F("l'ampli se n'e' andato: mi riannuncio"));
                       BLEDevice::startAdvertising(); }
   sbrigaRicercaAmpli();
+  passoPedale();
   static bool ffc0Prima = false;                 // il collegamento FFC0 che cade, detto una volta
   const bool ffc0 = client && client->isConnected();
   if (ffc0 != ffc0Prima) { ffc0Prima = ffc0; if (!ffc0) { chPreset = nullptr; Serial.println(F("FFC0: l'ampli si e' staccato")); } }
