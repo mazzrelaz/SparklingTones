@@ -442,6 +442,16 @@ Learn: **il pedale di AmpliTube segue il cursore** (l'utente). Manca solo la let
   riaggancia da solo quando l'annuncio riparte; con l'indirizzo casuale nuovo a ogni accensione no di
   sicuro, quindi va tenuto fisso (salvato in flash).
 
+**29 ottobre: arrivati il pedale (M-Audio EX-P, selettore M-AUDIO/OTHER sotto), la presa e i
+condensatori.** Presa a 6 piedini, misurata col multimetro dall'utente; numeri sulla foto vista dai
+piedini, dado a destra: sopra 1-2-3, sotto 4-5-6, da sinistra. **6 = manica.** A presa vuota si toccano
+1-4, 2-5, 3-6; con lo spinotto nessuna delle tre. Con lo spinotto, dal 6: **4 = 63 kΩ fisso** (capo del
+potenziometro), **5 = 64 kΩ che cambia col pedale** (cursore); 1 e 2 niente (lamelle). Quindi la
+presenza del jack si legge meglio dal **3, la lamella della manica**: D8 col **pull-up** interno,
+vuoto = basso (3 tocca la massa), infilato = alto. Cablaggio dato: 6 → G, 5 → D2 col 100 nF fra 5 e 6,
+4 → 1 kΩ → 3V3, 3 → D8, 1 e 2 liberi. **Il selettore del pedale non si sposta**: cambia quale fra 4 e 5
+è il cursore. Non ancora saldato né provato.
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni
