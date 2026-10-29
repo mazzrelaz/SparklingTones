@@ -196,6 +196,10 @@ datasheet MCP23017): 0 errori. DRC con `kicad-cli`: pulito. Anteprime PNG in `pc
   **«pedal» sotto il logo**, allineato alla fine di «Tones»: logo 30 mm invece di 32, un po' più a sinistra.
   **Da comprare (TME, scelto dall'utente il chip e non il KAmod)**: MCP23017-E/SP, zoccolo **ICVT-28P-W**
   (stretto, 7,62; ICVT-28P senza -W è largo), file femmina **ZL262-7SG** (1×7, 8,5 mm, niente da tagliare).
+- **Ordinata il 29 ottobre 2026** dall'utente, dall'app **JLCONE** (il coupon «JLCONE PCB $5» vale solo da lì;
+  la dogana vuole almeno 1 $ di merce, quindi scala meno): 10 pezzi, FR-4 TG135, 2 strati, 1,6 mm, **verde**,
+  **HASL con piombo**, 1 oz, Tented, Remove Mark, Flying Probe, niente assemblaggio. **14,15 € (15,80 $, ~62 zł)**
+  con spedizione economica, IVA e dogana pagate all'ordine. Spedizione prevista dalla fabbrica il 31 ottobre.
 - **Prese JST-XH con G sul piedino 1**: i cavi di adesso vanno controllati, il contatto si sposta.
 - **Linee nuove, il firmware non è ancora cambiato**: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
   DX = GPA0, GPA7 libera (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =

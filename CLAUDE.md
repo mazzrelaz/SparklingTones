@@ -328,8 +328,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   Il 26 ottobre (`v141`–`v143`): trimmer dello sfondo accanto a Salva, fascia scura sotto i comandi, «?» tolto
   dai due editor, e **il classico non scorre mai** (`adattaClassico`).
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
-- **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano; approvata,
-  **non ordinata**; il 29 ottobre aggiunta la presa ESPRESSIONE (J11: G, 3V3, D2, D8 come la presa H,
+- **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano; approvata e
+  **ordinata il 29 ottobre** (JLCPCB, verde, HASL con piombo); il 29 ottobre aggiunta la presa ESPRESSIONE (J11: G, 3V3, D2, D8 come la presa H,
   R e C sulla presa del pedale). Linee nuove e cosa fare a scheda arrivata:
   `docs/pedale-lavoro.md`, «La basetta stampata».
 - **Il wah al posto del LA Comp** (22 ottobre, sera): non è un difetto. Il test del wah del 16 ottobre negli slot
