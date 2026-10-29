@@ -450,7 +450,8 @@ potenziometro), **5 = 64 kΩ che cambia col pedale** (cursore); 1 e 2 niente (la
 presenza del jack si legge meglio dal **3, la lamella della manica**: D8 col **pull-up** interno,
 vuoto = basso (3 tocca la massa), infilato = alto. Cablaggio dato: 6 → G, 5 → D2 col 100 nF fra 5 e 6,
 4 → 1 kΩ → 3V3, 3 → D8, 1 e 2 liberi. **Il selettore del pedale non si sposta**: cambia quale fra 4 e 5
-è il cursore. Non ancora saldato né provato.
+è il cursore. **La rotella laterale regola la corsa**: al massimo 5-6 va da 1 a 64 kΩ, al minimo da 53 a
+64; si tiene al massimo (con l'1 kΩ, su D2 circa 0,05–3,25 V). Non ancora saldato né provato.
 
 ## Dove si riprende col pedale — 24 settembre 2026
 
