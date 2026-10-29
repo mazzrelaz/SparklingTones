@@ -200,6 +200,10 @@ datasheet MCP23017): 0 errori. DRC con `kicad-cli`: pulito. Anteprime PNG in `pc
   la dogana vuole almeno 1 $ di merce, quindi scala meno): 10 pezzi, FR-4 TG135, 2 strati, 1,6 mm, **verde**,
   **HASL con piombo**, 1 oz, Tented, Remove Mark, Flying Probe, niente assemblaggio. **14,15 € (15,80 $, ~62 zł)**
   con spedizione economica, IVA e dogana pagate all'ordine. Spedizione prevista dalla fabbrica il 31 ottobre.
+- **Ordinati da TME lo stesso giorno**: 2 × MCP23017-E/SP, 10 × ICVT-28P-W, 10 × ZL262-7SG. Il resto c'è
+  già: resistenze (assortimento), condensatori (kit YIXISI: **104** per «100n», **106** ceramico per «10u» —
+  niente verso, gambe da stringere appena, il «+» stampato si ignora), prese JST-XH da basetta nel kit
+  DxCRIMP (XH-2A/4A/5A: ne avanzano). **Mancano solo i pezzi della basetta, non i cavi.**
 - **Prese JST-XH con G sul piedino 1**: i cavi di adesso vanno controllati, il contatto si sposta.
 - **Linee nuove, il firmware non è ancora cambiato**: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
   DX = GPA0, GPA7 libera (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =
