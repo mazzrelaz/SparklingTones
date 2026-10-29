@@ -329,7 +329,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   dai due editor, e **il classico non scorre mai** (`adattaClassico`).
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
 - **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano;
-  approvata, da ordinare su JLCPCB, **non provata**. Linee nuove: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
+  approvata, da ordinare su JLCPCB, **non provata**. **Non ancora ordinata: l'utente aspetta di decidere il
+  pedale d'espressione** (29 ottobre: J10 ha già G, 3V3, D2, D8; proposta una presa JST-XH apposta con 1 kΩ e
+  100 nF sulla basetta; ci sta pensando). Linee nuove: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
   DX = GPA0, **GPA7 libera**; LED*n* rosso/verde = GPB(2n-2)/GPB(2n-1). A scheda arrivata: firmware con le
   tabelle nuove e mappatura guidata.
 - **Il wah al posto del LA Comp** (22 ottobre, sera): non è un difetto. Il test del wah del 16 ottobre negli slot
