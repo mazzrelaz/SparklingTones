@@ -344,7 +344,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   100 nF sulla presa del pedale), rotella al massimo, selettore da non spostare. **2.31 caricata e provata il 29
   ottobre**: tallone 0 mV, punta ~3040; il jack lo dice D8 (lamella della manica, pull-up). Comando seriale `I`.
   Il wah manuale lo fa l'ampli solo se il pedale **si finge uno Spark Control X** (`pedale/prova-controlx/`, FFC8,
-  0x70 wah / 0x72 volume). **Deciso dall'utente**: wah se nel preset c'è `JH.Vox846`, altrimenti volume; senza
+  0x70 wah / 0x72 volume). **30 ottobre: col pedale vero comanda wah e volume** (volume 0..32767 come il wah,
+  misurato; jack dentro prima dell'aggancio; `JH.Vox846` vuole lo sblocco). **Deciso dall'utente**: wah se nel preset c'è `JH.Vox846`, altrimenti volume; senza
   jack niente Control X. **Prossimo, quando lo dice lui: il firmware vero** (doppio ruolo, scritto e mai provato).
   Tutto in `docs/pedale-lavoro.md`, con la mappa dei connettori (`foto/pedale/millefori-connettori.png`).
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
