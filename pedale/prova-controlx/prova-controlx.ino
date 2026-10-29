@@ -246,7 +246,7 @@ static void mandaEspressione(uint16_t a, uint16_t b) {
   manda(d, sizeof(d));
 }
 
-/* ---- il pedale d'espressione vero (30 ottobre 2026) ----
+/* ---- il pedale d'espressione vero (29 ottobre 2026) ----
  * M-Audio EX-P sulla presa H: il cursore su D2, da 0 mV a tallone a ~3040 a
  * punta (misurato il 29 ottobre con prova-ble 2.31); il jack su D8, la
  * lamella della manica col pull-up: basso = presa vuota, alto = infilato.
@@ -261,7 +261,7 @@ static const uint32_t ESPR_OGNI       = 50;
 static const uint16_t ESPR_FERMO      = 300;     // passi della scala: sotto, non si manda
 static uint16_t esprTallone = 40, esprPunta = 3000;   // mV, si allargano da soli se serve
 static char     modo = 'w';
-/* Il volume (30 ottobre): dritto su 0..65535 «fa quasi tutto vicino al
+/* Il volume (29 ottobre): dritto su 0..65535 «fa quasi tutto vicino al
  * tallone» (l'utente). Misurato a gradini: basso a 8192, medio a 16384, pieno
  * a 32767, e oltre non cambia: la scala e' 0..32767 come il wah. Dritto, senza
  * curva, «meglio» e l'utente lo tiene cosi'. Curva e fondo scala restano
