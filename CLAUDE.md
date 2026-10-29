@@ -317,7 +317,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 29 ottobre 2026
+## Dove si riprende — 29 ottobre 2026 (sera)
 
 - **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
   neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
@@ -332,10 +332,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   **ordinata il 29 ottobre** (JLCPCB, verde, HASL con piombo); il 29 ottobre aggiunta la presa ESPRESSIONE (J11: G, 3V3, D2, D8 come la presa H,
   R e C sulla presa del pedale). Linee nuove e cosa fare a scheda arrivata:
   `docs/pedale-lavoro.md`, «La basetta stampata».
-- **Il wah al posto del LA Comp** (22 ottobre, sera): non è un difetto. Il test del wah del 16 ottobre negli slot
-  A1–A4 ha riscritto, per UUID, quattro preset (Nylon Reverb, Jazz tone, PF comfortably numb, prova); l'omonimo del
-  NEO non li ha corretti. Rimedio dato all'utente: `Dropbox\ripristino-la-comp.json` da «Importa». **Da sentire
-  se ha funzionato**, e se gli slot A1–A4 dello Spark 2 hanno ancora il wah (rileggendoli tornerebbe).
+- **Il wah al posto del LA Comp** (22 ottobre): non è un difetto; rimedio dato, **da sentire se ha funzionato**.
+  Dettaglio: `docs/diario.md`, estratto del 29 ottobre (sera).
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
@@ -347,6 +345,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   0x70 wah / 0x72 volume). **29 ottobre: col pedale vero comanda wah e volume** (volume 0..32767 come il wah,
   misurato; jack dentro prima dell'aggancio; `JH.Vox846` vuole lo sblocco). **Deciso dall'utente**: wah se nel preset c'è `JH.Vox846`, altrimenti volume; senza
   jack niente Control X. **Prossimo, già deciso: la prova del doppio ruolo** (`prova-controlx`: Control X agganciato, poi `#ampli`, `#slot n`), poi il firmware vero.
+  **Da misurare con l'ampli** (dubbio dell'utente): l'Auto Wah gratuito (anche lui `JH.Vox846`) suona senza aprire l'app
+  ufficiale? E lo sblocco Hendrix resta dopo aver spento l'ampli? Mai misurati apposta.
   Tutto in `docs/pedale-lavoro.md`, con la mappa dei connettori (`foto/pedale/millefori-connettori.png`).
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.

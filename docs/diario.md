@@ -1239,3 +1239,10 @@ letto, 2.31: `docs/pedale-lavoro.md`).
   senza jack infilato niente Control X (presa Neutrik/Rean NYS215 col contatto dell'anello su **D8**, 1 kΩ fra 3V3
   e anello; foto della presa prima dei fili). **CC 11 verso AmpliTube 5 verificato** dal cursore. **Prossimo: il
   doppio ruolo** (preset e Control X insieme), scritto e mai provato. Tutto in `docs/pedale-lavoro.md`.
+
+## Estratto di CLAUDE.md del 29 ottobre 2026 (sera): il wah al posto del LA Comp
+
+- **Il wah al posto del LA Comp** (22 ottobre, sera): non è un difetto. Il test del wah del 16 ottobre negli slot
+  A1–A4 ha riscritto, per UUID, quattro preset (Nylon Reverb, Jazz tone, PF comfortably numb, prova); l'omonimo del
+  NEO non li ha corretti. Rimedio dato all'utente: `Dropbox\ripristino-la-comp.json` da «Importa». **Da sentire
+  se ha funzionato**, e se gli slot A1–A4 dello Spark 2 hanno ancora il wah (rileggendoli tornerebbe).
