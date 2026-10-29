@@ -39,7 +39,7 @@ NOME = "basetta-pedale"
 # Sul foglio di KiCad la scheda sta spostata di (OX, OY).
 OX, OY = 100.0, 100.0
 W, H = 86.0, 70.0      # stretta attorno ai pezzi (chiesto dall'utente)
-LOGO = (78.5, 24.0, 32.0)  # centro e lunghezza del logo, in verticale a destra
+LOGO = (77.3, 25.0, 30.0)  # centro e lunghezza del logo, in verticale a destra
 FORI = [(4, 4), (W - 4, 4), (4, H - 4), (W - 4, H - 4)]   # M3
 RAGGIO_VITE = 3.6        # niente rame dove appoggia la testa della vite
 
@@ -124,7 +124,7 @@ connettore("J4", J_LED34, 47.5, BASSO)
 connettore("J5", ["GND", "+3V3", "SCL", "SDA"], 64.0, BASSO)
 connettore("J6", ["GND", "LED_T_R"], 11.0, BASSO)
 connettore("J7", ["GND", "CLIC_R"], 20.5, BASSO)
-connettore("J8", ["GND", "VBAT"], 5.5, 42.0)      # sotto la XIAO: i fili delle piazzole BAT
+# J8, la batteria della XIAO: due piazzole fra le sue file, vedi piazzole_bat()
 # il morsetto sul lato destro, girato: i fili entrano dal bordo
 pezzo("J9", ("TerminalBlock_Phoenix",
              "TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal"),
@@ -166,7 +166,6 @@ ETICHETTE = {
     "J5": ("DISPLAY", ["G", "3V3", "SCL", "SDA"], "sopra"),
     "J6": ("TEMPO", ["G", "+"], "sopra"),
     "J7": ("PIEZO", ["G", "+"], "sopra"),
-    "J8": ("BAT XIAO", ["-", "+"], "destra"),
     "J10": ("LIBERI", ["G", "3V3", "D2", "D8", "D9", "D10", "TX", "RX"], "sopra"),
     "J11": ("ESPRESSIONE", ["G", "3V3", "D2", "D8"], "sotto"),
 }
@@ -286,6 +285,35 @@ def xiao(b, reti):
         x, y = da_iu(p.GetPosition())
         s = 1 if y < cy else -1             # verso l'interno
         testo(b, nomi[p.GetNumber()], x, y + s * 2.75, 0.8, ang=90)
+    return f
+
+
+def piazzole_bat(b, reti):
+    """La batteria della XIAO (29 ottobre 2026, chiesto dall'utente): le sue
+    piazzole BAT+ e BAT- stanno sotto di lei, e prima andavano con due fili a
+    una presa JST accanto. Ora due piazzole sulla basetta fra le due file,
+    verso il lato opposto all'USB: due fili corti, e la XIAO li copre."""
+    f = pcbnew.FOOTPRINT(b)
+    f.SetReference("J8")
+    f.SetValue("BAT")
+    f.Reference().SetVisible(False)
+    f.Value().SetVisible(False)
+    b.Add(f)
+    x, y = XIAO_C[0] + 5.5, XIAO_C[1]
+    f.SetPosition(V(x, y))
+    for num, r, dy, segno in (("1", "GND", 1.7, "-"), ("2", "VBAT", -1.7, "+")):
+        p = pcbnew.PAD(f)
+        p.SetAttribute(pcbnew.PAD_ATTRIB_PTH)
+        p.SetShape(pcbnew.PAD_SHAPE_CIRCLE)
+        p.SetSize(pcbnew.VECTOR2I(mm(1.8), mm(1.8)))
+        p.SetDrillSize(pcbnew.VECTOR2I(mm(1.0), mm(1.0)))
+        p.SetLayerSet(pcbnew.PAD.PTHMask())
+        p.SetNumber(num)
+        p.SetPosition(V(x, y + dy))
+        p.SetNet(rete(b, reti, r))
+        f.Add(p)
+        testo(b, segno, x + 1.9, y + dy, 1.2)
+    testo(b, "BAT", x + 3.3, y, 0.8, ang=90)
     return f
 
 
@@ -414,7 +442,10 @@ def etichette(b, fps):
     testo(b, "+", xp - 7.2, yp, 1.6)
     testo(b, "CELLA", xm, yp - 4.2, 1.1)
     alto = logo(b, LOGO[0], LOGO[1], LOGO[2], verticale=True)
-    testo(b, "by Massimo Togni 2026", LOGO[0] + alto / 2 + 1.6, LOGO[1], 1.1, ang=90)
+    # sotto il logo «pedal», allineato alla fine di «Tones» (29 ottobre, chiesto
+    # dall'utente; per far posto il logo e' piu' corto di 2 mm e piu' a sinistra)
+    testo(b, "pedal", LOGO[0] + alto / 2 + 1.25, LOGO[1] - LOGO[2] / 2, 1.5, ang=90, giust=1)
+    testo(b, "by Massimo Togni 2026", LOGO[0] + alto / 2 + 3.7, LOGO[1], 1.1, ang=90)
     # il chip
     testo(b, "MCP23017", MCP_X + 16.5, MCP_Y + 2.8, 1.0)
     # titolo, sul retro
@@ -804,6 +835,7 @@ def main():
         rete(b, reti, "GND")
         contorno(b)
         xiao(b, reti)
+        piazzole_bat(b, reti)
         fps = piazza(b, reti)
         piste, vie, falliti, gr = instrada(b, reti, prima)
         segnali = [f for f in falliti if f != "GND"]

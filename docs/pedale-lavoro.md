@@ -190,6 +190,12 @@ datasheet MCP23017): 0 errori. DRC con `kicad-cli`: pulito. Anteprime PNG in `pc
   entra uguale. **Niente 1 kΩ né 100 nF sulla basetta**: stanno sulla presa del pedale (scelta
   dell'utente). La 10k del RESET scesa di 3 mm per non sembrare della presa. Verifica 119 piazzole, 0
   errori; DRC pulito; Gerber, zip e copia sul Desktop rifatti.
+- **29 ottobre, sera: via la presa BAT XIAO**, al suo posto **due piazzole BAT + e − fra le file della XIAO**
+  (verso il lato opposto all'USB, sempre `J8`: GND e VBAT, quindi morsetto e partitore come prima): due fili
+  corti dalle piazzole BAT sotto la XIAO, e la XIAO li copre (chiesto dall'utente: oggi i fili vanno al morsetto).
+  **«pedal» sotto il logo**, allineato alla fine di «Tones»: logo 30 mm invece di 32, un po' più a sinistra.
+  **Da comprare (TME, scelto dall'utente il chip e non il KAmod)**: MCP23017-E/SP, zoccolo **ICVT-28P-W**
+  (stretto, 7,62; ICVT-28P senza -W è largo), file femmina **ZL262-7SG** (1×7, 8,5 mm, niente da tagliare).
 - **Prese JST-XH con G sul piedino 1**: i cavi di adesso vanno controllati, il contatto si sposta.
 - **Linee nuove, il firmware non è ancora cambiato**: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
   DX = GPA0, GPA7 libera (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =
