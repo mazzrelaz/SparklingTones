@@ -469,6 +469,7 @@ void loop() {
     else if (c == 'L') cambiaLooper();               // il looper dal PC, per le prove
     else if (c == 'Y') { if (looper) looperTap(); }  // un colpo di tap tempo
     else if (c == 'J' || c == 'X' || c == 'Z') avviaSpazzata(c); // il pedale d'espressione finto (2.30)
+    else if (c == 'I') avviaEspressione();                  // quello vero, la prova dei fili (2.31)
     else if (c == 'j') { indiceWah = (uint8_t)((indiceWah + 1) % 6);
                          Serial.printf("wah: la prossima spazzata va sull'indice %u\n", indiceWah); }
     // Lo stato che suona, coi pezzi grezzi sul seriale: per vedere dal PC cosa
@@ -479,6 +480,7 @@ void loop() {
     else if (c == '?') elenco();
   }
   passoSpazzata();
+  passoEspressione();
   // 2 ms, non 10: una battuta secca su un tattile puo' durare pochi
   // millisecondi, e con un polling lento la si perde e basta.
   delay(2);

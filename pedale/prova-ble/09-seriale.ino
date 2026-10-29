@@ -156,6 +156,40 @@ static void passoSpazzata() {
   }
 }
 
+/* Il pedale d'espressione vero (2.31, 29 ottobre 2026): M-Audio EX-P sulla
+ * presa H. Il cursore arriva su D2 (64 kOhm, 1 kOhm verso 3V3, 100 nF verso
+ * massa); D8 sta sulla lamella della manica, che a presa vuota tocca la
+ * massa: col pull-up, basso = vuota, alto = jack infilato. Per ora solo la
+ * prova dei fili: 'I' scrive quattro volte al secondo i mV, il minimo e il
+ * massimo visti, e il jack. */
+static const uint8_t  PIN_ESPRESSIONE = D2;
+static const uint8_t  PIN_JACK        = D8;
+static const uint32_t ESPR_OGNI       = 250;
+static bool     esprStampa = false;
+static uint32_t esprDa = 0;
+static uint16_t esprMin = 0xffff, esprMax = 0;
+
+static void avviaEspressione() {
+  pinMode(PIN_JACK, INPUT_PULLUP);
+  esprStampa = !esprStampa;
+  esprMin = 0xffff;
+  esprMax = 0;
+  if (!esprStampa) Serial.println(F("espressione: fermata"));
+}
+
+/** Una riga della prova, se e' ora. Dal loop. */
+static void passoEspressione() {
+  if (!esprStampa || millis() - esprDa < ESPR_OGNI) return;
+  esprDa = millis();
+  uint32_t somma = 0;
+  for (uint8_t i = 0; i < 16; i++) somma += analogReadMilliVolts(PIN_ESPRESSIONE);
+  const uint16_t mv = (uint16_t)(somma / 16);
+  if (mv < esprMin) esprMin = mv;
+  if (mv > esprMax) esprMax = mv;
+  Serial.printf("espressione: D2 %4u mV  (min %4u, max %4u)  jack %s\n", mv, esprMin, esprMax,
+                digitalRead(PIN_JACK) ? "infilato" : "vuoto");
+}
+
 /* Il wah dal PC (tools/wah.html, 24 ottobre 2026): l'utente vuole muovere lui
  * modalita' e posizione, coi secondi non si capiva. Una riga per comando:
  * «#<indice> <valore>» manda 0x0104 su JH.Vox846, «#on» lo accende. */
@@ -217,6 +251,7 @@ static void elenco() {
     "  T     apri/chiudi il tuner;  L  dentro/fuori dal looper;  Y  un colpo di tap\n"
     "  J     espressione finta sul wah (accende JH.Vox846, spazza un indice); j cambia indice\n"
     "  X     espressione finta sul MIDI (CC 11, canale 1)\n"
+    "  I     il pedale d'espressione vero: D2 e jack, 4 righe al secondo (I ferma)\n"
     "  Z     wah: BPM spento, le sei modalita' con una rampa ciascuna\n"
     "  Q     rileggi lo stato che suona (pezzi grezzi)\n"
     "  #i v  wah: l'indice i a v (0..1), una riga; #on lo accende (tools/wah.html)\n"));
