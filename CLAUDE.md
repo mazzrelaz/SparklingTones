@@ -317,7 +317,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 24 ottobre 2026
+## Dove si riprende — 29 ottobre 2026
 
 - **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
   neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
@@ -328,35 +328,25 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   Il 26 ottobre (`v141`–`v143`): trimmer dello sfondo accanto a Salva, fascia scura sotto i comandi, «?» tolto
   dai due editor, e **il classico non scorre mai** (`adattaClassico`).
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
-- **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano;
-  approvata, da ordinare su JLCPCB, **non provata**. **Non ancora ordinata: l'utente aspetta di decidere il
-  pedale d'espressione** (29 ottobre: J10 ha già G, 3V3, D2, D8; proposta una presa JST-XH apposta con 1 kΩ e
-  100 nF sulla basetta; ci sta pensando). Linee nuove: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
-  DX = GPA0, **GPA7 libera**; LED*n* rosso/verde = GPB(2n-2)/GPB(2n-1). A scheda arrivata: firmware con le
-  tabelle nuove e mappatura guidata.
+- **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano; approvata,
+  **non ordinata**: l'utente ci pensa per il pedale d'espressione (J10 ha già G, 3V3, D2, D8, lo stesso ordine
+  della presa H; proposta una JST-XH apposta con 1 kΩ e 100 nF). Linee nuove e cosa fare a scheda arrivata:
+  `docs/pedale-lavoro.md`, «La basetta stampata».
 - **Il wah al posto del LA Comp** (22 ottobre, sera): non è un difetto. Il test del wah del 16 ottobre negli slot
   A1–A4 ha riscritto, per UUID, quattro preset (Nylon Reverb, Jazz tone, PF comfortably numb, prova); l'omonimo del
   NEO non li ha corretti. Rimedio dato all'utente: `Dropbox\ripristino-la-comp.json` da «Importa». **Da sentire
   se ha funzionato**, e se gli slot A1–A4 dello Spark 2 hanno ancora il wah (rileggendoli tornerebbe).
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
-- **Pedale 2.29 caricato e verificato il 23 ottobre**: partenza in Spark, menu, CC 21–26 a 127/0 in Play
-  Acoustic, giro fino all'adattatore. **Schermate di menu e Play Acoustic scelte dall'utente fra due bozze**
-  (disegnate sul PC coi font veri: `..\MIdiAdapter\tools\oled\`, `node bozze.js <cartella>`), viste sul
-  pedale e approvate. **27 ottobre: l'adattatore saldato funziona sul Play Acoustic vero, tutte le funzioni**
-  (HIT, preset su/giù, Rec/Play/Overdub, Stop, cancella tenendo FS2, Undo). Guida italiana già aggiornata;
-  l'inglese no, per la regola sull'inglese. **Trappola**: se un iPad ricorda il pedale da GarageBand, gli
-  si ricollega da solo appena si annuncia e occupa il posto dell'adattatore (quadratino M pieno, C6 che
-  non trova niente): Bluetooth dell'iPad spento.
-- **Pedale d'espressione** (24 ottobre, prove): volume col Master liscio; il wah manuale **non è un parametro** di
-  `JH.Vox846`. Lo fa l'ampli se il pedale **si finge uno Spark Control X** (servizio FFC8, l'ampli si collega lui,
-  mappa 0x70 wah / 0x72 volume, posizione con 0x0C): `pedale/prova-controlx/` comanda wah e volume.
-  Attrezzi: `tools/wah-ponte.ps1` + `tools/wah.html`. **Trappola**: chiusa l'app l'ampli suona lo slot,
-  i 0x0104 cambiano 0x7f senza suonare finché non arriva `0x0138 7f`. Scala 0…32767, calibrazione nel pedale.
-  **Deciso dall'utente** (25 ottobre): wah se nel preset c'è `JH.Vox846`, altrimenti volume, lo sceglie il pedale;
-  senza jack infilato niente Control X (presa Neutrik/Rean NYS215 col contatto dell'anello su **D8**, 1 kΩ fra 3V3
-  e anello; foto della presa prima dei fili). **CC 11 verso AmpliTube 5 verificato** dal cursore. **Prossimo: il
-  doppio ruolo** (preset e Control X insieme), scritto e mai provato. Tutto in `docs/pedale-lavoro.md`.
+- **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
+  che ricorda il pedale da GarageBand gli si ricollega e occupa il posto dell'adattatore: Bluetooth dell'iPad spento.
+- **Pedale d'espressione**: M-Audio EX-P sulla presa **H** della millefori (da sinistra G, 3V3, D2, D8; 1 kΩ e
+  100 nF sulla presa del pedale), rotella al massimo, selettore da non spostare. **2.31 caricata e provata il 29
+  ottobre**: tallone 0 mV, punta ~3040; il jack lo dice D8 (lamella della manica, pull-up). Comando seriale `I`.
+  Il wah manuale lo fa l'ampli solo se il pedale **si finge uno Spark Control X** (`pedale/prova-controlx/`, FFC8,
+  0x70 wah / 0x72 volume). **Deciso dall'utente**: wah se nel preset c'è `JH.Vox846`, altrimenti volume; senza
+  jack niente Control X. **Prossimo, quando lo dice lui: il firmware vero** (doppio ruolo, scritto e mai provato).
+  Tutto in `docs/pedale-lavoro.md`, con la mappa dei connettori (`foto/pedale/millefori-connettori.png`).
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
 - **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key): **mai più catture o
