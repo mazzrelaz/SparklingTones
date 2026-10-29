@@ -80,6 +80,13 @@ sua `G`**; quelli uguali si segnano. **Morsetto verde per la cella**, rosso `+` 
 verso le piazzole `BAT` sotto la XIAO: **polarità misurata** (~4 V dal caricabatterie della
 XIAO anche senza cella).
 
+**I connettori della millefori, 29 ottobre 2026** (confermati dall'utente; foto
+`foto/pedale/millefori-connettori.png`, XIAO in alto a sinistra, espansore in alto a destra):
+A (4) LED 1 e 2, accanto a PB4–PB7 · B (4) LED 3 e 4, accanto a PB0–PB3 · C (5) pulsanti, banco SX e DX
+e FS4 · D (5) pulsanti, FS1 FS2 FS3 FS5 · E (4) display · F (2) LED del tempo, D1 · G (2) piezo, D3 ·
+**H (4) pedale d'espressione, nuovo: G, 3V3, D2, D8 dal piedino verso il morsetto** (stesso ordine di
+J10 della basetta stampata) · M morsetto della cella, spostato per far posto a H.
+
 | piedino | GPIO | a cosa serve |
 |---|---|---|
 | D4 / D5 | `5`, `6` | I²C: display ed espansore (SDA, SCL) |
