@@ -134,6 +134,10 @@ pezzo("J10", ("Connector_PinHeader_2.54mm", "PinHeader_1x08_P2.54mm_Vertical"),
       "", 4.0, 13.0, 90,
       {str(i + 1): r for i, r in enumerate(
           ["GND", "+3V3", "D2", "D8", "D9", "D10", "TX", "RX"])})
+# il pedale d'espressione (29 ottobre 2026): stesso ordine della presa H della
+# millefori, cosi' il cavo fatto per quella entra qui. Resistenza da 1 kOhm e
+# 100 nF stanno sulla presa del pedale, non sulla basetta.
+connettore("J11", ["GND", "+3V3", "D2", "D8"], 63.0, 9.0)
 
 # Le otto resistenze dei LED, in piedi sul foglio (piazzola 1 in alto).
 for i, rete in enumerate(LED_USCITE):
@@ -141,7 +145,7 @@ for i, rete in enumerate(LED_USCITE):
           30.5 + i * 3.81, 40.0, 270, {"1": "PB%d" % i, "2": rete})
 pezzo("R1", RES, "4k7", 62.5, 38.5, 0, {"1": "+3V3", "2": "SDA"})
 pezzo("R2", RES, "4k7", 62.5, 42.0, 0, {"1": "+3V3", "2": "SCL"})
-pezzo("R3", RES, "10k", 60.0, 20.0, 0, {"1": "+3V3", "2": "RESET"})
+pezzo("R3", RES, "10k", 60.0, 23.0, 0, {"1": "+3V3", "2": "RESET"})
 # vicino alla XIAO: partitore della batteria (D0), LED del tempo (D1), piezo (D3)
 pezzo("R4", RES, "100k", 3.5, 49.0, 0, {"1": "VBAT", "2": "VSENSE"})
 pezzo("R5", RES, "100k", 3.5, 52.2, 0, {"1": "VSENSE", "2": "GND"})
@@ -164,6 +168,7 @@ ETICHETTE = {
     "J7": ("PIEZO", ["G", "+"], "sopra"),
     "J8": ("BAT XIAO", ["-", "+"], "destra"),
     "J10": ("LIBERI", ["G", "3V3", "D2", "D8", "D9", "D10", "TX", "RX"], "sopra"),
+    "J11": ("ESPRESSIONE", ["G", "3V3", "D2", "D8"], "sotto"),
 }
 
 FORTI = {"GND", "+3V3", "VBAT"}

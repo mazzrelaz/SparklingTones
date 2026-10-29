@@ -185,6 +185,11 @@ datasheet MCP23017): 0 errori. DRC con `kicad-cli`: pulito. Anteprime PNG in `pc
   sulla scheda (sulla piastrina LED vanno sostituite con un filo); pull-up I²C 4k7, RESET 10k,
   100n + 10µ; partitore 100k/100k su D0, 330 su D1 (TEMPO) e D3 (PIEZO); morsetto CELLA sul lato
   destro, presa BAT XIAO per i fili delle piazzole BAT; pettine LIBERI (D2, D8, D9, D10, TX, RX).
+- **29 ottobre: presa ESPRESSIONE (J11)**, JST-XH 4 poli in alto a destra accanto a «FS5 E BANCO»:
+  G, 3V3, D2, D8, lo stesso ordine della presa H della millefori, così il cavo del pedale d'espressione
+  entra uguale. **Niente 1 kΩ né 100 nF sulla basetta**: stanno sulla presa del pedale (scelta
+  dell'utente). La 10k del RESET scesa di 3 mm per non sembrare della presa. Verifica 119 piazzole, 0
+  errori; DRC pulito; Gerber, zip e copia sul Desktop rifatti.
 - **Prese JST-XH con G sul piedino 1**: i cavi di adesso vanno controllati, il contatto si sposta.
 - **Linee nuove, il firmware non è ancora cambiato**: FS1..FS4 = GPA6..GPA3, FS5 = GPA2, SX = GPA1,
   DX = GPA0, GPA7 libera (sui chip nuovi non è ingresso garantito); LED*n* rosso/verde =
@@ -464,7 +469,7 @@ firmware 2.31** (comando seriale `I`, non `E`: le maiuscole A–H scelgono un pr
 ~3040 mV**, liscio nei due versi; **jack: tolto → «vuoto», rimesso → «infilato»**, entro 250 ms. A jack
 vuoto D2 resta appesa e scende piano (il condensatore si scarica): va ignorata, la presenza la dice D8.
 
-### 30 ottobre: **il pedale d'espressione vero comanda wah e volume** (col Control X finto)
+### 29 ottobre: **il pedale d'espressione vero comanda wah e volume** (col Control X finto)
 
 `prova-controlx` legge D2 e D8 (venti volte al secondo, manda 0x0C solo se la posizione si è mossa di
 300 passi) e dice all'ampli il jack con 0x0D (03 infilato, 00 tolto; tolto → prima wah chiuso e volume
