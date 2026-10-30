@@ -540,6 +540,15 @@ Jack del pannello montato dall'utente (D8 lo vede). Prove con `prova-controlx`, 
   «meglio», ma poi «perde qualche colpo»; **tornato a 50: accettabile, deciso dall'utente.** L'intervallo
   del collegamento lo sceglie l'ampli, 15 ms; chiesto 7,5–15 (`#veloce`, rc 0) lo tiene a 15. **Nel firmware
   vero: posizione di continuo, ogni 20 ms.** L'utente: può anche darsi che il wah dello Spark sia così.
+- **Il botto (errore mio).** Passato a `#modo v` col pedale in punta (gliel'avevo chiesto io, per sentire se
+  il wah restava aperto) e col flusso ancora acceso: **volume del finale a canna, e la manopola non lo
+  abbassava più** (il pedale la riscavalcava 50 volte al secondo); l'utente ha dovuto spegnere l'ampli.
+  Il modo volume di ieri andava benissimo (l'utente): l'ha rotto il flusso. **Regole, nello sketch e nel
+  firmware vero**: in modo volume il volume parte solo quando il pedale si muove, mai di continuo; al
+  cambio di modo, all'aggancio e al jack infilato non parte niente finché il pedale non si muove
+  (`riarma()`); jack tolto → niente volume (prima mandava «pieno»); in modo wah il messaggio porta volume
+  0, non pieno; nessuna 0x0C prima dello 0x0D (`dettoJack`). **Mai chiedere all'utente il pedale in punta
+  in modo volume.** Se l'ampli ignori il wah con 0x0D 02 resta non provato.
 - Dopo ogni caricamento l'ampli si è riagganciato da solo; dopo averlo spento e riacceso no (tasto di
   accoppiamento: l'indirizzo casuale del finto era lo stesso, quindi non è quello).
 

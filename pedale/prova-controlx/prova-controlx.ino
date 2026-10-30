@@ -55,6 +55,7 @@ static volatile bool ampliDentro = false, ampliEntrato = false, ampliUscito = fa
 static char     indirizzoCasuale[18] = "?";
 static uint32_t domande = 0;                    // messaggi arrivati dall'ampli
 static bool     jackDentro = false;              // il pedale d'espressione vero (D8)
+static volatile bool dettoJack = false;          // l'ampli sa gia' quali pedali ci sono (vedi riarma)
 
 /* La mappa del profilo 1 (SparkControl.cpp): sei pulsanti, poi i due pedali
  * d'espressione. Di serie 0x72 e 0x75 (volume, volume della musica): qui il
@@ -109,7 +110,7 @@ static void scriviIndirizzo(char* fuori, size_t n, const ble_addr_t& a) {
 
 class Collegamenti : public BLEServerCallbacks {
   void onConnect(BLEServer*) override    { ampliDentro = true;  ampliEntrato = true; }
-  void onDisconnect(BLEServer*) override { ampliDentro = false; ampliUscito = true; }
+  void onDisconnect(BLEServer*) override { ampliDentro = false; ampliUscito = true; dettoJack = false; }
   void onConnect(BLEServer*, ble_gap_conn_desc* d) override {
     connX = d->conn_handle;
     indirizzoAmpliX = d->peer_id_addr;
@@ -151,7 +152,7 @@ static void rispondi(const uint8_t* m, size_t n) {
       memcpy(r + 5, FIRMWARE, strlen(FIRMWARE));
       manda(r, 6 + strlen(FIRMWARE));
       break;
-    case 0x0d: r[4] = pedaliInfilati(); manda(r, 5); break;   // pedali inseriti: dal jack e dal modo
+    case 0x0d: r[4] = pedaliInfilati(); manda(r, 5); dettoJack = true; break;   // pedali inseriti: dal jack e dal modo
     case 0x08: r[4] = 0x01; manda(r, 5); break;          // profilo corrente: 1
     case 0x0f: r[4] = 0x60; manda(r, 5); break;          // batteria 96%
     case 0x10: case 0x11: r[4] = 0x00; manda(r, 5); break;   // ignoti, si risponde 0
@@ -453,6 +454,25 @@ static int32_t  ultimaMandata = -1;
  *  il wah si muove). Il messaggio con un pedale solo invece non muove niente. */
 static uint8_t pedaliInfilati() { return !jackDentro ? 0x00 : modo == 'w' ? 0x01 : 0x02; }
 
+/* Il botto del 30 ottobre: in modo volume, pedale in punta e flusso continuo, il
+ * volume del finale e' andato a canna e la manopola non lo abbassava piu' (il
+ * pedale la riscavalcava 50 volte al secondo): l'utente ha dovuto spegnere.
+ * Le regole, da qui in poi:
+ * - in modo volume il volume parte solo quando il pedale si muove, mai di
+ *   continuo: da fermo vince la manopola;
+ * - all'aggancio, al cambio di modo e al jack infilato, in modo volume non parte
+ *   niente finche' il pedale non si muove (riarma() prende la posizione di adesso);
+ * - jack tolto: niente volume (prima mandava «pieno»);
+ * - in modo wah il messaggio porta volume 0: se l'ampli non lo ignorasse,
+ *   silenzio, non un botto;
+ * - nessuna 0x0C prima che l'ampli sappia quali pedali ci sono (dettoJack, in cima). */
+
+static void riarma() {
+  if (modo != 'v') { ultimaMandata = -1; return; }
+  uint16_t mv;
+  ultimaMandata = (int32_t)(powf(posizionePedale(&mv), curvaVolume) * scalaVolume + 0.5f);
+}
+
 /** La lettura di D2 riportata su 0..1. */
 static float posizionePedale(uint16_t* mv) {
   uint32_t somma = 0;
@@ -484,18 +504,19 @@ static void passoPedale() {
     jackDentro = grezzo;
     Serial.printf("jack %s\n", jackDentro ? "infilato" : "tolto");
     if (ampliDentro) {
-      // Tolto il pedale: wah chiuso; in modo volume il volume torna pieno, se no col
-      // pedale al tallone si resterebbe muti. Prima dello 0x0D, che lo farebbe ignorare.
-      if (!jackDentro) mandaEspressione(0, modo == 'v' ? 32767 : 0);
+      // Tolto il pedale: in modo wah, wah chiuso; in modo volume niente, il volume
+      // resta dov'e' e la manopola lo riprende (il «pieno» di prima era un botto).
+      if (!jackDentro && modo == 'w') mandaEspressione(0, 0);
       const uint8_t d[5] = { 0x0d, 0, 0, 0, pedaliInfilati() };
       manda(d, 5);
+      dettoJack = true;
     }
-    ultimaMandata = -1;
+    riarma();
   }
   grezzoPrima = grezzo;
-  if (!jackDentro || !ampliDentro) return;
+  if (!jackDentro || !ampliDentro || !dettoJack) return;
   uint16_t mv;
-  mandaPedale(posizionePedale(&mv), flusso);
+  mandaPedale(posizionePedale(&mv), flusso && modo == 'w');   // il flusso solo per il wah
 }
 
 static void eseguiRiga() {
@@ -512,14 +533,15 @@ static void eseguiRiga() {
   else if (!strcmp(riga, "modo w") || !strcmp(riga, "modo v")) {
     modo = riga[5];
     Serial.printf("pedale d'espressione: %s\n", modo == 'w' ? "wah (EXP1), il volume resta alla manopola" : "volume (EXP2), wah chiuso");
-    if (ampliDentro) { const uint8_t d[5] = { 0x0d, 0, 0, 0, pedaliInfilati() }; manda(d, 5); }
-    if (jackDentro && ampliDentro) { uint16_t mv; mandaPedale(posizionePedale(&mv), true); }
+    if (ampliDentro) { const uint8_t d[5] = { 0x0d, 0, 0, 0, pedaliInfilati() }; manda(d, 5); dettoJack = true; }
+    riarma();                                    // in modo volume: niente finche' il pedale non si muove
+    if (modo == 'w' && jackDentro && ampliDentro) { uint16_t mv; mandaPedale(posizionePedale(&mv), true); }
   }
   else if (sscanf(riga, "curva %f", &curvaVolume) == 1 || sscanf(riga, "scala %u", &a) == 1) {
     if (sscanf(riga, "scala %u", &a) == 1 && a >= 1000 && a <= 65535) scalaVolume = (uint16_t)a;
     if (curvaVolume < 0.2f || curvaVolume > 6.0f) curvaVolume = 1.0f;
     Serial.printf("volume: curva %.2f, fondo scala %u\n", curvaVolume, scalaVolume);
-    if (jackDentro && ampliDentro) { uint16_t mv; mandaPedale(posizionePedale(&mv), true); }
+    riarma();                                    // si sente al prossimo movimento, non adesso
   }
   else if (!strcmp(riga, "pedale")) {
     uint16_t mv;
@@ -668,7 +690,7 @@ void loop() {
   if (avvisoJack && (int32_t)(millis() - avvisoJack) > 0) {
     avvisoJack = 0;
     if (ampliDentro) { const uint8_t d[5] = { 0x0d, 0, 0, 0, pedaliInfilati() }; manda(d, 5);
-                       ultimaMandata = -1; }
+                       dettoJack = true; riarma(); }
   }
   if (ampliUscito)  { ampliUscito = false;  Serial.println(F("l'ampli se n'e' andato: mi riannuncio"));
                       BLEDevice::startAdvertising(); }
