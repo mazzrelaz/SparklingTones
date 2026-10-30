@@ -139,7 +139,7 @@ void loop() {
     static uint32_t ultimoPasso = 0;
     if (millis() - ultimoPasso > 400) { ultimoPasso = millis(); schermoSporco = true; }
   }
-  if (!inTrasferimento) leggiBatteria();
+  if (!inTrasferimento) { leggiBatteria(); registraBatteria(); }
   if (mvBatteria && tacche(mvBatteria) == 0) {
     static uint32_t ultimoLampo = 0;
     if (millis() - ultimoLampo > 500) { ultimoLampo = millis(); schermoSporco = true; }
@@ -451,6 +451,7 @@ void loop() {
     else if (c == 'u') Serial.printf("batteria: %u mV letti, %u mV mediati, %u tacche%s\n",
                                      mvGrezzo, mvBatteria, tacche(mvBatteria),
                                      mvBatteria ? "" : "  (partitore assente?)");
+    else if (c == 'U') stampaRegistroBatteria();     // una riga al minuto (2.32)
     else if (c == 'K') { luce = (uint8_t)((luce + 1) % sizeof(LUCI)); schermo.setContrast(LUCI[luce]);
                          Serial.printf("display: luminosita' %u\n", LUCI[luce]); }
     else if (c == 'P') { precarica = (uint8_t)((precarica + 1) % sizeof(PRECARICHE));

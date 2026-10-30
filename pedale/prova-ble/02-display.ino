@@ -76,6 +76,51 @@ static void leggiBatteria() {
   if (prima >= 3500 && mvBatteria && mvBatteria < 3500) avvisa(TESTO("batteria scarica", "battery low"));
 }
 
+/* Il registro della batteria (2.32, chiesto dall'utente il 30 ottobre 2026, per
+ * la durata e per mettere le soglie delle tacche dove servono). Una riga al
+ * minuto in LittleFS: a cavo staccato il seriale non c'e', quindi la scarica si
+ * scrive e si rilegge dopo con 'U'. Ogni accensione apre un giro nuovo; sopra
+ * i 48 KB il file passa nel secondo (17 ore sono ~25 KB). Le colonne: minuti
+ * dall'accensione, mV letti, mV mediati, Spark agganciato, modalita', seriale
+ * aperto da un programma sul PC (il cavo da solo non basta a farlo dire, ma il
+ * cavo della XIAO carica a 50 mA e alza la tensione: verificato il 30 ottobre). */
+static const char* VIA_BATTERIA  = "/batteria1.csv";
+static const char* VIA_BATTERIA2 = "/batteria2.csv";
+
+static void registraBatteria() {
+  static uint32_t ultimaRiga = 0;
+  static bool aperto = false;
+  if (aperto && millis() - ultimaRiga < 60000) return;
+  ultimaRiga = millis();
+  File f = LittleFS.open(VIA_BATTERIA, "r");
+  const size_t quanto = f ? f.size() : 0;
+  if (f) f.close();
+  if (quanto > 48 * 1024) {
+    LittleFS.remove(VIA_BATTERIA2);
+    LittleFS.rename(VIA_BATTERIA, VIA_BATTERIA2);
+  }
+  f = LittleFS.open(VIA_BATTERIA, "a");
+  if (!f) return;
+  if (!aperto) {
+    f.printf("# acceso, firmware %s\n# min,mV letti,mV mediati,spark,modo,pc\n", VERSIONE);
+    aperto = true;
+  }
+  f.printf("%lu,%u,%u,%d,%u,%d\n", (unsigned long)(millis() / 60000), mvGrezzo, mvBatteria,
+           chScrittura ? 1 : 0, modo, Serial ? 1 : 0);
+  f.close();
+}
+
+/** 'U' dal seriale: i due registri, il piu' vecchio prima. */
+static void stampaRegistroBatteria() {
+  for (const char* via : { VIA_BATTERIA2, VIA_BATTERIA }) {
+    File f = LittleFS.open(via, "r");
+    if (!f) { Serial.printf("%s: nessuno\n", via); continue; }
+    Serial.printf("===== %s =====\n", via);
+    while (f.available()) Serial.write(f.read());
+    f.close();
+  }
+}
+
 /** L'icona, a sinistra del quadratino: 15x8 piu' il polo. */
 static void disegnaBatteria() {
   if (!mvBatteria) return;

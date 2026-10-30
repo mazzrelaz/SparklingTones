@@ -241,6 +241,7 @@ static void elenco() {
     "  w     chiedi intervallo 15 ms\n"
     "  s     chiedi intervallo lento (30 ms)\n"
     "  u     tensione della batteria\n"
+    "  U     il registro della batteria: una riga al minuto da ogni accensione\n"
     "  x     molla l'ampli (cosi' l'app nel browser lo trova)\n"
     "  r     riprendi l'ampli\n"
     "  W     prova del display: tutto acceso, meta' sopra, meta' a sinistra, bande, normale\n"
