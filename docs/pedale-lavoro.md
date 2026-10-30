@@ -553,7 +553,15 @@ scritto «finito»):
 3. **L'autonomia: misurata il 4 ottobre 2026, 0,15 A** (tester su 10A sui contatti
    dell'interruttore spento, USB staccato, pedale col NEO e fermo): **~17 ore** su 2600 mAh
    utili. Piu' dei 70–100 stimati; le leve, se l'utente vuole piu' ore: luminosita' del
-   display (`setContrast(255)`) o spegnerlo da fermo, intervallo BLE da 7,5 ms. Sotto, il piano
+   display (`setContrast(255)`) o spegnerlo da fermo, intervallo BLE da 7,5 ms.
+   **Rimisurato il 30 ottobre 2026 con lo Spark 2** (stesso metodo, firmware 2.32, tester ANENG 681
+   automatico, presa unica «mA A»): **130 mA agganciato e fermo**, 165 col footswitch tenuto, 170 a
+   Spark spento mentre lo cerca; cella a 4,044 V. Il pedale legge ~40 mV meno del tester sulla
+   cella (4,006 contro 4,044, col cavo dati attaccato): cadute fra cella, caricatore, interruttore
+   e fili sotto carico. **La 2.32 registra la scarica** (una riga al minuto in `/batteria1.csv`,
+   `U` dal seriale): carica piena, scarica fino allo spegnimento, poi le soglie delle tacche
+   rimesse sui numeri del pedale, un quarto del tempo ciascuna. **La corrente di carica** del
+   bq25185 si misura dopo la scarica, a cella bassa. Sotto, il piano
    di prima, ormai storia. 3. **L'autonomia**, l'ultima misura mai fatta, **rimandata dall'utente il 24 settembre**. Il
    piano deciso: **tester sui due contatti dell'interruttore lasciato spento** (è sul
    positivo fra cella e XIAO, quindi il tester fa da interruttore e misura), USB staccato;
