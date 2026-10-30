@@ -506,6 +506,43 @@ Tre cose imparate, tutte provate:
 **Sul pedale a fine prova c'è di nuovo prova-ble 2.31** (COM3). Prossimo: il firmware vero in prova-ble
 (doppio ruolo, wah o volume secondo il preset, niente annuncio senza jack).
 
+### 30 ottobre: **il doppio ruolo funziona, su un collegamento solo**
+
+Jack del pannello montato dall'utente (D8 lo vede). Prove con `prova-controlx`, ampli vero:
+- **Due collegamenti fra pedale e ampli non si fanno**: l'ampli si collega al Control X dallo stesso
+  indirizzo che annuncia (`f0:9e:9e:10:5a:62`, pubblico), e la libreria rifiuta all'istante un secondo
+  collegamento verso un apparecchio già collegato (`ble_gap_conn_find_by_addr`; anche NimBLE ha lo stesso
+  controllo). L'idea dei due indirizzi del pedale non serviva: conta quello dell'ampli. `#ampli` resta e fallisce.
+- **Il collegamento unico funziona** (`#stesso`): sul collegamento che l'ampli apre col Control X il pedale fa
+  lui da client GATT (chi apre il collegamento e chi fa le domande sono cose separate): FFC0 c'è (handle
+  40, FFC1 42, FFC2 44, CCCD 45), l'iscrizione alle notifiche passa, e **`0x0138` cambia preset** (l'utente: A2,
+  poi A1, B1, A2 due volte, col volume del Control X che segue anche durante i cambi). L'ampli, dopo ogni
+  cambio, manda al Control X le luci del pulsante giusto (`01 … <tasto> 01 ff …`; B1 con un altro colore).
+  Le notifiche FFC2 con l'ascoltatore GAP non si sono viste (non indagato: per cambiare preset non servono).
+- **Il volume del Control X è il volume del finale, quello della manopola**, che dall'app non si comanda
+  (l'utente, certo: manopola quasi a zero, un 0x0C col volume pieno e torna «a canna»). Il pedale **scavalca**
+  la manopola, vince l'ultimo che parla.
+- In modo wah il messaggio portava il volume pieno: a ogni passo il volume tornava a canna. **Il messaggio con
+  un pedale solo** (`0c 00 00 00 01 <basso> <alto>`) **non muove niente**. **Con «pedali infilati: solo il 1»**
+  (0x0D 01) l'ampli **ignora il volume** anche dentro il messaggio intero: volume a 0 nel messaggio, suono
+  invariato, il wah si muove (l'utente). Lo sketch ora dice 01 in modo wah, 02 in modo volume (02 non provato).
+- **Ordine**: all'aggancio il pedale ha mandato una posizione prima che l'ampli chiedesse lo 0x0D. Nel
+  firmware vero: nessuna 0x0C prima della domanda 0x0D dell'ampli (o del nostro 0x0D).
+- **Lo sblocco**: ampli spento e riacceso, app ufficiale chiusa → il wah (A4, Auto Wah) non suona; con l'app
+  collegata nemmeno, **finché l'utente non ha caricato il wah Hendrix dall'app** (che rimanda il preset
+  intero). Quindi lo sblocco non resta allo spegnimento, e vale per i preset caricati dopo. Anche l'Auto Wah.
+- **Il wah suona poco**: «più un'apertura degli alti che un wah», e col pedale vero «varia poco» anche se le
+  posizioni coprono 323…32444. Gradini fissi (un messaggio ciascuno) quasi muti; salti grandi sì, e più grandi
+  più cambia. **La scala è giusta**: con `#swah 65535` l'app ufficiale segna il wah tutto aperto a ~29000.
+- **Il ritardo era nostro: l'ampli avvicina il wah di un pezzo per messaggio.** Il pedale mandava la
+  posizione solo quando si muoveva (20 letture al secondo, soglia 300): fermandosi, il wah restava indietro.
+  `#flusso` (la posizione ripetuta a ogni lettura, anche da fermo): «meglio». 50 al secondo: «meglio». 100:
+  «meglio», ma poi «perde qualche colpo»; **tornato a 50: accettabile, deciso dall'utente.** L'intervallo
+  del collegamento lo sceglie l'ampli, 15 ms; chiesto 7,5–15 (`#veloce`, rc 0) lo tiene a 15. **Nel firmware
+  vero: posizione di continuo, ogni 20 ms.** L'utente: può anche darsi che il wah dello Spark sia così.
+- Dopo ogni caricamento l'ampli si è riagganciato da solo; dopo averlo spento e riacceso no (tasto di
+  accoppiamento: l'indirizzo casuale del finto era lo stesso, quindi non è quello).
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni
