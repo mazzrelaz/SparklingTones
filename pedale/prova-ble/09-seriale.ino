@@ -44,29 +44,33 @@ static void misura() {
 }
 
 /* ======================================================================
-   Il pedale d'espressione finto (2.30, 24 ottobre 2026): prima di comprarne
-   uno, l'utente vuole sapere se avrebbe senso. Al passo dell'editor (90 ms,
-   PAUSA_PARAMETRO): 'J' sul wah dello Spark (0x0104 su JH.Vox846), a 0 per
-   due secondi e poi su fino a 1 in dieci; 'X' sul MIDI (CC 11, per
-   AmpliTube), 0 -> 127 -> 0 in quattro secondi, tre volte. Gira nel loop, a passi: i pulsanti restano vivi. Il wah dello
-   Spark 2 non ha una posizione fra i parametri misurati (indici 0-4); il 5,
-   «sempre 0», e' il candidato. 'j' cambia l'indice da provare.
+   Il pedale d'espressione (2.33, 30 ottobre 2026). M-Audio EX-P sulla presa
+   H: il cursore su D2 (da ~0 mV a tallone a ~3040 a punta, misurato il 29
+   ottobre), il jack su D8 (la lamella della manica col pull-up: basso = presa
+   vuota, alto = infilato). Senza jack non parte niente.
+
+   Fa solo il volume: deciso dall'utente il 30 ottobre, dopo aver scartato il
+   Control X finto e il wah (docs/pedale-lavoro.md). In modalita' MIDI e' il
+   CC 11 (Expression) sul canale MIDI_CANALE, USB e Bluetooth, per AmpliTube:
+   cinquanta letture al secondo, una media mobile, e un valore parte solo
+   quando cambia, con mezzo passo di isteresi, cosi' da fermo non trema fra
+   due numeri vicini. In modalita' Spark sara' il Master dell'ampli modellato
+   (0x0104, mandaParametro): provato con prova-controlx, qui ancora da fare.
    ====================================================================== */
 
-static const char*    WAH_NOME      = "JH.Vox846";
-static const uint32_t SPAZZATA_PASSO = 90;
-static const uint8_t  SPAZZATA_MEZZA = 22;      // passi da 0 a 1: ~2 s
-static const uint8_t  SPAZZATA_GIRI  = 3;
-static const uint8_t  RAMPA_ATTESA   = 22;      // passi a 0 prima di salire: ~2 s
-static const uint8_t  RAMPA_PASSI    = 111;     // da 0 a 1: ~10 s
-static const uint16_t GIRO_MODO      = RAMPA_ATTESA + RAMPA_PASSI + 22;   // ~14 s per modalita'
+static const uint8_t  PIN_ESPRESSIONE = D2;
+static const uint8_t  PIN_JACK        = D8;
+static const uint32_t ESPR_OGNI       = 20;        // ms: cinquanta letture al secondo
+static const uint8_t  ESPR_CC         = 11;        // Expression
+static uint16_t esprTallone = 60, esprPunta = 2900; // mV: si allargano da soli
+static float    esprMedia = -1;                     // mV filtrati; -1 = si riparte
+static int16_t  esprCc = -1;                        // l'ultimo CC mandato
+static bool     jackDentro = false;
+static bool     esprStampa = false;                 // 'I': la prova dei fili
+static uint32_t esprDa = 0, esprStampaDa = 0;
 
-static char     spazzata = 0;                   // 'J', 'X' o 0
-static uint16_t spazzataPasso = 0;
-static uint32_t spazzataDa = 0;
-static uint8_t  indiceWah = 5;
-
-/** 0x0104: [nome con lunghezza, indice, 0xca + float big endian, 0x00]. */
+/** 0x0104: [nome con lunghezza, indice, 0xca + float big endian, 0x00].
+ *  Servira' al volume in modalita' Spark (il Master e' l'indice 4). */
 static bool mandaParametro(const char* nome, uint8_t indice, float valore) {
   uint8_t dati[48];
   size_t n = 0;
@@ -84,145 +88,81 @@ static bool mandaParametro(const char* nome, uint8_t indice, float valore) {
   return manda(frame, costruisci(0x01, 0x04, dati, n, frame));
 }
 
-/** 0x0115: [nome con lunghezza, 0xc3 acceso, 0x00]. */
-static bool accendiEffetto(const char* nome) {
-  uint8_t dati[40];
-  size_t n = 0;
-  const size_t l = strlen(nome);
-  dati[n++] = (uint8_t)l;
-  dati[n++] = (uint8_t)(0xa0 + l);
-  memcpy(dati + n, nome, l); n += l;
-  dati[n++] = 0xc3;
-  dati[n++] = 0x00;
-  uint8_t frame[64];
-  return manda(frame, costruisci(0x01, 0x15, dati, n, frame));
-}
-
-static void avviaSpazzata(char quale) {
-  if (spazzata == quale) { spazzata = 0; Serial.println(F("spazzata fermata")); return; }
-  if (quale == 'J') {
-    if (!chScrittura) { Serial.println(F("non connesso")); return; }
-    accendiEffetto(WAH_NOME);                   // il parametro di un effetto spento non suona
-    Serial.printf("wah: indice %u di %s a 0 per 2 s, poi a 1 in 10 s\n", indiceWah, WAH_NOME);
-  } else if (quale == 'Z') {
-    if (!chScrittura) { Serial.println(F("non connesso")); return; }
-    Serial.printf("wah: BPM spento, sei modalita', rampa sull'indice %u in ognuna\n", indiceWah);
-  } else {
-    Serial.println(F("MIDI: spazzo il CC 11 sul canale 1, tre volte"));
-  }
-  spazzata = quale;
-  spazzataPasso = 0;
-  spazzataDa = millis();
-}
-
-/** Un passo della spazzata, se e' ora. Dal loop. */
-static void passoSpazzata() {
-  if (!spazzata || millis() - spazzataDa < SPAZZATA_PASSO) return;
-  spazzataDa = millis();
-  if (spazzata == 'Z') {
-    // Le sei modalita' col BPM spento (chiesto dall'utente dopo la rampa sulla
-    // quarta, che non ha cambiato niente): per ognuna, la modalita' e
-    // l'indice 5 a 0, due secondi, la rampa in dieci, due secondi fermi.
-    const uint16_t p = spazzataPasso;
-    if (p == 0) accendiEffetto(WAH_NOME);
-    else if (p == 1) mandaParametro(WAH_NOME, 1, 0.0f);          // BPM spento
-    else {
-      const uint8_t  modo = (uint8_t)((p - 2) / GIRO_MODO);
-      const uint16_t q    = (uint16_t)((p - 2) % GIRO_MODO);
-      if (q == 0) { mandaParametro(WAH_NOME, 0, modo * 0.2f);
-                    Serial.printf("modalita' %u (valore %.1f)\n", modo + 1, modo * 0.2f); }
-      else if (q == 1) mandaParametro(WAH_NOME, indiceWah, 0.0f);
-      else if (q > RAMPA_ATTESA && q <= RAMPA_ATTESA + RAMPA_PASSI)
-        mandaParametro(WAH_NOME, indiceWah, (q - RAMPA_ATTESA) / (float)RAMPA_PASSI);
-    }
-    if (++spazzataPasso >= 2 + 6 * GIRO_MODO) { spazzata = 0; Serial.println(F("sei modalita' finite")); }
-    return;
-  }
-  if (spazzata == 'J') {
-    // Sul wah una rampa sola, chiesta dall'utente per sentire bene: chiuso
-    // per due secondi, poi da 0 a 1 dritto in dieci, e resta aperto.
-    const uint8_t p = spazzataPasso;
-    if (p == 0) mandaParametro(WAH_NOME, indiceWah, 0.0f);
-    else if (p > RAMPA_ATTESA) mandaParametro(WAH_NOME, indiceWah, (p - RAMPA_ATTESA) / (float)RAMPA_PASSI);
-    if (++spazzataPasso > RAMPA_ATTESA + RAMPA_PASSI) { spazzata = 0; Serial.println(F("rampa finita")); }
-    return;
-  }
-  const uint8_t p = spazzataPasso % (2 * SPAZZATA_MEZZA);
-  const float v = (p <= SPAZZATA_MEZZA ? p : 2 * SPAZZATA_MEZZA - p) / (float)SPAZZATA_MEZZA;
-  mandaMidi(0xb0, 11, (int)(v * 127 + 0.5f));
-  if (++spazzataPasso > SPAZZATA_GIRI * 2 * SPAZZATA_MEZZA) {
-    spazzata = 0;
-    Serial.println(F("spazzata finita"));
-  }
-}
-
-/* Il pedale d'espressione vero (2.31, 29 ottobre 2026): M-Audio EX-P sulla
- * presa H. Il cursore arriva su D2 (64 kOhm, 1 kOhm verso 3V3, 100 nF verso
- * massa); D8 sta sulla lamella della manica, che a presa vuota tocca la
- * massa: col pull-up, basso = vuota, alto = jack infilato. Per ora solo la
- * prova dei fili: 'I' scrive quattro volte al secondo i mV, il minimo e il
- * massimo visti, e il jack. */
-static const uint8_t  PIN_ESPRESSIONE = D2;
-static const uint8_t  PIN_JACK        = D8;
-static const uint32_t ESPR_OGNI       = 250;
-static bool     esprStampa = false;
-static uint32_t esprDa = 0;
-static uint16_t esprMin = 0xffff, esprMax = 0;
-
+/** 'I' dal seriale: quattro righe al secondo coi mV, i capi visti, il jack e il CC. */
 static void avviaEspressione() {
-  pinMode(PIN_JACK, INPUT_PULLUP);
   esprStampa = !esprStampa;
-  esprMin = 0xffff;
-  esprMax = 0;
   if (!esprStampa) Serial.println(F("espressione: fermata"));
 }
 
-/** Una riga della prova, se e' ora. Dal loop. */
-static void passoEspressione() {
-  if (!esprStampa || millis() - esprDa < ESPR_OGNI) return;
-  esprDa = millis();
-  uint32_t somma = 0;
-  for (uint8_t i = 0; i < 16; i++) somma += analogReadMilliVolts(PIN_ESPRESSIONE);
-  const uint16_t mv = (uint16_t)(somma / 16);
-  if (mv < esprMin) esprMin = mv;
-  if (mv > esprMax) esprMax = mv;
-  Serial.printf("espressione: D2 %4u mV  (min %4u, max %4u)  jack %s\n", mv, esprMin, esprMax,
-                digitalRead(PIN_JACK) ? "infilato" : "vuoto");
+/** La posizione 0..1, col 3% di zona morta ai due capi: il tallone da' 0 e la
+ *  punta il massimo anche se il pedale non arriva proprio in fondo. */
+static float posizioneEspressione(float mv) {
+  if (mv < esprTallone) esprTallone = (uint16_t)mv;
+  if (mv > esprPunta) esprPunta = (uint16_t)mv;
+  float p = (mv - esprTallone) / (float)(esprPunta - esprTallone);
+  p = (p - 0.03f) / 0.94f;
+  return p < 0 ? 0 : p > 1 ? 1 : p;
 }
 
-/* Il wah dal PC (tools/wah.html, 24 ottobre 2026): l'utente vuole muovere lui
- * modalita' e posizione, coi secondi non si capiva. Una riga per comando:
- * «#<indice> <valore>» manda 0x0104 su JH.Vox846, «#on» lo accende. */
-static char    rigaWah[24];
-static int8_t  lungRigaWah = -1;               // -1: nessuna riga in corso
+/** Dal loop: una lettura ogni ESPR_OGNI ms. */
+static void passoEspressione() {
+  static bool pronto = false;
+  if (!pronto) { pinMode(PIN_JACK, INPUT_PULLUP); pronto = true; }
+  if (millis() - esprDa < ESPR_OGNI) return;
+  esprDa = millis();
+  // Il jack: due letture uguali di fila (40 ms), poi si riparte da capo.
+  static bool grezzoPrima = false;
+  const bool grezzo = digitalRead(PIN_JACK);
+  if (grezzo == grezzoPrima && grezzo != jackDentro) {
+    jackDentro = grezzo;
+    esprMedia = -1;
+    esprCc = -1;
+    Serial.printf("pedale d'espressione: jack %s\n", jackDentro ? "infilato" : "tolto");
+  }
+  grezzoPrima = grezzo;
+  uint32_t somma = 0;
+  for (uint8_t i = 0; i < 16; i++) somma += analogReadMilliVolts(PIN_ESPRESSIONE);
+  const float mv = somma / 16.0f;
+  if (esprStampa && millis() - esprStampaDa >= 250) {
+    esprStampaDa = millis();
+    Serial.printf("espressione: D2 %4.0f mV  (tallone %u, punta %u)  jack %s  CC %d\n", mv,
+                  esprTallone, esprPunta, jackDentro ? "infilato" : "vuoto", esprCc);
+  }
+  if (!jackDentro) return;
+  esprMedia = esprMedia < 0 ? mv : esprMedia * 0.7f + mv * 0.3f;
+  const float p = posizioneEspressione(esprMedia);
+  if (modo == MODO_MIDI) {
+    const float x = p * 127;
+    if (esprCc >= 0 && fabsf(x - esprCc) < 0.6f) return;        // mezzo passo di isteresi
+    const int16_t cc = (int16_t)(x + 0.5f);
+    if (cc == esprCc) return;
+    esprCc = cc;
+    mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), ESPR_CC, cc);
+  }
+}
+
+/* Le righe col '#' davanti, dal seriale: per ora solo «#cc <0..127>», il CC 11
+ * a mano (la prova con AmpliTube del 25 ottobre). */
+static char    rigaComando[24];
+static int8_t  lungRiga = -1;                  // -1: nessuna riga in corso
 
 /** Torna true se il carattere fa parte di una riga «#…» e va consumato qui. */
 static bool rigaSeriale(char c) {
-  if (lungRigaWah < 0) {
+  if (lungRiga < 0) {
     if (c != '#') return false;
-    lungRigaWah = 0;
+    lungRiga = 0;
     return true;
   }
   if (c != '\n' && c != '\r') {
-    if (lungRigaWah < (int8_t)sizeof(rigaWah) - 1) rigaWah[lungRigaWah++] = c;
+    if (lungRiga < (int8_t)sizeof(rigaComando) - 1) rigaComando[lungRiga++] = c;
     return true;
   }
-  rigaWah[lungRigaWah] = 0;
-  lungRigaWah = -1;
-  int indice;
-  float valore;
+  rigaComando[lungRiga] = 0;
+  lungRiga = -1;
   int cc;
-  // «#cc <0..127>»: il CC 11 sul canale 1, USB e Bluetooth (AmpliTube, la prova 3).
-  if (sscanf(rigaWah, "cc %d", &cc) == 1 && cc >= 0 && cc <= 127) mandaMidi(0xb0, 11, cc);
-  else if (!strcmp(rigaWah, "on")) accendiEffetto(WAH_NOME);
-  // Chiusa l'app, l'ampli sembra tornare allo slot: i 0x0104 cambiavano lo
-  // stato in 0x7f (riletto) ma non il suono. Si torna a suonare 0x7f.
-  else if (!strcmp(rigaWah, "suona")) { cambiaPreset(0x7f); Serial.println(F("wah: suona lo stato modificato (0x7f)")); }
-  else if (sscanf(rigaWah, "%d %f", &indice, &valore) == 2 && indice >= 0 && indice <= 9 &&
-           valore >= 0.0f && valore <= 1.0f) {
-    mandaParametro(WAH_NOME, (uint8_t)indice, valore);
-    Serial.printf("wah: indice %d = %.3f\n", indice, valore);
-  } else Serial.printf("riga non capita: \"%s\"\n", rigaWah);
+  if (sscanf(rigaComando, "cc %d", &cc) == 1 && cc >= 0 && cc <= 127)
+    mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), ESPR_CC, cc);
+  else Serial.printf("riga non capita: \"%s\"\n", rigaComando);
   return true;
 }
 
@@ -250,11 +190,8 @@ static void elenco() {
     "  M     le due scatole salvate quando l'ampli si e' inceppato\n"
     "  S     salva adesso la scatola (prova)\n"
     "  T     apri/chiudi il tuner;  L  dentro/fuori dal looper;  Y  un colpo di tap\n"
-    "  J     espressione finta sul wah (accende JH.Vox846, spazza un indice); j cambia indice\n"
-    "  X     espressione finta sul MIDI (CC 11, canale 1)\n"
-    "  I     il pedale d'espressione vero: D2 e jack, 4 righe al secondo (I ferma)\n"
-    "  Z     wah: BPM spento, le sei modalita' con una rampa ciascuna\n"
+    "  I     il pedale d'espressione: mV di D2, capi, jack e CC, 4 righe al secondo (I ferma)\n"
     "  Q     rileggi lo stato che suona (pezzi grezzi)\n"
-    "  #i v  wah: l'indice i a v (0..1), una riga; #on lo accende (tools/wah.html)\n"));
+    "  #cc n il CC 11 (Expression) a n (0..127), USB e Bluetooth\n"));
 }
 

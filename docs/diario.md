@@ -1246,3 +1246,18 @@ letto, 2.31: `docs/pedale-lavoro.md`).
   A1–A4 ha riscritto, per UUID, quattro preset (Nylon Reverb, Jazz tone, PF comfortably numb, prova); l'omonimo del
   NEO non li ha corretti. Rimedio dato all'utente: `Dropbox\ripristino-la-comp.json` da «Importa». **Da sentire
   se ha funzionato**, e se gli slot A1–A4 dello Spark 2 hanno ancora il wah (rileggendoli tornerebbe).
+
+## Estratto di CLAUDE.md del 30 ottobre 2026: il pedale d'espressione col Control X
+
+Sostituito quando l'utente ha scartato Control X e wah (il pedale d'espressione fa solo il volume).
+
+- **Pedale d'espressione**: M-Audio EX-P sulla presa **H** della millefori (da sinistra G, 3V3, D2, D8; 1 kΩ e
+  100 nF sulla presa del pedale), rotella al massimo, selettore da non spostare. **2.31 caricata e provata il 29
+  ottobre**: tallone 0 mV, punta ~3040; il jack lo dice D8 (lamella della manica, pull-up). Comando seriale `I`.
+  Il wah manuale lo fa l'ampli solo se il pedale **si finge uno Spark Control X** (`pedale/prova-controlx/`, FFC8,
+  0x70 wah / 0x72 volume). **29 ottobre: col pedale vero comanda wah e volume** (volume 0..32767 come il wah,
+  misurato; jack dentro prima dell'aggancio; `JH.Vox846` vuole lo sblocco). **Deciso dall'utente**: wah se nel preset c'è `JH.Vox846`, altrimenti volume; senza
+  jack niente Control X. **Prossimo, già deciso: la prova del doppio ruolo** (`prova-controlx`: Control X agganciato, poi `#ampli`, `#slot n`), poi il firmware vero.
+  **Da misurare con l'ampli** (dubbio dell'utente): l'Auto Wah gratuito (anche lui `JH.Vox846`) suona senza aprire l'app
+  ufficiale? E lo sblocco Hendrix resta dopo aver spento l'ampli? Mai misurati apposta.
+  Tutto in `docs/pedale-lavoro.md`, con la mappa dei connettori (`foto/pedale/millefori-connettori.png`).

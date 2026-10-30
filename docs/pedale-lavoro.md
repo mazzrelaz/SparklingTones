@@ -566,7 +566,34 @@ Jack del pannello montato dall'utente (D8 lo vede). Prove con `prova-controlx`, 
   Control X solo se si preme il tasto. **Provato** (`#modo m`, `#amp Acoustic`, Pure Acoustic): il volume
   segue, «non proprio liscio ma va bene» (dieci al secondo, soglia 1,5%); la manopola nell'app non si muove
   (l'app non vede i cambi degli altri). Cambiando preset il Master torna a quello del preset. Lo 0x0D in
-  modo Master dice «nessun pedale». Scartato per ora il Master dell'ampli modellato con 0x0104 sul collegamento dei preset (a passi,
+  modo Master dice «nessun pedale».
+- **L'ordine inverso**: pedale collegato all'ampli come centrale (le risposte arrivano: `04 38` dopo un
+  0x0138), poi il tasto di accoppiamento → **l'ampli chiude lui il collegamento del pedale** (scadenza,
+  `0x208`) e 6,5 s dopo prende il Control X da solo. Ma **sul collegamento del Control X l'ampli non manda
+  notifiche** (contatore di tutte le notifiche a zero dopo un 0x0138, iscrizione accettata): i comandi
+  arrivano alla cieca, niente tuner, looper, conferme.
+- **Deciso dall'utente, a fine giornata: Control X e wah scartati, tolti.** «Mi ha rotto le palle sta roba»:
+  il pedale d'espressione fa **solo il volume**, e l'importante è che vada bene **in MIDI per AmpliTube**.
+  `pedale/prova-controlx/` tolto (l'ultima versione nel commit `f27732d`); da `prova-ble` tolte le prove del
+  wah (`J`, `Z`, `j`, `#i v`, `#on`, `#suona`) e la spazzata finta `X`.
+
+**Firmware 2.33 (30 ottobre, caricato)**: `passoEspressione()` in `09-seriale.ino` legge D2 cinquanta volte
+al secondo (16 campioni, media mobile 0,7/0,3), D8 per il jack (due letture uguali), capi che si allargano da
+soli (tallone 60, punta 2900 di partenza) e 3% di zona morta ai due capi. **In modalità MIDI manda il CC 11
+sul canale MIDI_CANALE, USB e Bluetooth**, solo quando cambia e con mezzo passo di isteresi. Senza jack niente.
+`I` mostra mV, capi, jack e l'ultimo CC; `#cc n` lo manda a mano. Verificato solo che parte (jack infilato,
+D2 fermo entro ±4 mV); **il CC con AmpliTube è da provare**.
+
+**Dove si riprende col pedale d'espressione:**
+1. **AmpliTube**: pedale in modalità MIDI (FS4 tenuto 2 s, menu), «SparkPedale MIDI» in AmpliTube, MIDI Learn
+   sul pedale del volume, e sentire se va liscio da tallone a punta (da ferma non deve tremare).
+2. **Il volume in modalità Spark col Master** (`mandaParametro(nome, 4, v)`, dieci al secondo, solo quando si
+   muove, niente al cambio di modo): manca il **nome del modello d'ampli che suona**. Strada più semplice:
+   dopo ogni cambio di preset (o al primo movimento del pedale) leggere lo stato che suona con 0x0201 `01 00`
+   (come `Q`) e prendere il nome del quarto effetto della catena; `pezzi` oggi ne tiene sei da 32 byte, e il
+   nome dell'ampli può cadere più in là. **Da verificare**: con un slot dell'ampli selezionato (banco «Amp
+   Preset»), il 24 ottobre i 0x0104 cambiavano lo stato 0x7f ma non il suono.
+3. **Mai chiedere il pedale in punta** quando comanda un volume, e niente invio continuo sul volume. Scartato per ora il Master dell'ampli modellato con 0x0104 sul collegamento dei preset (a passi,
   ~10 al secondo per non piantare l'ampli, e vuole il nome del modello che suona).
 - Dopo ogni caricamento l'ampli si è riagganciato da solo; dopo averlo spento e riacceso no (tasto di
   accoppiamento: l'indirizzo casuale del finto era lo stesso, quindi non è quello).

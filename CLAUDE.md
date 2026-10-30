@@ -41,7 +41,7 @@ src/spark-effetti.js              nomi di effetti e manopole + MODELLI
 src/spark-backup.js · dropbox-sync.js · pedale-ponte.js · pwa.js · snake-pedali.js
 src/lingua.js / lingua-en.js      le lingue (lingua-en.js NON si legge: vedi «L'inglese»)
 pedale/prova-ble/                 firmware del pedale (prova-ble.ino + 01-…11-*.ino, banchi.h)
-pedale/prova-espansore|usb|display|midi|controlx/   sketch di prova (mappatura guidata; Control X finto)
+pedale/prova-espansore|usb|display|midi/   sketch di prova (mappatura guidata)
 pcb/basetta/                      basetta stampata v1 (20 ottobre 2026), sorgente tools/genera-basetta.py; pcb/*.kicad_* vecchio, fermo
 tools/                            serve.ps1, server-rete.js, wah-ponte.ps1 + wah.html, togli-sfondo/, video-demo/
 test/*.html                       protocol 147, transport 64, store 151, backup 41, dropbox 38
@@ -317,7 +317,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 29 ottobre 2026 (sera)
+## Dove si riprende — 30 ottobre 2026 (sera)
 
 - **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
   neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
@@ -338,16 +338,16 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
   che ricorda il pedale da GarageBand gli si ricollega e occupa il posto dell'adattatore: Bluetooth dell'iPad spento.
-- **Pedale d'espressione**: M-Audio EX-P sulla presa **H** della millefori (da sinistra G, 3V3, D2, D8; 1 kΩ e
-  100 nF sulla presa del pedale), rotella al massimo, selettore da non spostare. **2.31 caricata e provata il 29
-  ottobre**: tallone 0 mV, punta ~3040; il jack lo dice D8 (lamella della manica, pull-up). Comando seriale `I`.
-  Il wah manuale lo fa l'ampli solo se il pedale **si finge uno Spark Control X** (`pedale/prova-controlx/`, FFC8,
-  0x70 wah / 0x72 volume). **29 ottobre: col pedale vero comanda wah e volume** (volume 0..32767 come il wah,
-  misurato; jack dentro prima dell'aggancio; `JH.Vox846` vuole lo sblocco). **Deciso dall'utente**: wah se nel preset c'è `JH.Vox846`, altrimenti volume; senza
-  jack niente Control X. **Prossimo, già deciso: la prova del doppio ruolo** (`prova-controlx`: Control X agganciato, poi `#ampli`, `#slot n`), poi il firmware vero.
-  **Da misurare con l'ampli** (dubbio dell'utente): l'Auto Wah gratuito (anche lui `JH.Vox846`) suona senza aprire l'app
-  ufficiale? E lo sblocco Hendrix resta dopo aver spento l'ampli? Mai misurati apposta.
-  Tutto in `docs/pedale-lavoro.md`, con la mappa dei connettori (`foto/pedale/millefori-connettori.png`).
+- **Pedale d'espressione** (30 ottobre): M-Audio EX-P sulla presa **H** (G, 3V3, D2, D8; 1 kΩ e 100 nF), jack
+  del pannello montato; tallone 0 mV, punta ~3040, jack su D8. **Solo volume, deciso dall'utente**: Control X
+  finto e wah **scartati e tolti** (tasto di accoppiamento a ogni accensione, come col vero; sul collegamento
+  del Control X l'ampli non risponde; misure in `docs/pedale-lavoro.md`, «30 ottobre»; l'ultimo sketch è nel
+  commit `f27732d`). **2.33 caricata**: in MIDI il CC 11 per AmpliTube, **da provare con AmpliTube**; in Spark
+  il **Master dell'ampli modellato** (0x0104 indice 4, `mandaParametro`; provato con lo sketch: «non liscio ma
+  va bene», dieci al secondo) **da scrivere**: serve il nome del modello che suona (0x0201 `01 00`), e va
+  sentito con uno slot dell'ampli (0x0104 cambia 0x7f). **Mai il volume del finale (0x72) in punta**: un botto.
+- **Batteria** (2.32): una riga al minuto in memoria (`U`); 130 mA agganciato. Prossimo: carica piena, scarica
+  fino allo spegnimento, tacche rimesse; la corrente di carica a cella bassa (`docs/pedale-lavoro.md`, punto 3).
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
 - **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key): **mai più catture o
