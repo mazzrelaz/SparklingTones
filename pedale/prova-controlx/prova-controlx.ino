@@ -440,7 +440,7 @@ static char     modo = 'w';
  * curva, «meglio» e l'utente lo tiene cosi'. Curva e fondo scala restano
  * regolabili dal seriale. */
 static float    curvaVolume = 1.0f;
-static uint16_t scalaVolume = 32767;
+static uint16_t scalaVolume = 20480;   // il tetto (30 ottobre): 8192 e 16384 «troppo poco», 24576 troppo, 20480 «va bene»
 static uint16_t scalaWah = 32767;
 /* #flusso (30 ottobre): la posizione ripetuta a ogni lettura anche da fermo. Il wah
  * «non sta dietro al pedale» (l'utente): se l'ampli si avvicina alla posizione nuova

@@ -549,6 +549,13 @@ Jack del pannello montato dall'utente (D8 lo vede). Prove con `prova-controlx`, 
   (`riarma()`); jack tolto → niente volume (prima mandava «pieno»); in modo wah il messaggio porta volume
   0, non pieno; nessuna 0x0C prima dello 0x0D (`dettoJack`). **Mai chiedere all'utente il pedale in punta
   in modo volume.** Se l'ampli ignori il wah con 0x0D 02 resta non provato.
+- **Il volume del Control X è uno solo**: nell'app ufficiale le funzioni del pedale d'espressione sono Control
+  Wah LFO, Control Volume (0x72, il finale) e Control Music Volume (0x75); per il volume dell'ampli modellato
+  non c'è niente. Anche ieri il modo volume usava 0x72 (verificato nel commit d674cae): l'utente lo ricordava
+  come volume dell'ampli modellato, ma la manopola allora non l'abbassava. **Scelta dell'utente: 0x72 come
+  ieri, con un tetto** (`#scala`): 8192 e 16384 «troppo poco», 24576 troppo, **20480 «va bene»**, ora di
+  serie. Scartato per ora il Master dell'ampli modellato con 0x0104 sul collegamento dei preset (a passi,
+  ~10 al secondo per non piantare l'ampli, e vuole il nome del modello che suona).
 - Dopo ogni caricamento l'ampli si è riagganciato da solo; dopo averlo spento e riacceso no (tasto di
   accoppiamento: l'indirizzo casuale del finto era lo stesso, quindi non è quello).
 
