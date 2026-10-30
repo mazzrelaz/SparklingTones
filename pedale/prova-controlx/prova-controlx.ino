@@ -47,6 +47,8 @@
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <host/ble_hs.h>
+#include <host/ble_store.h>
+#include <Preferences.h>
 
 static const char* FIRMWARE = "F4.1.19";        // quello del Control X di paulhamsh
 
@@ -331,7 +333,24 @@ static int suForza(struct ble_gap_event* ev, void*) {
   }
   return 0;
 }
+/* Il riaggancio (30 ottobre): spento e riacceso, l'ampli non torna dal Control X
+ * finto (aspettato un minuto e mezzo). Due cause possibili: l'indirizzo, che
+ * cambiava a ogni accensione del pedale, e lo scambio di chiavi (bonding), che il
+ * Control X vero forse fa e il finto no (neanche quello di paulhamsh). Qui:
+ * indirizzo fisso in memoria, bonding acceso, e gli eventi della sicurezza sul
+ * seriale; #cifra lo chiede dal pedale, #dimentica cancella le chiavi.
+ * Tutte le notifiche in arrivo si contano (le risposte su FFC2 non si vedevano). */
+static volatile int      eventoSicurezza = 0, statoSicurezza = 0;   // 1 cifratura, 2 di nuovo, 3 passkey
+static volatile uint32_t notificheTutte = 0;
+static volatile uint16_t ultimaNotificaConn = 0, ultimaNotificaAttr = 0;
+
 static int suEventoGap(struct ble_gap_event* ev, void*) {
+  if (ev->type == BLE_GAP_EVENT_NOTIFY_RX) {
+    notificheTutte++; ultimaNotificaConn = ev->notify_rx.conn_handle; ultimaNotificaAttr = ev->notify_rx.attr_handle;
+  }
+  if (ev->type == BLE_GAP_EVENT_ENC_CHANGE)     { statoSicurezza = ev->enc_change.status; eventoSicurezza = 1; }
+  if (ev->type == BLE_GAP_EVENT_REPEAT_PAIRING) { eventoSicurezza = 2; }
+  if (ev->type == BLE_GAP_EVENT_PASSKEY_ACTION) { statoSicurezza = ev->passkey.params.action; eventoSicurezza = 3; }
   if (ev->type == BLE_GAP_EVENT_NOTIFY_RX && ev->notify_rx.conn_handle == connGatt && !notificaNuova) {
     const uint16_t n = OS_MBUF_PKTLEN(ev->notify_rx.om);
     notificaN = (uint8_t)(n < sizeof(notifica) ? n : sizeof(notifica));
@@ -452,7 +471,45 @@ static int32_t  ultimaMandata = -1;
  *  pedale 1» l'ampli ignora il volume anche dentro il messaggio intero, e la
  *  manopola resta all'utente (provato: volume a 0 nel messaggio, suono invariato,
  *  il wah si muove). Il messaggio con un pedale solo invece non muove niente. */
-static uint8_t pedaliInfilati() { return !jackDentro ? 0x00 : modo == 'w' ? 0x01 : 0x02; }
+static uint8_t pedaliInfilati() { return !jackDentro || modo == 'm' ? 0x00 : modo == 'w' ? 0x01 : 0x02; }
+
+/* Il modo Master (30 ottobre, scelto dall'utente: «la 3»). Il volume che vuole
+ * l'utente e' quello dell'ampli modellato, non il finale (0x72 del Control X):
+ * il pedale gira la manopola Master (indice 4) dell'ampli del preset col comando
+ * delle manopole dell'editor, 0x0104 [nome][4][float][00], sul collegamento dei
+ * preset. Non serve il Control X: lo 0x0D dice «nessun pedale», cosi' l'ampli
+ * non tocca ne' wah ne' finale. Al massimo dieci al secondo (i parametri fitti
+ * piantano l'ampli: PAUSA_PARAMETRO 90 ms nell'app) e solo quando si muove.
+ * Il nome del modello per ora si da' a mano: #amp <nome>. */
+static char     nomeAmpli[24] = "";
+static uint32_t ultimoMaster = 0;
+
+static void mandaMaster(float v) {
+  if (!nomeAmpli[0]) { Serial.println(F("master: prima #amp <nome del modello>")); return; }
+  if (passoGatt != 5 || connGatt == BLE_HS_CONN_HANDLE_NONE) { Serial.println(F("master: prima #stesso")); return; }
+  if (v < 0) v = 0;
+  if (v > 1) v = 1;
+  uint8_t dati[40]; size_t n = 0;
+  const size_t l = strlen(nomeAmpli);
+  dati[n++] = (uint8_t)l; dati[n++] = (uint8_t)(0xa0 + l);
+  memcpy(dati + n, nomeAmpli, l); n += l;
+  dati[n++] = 4;                                           // Master
+  uint32_t b; memcpy(&b, &v, 4);
+  dati[n++] = 0xca; dati[n++] = b >> 24; dati[n++] = b >> 16; dati[n++] = b >> 8; dati[n++] = b;
+  dati[n++] = 0x00;                                        // senza, ack e niente
+  uint8_t packed[48];
+  const size_t np = impacchetta(dati, n, packed);
+  uint8_t f[64], k = 0, cs = 0;
+  for (size_t i = 0; i < np; i++) cs ^= packed[i];
+  f[k++] = 0xf0; f[k++] = 0x01; f[k++] = seq; f[k++] = cs; f[k++] = 0x01; f[k++] = 0x04;
+  memcpy(f + k, packed, np); k += np;
+  f[k++] = 0xf7;
+  if (++seq > 0x3e) seq = 1;
+  for (uint8_t i = 0; i < k; i += 20)                      // write da 20 byte, come sendSpezzato
+    ble_gattc_write_no_rsp_flat(connGatt, handleFFC1, f + i, (k - i) < 20 ? (k - i) : 20);
+  static uint32_t ultimaStampa = 0;
+  if (millis() - ultimaStampa > 1000) { ultimaStampa = millis(); Serial.printf("  master %s = %.2f (%u byte)\n", nomeAmpli, v, k); }
+}
 
 /* Il botto del 30 ottobre: in modo volume, pedale in punta e flusso continuo, il
  * volume del finale e' andato a canna e la manopola non lo abbassava piu' (il
@@ -468,9 +525,10 @@ static uint8_t pedaliInfilati() { return !jackDentro ? 0x00 : modo == 'w' ? 0x01
  * - nessuna 0x0C prima che l'ampli sappia quali pedali ci sono (dettoJack, in cima). */
 
 static void riarma() {
-  if (modo != 'v') { ultimaMandata = -1; return; }
   uint16_t mv;
-  ultimaMandata = (int32_t)(powf(posizionePedale(&mv), curvaVolume) * scalaVolume + 0.5f);
+  if (modo == 'v') ultimaMandata = (int32_t)(powf(posizionePedale(&mv), curvaVolume) * scalaVolume + 0.5f);
+  else if (modo == 'm') ultimaMandata = (int32_t)(posizionePedale(&mv) * 1000 + 0.5f);
+  else ultimaMandata = -1;
 }
 
 /** La lettura di D2 riportata su 0..1. */
@@ -484,6 +542,15 @@ static float posizionePedale(uint16_t* mv) {
 }
 
 static void mandaPedale(float p, bool sempre) {
+  if (modo == 'm') {                                       // il Master: millesimi, soglia 1,5%, dieci al secondo
+    const int32_t m = (int32_t)(p * 1000 + 0.5f);
+    if (ultimaMandata >= 0 && abs(m - ultimaMandata) < 15) return;
+    if (millis() - ultimoMaster < 100) return;             // ci si riprova alla lettura dopo
+    ultimoMaster = millis();
+    ultimaMandata = m;
+    mandaMaster(p);
+    return;
+  }
   const uint16_t wah = (uint16_t)(p * scalaWah + 0.5f), volume = (uint16_t)(powf(p, curvaVolume) * scalaVolume + 0.5f);
   const int32_t v = modo == 'w' ? wah : volume;
   const int32_t soglia = modo == 'w' ? ESPR_FERMO : 2 * ESPR_FERMO;
@@ -530,9 +597,12 @@ static void eseguiRiga() {
   else if (sscanf(riga, "ins %u", &a) == 1 && a <= 3) { const uint8_t d[5] = { 0x0d, 0, 0, 0, (uint8_t)a }; manda(d, 5); }
   else if (sscanf(riga, "mappa %x %x", &a, &b) == 2) { mappa[6] = a; mappa[7] = b;
                                                        Serial.printf("mappa: pedale 1 = %02x, pedale 2 = %02x\n", a, b); }
-  else if (!strcmp(riga, "modo w") || !strcmp(riga, "modo v")) {
+  else if (sscanf(riga, "amp %23s", nomeAmpli) == 1) Serial.printf("ampli del preset: %s\n", nomeAmpli);
+  else if (sscanf(riga, "master %u", &a) == 1 && a <= 100) mandaMaster(a / 100.0f);
+  else if (!strcmp(riga, "modo w") || !strcmp(riga, "modo v") || !strcmp(riga, "modo m")) {
     modo = riga[5];
-    Serial.printf("pedale d'espressione: %s\n", modo == 'w' ? "wah (EXP1), il volume resta alla manopola" : "volume (EXP2), wah chiuso");
+    Serial.printf("pedale d'espressione: %s\n", modo == 'w' ? "wah (EXP1), il volume resta alla manopola"
+                  : modo == 'v' ? "volume del finale (EXP2), wah chiuso" : "Master dell'ampli del preset (0x0104), Control X muto");
     if (ampliDentro) { const uint8_t d[5] = { 0x0d, 0, 0, 0, pedaliInfilati() }; manda(d, 5); dettoJack = true; }
     riarma();                                    // in modo volume: niente finche' il pedale non si muove
     if (modo == 'w' && jackDentro && ampliDentro) { uint16_t mv; mandaPedale(posizionePedale(&mv), true); }
@@ -553,6 +623,9 @@ static void eseguiRiga() {
   else if (!strcmp(riga, "ampli")) avviaRicercaAmpli();
   else if (sscanf(riga, "slot %u", &a) == 1 && a <= 7) cambiaSlot((uint8_t)a);
   else if (!strcmp(riga, "forza")) forza();
+  else if (!strcmp(riga, "cifra")) Serial.printf("chiedo lo scambio di chiavi: rc %d\n",
+                                                 connX == BLE_HS_CONN_HANDLE_NONE ? -1 : ble_gap_security_initiate(connX));
+  else if (!strcmp(riga, "dimentica")) Serial.printf("chiavi cancellate: rc %d\n", ble_store_clear());
   // Il ritardo del wah (30 ottobre): l'intervallo del collegamento del Control X
   // lo sceglie l'ampli; se e' lungo le posizioni si accodano. #itv lo legge,
   // #veloce ne chiede uno da 7,5-15 ms (la risposta si rilegge con #itv).
@@ -589,12 +662,14 @@ static void leggiSeriale() {
       else if (c == 'r') Serial.println(F("prova-controlx: sono il Control X finto"));
       // Lo stato: i messaggi dell'avvio si perdono prima che il ponte apra la porta.
       else if (c == 'i') Serial.printf("annuncio %s, indirizzo %s (casuale %s), Control X %s, %u domande; "
-                                       "FFC0 %s, %u notifiche\n",
+                                       "FFC0 %s, %u notifiche; tutte le notifiche %u (ultima: coll. %u, handle %u); "
+                                       "chiavi salvate %d\n",
                                        BLEDevice::getAdvertising()->isAdvertising() ? "acceso" : "SPENTO",
                                        BLEDevice::getAddress().toString().c_str(), indirizzoCasuale,
                                        ampliDentro ? "collegato" : "non collegato", domande,
                                        (client && client->isConnected()) ? "collegato" : "non collegato",
-                                       notificheFFC0);
+                                       notificheFFC0, notificheTutte, ultimaNotificaConn, ultimaNotificaAttr,
+                                       [] { int n = -1; ble_store_util_count(BLE_STORE_OBJ_TYPE_OUR_SEC, &n); return n; }());
       continue;
     }
     if (c == '\n' || c == '\r') { riga[lungRiga] = 0; lungRiga = -1; eseguiRiga(); continue; }
@@ -609,8 +684,26 @@ static void avviaControlX() {
 
   // Indirizzo casuale statico: per paulhamsh «critico» per farsi trovare.
   // Prima l'indirizzo, poi il tipo: setOwnAddrType controlla che ci sia gia'.
+  // L'indirizzo, uno per sempre (30 ottobre): generato la prima volta e salvato,
+  // perche' l'ampli possa riconoscere il suo Control X a ogni accensione.
   ble_addr_t a;
-  if (ble_hs_id_gen_rnd(0, &a) == 0) BLEDevice::setOwnAddr(a.val);   // 0: statico, non risolvibile
+  Preferences pref;
+  pref.begin("controlx", false);
+  if (pref.getBytes("ind", a.val, 6) != 6) {
+    ble_hs_id_gen_rnd(0, &a);                                         // 0: statico, non risolvibile
+    pref.putBytes("ind", a.val, 6);
+    Serial.println(F("indirizzo nuovo, salvato"));
+  }
+  pref.end();
+  BLEDevice::setOwnAddr(a.val);
+  // Lo scambio di chiavi: senza codice (il pedale non ha schermo per l'ampli), con
+  // le chiavi salvate in memoria dalla libreria.
+  ble_hs_cfg.sm_io_cap = BLE_HS_IO_NO_INPUT_OUTPUT;
+  ble_hs_cfg.sm_bonding = 1;
+  ble_hs_cfg.sm_mitm = 0;
+  ble_hs_cfg.sm_sc = 1;
+  ble_hs_cfg.sm_our_key_dist = BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID;
+  ble_hs_cfg.sm_their_key_dist = BLE_SM_PAIR_KEY_DIST_ENC | BLE_SM_PAIR_KEY_DIST_ID;
   if (!BLEDevice::setOwnAddrType(BLE_OWN_ADDR_RANDOM)) Serial.println(F("indirizzo casuale non impostato"));
   snprintf(indirizzoCasuale, sizeof(indirizzoCasuale), "%02x:%02x:%02x:%02x:%02x:%02x",
            a.val[5], a.val[4], a.val[3], a.val[2], a.val[1], a.val[0]);
@@ -703,6 +796,12 @@ void loop() {
                                       iniziaGatt(connForzata, "forzato"); }
     else if (e == 1) Serial.printf("collegamento forzato fallito: stato %d\n", statoForza);
     else Serial.printf("collegamento forzato chiuso: motivo %d (0x%x)\n", statoForza, statoForza);
+  }
+  if (eventoSicurezza) {
+    const int e = eventoSicurezza; eventoSicurezza = 0;
+    if (e == 1) Serial.printf("SICUREZZA: cifratura %s (stato %d)\n", statoSicurezza == 0 ? "RIUSCITA" : "fallita", statoSicurezza);
+    else if (e == 2) Serial.println(F("SICUREZZA: l'ampli chiede di accoppiarsi di nuovo"));
+    else Serial.printf("SICUREZZA: chiesto un codice (azione %d)\n", statoSicurezza);
   }
   if (notificaNuova) {
     if (notificaN <= 12) stampaHex("  ffc2<- ", notifica, notificaN);

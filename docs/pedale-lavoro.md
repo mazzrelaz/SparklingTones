@@ -554,7 +554,19 @@ Jack del pannello montato dall'utente (D8 lo vede). Prove con `prova-controlx`, 
   non c'è niente. Anche ieri il modo volume usava 0x72 (verificato nel commit d674cae): l'utente lo ricordava
   come volume dell'ampli modellato, ma la manopola allora non l'abbassava. **Scelta dell'utente: 0x72 come
   ieri, con un tetto** (`#scala`): 8192 e 16384 «troppo poco», 24576 troppo, **20480 «va bene»**, ora di
-  serie; **col pedale fermo la manopola dell'ampli risponde** (l'utente). Scartato per ora il Master dell'ampli modellato con 0x0104 sul collegamento dei preset (a passi,
+  serie; **col pedale fermo la manopola dell'ampli risponde** (l'utente).
+- **Il riaggancio all'accensione non c'è, neanche col Control X vero.** Ampli spento e riacceso: in un
+  minuto e mezzo non torna dal finto. Indirizzo fisso in memoria (Preferences «controlx», d5:c8:af:b2:1c:11;
+  dopo un caricamento, ampli acceso, si è ricollegato da solo) e bonding acceso: l'ampli non chiede lo
+  scambio di chiavi e ignora quello chiesto dal pedale (`#cifra`, rc 0, nessuna risposta). paulhamsh non fa
+  bonding e cambia indirizzo a ogni accensione. Recensioni Thomann del Control X vero: «va collegato ogni
+  volta», «15 secondi col tasto sul retro»; l'app ufficiale dice anche lei di premere il tasto.
+- **Scelta dell'utente («la 3»)**: il pedale d'espressione fa sempre il **volume col Master dell'ampli
+  modellato** (0x0104, indice 4, sul collegamento dei preset: niente Control X, niente tasto); il wah col
+  Control X solo se si preme il tasto. **Provato** (`#modo m`, `#amp Acoustic`, Pure Acoustic): il volume
+  segue, «non proprio liscio ma va bene» (dieci al secondo, soglia 1,5%); la manopola nell'app non si muove
+  (l'app non vede i cambi degli altri). Cambiando preset il Master torna a quello del preset. Lo 0x0D in
+  modo Master dice «nessun pedale». Scartato per ora il Master dell'ampli modellato con 0x0104 sul collegamento dei preset (a passi,
   ~10 al secondo per non piantare l'ampli, e vuole il nome del modello che suona).
 - Dopo ogni caricamento l'ampli si è riagganciato da solo; dopo averlo spento e riacceso no (tasto di
   accoppiamento: l'indirizzo casuale del finto era lo stesso, quindi non è quello).
