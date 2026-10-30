@@ -344,7 +344,25 @@ static volatile int      eventoSicurezza = 0, statoSicurezza = 0;   // 1 cifratu
 static volatile uint32_t notificheTutte = 0;
 static volatile uint16_t ultimaNotificaConn = 0, ultimaNotificaAttr = 0;
 
+/* Chi ha detto no (30 ottobre): col pedale gia' collegato all'ampli come centrale,
+ * al tasto di accoppiamento l'ampli non si e' collegato al Control X. Ogni
+ * collegamento che nasce o muore, e ogni fine d'annuncio, finisce qui e il loop
+ * lo stampa: se l'ampli ci prova e qualcosa lo rifiuta, si vede. */
+static const uint8_t EVENTI = 8;
+static volatile uint8_t eventiTipo[EVENTI], eventiN = 0, eventiLetti = 0;
+static volatile int     eventiStato[EVENTI];
+static volatile uint16_t eventiConn[EVENTI];
+
 static int suEventoGap(struct ble_gap_event* ev, void*) {
+  if (ev->type == BLE_GAP_EVENT_CONNECT || ev->type == BLE_GAP_EVENT_DISCONNECT || ev->type == BLE_GAP_EVENT_ADV_COMPLETE) {
+    const uint8_t i = eventiN % EVENTI;
+    eventiTipo[i] = ev->type;
+    eventiStato[i] = ev->type == BLE_GAP_EVENT_CONNECT ? ev->connect.status
+                   : ev->type == BLE_GAP_EVENT_DISCONNECT ? ev->disconnect.reason : ev->adv_complete.reason;
+    eventiConn[i] = ev->type == BLE_GAP_EVENT_CONNECT ? ev->connect.conn_handle
+                  : ev->type == BLE_GAP_EVENT_DISCONNECT ? ev->disconnect.conn.conn_handle : 0;
+    eventiN++;
+  }
   if (ev->type == BLE_GAP_EVENT_NOTIFY_RX) {
     notificheTutte++; ultimaNotificaConn = ev->notify_rx.conn_handle; ultimaNotificaAttr = ev->notify_rx.attr_handle;
   }
@@ -597,7 +615,8 @@ static void eseguiRiga() {
   else if (sscanf(riga, "ins %u", &a) == 1 && a <= 3) { const uint8_t d[5] = { 0x0d, 0, 0, 0, (uint8_t)a }; manda(d, 5); }
   else if (sscanf(riga, "mappa %x %x", &a, &b) == 2) { mappa[6] = a; mappa[7] = b;
                                                        Serial.printf("mappa: pedale 1 = %02x, pedale 2 = %02x\n", a, b); }
-  else if (sscanf(riga, "amp %23s", nomeAmpli) == 1) Serial.printf("ampli del preset: %s\n", nomeAmpli);
+  else if (!strncmp(riga, "amp ", 4) && sscanf(riga + 4, "%23s", nomeAmpli) == 1)   // non «ampli»
+    Serial.printf("ampli del preset: %s\n", nomeAmpli);
   else if (sscanf(riga, "master %u", &a) == 1 && a <= 100) mandaMaster(a / 100.0f);
   else if (!strcmp(riga, "modo w") || !strcmp(riga, "modo v") || !strcmp(riga, "modo m")) {
     modo = riga[5];
@@ -796,6 +815,17 @@ void loop() {
                                       iniziaGatt(connForzata, "forzato"); }
     else if (e == 1) Serial.printf("collegamento forzato fallito: stato %d\n", statoForza);
     else Serial.printf("collegamento forzato chiuso: motivo %d (0x%x)\n", statoForza, statoForza);
+  }
+  while (eventiLetti != eventiN) {
+    const uint8_t i = eventiLetti % EVENTI;
+    struct ble_gap_conn_desc d;
+    const bool c = eventiTipo[i] == BLE_GAP_EVENT_CONNECT;
+    const char* ruolo = (c && eventiStato[i] == 0 && ble_gap_conn_find(eventiConn[i], &d) == 0)
+                        ? (d.role == BLE_GAP_ROLE_MASTER ? ", noi centrale" : ", noi periferica (l'ampli ci ha cercato)") : "";
+    Serial.printf("GAP: %s, stato %d (0x%x), collegamento %u%s\n",
+                  c ? "collegamento" : eventiTipo[i] == BLE_GAP_EVENT_DISCONNECT ? "distacco" : "fine annuncio",
+                  eventiStato[i], eventiStato[i], eventiConn[i], ruolo);
+    eventiLetti++;
   }
   if (eventoSicurezza) {
     const int e = eventoSicurezza; eventoSicurezza = 0;
