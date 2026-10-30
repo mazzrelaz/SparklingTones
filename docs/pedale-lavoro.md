@@ -554,7 +554,7 @@ Jack del pannello montato dall'utente (D8 lo vede). Prove con `prova-controlx`, 
   non c'è niente. Anche ieri il modo volume usava 0x72 (verificato nel commit d674cae): l'utente lo ricordava
   come volume dell'ampli modellato, ma la manopola allora non l'abbassava. **Scelta dell'utente: 0x72 come
   ieri, con un tetto** (`#scala`): 8192 e 16384 «troppo poco», 24576 troppo, **20480 «va bene»**, ora di
-  serie. Scartato per ora il Master dell'ampli modellato con 0x0104 sul collegamento dei preset (a passi,
+  serie; **col pedale fermo la manopola dell'ampli risponde** (l'utente). Scartato per ora il Master dell'ampli modellato con 0x0104 sul collegamento dei preset (a passi,
   ~10 al secondo per non piantare l'ampli, e vuole il nome del modello che suona).
 - Dopo ogni caricamento l'ampli si è riagganciato da solo; dopo averlo spento e riacceso no (tasto di
   accoppiamento: l'indirizzo casuale del finto era lo stesso, quindi non è quello).
