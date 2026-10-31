@@ -472,9 +472,7 @@ void loop() {
     else if (c == 'I') avviaEspressione();                  // il pedale d'espressione: la prova dei fili
     // Lo stato che suona, coi pezzi grezzi sul seriale: per vedere dal PC cosa
     // c'e' davvero nella catena (2.30).
-    else if (c == 'Q') { const uint8_t dati[2] = { 0x01, 0x00 };
-                         Serial.printf("stato che suona: %s\n",
-                                       chiediEAspetta(0x02, 0x01, dati, 2, 0x01, 1500) ? "letto" : "incompleto"); }
+    else if (c == 'Q') leggiAmpliCheSuona();       // e il modello d'ampli, per il Master (2.34)
     else if (c == '?') elenco();
   }
   passoEspressione();                                // il volume del pedale d'espressione (2.33)

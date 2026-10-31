@@ -587,12 +587,20 @@ D2 fermo entro ±4 mV); **il CC con AmpliTube è da provare**.
 **Dove si riprende col pedale d'espressione:**
 1. **AmpliTube**: pedale in modalità MIDI (FS4 tenuto 2 s, menu), «SparkPedale MIDI» in AmpliTube, MIDI Learn
    sul pedale del volume, e sentire se va liscio da tallone a punta (da ferma non deve tremare).
-2. **Il volume in modalità Spark col Master** (`mandaParametro(nome, 4, v)`, dieci al secondo, solo quando si
-   muove, niente al cambio di modo): manca il **nome del modello d'ampli che suona**. Strada più semplice:
-   dopo ogni cambio di preset (o al primo movimento del pedale) leggere lo stato che suona con 0x0201 `01 00`
-   (come `Q`) e prendere il nome del quarto effetto della catena; `pezzi` oggi ne tiene sei da 32 byte, e il
-   nome dell'ampli può cadere più in là. **Da verificare**: con un slot dell'ampli selezionato (banco «Amp
-   Preset»), il 24 ottobre i 0x0104 cambiavano lo stato 0x7f ma non il suono.
+2. **Il volume in modalità Spark col Master: scritto nella 2.34** (sotto). **Da sentire** con un banco
+   dell'app e con uno slot dell'ampli selezionato (banco «Amp Preset»): il 24 ottobre i 0x0104 cambiavano lo
+   stato 0x7f ma non il suono.
+
+**Firmware 2.34 (31 ottobre)**: in modalità Spark il pedale d'espressione muove il **Master dell'ampli
+modellato** (0x0104 indice 4, `mandaParametro`), come lo sketch del 30 ottobre: millesimi, soglia 1,5%, al
+massimo dieci al secondo, **solo quando il pedale si muove**. Si riarma (`masterMandato = -1`: la posizione di
+adesso diventa il riferimento, non parte niente) a ogni `cambiaPreset`, al 0x0338 dell'ampli (preset cambiato
+dai suoi pulsanti), all'aggancio, al jack infilato, col tuner aperto e fuori dalla modalità Spark. Il nome del
+modello: al primo movimento dopo ogni cambio di preset, 0x0201 `01 00` e il **quarto effetto della catena**
+(`nomeAmpliDalPreset` in `05-preset.ino`, la camminata di `parsePreset`; provata in JS sui due preset della suite:
+«AcousticAmpV2» nello stato live, «Twin» nel preset 0). Per starci, `pezzi` tiene ora 24 pezzi da 32 byte invece
+di 6. Una lettura andata male si riprova dopo 2 s. `Q` rilegge e stampa il modello; `I` mostra anche Master e
+modello.
 3. **Mai chiedere il pedale in punta** quando comanda un volume, e niente invio continuo sul volume. Scartato per ora il Master dell'ampli modellato con 0x0104 sul collegamento dei preset (a passi,
   ~10 al secondo per non piantare l'ampli, e vuole il nome del modello che suona).
 - Dopo ogni caricamento l'ampli si è riagganciato da solo; dopo averlo spento e riacceso no (tasto di

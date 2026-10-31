@@ -35,8 +35,17 @@ static volatile uint8_t attesaSub = 0;           // 0x11 il nome, 0x01 un preset
 static volatile bool    rispostaFinita = false;
 static volatile uint32_t ultimoPezzo = 0;
 static char    nomeLetto[24] = "";
-static uint8_t pezzi[6][32];
-static uint8_t lungPezzo[6];
+// 24 pezzi da 32: un preset ne fa ~16 da 25, e il nome dell'ampli modellato
+// (2.34) sta a meta' catena, non nei primi cento byte.
+static const uint8_t PEZZI_TENUTI = 24;
+static uint8_t pezzi[PEZZI_TENUTI][32];
+static uint8_t lungPezzo[PEZZI_TENUTI];
+
+/* Il Master col pedale d'espressione (2.34, vedi 09-seriale.ino): dopo ogni
+ * cambio di preset il modello d'ampli che suona va riletto, e il pedale non
+ * manda niente finche' non si muove. */
+static volatile bool    ampliDaRileggere = true;
+static volatile int16_t masterMandato = -1;     // millesimi; -1 = si riarma
 
 /** L'inverso di impacchetta: ogni gruppo di 8 byte e' un byte coi bit alti,
  *  LSB-first, seguito da fino a 7 byte dati. */
@@ -69,7 +78,7 @@ static void ascoltaRisposta(const uint8_t* m, size_t n) {
   const uint8_t tutti = dati[0], indice = dati[1];
   uint8_t utili = dati[2];
   if (utili > nd - 3) utili = (uint8_t)(nd - 3);
-  if (indice < 6) {
+  if (indice < PEZZI_TENUTI) {
     if (utili > sizeof(pezzi[0])) utili = sizeof(pezzi[0]);
     memcpy(pezzi[indice], dati + 3, utili);
     lungPezzo[indice] = utili;
@@ -170,6 +179,9 @@ static void messaggioIntero(const uint8_t* m, size_t n) {
     }
   }
   ascoltaRisposta(m, n);
+  // 0x0338: l'ampli ha cambiato preset da se' (i suoi pulsanti): il Master del
+  // pedale d'espressione va riarmato e il modello d'ampli riletto.
+  if (n >= 6 && m[4] == 0x03 && m[5] == 0x38) { ampliDaRileggere = true; masterMandato = -1; }
   // Lo stato del looper (0x0375, un byte): in coda per il loop.
   if (n >= 8 && m[4] == 0x03 && m[5] == 0x75) {
     uint8_t v[4];
@@ -345,6 +357,8 @@ static bool cambiaPreset(uint8_t slot) {
   uint8_t frame[32];
   size_t n = costruisci(0x01, 0x38, dati, sizeof(dati), frame);
   atteso0138 = ack0138 + 1;              // il loop guarda che arrivi (scatola nera)
+  ampliDaRileggere = true;               // il Master del pedale d'espressione (2.34)
+  masterMandato = -1;
   atteso0138Da = millis() | 1;
   return manda(frame, n);
 }

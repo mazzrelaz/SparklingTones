@@ -54,8 +54,17 @@ static void misura() {
    CC 11 (Expression) sul canale MIDI_CANALE, USB e Bluetooth, per AmpliTube:
    cinquanta letture al secondo, una media mobile, e un valore parte solo
    quando cambia, con mezzo passo di isteresi, cosi' da fermo non trema fra
-   due numeri vicini. In modalita' Spark sara' il Master dell'ampli modellato
-   (0x0104, mandaParametro): provato con prova-controlx, qui ancora da fare.
+   due numeri vicini.
+
+   In modalita' Spark (2.34, 31 ottobre) e' il Master dell'ampli modellato:
+   0x0104, indice 4, col nome del modello che suona, come provato il 30 ottobre
+   con prova-controlx («non proprio liscio ma va bene»). Millesimi, soglia
+   1,5%, al massimo dieci al secondo, e **solo quando il pedale si muove**: al
+   cambio di preset, al jack infilato, all'aggancio e al cambio di modalita' si
+   riarma (masterMandato = -1) e non parte niente finche' non lo si muove; il
+   Master resta quello del preset. Il nome del modello si rilegge (0x0201
+   `01 00`) al primo movimento dopo ogni cambio di preset: ~0,3 s di ritardo
+   quella volta sola. Niente col tuner aperto ne' durante un invio di preset.
    ====================================================================== */
 
 static const uint8_t  PIN_ESPRESSIONE = D2;
@@ -68,9 +77,10 @@ static int16_t  esprCc = -1;                        // l'ultimo CC mandato
 static bool     jackDentro = false;
 static bool     esprStampa = false;                 // 'I': la prova dei fili
 static uint32_t esprDa = 0, esprStampaDa = 0;
+static uint32_t masterDa = 0, ampliRiprovaDa = 0;
 
 /** 0x0104: [nome con lunghezza, indice, 0xca + float big endian, 0x00].
- *  Servira' al volume in modalita' Spark (il Master e' l'indice 4). */
+ *  Il volume in modalita' Spark: il Master e' l'indice 4. */
 static bool mandaParametro(const char* nome, uint8_t indice, float valore) {
   uint8_t dati[48];
   size_t n = 0;
@@ -117,6 +127,7 @@ static void passoEspressione() {
     jackDentro = grezzo;
     esprMedia = -1;
     esprCc = -1;
+    masterMandato = -1;
     Serial.printf("pedale d'espressione: jack %s\n", jackDentro ? "infilato" : "tolto");
   }
   grezzoPrima = grezzo;
@@ -125,8 +136,9 @@ static void passoEspressione() {
   const float mv = somma / 16.0f;
   if (esprStampa && millis() - esprStampaDa >= 250) {
     esprStampaDa = millis();
-    Serial.printf("espressione: D2 %4.0f mV  (tallone %u, punta %u)  jack %s  CC %d\n", mv,
-                  esprTallone, esprPunta, jackDentro ? "infilato" : "vuoto", esprCc);
+    Serial.printf("espressione: D2 %4.0f mV  (tallone %u, punta %u)  jack %s  CC %d  Master %d (%s)\n", mv,
+                  esprTallone, esprPunta, jackDentro ? "infilato" : "vuoto", esprCc,
+                  masterMandato, ampliDaRileggere ? "ampli da rileggere" : ampliCheSuona);
   }
   if (!jackDentro) return;
   esprMedia = esprMedia < 0 ? mv : esprMedia * 0.7f + mv * 0.3f;
@@ -138,7 +150,27 @@ static void passoEspressione() {
     if (cc == esprCc) return;
     esprCc = cc;
     mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), ESPR_CC, cc);
+    return;
   }
+  // Modalita' Spark: il Master. Ogni pausa (altra modalita', ampli staccato,
+  // tuner) riarma: al ritorno si riparte da dove sta il pedale, senza mandare.
+  if (modo != MODO_SPARK || !chScrittura || tuner) {
+    masterMandato = -1;
+    return;
+  }
+  const int16_t m = (int16_t)(p * 1000 + 0.5f);
+  if (masterMandato < 0) { masterMandato = m; return; }     // il riferimento, niente da mandare
+  if (abs(m - masterMandato) < 15) return;                  // fermo: 1,5%
+  if (inTrasferimento || millis() - masterDa < 100) return; // dieci al secondo
+  if (ampliDaRileggere) {
+    if (millis() - ampliRiprovaDa < 2000) return;           // dopo una lettura andata male
+    ampliRiprovaDa = millis();
+    if (!leggiAmpliCheSuona()) return;
+    if (masterMandato < 0) return;                          // un cambio di preset nel frattempo
+  }
+  masterDa = millis();
+  masterMandato = m;
+  mandaParametro(ampliCheSuona, 4, m / 1000.0f);
 }
 
 /* Le righe col '#' davanti, dal seriale: per ora solo «#cc <0..127>», il CC 11
@@ -191,7 +223,7 @@ static void elenco() {
     "  S     salva adesso la scatola (prova)\n"
     "  T     apri/chiudi il tuner;  L  dentro/fuori dal looper;  Y  un colpo di tap\n"
     "  I     il pedale d'espressione: mV di D2, capi, jack e CC, 4 righe al secondo (I ferma)\n"
-    "  Q     rileggi lo stato che suona (pezzi grezzi)\n"
+    "  Q     rileggi lo stato che suona e il modello d'ampli (quello del Master)\n"
     "  #cc n il CC 11 (Expression) a n (0..127), USB e Bluetooth\n"));
 }
 

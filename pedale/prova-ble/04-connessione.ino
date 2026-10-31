@@ -80,6 +80,8 @@ static bool agganciaAmpli() {
   if (!chScrittura || !chNotifiche) { Serial.println(F("caratteristiche assenti")); client->disconnect(); return false; }
 
   chNotifiche->registerForNotify(alArrivo);
+  ampliDaRileggere = true;               // il Master del pedale d'espressione (2.34)
+  masterMandato = -1;
   // L'intervallo corto e' la differenza fra ~1400 ms e ~420 ms per un preset
   // intero, e va chiesto SECCO, min uguale a max, perche' l'ampli sceglie
   // dentro l'intervallo e prende sempre il massimo.

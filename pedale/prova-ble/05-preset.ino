@@ -76,6 +76,94 @@ static void nomeDalPreset(char* fuori, size_t max) {
   }
 }
 
+/** Il modello d'ampli di un preset (2.34): il nome del quarto effetto della
+ *  catena (gate, compressore, drive, **ampli**, modulazione, delay, riverbero).
+ *  Si cammina il payload come parsePreset in src/spark-protocol.js: banco,
+ *  numero, cinque stringhe (UUID, nome, versione, descrizione, icona), il bpm
+ *  (0xca + 4 byte), la lista degli effetti; ogni effetto e' nome, acceso
+ *  (0xc2/0xc3) e la lista dei parametri [indice, 0x91, 0xca + 4 byte].
+ *  Torna false se qualcosa non torna, e il nome resta vuoto. */
+static bool nomeAmpliDalPreset(char* fuori, size_t max) {
+  static uint8_t p[PEZZI_TENUTI * 32];
+  size_t np = 0;
+  for (uint8_t k = 0; k < PEZZI_TENUTI && lungPezzo[k]; k++) {
+    memcpy(p + np, pezzi[k], lungPezzo[k]);
+    np += lungPezzo[k];
+  }
+  fuori[0] = 0;
+  size_t i = 0;
+  auto intero = [&]() -> bool {
+    if (i >= np) return false;
+    const uint8_t b = p[i++];
+    if (b == 0xcc) i += 1; else if (b == 0xcd) i += 2; else if (b == 0xce) i += 4;
+    else if (b > 0x7f) return false;
+    return i <= np;
+  };
+  auto stringa = [&](size_t* da, size_t* l) -> bool {
+    if (i >= np) return false;
+    const uint8_t b = p[i++];
+    if (b >= 0xa0 && b <= 0xbf) *l = b - 0xa0;
+    else if (b == 0xd9 && i < np) *l = p[i++];
+    else return false;
+    *da = i;
+    i += *l;
+    return i <= np;
+  };
+  auto lista = [&](uint8_t* n) -> bool {
+    if (i >= np || p[i] < 0x90 || p[i] > 0x9f) return false;
+    *n = p[i++] - 0x90;
+    return true;
+  };
+  auto virgola = [&]() -> bool {                // un float: 0xca + 4 byte
+    if (i >= np || p[i] != 0xca) return false;
+    i += 5;
+    return i <= np;
+  };
+  size_t da, l;
+  uint8_t effetti;
+  if (!intero() || !intero()) return false;
+  for (uint8_t s = 0; s < 5; s++) if (!stringa(&da, &l)) return false;
+  if (!virgola() || !lista(&effetti) || effetti < 4) return false;
+  for (uint8_t e = 0; e < effetti; e++) {
+    if (!stringa(&da, &l)) return false;
+    if (e == 3) {
+      if (l == 0 || l >= max) return false;
+      memcpy(fuori, p + da, l);
+      fuori[l] = 0;
+      return true;
+    }
+    if (i >= np || (p[i] != 0xc2 && p[i] != 0xc3)) return false;
+    i++;
+    uint8_t parametri;
+    if (!lista(&parametri)) return false;
+    for (uint8_t k = 0; k < parametri; k++) {
+      if (!intero() || i >= np || p[i++] != 0x91 || !virgola()) return false;
+    }
+  }
+  return false;
+}
+
+/** Il modello d'ampli che suona adesso: 0x0201 `01 00` (lo stato che suona,
+ *  slot dell'ampli compresi) e il quarto effetto. ~0,3 s, leggendo i tasti. */
+static char ampliCheSuona[24] = "";
+
+static bool leggiAmpliCheSuona() {
+  const uint8_t dati[2] = { 0x01, 0x00 };
+  ampliDaRileggere = false;            // un cambio durante la lettura la rialza
+  const bool letto = chiediEAspetta(0x02, 0x01, dati, 2, 0x01, 1500);
+  char nome[sizeof(ampliCheSuona)];
+  if (!letto || !nomeAmpliDalPreset(nome, sizeof(nome))) {
+    ampliDaRileggere = true;
+    Serial.printf("ampli che suona: %s\n", letto ?"non trovato nello stato" : "stato incompleto");
+    annota("ampli che suona: non letto");
+    return false;
+  }
+  strcpy(ampliCheSuona, nome);
+  Serial.printf("ampli che suona: %s\n", ampliCheSuona);
+  annota("ampli %s", ampliCheSuona);
+  return true;
+}
+
 
 /** Appena collegati: e' l'ampli scelto? E come si chiamano i suoi preset?
  *  Il nome si chiede con 0x0211; se e' l'altro ampli lo si molla e lo si salta
