@@ -322,14 +322,35 @@ class Collegamenti : public BLEServerCallbacks {
  *  insieme nei 31 byte dell'annuncio, e comunque servono in momenti diversi:
  *  col ponte aperto quello del ponte (l'app lo cerca per servizio), in
  *  modalita' MIDI e Play Acoustic quello del MIDI (l'iPad e l'adattatore lo
- *  cercano cosi'), altrimenti niente. */
+ *  cercano cosi'), altrimenti niente.
+ *
+ *  In modalita' MIDI (2.35, 1° novembre 2026) l'annuncio e' fatto a mano: il
+ *  nome nel primo messaggio e l'UUID del MIDI nella risposta alla scansione.
+ *  Con l'UUID davanti il nome finiva solo nella risposta, e la finestra
+ *  «Aggiungi dispositivo» di Windows non mostrava il pedale (la ricerca di
+ *  Windows lo vedeva): senza accoppiamento MIDIberry non lo usa. In Play
+ *  Acoustic resta com'era, l'adattatore va cosi' (27 ottobre). Uscendo dal
+ *  MIDI `reset()` toglie l'annuncio a mano e la libreria torna a comporlo. */
+static bool annuncioAMano = false;
+
 static void annuncia() {
   BLEAdvertising* adv = BLEDevice::getAdvertising();
   BLEDevice::stopAdvertising();
+  if (annuncioAMano) { adv->reset(); annuncioAMano = false; }
   adv->removeServiceUUID(BLEUUID(UUID_PONTE));
   adv->removeServiceUUID(BLEUUID(UUID_MIDI));
   if (appCollegata || midiCentrale) return;          // c'e' gia' qualcuno
   if (pontefino)               { adv->addServiceUUID(UUID_PONTE); BLEDevice::startAdvertising(); }
+  else if (modo == MODO_MIDI) {
+    BLEAdvertisementData dati, risposta;
+    dati.setFlags(0x06);                             // visibile a tutti, niente Bluetooth classico
+    dati.setName("SparkPedale");
+    risposta.setCompleteServices(BLEUUID(UUID_MIDI));
+    adv->setAdvertisementData(dati);
+    adv->setScanResponseData(risposta);
+    annuncioAMano = true;
+    BLEDevice::startAdvertising();
+  }
   else if (modo != MODO_SPARK) { adv->addServiceUUID(UUID_MIDI);  BLEDevice::startAdvertising(); }
 }
 

@@ -589,8 +589,26 @@ D2 fermo entro ±4 mV); **il CC con AmpliTube è da provare**.
    «MIDI Input» su ANY (l'unica voce: elenca gli apparecchi solo all'avvio, e quella volta il cavo non c'era),
    tasto destro sul pedale Volume per il Learn. **Il Bluetooth sul PC no, per colpa di Windows**: i programmi
    WinMM come AmpliTube non vedono i MIDI Bluetooth (Windows MIDI Services, arrivato nel 2026, mette il BLE
-   MIDI 1.0 fra le cose «dopo il primo rilascio»). L'utente preferirebbe il Bluetooth: la strada è un ponte,
-   MIDIberry (WinRT, vede «SparkPedale» accoppiato in Windows) che gira su una porta finta di loopMIDI.
+   MIDI 1.0 fra le cose «dopo il primo rilascio»). **Col Bluetooth va anche lui, dal 1° novembre (l'utente:
+   «funziona»)**, con un ponte: MIDIberry (WinRT, vede «SparkPedale (Bluetooth MIDI IN)» una volta accoppiato
+   in Windows) che gira su una porta finta di loopMIDI («Pedale»); in AmpliTube «MIDI Input» resta ANY.
+   loopMIDI e MIDIberry vanno tenuti aperti. Per arrivarci sono servite tre cose:
+   - **2.35, il nome nel primo messaggio.** Con l'UUID MIDI da 128 bit nell'annuncio il nome finiva solo nella
+     risposta alla scansione, e «Aggiungi dispositivo» di Windows non mostrava il pedale (la ricerca di Windows
+     lo vedeva). In modalità MIDI `annuncia()` ora compone l'annuncio a mano (`setAdvertisementData`: flag
+     0x06 e nome; `setScanResponseData`: l'UUID MIDI); uscendo dal MIDI `adv->reset()`. Play Acoustic come prima.
+   - **Un accoppiamento rimasto a metà.** Il primo «SparkPedale» cliccato restava su «Connessione in corso…» e
+     Windows lo segnava accoppiato (`System.Devices.Aep.IsPaired`) senza creare l'apparecchio: da lì
+     «Aggiungi dispositivo» non lo mostrava più, e da Impostazioni o Gestione dispositivi non si toglieva.
+     Si toglie con `tools/togli-accoppiamento-pedale.ps1` (`Pairing.UnpairAsync`, solo l'indirizzo del pedale,
+     68:ee:8f:4f:da:1d). La voce «XIAO_ESP32S3» in «Altri dispositivi» era invece il pedale sul cavo USB.
+   - **2.36, il bonding.** La libreria parte con `sm_bonding = 0`: Windows non finiva l'accoppiamento. Ora
+     `BLESecurity::setAuthenticationMode(true, false, true)` dopo `BLEDevice::init` (senza PIN; NimBLE tiene
+     le chiavi in memoria, tre apparecchi). Con la 2.36 «Connesso» e le porte «SparkPedale (Bluetooth MIDI
+     IN/OUT)». **Da riprovare**: iPad con GarageBand (annuncio diverso, e iOS ora fa il bonding) e
+     l'adattatore del Play Acoustic (annuncio uguale, bonding acceso).
+   - **Trappola**: aprire la seriale del pedale (COM3) da PowerShell con `DtrEnable` una volta l'ha lasciato in
+     download mode (COM13, «USB JTAG/serial debug unit»): un `upload` lo rimette in moto. Le altre volte no.
 2. **Il volume in modalità Spark col Master: fatto nella 2.34** (sotto), **verificato il 1° novembre**
    sull'ampli vero (l'utente: «funziona tutto»): il volume segue il pedale; cambiando preset col pedale fermo
    resta quello del preset; muovendolo torna a seguirlo; e va anche con uno slot dell'ampli selezionato (banco

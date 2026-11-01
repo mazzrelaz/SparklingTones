@@ -115,6 +115,12 @@ void setup() {
   Serial.printf("modalita' %s\n", nomeModo(modo));
   aggiornaLed();   // spenti: finche' non si preme un tasto non suona niente di nostro
   BLEDevice::init("SparkPedale");
+  // L'accoppiamento con bonding (2.36, 1° novembre 2026): Windows accoppia il
+  // pedale per il MIDI Bluetooth (MIDIberry), e senza bonding lo segnava
+  // accoppiato ma non lo finiva mai («Connessione in corso...»). Sempre senza
+  // PIN; le chiavi restano nella memoria del pedale (NimBLE, tre apparecchi).
+  // iPad, adattatore, ampli e app non chiedono accoppiamento: per loro niente cambia.
+  BLESecurity::setAuthenticationMode(true, false, true);
   avviaPonte();          // prima il server: cosi' l'app lo trova sempre
   annuncia();            // in modalita' MIDI l'iPad deve trovarci subito
   avviaScansione();
