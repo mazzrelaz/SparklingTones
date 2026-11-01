@@ -344,8 +344,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   del Control X l'ampli non risponde; misure in `docs/pedale-lavoro.md`, «30 ottobre»; l'ultimo sketch è nel
   commit `f27732d`). In MIDI il CC 11 per AmpliTube (2.33), **da provare con AmpliTube**. **2.34 caricata il 31
   ottobre**: in Spark il **Master dell'ampli modellato** (0x0104 indice 4; il modello dal quarto effetto di 0x0201
-  `01 00`, riletto al primo movimento dopo ogni cambio di preset; solo quando il pedale si muove), **da sentire**
-  con un banco dell'app e con uno slot dell'ampli (0x0104 cambia 0x7f). **Mai il volume del finale (0x72) in punta**: un botto.
+  `01 00`, riletto al primo movimento dopo ogni cambio di preset; solo quando il pedale si muove): **verificato
+  il 1° novembre** con un banco dell'app e con uno slot dell'ampli (l'utente: «funziona tutto»). **Mai il volume del finale (0x72) in punta**: un botto.
 - **Batteria** (2.32): una riga al minuto in memoria (`U`); 130 mA agganciato. Prossimo: carica piena, scarica
   fino allo spegnimento, tacche rimesse; la corrente di carica a cella bassa (`docs/pedale-lavoro.md`, punto 3).
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
