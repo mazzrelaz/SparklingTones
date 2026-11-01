@@ -585,8 +585,12 @@ sul canale MIDI_CANALE, USB e Bluetooth**, solo quando cambia e con mezzo passo 
 D2 fermo entro ±4 mV); **il CC con AmpliTube è da provare**.
 
 **Dove si riprende col pedale d'espressione:**
-1. **AmpliTube**: pedale in modalità MIDI (FS4 tenuto 2 s, menu), «SparkPedale MIDI» in AmpliTube, MIDI Learn
-   sul pedale del volume, e sentire se va liscio da tallone a punta (da ferma non deve tremare).
+1. **AmpliTube: col cavo USB va** (1° novembre, l'utente). AmpliTube 5 sul PC, Impostazioni → AUDIO / MIDI,
+   «MIDI Input» su ANY (l'unica voce: elenca gli apparecchi solo all'avvio, e quella volta il cavo non c'era),
+   tasto destro sul pedale Volume per il Learn. **Il Bluetooth sul PC no, per colpa di Windows**: i programmi
+   WinMM come AmpliTube non vedono i MIDI Bluetooth (Windows MIDI Services, arrivato nel 2026, mette il BLE
+   MIDI 1.0 fra le cose «dopo il primo rilascio»). L'utente preferirebbe il Bluetooth: la strada è un ponte,
+   MIDIberry (WinRT, vede «SparkPedale» accoppiato in Windows) che gira su una porta finta di loopMIDI.
 2. **Il volume in modalità Spark col Master: fatto nella 2.34** (sotto), **verificato il 1° novembre**
    sull'ampli vero (l'utente: «funziona tutto»): il volume segue il pedale; cambiando preset col pedale fermo
    resta quello del preset; muovendolo torna a seguirlo; e va anche con uno slot dell'ampli selezionato (banco

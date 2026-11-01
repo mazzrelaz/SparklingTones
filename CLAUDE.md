@@ -342,7 +342,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   del pannello montato; tallone 0 mV, punta ~3040, jack su D8. **Solo volume, deciso dall'utente**: Control X
   finto e wah **scartati e tolti** (tasto di accoppiamento a ogni accensione, come col vero; sul collegamento
   del Control X l'ampli non risponde; misure in `docs/pedale-lavoro.md`, «30 ottobre»; l'ultimo sketch è nel
-  commit `f27732d`). In MIDI il CC 11 per AmpliTube (2.33), **da provare con AmpliTube**. **2.34 caricata il 31
+  commit `f27732d`). In MIDI il CC 11 per AmpliTube (2.33): **col cavo USB va** (1° novembre, AmpliTube 5 sul PC, «MIDI Input:
+  ANY»); l'utente preferirebbe il Bluetooth, ma Windows non dà il MIDI Bluetooth ad AmpliTube (WinMM; Windows
+  MIDI Services lo promette «dopo»): serve un ponte, MIDIberry + loopMIDI. **2.34 caricata il 31
   ottobre**: in Spark il **Master dell'ampli modellato** (0x0104 indice 4; il modello dal quarto effetto di 0x0201
   `01 00`, riletto al primo movimento dopo ogni cambio di preset; solo quando il pedale si muove): **verificato
   il 1° novembre** con un banco dell'app e con uno slot dell'ampli (l'utente: «funziona tutto»). **Mai il volume del finale (0x72) in punta**: un botto.
