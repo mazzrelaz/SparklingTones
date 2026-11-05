@@ -282,8 +282,8 @@ i quattro suoni della metà corrente, il quinto cambia metà senza toccare il su
   compresa (FNV-1a 32 bit, `bancoImpronta` / `impronta`). `banchi.h` legge byte non nostri:
   offset e lunghezze vanno verificati.
 - **Il tasto banco cambia banco al rilascio**; tenuto 2 s apre il tuner (2.24, verificato).
-- **Tre modalità, scelte da un menu: FS4 tenuto 2 s** (2.28, 23 ottobre 2026; FS1+FS4 non fa più niente):
-  Spark / MIDI / **Play Acoustic**, tasti banco su e giù, FS5 conferma. **All'accensione sempre Spark**
+- **Quattro modalità, scelte da un menu: FS4 tenuto 2 s** (2.28, 23 ottobre 2026; FS1+FS4 non fa più niente):
+  Spark / MIDI / **Play Acoustic** / **Pulze** (2.37, Pulze Mini: `13-pulze.ino`), tasti banco su e giù, FS5 conferma. **All'accensione sempre Spark**
   (regola dell'utente: `/modo.txt` non si usa più). Play Acoustic = il pedale comanda un TC-Helicon Play
   Acoustic attraverso l'adattatore di `..\MIdiAdapter` (XIAO C6 che finge un Switch-6): **CC 20+n a 127
   alla pressione e a 0 al rilascio**, n = pulsante 1–6 del Switch-6; numero del CC e adattatore cambiano

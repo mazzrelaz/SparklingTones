@@ -10,6 +10,19 @@
 
 class Scansione : public BLEAdvertisedDeviceCallbacks {
   void onResult(BLEAdvertisedDevice d) override {
+    /* In modalita' Pulze si cerca il Pulze Mini («Pulze Mini BLE», visto con nRF
+     * Connect il 4 novembre 2026), non lo Spark. Il Pulze Control, il
+     * footswitch di Hotone, ha «Pulze» nel nome anche lui: escluso. */
+    if (modo == MODO_PULZE) {
+      const auto nomeAnnuncio = d.getName();
+      const char* nome = nomeAnnuncio.c_str();
+      if (!strstr(nome, "Pulze") || strstr(nome, "Control")) return;
+      Serial.printf("trovato: %s  [%s]  rssi %d\n", nome, d.getAddress().toString().c_str(), d.getRSSI());
+      BLEDevice::getScan()->stop();
+      if (trovato) delete trovato;
+      trovato = new BLEAdvertisedDevice(d);
+      return;
+    }
     if (d.haveServiceUUID() && d.isAdvertisingService(UUID_SERVIZIO)) {
       /* Solo l'ampli scelto. Il nome nell'annuncio: «Spark 2 BLE», «Spark NEO
        * Control». Se manca si prende lo stesso, e decide il 0x0211 dopo

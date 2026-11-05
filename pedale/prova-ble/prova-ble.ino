@@ -53,6 +53,7 @@
  *   10-ponte.ino        Il ponte BLE verso l'app: server GATT, banchi da fuori, annuncio.
  *   11-avvio.ino        Il LED del tempo (un compito suo), setup() e loop().
  *   12-tuner.ino        Il tuner: entrare, uscire, accendere l'ampli, le letture, il disegno.
+ *   13-pulze.ino        La modalita' Pulze: il Pulze Mini agganciato via BLE MIDI, Songlist, tone, stomp, schermo.
  *
  * Una funzione si puo' chiamare da qualunque file (Arduino ne scrive i
  * prototipi), ma una variabile si usa solo nei file che vengono dopo quello
@@ -77,7 +78,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.36";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo; 2.19: «libero» fino a 60 s; 2.20: cerchio in «libero» e click per tutta la registrazione; 2.21: niente doppio click sull'«uno»; 2.22: l'impronta dei banchi, per «Aggiorna» nell'app; 2.23: il ponte si chiude quando l'app si stacca; 2.24: il tuner, tasto banco al rilascio; 2.25: diagnosi del tuner sul seriale; 2.26: la scatola nera; 2.27: la scatola salvata quando l'ampli si inceppa; 2.28: menu delle modalita' su FS4 tenuto, Play Acoustic, si parte sempre in Spark; 2.29: Play Acoustic a icone e menu una modalita' alla volta (bozze B); 2.30: il pedale d'espressione finto dal seriale (J wah, X MIDI); 2.31: la lettura del pedale d'espressione vero (I, prova dei fili); 2.32: il registro della batteria (U); 2.33: il pedale d.espressione manda il CC 11 in MIDI, tolte le prove del wah; 2.34: in Spark il pedale d.espressione muove il Master dell'ampli modellato; 2.35: in MIDI il nome nel primo messaggio, per Windows; 2.36: bonding, per accoppiarsi con Windows
+static const char* VERSIONE = "2.37";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo; 2.19: «libero» fino a 60 s; 2.20: cerchio in «libero» e click per tutta la registrazione; 2.21: niente doppio click sull'«uno»; 2.22: l'impronta dei banchi, per «Aggiorna» nell'app; 2.23: il ponte si chiude quando l'app si stacca; 2.24: il tuner, tasto banco al rilascio; 2.25: diagnosi del tuner sul seriale; 2.26: la scatola nera; 2.27: la scatola salvata quando l'ampli si inceppa; 2.28: menu delle modalita' su FS4 tenuto, Play Acoustic, si parte sempre in Spark; 2.29: Play Acoustic a icone e menu una modalita' alla volta (bozze B); 2.30: il pedale d'espressione finto dal seriale (J wah, X MIDI); 2.31: la lettura del pedale d'espressione vero (I, prova dei fili); 2.32: il registro della batteria (U); 2.33: il pedale d.espressione manda il CC 11 in MIDI, tolte le prove del wah; 2.34: in Spark il pedale d.espressione muove il Master dell'ampli modellato; 2.35: in MIDI il nome nel primo messaggio, per Windows; 2.36: bonding, per accoppiarsi con Windows; 2.37: la modalita' Pulze (Hotone Pulze Mini)
 
 /* La lingua delle scritte del display (9 ottobre 2026, chiesta dall'utente per chi
  * costruisce il pedale fuori dall'Italia): 0 italiano, 1 inglese. Si sceglie qui,
@@ -276,7 +277,7 @@ static uint32_t avvisoFino = 0;
  * (23 ottobre 2026): comanda un TC-Helicon Play Acoustic attraverso
  * l'adattatore (progetto `MIdiAdapter`, una XIAO C6 che finge un Switch-6).
  * Decise dall'utente il 29 agosto, il 24 settembre e il 23 ottobre 2026:
- *  - **FS4 tenuto due secondi apre un menu** con le tre modalita': tasti banco
+ *  - **FS4 tenuto due secondi apre un menu** con le modalita' (quattro con Pulze): tasti banco
  *    su e giu', FS5 conferma (prima era FS1+FS4 fra due sole: «troppe
  *    combinazioni»). In Play Acoustic FS4 e' vuoto, quindi tenerlo non manda
  *    niente; altrove FS4 fa prima il suo lavoro, come faceva con FS1+FS4.
@@ -290,11 +291,27 @@ static uint32_t avvisoFino = 0;
  * La mappa MIDI e' fissa nel firmware (canale 1, preset = Program Change, stomp =
  * CC 80-83 a 127/0): i programmi sul PC hanno il MIDI learn, quindi basta che
  * i comandi siano diversi fra loro. Farla scrivere dall'app e' il passo dopo. */
-static const uint8_t MODO_SPARK = 0, MODO_MIDI = 1, MODO_PLAY = 2;
+/* **Pulze** (5 novembre 2026, 2.37): il pedale comanda un Hotone Pulze Mini
+ * facendo da centrale BLE MIDI, senza telefono in mezzo; tutto in 13-pulze.ino,
+ * il ragionamento in `..\Pulze Control\ricerca-pulze-mini.md`. */
+static const uint8_t MODO_SPARK = 0, MODO_MIDI = 1, MODO_PLAY = 2, MODO_PULZE = 3;
+static const uint8_t N_MODI = 4;
 static uint8_t modo = MODO_SPARK;
 static const char* nomeModo(uint8_t m) {
-  return m == MODO_MIDI ? "MIDI" : m == MODO_PLAY ? "Play Acoustic" : "Spark";
+  return m == MODO_MIDI ? "MIDI" : m == MODO_PLAY ? "Play Acoustic" : m == MODO_PULZE ? "Pulze" : "Spark";
 }
+/* Le funzioni della modalita' Pulze (13-pulze.ino) che i file prima chiamano. */
+static void    sbrigaPulze();
+static void    pulzeEntra();
+static void    pulzeLascia();
+static void    pulzePremuto(uint8_t k, uint8_t ingressi);
+static void    pulzeBanco(int8_t passo);
+static void    pulzeAccordatore(bool aperto);
+static void    pulzeEspressione(float p);
+static void    pulzeRiarma();
+static uint8_t ledPulze();
+static void    disegnaPulze(const char* avviso);
+static void    pulzeStato();
 static USBMIDI midi("SparkPedale MIDI");
 static const uint8_t MIDI_CANALE = 1;
 static const uint8_t MIDI_CC_STOMP = 80;       // 80..83: liberi nello standard

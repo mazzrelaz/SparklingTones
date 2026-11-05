@@ -81,6 +81,8 @@ static void aggiornaLed() {
   uint8_t maschera = 0;
   // Col menu aperto spenti: i piedi non comandano niente finche' non si sceglie.
   if (menuAperto) { mcpScrivi(MCP_OLATB, 0); return; }
+  // Pulze: il tone che suona, o i blocchi accesi nella pagina stomp (13-pulze.ino).
+  if (modo == MODO_PULZE) { mcpScrivi(MCP_OLATB, ledPulze()); return; }
   /* In Play Acoustic il rosso sul footswitch mentre e' premuto: il Play Acoustic
    * non ci dice niente del suo stato, quindi il pedale mostra solo cosa manda. */
   if (modo == MODO_PLAY) {

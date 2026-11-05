@@ -128,6 +128,7 @@ static void passoEspressione() {
     esprMedia = -1;
     esprCc = -1;
     masterMandato = -1;
+    pulzeRiarma();
     Serial.printf("pedale d'espressione: jack %s\n", jackDentro ? "infilato" : "tolto");
   }
   grezzoPrima = grezzo;
@@ -143,6 +144,8 @@ static void passoEspressione() {
   if (!jackDentro) return;
   esprMedia = esprMedia < 0 ? mv : esprMedia * 0.7f + mv * 0.3f;
   const float p = posizioneEspressione(esprMedia);
+  // Pulze: il Pitch se il tone ce l'ha, altrimenti Inst Volume (13-pulze.ino).
+  if (modo == MODO_PULZE) { pulzeEspressione(p); return; }
   if (modo == MODO_MIDI) {
     const float x = p * 127;
     if (esprCc >= 0 && fabsf(x - esprCc) < 0.6f) return;        // mezzo passo di isteresi
@@ -224,6 +227,7 @@ static void elenco() {
     "  T     apri/chiudi il tuner;  L  dentro/fuori dal looper;  Y  un colpo di tap\n"
     "  I     il pedale d'espressione: mV di D2, capi, jack e CC, 4 righe al secondo (I ferma)\n"
     "  Q     rileggi lo stato che suona e il modello d'ampli (quello del Master)\n"
+    "  Z     la modalita' Pulze: collegamento, Songlist, tone che suona, blocchi\n"
     "  #cc n il CC 11 (Expression) a n (0..127), USB e Bluetooth\n"));
 }
 

@@ -304,7 +304,8 @@ class Collegamenti : public BLEServerCallbacks {
       // A ponte chiuso, in modalita' MIDI chi arriva e' l'iPad per il MIDI (in
       // Play Acoustic l'adattatore): non tocca l'ampli (li' non c'e') e non
       // puo' scrivere banchi.
-      if (modo != MODO_SPARK) { midiCentrale = true; return; }
+      // In Pulze il pedale non si annuncia: chi arriva lo stesso se ne va.
+      if (modo == MODO_MIDI || modo == MODO_PLAY) { midiCentrale = true; return; }
       cacciaApp = true;
       return;
     }
@@ -351,7 +352,8 @@ static void annuncia() {
     annuncioAMano = true;
     BLEDevice::startAdvertising();
   }
-  else if (modo != MODO_SPARK) { adv->addServiceUUID(UUID_MIDI);  BLEDevice::startAdvertising(); }
+  else if (modo == MODO_PLAY)  { adv->addServiceUUID(UUID_MIDI);  BLEDevice::startAdvertising(); }
+  // In Pulze niente: il pedale fa da centrale verso il Mini, e basta.
 }
 
 static void apriPonte() {

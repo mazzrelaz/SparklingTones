@@ -1,4 +1,4 @@
-// prova-ble, 08-tasti.ino — La modalita' (Spark/MIDI/Play Acoustic) e il suo menu, la scelta dell'ampli, la lettura dei tasti.
+// prova-ble, 08-tasti.ino — La modalita' (Spark/MIDI/Play Acoustic/Pulze) e il suo menu, la scelta dell'ampli, la lettura dei tasti.
 // Un pezzo del firmware: Arduino compila i .ino di questa cartella in fila,
 // prova-ble.ino per primo e poi gli altri nell'ordine del nome (vedi la testa
 // di prova-ble.ino). Le variabili stanno dove stavano: qui si usa quello che
@@ -13,6 +13,7 @@ static void cambiaModo(uint8_t nuovo) {
   if (nuovo == modo) return;
   const uint8_t prima = modo;
   if (prima == MODO_PLAY) playLasciaTutti();     // niente pulsanti appesi sull'adattatore
+  if (prima == MODO_PULZE) pulzeLascia();        // accordatore chiuso, Mini scollegato
   modo = nuovo;
   looper = false;
   // Il tuner si chiude, e l'ampli torna a suonare prima che il pedale lo lasci.
@@ -32,9 +33,17 @@ static void cambiaModo(uint8_t nuovo) {
       dentro = 0;
       nomeSuona[0] = 0;
     }
+    // In Pulze il pedale non si annuncia e chi era collegato per il MIDI se ne va:
+    // la radio serve al Mini.
+    if (modo == MODO_PULZE) {
+      if (midiCentrale && serverPonte) serverPonte->disconnect(connApp);
+      chiudiPonte("modalita' Pulze");      // l'app, entrando, staccherebbe il Mini
+      pulzeEntra();
+    }
     annuncia();                            // l'iPad, o l'adattatore, ora ci trova
     avvisa(modo == MODO_MIDI ? TESTO("modalita' MIDI", "MIDI mode")
-                             : TESTO("Play Acoustic", "Play Acoustic"));
+         : modo == MODO_PLAY ? TESTO("Play Acoustic", "Play Acoustic")
+                             : TESTO("modalita' Pulze", "Pulze mode"));
   } else {
     momentoSgancio = millis();
     ultimoTentativo = 0;
@@ -87,8 +96,8 @@ static void chiudiMenu() {
  *  FS5 conferma, FS1-FS4 escono senza cambiare. Non fa nient'altro. */
 static void menuPremuto(uint8_t k) {
   menuFino = millis() + MENU_MS;
-  if (k == BANCO_SX)      menuScelta = (uint8_t)((menuScelta + 2) % 3);
-  else if (k == BANCO_DX) menuScelta = (uint8_t)((menuScelta + 1) % 3);
+  if (k == BANCO_SX)      menuScelta = (uint8_t)((menuScelta + N_MODI - 1) % N_MODI);
+  else if (k == BANCO_DX) menuScelta = (uint8_t)((menuScelta + 1) % N_MODI);
   else if (k == FS5)      { chiudiMenu(); cambiaModo(menuScelta); return; }
   else                    { chiudiMenu(); return; }
   schermoSporco = true;
@@ -123,6 +132,8 @@ static void leggiTasto() {
         bancoInAttesa = -1;
         if (!bancoAnnullato && !tuner && !looper && modo == MODO_SPARK && chScrittura)
           cambiaBanco(k == BANCO_DX ? +1 : -1);
+        else if (!bancoAnnullato && modo == MODO_PULZE)
+          pulzeBanco(k == BANCO_DX ? +1 : -1);  // la Songlist cambia al rilascio, come il banco
       }
       continue;
     }
@@ -135,6 +146,9 @@ static void leggiTasto() {
     // In Play Acoustic ogni tasto e' un pulsante del Switch-6, tasti banco
     // compresi (Preset Down/Up): niente ponte, niente tuner.
     if (modo == MODO_PLAY) { playTasto(k, true); continue; }
+
+    // In Pulze tutto passa da 13-pulze.ino; niente ponte ne' looper.
+    if (modo == MODO_PULZE) { pulzePremuto(k, ingressi); continue; }
 
     // I due tasti banco insieme restano la combinazione del ponte anche qui.
     if (modo == MODO_MIDI) {

@@ -20,6 +20,7 @@ static void tunerAzzera() {
 
 /** Un tasto banco tenuto due secondi. Il comando all'ampli lo manda il loop. */
 static void entraTuner() {
+  if (modo == MODO_PULZE) { pulzeAccordatore(true); return; }   // l'accordatore e' quello del Mini
   if (modo != MODO_SPARK || looper) return;
   if (!chScrittura) { avvisa(TESTO("lo Spark non c'e'", "no Spark")); return; }
   tuner = true;

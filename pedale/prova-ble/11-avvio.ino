@@ -186,7 +186,8 @@ void loop() {
   }
   // L'ampli si e' fatto vedere: ci si attacca **qui**, fuori dal callback
   // della scansione, che e' la regola di sempre per le operazioni BLE.
-  if (trovato && !scansioneInCorso && !chScrittura && !sganciato && !inScelta()) {
+  // In Pulze il Mini lo aggancia sbrigaPulze(), qui sotto.
+  if (modo != MODO_PULZE && trovato && !scansioneInCorso && !chScrittura && !sganciato && !inScelta()) {
     if (modo == MODO_SPARK && agganciaAmpli()) daLeggere = true;
     else { delete trovato; trovato = nullptr; }   // in MIDI lo Spark resta libero
   }
@@ -201,6 +202,8 @@ void loop() {
     }
   }
 
+  if (modo == MODO_PULZE) sbrigaPulze();   // il Mini: aggancio, messaggi, invii, FS5 tenuto
+
   leggiTasto();
   /* I due tasti banco tenuti insieme per un secondo e mezzo aprono il ponte.
    * Si guarda il livello gia' filtrato, non i fronti: una combinazione si
@@ -211,8 +214,9 @@ void loop() {
     const uint8_t dx = (uint8_t)(1 << LINEA_PULSANTE[BANCO_DX]);
     // In Play Acoustic i tasti banco sono Preset Down e Up, e col menu aperto
     // scorrono: li' la combinazione non apre il ponte.
+    // In Pulze nemmeno: i banchi del ponte sono dello Spark.
     const bool tuttiEDue = !(ingressiFermi & sx) && !(ingressiFermi & dx)
-                           && modo != MODO_PLAY && !menuAperto;
+                           && modo != MODO_PLAY && modo != MODO_PULZE && !menuAperto;
     if (tuttiEDue) {
       if (insiemeDa == 0) insiemeDa = millis() | 1;
       else if (millis() - insiemeDa > 1500 && !ponteAperto()) { insiemeDa = 0; apriPonte(); }
@@ -479,6 +483,7 @@ void loop() {
     // Lo stato che suona, coi pezzi grezzi sul seriale: per vedere dal PC cosa
     // c'e' davvero nella catena (2.30).
     else if (c == 'Q') leggiAmpliCheSuona();       // e il modello d'ampli, per il Master (2.34)
+    else if (c == 'Z') pulzeStato();               // la modalita' Pulze (2.37)
     else if (c == '?') elenco();
   }
   passoEspressione();                                // il volume del pedale d'espressione (2.33)

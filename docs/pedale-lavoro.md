@@ -629,6 +629,17 @@ modello.
 - Dopo ogni caricamento l'ampli si è riagganciato da solo; dopo averlo spento e riacceso no (tasto di
   accoppiamento: l'indirizzo casuale del finto era lo stesso, quindi non è quello).
 
+## La modalità Pulze — 5 novembre 2026 (firmware 2.37, caricato, da provare col Mini)
+
+Quarta voce del menu di FS4 tenuto: il pedale comanda un **Hotone Pulze Mini** facendo da centrale BLE
+MIDI (niente telefono in mezzo). Il codice sta in **`13-pulze.ino`**; il protocollo, le prove e le
+decisioni dell'utente in **`..\Pulze Control\ricerca-pulze-mini.md`** («Dove si riprende» dice cosa c'è nel
+firmware e cosa provare). In breve: tasti banco = Songlist, FS1–FS4 = quattro tone, FS5 = gruppo dopo,
+FS5 tenuto 1 s = stomp (PRE, EQ, Fx1, Fx2), tasto banco tenuto 2 s = accordatore del Mini, pedale
+d'espressione = Pitch o Inst Volume; si torna al tone di prima (`/pulze.txt`). In Pulze il pedale **non si
+annuncia** e il ponte resta chiuso. `Z` dal seriale stampa lo stato. Compilato e caricato il 5 novembre
+(1200 baud su COM3, upload su COM13, uscita 0).
+
 ## Dove si riprende col pedale — 24 settembre 2026
 
 **Sulla XIAO c'è `prova-ble`, il firmware vero. La ferramenta è finita, il pedale no.** Fa i quattro suoni

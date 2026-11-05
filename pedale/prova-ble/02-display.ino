@@ -134,7 +134,11 @@ static void disegnaBatteria() {
 
 /** La riga in alto delle modalita' senza Spark: il testo, la batteria e il
  *  quadratino con la M (pieno quando qualcuno ha la pedaliera), poi la linea. */
-static void disegnaTestaMidi(const char* testa, bool pieno) {
+static void disegnaTesta(const char* testa, bool pieno, const char* lettera);
+static void disegnaTestaMidi(const char* testa, bool pieno) { disegnaTesta(testa, pieno, "M"); }
+
+/** La stessa riga con un'altra lettera nel quadratino: la P del Pulze. */
+static void disegnaTesta(const char* testa, bool pieno, const char* lettera) {
   schermo.setFont(u8g2_font_helvB08_tf);
   schermo.setClipWindow(0, 0, 96, 11);   // a destra stanno la batteria e il quadratino
   schermo.drawStr(0, 8, testa);
@@ -145,7 +149,7 @@ static void disegnaTestaMidi(const char* testa, bool pieno) {
     schermo.drawBox(118, 0, 10, 10);
     schermo.setDrawColor(0);
     schermo.setFont(u8g2_font_5x7_tf);
-    schermo.drawStr(121, 8, "M");
+    schermo.drawStr(121, 8, lettera);
     schermo.setDrawColor(1);
   } else {
     schermo.drawFrame(118, 0, 10, 10);
@@ -250,8 +254,8 @@ static void disegnaMenu() {
   const bool lungo = strlen(nome) > 8;
   schermo.setFont(lungo ? u8g2_font_helvB10_tf : u8g2_font_helvB14_tf);
   centrato(64, lungo ? 37 : 39, nome);
-  for (uint8_t m = 0; m < 3; m++) {
-    const int x = 56 + m * 8;
+  for (uint8_t m = 0; m < N_MODI; m++) {
+    const int x = 64 - (N_MODI - 1) * 4 + m * 8;
     if (m == menuScelta) schermo.drawDisc(x, 48, 2); else schermo.drawFrame(x - 2, 46, 5, 5);
   }
   schermo.setFont(u8g2_font_5x7_tf);
@@ -419,12 +423,13 @@ static void disegnaSchermo() {
     disegnaMenu();
     return;
   }
-  if (modo == MODO_MIDI || modo == MODO_PLAY) {
+  if (modo == MODO_MIDI || modo == MODO_PLAY || modo == MODO_PULZE) {
     schermo.setFontMode(1);
     schermo.setDrawColor(1);
     const bool avviso = avvisoTesto[0] && (int32_t)(avvisoFino - millis()) > 0;
-    if (modo == MODO_MIDI) disegnaMidi(avviso ? avvisoTesto : nullptr);
-    else                   disegnaPlay(avviso ? avvisoTesto : nullptr);
+    if (modo == MODO_MIDI)      disegnaMidi(avviso ? avvisoTesto : nullptr);
+    else if (modo == MODO_PLAY) disegnaPlay(avviso ? avvisoTesto : nullptr);
+    else                        disegnaPulze(avviso ? avvisoTesto : nullptr);
     return;
   }
   schermo.setFontMode(1);                      // trasparente: serve al testo in negativo
