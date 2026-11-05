@@ -144,7 +144,7 @@ static void passoEspressione() {
   if (!jackDentro) return;
   esprMedia = esprMedia < 0 ? mv : esprMedia * 0.7f + mv * 0.3f;
   const float p = posizioneEspressione(esprMedia);
-  // Pulze: il Pitch se il tone ce l'ha, altrimenti Inst Volume (13-pulze.ino).
+  // Pulze: Inst Volume (13-pulze.ino).
   if (modo == MODO_PULZE) { pulzeEspressione(p); return; }
   if (modo == MODO_MIDI) {
     const float x = p * 127;

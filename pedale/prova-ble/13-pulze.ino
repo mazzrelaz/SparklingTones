@@ -31,13 +31,11 @@
 // Songlist; FS5 = il gruppo da quattro dopo, senza toccare il suono; FS5 tenuto un
 // secondo = la pagina stomp (FS1-FS4 = PRE, EQ, Fx1, Fx2; FS5 torna ai tone);
 // tasto banco tenuto due secondi = l'accordatore del Mini, un tasto qualunque lo
-// chiude. Il pedale d'espressione muove il Pitch se il tone ce l'ha, altrimenti
-// Inst Volume, e solo quando lo si muove.
+// chiude. Il pedale d'espressione muove Inst Volume, e solo quando lo si muove.
 
 static const uint8_t  PZ_CC_INST_VOLUME = 8;
 static const uint8_t  PZ_CC_BLOCCO      = 45;     // 45 + blocco (0 NR, 1 PRE, 2 AMP, 3 CAB, 4 EQ, 5 Fx1, 6 Fx2)
 static const uint8_t  PZ_CC_TUNER       = 55;
-static const uint16_t PZ_MODELLO_PITCH  = 38;     // il Pitch, nei due posti (verificato il 4 novembre)
 static const uint8_t  PZ_LISTA_INTERA   = 0xff;
 /* Una scrittura ogni 70 ms, come l'app quando si gira una manopola (e cosi' sono
  * passati i 39 blocchi del pedale simulato, il 4 novembre). Fra i due pezzi del
@@ -109,13 +107,9 @@ static bool    pzDaSalvare = false;
 static const char* VIA_PULZE = "/pulze.txt";
 
 /* --- Il pedale d'espressione ---------------------------------------------------- */
-static int8_t  pzPitchBlocco = -1;                   // il blocco col Pitch nel tone, -1 = nessuno
-static bool    pzPitchLetto = false;
-static uint8_t pzPitchCorpo[72];
-static float   pzPitchBase = 0;                      // Pitch 1 com'e' salvato nel tone: il tallone
 static int16_t pzEsprRif = -1;                       // millesimi al riarmo; -1 = da riarmare
 static bool    pzEsprMosso = false;
-static int16_t pzPitchMandato = -100, pzVolMandato = -1;
+static int16_t pzVolMandato = -1;                    // l'ultimo Inst Volume mandato
 
 /* --- Le code ---------------------------------------------------------------------
  * In arrivo: il callback delle notifiche ricompone i SysEx dal BLE MIDI e li mette
@@ -385,18 +379,6 @@ static void pzTone(const uint8_t* D) {
   pzSuonaPos = pos;
   pzCopiaNome(pzNomeSuona, sizeof(pzNomeSuona), D + 77, 16);
   pzAccesi = D[97];
-  /* Il Pitch nella catena: 98-104 la posizione di ogni blocco, 105-132 per ogni
-   * posizione il modello (16 bit LE), 00 e la categoria (rassegna del 4 novembre). */
-  pzPitchBlocco = -1;
-  for (uint8_t b = 0; b < 7 && pzPitchBlocco < 0; b++) {
-    const uint8_t p = D[98 + b];
-    if (p < 7 && (uint16_t)(D[105 + 4 * p] | D[106 + 4 * p] << 8) == PZ_MODELLO_PITCH) pzPitchBlocco = (int8_t)b;
-  }
-  pzPitchLetto = false;
-  if (pzPitchBlocco >= 0) {                // il suo corpo, per avere Pitch 1 e rimandarlo
-    const uint8_t c[3] = { (uint8_t)pzPitchBlocco, 0, 0 };
-    pzChiedi(2, 0, c, sizeof(c));
-  }
   pulzeRiarma();
   if (pzFase >= 3) {
     // Il ricordo, se e' cambiato (lo guarda sbrigaPulze). Un salto chiesto da noi
@@ -408,8 +390,8 @@ static void pzTone(const uint8_t* D) {
       if (pos >= 0) pzGruppo = (uint8_t)(pos / 4);
     }
   }
-  Serial.printf("Pulze: suona \"%s\" (lista %u, posto %d), blocchi %02x, pitch %d\n",
-                pzNomeSuona, lista, pos, pzAccesi, pzPitchBlocco);
+  Serial.printf("Pulze: suona \"%s\" (lista %u, posto %d), blocchi %02x\n",
+                pzNomeSuona, lista, pos, pzAccesi);
   aggiornaLed();
   schermoSporco = true;
 }
@@ -422,15 +404,6 @@ static void pzBlocco(const uint8_t* D) {
   // La conferma del Mini: dopo un CC di on/off (o una lettura) dice com'e' il blocco.
   static const char* const NOMI[7] = { "NR", "PRE", "AMP", "CAB", "EQ", "Fx1", "Fx2" };
   Serial.printf("Pulze: il Mini dice %s %s (modello %u)\n", NOMI[b], D[10] ? "acceso" : "spento", D[17]);
-  if ((int8_t)b == pzPitchBlocco && D[17] == PZ_MODELLO_PITCH) {
-    memcpy(pzPitchCorpo, D + 9, sizeof(pzPitchCorpo));
-    if (!pzPitchLetto) {
-      memcpy(&pzPitchBase, D + 21, 4);     // il primo parametro, float little endian
-      if (!(pzPitchBase >= -24 && pzPitchBase <= 24)) pzPitchBase = 0;
-      pzPitchLetto = true;
-      Serial.printf("Pulze: Pitch nel blocco %u, Pitch 1 = %.0f\n", b, pzPitchBase);
-    }
-  }
   aggiornaLed();
   schermoSporco = true;
 }
@@ -781,17 +754,20 @@ static void pulzePremuto(uint8_t k, uint8_t ingressi) {
 }
 
 /* ======================================================================
-   Il pedale d'espressione (deciso dall'utente il 4 novembre): il Pitch se nel
-   tone c'e' l'effetto Pitch (modello 38), dal Pitch 1 salvato nel tone (tallone)
-   a +12 (punta), a semitoni, rimandando il blocco intero come l'app; altrimenti
-   Inst Volume, CC 8, da 0 a 100. Si riarma a ogni tone e all'accordatore, e non
-   parte niente finche' il pedale non si muove (come il Master dello Spark).
+   Il pedale d'espressione: **Inst Volume**, CC 8, da 0 (tallone) a 100 (punta),
+   come il Simple Mode del Pulze Control. E' un'impostazione generale del Mini:
+   resta dove la si lascia, anche cambiando tone. Si riarma a ogni tone,
+   all'accordatore e al jack, e non parte niente finche' il pedale non si muove
+   (come il Master dello Spark).
+
+   Il Pitch col pedale (deciso il 4 novembre, scritto nella 2.37) l'utente l'ha
+   tolto il 5 novembre: «fa talmente schifo quel pitch che non lo usero' mai».
+   Come si muove una manopola col blocco intero: `..\Pulze Control\ricerca-pulze-mini.md`.
    ====================================================================== */
 
 static void pulzeRiarma() {
   pzEsprRif = -1;
   pzEsprMosso = false;
-  pzPitchMandato = -100;
   pzVolMandato = -1;
 }
 
@@ -804,19 +780,6 @@ static void pulzeEspressione(float p) {
     pzEsprMosso = true;
   }
   if (!pzCodaVuota()) return;              // uno alla volta, ogni PZ_PAUSA_MS
-  if (pzPitchBlocco >= 0) {
-    if (!pzPitchLetto) return;
-    const int16_t s = (int16_t)lroundf(pzPitchBase + p * (12 - pzPitchBase));
-    if (s == pzPitchMandato) return;
-    pzPitchMandato = s;
-    uint8_t corpo[sizeof(pzPitchCorpo)];
-    memcpy(corpo, pzPitchCorpo, sizeof(corpo));
-    const float f = s;
-    memcpy(corpo + 12, &f, 4);             // p0 = Pitch 1, little endian come l'ESP32
-    uint8_t D[9 + sizeof(corpo)];
-    pzMandaDati(0, 0x12, D, pzTesta(D, 2, 0, corpo, sizeof(corpo)));
-    return;
-  }
   const float x = p * 100;
   if (pzVolMandato >= 0 && fabsf(x - pzVolMandato) < 0.6f) return;   // mezzo passo di isteresi
   const int16_t v = (int16_t)lroundf(x);
@@ -916,9 +879,8 @@ static void pulzeStato() {
   pzNomeLista(pzLista, nome, sizeof(nome));
   Serial.printf("  mostrata: \"%s\" (%u), gruppo %u%s; suona: lista %d, posto %d, \"%s\"\n",
                 nome, pzLista, pzGruppo, pzStomp ? ", pagina stomp" : "", pzSuonaLista, pzSuonaPos, pzNomeSuona);
-  Serial.printf("  blocchi accesi %02x; pitch nel blocco %d (%s, Pitch 1 = %.0f); ricordato %u/%u\n",
-                pzAccesi, pzPitchBlocco, pzPitchLetto ? "letto" : "non letto", pzPitchBase,
-                pzVolutaLista, pzVolutaPos);
+  Serial.printf("  blocchi accesi %02x; Inst Volume mandato %d; ricordato %u/%u\n",
+                pzAccesi, pzVolMandato, pzVolutaLista, pzVolutaPos);
   const uint8_t liste = pzQuanteListe();
   for (uint8_t l = 0; l < liste; l++) {
     pzNomeLista(l, nome, sizeof(nome));
