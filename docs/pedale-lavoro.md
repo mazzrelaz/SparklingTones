@@ -639,7 +639,7 @@ FS5 tenuto 1 s = stomp (PRE, EQ, Fx1, Fx2), tasto banco tenuto 2 s = accordatore
 d'espressione = Pitch o Inst Volume; si torna al tone di prima (`/pulze.txt`). In Pulze il pedale **non si
 annuncia** e il ponte resta chiuso. `Z` dal seriale stampa lo stato, `#modo n` cambia modalità dal PC.
 Provata dall'utente col Mini il 5 novembre: tone, Songlist, gruppi, stomp, accordatore, Inst Volume e ritorno
-al tone di prima vanno; mancano il Pitch e lo stomp sentito suonando. FS4 tenuto in Pulze rimette il tone
+al tone di prima vanno, e la sera anche lo stomp sentito con la chitarra: verificata in tutto. FS4 tenuto in Pulze rimette il tone
 di prima aprendo il menu (scelta dell'utente). Il Pitch col pedale d'espressione l'utente l'ha tolto lo
 stesso giorno: in Pulze il pedale fa solo Inst Volume.
 
