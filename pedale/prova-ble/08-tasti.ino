@@ -76,6 +76,7 @@ static void scegliAmpli(uint8_t a) {
 /** FS4 tenuto (lo guarda il loop): il menu parte dalla modalita' di adesso. */
 static void apriMenu() {
   if (modo == MODO_PLAY) playLasciaTutti();
+  if (modo == MODO_PULZE) pulzeMenu();     // quello che FS4 ha fatto premendo si disfa
   menuAperto = true;
   menuScelta = modo;
   menuFino = millis() + MENU_MS;

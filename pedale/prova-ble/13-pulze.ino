@@ -98,6 +98,12 @@ static bool    pzStomp = false;
 static bool    pzTuner = false, pzTunerAlRitorno = false;
 static bool    pzFs5Tenibile = false;                // FS5 premuto ai tone: tenuto apre lo stomp
 static uint32_t pzFs5Da = 0;
+/* FS4 tenuto apre il menu, ma premendo ha gia' cambiato tone (o Fx2 nello stomp):
+ * aprendo il menu si rimette com'era (deciso dall'utente il 5 novembre, come FS5
+ * col gruppo). Qui cosa c'era prima della pressione; 0 = niente da disfare. */
+static uint8_t pzFs4Disfa = 0;                       // 1 = il tone, 2 = Fx2
+static int16_t pzFs4Lista = -1, pzFs4Pos = -1;
+static uint8_t pzFs4Gruppo = 0;
 static uint8_t pzVolutaLista = 0, pzVolutaPos = 0;   // quella ricordata in /pulze.txt
 static bool    pzDaSalvare = false;
 static const char* VIA_PULZE = "/pulze.txt";
@@ -413,6 +419,9 @@ static void pzBlocco(const uint8_t* D) {
   const uint8_t b = D[9];
   if (b >= 7) return;
   if (D[10]) pzAccesi |= (uint8_t)(1 << b); else pzAccesi &= (uint8_t)~(1 << b);
+  // La conferma del Mini: dopo un CC di on/off (o una lettura) dice com'e' il blocco.
+  static const char* const NOMI[7] = { "NR", "PRE", "AMP", "CAB", "EQ", "Fx1", "Fx2" };
+  Serial.printf("Pulze: il Mini dice %s %s (modello %u)\n", NOMI[b], D[10] ? "acceso" : "spento", D[17]);
   if ((int8_t)b == pzPitchBlocco && D[17] == PZ_MODELLO_PITCH) {
     memcpy(pzPitchCorpo, D + 9, sizeof(pzPitchCorpo));
     if (!pzPitchLetto) {
@@ -528,7 +537,14 @@ static bool agganciaPulze() {
   if (!client->connect(trovato)) { Serial.println(F("Pulze: connessione fallita")); return false; }
   BLERemoteService* s = client->getService(BLEUUID(UUID_MIDI));
   BLERemoteCharacteristic* c = s ? s->getCharacteristic(BLEUUID(UUID_MIDI_DATI)) : nullptr;
-  if (!c) { Serial.println(F("Pulze: niente MIDI")); client->disconnect(); return false; }
+  if (!c) {
+    Serial.printf("Pulze: niente MIDI (servizio %s, collegato %d)\n", s ? "trovato" : "assente",
+                  client->isConnected());
+    auto* tutti = client->getServices();
+    if (tutti) for (auto& v : *tutti) Serial.printf("  servizio %s\n", v.first.c_str());
+    client->disconnect();
+    return false;
+  }
   pzInDentro = false;
   pzRxLetti = pzRxScritti;
   pzTxTesta = pzTxFondo;
@@ -668,6 +684,26 @@ static void pulzeAccordatore(bool aperto) {
   schermoSporco = true;
 }
 
+/** Il menu si apre (FS4 tenuto): quello che FS4 ha fatto alla pressione si
+ *  disfa. Il tone di prima torna a suonare e a essere quello ricordato; nello
+ *  stomp Fx2 torna com'era. Se prima non suonava niente di nostro, resta cosi'. */
+static void pulzeMenu() {
+  const uint8_t disfa = pzFs4Disfa;
+  pzFs4Disfa = 0;
+  if (!chPulze || pzFase < 3) return;
+  if (disfa == 1 && pzFs4Lista >= 0 && pzFs4Pos >= 0) {
+    Serial.println(F("Pulze: menu, torno al tone di prima di FS4"));
+    pzSalta((uint8_t)pzFs4Lista, (uint8_t)pzFs4Pos);
+    pzGruppo = pzFs4Gruppo;
+  } else if (disfa == 2) {
+    const uint8_t b = PZ_STOMP[3];
+    const bool acceso = !(pzAccesi & (1 << b));
+    if (acceso) pzAccesi |= (uint8_t)(1 << b); else pzAccesi &= (uint8_t)~(1 << b);
+    pzMandaCC((uint8_t)(PZ_CC_BLOCCO + b), acceso ? 127 : 0);
+    Serial.println(F("Pulze: menu, Fx2 torna com'era"));
+  }
+}
+
 /** Un tasto banco lasciato (senza essere tenuto): la Songlist dopo o prima, in
  *  tondo e solo fra le Songlist, partendo dal suo primo tone come nell'app. */
 static void pulzeBanco(int8_t passo) {
@@ -688,6 +724,7 @@ static void pulzeBanco(int8_t passo) {
 
 /** Una pressione in modalita' Pulze (il rilascio dei tasti banco sta in leggiTasto). */
 static void pulzePremuto(uint8_t k, uint8_t ingressi) {
+  pzFs4Disfa = 0;                          // un'altra pressione: FS4 non e' piu' da disfare
   // Con l'accordatore aperto un tasto qualunque lo chiude, e non fa altro.
   if (pzTuner) { pulzeAccordatore(false); pzFs5Tenibile = false; return; }
   if (k == BANCO_SX || k == BANCO_DX) {
@@ -722,6 +759,7 @@ static void pulzePremuto(uint8_t k, uint8_t ingressi) {
   if (pzStomp) {                           // PRE, EQ, Fx1, Fx2: il Mini conferma col blocco
     const uint8_t b = PZ_STOMP[k];
     const bool acceso = !(pzAccesi & (1 << b));
+    if (k == 3) pzFs4Disfa = 2;
     if (acceso) pzAccesi |= (uint8_t)(1 << b); else pzAccesi &= (uint8_t)~(1 << b);
     pzMandaCC((uint8_t)(PZ_CC_BLOCCO + b), acceso ? 127 : 0);
     Serial.printf("Pulze: %s %s\n", PZ_NOMI_STOMP[k], acceso ? "acceso" : "spento");
@@ -731,6 +769,12 @@ static void pulzePremuto(uint8_t k, uint8_t ingressi) {
   }
   const uint16_t posto = (uint16_t)(pzGruppo * 4 + k);
   if (posto >= pzQuantiTone(pzLista)) { Serial.printf("Pulze: posto %u vuoto\n", posto + 1); return; }
+  if (k == 3 && (pzSuonaLista != pzLista || pzSuonaPos != (int16_t)posto)) {
+    pzFs4Disfa = 1;
+    pzFs4Lista = pzSuonaLista;
+    pzFs4Pos = pzSuonaPos;
+    pzFs4Gruppo = pzGruppo;
+  }
   pzSalta(pzLista, (uint8_t)posto);
   aggiornaLed();
   schermoSporco = true;

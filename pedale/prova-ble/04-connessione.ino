@@ -16,7 +16,25 @@ class Scansione : public BLEAdvertisedDeviceCallbacks {
     if (modo == MODO_PULZE) {
       const auto nomeAnnuncio = d.getName();
       const char* nome = nomeAnnuncio.c_str();
-      if (!strstr(nome, "Pulze") || strstr(nome, "Control")) return;
+      /* Il nome puo' stare nella sola risposta alla scansione, che non sempre
+       * arriva insieme all'annuncio: vale anche il servizio MIDI annunciato
+       * (il Mini lo mette nell'annuncio, nell'elenco incompleto). */
+      const bool midi = d.haveServiceUUID() && d.isAdvertisingService(BLEUUID(UUID_MIDI));
+      {
+        // Per la diagnosi (5 novembre 2026): ogni apparecchio visto, una volta sola.
+        static char visti[16][18];
+        static uint8_t quantiVisti = 0;
+        const auto ind = d.getAddress().toString();
+        bool gia = false;
+        for (uint8_t i = 0; i < quantiVisti && !gia; i++) gia = strcmp(visti[i], ind.c_str()) == 0;
+        if (!gia) {
+          if (quantiVisti < 16) snprintf(visti[quantiVisti++], sizeof(visti[0]), "%s", ind.c_str());
+          Serial.printf("  visto: \"%s\"  [%s]  rssi %d%s\n", nome, ind.c_str(), d.getRSSI(),
+                        midi ? "  MIDI" : "");
+        }
+      }
+      const bool pulze = strstr(nome, "Pulze") && !strstr(nome, "Control");
+      if (!pulze && !(midi && !nome[0])) return;
       Serial.printf("trovato: %s  [%s]  rssi %d\n", nome, d.getAddress().toString().c_str(), d.getRSSI());
       BLEDevice::getScan()->stop();
       if (trovato) delete trovato;

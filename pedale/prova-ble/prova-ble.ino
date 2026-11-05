@@ -309,6 +309,7 @@ static void    pulzeBanco(int8_t passo);
 static void    pulzeAccordatore(bool aperto);
 static void    pulzeEspressione(float p);
 static void    pulzeRiarma();
+static void    pulzeMenu();
 static uint8_t ledPulze();
 static void    disegnaPulze(const char* avviso);
 static void    pulzeStato();
