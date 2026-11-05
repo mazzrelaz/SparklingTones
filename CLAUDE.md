@@ -283,8 +283,8 @@ i quattro suoni della metà corrente, il quinto cambia metà senza toccare il su
   offset e lunghezze vanno verificati.
 - **Il tasto banco cambia banco al rilascio**; tenuto 2 s apre il tuner (2.24, verificato).
 - **Quattro modalità, scelte da un menu: FS4 tenuto 2 s** (2.28, 23 ottobre 2026; FS1+FS4 non fa più niente):
-  Spark / MIDI / **Play Acoustic** / **Pulze** (2.37, Pulze Mini: `13-pulze.ino`), tasti banco su e giù, FS5 conferma. **All'accensione sempre Spark**
-  (regola dell'utente: `/modo.txt` non si usa più). Play Acoustic = il pedale comanda un TC-Helicon Play
+  Spark / **Pulze** (2.37, Pulze Mini: `13-pulze.ino`) / **Play Acoustic** / MIDI (ordine dell'utente), tasti banco, FS5 conferma.
+  **All'accensione il menu** (2.38, regola dell'utente del 5 novembre; prima sempre Spark), aperto finché FS5 non sceglie. Play Acoustic = il pedale comanda un TC-Helicon Play
   Acoustic attraverso l'adattatore di `..\MIdiAdapter` (XIAO C6 che finge un Switch-6): **CC 20+n a 127
   alla pressione e a 0 al rilascio**, n = pulsante 1–6 del Switch-6; numero del CC e adattatore cambiano
   insieme. Nel looper FS4 tenuto resta «cancella». Dettaglio in `docs/pedale-lavoro.md`.

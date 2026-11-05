@@ -250,7 +250,7 @@ static void disegnaMenu() {
   schermo.drawHLine(0, 12, 128);
   schermo.drawTriangle(2, 32, 9, 25, 9, 39);
   schermo.drawTriangle(125, 32, 118, 25, 118, 39);
-  const char* nome = nomeModo(menuScelta);
+  const char* nome = nomeModo(ORDINE_MENU[menuScelta]);
   const bool lungo = strlen(nome) > 8;
   schermo.setFont(lungo ? u8g2_font_helvB10_tf : u8g2_font_helvB14_tf);
   centrato(64, lungo ? 37 : 39, nome);
@@ -259,7 +259,8 @@ static void disegnaMenu() {
     if (m == menuScelta) schermo.drawDisc(x, 48, 2); else schermo.drawFrame(x - 2, 46, 5, 5);
   }
   schermo.setFont(u8g2_font_5x7_tf);
-  if (menuScelta == modo) schermo.drawStr(0, 63, TESTO("attiva", "active"));
+  // All'accensione nessuna e' ancora attiva.
+  if (!menuAvvio && ORDINE_MENU[menuScelta] == modo) schermo.drawStr(0, 63, TESTO("attiva", "active"));
   const char* ok = "FS5 = OK";
   schermo.drawStr(128 - schermo.getStrWidth(ok), 63, ok);
   schermo.sendBuffer();

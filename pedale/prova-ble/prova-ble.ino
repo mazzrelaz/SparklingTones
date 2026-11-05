@@ -78,7 +78,7 @@
 
 /* La versione del firmware, sulla schermata di avvio: si alza a ogni
  * caricamento che cambia qualcosa di visibile sul pedale. */
-static const char* VERSIONE = "2.37";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo; 2.19: «libero» fino a 60 s; 2.20: cerchio in «libero» e click per tutta la registrazione; 2.21: niente doppio click sull'«uno»; 2.22: l'impronta dei banchi, per «Aggiorna» nell'app; 2.23: il ponte si chiude quando l'app si stacca; 2.24: il tuner, tasto banco al rilascio; 2.25: diagnosi del tuner sul seriale; 2.26: la scatola nera; 2.27: la scatola salvata quando l'ampli si inceppa; 2.28: menu delle modalita' su FS4 tenuto, Play Acoustic, si parte sempre in Spark; 2.29: Play Acoustic a icone e menu una modalita' alla volta (bozze B); 2.30: il pedale d'espressione finto dal seriale (J wah, X MIDI); 2.31: la lettura del pedale d'espressione vero (I, prova dei fili); 2.32: il registro della batteria (U); 2.33: il pedale d.espressione manda il CC 11 in MIDI, tolte le prove del wah; 2.34: in Spark il pedale d.espressione muove il Master dell'ampli modellato; 2.35: in MIDI il nome nel primo messaggio, per Windows; 2.36: bonding, per accoppiarsi con Windows; 2.37: la modalita' Pulze (Hotone Pulze Mini)
+static const char* VERSIONE = "2.38";   // 1.3: Spark 2 e NEO; 1.4: NEO a pezzi grandi; 1.5: batteria; 1.6: looper; 1.7: looper come il pannello; 1.8: lo stato lo segna anche il pedale; 1.9: annulla durante la sovraincisione; 2.0: conteggio; 2.1: tap, cerchio, lampo; 2.2: cerchio come l'app; 2.3: battute dai tasti banco, a blocchi; 2.4: il cerchio si riempie in ogni stato; 2.5: anello e giro col nostro orologio; 2.6: la sovraincisione non riavvolge; 2.7: battute e tempo solo a loop vuoto davvero; 2.8: niente aggiornamento parziale; 2.9: precarica del display; 2.10: tolta, il display era piu' scuro; 2.11: LED del tempo su D1; 2.12: il LED in un compito suo; 2.13: FS1 fisso mentre registra; 2.14: click del conteggio su D3; 2.15: piezo da 35 mm a 2,8 kHz; 2.16: di nuovo i due toni; 2.17: le scritte anche in inglese; 2.18: il loop registrato tiene il suo tempo; 2.19: «libero» fino a 60 s; 2.20: cerchio in «libero» e click per tutta la registrazione; 2.21: niente doppio click sull'«uno»; 2.22: l'impronta dei banchi, per «Aggiorna» nell'app; 2.23: il ponte si chiude quando l'app si stacca; 2.24: il tuner, tasto banco al rilascio; 2.25: diagnosi del tuner sul seriale; 2.26: la scatola nera; 2.27: la scatola salvata quando l'ampli si inceppa; 2.28: menu delle modalita' su FS4 tenuto, Play Acoustic, si parte sempre in Spark; 2.29: Play Acoustic a icone e menu una modalita' alla volta (bozze B); 2.30: il pedale d'espressione finto dal seriale (J wah, X MIDI); 2.31: la lettura del pedale d'espressione vero (I, prova dei fili); 2.32: il registro della batteria (U); 2.33: il pedale d.espressione manda il CC 11 in MIDI, tolte le prove del wah; 2.34: in Spark il pedale d.espressione muove il Master dell'ampli modellato; 2.35: in MIDI il nome nel primo messaggio, per Windows; 2.36: bonding, per accoppiarsi con Windows; 2.37: la modalita' Pulze (Hotone Pulze Mini); 2.38: all'accensione il menu, in fila Spark, Pulze, Play Acoustic, MIDI
 
 /* La lingua delle scritte del display (9 ottobre 2026, chiesta dall'utente per chi
  * costruisce il pedale fuori dall'Italia): 0 italiano, 1 inglese. Si sceglie qui,
@@ -282,8 +282,8 @@ static uint32_t avvisoFino = 0;
  *    combinazioni»). In Play Acoustic FS4 e' vuoto, quindi tenerlo non manda
  *    niente; altrove FS4 fa prima il suo lavoro, come faceva con FS1+FS4.
  *    Nel looper dello Spark FS4 tenuto resta «cancella», e il menu non si apre;
- *  - **all'accensione si parte sempre in Spark**: la modalita' non si ricorda
- *    piu' (fino al 23 ottobre stava in /modo.txt);
+ *  - **all'accensione si apre il menu** (dal 5 novembre 2026; dal 23 ottobre si
+ *    partiva sempre in Spark, e fino ad allora la modalita' stava in /modo.txt);
  *  - in MIDI ci sono due pagine, e **il quinto footswitch passa dall'una
  *    all'altra**: *preset* (otto Program Change: 1-4 col tasto banco sinistro,
  *    5-8 col destro) e *stomp* (quattro Control Change acceso/spento).
@@ -339,8 +339,21 @@ static uint8_t playPremuti = 0;                // un bit per tasto: mandato 127,
 static const uint32_t MENU_TENUTO_MS = 2000;
 static const uint32_t MENU_MS = 10000;
 static bool     menuAperto = false;
-static uint8_t  menuScelta = MODO_SPARK;
+static uint8_t  menuScelta = 0;                // il posto in ORDINE_MENU, non il numero della modalita'
 static uint32_t menuFino   = 0;
+/* L'ordine del menu (chiesto dall'utente il 5 novembre 2026): Spark, Pulze, Play
+ * Acoustic, MIDI. I numeri delle modalita' restano quelli (il registro della
+ * batteria e «#modo n» li usano). */
+static const uint8_t ORDINE_MENU[N_MODI] = { MODO_SPARK, MODO_PULZE, MODO_PLAY, MODO_MIDI };
+static uint8_t postoNelMenu(uint8_t m) {
+  for (uint8_t i = 0; i < N_MODI; i++) if (ORDINE_MENU[i] == m) return i;
+  return 0;
+}
+/* **All'accensione si apre il menu** (5 novembre 2026, regola dell'utente: «le
+ * modalita' cominciano a essere tante»; prima si partiva sempre in Spark). Finche'
+ * non si sceglie con FS5 non parte niente: lo Spark non si cerca, il menu non
+ * scade, e FS1-FS4 non lo chiudono. */
+static bool     menuAvvio  = false;
 
 /* --- Il looper dello Spark 2 -------------------------------------------------
  *

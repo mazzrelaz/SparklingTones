@@ -198,8 +198,10 @@ static bool rigaSeriale(char c) {
   if (sscanf(rigaComando, "cc %d", &cc) == 1 && cc >= 0 && cc <= 127)
     mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), ESPR_CC, cc);
   // «#modo n»: la modalita' dal PC, per le prove (0 Spark, 1 MIDI, 2 Play, 3 Pulze).
-  else if (sscanf(rigaComando, "modo %d", &cc) == 1 && cc >= 0 && cc < N_MODI)
+  else if (sscanf(rigaComando, "modo %d", &cc) == 1 && cc >= 0 && cc < N_MODI) {
+    if (menuAperto) { menuAvvio = false; chiudiMenu(); }   // anche quello dell'accensione
     cambiaModo((uint8_t)cc);
+  }
   else Serial.printf("riga non capita: \"%s\"\n", rigaComando);
   return true;
 }

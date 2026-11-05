@@ -78,7 +78,7 @@ static void apriMenu() {
   if (modo == MODO_PLAY) playLasciaTutti();
   if (modo == MODO_PULZE) pulzeMenu();     // quello che FS4 ha fatto premendo si disfa
   menuAperto = true;
-  menuScelta = modo;
+  menuScelta = postoNelMenu(modo);
   menuFino = millis() + MENU_MS;
   bancoInAttesa = -1;
   Serial.println(F("menu delle modalita'"));
@@ -96,10 +96,23 @@ static void chiudiMenu() {
 /** Un tasto col menu aperto: i tasti banco scorrono (sinistro su, destro giu'),
  *  FS5 conferma, FS1-FS4 escono senza cambiare. Non fa nient'altro. */
 static void menuPremuto(uint8_t k) {
-  menuFino = millis() + MENU_MS;
+  if (!menuAvvio) menuFino = millis() + MENU_MS;
   if (k == BANCO_SX)      menuScelta = (uint8_t)((menuScelta + N_MODI - 1) % N_MODI);
   else if (k == BANCO_DX) menuScelta = (uint8_t)((menuScelta + 1) % N_MODI);
-  else if (k == FS5)      { chiudiMenu(); cambiaModo(menuScelta); return; }
+  else if (k == FS5) {
+    const uint8_t m = ORDINE_MENU[menuScelta];
+    const bool avvio = menuAvvio;
+    menuAvvio = false;
+    chiudiMenu();
+    if (!avvio || m != MODO_SPARK) { cambiaModo(m); return; }
+    // All'accensione in Spark: si parte da qui, coi tre secondi per scegliere l'ampli.
+    sceltaFino = millis() + SCELTA_MS;
+    momentoSgancio = millis();
+    ultimoTentativo = 0;
+    Serial.println(F("modalita' Spark"));
+    return;
+  }
+  else if (menuAvvio)     return;          // all'accensione si esce solo scegliendo
   else                    { chiudiMenu(); return; }
   schermoSporco = true;
 }

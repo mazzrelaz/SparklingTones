@@ -108,9 +108,17 @@ void setup() {
       break;
     }
   }
-  modo = MODO_SPARK;                     // sempre: regola dell'utente, 23 ottobre 2026
+  /* All'accensione il menu delle modalita' (5 novembre 2026, regola dell'utente;
+   * dal 23 ottobre si partiva sempre in Spark): si apre dopo il logo, parte dalla
+   * prima voce e resta aperto finche' FS5 non sceglie. Intanto lo Spark non si
+   * cerca (menuAvvio); scegliendo Spark partono i tre secondi per l'ampli. */
+  modo = MODO_SPARK;
   ampliScelto = ampliRicordato();
-  sceltaFino = millis() + AVVIO_MS + SCELTA_MS;   // dopo il logo, tre secondi per cambiare ampli
+  sceltaFino = 0;
+  menuAvvio = true;
+  menuAperto = true;
+  menuScelta = 0;
+  menuFino = 0;
   Serial.printf("ampli: %s\n", ampliScelto == AMPLI_NEO ? "Spark NEO" : "Spark 2");
   Serial.printf("modalita' %s\n", nomeModo(modo));
   aggiornaLed();   // spenti: finche' non si preme un tasto non suona niente di nostro
@@ -123,7 +131,7 @@ void setup() {
   BLESecurity::setAuthenticationMode(true, false, true);
   avviaPonte();          // prima il server: cosi' l'app lo trova sempre
   annuncia();            // in modalita' MIDI l'iPad deve trovarci subito
-  avviaScansione();
+  // La scansione dello Spark parte dal loop, dopo la scelta nel menu.
 }
 
 void loop() {
@@ -177,7 +185,7 @@ void loop() {
   // rimettersi ad annunciarsi, quindi il primo tentativo va spesso a vuoto:
   // per mezzo minuto si riprova fitto, poi si rallenta per non stare a
   // scansionare in eterno.
-  if (modo == MODO_SPARK && !chScrittura && !sganciato && !scansioneInCorso && !trovato) {
+  if (modo == MODO_SPARK && !menuAvvio && !chScrittura && !sganciato && !scansioneInCorso && !trovato) {
     const uint32_t attesa = (millis() - momentoSgancio < 30000) ? 2000 : 5000;
     if (millis() - ultimoTentativo > attesa) {
       ultimoTentativo = millis();
@@ -187,7 +195,7 @@ void loop() {
   // L'ampli si e' fatto vedere: ci si attacca **qui**, fuori dal callback
   // della scansione, che e' la regola di sempre per le operazioni BLE.
   // In Pulze il Mini lo aggancia sbrigaPulze(), qui sotto.
-  if (modo != MODO_PULZE && trovato && !scansioneInCorso && !chScrittura && !sganciato && !inScelta()) {
+  if (modo != MODO_PULZE && !menuAvvio && trovato && !scansioneInCorso && !chScrittura && !sganciato && !inScelta()) {
     if (modo == MODO_SPARK && agganciaAmpli()) daLeggere = true;
     else { delete trovato; trovato = nullptr; }   // in MIDI lo Spark resta libero
   }
@@ -246,7 +254,7 @@ void loop() {
     }
   }
   // Il menu senza tocchi si chiude da solo, e non cambia niente.
-  if (menuAperto && (int32_t)(millis() - menuFino) >= 0) {
+  if (menuAperto && !menuAvvio && (int32_t)(millis() - menuFino) >= 0) {
     Serial.println(F("menu chiuso senza cambiare"));
     chiudiMenu();
   }

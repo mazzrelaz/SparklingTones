@@ -640,7 +640,14 @@ d'espressione = Pitch o Inst Volume; si torna al tone di prima (`/pulze.txt`). I
 annuncia** e il ponte resta chiuso. `Z` dal seriale stampa lo stato, `#modo n` cambia modalità dal PC.
 Provata dall'utente col Mini il 5 novembre: tone, Songlist, gruppi, stomp, accordatore, Inst Volume e ritorno
 al tone di prima vanno; mancano il Pitch e lo stomp sentito suonando. FS4 tenuto in Pulze rimette il tone
-di prima aprendo il menu (scelta dell'utente).
+di prima aprendo il menu (scelta dell'utente). Il Pitch col pedale d'espressione l'utente l'ha tolto lo
+stesso giorno: in Pulze il pedale fa solo Inst Volume.
+
+**2.38 (5 novembre, sera), chiesta dall'utente («le modalità cominciano a essere tante»)**: **all'accensione,
+dopo il logo, si apre il menu** e resta aperto finché FS5 non sceglie (non scade, FS1–FS4 non lo chiudono, lo
+Spark non si cerca); scegliendo Spark partono i tre secondi per l'ampli. Le voci sono in fila **Spark, Pulze,
+Play Acoustic, MIDI** (`ORDINE_MENU`; i numeri delle modalità restano quelli). Caricata; l'utente è entrato in
+Pulze dal menu dell'accensione.
 
 **Trappola del seriale (5 novembre)**: con USB-OTG il core riconosce la sequenza DTR/RTS di esptool, e
 aprire la porta col DTR alto e RTS basso e poi chiuderla **manda il pedale in download mode** (COM13, schermo
