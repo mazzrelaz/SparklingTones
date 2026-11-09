@@ -329,16 +329,18 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   `17-editor-classico.js`; **il classico non scorre mai** (`adattaClassico`). Immagini, guscio e il resto:
   `docs/diario.md`, estratto del 9 novembre (gli editor).
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
-- **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano; approvata e
-  **ordinata il 29 ottobre** (JLCPCB, verde, HASL con piombo); il 29 ottobre aggiunta la presa ESPRESSIONE (J11: G, 3V3, D2, D8 come la presa H,
-  R e C sulla presa del pedale). Linee nuove e cosa fare a scheda arrivata:
-  `docs/pedale-lavoro.md`, «La basetta stampata».
+- **Basetta** `pcb/basetta/`: generata **solo** da `tools/genera-basetta.py`, mai a mano; **ordinata il 29
+  ottobre**. A scheda arrivata: `docs/pedale-lavoro.md`, «La basetta stampata»; il punto intero nel diario (9 novembre).
 - **La versione per il PC** (9 novembre, `pc.html` + `src/pc/`, **non pubblicata**, si pubblica solo su suo comando):
   pagina a parte, l'app del telefono non si tocca; tutto quello che fa l'app nella veste del Pulze editor, immagini
   nuove in `immagini/pc/` (`IMMAGINI_PC`), **niente scritte guida** (le odia), banchi spostabili come le Songlist.
   L'utente la prova **in locale** (`localhost:8099/pc.html`, Edge): la prima prova ha dato ‹ › fermi, nome fuori
   centro e lentezza, corretti; **il resto con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria di localhost: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
+- **9 novembre, pubblicato** (v145–v146, solo la parte del telefono: il lavoro del PC resta fuori, e ogni volta
+  si pubblica da un worktree su `origin/main` con i soli file del telefono): «Cambia» al posto di «Elimina» sui
+  preset dell'ampli (uno slot non si svuota, si riscrive) e «Ripristina da Dropbox». **Non pubblicato**: il sync
+  automatico e il backup di sicurezza, sul telefono e sul PC. **Al prossimo «pubblica» il guscio va oltre v146.**
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
