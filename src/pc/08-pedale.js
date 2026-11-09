@@ -74,8 +74,6 @@ function apriPedale(bancoId) {
           <h3>${tr('Pedale SparklingTones')}</h3>
           <div class="pd-stato"><span class="lampada" data-f="lampada"></span><span data-f="stato"></span><span class="spazio"></span>
             <button class="primario" data-f="cerca">${tr('Cerca')}</button><button data-f="stacca" hidden>${tr('Stacca')}</button></div>
-          <p data-f="suggerimento">${tr('Prima apri il ponte sul pedale: tieni premuti insieme i due tasti banco per un secondo e mezzo.')}</p>
-          <p>${tr('Il ponte resta aperto due minuti, e il display lo dice. Mentre sei collegato al pedale, <em>il pedale ha mollato l\'ampli</em> e non suona: è così per scelta, un padrone alla volta. Appena stacchi se lo riprende da solo. I banchi restano nel pedale anche a corrente staccata.')}</p>
           <p data-f="da-aggiornare" hidden></p>
         </div>
         <div class="pd-carta" style="margin-top:16px">
@@ -98,7 +96,6 @@ function apriPedale(bancoId) {
         <div data-f="slots"></div>
         <div class="riga-azioni" data-f="modifiche" hidden style="margin-top:10px"><span style="flex:1;color:var(--ambra)">${tr('Ci sono spostamenti non ancora applicati al pedale.')}</span>
           <button data-f="annulla">${tr('Annulla')}</button><button class="primario" data-f="applica">${tr('Aggiorna il pedale')}</button></div>
-        <p style="margin-top:10px">${tr('▶ fa suonare subito quel banco. Spostare e togliere, dal ⋯ di ogni banco, cambiano il pedale solo quando premi «Aggiorna il pedale».')}</p>
       </div>
     </div>`;
   document.body.appendChild(schermoPedale);
@@ -159,7 +156,6 @@ function disegnaPedale() {
   q('stato').textContent = su ? tr('collegato: {0}', pedale.device.name || tr('pedale')) : (pedale.cercando ? tr('ricerca…') : tr('non collegato'));
   q('cerca').hidden = su;
   q('stacca').hidden = !su;
-  q('suggerimento').hidden = su;
   q('registro').textContent = pedale.righe.join('\n');
 
   const da = banchiPedaleDaAggiornare();
@@ -172,8 +168,7 @@ function disegnaPedale() {
   const quanti = banco ? postiDiBanco(banco).filter(Boolean).length : 0;
   q('banco').textContent = banco ? tr('{0} — {1} preset', banco.nome, quanti) : tr('nessun banco');
   q('slot').textContent = tr('slot {0}', pedale.slotScelto + 1);
-  q('nota-banco').textContent = !banchi.length ? tr('Non hai ancora banchi: creane uno in «Banchi» e riempilo.')
-    : !quanti ? tr('Questo banco è vuoto: mettici dentro dei preset prima di mandarlo.') : '';
+  q('nota-banco').textContent = '';
   q('manda').disabled = !(su && banco && quanti);
 
   const cont = q('slots');

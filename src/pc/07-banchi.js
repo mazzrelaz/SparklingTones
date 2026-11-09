@@ -16,7 +16,6 @@ function apriBanchi() {
   schermoBanchi.innerHTML = `
     <div class="sch-cima">
       <h2>${tr('Banchi')}</h2>
-      <span class="nota">${tr('Trascina un preset su un posto · trascina un posto su un altro per scambiarli · clic = suona. I banchi non scrivono mai sull\'ampli.')}</span>
       <span class="spazio"></span>
       <button data-f="nuovo" class="primario">${tr('Nuovo banco')}</button>
       <button data-f="chiudi" title="${tr('Chiudi')}">✕</button>
@@ -68,7 +67,6 @@ function disegnaBanchi() {
   const candidati = ordinaLibreria(tutti.filter(r => visibileSenzaHendrix(r) && (!termine || (r.name || '').toLowerCase().includes(termine))));
   for (const r of candidati) {
     const li = document.createElement('li');
-    li.title = tr('trascinalo su un posto; doppio clic = suona');
     const fam = famigliaDi(r);
     if (fam) {
       const p = document.createElement('span');
@@ -134,7 +132,7 @@ function bloccoBanco(banco) {
     n.textContent = banco ? posto + 1 : nomeSlot(posto);
     const nome = document.createElement('span');
     nome.className = 'nome';
-    nome.textContent = record ? record.name : banco ? tr('vuoto — trascina qui un preset') : tr('non ancora letto');
+    nome.textContent = record ? record.name : banco ? tr('vuoto') : tr('non ancora letto');
     li.append(n, nome);
     if (banco) {
       li.dataset.banco = banco.id;
@@ -182,7 +180,6 @@ async function aggiornaBanchi() {
 
 async function nuovoBanco() {
   const r = await finestra({ titolo: tr('nuovo banco'),
-    testo: tr('Otto posti, quattro per piede. I banchi non scrivono mai sull\'ampli.'),
     campo: { valore: tr('Banco {0}', banchi.length + 1) },
     azioni: [{ testo: tr('Annulla'), valore: null }, { testo: tr('Crea il banco'), valore: true, primario: true }] });
   if (!r) return;
@@ -192,7 +189,6 @@ async function nuovoBanco() {
 
 async function rinominaOEliminaBanco(banco) {
   const r = await finestra({ titolo: tr('banco'),
-    testo: tr('Cambiagli nome, oppure eliminalo: <strong>i preset restano in libreria</strong>, sparisce solo l\'ordine in cui li avevi messi.'),
     campo: { valore: banco.nome },
     azioni: [{ testo: tr('Annulla'), valore: null }, { testo: tr('Elimina il banco'), valore: 'via', pericolo: true },
              { testo: tr('Salva il nome'), valore: 'nome', primario: true }] });

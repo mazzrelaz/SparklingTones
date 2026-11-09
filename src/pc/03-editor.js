@@ -26,16 +26,12 @@ function disegnaVuoto() {
       '<b>Chrome</b> o <b>Edge</b> aggiornati.');
     return;
   }
-  testo.innerHTML = spark.connected
-    ? tr('Sto leggendo l\'ampli…')
-    : tr('<b>Collega lo Spark</b> per regolare il preset che sta suonando: le manopole agiscono sul ' +
-      'suono vero. Senza ampli puoi aprire uno degli slot qui sopra e regolare la copia in libreria.');
+  testo.textContent = spark.connected ? tr('Sto leggendo l\'ampli…') : '';
   if (!spark.connected) {
     const b = document.createElement('button');
     b.className = 'primario';
     b.textContent = tr('Collega');
     b.addEventListener('click', collega);
-    testo.appendChild(document.createElement('br'));
     testo.appendChild(b);
   }
 }

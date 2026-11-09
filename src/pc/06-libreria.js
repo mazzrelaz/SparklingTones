@@ -137,11 +137,8 @@ function disegnaLibreria() {
     if (!r && (filtroAttivo() || maiLetto)) continue;
     slotVisti.push(s);
   }
-  if (slotVisti.length || (!filtroAttivo() && maiLetto)) {
+  if (slotVisti.length) {
     titolo(spark.state.name || tr('Sull\'ampli'), spark.connected ? '' : tr('ultima lettura'));
-    if (maiLetto && !filtroAttivo()) {
-      corpo.insertAdjacentHTML('beforeend', `<div class="elenco-vuoto">${tr('Collega l\'ampli: i suoi slot si leggono da soli.')}</div>`);
-    }
     for (const s of slotVisti) corpo.appendChild(rigaPreset(suAmpli[s], s));
   }
 
@@ -153,7 +150,7 @@ function disegnaLibreria() {
   if (!visibili.length) {
     corpo.insertAdjacentHTML('beforeend', `<div class="elenco-vuoto">${altri.length
       ? tr('Nessun preset corrisponde alla ricerca.')
-      : tr('Nessun preset oltre a quelli sull\'ampli. Importa un backup dal menu ☰ → «Backup e Dropbox».')}</div>`);
+      : tr('Nessun preset.')}</div>`);
   }
   $('elenco-cerca').placeholder = tr('cerca fra {0} preset', altri.length + slotVisti.length);
   $('elenco-ordine').title = tr('ordine: {0}', (ORDINI.find(o => o.valore === vista.ordine) || ORDINI[0]).testo);
@@ -223,8 +220,6 @@ async function mettiInSlot(record) {
     }
     finestra({
       titolo: tr('dove scriverlo sull\'ampli'),
-      testo: tr('Scegli lo slot per <strong>{0}</strong>. Quello che c\'è adesso non si perde: la sua copia resta in libreria.',
-                testoConNome(record.name)),
       corpo,
       azioni: [{ testo: tr('Annulla'), valore: null }, { testo: tr('Scrivi'), valore: true, primario: true }],
     }).then(risolvi);
@@ -260,7 +255,7 @@ async function mettiNelBanco(record, vicino) {
 
 async function rinomina(record) {
   const r = await finestra({
-    titolo: tr('rinomina'), testo: tr('Il nuovo nome del preset. Sull\'ampli il nome resta quello vecchio finché non lo riscrivi in uno slot.'),
+    titolo: tr('rinomina'),
     campo: { valore: record.name || '' },
     azioni: [{ testo: tr('Annulla'), valore: null }, { testo: tr('Rinomina'), valore: true, primario: true }],
   });
@@ -317,7 +312,7 @@ async function scegliCategorie(record) {
     nuova.textContent = tr('＋ nuova…');
     nuova.addEventListener('click', async () => {
       const r = await finestra({ titolo: tr('nuova categoria'),
-        testo: tr('Come si chiama? La userai per filtrare la libreria.'), campo: { invito: tr('blues, prove, casa…') },
+        campo: { invito: tr('blues, prove, casa…') },
         azioni: [{ testo: tr('Annulla'), valore: null }, { testo: tr('Crea e assegna'), valore: true, primario: true }] });
       const nome = r && r.testo.trim();
       if (nome) { await store.addCategory(nome); await store.addTag(record.id, nome); await ricarica(); disegnaLibreria(); }
@@ -326,8 +321,7 @@ async function scegliCategorie(record) {
     corpo.appendChild(nuova);
   };
   await disegna();
-  await finestra({ titolo: tr('categorie di «{0}»', record.name),
-    testo: tr('Lo stile, o il pezzo: un preset ne può avere quante ne servono.'), corpo });
+  await finestra({ titolo: tr('categorie di «{0}»', record.name), corpo });
 }
 
 async function scriviNote(record) {
@@ -369,10 +363,8 @@ async function apriCategorie() {
   const corpo = document.createElement('div');
   const disegna = () => {
     corpo.innerHTML = `<h3>${tr('Famiglia di suono')}</h3>
-      <p>${tr('Che <em>tipo</em> di suono è: una sola per preset, e si riconosce dal colore. Si assegna dal ⋯ di un preset.')}</p>
       <div data-f="famiglie"></div>
       <h3>${tr('Categorie')}</h3>
-      <p>${tr('Lo <em>stile</em>, o il pezzo. Eliminarne una la toglie dai preset, che restano.')}</p>
       <div class="riga-azioni"><input type="text" data-f="nuova" placeholder="${tr('nuova categoria')}" style="flex:1;margin:0">
         <button class="primario" data-f="aggiungi">${tr('Aggiungi')}</button></div>
       <div data-f="categorie"></div>
@@ -539,9 +531,7 @@ async function apriDoppioni(modo = 'suono') {
     }
     corpo.appendChild(box);
   }
-  await finestra({ titolo: tr('Doppioni'), testo: perSuono
-    ? tr('Preset con le stesse impostazioni, qualunque nome abbiano. Niente si toglie da solo: guarda e scegli.')
-    : tr('Preset con lo stesso nome (maiuscole e spazi non contano). La lettera dice chi suona uguale.'), corpo, larga: true });
+  await finestra({ titolo: tr('Doppioni'), corpo, larga: true });
 }
 
 /* ================================================================ Elimina tutti i preset

@@ -58,10 +58,6 @@ async function apriSalva() {
     for (let n = 0; n < profilo.slot; n++) tasto(nomeSlot(n), n, suAmpli[n] ? suAmpli[n].name : '');
     segna();
     corpo.appendChild(fila);
-    const nota = document.createElement('p');
-    nota.style.marginTop = '10px';
-    nota.textContent = tr('Il preset che stava nello slot non si perde: resta in libreria.');
-    corpo.appendChild(nota);
   }
 
   const azioni = [{ testo: tr('Annulla'), valore: null }];
@@ -70,10 +66,6 @@ async function apriSalva() {
 
   const r = await finestra({
     titolo: tr('salvare il preset'),
-    testo: ora.record
-      ? tr('In libreria si aggiorna <strong>{0}</strong>: tag, note e famiglia restano. «Salva come nuovo» ne fa una copia.',
-           testoConNome(ora.record.name))
-      : tr('Il preset va in libreria come preset nuovo.'),
     campo: { valore: ora.nome, invito: tr('nome del preset') },
     corpo,
     azioni,
@@ -281,7 +273,6 @@ async function apriBackup() {
     const inSospeso = !collegato && await store.getSetting('dropboxVerifier', null);
     corpo.innerHTML = `
       <h3>${tr('Sul PC')}</h3>
-      <p>${tr('Un file JSON con tutta la libreria: preset, tag, note, categorie e banchi.')}</p>
       <div class="riga-azioni"><button class="primario" data-f="scarica">${tr('Scarica il backup')}</button>
         <button data-f="ripristina">${tr('Ripristina da un file…')}</button></div>
       <h3>Dropbox</h3>
@@ -289,16 +280,14 @@ async function apriBackup() {
         <div class="stato-db"><span class="lampada on"></span><span data-f="quando">${tr('Collegato.')}</span></div>
         <div class="riga-azioni"><button class="primario" data-f="su">${tr('Manda su')}</button>
           <button data-f="giu">${tr('Prendi da Dropbox')}</button><button data-f="via">${tr('Scollega')}</button></div>` : `
-        <p>${tr('L\'app key della tua app Dropbox (come spiegato nella guida dell\'app):')}</p>
-        <input type="text" data-f="chiave" autocomplete="off">
+        <input type="text" data-f="chiave" autocomplete="off" placeholder="app key">
         <div class="riga-azioni"><button class="primario" data-f="collega">${tr('Collega Dropbox')}</button></div>
         <div data-f="passo2" ${inSospeso ? '' : 'hidden'}>
-          <p style="margin-top:12px">${tr('Autorizza su Dropbox (<a data-f="link" target="_blank" rel="noopener">apri la pagina</a>), poi incolla qui il codice:')}</p>
-          <input type="text" data-f="codice" autocomplete="off">
+          <p style="margin-top:12px"><a data-f="link" target="_blank" rel="noopener">${tr('Apri Dropbox')}</a></p>
+          <input type="text" data-f="codice" autocomplete="off" placeholder="${tr('codice')}">
           <div class="riga-azioni"><button class="primario" data-f="fine">${tr('Fatto')}</button></div>
         </div>`}
       </div>
-      <p style="margin-top:12px">${tr('La libreria è la stessa dell\'app aperta su questo PC allo stesso indirizzo.')}</p>
       <div class="stato-finestra" data-f="stato"></div>`;
     const q = f => corpo.querySelector(`[data-f="${f}"]`);
     // Il valore si mette da qui e non nell'HTML: un testo dentro un attributo potrebbe uscirne.
@@ -363,8 +352,7 @@ async function apriBackup() {
         if (!verifier) { verifier = DropboxSync.nuovoVerifier(); await store.setSetting('dropboxVerifier', verifier); }
         await mettiLink(verifier);
         const aperta = window.open(q('link').href, '_blank', 'noopener');
-        dire(aperta ? tr('autorizza su Dropbox, poi incolla qui il codice')
-                    : tr('il browser ha bloccato la finestra: apri Dropbox col link qui sopra'));
+        if (!aperta) dire(tr('il browser ha bloccato la finestra: apri Dropbox col link qui sopra'));
       };
       q('fine').onclick = async () => {
         const codice = q('codice').value.trim();

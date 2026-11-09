@@ -121,7 +121,7 @@ function disegnaAccordatore() {
   const intonata = !tace && Math.abs(cent) <= CENT_INTONATA;
   q('piastra').classList.toggle('tace', tace);
   q('piastra').classList.toggle('intonata', intonata);
-  q('avviso').textContent = collegato ? (tace ? tr('suona una corda') : '') : tr('Collega l\'ampli: la nota la calcola lui.');
+  q('avviso').textContent = collegato ? '' : tr('ampli non collegato');
   if (lettura.nota === null) q('nota').textContent = '';
   else {
     const lettera = LETTERE_NOTE[lettura.nota];
