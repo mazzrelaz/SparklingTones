@@ -217,8 +217,67 @@ function menuPreset(record, slot, vicino) {
     voceTendina(t, tr('Note…'), () => scriviNote(record));
     voceTendina(t, tr('Esporta'), () => esportaRecord(record));
     t.insertAdjacentHTML('beforeend', '<hr>');
-    voceTendina(t, tr('Elimina dalla libreria'), () => eliminaRecord(record), { classe: 'pericolo' });
+    // Su un preset dell'ampli «Elimina» non ha senso: uno slot dello Spark non si svuota, si può
+    // solo riscrivere (l'utente, 9 novembre 2026). Al suo posto «Cambia…».
+    if (slot !== null) voceTendina(t, tr('Cambia…'), () => cambiaSlot(record, slot));
+    else voceTendina(t, tr('Elimina dalla libreria'), () => eliminaRecord(record), { classe: 'pericolo' });
   });
+}
+
+/* «Cambia…» su un preset dell'ampli: si sceglie dalla libreria quello da mettere nello slot. Il
+   preset che c'era è già in libreria (ci entra alla lettura degli slot): perde lo slot e scende
+   fra gli altri, come quando si sovrascrive uno slot da «Metti in uno slot…». */
+async function cambiaSlot(vecchio, slot) {
+  if (!spark.connected) {
+    await avvisa(tr('serve l\'ampli'), tr('Per cambiare il preset di uno slot serve l\'amplificatore: premi «Collega» in alto e riprova.'));
+    return;
+  }
+  const corpo = document.createElement('div');
+  corpo.className = 'scegli-preset';
+  const cerca = document.createElement('input');
+  cerca.type = 'search';
+  cerca.placeholder = tr('cerca…');
+  cerca.autocomplete = 'off';
+  const lista = document.createElement('div');
+  lista.className = 'scegli-lista';
+  let scelto = null;
+  const disegna = () => {
+    lista.textContent = '';
+    const termini = cerca.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const candidati = ordinaLibreria(tutti.filter(r => r.id !== vecchio.id && visibileSenzaHendrix(r) &&
+      termini.every(x => (r.name || '').toLowerCase().includes(x))));
+    for (const r of candidati) {
+      const riga = document.createElement('div');
+      riga.className = 'riga-preset';
+      const fam = famigliaDi(r);
+      if (fam) {
+        const p = document.createElement('span');
+        p.className = 'pallino-fam';
+        p.style.setProperty('--famiglia', fam.colore);
+        riga.appendChild(p);
+      }
+      const nome = document.createElement('span');
+      nome.className = 'nome';
+      nome.textContent = r.name || tr('(senza nome)');
+      riga.appendChild(nome);
+      for (const s of slotsDi(r)) riga.appendChild(etichettaAmpli(s));
+      riga.addEventListener('click', () => { scelto = r; chiudiFinestra(true); });
+      lista.appendChild(riga);
+    }
+    if (!candidati.length) lista.innerHTML = `<div class="elenco-vuoto">${tr('Nessun preset.')}</div>`;
+  };
+  cerca.addEventListener('input', disegna);
+  corpo.append(cerca, lista);
+  disegna();
+  setTimeout(() => cerca.focus(), 0);
+  const r = await finestra({ titolo: tr('al posto di «{0}» in {1}', vecchio.name, nomeSlot(slot)), corpo,
+    azioni: [{ testo: tr('Annulla'), valore: null }] });
+  if (r !== true || !scelto) return;
+  if (!await conferma(tr('scrivere sull\'ampli'), tr('Scrivere <strong>{0}</strong> in {1} al posto di <strong>{2}</strong>? ' +
+    '«{2}» resta in libreria e ricompare fra gli altri preset.', testoConNome(scelto.name), nomeSlot(slot), testoConNome(vecchio.name)),
+    { ok: tr('Scrivi {0}', nomeSlot(slot)) })) return;
+  if (!await chiediPrimaDiLasciare()) return;
+  await scriviNelloSlot(scelto, slot);
 }
 
 async function mettiInSlot(record) {
