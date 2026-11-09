@@ -279,7 +279,8 @@ async function apriBackup() {
       <div class="scatola">${collegato ? `
         <div class="stato-db"><span class="lampada on"></span><span data-f="quando">${tr('Collegato.')}</span></div>
         <div class="riga-azioni"><button class="primario" data-f="su">${tr('Manda su')}</button>
-          <button data-f="giu">${tr('Prendi da Dropbox')}</button><button data-f="via">${tr('Scollega')}</button></div>` : `
+          <button data-f="giu">${tr('Prendi da Dropbox')}</button><button data-f="ripristinaDb">${tr('Ripristina da Dropbox')}</button>
+          <button data-f="via">${tr('Scollega')}</button></div>` : `
         <input type="text" data-f="chiave" autocomplete="off" placeholder="app key">
         <div class="riga-azioni"><button class="primario" data-f="collega">${tr('Collega Dropbox')}</button></div>
         <div data-f="passo2" ${inSospeso ? '' : 'hidden'}>
@@ -327,6 +328,21 @@ async function apriBackup() {
           await ricarica();
           disegnaTutto();
           stato(tr('{0} preset presi da Dropbox.', quanti), 'ok');
+        } catch (err) { stato(tr('non sono riuscito a prenderla: {0}', err.message), 'errore'); }
+      };
+      // «Prendi» senza le lapidi, come un file: rientra tutto, anche ciò che è stato cancellato qui
+      // (9 novembre 2026: dopo lo svuotamento del telefono «Prendi» ne dava 6 su 86).
+      q('ripristinaDb').onclick = async () => {
+        chiudiFinestra(null);
+        if (!await conferma(tr('ripristinare da Dropbox'), tr('Rimettere in libreria <strong>tutti i preset che sono su Dropbox</strong>, ' +
+          'anche quelli cancellati su questo apparecchio? Quelli che hai già prendono suono, tag e note di Dropbox. ' +
+          'Qui non viene cancellato niente.'), { ok: tr('Ripristina') })) return;
+        stato(tr('prendo la libreria da Dropbox…'));
+        try {
+          const quanti = await store.importBackup(JSON.parse(await dropbox.scarica()), { lapidi: false });
+          await ricarica();
+          disegnaTutto();
+          stato(tr('{0} preset ripristinati da Dropbox.', quanti), 'ok');
         } catch (err) { stato(tr('non sono riuscito a prenderla: {0}', err.message), 'errore'); }
       };
       q('via').onclick = async () => {
