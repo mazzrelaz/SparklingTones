@@ -619,8 +619,8 @@ async function svuotaLibreria() {
   if (!quanti) { await avvisa(tr('niente da togliere'), tr('In libreria ci sono solo i preset dell\'ampli.')); return; }
   if (!await conferma(tr('svuotare la libreria'), tr('Eliminare <strong>{0} preset</strong> dalla libreria? Restano solo quelli ' +
     'caricati sull\'ampli, e l\'ampli non viene toccato.', quanti), { ok: tr('Elimina {0} preset', quanti), pericolo: true })) return;
-  if (!await conferma(tr('ultima conferma'), tr('<strong>{0} preset, e non si torna indietro.</strong> Se usi Dropbox, al ' +
-    'prossimo «Manda su» spariranno anche dagli altri apparecchi.', quanti), { ok: tr('Sì, elimina'), pericolo: true })) return;
+  if (!await conferma(tr('ultima conferma'), tr('<strong>{0} preset, e non si torna indietro.</strong> Con Dropbox collegato ' +
+    'spariscono anche dagli altri apparecchi.', quanti), { ok: tr('Sì, elimina'), pericolo: true })) return;
   const tolti = await store.svuotaTranneAmpli();
   if (ora && ora.record && !(await store.get(ora.record.id))) ora.record = null;
   await aggiornaTutto();

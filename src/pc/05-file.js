@@ -253,10 +253,12 @@ async function importaJson(file, bytes) {
 }
 
 /* ================================================================ Backup e Dropbox
-   Gli stessi gesti dell'app, con le stesse impostazioni (stessa origine, stessa libreria):
-   scaricare e ripristinare il backup; con Dropbox «Manda su» e «Prendi» (che fonde e può
-   togliere: si chiede). Le lapidi valgono solo per il sync, non per un file. */
+   Come nell'app, con le stesse impostazioni (stessa origine, stessa libreria): scaricare e
+   rimettere un file; con Dropbox la libreria si allinea da sola (`sync-auto.js`, dal 9
+   novembre 2026, al posto di «Manda su» e «Prendi»), più il backup di sicurezza, un file a
+   parte che scrive e rimette solo l'utente. Le lapidi valgono solo per il sync. */
 let dropbox = null;
+let sincro = null;
 
 async function preparaDropbox() {
   dropbox = new DropboxSync.Client({
@@ -264,6 +266,47 @@ async function preparaDropbox() {
     refreshToken: await store.getSetting('dropboxRefresh', null),
     salvaRefresh: valore => store.setSetting('dropboxRefresh', valore),
   });
+  avviaSincro();
+}
+
+function avviaSincro() {
+  if (!dropbox || !dropbox.autorizzato()) return;
+  if (!sincro) {
+    sincro = new SyncAuto.Motore({
+      store, dropbox,
+      chiediCancellazioni: via => conferma(tr('cancellare anche qui'),
+        tr('Sull\'altro apparecchio sono stati cancellati <strong>{0} preset</strong>, fra cui {1}. ' +
+        'Cancellarli anche qui? Se rispondi di no restano, e tornano anche di là.',
+        via.length, testoConNome(via.slice(0, 3).map(r => '«' + r.name + '»').join(', '))),
+        { ok: tr('Cancella {0} preset', via.length), pericolo: true }),
+      quandoArriva: async esito => {
+        await ricarica();
+        disegnaTutto();
+        const pezzi = [];
+        if (esito.arrivati)   pezzi.push(tr('{0} nuovi', esito.arrivati));
+        if (esito.cambiati)   pezzi.push(tr('{0} cambiati', esito.cambiati));
+        if (esito.cancellati) pezzi.push(tr('{0} cancellati', esito.cancellati));
+        if (pezzi.length) stato(tr('dall\'altro apparecchio: {0}', pezzi.join(', ')), 'ok');
+      },
+      quandoStato: st => { if (st.stato === 'errore') stato(testoSincro(st), 'errore'); disegnaSincro(); },
+    });
+  }
+  sincro.avvia();
+}
+
+function testoSincro(st) {
+  if (!st) return '';
+  const ora = st.quando ? new Date(st.quando).toLocaleTimeString(Lingua.attuale, { hour: '2-digit', minute: '2-digit' }) : null;
+  return st.stato === 'in corso'   ? tr('allineo la libreria con Dropbox…')
+       : st.stato === 'ok'         ? tr('Libreria allineata con Dropbox alle {0}.', ora)
+       : st.stato === 'senza rete' ? tr('Senza rete: le modifiche partono quando torna.')
+       : tr('Il sync con Dropbox si è fermato: {0}', st.errore ? st.errore.message : '?');
+}
+
+/** La riga dello stato nella finestra Backup, se è aperta. */
+function disegnaSincro() {
+  const riga = document.querySelector('[data-f="quando"]');
+  if (riga && sincro) riga.textContent = testoSincro(sincro.ultimo);
 }
 
 async function apriBackup() {
@@ -278,8 +321,9 @@ async function apriBackup() {
       <h3>Dropbox</h3>
       <div class="scatola">${collegato ? `
         <div class="stato-db"><span class="lampada on"></span><span data-f="quando">${tr('Collegato.')}</span></div>
-        <div class="riga-azioni"><button class="primario" data-f="su">${tr('Manda su')}</button>
-          <button data-f="giu">${tr('Prendi da Dropbox')}</button><button data-f="ripristinaDb">${tr('Ripristina da Dropbox')}</button>
+        <div class="stato-db" data-f="sicurezza"></div>
+        <div class="riga-azioni"><button class="primario" data-f="sicFai">${tr('Fai un backup di sicurezza')}</button>
+          <button data-f="sicRimetti">${tr('Ripristina il backup di sicurezza')}</button>
           <button data-f="via">${tr('Scollega')}</button></div>` : `
         <input type="text" data-f="chiave" autocomplete="off" placeholder="app key">
         <div class="riga-azioni"><button class="primario" data-f="collega">${tr('Collega Dropbox')}</button></div>
@@ -301,54 +345,58 @@ async function apriBackup() {
     };
     q('ripristina').onclick = () => { chiudiFinestra(null); $('file-importa').click(); };
     if (collegato) {
+      // La finestra non è ancora nella pagina: la riga si scrive da qui, poi la aggiorna disegnaSincro.
+      if (sincro) { q('quando').textContent = testoSincro(sincro.ultimo); sincro.sincronizza(); }
       (async () => {
         try {
-          const info = await dropbox.info();
-          if (q('quando')) q('quando').textContent = info
-            ? tr('Collegato. Lassù: {0}, {1} KB.', new Date(info.quando).toLocaleString(Lingua.attuale), Math.round(info.byte / 1024))
-            : tr('Collegato. Su Dropbox non c\'è ancora niente: il primo invio lo crea.');
+          const info = await dropbox.info(DropboxSync.PERCORSO_SICUREZZA);
+          if (q('sicurezza')) q('sicurezza').textContent = info
+            ? tr('Backup di sicurezza del {0}.', new Date(info.quando).toLocaleString(Lingua.attuale))
+            : tr('Nessun backup di sicurezza.');
         } catch (err) { dire(tr('non riesco a leggere Dropbox: {0}', err.message)); }
       })();
-      q('su').onclick = async () => {
-        dire(tr('mando la libreria su Dropbox…'));
+      // Il backup di sicurezza: un file suo, che il sync non tocca. Prima di sostituirlo si dice
+      // di quando è quello che c'è.
+      q('sicFai').onclick = async () => {
+        chiudiFinestra(null);
         try {
+          const info   = await dropbox.info(DropboxSync.PERCORSO_SICUREZZA);
           const backup = await store.exportAll();
-          await dropbox.carica(JSON.stringify(backup, null, 2));
-          dire(tr('{0} preset mandati su Dropbox.', backup.presets.length));
-        } catch (err) { dire(tr('non sono riuscito a mandarla su: {0}', err.message)); }
+          const n = backup.presets.length;
+          if (!await conferma(tr('backup di sicurezza'), info
+            ? tr('Sostituire il backup di sicurezza del {0} con la libreria di adesso, <strong>{1} preset</strong>?',
+                 new Date(info.quando).toLocaleString(Lingua.attuale), n)
+            : tr('Mettere da parte su Dropbox la libreria di adesso, <strong>{0} preset</strong>?', n),
+            { ok: tr('Fai il backup') })) return;
+          stato(tr('faccio il backup di sicurezza…'));
+          await dropbox.carica(JSON.stringify(backup, null, 2), DropboxSync.PERCORSO_SICUREZZA);
+          stato(tr('backup di sicurezza fatto: {0} preset', n), 'ok');
+        } catch (err) { stato(tr('non sono riuscito a fare il backup: {0}', err.message), 'errore'); }
       };
-      q('giu').onclick = async () => {
+      // Rimetterlo: come un file (senza lapidi), rientra tutto; il sync lo porta anche di là.
+      q('sicRimetti').onclick = async () => {
         chiudiFinestra(null);
-        if (!await conferma(tr('prendere da Dropbox'), tr('Prendere la libreria da Dropbox e fonderla con questa? ' +
-          '<strong>Quello che è stato cancellato sull\'altro apparecchio sparisce anche qui</strong>, se qui non l\'hai toccato dopo.'),
-          { ok: tr('Prendi e fondi') })) return;
-        stato(tr('prendo la libreria da Dropbox…'));
         try {
-          const quanti = await store.importBackup(JSON.parse(await dropbox.scarica()));
+          const info = await dropbox.info(DropboxSync.PERCORSO_SICUREZZA);
+          if (!info) { await avvisa(tr('nessun backup di sicurezza'), tr('Su Dropbox non c\'è ancora un backup di sicurezza.')); return; }
+          const json = JSON.parse(await dropbox.scarica(DropboxSync.PERCORSO_SICUREZZA));
+          const n = (json.presets || []).length;
+          if (!await conferma(tr('ripristinare il backup di sicurezza'),
+            tr('Rimettere in libreria i <strong>{0} preset</strong> del backup di sicurezza del {1}? ' +
+            'Quelli che hai già tornano come erano allora. Non viene cancellato niente.',
+            n, new Date(info.quando).toLocaleString(Lingua.attuale)), { ok: tr('Ripristina') })) return;
+          stato(tr('rimetto il backup di sicurezza…'));
+          const quanti = await store.importBackup(json, { lapidi: false });
           await ricarica();
           disegnaTutto();
-          stato(tr('{0} preset presi da Dropbox.', quanti), 'ok');
-        } catch (err) { stato(tr('non sono riuscito a prenderla: {0}', err.message), 'errore'); }
-      };
-      // «Prendi» senza le lapidi, come un file: rientra tutto, anche ciò che è stato cancellato qui
-      // (9 novembre 2026: dopo lo svuotamento del telefono «Prendi» ne dava 6 su 86).
-      q('ripristinaDb').onclick = async () => {
-        chiudiFinestra(null);
-        if (!await conferma(tr('ripristinare da Dropbox'), tr('Rimettere in libreria <strong>tutti i preset che sono su Dropbox</strong>, ' +
-          'anche quelli cancellati su questo apparecchio? Quelli che hai già prendono suono, tag e note di Dropbox. ' +
-          'Qui non viene cancellato niente.'), { ok: tr('Ripristina') })) return;
-        stato(tr('prendo la libreria da Dropbox…'));
-        try {
-          const quanti = await store.importBackup(JSON.parse(await dropbox.scarica()), { lapidi: false });
-          await ricarica();
-          disegnaTutto();
-          stato(tr('{0} preset ripristinati da Dropbox.', quanti), 'ok');
-        } catch (err) { stato(tr('non sono riuscito a prenderla: {0}', err.message), 'errore'); }
+          stato(tr('{0} preset rimessi dal backup di sicurezza', quanti), 'ok');
+        } catch (err) { stato(tr('non sono riuscito a rimetterlo: {0}', err.message), 'errore'); }
       };
       q('via').onclick = async () => {
         chiudiFinestra(null);
         if (!await conferma(tr('scollegare Dropbox'), tr('Scollegare Dropbox? La libreria qui e quella lassù restano dove sono: ' +
           'smettono solo di parlarsi.'), { ok: tr('Scollega') })) return;
+        if (sincro) { sincro.ferma(); sincro = null; }
         const revocato = await dropbox.scollega();
         stato(revocato ? tr('Dropbox scollegato.') : tr('Dropbox scollegato qui; lassù toglilo da dropbox.com, nelle app collegate.'), 'ok');
       };
@@ -378,6 +426,7 @@ async function apriBackup() {
         try {
           await dropbox.completaAutorizzazione(verifier, codice);
           await store.setSetting('dropboxVerifier', null);
+          avviaSincro();
           await ridisegna();
           dire(tr('Dropbox collegato.'));
         } catch (err) {
