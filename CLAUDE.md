@@ -337,10 +337,10 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   L'utente la prova **in locale** (`localhost:8099/pc.html`, Edge): la prima prova ha dato ‹ › fermi, nome fuori
   centro e lentezza, corretti; **il resto con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria di localhost: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **9 novembre, pubblicato** (v145–v146, solo la parte del telefono: il lavoro del PC resta fuori, e ogni volta
-  si pubblica da un worktree su `origin/main` con i soli file del telefono): «Cambia» al posto di «Elimina» sui
-  preset dell'ampli (uno slot non si svuota, si riscrive) e «Ripristina da Dropbox». **Non pubblicato**: il sync
-  automatico e il backup di sicurezza, sul telefono e sul PC. **Al prossimo «pubblica» il guscio va oltre v146.**
+- **9 novembre, pubblicato** (v145–v147, solo la parte del telefono: il lavoro del PC resta fuori, e ogni volta
+  si pubblica da un worktree su `origin/main` con i soli file del telefono, poi `rebase -X theirs`): «Cambia» al
+  posto di «Elimina» sui preset dell'ampli (uno slot non si svuota, si riscrive) e il **sync automatico** col
+  backup di sicurezza (v147). **Al prossimo «pubblica» il guscio va oltre v147.**
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
