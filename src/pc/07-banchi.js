@@ -119,7 +119,7 @@ function bloccoBanco(banco) {
     testa.appendChild(matita);
     box.dataset.banco = banco.id;
     // Presa per la testa, il banco intero si sposta fra gli altri (come le Songlist del Pulze).
-    trascinabile(testa, { bancoIntero: banco }, box);
+    testa.addEventListener('pointerdown', e => trascinaBanco(e, box));
   } else {
     testa.title = tr('gli slot dell\'ampli: sempre istantanei. Si cambiano scrivendo un preset in uno slot.');
   }
@@ -221,14 +221,86 @@ function trascinabile(el, cosa, sbiadito) {
   });
 }
 
-/** Sposta un banco al posto di un altro: gli altri scivolano. Si riscrive l'elenco salvato, nel nuovo ordine. */
-async function spostaBanco(banco, davanti) {
+/**
+ * Un banco preso per la testa, come i blocchi delle Songlist del Pulze: una sua copia segue il mouse
+ * (appena inclinata), al suo posto resta un riquadro tratteggiato che si sposta nella griglia mentre
+ * gli altri banchi scivolano (FLIP); lasciando, la copia atterra sul riquadro e l'ordine si salva.
+ * Niente `requestAnimationFrame` (nel riquadro del browser non gira): la transizione parte dopo un
+ * ricalcolo forzato della posizione.
+ */
+function trascinaBanco(e, b) {
+  if (e.button !== 0 || !schermoBanchi) return;
+  const griglia = schermoBanchi.querySelector('[data-f="blocchi"]');
+  const x0 = e.clientX, y0 = e.clientY;
+  let copia = null, dx = 0, dy = 0, ultimoScambio = 0;
+  const muovi = ev => {
+    if (!copia) {
+      if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 5) return;
+      const r = b.getBoundingClientRect();
+      dx = x0 - r.left; dy = y0 - r.top;
+      copia = b.cloneNode(true);
+      copia.classList.add('blocco-volante');
+      copia.style.width = r.width + 'px';
+      copia.style.height = r.height + 'px';
+      schermoBanchi.appendChild(copia);
+      b.classList.add('segnaposto');
+      schermoBanchi.classList.add('trascina');
+    }
+    ev.preventDefault();
+    copia.style.transform = `translate(${ev.clientX - dx}px, ${ev.clientY - dy}px) rotate(1.5deg)`;
+    // vicino ai bordi la griglia scorre da sola
+    const rg = griglia.getBoundingClientRect();
+    if (ev.clientY < rg.top + 40) griglia.scrollTop -= 12;
+    else if (ev.clientY > rg.bottom - 40) griglia.scrollTop += 12;
+    // un altro banco sotto il mouse: il riquadro tratteggiato va al suo posto (al più uno scambio ogni
+    // 200 ms, così i banchi che stanno scivolando non rimbalzano)
+    const sotto = document.elementFromPoint(ev.clientX, ev.clientY);
+    const t = sotto && sotto.closest('.bl-blocco[data-banco]');
+    if (!t || t === b || !griglia.contains(t) || performance.now() - ultimoScambio < 200) return;
+    ultimoScambio = performance.now();
+    const figli = [...griglia.children];
+    const prima = new Map(figli.map(x => [x, x.getBoundingClientRect()]));
+    griglia.insertBefore(b, figli.indexOf(b) < figli.indexOf(t) ? t.nextSibling : t);
+    for (const x of figli) {
+      if (x === b) continue;
+      const r0 = prima.get(x), r1 = x.getBoundingClientRect();
+      if (r0.left === r1.left && r0.top === r1.top) continue;
+      x.style.transition = 'none';
+      x.style.transform = `translate(${r0.left - r1.left}px, ${r0.top - r1.top}px)`;
+      x.getBoundingClientRect();                 // fissa la partenza, poi scivola al posto nuovo
+      x.style.transition = 'transform 0.18s ease';
+      x.style.transform = '';
+    }
+  };
+  const fine = () => {
+    document.removeEventListener('pointermove', muovi);
+    document.removeEventListener('pointerup', fine);
+    document.removeEventListener('pointercancel', fine);
+    if (!copia) return;
+    // la copia «atterra» sul riquadro tratteggiato, poi si salva e si ridisegna con l'ordine nuovo
+    const r = b.getBoundingClientRect();
+    copia.style.transition = 'transform 0.15s ease';
+    copia.style.transform = `translate(${r.left}px, ${r.top}px)`;
+    const ordine = [...griglia.querySelectorAll('.bl-blocco[data-banco]')].map(x => x.dataset.banco);
+    setTimeout(async () => {
+      copia.remove();
+      if (schermoBanchi) schermoBanchi.classList.remove('trascina');
+      b.classList.remove('segnaposto');
+      await ordinaBanchi(ordine);
+    }, 150);
+  };
+  document.addEventListener('pointermove', muovi);
+  document.addEventListener('pointerup', fine);
+  document.addEventListener('pointercancel', fine);
+}
+
+/** Salva i banchi nell'ordine dato (id come stanno nella griglia); lo stesso ordine vale nella vista Live. */
+async function ordinaBanchi(ordine) {
   const salvati = await store.getSetting('banchi', []);
-  const da = salvati.findIndex(b => b.id === banco.id), a = salvati.findIndex(b => b.id === davanti.id);
-  if (da < 0 || a < 0 || da === a) return;
-  const [preso] = salvati.splice(da, 1);
-  salvati.splice(a, 0, preso);
-  await store.setBanks(salvati);
+  const nuovi = ordine.map(id => salvati.find(x => String(x.id) === id)).filter(Boolean);
+  for (const x of salvati) if (!nuovi.includes(x)) nuovi.push(x);
+  if (nuovi.every((x, i) => x === salvati[i])) { disegnaBanchi(); return; }
+  await store.setBanks(nuovi);
   await aggiornaBanchi();
 }
 
@@ -238,16 +310,14 @@ addEventListener('pointermove', e => {
     if (Math.hypot(e.clientX - presa.x, e.clientY - presa.y) < 6) return;
     presa.fantasma = document.createElement('div');
     presa.fantasma.className = 'fantasma';
-    presa.fantasma.textContent = presa.cosa.bancoIntero ? presa.cosa.bancoIntero.nome : presa.cosa.record.name;
+    presa.fantasma.textContent = presa.cosa.record.name;
     document.body.appendChild(presa.fantasma);
     presa.el.classList.add('preso');
     if (schermoBanchi) schermoBanchi.classList.add('trascina');
   }
   presa.fantasma.style.transform = `translate(${e.clientX + 12}px, ${e.clientY + 8}px)`;
   const sotto = document.elementFromPoint(e.clientX, e.clientY);
-  // Un banco intero si posa solo su un altro banco; un preset su un posto o su un banco.
-  const meta = sotto && (presa.cosa.bancoIntero ? sotto.closest('.bl-blocco[data-banco]')
-    : sotto.closest('li[data-posto]') || sotto.closest('.bl-blocco[data-banco]'));
+  const meta = sotto && (sotto.closest('li[data-posto]') || sotto.closest('.bl-blocco[data-banco]'));
   if (presa.sopra && presa.sopra !== meta) presa.sopra.classList.remove('sopra');
   presa.sopra = meta || null;
   if (meta) meta.classList.add('sopra');
@@ -267,7 +337,6 @@ addEventListener('pointerup', async () => {
   sopra.classList.remove('sopra');
   const banco = banchi.find(b => String(b.id) === sopra.dataset.banco);
   if (!banco) return;
-  if (cosa.bancoIntero) { await spostaBanco(cosa.bancoIntero, banco); return; }
   let posto = sopra.dataset.posto !== undefined ? Number(sopra.dataset.posto) : banco.posti.indexOf(null);
 
   if (cosa.banco) {

@@ -158,7 +158,11 @@
   /* i banchi si spostano prendendoli per la testa, come le Songlist del Pulze */
   .bl-blocco[data-banco] .bl-testa { cursor:grab; touch-action:none; user-select:none; }
   .bl-blocco.sopra { border-color:var(--accent-chiaro); box-shadow:0 0 0 2px var(--accent), 0 10px 24px rgba(0,0,0,0.4); }
-  .bl-blocco.preso { opacity:0.35; }
+  /* il banco che si sposta: la copia vola col mouse, al suo posto un riquadro tratteggiato (come nel Pulze) */
+  .blocco-volante { position:fixed; left:0; top:0; z-index:50; margin:0; pointer-events:none; opacity:0.96;
+                    box-shadow:0 22px 44px rgba(0,0,0,0.6), 0 0 0 2px var(--accent-chiaro); }
+  .bl-blocco.segnaposto { background:rgba(47,127,232,0.08); border:2px dashed var(--accent-chiaro) !important; box-shadow:none; }
+  .bl-blocco.segnaposto > * { visibility:hidden; }
   .bl-nome { flex:1; min-width:0; font-family:var(--strumento); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .bl-conta { font-family:var(--strumento); font-size:0.72rem; color:var(--dim); background:var(--incavo); border:1px solid var(--line);
               border-radius:999px; padding:1px 8px; font-variant-numeric:tabular-nums; }
