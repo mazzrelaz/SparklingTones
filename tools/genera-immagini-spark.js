@@ -12,65 +12,69 @@ global.window = {};
 eval(fs.readFileSync(path.join(SPARK, 'src/spark-effetti.js'), 'utf8'));
 const E = window.SparkEffetti;
 
-// L'apparecchio vero e da dove viene. Fonti (lette il 9 novembre 2026):
-//  - Spark: help.positivegrid.com, «Amp & Effect List» dello Spark (ampli e pacchetto Hendrix);
-//  - BIAS FX 2: help.positivegrid.com, «Effect List» di BIAS FX 2 Desktop, da cui vengono gli effetti
-//    dello Spark: vale quando il nome è lo stesso;
-//  - nome interno: l'identificativo che lo Spark manda (es. `ProCoRat`), che dice il pedale da sé.
-// Vuoto = nessuna fonte: design originale, finché l'utente non scrive un apparecchio.
+// L'apparecchio vero e da dove viene (9 novembre 2026). **Il riferimento sono le immagini dell'editor
+// classico** (`immagini/classico/`, scelta dell'utente): il pedale che lì è disegnato. Dove il classico
+// non dice niente di diverso valgono le fonti ufficiali di Positive Grid (help.positivegrid.com):
+//  - Spark: la «Amp & Effect List» dello Spark (ampli e pacchetto Hendrix);
+//  - BIAS FX 2: la «Effect List» di BIAS FX 2 Desktop, da cui vengono gli effetti dello Spark (stesso nome);
+//  - nome interno: l'identificativo che lo Spark manda (es. `ProCoRat`).
+// Vuoto = nessun apparecchio vero: design originale (regola dell'utente).
 const VERO = {
-  'bias.noisegate': ['', 'BIAS FX 2: Noise Gate = PG Original'],
-  LA2AComp: ['Teletronix LA-2A', 'BIAS FX 2: Studio Comp'],
-  BlueComp: ['Boss CS-1', 'BIAS FX 2: Blue Comp (le immagini del classico usano il CS-3)'],
-  Compressor: ['MXR Dyna Comp', 'BIAS FX 2: Red Comp'],
-  BassComp: ['', 'nessuna fonte'],
-  BBEOpticalComp: ['BBE Opto Stomp', 'BIAS FX 2: Opto Comp'],
-  'JH.Vox846': ['Vox V846 wah-wah pedal', 'Spark: J.H. Legendary Wah'],
-  AutoWah: ['Boss AW-2 Auto Wah', 'BIAS FX 2: Auto Wah'],
-  Booster: ['Xotic RC Boost', 'BIAS FX 2: Booster (il classico usa l\'MXR Micro Amp)'],
-  KlonCentaurSilver: ['Klon Centaur (silver)', 'BIAS FX 2: Clone Drive'],
-  DistortionTS9: ['Ibanez TS9 Tube Screamer', 'nome interno DistortionTS9 (il classico usa il TS-808)'],
-  Overdrive: ['Boss OD-3', 'BIAS FX 2: Vintage Overdrive'],
-  'JH.AxisFuzz': ['Roger Mayer Axis Fuzz', 'Spark: pacchetto Hendrix'],
-  'JH.SupaFuzz': ['Marshall Supa Fuzz', 'Spark: pacchetto Hendrix'],
-  'JH.Octavia': ['Roger Mayer Octavia', 'Spark: pacchetto Hendrix'],
-  'JH.FuzzTone': ['Maestro FZ-1 Fuzz-Tone', 'Spark: pacchetto Hendrix'],
-  Fuzz: ['Dunlop Germanium Fuzz Face', 'BIAS FX 2: VintageFuzz'],
-  ProCoRat: ['ProCo RAT', 'nome interno ProCoRat'],
-  BassBigMuff: ['Electro-Harmonix Bass Big Muff Pi', 'nome interno BassBigMuff'],
-  GuitarMuff: ['Electro-Harmonix Big Muff Pi', 'BIAS FX 2: Guitar Muff (il classico usa il Little Big Muff)'],
-  MaestroBassmaster: ['Maestro Bass Brassmaster', 'nome interno MaestroBassmaster'],
-  SABdriver: ['Fulltone OCD', 'BIAS FX 2: SAB Driver'],
-  Tremolo: ['Dunlop TS-1 Stereo Tremolo', 'BIAS FX 2: Tremolo'],
-  ChorusAnalog: ['MXR M134 Stereo Chorus', 'BIAS FX 2: Chorus'],
-  Flanger: ['Electro-Harmonix Electric Mistress', 'BIAS FX 2: Flanger'],
-  Phaser: ['', 'nessuna fonte (in BIAS FX 2: Orange Phaser = MXR Phase 90, Phaser Pro = Boss PH-2)'],
-  Vibrato01: ['BBE Mind Bender', 'BIAS FX 2: Vibrato'],
-  UniVibe: ['Univox Uni-Vibe', 'BIAS FX 2: Uni-Vibe'],
-  'JH.VoodooVibeJr': ['Roger Mayer Voodoo-Vibe Jr', 'Spark: pacchetto Hendrix'],
-  Cloner: ['Electro-Harmonix Small Clone', 'BIAS FX 2: Cloner'],
-  MiniVibe: ['Voodoo Lab Analog Chorus', 'BIAS FX 2: Classic Vibe'],
-  Tremolator: ['Demeter TRM-1 Tremulator', 'BIAS FX 2: Tremulator'],
-  TremoloSquare: ['', 'nessuna fonte'],
-  GuitarEQ6: ['MXR M109S Six Band EQ', 'BIAS FX 2: EQ6 (nel classico il Guitar EQ è blu)'],
-  BassEQ6: ['', 'nessuna fonte (nel classico il Bass EQ è nero)'],
-  DelayMono: ['Boss DD-3', 'BIAS FX 2: Delay'],
-  DelayEchoFilt: ['', 'nessuna fonte'],
-  VintageDelay: ['', 'nessuna fonte'],
-  DelayReverse: ['Electro-Harmonix Stereo Memory Man', 'BIAS FX 2: Reverse Delay'],
-  DelayMultiHead: ['', 'nessuna fonte'],
-  DelayRe201: ['Roland RE-201 Space Echo', 'nome interno DelayRe201'],
+  'bias.noisegate': ['', 'originale (BIAS FX 2: PG Original)'],
+  LA2AComp: ['Teletronix LA-2A', "classico: l'LA-2A fatto pedale (BIAS FX 2: Studio Comp)"],
+  BlueComp: ['Boss CS-3 Compression Sustainer', 'classico (BIAS FX 2 dice Boss CS-1)'],
+  Compressor: ['MXR Dyna Comp', 'classico e BIAS FX 2: Red Comp'],
+  BassComp: ['', 'nessuna fonte: originale'],
+  BBEOpticalComp: ['BBE Opto Stomp', 'classico e BIAS FX 2: Opto Comp'],
+  'JH.Vox846': ['Vox V846 wah-wah pedal', 'classico e Spark: J.H. Legendary Wah'],
+  AutoWah: ['', 'classico: un wah rosso che non è un modello vero, quindi originale'],
+  Booster: ['MXR Micro Amp', 'classico (BIAS FX 2 dice Xotic RC Boost)'],
+  KlonCentaurSilver: ['Klon Centaur (gold)', 'classico e BIAS FX 2: Clone Drive'],
+  DistortionTS9: ['Ibanez TS-808 Tube Screamer', 'classico'],
+  Overdrive: ['Boss OD-3', 'classico e BIAS FX 2: Vintage Overdrive'],
+  'JH.AxisFuzz': ['Roger Mayer Axis Fuzz', 'classico e Spark: pacchetto Hendrix'],
+  'JH.SupaFuzz': ['Marshall Supa Fuzz', 'classico e Spark: pacchetto Hendrix'],
+  'JH.Octavia': ['Roger Mayer Octavia', 'classico e Spark: pacchetto Hendrix'],
+  'JH.FuzzTone': ['Maestro FZ-1 Fuzz-Tone', 'classico e Spark: pacchetto Hendrix'],
+  Fuzz: ['Dallas Arbiter Fuzz Face (red)', 'classico (BIAS FX 2 dice Dunlop Germanium Fuzz Face)'],
+  ProCoRat: ['ProCo RAT', 'classico e nome interno ProCoRat'],
+  BassBigMuff: ['Electro-Harmonix Bass Big Muff Pi', 'classico e nome interno BassBigMuff'],
+  GuitarMuff: ['Electro-Harmonix Little Big Muff Pi', 'classico (BIAS FX 2 dice Big Muff Pi)'],
+  MaestroBassmaster: ['Maestro Bass Brassmaster', 'classico e nome interno MaestroBassmaster'],
+  SABdriver: ['Fulltone Plexi-Drive', 'classico (BIAS FX 2 dice Fulltone OCD)'],
+  Tremolo: ['Mad Professor Mellow Yellow Tremolo', 'classico (BIAS FX 2 dice Dunlop TS-1)'],
+  ChorusAnalog: ['Boss CH-1 Super Chorus', 'classico (BIAS FX 2 dice MXR M134)'],
+  Flanger: ['Electro-Harmonix Electric Mistress', 'classico e BIAS FX 2: Flanger'],
+  Phaser: ['', 'nessuna fonte: originale'],
+  Vibrato01: ['BBE Mind Bender', 'classico e BIAS FX 2: Vibrato'],
+  UniVibe: ['Univox Uni-Vibe', 'classico e BIAS FX 2: Uni-Vibe'],
+  'JH.VoodooVibeJr': ['Roger Mayer Voodoo-Vibe Jr', 'classico e Spark: pacchetto Hendrix'],
+  Cloner: ['Electro-Harmonix Small Clone', 'classico e BIAS FX 2: Cloner'],
+  MiniVibe: ['Voodoo Lab Micro Vibe', 'classico (BIAS FX 2 dice Voodoo Lab Analog Chorus)'],
+  Tremolator: ['Demeter TRM-1 Tremulator', 'classico e BIAS FX 2: Tremulator'],
+  TremoloSquare: ['', 'nessuna fonte: originale'],
+  GuitarEQ6: ['MXR M109 Six Band EQ', "classico: l'MXR, ma blu (BIAS FX 2: EQ6)"],
+  BassEQ6: ['', 'nessuna fonte: originale'],
+  DelayMono: ['Boss DD-3', 'classico e BIAS FX 2: Delay'],
+  DelayEchoFilt: ['', 'nessuna fonte: originale'],
+  VintageDelay: ['', 'nessuna fonte: originale'],
+  DelayReverse: ['', 'classico: un disegno originale (BIAS FX 2 dice EHX Stereo Memory Man)'],
+  DelayMultiHead: ['', 'nessuna fonte: originale'],
+  DelayRe201: ['Roland RE-201 Space Echo', 'classico e nome interno DelayRe201'],
 };
-// Gli ampli: la mappa `AMPLI` di spark-effetti.js, che è la lista ufficiale dello Spark.
+// Gli ampli: la mappa `AMPLI` di spark-effetti.js, che è la lista ufficiale dello Spark (e il classico la segue).
 const AMPLI_VERI = { 'JH.Bassman50Silver': 'Fender 1968 Bassman 50', 'JH.DualShowman': 'Fender Dual Showman',
   'JH.Sunn100': 'Sunn 100S', 'JH.SoundCity100': 'Sound City One Hundred', 'JH.JTM45': 'Marshall JTM45/100' };
 
-// Aspetti scritti a mano dove serve (in inglese, come nel Pulze).
+// Aspetti scritti a mano dove serve (in inglese, come nel Pulze): quello che il classico ha di diverso dall'originale.
 const ASPETTO = {
-  GuitarEQ6: 'six vertical EQ sliders plus a level slider, no round knobs',
-  BassEQ6: 'black enclosure, six vertical EQ sliders plus a level slider, no round knobs',
+  GuitarEQ6: 'blue enclosure instead of black; six vertical EQ sliders labelled 100, 200, 400, 800, 1.6K, 3.2K plus a level slider, no round knobs',
+  BassEQ6: 'six vertical EQ sliders plus a level slider, no round knobs',
+  LA2AComp: 'reimagined as a compact stompbox, not a rack unit: grey metal enclosure with corner screws, two black studio knobs with numbered scales, a small red LED',
+  UniVibe: 'the original black Uni-Vibe control console (a wide low box, not a stompbox)',
   'JH.Vox846': 'a classic rocker wah pedal with a treadle, no knobs',
-  AutoWah: 'a compact auto-wah stompbox',
+  AutoWah: 'a vintage rocker wah-wah pedal: red enclosure, black ribbed treadle, a metal name plate on the front, no knobs',
+  DelayReverse: 'blue enclosure with a darker blue zigzag chevron pattern, cream knobs, a small BPM toggle switch, big distressed stencil lettering',
 };
 
 const slug = s => s.toLowerCase().replace(/^j\.h\.\s*/, 'jh-').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -106,7 +110,7 @@ E.MODELLI.forEach((ids, pos) => {
 });
 // L'Auto Wah gratuito: stesso identificativo del Legendary Wah, ma un'altra voce e un'altra immagine.
 DATI.splice(DATI.findIndex(d => d.modelli[0] === 'JH.Vox846') + 1, 0, {
-  nome: 'Auto Wah', tipo: 'pedale', classe: 'Comp e wah', gruppo: 'Comp e wah', base: 'Based on Boss AW-2 Auto Wah',
+  nome: 'Auto Wah', tipo: 'pedale', classe: 'Comp e wah', gruppo: 'Comp e wah', base: 'Positive Grid original design',
   file: 'auto-wah.png', modelli: ['AutoWah'], manopole: ['Sensitivity'], vero: VERO.AutoWah[0], fonte: VERO.AutoWah[1],
   aspetto: ASPETTO.AutoWah });
 // I nove riverberi: nove modelli, originali Positive Grid.
