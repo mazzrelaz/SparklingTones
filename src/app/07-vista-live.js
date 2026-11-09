@@ -290,12 +290,19 @@ async function attiva(record, barra) {
 
 /* ---- scelta del preset per un posto del banco ---------------------- */
 
-let sceltaInCorso = null;   // {bancoId, posto}
+// {bancoId, posto} per un posto del banco; {quando, escludi} per «Cambia» su
+// uno slot dell'ampli (`cambiaSlot`): lì «Svuota il posto» non c'è.
+let sceltaInCorso = null;
 
 function scegliPer(banco, posto) {
-  sceltaInCorso = { bancoId: banco.id, posto };
-  $('titoloScegli').textContent = tr`${banco.nome} — posto ${posto + 1}`;
+  apriScegli(tr`${banco.nome} — posto ${posto + 1}`, { bancoId: banco.id, posto });
+}
+
+function apriScegli(titolo, scelta) {
+  sceltaInCorso = scelta;
+  $('titoloScegli').textContent = titolo;
   $('cercaScegli').value = '';
+  $('btnSvuotaPosto').style.display = scelta.quando ? 'none' : '';
   disegnaElencoScelta();
   apriPannello('pannelloScegli');
 }
@@ -304,7 +311,8 @@ function disegnaElencoScelta() {
   const elenco = $('elencoScegli');
   elenco.innerHTML = '';
   const termine = $('cercaScegli').value.trim().toLowerCase();
-  const candidati = tutti.filter(r => visibileSenzaHendrix(r) &&
+  const escludi = sceltaInCorso && sceltaInCorso.escludi;
+  const candidati = tutti.filter(r => visibileSenzaHendrix(r) && r.id !== escludi &&
     (!termine || (r.name || '').toLowerCase().includes(termine)));
 
   if (candidati.length === 0) {
@@ -327,6 +335,13 @@ function disegnaElencoScelta() {
     }
     voce.addEventListener('click', async () => {
       if (!sceltaInCorso) return;
+      if (sceltaInCorso.quando) {
+        const quando = sceltaInCorso.quando;
+        sceltaInCorso = null;
+        chiudiPannelli();
+        quando(record);
+        return;
+      }
       await store.setBankSlot(sceltaInCorso.bancoId, sceltaInCorso.posto, record.id);
       sceltaInCorso = null;
       chiudiPannelli();

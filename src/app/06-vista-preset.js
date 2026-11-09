@@ -386,6 +386,7 @@ const ICONE_SCHEDA = {
   slot:     '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M6 9l4 4 4-4"/><rect x="3" y="14" width="14" height="3" rx="1"/></svg>',
   banco:    '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><path d="M14 11v6M11 14h6"/></svg>',
   elimina:  '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h12M8 6V4h4v2M6 6l1 11h6l1-11"/></svg>',
+  cambia:   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l-3-3M16 13H4l3 3"/></svg>',
   chiudi:   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>',
   matita:   '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></svg>',
   note:     '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h7l3 3v11H5z"/><path d="M8 10h5M8 13h4"/></svg>',
@@ -417,6 +418,28 @@ function rigaApribile(icona, etichetta, anteprima, aperta, quando) {
 }
 
 /** Un pulsante della scheda: icona e scritta. */
+/**
+ * «Cambia» su un preset dell'ampli: dall'elenco con la ricerca (lo stesso dei
+ * posti dei banchi) si sceglie quello da scrivere nello slot, si conferma, e
+ * `mandaPreset` lo scrive e lo verifica rileggendo. Il vecchio resta in libreria.
+ */
+function cambiaSlot(vecchio, slot) {
+  vista.aperto = null;            // la scheda si chiude: sotto l'elenco non serve
+  disegnaPreset();
+  apriScegli(tr('al posto di «{0}» in {1}', vecchio.name, postoAmpli(slot).label), {
+    escludi: vecchio.id,
+    quando: async scelto => {
+      if (!spark.connected) return logLine(senzaAmpli(tr('cambiare il preset di uno slot')));
+      if (!await conferma(tr('scrivere sull\'ampli'),
+        tr('Scrivere <strong>{0}</strong> in {1} al posto di <strong>{2}</strong>? ' +
+        '«{2}» resta in libreria e ricompare nella lista qui sotto.',
+        testoConNome(scelto.name), nomeSlot(slot), testoConNome(vecchio.name)),
+        { ok: tr('Scrivi {0}', nomeSlot(slot)) })) return;
+      mandaPreset(scelto, slot);
+    },
+  });
+}
+
 function tastoScheda(icona, testo, classe = '') {
   const b = document.createElement('button');
   b.type = 'button';
@@ -639,21 +662,33 @@ function dettaglio(record, slot) {
     piccole.appendChild(metti);
   }
 
-  // Ultima: resta quella che non si torna indietro, e la conferma è lì per quello.
-  const elimina = tastoScheda('elimina', tr('Elimina'), 'pericolo');
-  elimina.addEventListener('click', async () => {
-    if (!await conferma(tr('eliminare dalla libreria'),
-      tr('Eliminare <strong>{0}</strong> dalla libreria? ' +
-      'L\'ampli non viene toccato: se è caricato in uno slot continua a suonare.', testoConNome(record.name)),
-      { ok: tr('Elimina'), pericolo: true })) return;
-    await store.remove(record.id);
-    vista.aperto = null;
-    logLine(tr`«${record.name}» eliminato dalla libreria`);
-    await ricarica();
-    disegnaPreset();
-    disegnaLive();
-  });
-  piccole.appendChild(elimina);
+  // Su un preset dell'ampli «Elimina» non ha senso: uno slot dello Spark non si
+  // svuota, si può solo riscrivere (l'utente, 9 novembre 2026). Al suo posto
+  // «Cambia»: si sceglie il preset da mettere nello slot, e quello che c'era —
+  // già in libreria dalla lettura degli slot — perde lo slot e scende qui sotto.
+  if (slot !== null) {
+    const cambia = tastoScheda('cambia', tr('Cambia'));
+    cambia.title = tr('mette un altro preset in questo slot; questo resta in libreria');
+    cambia.disabled = !spark.connected;
+    cambia.addEventListener('click', () => cambiaSlot(record, slot));
+    piccole.appendChild(cambia);
+  } else {
+    // Ultima: resta quella che non si torna indietro, e la conferma è lì per quello.
+    const elimina = tastoScheda('elimina', tr('Elimina'), 'pericolo');
+    elimina.addEventListener('click', async () => {
+      if (!await conferma(tr('eliminare dalla libreria'),
+        tr('Eliminare <strong>{0}</strong> dalla libreria? ' +
+        'L\'ampli non viene toccato: se è caricato in uno slot continua a suonare.', testoConNome(record.name)),
+        { ok: tr('Elimina'), pericolo: true })) return;
+      await store.remove(record.id);
+      vista.aperto = null;
+      logLine(tr`«${record.name}» eliminato dalla libreria`);
+      await ricarica();
+      disegnaPreset();
+      disegnaLive();
+    });
+    piccole.appendChild(elimina);
+  }
   det.appendChild(piccole);
   if (avvisoAltriSlot) det.appendChild(avvisoAltriSlot);
 
