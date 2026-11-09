@@ -687,6 +687,23 @@ const DB_NAME = 'spark-test-' + Date.now();
   check('rifarlo su una libreria già sfoltita non toglie niente',
         await piena.svuotaTranneAmpli(), 0);
 
+  // Il caso dell'utente (9 novembre 2026): svuota il telefono e riprende da
+  // Dropbox un backup fatto prima. «Prendi» rispetta le lapidi di qui, e i
+  // tolti non tornano; «Ripristina» (lapidi: false) li rimette tutti.
+  const lassu = { format: 'spark-controller-library', version: 2, presets: [
+    Object.assign(makePreset('uuid-l1', 'Solo in libreria', []), { updatedAt: 1 }),
+    Object.assign(makePreset('uuid-l2', 'Pure questo', []), { updatedAt: 1 }),
+    Object.assign(makePreset('uuid-n1', 'Nuovo lassù', []), { updatedAt: 1 }),
+  ] };
+  check('«Prendi» dopo lo svuotamento porta solo quelli mai cancellati qui',
+        await piena.importBackup(lassu), 1);
+  check('«Ripristina» li rimette tutti', await piena.importBackup(lassu, { lapidi: false }), 3);
+  check('e i tolti sono di nuovo in libreria',
+        (await piena.all()).map(r => r.name).sort(),
+        ['Anche questo', 'Nuovo lassù', 'Pure questo', 'Solo in libreria', 'Sull\'ampli']);
+  check('con le loro lapidi sparite: un «Manda su» non li cancella altrove',
+        Object.keys(await piena.getSetting('cancellati', {})), []);
+
   piena.close();
   await PresetStore.deleteDatabase(DB_VUOTA);
 

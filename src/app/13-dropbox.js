@@ -159,6 +159,30 @@ $('btnDropboxGiu').addEventListener('click', async () => {
   }
 });
 
+// «Ripristina» è «Prendi» senza le lapidi, come «Importa un file»: rientra
+// tutto quello che c'è lassù, anche ciò che è stato cancellato qui. Nato il
+// 9 novembre 2026: l'utente ha svuotato la libreria del telefono per
+// riprenderla da Dropbox, e «Prendi» gliene ha dati 6 su 86, perché le
+// lapidi lasciate dallo svuotamento erano più nuove del backup.
+$('btnDropboxRipristina').addEventListener('click', async () => {
+  if (!await conferma(tr('ripristinare da Dropbox'),
+    tr('Rimettere in libreria <strong>tutti i preset che sono su Dropbox</strong>, anche quelli ' +
+    'cancellati su questo apparecchio? Quelli che hai già prendono suono, tag e note di Dropbox. ' +
+    'Qui non viene cancellato niente.'),
+    { ok: tr('Ripristina') })) return;
+  statoDelPannello(tr('prendo la libreria da Dropbox…'));
+  try {
+    const quanti = await store.importBackup(JSON.parse(await dropbox.scarica()), { lapidi: false });
+    logLine(tr`${quanti} preset ripristinati da Dropbox`);
+    await ricarica();
+    disegnaPreset();
+    disegnaLive();
+    await leggiDataDropbox();
+  } catch (err) {
+    statoDelPannello(tr('non sono riuscito a prenderla: {0}', err.message));
+  }
+});
+
 $('btnDropboxVia').addEventListener('click', async () => {
   if (!await conferma(tr('scollegare Dropbox'),
     tr('Scollegare Dropbox? La libreria qui e quella lassù restano dove sono: ' +
