@@ -24,13 +24,14 @@ ripercorrere una strada chiusa**, più il lavoro in corso. Il ragionamento sta i
 
 **I documenti grossi non si leggono interi** (`pedale.md` 173 KB, `decisioni-ui.md` ~90 KB,
 `HANDOFF` 45 KB): `grep -n '^#'` per l'indice, poi solo la sezione. **Si sposta, non si butta**:
-ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 22 ottobre 2026, da 30 a
-23 KB). Si rimisura con `wc -c CLAUDE.md`: sopra i 25 KB si sfoltisce.
+ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 9 novembre 2026, da 26 a
+25 KB). Si rimisura con `wc -c CLAUDE.md`: sopra i 25 KB si sfoltisce.
 
 ## Struttura
 
 ```
 index.html                        HTML e l'unico <style>: Preset e Live nello stesso documento
+pc.html / src/pc/01-…10-*.js       la versione per il PC (9 novembre 2026): editor, libreria, banchi, pedale, tuner
 src/app/01-…16-*.js               lo script dell'app, in fila (16: il tuner)
 guida.html / guida.en.html        guida all'uso (guida.css, guida.js); guida-pedale(.en).html
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
@@ -313,7 +314,11 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 
 ## Dropbox e sito
 
-**Sync Dropbox** funziona (OAuth PKCE senza server, backup versione 2, lapidi): `docs/dropbox.md`.
+**Sync Dropbox automatico** dal 9 novembre 2026 (`src/sync-auto.js`; «Manda su» e «Prendi» tolti, chiesto
+dall'utente): per ogni preset vince la modifica più recente, la data di chi arriva non si tocca, gli slot non
+viaggiano, banchi e categorie vincono interi da chi li ha cambiati per ultimo, oltre 5 cancellazioni si chiede.
+**Backup di sicurezza** manuale e separato (`/spark-sicurezza.json`), che il sync non tocca. OAuth PKCE senza
+server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Col Dropbox vero è da provare.**
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
@@ -321,34 +326,29 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 
 - **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
   neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
-  `17-editor-classico.js`. Classico completo e pubblicato il 22 ottobre (guscio `v138`): un'immagine per
-  modello in `immagini/classico/` (`SFONDI_CLASSICI`; il riverbero per tipo, `'bias.reverb:<tipo>'`). Neon:
-  `immagini/blocchi/` e `src/spark-immagini.js`; come entra un'immagine nuova del neon: `docs/diario.md`,
-  estratto del 22 ottobre (sera). Scelte e scartati: `docs/decisioni-ui.md`, «L'editor classico».
-  Il 26 ottobre (`v141`–`v143`): trimmer dello sfondo accanto a Salva, fascia scura sotto i comandi, «?» tolto
-  dai due editor, e **il classico non scorre mai** (`adattaClassico`).
+  `17-editor-classico.js`; **il classico non scorre mai** (`adattaClassico`). Immagini, guscio e il resto:
+  `docs/diario.md`, estratto del 9 novembre (gli editor).
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
-- **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano; approvata e
-  **ordinata il 29 ottobre** (JLCPCB, verde, HASL con piombo); il 29 ottobre aggiunta la presa ESPRESSIONE (J11: G, 3V3, D2, D8 come la presa H,
-  R e C sulla presa del pedale). Linee nuove e cosa fare a scheda arrivata:
-  `docs/pedale-lavoro.md`, «La basetta stampata».
-- **Il wah al posto del LA Comp** (22 ottobre): non è un difetto; rimedio dato, **da sentire se ha funzionato**.
-  Dettaglio: `docs/diario.md`, estratto del 29 ottobre (sera).
+- **Basetta** `pcb/basetta/`: generata **solo** da `tools/genera-basetta.py`, mai a mano; **ordinata il 29
+  ottobre**. A scheda arrivata: `docs/pedale-lavoro.md`, «La basetta stampata»; il punto intero nel diario (9 novembre).
+- **La versione per il PC** (9 novembre, `pc.html` + `src/pc/`, **non pubblicata**, si pubblica solo su suo comando):
+  pagina a parte, l'app del telefono non si tocca; tutto quello che fa l'app nella veste del Pulze editor, immagini
+  nuove in `immagini/pc/` (`IMMAGINI_PC`), **niente scritte guida** (le odia), banchi spostabili come le Songlist.
+  L'utente la prova **in locale** (`localhost:8099/pc.html`, Edge): la prima prova ha dato ‹ › fermi, nome fuori
+  centro e lentezza, corretti; **il resto con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
+  (riempie la libreria di localhost: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
+- **9 novembre, pubblicato** (v145–v146, solo la parte del telefono: il lavoro del PC resta fuori, e ogni volta
+  si pubblica da un worktree su `origin/main` con i soli file del telefono): «Cambia» al posto di «Elimina» sui
+  preset dell'ampli (uno slot non si svuota, si riscrive) e «Ripristina da Dropbox». **Non pubblicato**: il sync
+  automatico e il backup di sicurezza, sul telefono e sul PC. **Al prossimo «pubblica» il guscio va oltre v146.**
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
   che ricorda il pedale da GarageBand gli si ricollega e occupa il posto dell'adattatore: Bluetooth dell'iPad spento.
-- **Pedale d'espressione** (30 ottobre): M-Audio EX-P sulla presa **H** (G, 3V3, D2, D8; 1 kΩ e 100 nF), jack
-  del pannello montato; tallone 0 mV, punta ~3040, jack su D8. **Solo volume, deciso dall'utente**: Control X
-  finto e wah **scartati e tolti** (tasto di accoppiamento a ogni accensione, come col vero; sul collegamento
-  del Control X l'ampli non risponde; misure in `docs/pedale-lavoro.md`, «30 ottobre»; l'ultimo sketch è nel
-  commit `f27732d`). In MIDI il CC 11 per AmpliTube (2.33): **va col cavo USB e col Bluetooth** (1° novembre, AmpliTube 5 sul
-  PC). Il Bluetooth passa da MIDIberry + loopMIDI (Windows non dà il MIDI Bluetooth ad AmpliTube) e ha voluto
-  la 2.35 (in MIDI il nome nel primo messaggio) e la 2.36 (bonding): **da riprovare iPad/GarageBand e adattatore
-  del Play Acoustic**. Accoppiamento con Windows rimasto a metà: `tools/togli-accoppiamento-pedale.ps1`. **2.34 caricata il 31
-  ottobre**: in Spark il **Master dell'ampli modellato** (0x0104 indice 4; il modello dal quarto effetto di 0x0201
-  `01 00`, riletto al primo movimento dopo ogni cambio di preset; solo quando il pedale si muove): **verificato
-  il 1° novembre** con un banco dell'app e con uno slot dell'ampli (l'utente: «funziona tutto»). **Mai il volume del finale (0x72) in punta**: un botto.
+- **Pedale d'espressione** (30 ottobre–1° novembre): EX-P sulla presa **H**, solo volume (deciso dall'utente;
+  Control X finto e wah scartati), CC 11 in MIDI, Master dell'ampli modellato in Spark (2.34, verificato).
+  **Mai il volume del finale (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore del Play
+  Acoustic. Il punto intero: `docs/diario.md`, estratto del 9 novembre.
 - **Batteria** (2.32): una riga al minuto in memoria (`U`); 130 mA agganciato. Prossimo: carica piena, scarica
   fino allo spegnimento, tacche rimesse; la corrente di carica a cella bassa (`docs/pedale-lavoro.md`, punto 3).
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un

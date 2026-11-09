@@ -25,6 +25,7 @@ viene cancellato alla fine.</p>
 <div id="out"></div>
 
 <script src="../src/preset-store.js"></script>
+<script src="../src/sync-auto.js"></script>
 <script>
 'use strict';
 
@@ -735,6 +736,144 @@ const DB_NAME = 'spark-test-' + Date.now();
   const altroNome = Object.assign(makePreset('uuid-nuovo-davvero', 'Un nome nuovo', ['Twin']), { slot: 7 });
   const esitoNuovo = await store.importFromAmp([altroNome]);
   check('un nome nuovo entra come sempre', [esitoNuovo.added, await store.count()], [1, quantiPrima + 1]);
+
+  /* ------------------------------------------------------------------ */
+  group('sync automatico fra due apparecchi (9 novembre 2026)');
+
+  // Un Dropbox finto in memoria, con le versioni: scriviSe rifiuta se lassù
+  // c'è una versione diversa da quella letta, come fa quello vero.
+  const finto = (() => {
+    const file = {}; let n = 0, scritture = 0, primaDiScrivere = null;
+    const P = '/spark-libreria.json';
+    return {
+      autorizzato: () => true,
+      get scritture() { return scritture; },
+      set primaDiScrivere(f) { primaDiScrivere = f; },
+      async info(p = P) { return file[p] ? { rev: file[p].rev, quando: '', byte: file[p].testo.length } : null; },
+      async scarica(p = P) { return file[p].testo; },
+      async scriviSe(testo, rev, p = P) {
+        if (primaDiScrivere) { const f = primaDiScrivere; primaDiScrivere = null; await f(); }
+        if ((file[p] ? file[p].rev : null) !== rev) { const e = new Error('conflitto'); e.conflitto = true; throw e; }
+        scritture++;
+        file[p] = { testo, rev: 'r' + (++n) };
+        return { rev: file[p].rev };
+      },
+    };
+  })();
+  const nomi = async s => (await s.all()).map(r => r.name).sort();
+
+  const DB_TEL = DB_NAME + '-tel', DB_PC = DB_NAME + '-pc';
+  const tel = await new PresetStore(DB_TEL).open();
+  const pc  = await new PresetStore(DB_PC).open();
+  let chieste = [];
+  let rispostaCancella = false;
+  const motore = s => new SyncAuto.Motore({ store: s, dropbox: finto, pausaMs: 100000, ogniMs: 0,
+    chiediCancellazioni: async via => { chieste.push(via.length); return rispostaCancella; } });
+  const mTel = motore(tel), mPc = motore(pc);
+
+  await tel.add(makePreset('uuid-y1', 'Uno', ['Twin']));
+  await tel.add(makePreset('uuid-y2', 'Due', ['Twin']));
+  await mTel.avvia();
+  await mPc.avvia();
+  check('quello che c\'è sul telefono arriva da solo sul PC', await nomi(pc), ['Due', 'Uno']);
+  check('con la stessa data: chi lo riceve non lo crede più nuovo',
+        (await pc.byUuid('uuid-y1')).updatedAt, (await tel.byUuid('uuid-y1')).updatedAt);
+  const scrittePrima = finto.scritture;
+  await mPc.sincronizza();
+  await mTel.sincronizza();
+  check('se non è cambiato niente non si scrive niente lassù', finto.scritture, scrittePrima);
+
+  await attesa(5);
+  await pc.setName((await pc.byUuid('uuid-y1')).id, 'Uno dal PC');
+  check('un cambiamento si segna da solo, senza premere niente', mPc.pendente, true);
+  await mPc.sincronizza();
+  await mTel.sincronizza();
+  check('rinominato sul PC, rinominato sul telefono', await nomi(tel), ['Due', 'Uno dal PC']);
+
+  // Lo stesso preset cambiato da tutte e due le parti: vince il più recente,
+  // anche se arriva lassù per primo quello più vecchio.
+  await attesa(5);
+  await tel.setNotes((await tel.byUuid('uuid-y2')).id, 'dal telefono');
+  await attesa(5);
+  await pc.setNotes((await pc.byUuid('uuid-y2')).id, 'dal PC, dopo');
+  await mTel.sincronizza();
+  await mPc.sincronizza();
+  await mTel.sincronizza();
+  check('due modifiche allo stesso preset: vince la più recente, da tutte e due le parti',
+        [(await tel.byUuid('uuid-y2')).notes, (await pc.byUuid('uuid-y2')).notes], ['dal PC, dopo', 'dal PC, dopo']);
+
+  await tel.remove((await tel.byUuid('uuid-y1')).id);
+  await mTel.sincronizza();
+  await mPc.sincronizza();
+  check('cancellato sul telefono, cancellato sul PC', await nomi(pc), ['Due']);
+
+  const bancoTel = await tel.addBank('Concerto');
+  await tel.setBankSlot(bancoTel.id, 0, (await tel.byUuid('uuid-y2')).id);
+  await mTel.sincronizza();
+  await mPc.sincronizza();
+  const suoi = await pc.getBanks();
+  check('un banco nuovo arriva, coi suoi posti',
+        [suoi.map(b => b.nome), suoi[0] && suoi[0].posti[0] === (await pc.byUuid('uuid-y2')).id], [['Concerto'], true]);
+  await attesa(5);
+  await pc.removeBank(suoi[0].id);
+  await mPc.sincronizza();
+  await mTel.sincronizza();
+  check('e un banco tolto dall\'altra parte sparisce', (await tel.getBanks()).length, 0);
+
+  await attesa(5);
+  await pc.addCategory('Blues');
+  await mPc.sincronizza();
+  await mTel.sincronizza();
+  check('le categorie viaggiano', (await tel.getSetting('categorie', [])).includes('Blues'), true);
+
+  // L'altro apparecchio scrive fra la lettura e la scrittura: si rilegge e si
+  // fonde, e il suo lavoro resta.
+  await attesa(5);
+  await tel.add(makePreset('uuid-y3', 'Tre dal telefono', ['Twin']));
+  await attesa(5);
+  await pc.add(makePreset('uuid-y4', 'Quattro dal PC', ['Twin']));
+  finto.primaDiScrivere = () => mTel.sincronizza();
+  await mPc.sincronizza();
+  await mTel.sincronizza();
+  check('due scritture incrociate: nessuno cancella il lavoro dell\'altro',
+        [await nomi(pc), await nomi(tel)],
+        [['Due', 'Quattro dal PC', 'Tre dal telefono'], ['Due', 'Quattro dal PC', 'Tre dal telefono']]);
+
+  // Il guaio di oggi: una libreria svuotata da una parte. Oltre la soglia si
+  // chiede, e «no» li tiene e li fa tornare anche dall'altra parte.
+  for (let i = 0; i < 6; i++) await pc.add(makePreset('uuid-m' + i, 'Molti ' + i, ['Twin']));
+  await mPc.sincronizza();
+  await mTel.sincronizza();
+  const primaDelGuaio = await nomi(tel);
+  await attesa(5);
+  await tel.svuotaTranneAmpli();
+  await mTel.sincronizza();
+  chieste = [];
+  rispostaCancella = false;
+  await mPc.sincronizza();
+  check('troppi preset da cancellare in un colpo: prima si chiede', chieste, [primaDelGuaio.length]);
+  check('rispondendo di no restano qui', await nomi(pc), primaDelGuaio);
+  await mTel.sincronizza();
+  check('e tornano anche dove erano stati tolti', await nomi(tel), primaDelGuaio);
+
+  await attesa(5);
+  await pc.remove((await pc.byUuid('uuid-m0')).id);
+  chieste = [];
+  await mPc.sincronizza();
+  await mTel.sincronizza();
+  check('sotto la soglia si cancella senza chiedere', [chieste, (await nomi(tel)).includes('Molti 0')], [[], false]);
+
+  // Gli slot non viaggiano: sono quello che ha letto dall'ampli quell'apparecchio.
+  await tel.assignSlots({ [(await tel.byUuid('uuid-y2')).id]: 3 });
+  await mTel.sincronizza();
+  await mPc.sincronizza();
+  check('gli slot restano di chi ha letto l\'ampli', (await pc.byUuid('uuid-y2')).slots, []);
+
+  mTel.ferma(); mPc.ferma();
+  check('fermato il sync, la libreria non avvisa più nessuno', [tel.onCambio, pc.onCambio], [null, null]);
+  tel.close(); pc.close();
+  await PresetStore.deleteDatabase(DB_TEL);
+  await PresetStore.deleteDatabase(DB_PC);
 
   /* ------------------------------------------------------------------ */
   group('errori');

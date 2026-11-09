@@ -38,6 +38,10 @@ window.DropboxSync = (function () {
    *  radice di Dropbox: l'app vede solo la sua cartella e nient'altro. */
   const PERCORSO = '/spark-libreria.json';
 
+  /** Il backup di sicurezza: un file a parte, che scrive solo l'utente a mano
+   *  e che il sync automatico non tocca mai (9 novembre 2026). */
+  const PERCORSO_SICUREZZA = '/spark-sicurezza.json';
+
   const AUTORIZZA = 'https://www.dropbox.com/oauth2/authorize';
   const TOKEN     = 'https://api.dropboxapi.com/oauth2/token';
   const RPC       = 'https://api.dropboxapi.com/2/';
@@ -196,10 +200,10 @@ window.DropboxSync = (function () {
     },
 
     /** Manda su l'istantanea della libreria. Sovrascrive quella di prima. */
-    async carica(testo) {
+    async carica(testo, percorso = PERCORSO) {
       const risposta = await this._chiama(CONTENUTO + 'files/upload', {
         headers: {
-          'Dropbox-API-Arg': arg({ path: PERCORSO, mode: 'overwrite', mute: true }),
+          'Dropbox-API-Arg': arg({ path: percorso, mode: 'overwrite', mute: true }),
           'Content-Type': 'application/octet-stream',
         },
         body: new Blob([testo], { type: 'application/octet-stream' }),
@@ -208,11 +212,35 @@ window.DropboxSync = (function () {
     },
 
     /** Riprende l'istantanea. Torna il testo, che sta al chiamante fondere. */
-    async scarica() {
+    async scarica(percorso = PERCORSO) {
       const risposta = await this._chiama(CONTENUTO + 'files/download', {
-        headers: { 'Dropbox-API-Arg': arg({ path: PERCORSO }) },
+        headers: { 'Dropbox-API-Arg': arg({ path: percorso }) },
       });
       return risposta.text();
+    },
+
+    /**
+     * Scrive solo se lassù c'è ancora la versione `rev` che abbiamo letto
+     * (`null`: solo se lassù non c'è niente). Se nel frattempo l'ha cambiata
+     * l'altro apparecchio, Dropbox rifiuta e l'errore ha `conflitto`: il sync
+     * automatico riprende la versione nuova, fonde e riprova, invece di
+     * cancellare il lavoro dell'altro. Torna i metadati nuovi, `rev` compreso.
+     */
+    async scriviSe(testo, rev, percorso = PERCORSO) {
+      const modo = rev ? { '.tag': 'update', update: rev } : 'add';
+      try {
+        const risposta = await this._chiama(CONTENUTO + 'files/upload', {
+          headers: {
+            'Dropbox-API-Arg': arg({ path: percorso, mode: modo, autorename: false, mute: true }),
+            'Content-Type': 'application/octet-stream',
+          },
+          body: new Blob([testo], { type: 'application/octet-stream' }),
+        });
+        return risposta.json();
+      } catch (err) {
+        if (err.stato === 409 && /conflict/.test(err.corpo || '')) err.conflitto = true;
+        throw err;
+      }
     },
 
     /**
@@ -221,14 +249,14 @@ window.DropboxSync = (function () {
      * vecchio di quello che si ha è il modo migliore di pentirsene.
      * Se lassù non c'è ancora niente torna `null`, che non è un errore.
      */
-    async info() {
+    async info(percorso = PERCORSO) {
       try {
         const risposta = await this._chiama(RPC + 'files/get_metadata', {
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: PERCORSO }),
+          body: JSON.stringify({ path: percorso }),
         });
         const dati = await risposta.json();
-        return { quando: dati.server_modified, byte: dati.size };
+        return { quando: dati.server_modified, byte: dati.size, rev: dati.rev };
       } catch (err) {
         if (/nessuna libreria/.test(err.message)) return null;
         throw err;
@@ -270,14 +298,18 @@ window.DropboxSync = (function () {
         method: 'POST', headers, body: opzioni.body,
       });
       if (!risposta.ok) {
-        throw new Error(messaggioErrore(risposta.status, await risposta.text()));
+        const corpo = await risposta.text();
+        const errore = new Error(messaggioErrore(risposta.status, corpo));
+        errore.stato = risposta.status;     // per chi deve riconoscere un conflitto
+        errore.corpo = corpo;
+        throw errore;
       }
       return risposta;
     },
   };
 
   return {
-    Client, PERCORSO,
+    Client, PERCORSO, PERCORSO_SICUREZZA,
     nuovoVerifier, sfida, urlAutorizza, arg, messaggioErrore,
   };
 })();

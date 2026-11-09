@@ -7,6 +7,39 @@ riprende» pesava da sola 13 KB.
 
 Le voci sono in ordine dal più recente al più vecchio.
 
+## Estratto di CLAUDE.md, 9 novembre 2026 — gli editor
+
+Stava in «Dove si riprende» fino al 9 novembre 2026, parola per parola (e sotto, la basetta):
+
+- **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
+  neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
+  `17-editor-classico.js`. Classico completo e pubblicato il 22 ottobre (guscio `v138`): un'immagine per
+  modello in `immagini/classico/` (`SFONDI_CLASSICI`; il riverbero per tipo, `'bias.reverb:<tipo>'`). Neon:
+  `immagini/blocchi/` e `src/spark-immagini.js`; come entra un'immagine nuova del neon: `docs/diario.md`,
+  estratto del 22 ottobre (sera). Scelte e scartati: `docs/decisioni-ui.md`, «L'editor classico».
+  Il 26 ottobre (`v141`–`v143`): trimmer dello sfondo accanto a Salva, fascia scura sotto i comandi, «?» tolto
+  dai due editor, e **il classico non scorre mai** (`adattaClassico`).
+- **Basetta** `pcb/basetta/` (20 ottobre): generata **solo** da `tools/genera-basetta.py`, mai a mano; approvata e
+  **ordinata il 29 ottobre** (JLCPCB, verde, HASL con piombo); il 29 ottobre aggiunta la presa ESPRESSIONE (J11: G, 3V3, D2, D8 come la presa H,
+  R e C sulla presa del pedale). Linee nuove e cosa fare a scheda arrivata:
+  `docs/pedale-lavoro.md`, «La basetta stampata».
+
+## Estratto di CLAUDE.md, 9 novembre 2026 — il pedale d'espressione
+
+Stava in «Dove si riprende» fino al 9 novembre 2026, parola per parola:
+
+- **Pedale d'espressione** (30 ottobre): M-Audio EX-P sulla presa **H** (G, 3V3, D2, D8; 1 kΩ e 100 nF), jack
+  del pannello montato; tallone 0 mV, punta ~3040, jack su D8. **Solo volume, deciso dall'utente**: Control X
+  finto e wah **scartati e tolti** (tasto di accoppiamento a ogni accensione, come col vero; sul collegamento
+  del Control X l'ampli non risponde; misure in `docs/pedale-lavoro.md`, «30 ottobre»; l'ultimo sketch è nel
+  commit `f27732d`). In MIDI il CC 11 per AmpliTube (2.33): **va col cavo USB e col Bluetooth** (1° novembre, AmpliTube 5 sul
+  PC). Il Bluetooth passa da MIDIberry + loopMIDI (Windows non dà il MIDI Bluetooth ad AmpliTube) e ha voluto
+  la 2.35 (in MIDI il nome nel primo messaggio) e la 2.36 (bonding): **da riprovare iPad/GarageBand e adattatore
+  del Play Acoustic**. Accoppiamento con Windows rimasto a metà: `tools/togli-accoppiamento-pedale.ps1`. **2.34 caricata il 31
+  ottobre**: in Spark il **Master dell'ampli modellato** (0x0104 indice 4; il modello dal quarto effetto di 0x0201
+  `01 00`, riletto al primo movimento dopo ogni cambio di preset; solo quando il pedale si muove): **verificato
+  il 1° novembre** con un banco dell'app e con uno slot dell'ampli (l'utente: «funziona tutto»). **Mai il volume del finale (0x72) in punta**: un botto.
+
 ## 5 ottobre 2026, pomeriggio — il doppiaggio del video del pedale, e il sito
 
 - **Il video del pedale in inglese**, girato dall'utente. Il primo tentativo (audio originale

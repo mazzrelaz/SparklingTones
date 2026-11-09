@@ -70,6 +70,14 @@ window.PresetStore = (function () {
   /** Campi dell'utente: non vengono mai toccati da un import. */
   const USER_FIELDS  = ['tags', 'notes', 'favorite', 'order'];
 
+  /**
+   * Le impostazioni che fanno parte della libreria e viaggiano col sync.
+   * Cambiarne una segna l'ora in `impostazioniIl`: fra due apparecchi vince
+   * tutto intero il gruppo cambiato per ultimo, così anche un banco o una
+   * categoria tolti spariscono dall'altra parte (9 novembre 2026).
+   */
+  const CHIAVI_LIBRERIA = new Set(['categorie', 'coloriFamiglia', 'nomiParametri', 'banchi']);
+
   const promisify = request => new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
     request.onerror   = () => reject(request.error);
@@ -108,10 +116,21 @@ window.PresetStore = (function () {
       if (this.db) { this.db.close(); this.db = null; }
     },
 
-    _tx(mode, which) {
+    _tx(mode, which, muto) {
       if (!this.db) throw new Error(tr('store non aperto: chiama open() prima'));
       const name = which || STORE;
+      if (mode === 'readwrite' && name === STORE && !muto) this._segnala();
       return this.db.transaction(name, mode).objectStore(name);
+    },
+
+    /**
+     * Avvisa chi ascolta (`onCambio`, il sync automatico) che la libreria è
+     * cambiata. Le scritture del sync stesso passano `muto`: altrimenti ogni
+     * preset arrivato da Dropbox farebbe ripartire un invio.
+     */
+    _segnala() {
+      if (typeof this.onCambio !== 'function') return;
+      try { this.onCambio(); } catch (err) { /* chi ascolta non ferma una scrittura */ }
     },
 
     /* ----------------------------------------------------------------
@@ -123,8 +142,12 @@ window.PresetStore = (function () {
       return row === undefined ? fallback : row.value;
     },
 
-    setSetting(key, value) {
-      return promisify(this._tx('readwrite', SETTINGS).put({ key, value }));
+    async setSetting(key, value, muto) {
+      await promisify(this._tx('readwrite', SETTINGS).put({ key, value }));
+      if (!muto && CHIAVI_LIBRERIA.has(key)) {
+        await promisify(this._tx('readwrite', SETTINGS).put({ key: 'impostazioniIl', value: Date.now() }));
+        this._segnala();
+      }
     },
 
     /**
@@ -191,8 +214,8 @@ window.PresetStore = (function () {
       }));
     },
 
-    setBanks(banchi) {
-      return this.setSetting('banchi', banchi);
+    setBanks(banchi, muto) {
+      return this.setSetting('banchi', banchi, muto);
     },
 
     async addBank(nome) {
@@ -230,7 +253,7 @@ window.PresetStore = (function () {
      * Un preset che qui non c'è lascia un posto vuoto, come già fa getBanks
      * con un id morto.
      */
-    async _importaBanchi(banchi) {
+    async _importaBanchi(banchi, muto) {
       if (!Array.isArray(banchi) || banchi.length === 0) return;
       const idDi   = new Map((await this.all()).map(r => [r.uuid, r.id]));
       const nostri = await this.getSetting('banchi', []);
@@ -252,7 +275,7 @@ window.PresetStore = (function () {
                         posti });
         }
       }
-      await this.setBanks(nostri);
+      await this.setBanks(nostri, muto);
     },
 
     async renameBank(id, nome) {
@@ -957,8 +980,154 @@ window.PresetStore = (function () {
         coloriFamiglia: await this.getSetting('coloriFamiglia', {}),
         banchi:        await this._banchiPerBackup(),
         cancellati:    await this.getSetting('cancellati', {}),
+        impostazioniIl: await this.getSetting('impostazioniIl', 0),
         presets:       await this.all(),
       };
+    },
+
+    /* ----------------------------------------------------------------
+       Il sync automatico (9 novembre 2026)
+
+       Diverso da `importBackup`, che è un gesto dell'utente e fa vincere il
+       file: qui due apparecchi si scambiano la libreria da soli, e per ogni
+       preset vince **la modifica più recente**, con la sua data. La data di
+       un preset che arriva non si tocca, o i due apparecchi se lo
+       rimbalzerebbero per sempre credendolo ognuno più nuovo. Gli slot non
+       viaggiano: dicono cosa ha letto dall'ampli questo apparecchio, e si
+       rifanno alla prima connessione. Le impostazioni della libreria
+       (banchi, categorie, colori, nomi dei parametri) vincono tutte intere
+       dal lato che le ha cambiate per ultimo.
+       ---------------------------------------------------------------- */
+
+    /** Le lapidi di qui fuse con quelle lassù, tenendo la data più vecchia. */
+    async _lapidiFuse(remoto) {
+      const tombe  = Object.assign({}, await this.getSetting('cancellati', {}));
+      const arrivo = remoto && remoto.cancellati && typeof remoto.cancellati === 'object' ? remoto.cancellati : {};
+      for (const [uuid, quando] of Object.entries(arrivo)) {
+        if (tombe[uuid] === undefined || quando < tombe[uuid]) tombe[uuid] = quando;
+      }
+      return tombe;
+    },
+
+    /** I preset di qui che la fusione con `remoto` cancellerebbe. */
+    async daCancellareSincro(remoto) {
+      const tombe = await this._lapidiFuse(remoto);
+      const via = [];
+      for (const [uuid, quando] of Object.entries(tombe)) {
+        const locale = await this.byUuid(uuid);
+        if (locale && !((locale.updatedAt || 0) > quando)) via.push(locale);
+      }
+      return via;
+    },
+
+    /**
+     * Fonde la libreria di lassù con questa. Con `tieni` i preset che le
+     * lapidi cancellerebbero restano, e prendono la data di adesso: così
+     * vincono la lapide anche sull'altro apparecchio e tornano lì.
+     * Torna quanti preset sono arrivati, cambiati e cancellati.
+     */
+    async fondiSincro(remoto, opzioni) {
+      const opts = opzioni || {};
+      if (!remoto || remoto.format !== 'spark-controller-library') {
+        throw new Error(tr('il file su Dropbox non è una libreria'));
+      }
+      const esito = { arrivati: 0, cambiati: 0, cancellati: 0, impostazioni: false };
+      const scrivi = record => promisify(this._tx('readwrite', STORE, true).put(record));
+      const tombe = await this._lapidiFuse(remoto);
+
+      for (const [uuid, quando] of Object.entries(tombe)) {
+        const locale = await this.byUuid(uuid);
+        if (!locale || (locale.updatedAt || 0) > quando) continue;
+        if (opts.tieni) {
+          locale.updatedAt = Date.now();
+          await scrivi(locale);
+          delete tombe[uuid];
+        } else {
+          await promisify(this._tx('readwrite', STORE, true).delete(locale.id));
+          esito.cancellati++;
+        }
+      }
+
+      const campi = SOUND_FIELDS.concat(USER_FIELDS);
+      for (const preset of remoto.presets || []) {
+        if (!preset || !preset.uuid) continue;
+        const cancellato = tombe[preset.uuid];
+        if (cancellato !== undefined && !((preset.updatedAt || 0) > cancellato)) continue;
+        delete tombe[preset.uuid];               // è vivo: la lapide non serve più
+        const locale = await this.byUuid(preset.uuid);
+        if (locale) {
+          if (!((preset.updatedAt || 0) > (locale.updatedAt || 0))) continue;
+          for (const f of campi) if (preset[f] !== undefined) locale[f] = preset[f];
+          if (preset.famiglia) locale.famiglia = preset.famiglia; else delete locale.famiglia;
+          locale.updatedAt = preset.updatedAt;
+          await scrivi(locale);
+          esito.cambiati++;
+        } else {
+          const copia = Object.assign({}, preset, { slots: [] });
+          delete copia.id;
+          delete copia.slot;
+          copia.tags = normalizeTags(copia.tags || []);
+          if (copia.order === undefined) copia.order = await this._nextOrder();
+          await promisify(this._tx('readwrite', STORE, true).add(copia));
+          esito.arrivati++;
+        }
+      }
+      await this.setSetting('cancellati', tombe, true);
+
+      // Le impostazioni: tutte intere da chi le ha cambiate per ultimo. Un file
+      // senza data (scritto prima del sync automatico) si fonde come faceva
+      // «Prendi», senza togliere niente.
+      const loro   = remoto.impostazioniIl || 0;
+      const nostre = await this.getSetting('impostazioniIl', 0);
+      if (!loro) {
+        if (Array.isArray(remoto.categorie) && remoto.categorie.length) {
+          await this.setSetting('categorie',
+            normalizeTags((await this.getSetting('categorie', [])).concat(remoto.categorie)), true);
+        }
+        if (remoto.coloriFamiglia && typeof remoto.coloriFamiglia === 'object') {
+          await this.setSetting('coloriFamiglia',
+            Object.assign({}, remoto.coloriFamiglia, await this.getSetting('coloriFamiglia', {})), true);
+        }
+        if (remoto.nomiParametri && typeof remoto.nomiParametri === 'object') {
+          const tutti = await this.getParamNames();
+          for (const [effetto, suoi] of Object.entries(remoto.nomiParametri)) {
+            tutti[effetto] = Object.assign({}, suoi, tutti[effetto]);
+          }
+          await this.setSetting('nomiParametri', tutti, true);
+        }
+        await this._importaBanchi(remoto.banchi, true);
+      } else if (loro > nostre) {
+        await this.setSetting('categorie', normalizeTags(remoto.categorie || []), true);
+        await this.setSetting('coloriFamiglia', remoto.coloriFamiglia || {}, true);
+        await this.setSetting('nomiParametri', remoto.nomiParametri || {}, true);
+        await this._sostituisciBanchi(remoto.banchi || []);
+        await this.setSetting('impostazioniIl', loro, true);
+        esito.impostazioni = true;
+      }
+      return esito;
+    },
+
+    /**
+     * I banchi di lassù al posto di questi, tutti: quelli tolti lassù spariscono.
+     * Un banco riconosciuto per UUID tiene il suo id di qui, che è quello che la
+     * vista live ricorda come banco scelto.
+     */
+    async _sostituisciBanchi(banchi) {
+      const idDi   = new Map((await this.all()).map(r => [r.uuid, r.id]));
+      const nostri = await this.getSetting('banchi', []);
+      let prossimo = nostri.reduce((max, b) => Math.max(max, b.id), 0) + 1;
+      const nuovi = [];
+      for (const arrivo of banchi) {
+        if (!arrivo) continue;
+        const mio = arrivo.uuid && nostri.find(b => b.uuid === arrivo.uuid);
+        nuovi.push({
+          id:    mio ? mio.id : prossimo++,
+          uuid:  arrivo.uuid || nuovoUuid(),
+          nome:  String(arrivo.nome || '').trim() || tr`Banco ${nuovi.length + 1}`,
+          posti: this._ottoPosti(arrivo.posti).map(uuid => (uuid && idDi.has(uuid) ? idDi.get(uuid) : null)),
+        });
+      }
+      await this.setBanks(nuovi, true);
     },
 
     /**
@@ -1049,6 +1218,9 @@ window.PresetStore = (function () {
           if (existing) {
             USER_FIELDS.forEach(f => { if (copy[f] !== undefined) existing[f] = copy[f]; });
             SOUND_FIELDS.forEach(f => { if (copy[f] !== undefined) existing[f] = copy[f]; });
+            // La famiglia non sta fra i campi dell'utente (un import dall'ampli non la
+            // deve toccare), ma un backup la porta: rimettendolo torna anche lei.
+            if (copy.famiglia) existing.famiglia = copy.famiglia;
             await this.put(existing);
           } else {
             await this.add(copy);

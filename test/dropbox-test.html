@@ -253,6 +253,32 @@ const corpoDi = chiamata => {
         'Dropbox non risponde bene: riprova fra poco');
 
   /* ------------------------------------------------------------------ */
+  group('scrivere solo sopra la versione letta (sync automatico)');
+
+  const conRev = clientCon([RINNOVO, { stato: 200, corpo: { server_modified: 'x', size: 1, rev: 'abc' } }]);
+  check('info porta anche la versione del file', (await conRev.client.info()).rev, 'abc');
+
+  const sopra = clientCon([RINNOVO, { stato: 200, corpo: { rev: 'def' } }]);
+  check('scriviSe torna la versione nuova', (await sopra.client.scriviSe('t', 'abc')).rev, 'def');
+  check('e chiede a Dropbox di scrivere solo se lassù c\'è ancora quella letta',
+        JSON.parse(sopra.finto.chiamate[1].opzioni.headers['Dropbox-API-Arg']),
+        { path: '/spark-libreria.json', mode: { '.tag': 'update', update: 'abc' }, autorename: false, mute: true });
+
+  const primoFile = clientCon([RINNOVO, { stato: 200, corpo: { rev: 'a1' } }]);
+  await primoFile.client.scriviSe('t', null);
+  check('senza versione scrive solo se lassù non c\'è niente',
+        JSON.parse(primoFile.finto.chiamate[1].opzioni.headers['Dropbox-API-Arg']).mode, 'add');
+
+  const scontro = clientCon([RINNOVO, { stato: 409, corpo: '{"error_summary":"path/conflict/file/.."}' }]);
+  check('se l\'altro apparecchio ha scritto in mezzo, l\'errore lo dice',
+        await scontro.client.scriviSe('t', 'vecchia').then(() => null, e => e.conflitto), true);
+
+  const sicurezza = clientCon([RINNOVO, { stato: 200, corpo: {} }]);
+  await sicurezza.client.carica('t', DropboxSync.PERCORSO_SICUREZZA);
+  check('il backup di sicurezza va in un file suo',
+        JSON.parse(sicurezza.finto.chiamate[1].opzioni.headers['Dropbox-API-Arg']).path, '/spark-sicurezza.json');
+
+  /* ------------------------------------------------------------------ */
   group('scollegarsi');
 
   const via = clientCon([RINNOVO, { stato: 200, corpo: 'null' }]);

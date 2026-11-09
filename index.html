@@ -2142,9 +2142,8 @@
   <h3 class="imp-titolo">Dropbox</h3>
   <div class="imp-gruppo">
     <div id="dropboxCollegato" hidden>
-      <button id="btnDropboxSu" class="imp-voce imp-principale">Manda su Dropbox</button>
-      <button id="btnDropboxGiu" class="imp-voce">Prendi da Dropbox</button>
-      <button id="btnDropboxRipristina" class="imp-voce">Ripristina da Dropbox</button>
+      <button id="btnSicurezzaFai" class="imp-voce imp-principale">Fai un backup di sicurezza</button>
+      <button id="btnSicurezzaRipristina" class="imp-voce">Ripristina il backup di sicurezza</button>
       <button id="btnDropboxVia" class="imp-voce imp-lieve">Scollega Dropbox</button>
     </div>
 
@@ -2168,10 +2167,7 @@
     </div>
   </div>
   <p class="imp-nota-sotto" id="dropboxQuando">&nbsp;</p>
-  <p class="imp-nota-sotto">Due gesti espliciti, mai in automatico. Quello che arriva si
-    <strong>fonde</strong>: aggiorna i preset che riconosce, aggiunge quelli che non ci
-    sono, e quelli cancellati sull'altro apparecchio spariscono anche qui — a meno che
-    tu non li abbia toccati dopo.</p>
+  <p class="imp-nota-sotto" id="sicurezzaQuando"></p>
   <p class="imp-nota-sotto imp-solo-da-collegare">Serve un'app tua, una volta sola: su
     <code>dropbox.com/developers</code>, «Create app», <em>Scoped access</em> e
     <em>App folder</em>; nella scheda «Permissions» spunta
@@ -2191,7 +2187,7 @@
     quali togliere.</p>
   <p class="imp-nota-sotto">Toglie dalla libreria tutti i preset <strong>tranne gli otto
     caricati sull'ampli</strong>, che restano coi loro tag e le loro note. L'ampli non
-    viene toccato. Se usi Dropbox, al prossimo «Manda su» spariranno anche di là.</p>
+    viene toccato. Con Dropbox collegato spariscono anche di là.</p>
 
   <div class="stato-pannello" hidden></div>
   <div class="imp-gruppo" style="margin-top:22px">
@@ -2500,6 +2496,7 @@
 <script src="src/lingua.js"></script>
 <script src="src/lingua-en.js"></script>
 <script src="src/dropbox-sync.js"></script>
+<script src="src/sync-auto.js"></script>
 <script src="src/spark-protocol.js"></script>
 <script src="src/spark-effetti.js"></script>
 <script src="src/spark-immagini.js"></script>

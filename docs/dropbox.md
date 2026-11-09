@@ -1,6 +1,6 @@
 # Il sync con Dropbox
 
-Estratto da `CLAUDE.md` il 26 agosto 2026. Capitolo chiuso e verificato:
+Estratto da `CLAUDE.md` il 26 agosto 2026. **Dal 9 novembre 2026 il sync è automatico**: vedi «Il sync automatico», più sotto. Capitolo chiuso e verificato:
 da aprire solo se il sync si rompe o si cambia trasporto.
 
 
@@ -83,6 +83,61 @@ API su un file dentro la cartella Dropbox locale — zero OAuth, ma **su Android
 esiste**, quindi risolverebbe solo la metà che serve meno, visto che il telefono è
 l'apparecchio che va all'ampli.
 
+
+## Il sync automatico — 9 novembre 2026
+
+**Il guaio che l'ha fatto nascere.** L'utente ha mandato su dal PC 86 preset, sul telefono ha
+svuotato la libreria ed ha fatto «Prendi»: ne sono arrivati 6. Non era un difetto del codice ma
+del disegno: lo svuotamento lascia una lapide per ogni preset con la data di adesso, e «Prendi»
+scarta ogni preset del backup più vecchio della sua lapide. Primo rimedio, pubblicato lo stesso
+giorno (v146): «Ripristina da Dropbox», cioè il file preso senza lapidi. Poi la richiesta vera:
+**«faccio dei cambiamenti dal telefono e in automatico sul pc mi ritrovo la stessa situazione»**,
+con **«Manda su» e «Prendi» tolti** e un **backup di sicurezza manuale, separato** da quello
+automatico, «nel caso di casini».
+
+**Come gira** (`src/sync-auto.js`, `SyncAuto.Motore`, lo stesso sul telefono e sul PC):
+
+- all'avvio, quando l'app torna in primo piano o torna la rete, e ogni minuto mentre è aperta e
+  visibile: `info()` (una chiamata piccola) dà la versione del file (`rev`); se è quella già fusa
+  e qui non c'è niente da mandare, il giro finisce lì;
+- dopo ogni cambiamento della libreria (`store.onCambio`), 4 s dopo l'ultimo di una raffica: si
+  scarica, si fonde, si manda su;
+- **si scrive solo sopra la versione letta** (`scriviSe`, `mode: update` con la `rev`; `add` se lassù
+  non c'è niente). Se l'altro apparecchio ha scritto in mezzo, Dropbox risponde 409 `conflict` e si
+  ricomincia dalla lettura (fino a quattro giri). Nessuno cancella il lavoro dell'altro;
+- se dopo la fusione la libreria è uguale a quella lassù (`canonica`: senza `exportedAt`, id e
+  slot) non si scrive niente;
+- senza rete si lavora lo stesso: `sincroPendente` resta in `settings`, anche ad app chiusa;
+- **oltre 5 preset da cancellare in un colpo si chiede** (`SOGLIA`). «No» li tiene e dà loro la data
+  di adesso, così vincono la lapide anche dall'altra parte e tornano lì.
+
+**La fusione** (`store.fondiSincro`, diversa da `importBackup`, che resta per i gesti dell'utente):
+
+- per ogni preset **vince la modifica più recente** (`updatedAt`). Prima vinceva sempre il file;
+- **la data di un preset che arriva non si tocca**: le scritture del sync passano `muto` e non
+  ripassano da `put`, che metterebbe la data di adesso. Senza, i due apparecchi si rimbalzerebbero
+  lo stesso preset all'infinito, credendolo ognuno più nuovo;
+- **gli slot non viaggiano**: dicono cosa ha letto dall'ampli *quell'*apparecchio, e si rifanno alla
+  prima connessione. Un preset che arriva nuovo entra senza slot;
+- le lapidi come prima (data più vecchia fra le due, il preset toccato dopo resta);
+- **banchi, categorie, colori delle famiglie e nomi dei parametri vincono tutti interi** dal lato
+  che li ha cambiati per ultimo (`impostazioniIl`, scritto da `setSetting` per le chiavi di
+  `CHIAVI_LIBRERIA`). È il modo semplice per far sparire dall'altra parte anche un banco o una
+  categoria tolti. Il prezzo: due modifiche alle impostazioni fatte nello stesso minuto su due
+  apparecchi, ne resta una. Un file senza `impostazioniIl` (scritto prima) si fonde come «Prendi».
+
+**Il backup di sicurezza** è `/spark-sicurezza.json` (`PERCORSO_SICUREZZA`), nella stessa cartella
+dell'app su Dropbox. Lo scrive solo «Fai un backup di sicurezza», che prima dice di quando è quello
+che c'è; lo rimette solo «Ripristina il backup di sicurezza», che è `importBackup(…, { lapidi: false })`:
+rientra tutto, i preset rimessi prendono la data di adesso e il sync li porta anche di là. Non
+cancella niente. Da allora `importBackup` rimette anche la famiglia (prima la lasciava com'era).
+Dropbox tiene in più le versioni vecchie dei due file per 30 giorni, dal suo sito.
+
+**Test**: 17 nuovi nella suite della libreria (due database, «telefono» e «PC», e un Dropbox finto
+con le versioni: rinomina, stessa modifica dalle due parti, cancellazione, banco nuovo e tolto,
+categorie, scritture incrociate, la libreria svuotata con la domanda, gli slot) e 6 nella suite di
+Dropbox (`rev`, `scriviSe`, il conflitto, il file di sicurezza). **Provato solo in locale, con un
+Dropbox finto: col Dropbox vero e i due apparecchi veri è da provare.**
 
 ## Il backup dell'app ufficiale — Dropbox dismesso nel 2027
 
