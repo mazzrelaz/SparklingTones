@@ -1,0 +1,48 @@
+<!doctype html>
+<meta charset="utf-8">
+<body>
+<pre id="out"></pre>
+<script>
+// Per ogni PNG: toglie i margini trasparenti, porta il lato lungo a LATO px e scrive una WebP in base64.
+const q = new URLSearchParams(location.search);
+const dir = q.get('dir'), files = q.get('files').split(','), LATO = +(q.get('lato') || 900);
+const out = document.getElementById('out');
+const scrivi = t => { out.textContent += t + '\n'; };
+const carica = src => new Promise((ok, no) => {
+  const img = new Image();
+  img.onload = () => ok(img);
+  img.onerror = () => no(new Error('non carica ' + src));
+  img.src = src;
+});
+(async () => {
+  scrivi('PARTITO');
+  for (const f of files) {
+    try {
+      const img = await carica(dir + '/' + encodeURIComponent(f));
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const g = c.getContext('2d');
+      g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height).data;
+      let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+      for (let y = 0; y < c.height; y++) for (let x = 0; x < c.width; x++) {
+        if (d[(y * c.width + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      }
+      if (x1 < 0) { x0 = 0; y0 = 0; x1 = c.width - 1; y1 = c.height - 1; }
+      const m = 6;
+      x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(c.width - 1, x1 + m); y1 = Math.min(c.height - 1, y1 + m);
+      const w = x1 - x0 + 1, h = y1 - y0 + 1, k = Math.min(1, LATO / Math.max(w, h));
+      const c2 = document.createElement('canvas');
+      c2.width = Math.round(w * k); c2.height = Math.round(h * k);
+      const g2 = c2.getContext('2d');
+      g2.imageSmoothingQuality = 'high';
+      g2.drawImage(c, x0, y0, w, h, 0, 0, c2.width, c2.height);
+      const trasparente = d[3] < 8;
+      scrivi(`FILE ${f} ${c2.width} ${c2.height} ${trasparente ? 'T' : 'O'} ${c2.toDataURL('image/webp', 0.86)}`);
+    } catch (e) {
+      scrivi(`ERRORE ${f} ${e.message}`);
+    }
+  }
+  scrivi('FINITO');
+})();
+</script>

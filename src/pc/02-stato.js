@@ -107,10 +107,108 @@ const nomeModello = id => id === 'JH.Vox846' && !haHendrix() ? tr('Auto Wah') : 
 /** Il nome di un blocco: per i riverberi quello del modello scelto. */
 const nomeBlocco = effetto => (eRiverbero(effetto) && modelloRiverbero(effetto)) || nomeModello(effetto.name);
 
-/** L'immagine (del neon, per ora) di un blocco, o null. */
+/** Le immagini della versione PC (9 novembre 2026): rifatte dall'utente con `Immagini Spark.html` nello
+ * stile di quelle del Pulze, convertite in WebP da 900 px in `immagini/pc/`. Modello (o `bias.reverb:<modello>`)
+ * → nome del file. Chi non è qui prende l'immagine del neon. */
+const IMMAGINI_PC = {
+  "bias.noisegate": "noise-gate",
+  "LA2AComp": "la-comp",
+  "BlueComp": "sustain-comp",
+  "Compressor": "red-comp",
+  "BassComp": "bass-comp",
+  "BBEOpticalComp": "optical-comp",
+  "JH.Vox846": "jh-legendary-wah",
+  "AutoWah": "auto-wah",
+  "Booster": "booster",
+  "KlonCentaurSilver": "clone-drive",
+  "DistortionTS9": "tube-drive",
+  "Overdrive": "over-drive",
+  "JH.AxisFuzz": "jh-axle-fuzz",
+  "JH.SupaFuzz": "jh-super-fuzz",
+  "JH.Octavia": "jh-octave-fuzz",
+  "JH.FuzzTone": "jh-fuzz-zone",
+  "Fuzz": "fuzz-face",
+  "ProCoRat": "black-op",
+  "BassBigMuff": "bass-muff",
+  "GuitarMuff": "guitar-muff",
+  "MaestroBassmaster": "bassmaster",
+  "SABdriver": "sab-driver",
+  "RolandJC120": "silver-120",
+  "Twin": "black-duo",
+  "ADClean": "ad-clean",
+  "94MatchDCV2": "match-dc",
+  "Bassman": "tweed-bass",
+  "AC Boost": "ac-boost",
+  "Checkmate": "checkmate",
+  "TwoStoneSP50": "two-stone-sp50",
+  "Deluxe65": "american-deluxe",
+  "Plexi": "plexiglas",
+  "OverDrivenJM45": "jm45",
+  "OverDrivenLuxVerb": "lux-verb",
+  "Bogner": "rb-101",
+  "OrangeAD30": "british-30",
+  "AmericanHighGain": "american-high-gain",
+  "SLO100": "slo-100",
+  "YJM100": "yjm100",
+  "Rectifier": "treadplate",
+  "EVH": "insane",
+  "SwitchAxeLead": "switchaxe",
+  "Invader": "rocker-v",
+  "BE101": "be-101",
+  "Acoustic": "pure-acoustic",
+  "AcousticAmpV2": "fishboy",
+  "FatAcousticV2": "jumbo",
+  "FlatAcoustic": "flat-acoustic",
+  "GK800": "rb-800",
+  "Sunny3000": "sunny-3000",
+  "W600": "w600",
+  "Hammer500": "hammer-500",
+  "6505Plus": "insane-6508",
+  "ODS50CN": "ods-50",
+  "BluesJrTweed": "blues-boy",
+  "JH.JTM45": "jh-45-100",
+  "JH.SuperLead100": "jh-super-100",
+  "JH.DualShowman": "jh-d-show-master",
+  "JH.Sunn100": "jh-sun-100s",
+  "JH.Bassman50Silver": "jh-bass-master",
+  "JH.SoundCity100": "jh-tone-city-100",
+  "Tremolo": "tremolo",
+  "ChorusAnalog": "chorus",
+  "Flanger": "flanger",
+  "Phaser": "phaser",
+  "Vibrato01": "vibrato",
+  "UniVibe": "univibe",
+  "JH.VoodooVibeJr": "jh-legendary-vibe",
+  "Cloner": "cloner-chorus",
+  "MiniVibe": "classic-vibe",
+  "Tremolator": "tremolator",
+  "TremoloSquare": "tremolo-square",
+  "GuitarEQ6": "guitar-eq",
+  "BassEQ6": "bass-eq",
+  "DelayMono": "digital-delay",
+  "DelayEchoFilt": "echo-filt",
+  "VintageDelay": "vintage-delay",
+  "DelayReverse": "reverse-delay",
+  "DelayMultiHead": "multi-head",
+  "DelayRe201": "echo-tape",
+  "bias.reverb:Room Studio A": "reverb-room-studio-a",
+  "bias.reverb:Room Studio B": "reverb-room-studio-b",
+  "bias.reverb:Chamber": "reverb-chamber",
+  "bias.reverb:Hall Natural": "reverb-hall-natural",
+  "bias.reverb:Hall Medium": "reverb-hall-medium",
+  "bias.reverb:Hall Ambient": "reverb-hall-ambient",
+  "bias.reverb:Plate Short": "reverb-plate-short",
+  "bias.reverb:Plate Rich": "reverb-plate-rich",
+  "bias.reverb:Plate Long": "reverb-plate-long",
+};
+
+/** L'immagine di un blocco: quella della versione PC, se no quella del neon, o null. */
 function immagineBlocco(effetto) {
   const id = effetto.name === 'JH.Vox846' && !haHendrix() ? 'AutoWah' : effetto.name;
-  const info = SparkImmagini.di(id, eRiverbero(effetto) ? modelloRiverbero(effetto) : null);
+  const tipo = eRiverbero(effetto) ? modelloRiverbero(effetto) : null;
+  const pc = IMMAGINI_PC[tipo ? id + ':' + tipo : id];
+  if (pc) return 'immagini/pc/' + pc + '.webp';
+  const info = SparkImmagini.di(id, tipo);
   return info ? info.src : null;
 }
 

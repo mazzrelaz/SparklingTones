@@ -1561,3 +1561,8 @@ Chiesta dall'utente «come il Pulze editor» (`..Pulze Controleditor`). Scelte s
   slot, manopole, acceso/spento, cambio di modello, riverberi, annulla/ripeti, A/B, salva in uno slot, nome già
   usato, banchi col trascinamento, tuner, finestre del menu, lavoro senza ampli. **Con lo Spark vero e col
   pedale: mai provata.** Il riquadro del browser non apre la scelta Bluetooth: si prova dalla pagina pubblicata.
+- **Le immagini nuove** (9 novembre, sera): l'utente le ha fatte tutte e 89 con `DesktopProgettiImmagini Spark.html`
+  (generato da `tools/genera-immagini-spark.js`: lo stile del Pulze, i pedali veri del classico, originali dove
+  non c'è un apparecchio vero) e salvate in `DesktopProgettiSparklingTonesImmagini Pc`. `tools/converti-immagini-pc/esegui.ps1`
+  le porta in `immagini/pc/`: margini trasparenti tolti, lato lungo 900 px, WebP 0,86 (da 216 a 10,9 MB). La mappa
+  modello → file è `IMMAGINI_PC` in `src/pc/02-stato.js`; chi non c'è prende il neon. Solo nella pagina PC.
