@@ -1566,3 +1566,9 @@ Chiesta dall'utente «come il Pulze editor» (`..Pulze Controleditor`). Scelte s
   non c'è un apparecchio vero) e salvate in `DesktopProgettiSparklingTonesImmagini Pc`. `tools/converti-immagini-pc/esegui.ps1`
   le porta in `immagini/pc/`: margini trasparenti tolti, lato lungo 900 px, WebP 0,86 (da 216 a 10,9 MB). La mappa
   modello → file è `IMMAGINI_PC` in `src/pc/02-stato.js`; chi non c'è prende il neon. Solo nella pagina PC.
+- **Dopo la prima prova dell'utente** (9 novembre, sera): ‹ › restavano spenti dopo un cambio di slot (corretto); il nome
+  del preset va al centro come nel Pulze (1,65 rem, frecce rotonde, slot e «modificato» accanto, stato nella barra in
+  alto); cambiando slot il palco mostra subito la copia in libreria, coi comandi fermi fino alla rilettura. Poi **tolte
+  tutte le scritte guida** («le odio») e la scritta «PC» accanto al logo; **i banchi si spostano prendendoli per la
+  testa** come le Songlist del Pulze (`spostaBanco`: riscrive `settings.banchi` nel nuovo ordine, che vale anche
+  per la vista Live dell'app).

@@ -333,9 +333,12 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   **ordinata il 29 ottobre** (JLCPCB, verde, HASL con piombo); il 29 ottobre aggiunta la presa ESPRESSIONE (J11: G, 3V3, D2, D8 come la presa H,
   R e C sulla presa del pedale). Linee nuove e cosa fare a scheda arrivata:
   `docs/pedale-lavoro.md`, «La basetta stampata».
-- **La versione per il PC** (9 novembre, `pc.html` + `src/pc/`, **non pubblicata**): pagina a parte, l'app del telefono
-  non si tocca; tutto quello che fa l'app, nella veste del Pulze editor. Prove: `pc.html#finto` (`test/ampli-finto.js`).
-  **Con lo Spark vero mai provata.** Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
+- **La versione per il PC** (9 novembre, `pc.html` + `src/pc/`, **non pubblicata**, si pubblica solo su suo comando):
+  pagina a parte, l'app del telefono non si tocca; tutto quello che fa l'app nella veste del Pulze editor, immagini
+  nuove in `immagini/pc/` (`IMMAGINI_PC`), **niente scritte guida** (le odia), banchi spostabili come le Songlist.
+  L'utente la prova **in locale** (`localhost:8099/pc.html`, Edge): la prima prova ha dato ‹ › fermi, nome fuori
+  centro e lentezza, corretti; **il resto con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
+  (riempie la libreria di localhost: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad

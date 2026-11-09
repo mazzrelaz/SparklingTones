@@ -114,9 +114,12 @@ function bloccoBanco(banco) {
     matita.className = 'mini-tasto';
     matita.textContent = '✎';
     matita.title = tr('rinomina o elimina il banco');
+    matita.addEventListener('pointerdown', e => e.stopPropagation());   // la matita non prende il banco
     matita.addEventListener('click', () => rinominaOEliminaBanco(banco));
     testa.appendChild(matita);
     box.dataset.banco = banco.id;
+    // Presa per la testa, il banco intero si sposta fra gli altri (come le Songlist del Pulze).
+    trascinabile(testa, { bancoIntero: banco }, box);
   } else {
     testa.title = tr('gli slot dell\'ampli: sempre istantanei. Si cambiano scrivendo un preset in uno slot.');
   }
@@ -209,12 +212,24 @@ async function rinominaOEliminaBanco(banco) {
    (il primo posto libero) — va il preset. Da posto a posto si scambiano. */
 let presa = null, trascinato = false;
 
-function trascinabile(el, cosa) {
+/** `sbiadito`: l'elemento che si sbiadisce mentre lo si porta (di solito quello preso; per un banco il riquadro). */
+function trascinabile(el, cosa, sbiadito) {
   el.addEventListener('pointerdown', e => {
     if (e.button !== 0) return;
-    presa = { cosa, el, x: e.clientX, y: e.clientY, fantasma: null, sopra: null };
+    presa = { cosa, el: sbiadito || el, x: e.clientX, y: e.clientY, fantasma: null, sopra: null };
     trascinato = false;
   });
+}
+
+/** Sposta un banco al posto di un altro: gli altri scivolano. Si riscrive l'elenco salvato, nel nuovo ordine. */
+async function spostaBanco(banco, davanti) {
+  const salvati = await store.getSetting('banchi', []);
+  const da = salvati.findIndex(b => b.id === banco.id), a = salvati.findIndex(b => b.id === davanti.id);
+  if (da < 0 || a < 0 || da === a) return;
+  const [preso] = salvati.splice(da, 1);
+  salvati.splice(a, 0, preso);
+  await store.setBanks(salvati);
+  await aggiornaBanchi();
 }
 
 addEventListener('pointermove', e => {
@@ -223,14 +238,16 @@ addEventListener('pointermove', e => {
     if (Math.hypot(e.clientX - presa.x, e.clientY - presa.y) < 6) return;
     presa.fantasma = document.createElement('div');
     presa.fantasma.className = 'fantasma';
-    presa.fantasma.textContent = presa.cosa.record.name;
+    presa.fantasma.textContent = presa.cosa.bancoIntero ? presa.cosa.bancoIntero.nome : presa.cosa.record.name;
     document.body.appendChild(presa.fantasma);
     presa.el.classList.add('preso');
     if (schermoBanchi) schermoBanchi.classList.add('trascina');
   }
   presa.fantasma.style.transform = `translate(${e.clientX + 12}px, ${e.clientY + 8}px)`;
   const sotto = document.elementFromPoint(e.clientX, e.clientY);
-  const meta = sotto && (sotto.closest('li[data-posto]') || sotto.closest('.bl-blocco[data-banco]'));
+  // Un banco intero si posa solo su un altro banco; un preset su un posto o su un banco.
+  const meta = sotto && (presa.cosa.bancoIntero ? sotto.closest('.bl-blocco[data-banco]')
+    : sotto.closest('li[data-posto]') || sotto.closest('.bl-blocco[data-banco]'));
   if (presa.sopra && presa.sopra !== meta) presa.sopra.classList.remove('sopra');
   presa.sopra = meta || null;
   if (meta) meta.classList.add('sopra');
@@ -250,6 +267,7 @@ addEventListener('pointerup', async () => {
   sopra.classList.remove('sopra');
   const banco = banchi.find(b => String(b.id) === sopra.dataset.banco);
   if (!banco) return;
+  if (cosa.bancoIntero) { await spostaBanco(cosa.bancoIntero, banco); return; }
   let posto = sopra.dataset.posto !== undefined ? Number(sopra.dataset.posto) : banco.posti.indexOf(null);
 
   if (cosa.banco) {
