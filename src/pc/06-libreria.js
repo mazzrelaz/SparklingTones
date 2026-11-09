@@ -64,15 +64,21 @@ function disegnaFiltri() {
       disegnaLibreria();
     });
   }
-  for (const { nome, quanti } of categorie) {
-    const q = document.createElement('span');
-    q.className = 'quanti';
-    q.textContent = quanti;
-    pastiglia([nome, q], vista.categoria === nome, () => {
-      vista.categoria = vista.categoria === nome ? '' : nome;
-      disegnaLibreria();
-    });
-  }
+  // Le categorie in una tendina sola: sono tante, e in fila riempivano mezza colonna.
+  if (!categorie.length) return;
+  const scelta = categorie.find(c => c.nome === vista.categoria);
+  const freccia = document.createElement('span');
+  freccia.className = 'quanti';
+  freccia.textContent = '▾';
+  pastiglia([scelta ? scelta.nome : tr('categoria'), freccia], !!scelta, e => apriTendina(e.currentTarget, t => {
+    voceTendina(t, tr('tutte le categorie'), () => { vista.categoria = ''; disegnaLibreria(); }, { scelta: !scelta });
+    for (const { nome, quanti } of categorie) {
+      voceTendina(t, `${testoConNome(nome)}<span class="quanti">${quanti}</span>`, () => {
+        vista.categoria = nome;
+        disegnaLibreria();
+      }, { scelta: vista.categoria === nome });
+    }
+  }));
 }
 
 function rigaPreset(record, slot) {
