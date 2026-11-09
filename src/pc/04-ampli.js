@@ -139,8 +139,21 @@ async function apriSlot(n) {
   await occupa(async () => {
     await codaVuota();
     await spark.send(Spark.commands.changePreset(n));
-    await attendi(300);
-    await apriDalVivo(n);
+    // Il suono cambia subito (`0x0138`, come i pulsantoni dell'app); il palco mostra **subito** la
+    // copia in libreria di quello slot, coi comandi fermi (`occupa`) finché la rilettura
+    // dall'ampli non dà i valori veri: girare manopole su valori non riletti resta vietato.
+    // (9 novembre 2026: l'utente lo trovava lento quando il palco aspettava la rilettura.)
+    const record = suAmpli[n];
+    if (record) {
+      mettiSulPalco({ record, slot: n, offline: false });
+      ora.attendibile = false;
+      stato(tr('«{0}» — {1}', record.name, nomeSlot(n)));
+    }
+    await attendi(120);
+    if (!await apriDalVivo(n) && record) {
+      ora = null;          // senza la rilettura non si regola niente
+      disegnaTutto();
+    }
   });
 }
 
@@ -201,7 +214,6 @@ function disegnaSlot() {
   disegnaLibreria();
   disegnaBanchi();
   const qui = ora && ora.slot !== null ? ora.slot : -1;
-  $('prima').disabled = $('dopo').disabled = occupato || ascoltoBase;
   $('prima').title = qui >= 0 ? tr('slot prima') : tr('ultimo slot');
   $('dopo').title = qui >= 0 ? tr('slot dopo') : tr('primo slot');
 }

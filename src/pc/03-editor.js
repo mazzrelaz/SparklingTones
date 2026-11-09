@@ -56,6 +56,7 @@ function disegnaTesta() {
   mod.hidden = !(pieno && (ora.toccato || ascoltoBase));
   mod.classList.toggle('confronto', ascoltoBase);
   mod.textContent = ascoltoBase ? tr('ascolti il preset salvato') : tr('modificato · non salvato');
+  mod.title = mod.textContent;   // sotto i 1280 px resta solo il pallino
   $('salva').classList.toggle('da-salvare', pieno && ora.toccato);
   $('salva').disabled = !pieno || ascoltoBase;
   $('esporta').disabled = !pieno;
@@ -66,6 +67,8 @@ function disegnaTesta() {
   $('bpm').disabled = !pieno || ascoltoBase;
   if (document.activeElement !== $('bpm')) $('bpm').value = pieno ? ora.bpm : '';
   $('rileggi').disabled = !spark.connected;
+  // ‹ › si spengono solo mentre l'ampli lavora: qui, perché `occupa` alla fine ridisegna la testa.
+  $('prima').disabled = $('dopo').disabled = occupato || ascoltoBase || !(spark.connected || suAmpli.some(Boolean));
   document.body.classList.toggle('fermo', ascoltoBase || occupato);
 }
 

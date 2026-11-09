@@ -60,9 +60,12 @@
   #menu svg { width:20px; height:20px; }
 
   /* ---------------------------------------------------------------- sotto la barra */
-  .sotto-barra { flex:none; display:grid; grid-template-columns:minmax(max-content, 1fr) minmax(0, 420px) minmax(max-content, 1fr);
+  /* Il nome del preset sta al centro della finestra: le due colonne ai lati sono uguali (9 novembre,
+     l'utente: «la scritta non è in centro»). Sotto i 1300 px i tasti ai lati restano con la sola icona. */
+  .sotto-barra { flex:none; display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, min(420px, 32vw)) minmax(0, 1fr);
                  align-items:center; gap:14px; padding:6px 16px 5px; background:var(--incavo); border-bottom:1px solid var(--line-soft); }
-  .sb-lato { display:flex; align-items:center; gap:8px; }
+  .sb-lato { display:flex; align-items:center; gap:8px; min-width:0; }
+  @media (max-width:1300px) { .sotto-barra .testo { display:none; } }
   .sb-lato.destra { justify-content:flex-end; }
   .sotto-barra .gruppo { background:var(--panel); gap:2px; padding:3px 4px; }
   .sotto-barra .gruppo button { padding:4px 8px; display:flex; align-items:center; gap:6px; background:transparent; border-color:transparent; }
@@ -70,17 +73,25 @@
   #salva.da-salvare { color:var(--ambra); }
   #confronta { font-weight:700; font-size:0.78rem; letter-spacing:0.04em; }
   #confronta.attivo { background:var(--ambra) !important; color:#1b2028; }
-  .preset-centro { display:flex; flex-direction:column; align-items:center; min-width:0; }
-  .preset-riga { display:flex; align-items:center; gap:10px; min-width:0; max-width:100%; }
-  .preset-riga button { border-radius:50%; width:28px; height:28px; padding:0; display:grid; place-items:center; background:var(--panel); flex:none; }
-  #preset-nome { font-family:var(--strumento); font-size:1.15rem; font-weight:700; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* il centro come nel Pulze: il nome grande da solo, in centro anche in verticale; lo slot e «modificato» accanto,
+     fuori dal conto del centro */
+  .preset-centro { display:flex; flex-direction:column; align-items:center; justify-content:center; align-self:stretch; min-width:0; }
+  .preset-riga { display:flex; align-items:center; gap:10px; min-width:0; max-width:100%; position:relative; }
+  .preset-riga .accanto { position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); display:flex; gap:6px; align-items:center; white-space:nowrap; }
+  .freccia { flex:none; width:34px; height:34px; padding:0; border-radius:50%; display:grid; place-items:center; }
+  .freccia > svg.ico { width:18px; height:18px; }
+  #preset-nome { font-family:var(--strumento); font-size:1.65rem; line-height:1.15; letter-spacing:0.01em; font-weight:700; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #preset-dove { font-family:var(--strumento); font-size:0.7rem; font-weight:700; letter-spacing:0.05em; color:var(--faint);
                  border:1px solid var(--line); border-radius:5px; padding:1px 6px; flex:none; }
-  .preset-sotto { display:flex; align-items:center; gap:8px; height:18px; max-width:100%; min-width:0; }
-  #modificato { font-family:var(--strumento); font-size:0.66rem; font-weight:600; color:var(--ambra); flex:none;
-                border:1px solid var(--ambra); border-radius:999px; padding:0 8px; white-space:nowrap; }
+  #modificato { font-family:var(--strumento); font-size:0.66rem; font-weight:600; letter-spacing:0.03em; color:var(--ambra); flex:none;
+                border:1px solid var(--ambra); border-radius:999px; padding:1px 9px; white-space:nowrap; }
+  @media (max-width:1279px) {
+    /* poco posto: solo un pallino ambra (il titolo dice cosa), come nel Pulze */
+    #modificato { width:11px; height:11px; padding:0; font-size:0; border-radius:50%; background:var(--ambra); }
+  }
   #modificato.confronto { background:rgba(245,176,65,0.12); }
-  #stato { font-size:0.74rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+  /* la riga di stato sta nella barra in alto, accanto al logo: sotto il nome lo spingeva in alto (9 novembre) */
+  #stato { flex:1; min-width:0; margin-left:14px; font-size:0.8rem; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #stato[data-tipo="errore"] { color:var(--rosso); }
   #stato[data-tipo="ok"] { color:var(--green); }
 
@@ -361,7 +372,7 @@
 <header class="barra">
   <img class="logo" src="icons/logo.svg" alt="SparklingTones">
   <span class="logo-pc">PC</span>
-  <div class="spazio"></div>
+  <span id="stato"></span>
   <button id="rileggi" title="Rileggi dall'ampli il suono che sta facendo"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
   <div class="gruppo" title="Il tempo del preset: gli effetti a tempo lo seguono"><span class="etichetta">BPM</span><input class="numero" id="bpm" inputmode="numeric" autocomplete="off"></div>
   <span id="nome-ampli"></span>
@@ -372,7 +383,7 @@
 <div class="sotto-barra">
   <div class="sb-lato">
     <div class="gruppo">
-      <button id="salva"><svg class="ico" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></svg>Salva…</button>
+      <button id="salva" title="Salva…"><svg class="ico" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></svg><span class="testo">Salva…</span></button>
     </div>
     <div class="gruppo">
       <button id="annulla" title="Annulla"><svg class="ico" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
@@ -380,24 +391,23 @@
       <button id="confronta" title="Confronta con il preset salvato">A/B</button>
     </div>
     <div class="gruppo">
-      <button id="importa"><svg class="ico" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M4 15v5h16v-5"/></svg>Importa</button>
-      <button id="esporta"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 15v5h16v-5"/></svg>Esporta</button>
+      <button id="importa" title="Importa un file"><svg class="ico" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M4 15v5h16v-5"/></svg><span class="testo">Importa</span></button>
+      <button id="esporta" title="Esporta il preset"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 15v5h16v-5"/></svg><span class="testo">Esporta</span></button>
     </div>
   </div>
   <div class="preset-centro">
     <div class="preset-riga">
-      <button id="prima" title="Slot prima">‹</button>
+      <button id="prima" class="freccia" title="Slot prima" aria-label="Slot prima"><svg class="ico" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>
       <h1 id="preset-nome">—</h1>
-      <span id="preset-dove" hidden></span>
-      <button id="dopo" title="Slot dopo">›</button>
+      <button id="dopo" class="freccia" title="Slot dopo" aria-label="Slot dopo"><svg class="ico" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+      <span class="accanto"><span id="preset-dove" hidden></span><span id="modificato" hidden>modificato · non salvato</span></span>
     </div>
-    <div class="preset-sotto"><span id="modificato" hidden>modificato · non salvato</span><span id="stato"></span></div>
   </div>
   <div class="sb-lato destra">
     <div class="gruppo">
-      <button id="apri-banchi" title="I banchi, come le Songlist"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Banchi</button>
-      <button id="apri-pedale" title="Il pedale SparklingTones"><svg class="ico" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="13.5" r="2.2"/><circle cx="16" cy="13.5" r="2.2"/></svg>Pedale<span class="pallino-pedale" id="pallino-pedale" hidden></span></button>
-      <button id="apri-tuner" title="L'accordatore dell'ampli"><svg class="ico" viewBox="0 0 24 24"><path d="M9 3v8a3 3 0 0 0 6 0V3M12 14v7"/></svg>Tuner</button>
+      <button id="apri-banchi" title="I banchi, come le Songlist"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="testo">Banchi</span></button>
+      <button id="apri-pedale" title="Il pedale SparklingTones"><svg class="ico" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="13.5" r="2.2"/><circle cx="16" cy="13.5" r="2.2"/></svg><span class="testo">Pedale</span><span class="pallino-pedale" id="pallino-pedale" hidden></span></button>
+      <button id="apri-tuner" title="L'accordatore dell'ampli"><svg class="ico" viewBox="0 0 24 24"><path d="M9 3v8a3 3 0 0 0 6 0V3M12 14v7"/></svg><span class="testo">Tuner</span></button>
     </div>
   </div>
 </div>
