@@ -1294,3 +1294,8 @@ Sostituito quando l'utente ha scartato Control X e wah (il pedale d'espressione 
   **Da misurare con l'ampli** (dubbio dell'utente): l'Auto Wah gratuito (anche lui `JH.Vox846`) suona senza aprire l'app
   ufficiale? E lo sblocco Hendrix resta dopo aver spento l'ampli? Mai misurati apposta.
   Tutto in `docs/pedale-lavoro.md`, con la mappa dei connettori (`foto/pedale/millefori-connettori.png`).
+
+## Estratto di CLAUDE.md del 9 novembre 2026: il wah al posto del LA Comp
+
+- **Il wah al posto del LA Comp** (22 ottobre): non è un difetto; rimedio dato, **da sentire se ha funzionato**.
+  Dettaglio: `docs/diario.md`, estratto del 29 ottobre (sera).

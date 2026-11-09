@@ -274,19 +274,3 @@ scheda. Niente di nuovo verso fuori. Controllato il codice nuovo (`src/pc/`): i 
 passano da `testoConNome` o da `textContent`; **il colore di una famiglia e l'app key di Dropbox stavano dentro
 un attributo HTML** (un backup importato può portare un colore con le virgolette): ora si mettono da JS
 (`style.setProperty`, `.value`). `test/ampli-finto.js` si carica solo con `#finto` e non parla con niente.
-
-## Il sync automatico con Dropbox — 9 novembre 2026
-
-Stesse strade di prima: `api.dropboxapi.com` e `content.dropboxapi.com` (già nella CSP), stesso token, la
-cartella dell'app su Dropbox; in più un secondo file, `/spark-sicurezza.json`. Niente di nuovo verso fuori. La
-differenza è che **quello che arriva lassù si applica da solo**, senza un gesto dell'utente: chi scrive quel
-file (solo chi ha il token della sua app) può cambiare la libreria. Le difese:
-
-- **una fusione che cancellerebbe più di 5 preset chiede prima** (Esc o tocco fuori = li tiene); sotto la
-  soglia vale la regola di sempre, il preset toccato qui dopo la cancellazione resta;
-- **il backup di sicurezza non lo tocca il sync**: lo scrive e lo rimette solo l'utente, e rimetterlo non
-  cancella niente;
-- i nomi che arrivano passano da `testoConNome` (nella domanda) o da `textContent` (riga di stato, log);
-- un preset arrivato che l'ampli non ha resta fermo a `controllaPreset` prima di partire, come prima;
-- un file rotto o non della libreria ferma il giro con un errore, senza toccare niente
-  (`fondiSincro` controlla `format` prima di scrivere).

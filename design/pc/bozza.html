@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SparklingTones PC — bozza</title>
+<style>
+  /* I font del Pulze (Inter, Space Grotesk) nella pagina vera andranno copiati in fonts/; qui, se mancano, Segoe UI. */
+  /* I colori del Pulze Mazz Editor (scelta dell'utente, 9 novembre 2026): grigio-blu ardesia, selezioni blu. */
+  :root {
+    color-scheme:dark;
+    --bg:#1e232b; --panel:#2a313c; --panel2:#323a47; --line:#3a4351; --line-soft:#303844;
+    --text:#dde3ec; --dim:#9aa4b3; --faint:#687384;
+    --incavo:#1b2028; --rialzo:#36404d; --traccia:#3f4957;
+    --accent:#2f7fe8; --accent-chiaro:#4c95f0; --su-accent:#ffffff;
+    --green:#4cd38a; --rosso:#ff7a7a; --ambra:#f5b041;
+    --slot-a:#e5484d; --slot-b:#3fbf6f;
+    --font:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --strumento:'Space Grotesk','Inter',-apple-system,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; height:100%; overscroll-behavior:none; }
+  body { background:var(--bg); color:var(--text); font-family:var(--font); font-size:14px; -webkit-font-smoothing:antialiased;
+         display:flex; flex-direction:column; overflow:hidden; }
+  [hidden] { display:none !important; }
+  button { font-family:var(--strumento); font-size:0.82rem; font-weight:600; letter-spacing:0.02em; color:var(--text);
+           background:var(--rialzo); border:1px solid var(--line); border-radius:8px; padding:7px 12px; cursor:pointer; }
+  button:hover:not(:disabled) { border-color:var(--faint); }
+  button:disabled { opacity:0.4; cursor:default; }
+  button.primario { background:var(--accent); border-color:var(--accent); color:var(--su-accent); }
+  button.primario:hover:not(:disabled) { background:var(--accent-chiaro); border-color:var(--accent-chiaro); }
+  svg.ico { width:16px; height:16px; display:block; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+
+  /* ---------------------------------------------------------------- la barra in alto */
+  .barra { flex:none; display:flex; align-items:center; gap:8px; padding:8px 16px;
+           background:linear-gradient(#2f3743, #262d37); border-bottom:1px solid var(--line); }
+  .logo { height:26px; width:auto; display:block; }
+  .logo-pc { font-family:var(--strumento); font-size:0.66rem; font-weight:700; letter-spacing:0.1em; color:var(--faint);
+             border:1px solid var(--line); border-radius:5px; padding:2px 6px; margin-left:4px; }
+  .spazio { flex:1; }
+  .gruppo { display:flex; align-items:center; gap:8px; background:var(--incavo); border:1px solid var(--line);
+            border-radius:10px; padding:4px 8px; }
+  .gruppo .etichetta { font-family:var(--strumento); font-size:0.7rem; color:var(--dim); letter-spacing:0.06em; text-transform:uppercase; }
+  .gruppo button { padding:4px 10px; }
+  .numero { width:3.6em; font-family:var(--strumento); font-size:0.95rem; font-weight:600; color:var(--text);
+            background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:2px 5px; }
+  .lampada { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--faint); margin-right:7px; vertical-align:1px; }
+  #collega.attivo { background:var(--rialzo); border-color:var(--line); color:var(--text); }
+  #collega.attivo .lampada { background:var(--green); box-shadow:0 0 7px rgba(76,211,138,0.7); }
+  #menu { padding:6px 9px; }
+  #menu svg { width:20px; height:20px; }
+
+  /* ---------------------------------------------------------------- sotto la barra */
+  .sotto-barra { flex:none; display:grid; grid-template-columns:minmax(max-content, 1fr) minmax(0, 420px) minmax(max-content, 1fr);
+                 align-items:center; gap:14px; padding:6px 16px 5px; background:var(--incavo); border-bottom:1px solid var(--line-soft); }
+  .sb-lato { display:flex; align-items:center; gap:8px; }
+  .sb-lato.destra { justify-content:flex-end; }
+  .sotto-barra .gruppo { background:var(--panel); gap:2px; padding:3px 4px; }
+  .sotto-barra .gruppo button { padding:4px 8px; display:flex; align-items:center; gap:6px; background:transparent; border-color:transparent; }
+  .sotto-barra .gruppo button:hover { background:var(--rialzo); }
+  #confronta { font-weight:700; font-size:0.78rem; letter-spacing:0.04em; }
+  .preset-centro { display:flex; flex-direction:column; align-items:center; min-width:0; }
+  .preset-riga { display:flex; align-items:center; gap:10px; min-width:0; max-width:100%; }
+  .preset-riga button { border-radius:50%; width:28px; height:28px; padding:0; display:grid; place-items:center; background:var(--panel); }
+  #preset-nome { font-family:var(--strumento); font-size:1.15rem; font-weight:700; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .preset-sotto { display:flex; align-items:center; gap:8px; height:18px; }
+  #modificato { font-family:var(--strumento); font-size:0.66rem; font-weight:600; color:var(--ambra);
+                border:1px solid var(--ambra); border-radius:999px; padding:0 8px; }
+  #stato { font-size:0.74rem; color:var(--dim); white-space:nowrap; }
+  /* gli otto slot dell'ampli: rosso banco A, verde banco B (regola dell'app) */
+  .slot-fila { display:flex; gap:3px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:3px; }
+  .slot-fila .etichetta { font-family:var(--strumento); font-size:0.64rem; color:var(--faint); letter-spacing:0.08em;
+                          text-transform:uppercase; align-self:center; padding:0 6px 0 4px; }
+  .slot { min-width:36px; padding:4px 0; border-radius:6px; background:transparent; border:1px solid transparent; position:relative; }
+  .slot::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:5px; vertical-align:1px; }
+  .slot.a::before { background:var(--slot-a); }
+  .slot.b::before { background:var(--slot-b); }
+  .slot:hover { background:var(--rialzo); }
+  .slot.suona { background:var(--accent); color:var(--su-accent); }
+  .slot-sep { width:1px; background:var(--line); margin:3px 2px; }
+
+  /* ---------------------------------------------------------------- il palco */
+  .centro { flex:1; min-height:0; display:flex; padding:14px 16px 0; }
+  #palco { flex:1; min-width:0; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px;
+           display:grid; grid-template-columns:minmax(220px, 30%) minmax(0, 1fr) 240px; gap:16px; min-height:0; }
+  #foto { display:flex; align-items:center; justify-content:center; border-radius:10px; padding:18px; min-height:0; position:relative;
+          background:radial-gradient(circle at 50% 45%, #3b4452, #252b34 72%); overflow:hidden; }
+  #foto img { max-width:100%; max-height:100%; object-fit:contain; filter:drop-shadow(0 14px 22px rgba(0,0,0,0.55)); transition:filter 0.2s; }
+  #palco.spento #foto img { filter:grayscale(0.85) brightness(0.55) drop-shadow(0 14px 22px rgba(0,0,0,0.55)); }
+  .foto-vuota { font-family:var(--strumento); font-size:2rem; font-weight:700; color:var(--faint); }
+  .dettaglio { display:flex; flex-direction:column; min-width:0; overflow-y:auto; overscroll-behavior:contain; }
+  .det-cima { display:flex; align-items:center; gap:10px; }
+  .etichetta-slot { font-family:var(--strumento); font-weight:700; font-size:0.74rem; letter-spacing:0.08em;
+                    padding:4px 10px; border-radius:6px; border:1px solid var(--line); background:var(--rialzo); color:var(--faint); }
+  .etichetta-slot.on { background:var(--accent); border-color:var(--accent); color:var(--su-accent); }
+  .det-pos { color:var(--faint); font-size:0.78rem; }
+  .jh { font-family:var(--strumento); font-size:0.62rem; font-weight:700; letter-spacing:0.05em; color:#1b2028;
+        background:var(--ambra); border-radius:4px; padding:1px 5px; vertical-align:2px; }
+  #det-nome { font-family:var(--strumento); font-size:2rem; font-weight:700; margin:6px 0 0; line-height:1.15; }
+  #palco.spento #det-nome { color:var(--dim); }
+  #det-sotto { color:var(--dim); margin:4px 0 0; }
+  #manopole { list-style:none; margin:20px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:18px 10px; align-content:flex-start; }
+  .comando { width:92px; display:flex; flex-direction:column; align-items:center; gap:4px; user-select:none; }
+  /* le manopole e le levette dell'editor classico (stessi colori e misure) */
+  .comando { width:104px; --crema:#e6cfa4; }
+  .comando .nome { font-size:0.8rem; font-weight:500; color:#fff; text-transform:uppercase; letter-spacing:0.03em; text-align:center;
+                   max-width:100%; line-height:1.15; text-shadow:0 1px 6px #000; }
+  .comando .val { font-family:var(--strumento); font-weight:600; font-size:0.78rem; color:var(--dim); text-align:center; font-variant-numeric:tabular-nums; }
+  .comando.largo { width:auto; min-width:104px; padding-top:20px; }
+  .girevole { cursor:ns-resize; touch-action:none; display:block; margin-bottom:4px; filter:drop-shadow(0 6px 8px rgba(0,0,0,0.75)); }
+  .girevole .guida, .girevole .arco { transform:rotate(135deg); transform-origin:50% 50%; }
+  .girevole .guida { stroke:rgba(255,255,255,0.13); stroke-width:3; }
+  .girevole .arco { stroke:var(--crema); stroke-width:3.5; }
+  .girevole .corpo { fill:#2c2b2a; stroke:#8f8a84; stroke-width:1.5; }
+  .girevole .denti { fill:#1c1b1a; stroke:#c9c4bc; stroke-width:1.3; stroke-linejoin:round; }
+  .girevole .anello { fill:#121212; stroke:#4a4744; stroke-width:1; }
+  .girevole .tacca { stroke:#fff; stroke-width:3.5; stroke-linecap:round; }
+  .comando.leva { cursor:pointer; }
+  .comando.leva svg { margin-bottom:4px; filter:drop-shadow(0 6px 8px rgba(0,0,0,0.75)); }
+  .comando.leva .pista-leva { fill:#121212; stroke:#8f8a84; stroke-width:2.5; }
+  .comando.leva .pallino { fill:#c9c4bc; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.8)); }
+  .comando.leva.acceso .pista-leva { stroke:var(--crema); }
+  .comando.leva.acceso .pallino { fill:var(--crema); }
+  #palco.spento #manopole { opacity:0.45; }
+  .pill { font-size:0.75rem; padding:4px 12px; border-radius:999px; color:var(--faint); background:var(--incavo); border:1px solid var(--line); }
+  .pill.on { color:var(--su-accent); background:var(--accent); border-color:var(--accent); }
+  .scelta { min-width:150px; text-align:left; background:var(--incavo); display:flex; justify-content:space-between; gap:10px; }
+  .scelta::after { content:'▾'; color:var(--dim); }
+  .det-piede { margin:auto 0 0; padding-top:16px; color:var(--faint); font-size:0.75rem; }
+
+  .modelli { display:flex; flex-direction:column; background:var(--incavo); border:1px solid var(--line); border-radius:10px; min-height:0; overflow:hidden; }
+  #cerca-modello { margin:8px; padding:6px 9px; font:inherit; color:var(--text); background:var(--panel); border:1px solid var(--line); border-radius:6px; }
+  #lista-modelli { list-style:none; margin:0; padding:0 6px 8px; overflow-y:auto; flex:1; overscroll-behavior:contain; }
+  #lista-modelli button { display:flex; align-items:center; gap:6px; width:100%; text-align:left; background:transparent; border:0; border-radius:6px;
+                          padding:5px 9px; font-family:var(--font); font-weight:400; font-size:0.85rem; letter-spacing:0; }
+  #lista-modelli button:hover { background:var(--rialzo); }
+  #lista-modelli button.sì { background:var(--accent); color:var(--su-accent); font-weight:600; }
+  #lista-modelli .famiglia { font-family:var(--strumento); font-size:0.66rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+                             color:var(--accent-chiaro); padding:8px 9px 3px; border-top:1px solid #4d5868; margin-top:6px; }
+  #lista-modelli .famiglia:first-child { border-top:0; margin-top:0; }
+
+  /* ---------------------------------------------------------------- la catena in basso */
+  .catena { flex:none; margin:14px 16px 14px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 16px 14px; }
+  .catena-cima { display:flex; align-items:baseline; gap:12px; margin-bottom:8px; }
+  .catena-cima h2 { font-family:var(--strumento); font-size:0.78rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); margin:0; }
+  .catena-cima .nota { color:var(--faint); font-size:0.75rem; }
+  .fila { display:grid; grid-template-columns:30px minmax(0, 1fr) 30px; align-items:start; gap:8px; position:relative; }
+  .fila::before { content:''; position:absolute; left:15px; right:15px; top:98px; height:2px; background:var(--traccia); }
+  .capo { position:relative; margin-top:84px; font-family:var(--strumento); font-size:0.62rem; color:var(--faint); text-align:center; letter-spacing:0.05em; }
+  .capo b { display:block; width:14px; height:14px; margin:0 auto 4px; border-radius:50%; background:var(--panel); border:2px solid var(--traccia); }
+  #catena { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:8px; position:relative; }
+  .anello { display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
+  .anello .chip { width:78px; padding:3px 0; font-size:0.7rem; letter-spacing:0.07em; border-radius:5px; color:var(--faint); }
+  .anello .chip.on { background:var(--accent); border-color:var(--accent); color:var(--su-accent); }
+  .miniatura { position:relative; width:100%; max-width:124px; height:112px; display:flex; align-items:center; justify-content:center;
+               border-radius:10px; border:2px solid transparent; background:var(--panel); cursor:pointer; padding:6px; }
+  .miniatura:hover { border-color:var(--line); }
+  .miniatura img { max-width:100%; max-height:96px; object-fit:contain; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.55)); pointer-events:none; }
+  .miniatura .pos { position:absolute; top:3px; left:6px; font-family:var(--strumento); font-size:0.66rem; color:var(--faint); }
+  .anello.spento .miniatura img { filter:grayscale(0.9) brightness(0.45); }
+  .anello.scelto .miniatura { border-color:var(--accent); background:rgba(47,127,232,0.2); }
+  .anello .mod { width:100%; max-width:140px; font-size:0.78rem; color:var(--text); background:var(--incavo); border-radius:6px; padding:5px 6px;
+                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .anello.spento .mod { color:var(--faint); }
+
+  /* ---------------------------------------------------------------- tendine e finestre (mai quelle del sistema) */
+  .tendina { position:fixed; z-index:20; min-width:240px; max-height:min(70vh, 560px); overflow-y:auto; padding:6px; background:var(--panel);
+             border:1px solid #4d5868; border-radius:10px; box-shadow:0 14px 34px rgba(0,0,0,0.6); }
+  .tendina button { display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:none; border:0; border-radius:7px;
+                    padding:7px 12px; font-family:var(--font); font-weight:400; font-size:0.88rem; letter-spacing:0; }
+  .tendina button:hover { background:var(--rialzo); }
+  .tendina button.sì { background:var(--accent); color:var(--su-accent); font-weight:600; }
+  .tendina .famiglia { font-family:var(--strumento); font-size:0.68rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase;
+                       color:var(--accent-chiaro); padding:8px 12px 3px; }
+  .tendina hr { border:0; border-top:1px solid var(--line); margin:6px 4px; }
+  .tendina svg { width:18px; height:18px; flex:none; fill:none; stroke:var(--dim); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .tendina .voce-caffe { color:#f2c14e; font-weight:700; }
+  .tendina .voce-caffe svg { stroke:#f2c14e; }
+  .velo { position:fixed; inset:0; z-index:30; background:rgba(10,13,18,0.6); display:grid; place-items:center; }
+  .finestra { width:min(560px, calc(100vw - 32px)); background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px 22px;
+              box-shadow:0 20px 50px rgba(0,0,0,0.6); }
+  .finestra h2 { font-family:var(--strumento); font-size:1.15rem; margin:0 0 14px; }
+  .finestra h3 { font-family:var(--strumento); font-size:0.74rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); margin:18px 0 8px; }
+  .finestra p { color:var(--dim); line-height:1.5; margin:0 0 10px; font-size:0.86rem; }
+  .riga-azioni { display:flex; gap:8px; flex-wrap:wrap; }
+  .scatola { background:var(--incavo); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .scatola .stato-db { display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:0.86rem; }
+  .finestra .piede { display:flex; justify-content:flex-end; margin-top:18px; }
+  .nota-bozza { position:fixed; right:16px; bottom:16px; z-index:10; max-width:330px; font-size:0.8rem; line-height:1.45; color:#1b2028;
+                background:var(--ambra); border-radius:10px; padding:9px 12px; box-shadow:0 8px 20px rgba(0,0,0,0.4); }
+</style>
+</head>
+<body>
+
+<header class="barra">
+  <img class="logo" src="../../icons/logo.svg" alt="SparklingTones">
+  <span class="logo-pc">PC</span>
+  <div class="spazio"></div>
+  <button id="rileggi" title="Rileggi dall'ampli"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
+  <div class="gruppo"><span class="etichetta">BPM</span><input class="numero" id="bpm" value="120"></div>
+  <button id="collega" class="primario"><span class="lampada"></span>Collega</button>
+  <button id="menu" title="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+
+<div class="sotto-barra">
+  <div class="sb-lato">
+    <div class="gruppo">
+      <button id="salva"><svg class="ico" viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/></svg>Salva…</button>
+    </div>
+    <div class="gruppo">
+      <button title="Annulla"><svg class="ico" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+      <button title="Ripeti"><svg class="ico" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+      <button id="confronta" title="Confronta con il preset salvato">A/B</button>
+    </div>
+    <div class="gruppo">
+      <button><svg class="ico" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M4 15v5h16v-5"/></svg>Importa</button>
+      <button><svg class="ico" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 15v5h16v-5"/></svg>Esporta</button>
+    </div>
+  </div>
+  <div class="preset-centro">
+    <div class="preset-riga">
+      <button id="prima" title="Slot prima">‹</button>
+      <h1 id="preset-nome">Silver Lining</h1>
+      <button id="dopo" title="Slot dopo">›</button>
+    </div>
+    <div class="preset-sotto"><span id="modificato" hidden>modificato · non salvato</span><span id="stato">Bozza: niente è collegato</span></div>
+  </div>
+  <div class="sb-lato destra">
+    <div class="slot-fila" id="slot-fila"><span class="etichetta">Ampli</span></div>
+  </div>
+</div>
+
+<main class="centro">
+  <section id="palco">
+    <div id="foto"></div>
+    <div class="dettaglio">
+      <div class="det-cima"><button class="etichetta-slot" id="det-chip"></button><span class="det-pos" id="det-pos"></span></div>
+      <h2 id="det-nome"></h2>
+      <p id="det-sotto"></p>
+      <ul id="manopole"></ul>
+      <p class="det-piede">Trascina su e giù · Maiusc = piano · rotella = un passo · doppio clic = metà corsa</p>
+    </div>
+    <div class="modelli">
+      <input id="cerca-modello" placeholder="Cerca modello…">
+      <ul id="lista-modelli"></ul>
+    </div>
+  </section>
+</main>
+
+<section class="catena">
+  <div class="catena-cima"><h2>Catena</h2><span class="nota">clic sull'immagine = sul palco · clic sull'etichetta = acceso/spento · l'ordine dello Spark 2 è fisso</span></div>
+  <div class="fila">
+    <div class="capo"><b></b>IN</div>
+    <div id="catena"></div>
+    <div class="capo"><b></b>OUT</div>
+  </div>
+</section>
+
+<div class="nota-bozza" id="nota-bozza">Bozza con un preset finto: manopole, catena, modelli, slot e menu ☰ si toccano, ma niente parla con l'ampli. Clic qui per nasconderla.</div>
+
+<script src="../../src/spark-effetti.js"></script>
+<script>
+'use strict';
+const E = window.SparkEffetti;
+const POSTI = ['GATE', 'COMP', 'DRIVE', 'AMP', 'MOD', 'DELAY', 'REVERB'];
+const NOMI_POSTI = ['Noise gate', 'Comp / Wah', 'Drive', 'Ampli', 'Modulazione / EQ', 'Delay', 'Riverbero'];
+const TIPI_RIVERBERO = E.nomiPosizioni('bias.reverb', 6);
+
+// Il preset finto della bozza: i valori vanno da 0 a 1 come nell'ampli.
+const valori = n => Array.from({ length: n }, (_, i) => [0.62, 0.45, 0.5, 0.7, 0.55, 0.35, 0.4, 0.6, 0.5][i % 9]);
+function blocco(id, acceso) {
+  const n = E.quanteManopole(id) || 5;
+  return { id, acceso, v: valori(n) };
+}
+const preset = [
+  blocco('bias.noisegate', true),
+  blocco('LA2AComp', false),
+  blocco('KlonCentaurSilver', true),
+  blocco('Twin', true),
+  blocco('ChorusAnalog', true),
+  blocco('DelayMono', true),
+  blocco('bias.reverb', true),
+];
+preset[6].v[6] = 0.3;   // Hall Natural
+const NOMI_SLOT = ['Silver Lining', 'Crunch Box', 'Blues Lead', 'Clean Chorus', 'Hendrix Fuzz', 'Metal Riff', 'Acoustic Sim', 'Ambient Pad'];
+let scelto = 3, slotSuona = 0, modificato = false;
+
+// ---------------------------------------------------------------- immagini (quelle scontornate del neon)
+function immagine(b) {
+  if (b.id === 'bias.reverb') {
+    const tipo = TIPI_RIVERBERO[Math.round(b.v[6] * 10)] || 'Hall Natural';
+    return '../../immagini/blocchi/Reverb-' + tipo.replace(/ /g, '') + '.webp';
+  }
+  return '../../immagini/blocchi/' + b.id.replace(/ /g, '') + '.webp';
+}
+const nomeDi = id => E.nome(id);
+// I riverberi sono nove modelli (Room Studio A … Plate Long): il nome è quello del modello scelto.
+const nomeBlocco = b => b.id === 'bias.reverb' ? (TIPI_RIVERBERO[Math.round(b.v[6] * 10)] || 'Riverbero') : nomeDi(b.id);
+const nascosto = (b, i) => b.id === 'bias.reverb' && i === 6;   // il modello del riverbero sta nell'elenco, non fra le manopole
+
+// ---------------------------------------------------------------- manopola rotonda (come nel Pulze)
+// La manopola dell'editor classico (`pomello` + `coronaClassica` dell'app): arco sottile crema fuori,
+// corpo, corona a 24 denti, anello liscio e tacca bianca.
+const DENTI_CLASSICI = (() => {
+  const denti = 24, dentro = 30.5, fuori = 35, passo = 2 * Math.PI / denti;
+  const punto = (r, a) => `${(50 + r * Math.sin(a)).toFixed(2)} ${(50 - r * Math.cos(a)).toFixed(2)}`;
+  let d = '';
+  for (let i = 0; i < denti; i++) {
+    const a = i * passo;
+    d += (i ? 'L' : 'M') + punto(dentro, a) + 'L' + punto(fuori, a + passo * 0.12) +
+         'L' + punto(fuori, a + passo * 0.46) + 'L' + punto(dentro, a + passo * 0.58);
+  }
+  return d + 'Z';
+})();
+function girevole(valore, cambia) {
+  const NS = 'http://www.w3.org/2000/svg', R = 47, GIRO = 2 * Math.PI * R * 0.75;
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100'); svg.setAttribute('width', 78); svg.setAttribute('height', 78); svg.classList.add('girevole');
+  const el = (tag, attr) => { const e = document.createElementNS(NS, tag); for (const k in attr) e.setAttribute(k, attr[k]); svg.appendChild(e); return e; };
+  el('circle', { cx: 50, cy: 50, r: R, class: 'guida', fill: 'none', 'stroke-dasharray': `${GIRO} 999` });
+  const arco = el('circle', { cx: 50, cy: 50, r: R, class: 'arco', fill: 'none' });
+  el('circle', { cx: 50, cy: 50, r: 39, class: 'corpo' });
+  el('path', { d: DENTI_CLASSICI, class: 'denti' });
+  el('circle', { cx: 50, cy: 50, r: 26, class: 'anello' });
+  const tacca = el('line', { x1: 50, y1: 25, x2: 50, y2: 41, class: 'tacca' });
+  function disegna(v) {
+    arco.setAttribute('stroke-dasharray', `${GIRO * v} 999`);
+    tacca.setAttribute('transform', `rotate(${-135 + v * 270} 50 50)`);
+  }
+  disegna(valore);
+  let y0 = null, v0 = 0;
+  svg.addEventListener('pointerdown', e => { y0 = e.clientY; v0 = valore; svg.setPointerCapture(e.pointerId); });
+  svg.addEventListener('pointermove', e => {
+    if (y0 === null) return;
+    const passo = e.shiftKey ? 1 / 1000 : 1 / 200;
+    valore = Math.min(1, Math.max(0, v0 + (y0 - e.clientY) * passo)); disegna(valore); cambia(valore);
+  });
+  svg.addEventListener('pointerup', () => { y0 = null; });
+  svg.addEventListener('wheel', e => { e.preventDefault(); valore = Math.min(1, Math.max(0, valore + (e.deltaY < 0 ? 0.01 : -0.01))); disegna(valore); cambia(valore); });
+  svg.addEventListener('dblclick', () => { valore = 0.5; disegna(valore); cambia(valore); });
+  return svg;
+}
+
+// ---------------------------------------------------------------- tendine finte
+let tendinaAperta = null;
+function chiudiTendina() { if (tendinaAperta) { tendinaAperta.remove(); tendinaAperta = null; } }
+function apriTendina(vicino, riempi) {
+  chiudiTendina();
+  const t = document.createElement('div'); t.className = 'tendina';
+  riempi(t);
+  document.body.appendChild(t);
+  const r = vicino.getBoundingClientRect(), h = t.offsetHeight, w = t.offsetWidth;
+  t.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+  t.style.top = (r.bottom + h + 8 < innerHeight ? r.bottom + 4 : Math.max(8, r.top - h - 4)) + 'px';
+  tendinaAperta = t;
+  const sel = t.querySelector('.sì'); if (sel) sel.scrollIntoView({ block: 'center' });
+}
+addEventListener('pointerdown', e => { if (tendinaAperta && !tendinaAperta.contains(e.target)) chiudiTendina(); }, true);
+addEventListener('keydown', e => { if (e.key === 'Escape') { chiudiTendina(); chiudiFinestra(); } });
+
+// I modelli di un posto, a famiglie per gli ampli; gli Hendrix in fondo, col bollo.
+function famiglieDi(pos) {
+  const ids = E.MODELLI[pos];
+  if (pos !== 3) {
+    const base = ids.filter(id => !E.eHendrix(id)), jh = ids.filter(id => E.eHendrix(id));
+    return jh.length ? [[null, base], [E.GRUPPO_HENDRIX, jh]] : [[null, base]];
+  }
+  return E.GRUPPI_AMPLI.map(g => [g, ids.filter(id => E.ampliGruppo(id) === g)]).filter(([, l]) => l.length);
+}
+function vociModelli(contenitore, pos, filtro, scegli, tag) {
+  const attuale = preset[pos].id;
+  for (const [fam, ids] of famiglieDi(pos)) {
+    const visti = ids.filter(id => !filtro || nomeDi(id).toLowerCase().includes(filtro));
+    if (!visti.length) continue;
+    if (fam) { const f = document.createElement(tag === 'li' ? 'li' : 'div'); f.className = 'famiglia'; f.textContent = fam; contenitore.appendChild(f); }
+    for (const id of visti) {
+      const b = document.createElement('button');
+      b.innerHTML = nomeDi(id) + (E.eHendrix(id) ? ' <span class="jh">JH</span>' : '');
+      if (id === attuale) b.classList.add('sì');
+      b.onclick = () => scegli(id);
+      if (tag === 'li') { const li = document.createElement('li'); li.appendChild(b); contenitore.appendChild(li); } else contenitore.appendChild(b);
+    }
+  }
+}
+function cambiaModello(pos, id) {
+  if (preset[pos].id === id) return;
+  preset[pos] = blocco(id, preset[pos].acceso);
+  segnaModificato(); disegnaTutto();
+}
+
+// ---------------------------------------------------------------- palco
+function disegnaPalco() {
+  const b = preset[scelto];
+  document.getElementById('palco').classList.toggle('spento', !b.acceso);
+  const foto = document.getElementById('foto'); foto.textContent = '';
+  const img = new Image(); img.src = immagine(b); img.alt = '';
+  img.onerror = () => { foto.innerHTML = '<span class="foto-vuota">' + POSTI[scelto] + '</span>'; };
+  foto.appendChild(img);
+  const chip = document.getElementById('det-chip');
+  chip.textContent = POSTI[scelto]; chip.classList.toggle('on', b.acceso);
+  chip.onclick = () => accendi(scelto);
+  document.getElementById('det-pos').textContent = NOMI_POSTI[scelto] + ' · ' + (b.acceso ? 'acceso' : 'spento');
+  document.getElementById('det-nome').innerHTML = nomeBlocco(b) + (E.eHendrix(b.id) ? ' <span class="jh">JH</span>' : '');
+  const reale = E.ampliReale(b.id);
+  document.getElementById('det-sotto').textContent = scelto === 3
+    ? (E.ampliGruppo(b.id) || '') + (reale ? ' · ispirato a ' + reale : '') : '';
+  const ul = document.getElementById('manopole'); ul.textContent = '';
+  const n = E.quanteManopole(b.id) || b.v.length;
+  // Gain, Bass, Middle, Treble, Master: l'ordine del frontale, non quello degli indici (come l'app).
+  const frontale = n === 5 && ['Gain', 'Treble', 'Middle', 'Bass', 'Master'].every((t, i) => E.manopola(b.id, i) === t);
+  for (const i of frontale ? [0, 3, 2, 1, 4] : [...Array(n).keys()]) {
+    if (nascosto(b, i)) continue;
+    const nome = E.manopola(b.id, i) || ('Parametro ' + (i + 1));
+    const li = document.createElement('li'); li.className = 'comando';
+    const posiz = E.posizioni(b.id, i);
+    if (E.interruttore(b.id, i)) {
+      const acceso = b.v[i] >= 0.5;
+      li.classList.add('leva'); li.classList.toggle('acceso', acceso);
+      li.innerHTML = `<svg viewBox="0 0 100 100" width="78" height="78"><rect class="pista-leva" x="33" y="8" width="34" height="84" rx="17"/>
+        <circle class="pallino" cx="50" cy="${acceso ? 29 : 71}" r="12"/></svg>`;
+      li.onclick = () => { b.v[i] = acceso ? 0 : 1; segnaModificato(); disegnaPalco(); };
+      li.append(testo('nome', nome), testo('val', acceso ? 'ON' : 'OFF'));
+    } else if (posiz) {
+      li.classList.add('largo');
+      const nomi = E.nomiPosizioni(b.id, i) || Array.from({ length: posiz }, (_, k) => String(k + 1));
+      const s = document.createElement('button'); s.className = 'scelta';
+      const att = Math.max(0, Math.round(b.v[i] * 10));
+      s.textContent = nomi[att];
+      s.onclick = () => apriTendina(s, t => nomi.forEach((nm, k) => {
+        const v = document.createElement('button'); v.textContent = nm; if (k === att) v.classList.add('sì');
+        v.onclick = () => { b.v[i] = k / 10; chiudiTendina(); segnaModificato(); disegnaTutto(); }; t.appendChild(v);
+      }));
+      li.append(s, testo('nome', nome));
+    } else {
+      const val = testo('val', (b.v[i] * 10).toFixed(1));
+      li.append(girevole(b.v[i], v => { b.v[i] = v; val.textContent = (v * 10).toFixed(1); segnaModificato(); }), testo('nome', nome), val);
+    }
+    ul.appendChild(li);
+  }
+  disegnaModelli();
+}
+function testo(cls, t) { const s = document.createElement('span'); s.className = cls; s.textContent = t; return s; }
+function disegnaModelli() {
+  const ul = document.getElementById('lista-modelli'); ul.textContent = '';
+  const filtro = document.getElementById('cerca-modello').value.trim().toLowerCase();
+  if (scelto === 6) {   // il riverbero ha un modello solo: qui si sceglie il tipo
+    const b = preset[6], att = Math.round(b.v[6] * 10);
+    TIPI_RIVERBERO.forEach((nm, k) => {
+      if (filtro && !nm.toLowerCase().includes(filtro)) return;
+      const li = document.createElement('li'), bt = document.createElement('button');
+      bt.textContent = nm; if (k === att) bt.classList.add('sì');
+      bt.onclick = () => { b.v[6] = k / 10; segnaModificato(); disegnaTutto(); };
+      li.appendChild(bt); ul.appendChild(li);
+    });
+    return;
+  }
+  vociModelli(ul, scelto, filtro, id => cambiaModello(scelto, id), 'li');
+  if (!ul.children.length) ul.innerHTML = '<li class="famiglia" style="border:0">Nessun modello</li>';
+}
+document.getElementById('cerca-modello').oninput = disegnaModelli;
+
+// ---------------------------------------------------------------- catena
+function disegnaCatena() {
+  const cat = document.getElementById('catena'); cat.textContent = '';
+  preset.forEach((b, pos) => {
+    const a = document.createElement('div');
+    a.className = 'anello' + (b.acceso ? '' : ' spento') + (pos === scelto ? ' scelto' : '');
+    const chip = document.createElement('button'); chip.className = 'chip' + (b.acceso ? ' on' : ''); chip.textContent = POSTI[pos];
+    chip.onclick = () => accendi(pos);
+    const m = document.createElement('div'); m.className = 'miniatura';
+    m.innerHTML = '<span class="pos">' + (pos + 1) + '</span>';
+    const img = new Image(); img.src = immagine(b); img.alt = ''; m.appendChild(img);
+    m.onclick = () => { scelto = pos; document.getElementById('cerca-modello').value = ''; disegnaTutto(); };
+    const mod = document.createElement('button'); mod.className = 'mod';
+    mod.innerHTML = nomeBlocco(b) + (E.eHendrix(b.id) ? ' <span class="jh">JH</span>' : '');
+    if (pos === 6) mod.onclick = () => apriTendina(mod, t => TIPI_RIVERBERO.forEach((nm, k) => {
+      const v = document.createElement('button'); v.textContent = nm; if (k === Math.round(b.v[6] * 10)) v.classList.add('sì');
+      v.onclick = () => { b.v[6] = k / 10; chiudiTendina(); segnaModificato(); disegnaTutto(); }; t.appendChild(v);
+    }));
+    else if (E.MODELLI[pos].length > 1) mod.onclick = () => apriTendina(mod, t => vociModelli(t, pos, '', id => { chiudiTendina(); cambiaModello(pos, id); }, 'div'));
+    else mod.disabled = true, mod.style.opacity = 1;
+    a.append(chip, m, mod);
+    cat.appendChild(a);
+  });
+}
+function accendi(pos) { preset[pos].acceso = !preset[pos].acceso; segnaModificato(); disegnaTutto(); }
+
+// ---------------------------------------------------------------- slot dell'ampli e preset
+function disegnaSlot() {
+  const fila = document.getElementById('slot-fila');
+  fila.querySelectorAll('.slot, .slot-sep').forEach(e => e.remove());
+  for (let n = 0; n < 8; n++) {
+    if (n === 4) { const s = document.createElement('span'); s.className = 'slot-sep'; fila.appendChild(s); }
+    const b = document.createElement('button');
+    b.className = 'slot ' + (n < 4 ? 'a' : 'b') + (n === slotSuona ? ' suona' : '');
+    b.textContent = (n < 4 ? 'A' : 'B') + (n % 4 + 1);
+    b.title = NOMI_SLOT[n];
+    b.onclick = () => suonaSlot(n);
+    fila.appendChild(b);
+  }
+}
+function suonaSlot(n) {
+  slotSuona = (n + 8) % 8; modificato = false;
+  document.getElementById('preset-nome').textContent = NOMI_SLOT[slotSuona];
+  document.getElementById('modificato').hidden = true;
+  document.getElementById('stato').textContent = 'Suona ' + (slotSuona < 4 ? 'A' : 'B') + (slotSuona % 4 + 1) + ' (finto)';
+  disegnaSlot();
+}
+document.getElementById('prima').onclick = () => suonaSlot(slotSuona - 1);
+document.getElementById('dopo').onclick = () => suonaSlot(slotSuona + 1);
+function segnaModificato() {
+  if (modificato) return;
+  modificato = true; document.getElementById('modificato').hidden = false;
+}
+
+// ---------------------------------------------------------------- menu ☰ e finestra Backup e Dropbox
+const ICONE = {
+  backup: '<path d="M7 18a5 5 0 0 1-.5-10A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9M12 12v8M9 15l3-3 3 3"/>',
+  file: '<path d="M6 3h8l4 4v14H6zM14 3v4h4"/>',
+  impost: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+  guida: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>',
+  telefono: '<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>',
+  bug: '<path d="M4 6h16v12H4zM4 7l8 6 8-6"/>',
+  caffe: '<path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3v3M12 3v3"/>',
+};
+const ico = k => '<svg viewBox="0 0 24 24">' + ICONE[k] + '</svg>';
+document.getElementById('menu').onclick = e => apriTendina(e.currentTarget, t => {
+  t.innerHTML = `
+    <button data-f="backup">${ico('backup')}Backup e Dropbox…</button>
+    <button>${ico('file')}Importa un file…</button>
+    <hr>
+    <button>${ico('impost')}Impostazioni</button>
+    <button>${ico('guida')}Guida</button>
+    <button>${ico('telefono')}Apri l'app per il telefono</button>
+    <hr>
+    <button>${ico('bug')}Segnala un problema</button>
+    <button class="voce-caffe">${ico('caffe')}Offrimi un caffè</button>`;
+  t.style.minWidth = '260px';
+  t.querySelector('[data-f="backup"]').onclick = () => { chiudiTendina(); apriBackup(); };
+});
+
+let velo = null;
+function chiudiFinestra() { if (velo) { velo.remove(); velo = null; } }
+function apriBackup() {
+  velo = document.createElement('div'); velo.className = 'velo';
+  velo.innerHTML = `<div class="finestra">
+    <h2>Backup e Dropbox</h2>
+    <h3>Sul PC</h3>
+    <p>Un file JSON con tutta la libreria: preset, tag, note, categorie e banchi.</p>
+    <div class="riga-azioni"><button class="primario">Scarica il backup</button><button>Ripristina da un file…</button></div>
+    <h3>Dropbox</h3>
+    <div class="scatola">
+      <div class="stato-db"><span class="lampada" style="background:var(--green);box-shadow:0 0 7px rgba(76,211,138,.7)"></span>Collegato · ultimo sync oggi alle 14:02</div>
+      <div class="riga-azioni"><button class="primario">Sincronizza ora</button><button>Scollega</button></div>
+    </div>
+    <p style="margin-top:12px">La libreria è la stessa dell'app del telefono aperta su questo PC, perché sta allo stesso indirizzo.</p>
+    <div class="piede"><button data-chiudi>Chiudi</button></div>
+  </div>`;
+  velo.addEventListener('click', e => { if (e.target === velo || e.target.hasAttribute('data-chiudi')) chiudiFinestra(); });
+  document.body.appendChild(velo);
+}
+
+document.getElementById('collega').onclick = e => {
+  const b = e.currentTarget, su = !b.classList.contains('attivo');
+  b.classList.toggle('attivo', su); b.lastChild.textContent = su ? 'Collegato' : 'Collega';
+  document.getElementById('stato').textContent = su ? 'Spark 2 collegato (finto)' : 'Bozza: niente è collegato';
+};
+document.getElementById('confronta').onclick = e => e.currentTarget.classList.toggle('primario');
+document.getElementById('nota-bozza').onclick = e => e.currentTarget.remove();
+
+function disegnaTutto() { disegnaPalco(); disegnaCatena(); }
+disegnaSlot(); disegnaTutto();
+</script>
+</body>
+</html>

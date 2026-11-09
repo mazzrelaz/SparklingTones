@@ -1531,3 +1531,33 @@ dall'editor, con un trimmer accanto a Salva**. Il bianco e nero puro non l'ha co
   Nome del preset e tempo sopra l'immagine, che ora sale fin dietro di loro.
 - **Aperto, dallo stesso messaggio**: il preset «verde 3» che ne seleziona altri tre (probabili preset diversi con lo stesso UUID: chiesto
   il backup all'utente).
+
+## La versione per il PC — 9 novembre 2026
+
+Chiesta dall'utente «come il Pulze editor» (`..Pulze Controleditor`). Scelte sue, una per una:
+
+- **Pagina a parte**, `pc.html` (codice in `src/pc/`): l'app del telefono non si tocca. Sta allo stesso indirizzo,
+  quindi **la libreria (IndexedDB) è la stessa**; il Bluetooth no: una pagina alla volta col suo ampli.
+- **L'aspetto del Pulze Mazz Editor**: grigio-blu ardesia e selezioni blu, barra e sotto-barra, palco al centro
+  (immagine, manopole, elenco dei modelli), catena in basso, **libreria a destra** come l'elenco dei tone.
+  Bozza approvata: `design/pc/bozza.html`.
+- **Le manopole dell'editor classico** (corona dentata, arco crema); **le immagini del neon per ora**: le
+  rifaranno tutte in un altro stile.
+- **I riverberi sono nove modelli** (elenco a destra e tendina della catena), non un «Tipo» fra le manopole:
+  l'utente ha corretto la bozza, che diceva «un modello solo».
+- **Non deve mancare nulla rispetto all'app**: libreria (cerca, ordine, famiglie, categorie, e il ⋯ di ogni
+  preset con tutte le azioni della scheda), **Banchi come le Songlist** del Pulze (libreria a sinistra da
+  trascinare, un riquadro per banco, otto posti), Pedale, Tuner, Categorie e famiglie, Doppioni, Elimina tutti,
+  Backup e Dropbox, Impostazioni (Hendrix, lingua), Guida, Informazioni, Segnala, Snake, caffè.
+  Restano solo nell'app: lo sfondo grigio/nero e la scelta neon/classico (qui la veste è una sola).
+- In più rispetto all'app: **Annulla/Ripeti** e **A/B** (come nel Pulze: si mandano all'ampli solo le
+  differenze), **Salva…** che sceglie anche lo slot (di partenza quello del preset; il preset che c'era resta in
+  libreria), Esporta del preset sul palco.
+- **Comandi e regole sono quelli dell'app**, niente di nuovo verso l'ampli: `0x0104` autocadenzato (90 ms),
+  `0x0115`, `0x0106` col nome riletto e un secondo di respiro, `0x0176`, `0x0138` per gli slot, `loadPreset`
+  per gli altri, `storePreset` verificato rileggendo lo slot; tuner `0x0165` solo a schermata aperta.
+- **Prove**: `pc.html#finto` carica `test/ampli-finto.js`, uno Spark finto con otto preset `demo` che capisce i
+  comandi della pagina (li segna in `spark.comandi`). Provati col finto il 9 novembre: collegamento e lettura
+  slot, manopole, acceso/spento, cambio di modello, riverberi, annulla/ripeti, A/B, salva in uno slot, nome già
+  usato, banchi col trascinamento, tuner, finestre del menu, lavoro senza ampli. **Con lo Spark vero e col
+  pedale: mai provata.** Il riquadro del browser non apre la scelta Bluetooth: si prova dalla pagina pubblicata.
