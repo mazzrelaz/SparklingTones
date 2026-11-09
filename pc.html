@@ -106,12 +106,9 @@
   #elenco-cerca { flex:1; min-width:0; font:inherit; font-size:0.86rem; color:var(--text); background:var(--incavo); border:1px solid var(--line);
                   border-radius:7px; padding:6px 9px; }
   #elenco-ordine { padding:5px 8px; }
-  .pastiglie { display:flex; flex-wrap:wrap; gap:4px; max-height:76px; overflow-y:auto; }
-  .pastiglia { font-family:var(--strumento); font-size:0.72rem; font-weight:600; letter-spacing:0; padding:2px 9px; border-radius:999px;
-               background:var(--incavo); color:var(--dim); border:1px solid var(--line); display:inline-flex; align-items:center; gap:5px; }
-  .pastiglia.sì { background:var(--accent); border-color:var(--accent); color:var(--su-accent); }
-  .pastiglia .quanti { color:var(--faint); font-weight:400; }
-  .pastiglia.sì .quanti { color:var(--su-accent); opacity:0.8; }
+  #elenco-filtri { display:flex; gap:6px; }
+  #elenco-filtri .scelta { flex:1; min-width:0; }
+  #elenco-filtri .etichetta { display:flex; align-items:center; gap:7px; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
   .pallino-fam { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--famiglia, var(--faint)); flex:none; }
   #elenco-corpo { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; margin:0 -4px; padding:0 4px; }
   .elenco-titolo { font-family:var(--strumento); font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
@@ -445,7 +442,7 @@
       <input type="search" id="elenco-cerca" placeholder="cerca un preset…" autocomplete="off">
       <button id="elenco-ordine" title="come ordinare la libreria"><svg class="ico" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
     </div>
-    <div id="elenco-filtri" class="pastiglie"></div>
+    <div id="elenco-filtri"></div>
     <div id="elenco-corpo"></div>
   </aside>
 </main>

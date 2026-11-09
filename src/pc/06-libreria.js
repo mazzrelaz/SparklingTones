@@ -42,43 +42,56 @@ function ordinaLibreria(lista) {
 }
 
 function disegnaFiltri() {
+  // Famiglia e categoria: due tendine come le altre della pagina (`.scelta`), niente pastiglie.
   const barra = $('elenco-filtri');
   barra.textContent = '';
   const usate = famiglie.filter(f => tutti.some(r => r.famiglia === f.id));
   barra.hidden = !categorie.length && !usate.length;
-  const pastiglia = (contenuto, attiva, quando) => {
-    const p = document.createElement('button');
-    p.type = 'button';
-    p.className = 'pastiglia' + (attiva ? ' sì' : '');
-    p.append(...contenuto);
-    p.addEventListener('click', quando);
-    barra.appendChild(p);
+  const pallino = colore => {
+    const p = document.createElement('span');
+    p.className = 'pallino-fam';
+    p.style.setProperty('--famiglia', colore);
+    return p;
   };
-  pastiglia([tr('tutti')], !vista.categoria && !vista.famiglia, () => { vista.categoria = vista.famiglia = ''; disegnaLibreria(); });
-  for (const f of usate) {
-    const pallino = document.createElement('span');
-    pallino.className = 'pallino-fam';
-    pallino.style.setProperty('--famiglia', f.colore);
-    pastiglia([pallino, f.nome], vista.famiglia === f.id, () => {
-      vista.famiglia = vista.famiglia === f.id ? '' : f.id;
-      disegnaLibreria();
+  const tendina = (testo, contenuto, voci) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'scelta';
+    const etichetta = document.createElement('span');
+    etichetta.className = 'etichetta';
+    etichetta.append(...contenuto);
+    b.appendChild(etichetta);
+    b.title = testo;
+    b.addEventListener('click', () => apriTendina(b, voci));
+    barra.appendChild(b);
+  };
+  if (usate.length) {
+    const f = usate.find(x => x.id === vista.famiglia);
+    tendina(tr('famiglia di suono'), f ? [pallino(f.colore), f.nome] : [tr('famiglia')], t => {
+      voceTendina(t, tr('tutte le famiglie'), () => { vista.famiglia = ''; disegnaLibreria(); }, { scelta: !f });
+      for (const x of usate) {
+        const quanti = tutti.filter(r => r.famiglia === x.id).length;
+        const v = voceTendina(t, `<span class="pallino-fam"></span>${testoConNome(x.nome)}<span class="quanti">${quanti}</span>`, () => {
+          vista.famiglia = x.id;
+          disegnaLibreria();
+        }, { scelta: vista.famiglia === x.id });
+        // Il colore può venire da un backup importato: si passa dallo stile, mai dentro l'HTML.
+        v.querySelector('.pallino-fam').style.setProperty('--famiglia', x.colore);
+      }
     });
   }
-  // Le categorie in una tendina sola: sono tante, e in fila riempivano mezza colonna.
-  if (!categorie.length) return;
-  const scelta = categorie.find(c => c.nome === vista.categoria);
-  const freccia = document.createElement('span');
-  freccia.className = 'quanti';
-  freccia.textContent = '▾';
-  pastiglia([scelta ? scelta.nome : tr('categoria'), freccia], !!scelta, e => apriTendina(e.currentTarget, t => {
-    voceTendina(t, tr('tutte le categorie'), () => { vista.categoria = ''; disegnaLibreria(); }, { scelta: !scelta });
-    for (const { nome, quanti } of categorie) {
-      voceTendina(t, `${testoConNome(nome)}<span class="quanti">${quanti}</span>`, () => {
-        vista.categoria = nome;
-        disegnaLibreria();
-      }, { scelta: vista.categoria === nome });
-    }
-  }));
+  if (categorie.length) {
+    const c = categorie.find(x => x.nome === vista.categoria);
+    tendina(tr('categoria'), [c ? c.nome : tr('categoria')], t => {
+      voceTendina(t, tr('tutte le categorie'), () => { vista.categoria = ''; disegnaLibreria(); }, { scelta: !c });
+      for (const { nome, quanti } of categorie) {
+        voceTendina(t, `${testoConNome(nome)}<span class="quanti">${quanti}</span>`, () => {
+          vista.categoria = nome;
+          disegnaLibreria();
+        }, { scelta: vista.categoria === nome });
+      }
+    });
+  }
 }
 
 function rigaPreset(record, slot) {
