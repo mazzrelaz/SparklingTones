@@ -31,7 +31,7 @@ ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 9 nov
 
 ```
 index.html                        HTML e l'unico <style>: Preset e Live nello stesso documento
-pc.html / src/pc/01-…10-*.js       la versione per il PC (9 novembre 2026): editor, libreria, banchi, pedale, tuner
+pc.html / src/pc/01-…11-*.js       la versione per il PC (9 novembre 2026): editor, libreria, banchi, pedale, tuner
 src/app/01-…16-*.js               lo script dell'app, in fila (16: il tuner)
 guida.html / guida.en.html        guida all'uso (guida.css, guida.js); guida-pedale(.en).html
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
@@ -318,7 +318,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 dall'utente): per ogni preset vince la modifica più recente, la data di chi arriva non si tocca, gli slot non
 viaggiano, banchi e categorie vincono interi da chi li ha cambiati per ultimo, oltre 5 cancellazioni si chiede.
 **Backup di sicurezza** manuale e separato (`/spark-sicurezza.json`), che il sync non tocca. OAuth PKCE senza
-server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Col Dropbox vero è da provare.**
+server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Provato col Dropbox vero il 9 novembre: funziona** (l'utente).
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
@@ -341,7 +341,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Pubblicazione**: da v148 `main` e `origin/main` vanno di nuovo insieme, niente più worktree coi soli file del
   telefono. Pubblicati il 9 novembre (v145–v147): «Cambia» al posto di «Elimina» sui preset dell'ampli e il **sync
   automatico** col backup di sicurezza. **Al prossimo «pubblica» il guscio va oltre v148.**
-- **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
+- **«Genera con l'IA» tornata solo sul PC** (10 novembre, chiesto dall'utente; `src/pc/11-genera-ia.js`, non
+  pubblicata): **copia e incolla, niente API né chiavi** (la domanda va nella sua chat, la risposta torna qui),
+  nascosta dietro la sua password (`pc-ia-sbloccata`). Nell'app del telefono resta tolta. **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
   che ricorda il pedale da GarageBand gli si ricollega e occupa il posto dell'adattatore: Bluetooth dell'iPad spento.

@@ -73,6 +73,7 @@ const GUSCIO = [
   './src/pc/08-pedale.js',
   './src/pc/09-accordatore.js',
   './src/pc/10-partenza.js',
+  './src/pc/11-genera-ia.js',
   './immagini/classico/ampli.webp',
   './icons/icon-192.png',
   './icons/icon-512.png',

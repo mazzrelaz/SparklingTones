@@ -1,0 +1,352 @@
+// Sparkling Tones — pc/11-genera-ia.js: un preset da una descrizione, con l'IA della chat.
+'use strict';
+
+/* ====================================================================
+   Genera con l'IA (10 novembre 2026, solo nella pagina PC)
+
+   Niente API e niente chiavi (scelta dell'utente): la pagina prepara la
+   domanda intera — la descrizione, il catalogo dei modelli che l'ampli ha
+   davvero con le loro manopole, la forma della risposta — e la copia negli
+   appunti; l'utente la incolla nella chat che usa già (ChatGPT, Claude…) e
+   incolla qui la risposta. La prima versione (17–19 ottobre, tolta) parlava
+   con le API di OpenAI e Anthropic: è nella cronologia, `f86fb12`.
+
+   Il preset lo costruiamo noi, **partendo da uno vero della libreria**, come
+   il Duplica: un preset nuovo non parte mai dal nulla. L'IA sceglie solo fra
+   i modelli di `SparkEffetti.MODELLI`; un nome fuori elenco non passa (un
+   modello che l'ampli non ha lo pianta), e prima dell'invio `apriRecord`
+   ripassa da `controllaPreset`. Il numero dei parametri di un blocco non lo
+   decide l'IA: si copia da un blocco uscito dall'ampli (`campioneModello`).
+
+   Il preset va sul palco **non salvato** («modificato»): lo si sente, lo si
+   gira, e resta solo se lo si salva con «Salva…».
+
+   La voce del menu è nascosta finché non la si sblocca con la password
+   dell'utente (Impostazioni → Funzioni nascoste). Nel codice c'è solo
+   l'impronta SHA-256; il codice è pubblico, quindi è una porta socchiusa,
+   non una serratura. Lo sblocco vale per questo browser. La chiave è
+   `pc-ia-sbloccata` e non `ia-sbloccata`: quella la cancella l'app del
+   telefono a ogni avvio (`15-partenza.js`), e l'origine è la stessa.
+   ==================================================================== */
+
+const IMPRONTA_PASSWORD_IA = '523bdf4f3cb1ebf0d021a0a6265a8b4bf9a6d21da2f7545304b2aa14671df557';
+const CHIAVE_SBLOCCO_IA = 'pc-ia-sbloccata';
+
+// I sette blocchi, nell'ordine di `Spark.CATENA`: sono le chiavi del JSON.
+const POSTI_IA = ['gate', 'comp', 'drive', 'amp', 'mod', 'delay', 'reverb'];
+
+// Quello che l'utente ha scritto resta fra un'apertura e l'altra della finestra.
+const bozzaIA = { descrizione: '', risposta: '' };
+
+function iaSbloccata() {
+  try { return localStorage.getItem(CHIAVE_SBLOCCO_IA) === '1'; } catch (e) { return false; }
+}
+function segnaSbloccoIA(acceso) {
+  try {
+    if (acceso) localStorage.setItem(CHIAVE_SBLOCCO_IA, '1');
+    else localStorage.removeItem(CHIAVE_SBLOCCO_IA);
+  } catch (e) { /* resta per questa volta */ }
+}
+
+async function improntaIA(testo) {
+  const byte = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(testo));
+  return [...new Uint8Array(byte)].map(n => n.toString(16).padStart(2, '0')).join('');
+}
+
+/** @returns true se la password era quella giusta. */
+async function sbloccaIA() {
+  const r = await finestra({
+    titolo: tr('Funzioni nascoste'),
+    campo: { valore: '', invito: tr('password'), tipo: 'password' },
+    azioni: [{ testo: tr('Annulla'), valore: null }, { testo: tr('Sblocca'), valore: 'ok', primario: true }],
+  });
+  if (!r) return false;
+  if (await improntaIA(String(r.testo).trim()) !== IMPRONTA_PASSWORD_IA) {
+    await avvisa(tr('Password sbagliata'), tr('Non è quella giusta: niente è cambiato.'));
+    return false;
+  }
+  segnaSbloccoIA(true);
+  stato(tr('«Genera con l\'IA» sbloccata.'), 'ok');
+  return true;
+}
+
+/* ---------------------------------------------------------------- la domanda */
+
+/**
+ * I modelli che l'IA può scegliere in una posizione: quelli di `MODELLI`, senza gli Hendrix
+ * se il pacchetto non c'è, e solo quelli di cui sappiamo quante manopole hanno (o che stanno
+ * già in un preset della libreria).
+ */
+function modelliPerIA(posizione) {
+  return SparkEffetti.MODELLI[posizione].filter(id =>
+    (haHendrix() || !SparkEffetti.eHendrix(id)) &&
+    (SparkEffetti.quanteManopole(id) > 0 || campioneModello(id)));
+}
+
+/** Il catalogo: per ogni modello, il nome e le manopole per indice. */
+function catalogoPerIA() {
+  const righe = [];
+  POSTI_IA.forEach((chiave, posizione) => {
+    righe.push('', `## ${chiave}`);
+    for (const id of modelliPerIA(posizione)) {
+      const voce = SparkEffetti.TABELLA[id] || {};
+      const manopole = (voce.manopole || []).map((nome, i) => {
+        const nomi = SparkEffetti.nomiPosizioni(id, i);
+        const quante = SparkEffetti.posizioni(id, i);
+        if (nomi) {
+          return `${i} ${nome} [choice: ${nomi.map((n, k) => `${SparkEffetti.valorePosizione(k)}=${n}`).join(', ')}]`;
+        }
+        if (quante) {
+          return `${i} ${nome} [choice: ${Array.from({ length: quante }, (_, k) => SparkEffetti.valorePosizione(k)).join(', ')}]`;
+        }
+        if (SparkEffetti.interruttore(id, i)) return `${i} ${nome} [switch: 0 or 1]`;
+        return `${i} ${nome}`;
+      });
+      const reale = SparkEffetti.ampliReale(id);
+      righe.push(`- ${id}: ${SparkEffetti.nome(id)}${reale ? ' (' + reale + ')' : ''}` +
+                 ` — knobs: ${manopole.join(', ') || '(none known)'}`);
+    }
+  });
+  return righe.join('\n');
+}
+
+/** La domanda intera da incollare nella chat. */
+function domandaIA(descrizione) {
+  const lingua = Lingua.attuale === 'en' ? 'English' : 'Italian';
+  const blocco = '{ "model": "<id from the catalog>", "on": true, "knobs": [0.5, 0.5] }';
+  return [
+    'You design guitar tones for a Positive Grid Spark 2 amplifier.',
+    'The signal chain has exactly seven blocks, in this order: gate, comp, drive, amp, mod,',
+    'delay, reverb. For each block choose one model from the catalog below (copy its id',
+    'exactly), whether it is on, and its knob values.',
+    '',
+    'Knob values go from 0 to 1 (0.5 is the middle); "knobs" lists them in index order:',
+    'knobs[0] is knob 0, knobs[1] is knob 1, and so on. Give exactly as many values as the',
+    'model has knobs. For a [choice] knob use one of the listed values; for a [switch] use',
+    '0 or 1. In the reverb block, the [choice] knob picks one of the nine reverb models.',
+    'Blocks that are off still need a model and sensible values.',
+    '',
+    'Aim for a tone that really works with a guitar plugged in: reasonable master volume',
+    '(not above 0.7), effects mixed with taste. "name" is a short preset name (max 20',
+    `characters); "why" is one or two sentences in ${lingua} saying what you chose and why;`,
+    '"bpm" is the tempo for the delay (60-200).',
+    '',
+    'Answer with the JSON object only, in one code block, exactly in this shape:',
+    '{',
+    '  "name": "...", "why": "...", "bpm": 120,',
+    ...POSTI_IA.map((k, i) => `  "${k}": ${blocco}${i < POSTI_IA.length - 1 ? ',' : ''}`),
+    '}',
+    '',
+    '# Catalog',
+    catalogoPerIA(),
+    '',
+    '# The tone I want',
+    descrizione,
+  ].join('\n');
+}
+
+/** Gli appunti; dove non si può (pagina non sicura), il testo si seleziona in un campo. */
+async function copiaNegliAppunti(testo, campoDiRiserva) {
+  try {
+    await navigator.clipboard.writeText(testo);
+    campoDiRiserva.hidden = true;
+    return true;
+  } catch (e) {
+    campoDiRiserva.hidden = false;
+    campoDiRiserva.value = testo;
+    campoDiRiserva.focus();
+    campoDiRiserva.select();
+    return false;
+  }
+}
+
+/* ---------------------------------------------------------------- la risposta */
+
+/** Il JSON della risposta, anche dentro un blocco di codice o con del testo intorno. */
+function leggiRispostaIA(testo) {
+  const t = String(testo || '');
+  const inizio = t.indexOf('{');
+  const fine = t.lastIndexOf('}');
+  if (inizio < 0 || fine <= inizio) throw new Error(tr('nella risposta non c\'è un preset: incollala intera.'));
+  try {
+    return JSON.parse(t.slice(inizio, fine + 1));
+  } catch (e) {
+    throw new Error(tr('la risposta non è un preset leggibile: incollala intera, dal primo «{» all\'ultimo «}».'));
+  }
+}
+
+/** Lo scheletro: un preset della libreria uscito dall'ampli, meglio se sta in uno slot. */
+function scheletroPerIA() {
+  const buoni = tutti.filter(r => Array.isArray(r.effects) && r.effects.length === 7 &&
+    !Spark.controllaPreset(r, { modelli: SparkEffetti.MODELLI.flat() }).errori.length);
+  return buoni.find(r => (r.slots || []).length) || buoni[0] || null;
+}
+
+/** Un valore dell'IA portato dentro quello che la manopola accetta. */
+function valoreSicuroIA(id, indice, valore) {
+  const v = Math.min(1, Math.max(0, valore));
+  if (SparkEffetti.interruttore(id, indice)) return v >= 0.5 ? 1 : 0;
+  const quante = SparkEffetti.posizioni(id, indice);
+  if (quante) {
+    // Il valore più vicino fra quelli delle posizioni (0, 0.1, 0.2…).
+    let migliore = 0;
+    for (let k = 1; k < quante; k++) {
+      if (Math.abs(SparkEffetti.valorePosizione(k) - v) < Math.abs(SparkEffetti.valorePosizione(migliore) - v)) migliore = k;
+    }
+    return SparkEffetti.valorePosizione(migliore);
+  }
+  return Math.round(v * 1000) / 1000;
+}
+
+/** Un nome che in libreria non c'è ancora: «Blues» → «Blues 2», «Blues 3»… */
+function nomeLiberoIA(nome) {
+  const presi = new Set(tutti.map(r => PresetStore.chiaveNome(r.name)));
+  let proposto = nome.slice(0, 24);
+  for (let n = 2; presi.has(PresetStore.chiaveNome(proposto)); n++) proposto = `${nome.slice(0, 21)} ${n}`;
+  return proposto;
+}
+
+/** Il preset costruito dalla risposta, sopra lo scheletro. Non si salva: lo fa «Salva…». */
+function presetDaIA(risposta, scheletro) {
+  const avvisi = [];
+  const effetti = scheletro.effects.map((originale, posizione) => {
+    const base = { name: originale.name, enabled: originale.enabled,
+                   params: (originale.params || []).map(p => ({ index: p.index, value: p.value })) };
+    const scelta = risposta[POSTI_IA[posizione]];
+    if (!scelta || !modelliPerIA(posizione).includes(scelta.model)) {
+      avvisi.push(tr('{0}: modello non valido, resta quello di partenza', Spark.CATENA[posizione]));
+      return base;
+    }
+
+    // Prima si copia, poi si costruisce: come il cambio di modello nell'editor.
+    let blocco = base;
+    if (scelta.model !== originale.name) {
+      const campione = campioneModello(scelta.model);
+      const quante = SparkEffetti.quanteManopole(scelta.model);
+      blocco = campione
+        ? { name: scelta.model, enabled: true, params: campione.params }
+        : { name: scelta.model, enabled: true, params: Array.from({ length: quante }, (_, i) => ({ index: i, value: 0.5 })) };
+    }
+    blocco.enabled = !!scelta.on;
+
+    const voce = SparkEffetti.TABELLA[blocco.name] || {};
+    const manopole = (voce.manopole || []).length;
+    (Array.isArray(scelta.knobs) ? scelta.knobs : []).slice(0, manopole).forEach((valore, i) => {
+      const param = blocco.params.find(p => p.index === i);
+      if (param && typeof valore === 'number' && Number.isFinite(valore)) {
+        param.value = valoreSicuroIA(blocco.name, i, valore);
+      }
+    });
+    // Il parametro in più di noise gate e riverbero è il loro acceso/spento.
+    if (voce.quante !== undefined) {
+      const interruttore = blocco.params.find(p => p.index === voce.quante);
+      if (interruttore) interruttore.value = blocco.enabled ? 1 : 0;
+    }
+    return blocco;
+  });
+
+  const bpm = Number(risposta.bpm);
+  const preset = {
+    uuid: nuovoUuid(),
+    name: nomeLiberoIA(String(risposta.name || '').replace(/\s+/g, ' ').trim() || tr('Preset IA')),
+    version: scheletro.version || '0.7',
+    description: scheletro.description || '',
+    icon: scheletro.icon || 'icon.png',
+    bpm: Number.isFinite(bpm) ? Math.min(250, Math.max(40, Math.round(bpm))) : bpmDi(scheletro),
+    effects: effetti,
+  };
+  return { preset, avvisi };
+}
+
+/**
+ * Il preset generato sul palco, non salvato: con l'ampli va nel preset software e si rilegge
+ * (come `apriRecord`), senza si regola sulla copia in memoria.
+ */
+async function mettiGeneratoSulPalco(preset) {
+  if (!spark.connected) {
+    mettiSulPalco({ record: null, slot: null, letto: preset, offline: true });
+  } else {
+    const controllo = Spark.controllaPreset(preset, { modelli: SparkEffetti.MODELLI.flat() });
+    if (controllo.errori.length) {
+      await avvisa(tr('non si può mandare'), tr('«{0}» non è mandabile così com\'è: {1}.',
+        testoConNome(preset.name), testoConNome(controllo.errori.slice(0, 3).join('; '))));
+      return false;
+    }
+    let riuscito = false;
+    await occupa(async () => {
+      await codaVuota();
+      const esito = await spark.loadPreset(preset, (i, tot) => stato(tr('invio «{0}»: chunk {1} di {2}…', preset.name, i + 1, tot)));
+      if (!esito.ok) { stato(tr('invio interrotto: {0}', esito.error), 'errore'); return; }
+      await attendi(400);
+      const letto = await spark.readLiveState();
+      if (!letto) { stato(tr('non riesco a rileggere il suono corrente.'), 'errore'); return; }
+      mettiSulPalco({ record: null, slot: null, letto, offline: false });
+      riuscito = true;
+    });
+    if (!riuscito) return false;
+  }
+  // Non è in libreria: «modificato» finché non lo si salva, e lasciandolo si chiede.
+  ora.nome = preset.name;
+  ora.meta = { uuid: preset.uuid, version: preset.version, description: preset.description, icon: preset.icon };
+  ora.toccato = true;
+  disegnaTutto();
+  return true;
+}
+
+/* ---------------------------------------------------------------- la finestra */
+
+async function apriGeneraIA() {
+  const scheletro = scheletroPerIA();
+  if (!scheletro) {
+    await avvisa(tr('serve un preset da cui partire'), tr('In libreria non c\'è ancora un preset letto dall\'ampli: premi «Collega», i suoi slot si leggono da soli.'));
+    return;
+  }
+
+  for (;;) {
+    const corpo = document.createElement('div');
+    corpo.innerHTML = `
+      <textarea data-f="descrizione" style="min-height:90px" placeholder="${tr('che suono vuoi')}"></textarea>
+      <div class="riga-azioni" style="margin:10px 0 4px"><button data-f="copia">${tr('Copia la domanda')}</button>
+        <span class="stato-db" data-f="copiata"></span></div>
+      <textarea data-f="domanda" hidden readonly style="min-height:90px"></textarea>
+      <h3>${tr('La risposta')}</h3>
+      <textarea data-f="risposta" style="min-height:130px" placeholder="${tr('incolla qui la risposta')}"></textarea>`;
+    const q = f => corpo.querySelector(`[data-f="${f}"]`);
+    q('descrizione').value = bozzaIA.descrizione;
+    q('risposta').value = bozzaIA.risposta;
+    q('copia').addEventListener('click', async () => {
+      const descrizione = q('descrizione').value.trim();
+      if (!descrizione) { q('copiata').textContent = tr('manca la descrizione'); q('descrizione').focus(); return; }
+      const fatto = await copiaNegliAppunti(domandaIA(descrizione), q('domanda'));
+      q('copiata').textContent = fatto ? tr('copiata') : tr('copiala da qui sotto');
+    });
+
+    const scelta = await finestra({
+      titolo: tr('Genera con l\'IA'),
+      corpo,
+      larga: true,
+      azioni: [{ testo: tr('Chiudi'), valore: null }, { testo: tr('Metti sul palco'), valore: 'costruisci', primario: true }],
+    });
+    bozzaIA.descrizione = q('descrizione').value;
+    bozzaIA.risposta = q('risposta').value;
+    if (scelta !== 'costruisci') return;
+
+    let fatto;
+    try {
+      fatto = presetDaIA(leggiRispostaIA(bozzaIA.risposta), scheletro);
+    } catch (err) {
+      await avvisa(tr('la risposta non va'), testoConNome(err.message));
+      continue;
+    }
+    if (!await chiediPrimaDiLasciare()) return;
+    if (!await mettiGeneratoSulPalco(fatto.preset)) return;
+
+    const risposta = leggiRispostaIA(bozzaIA.risposta);
+    const motivo = String(risposta.why || '').trim();
+    stato(tr('«{0}» dall\'IA, partendo da «{1}»', fatto.preset.name, scheletro.name) +
+      (fatto.avvisi.length ? ' — ' + fatto.avvisi.join('; ') : '') + (motivo ? ' — ' + motivo : ''),
+      fatto.avvisi.length ? 'errore' : 'ok');
+    bozzaIA.risposta = '';
+    return;
+  }
+}

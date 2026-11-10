@@ -1572,3 +1572,13 @@ Chiesta dall'utente «come il Pulze editor» (`..Pulze Controleditor`). Scelte s
   tutte le scritte guida** («le odio») e la scritta «PC» accanto al logo; **i banchi si spostano prendendoli per la
   testa** come le Songlist del Pulze (`spostaBanco`: riscrive `settings.banchi` nel nuovo ordine, che vale anche
   per la vista Live dell'app).
+- **«Genera con l'IA», copia e incolla** (10 novembre, `11-genera-ia.js`). L'utente l'ha voluta di nuovo, solo qui,
+  e **senza API**: la versione di ottobre (chiavi OpenAI e Anthropic, tolta il 19 ottobre perché «mi crea solo
+  problemi») chiedeva chiavi e crediti. Adesso la pagina prepara la domanda intera (descrizione, catalogo dei modelli
+  con le manopole per indice, forma del JSON) e la copia negli appunti; lui la incolla nella chat che usa già e
+  incolla la risposta. Il preset si costruisce sopra uno vero della libreria (`scheletroPerIA`), un modello fuori da
+  `MODELLI` non passa, i parametri si copiano da un blocco dell'ampli (`campioneModello`); va sul palco **non
+  salvato** (con l'ampli: `loadPreset` e rilettura) e resta solo con «Salva…». Nascosta: Impostazioni → «Funzioni
+  nascoste», la stessa password di ottobre (nel codice solo l'impronta), chiave `pc-ia-sbloccata` perché
+  `ia-sbloccata` la cancella l'app del telefono a ogni avvio. Scartata l'IA dentro il browser (Edge/Chrome): ancora
+  sperimentale e troppo piccola per 89 modelli. Provata col finto; **con una chat vera e lo Spark: da provare**.

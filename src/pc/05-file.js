@@ -474,6 +474,16 @@ async function apriImpostazioni() {
     if (ora) ora.toccato = false;
     Lingua.imposta(v);
   });
+  // Le funzioni in prova (oggi «Genera con l'IA»): si sbloccano con la password dell'utente.
+  riga(tr('Funzioni nascoste'), iaSbloccata() ? [['via', tr('Nascondi')]] : [['sblocca', tr('Sblocca…')]], null, async v => {
+    chiudiFinestra(null);
+    if (v === 'via') {
+      segnaSbloccoIA(false);
+      stato(tr('«Genera con l\'IA» di nuovo nascosta.'), 'ok');
+    } else {
+      await sbloccaIA();
+    }
+  });
   await finestra({ titolo: tr('Impostazioni'), corpo });
 }
 
@@ -491,6 +501,7 @@ const ICONE = {
   cestino: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>',
   gioco: '<rect x="3" y="8" width="18" height="10" rx="5"/><path d="M8 13h.01M16 13h.01"/>',
+  ia: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>',
 };
 
 /**
@@ -547,6 +558,8 @@ $('menu').addEventListener('click', e => apriTendina(e.currentTarget, t => {
   t.insertAdjacentHTML('beforeend', `<div class="famiglia">${tr('Libreria')}</div>`);
   voceTendina(t, icona('cartella') + tr('Categorie e famiglie…'), apriCategorie);
   voceTendina(t, icona('doppioni') + tr('Doppioni…'), () => apriDoppioni('suono'));
+  // Nascosta finché non la si sblocca in Impostazioni (`11-genera-ia.js`).
+  if (iaSbloccata()) voceTendina(t, icona('ia') + tr('Genera con l\'IA…'), apriGeneraIA);
   voceTendina(t, icona('backup') + tr('Backup e Dropbox…'), apriBackup);
   voceTendina(t, icona('cestino') + tr('Elimina tutti i preset…'), svuotaLibreria, { classe: 'pericolo' });
   t.insertAdjacentHTML('beforeend', '<hr>');
