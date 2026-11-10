@@ -4,6 +4,16 @@ Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync D
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
 
+## «Genera con l'IA» col copia e incolla, sulla pagina PC — 10 novembre 2026
+
+`src/pc/11-genera-ia.js`. Non parla con nessuno: la domanda va negli appunti (`navigator.clipboard`), e
+da fuori entra solo il testo che l'utente incolla, scritto da una chat. Lo si tratta da dato non
+fidato: `JSON.parse` dentro un `try`; i modelli passano solo se sono in `MODELLI` (e prima dell'invio
+`controllaPreset`), i valori sono numeri finiti portati fra 0 e 1, il bpm fra 40 e 250, la famiglia
+solo fra le quattro; le iniziali restano due lettere A–Z. Il nome e gli errori finiscono sulla pagina
+con `textContent` o con `testoConNome`, mai crudi in `innerHTML`. Niente chiavi né `localStorage`.
+Niente da correggere.
+
 ## Il tuner sul pedale — 20 ottobre 2026 (firmware 2.24)
 
 `0x0364` si legge nel callback con `spacchetta` in un buffer da 8 byte (il limite e' passato), e

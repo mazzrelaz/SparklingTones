@@ -56,6 +56,7 @@
   #collega.attivo { background:var(--rialzo); border-color:var(--line); color:var(--text); }
   #collega.attivo .lampada { background:var(--green); box-shadow:0 0 7px rgba(76,211,138,0.7); }
   #collega.attesa .lampada { background:var(--ambra); }
+  #genera-ia { display:flex; align-items:center; gap:7px; flex:none; line-height:16px; }
   #menu { padding:6px 9px; }
   #menu svg { width:20px; height:20px; }
 
@@ -382,6 +383,7 @@
 <header class="barra">
   <img class="logo" src="icons/logo.svg" alt="SparklingTones">
   <span id="stato"></span>
+  <button id="genera-ia" title="Genera con l'IA"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Genera con l'IA</span></button>
   <button id="rileggi" title="Rileggi dall'ampli il suono che sta facendo"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
   <div class="gruppo" title="Il tempo del preset: gli effetti a tempo lo seguono"><span class="etichetta">BPM</span><input class="numero" id="bpm" inputmode="numeric" autocomplete="off"></div>
   <span id="nome-ampli"></span>

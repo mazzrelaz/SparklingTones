@@ -340,10 +340,10 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
 - **Pubblicazione**: da v148 `main` e `origin/main` vanno di nuovo insieme, niente più worktree coi soli file del
   telefono. Pubblicati il 9 novembre (v145–v147): «Cambia» al posto di «Elimina» sui preset dell'ampli e il **sync
-  automatico** col backup di sicurezza. **Al prossimo «pubblica» il guscio va oltre v148.**
-- **«Genera con l'IA» tornata solo sul PC** (10 novembre, chiesto dall'utente; `src/pc/11-genera-ia.js`, non
-  pubblicata): **copia e incolla, niente API né chiavi** (la domanda va nella sua chat, la risposta torna qui),
-  **visibile a tutti nel menu** (la password l'ha tolta lui). Nell'app del telefono resta tolta. **Fermo per sua scelta**: il
+  automatico** col backup di sicurezza. **Al prossimo «pubblica» il guscio va oltre v149.**
+- **«Genera con l'IA» tornata solo sul PC** (10 novembre, chiesto dall'utente; `src/pc/11-genera-ia.js`,
+  pubblicata v149): **copia e incolla, niente API né chiavi** (la domanda va nella sua chat, la risposta torna qui),
+  nome «XX - Titolo» e famiglia dall'IA, **tasto nella barra in alto** accanto a ⟳ (niente password). Nell'app del telefono resta tolta. **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
   che ricorda il pedale da GarageBand gli si ricollega e occupa il posto dell'adattatore: Bluetooth dell'iPad spento.

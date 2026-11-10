@@ -21,7 +21,7 @@
    Il preset va sul palco **non salvato** («modificato»): lo si sente, lo si
    gira, e resta solo se lo si salva con «Salva…».
 
-   Visibile a tutti nel menu (10 novembre: l'utente ha tolto la password che
+   Visibile a tutti, col suo tasto nella barra in alto (10 novembre: l'utente ha tolto la password che
    la nascondeva nella prima prova di questa versione).
    ==================================================================== */
 
@@ -344,3 +344,6 @@ async function apriGeneraIA() {
     return;
   }
 }
+
+// Il tasto sta nella barra in alto, accanto a ⟳ (10 novembre: l'utente l'ha voluto fuori dal menu).
+$('genera-ia').addEventListener('click', apriGeneraIA);
