@@ -21,54 +21,15 @@
    Il preset va sul palco **non salvato** («modificato»): lo si sente, lo si
    gira, e resta solo se lo si salva con «Salva…».
 
-   La voce del menu è nascosta finché non la si sblocca con la password
-   dell'utente (Impostazioni → Funzioni nascoste). Nel codice c'è solo
-   l'impronta SHA-256; il codice è pubblico, quindi è una porta socchiusa,
-   non una serratura. Lo sblocco vale per questo browser. La chiave è
-   `pc-ia-sbloccata` e non `ia-sbloccata`: quella la cancella l'app del
-   telefono a ogni avvio (`15-partenza.js`), e l'origine è la stessa.
+   Visibile a tutti nel menu (10 novembre: l'utente ha tolto la password che
+   la nascondeva nella prima prova di questa versione).
    ==================================================================== */
-
-const IMPRONTA_PASSWORD_IA = '523bdf4f3cb1ebf0d021a0a6265a8b4bf9a6d21da2f7545304b2aa14671df557';
-const CHIAVE_SBLOCCO_IA = 'pc-ia-sbloccata';
 
 // I sette blocchi, nell'ordine di `Spark.CATENA`: sono le chiavi del JSON.
 const POSTI_IA = ['gate', 'comp', 'drive', 'amp', 'mod', 'delay', 'reverb'];
 
 // Quello che l'utente ha scritto resta fra un'apertura e l'altra della finestra.
 const bozzaIA = { descrizione: '', risposta: '' };
-
-function iaSbloccata() {
-  try { return localStorage.getItem(CHIAVE_SBLOCCO_IA) === '1'; } catch (e) { return false; }
-}
-function segnaSbloccoIA(acceso) {
-  try {
-    if (acceso) localStorage.setItem(CHIAVE_SBLOCCO_IA, '1');
-    else localStorage.removeItem(CHIAVE_SBLOCCO_IA);
-  } catch (e) { /* resta per questa volta */ }
-}
-
-async function improntaIA(testo) {
-  const byte = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(testo));
-  return [...new Uint8Array(byte)].map(n => n.toString(16).padStart(2, '0')).join('');
-}
-
-/** @returns true se la password era quella giusta. */
-async function sbloccaIA() {
-  const r = await finestra({
-    titolo: tr('Funzioni nascoste'),
-    campo: { valore: '', invito: tr('password'), tipo: 'password' },
-    azioni: [{ testo: tr('Annulla'), valore: null }, { testo: tr('Sblocca'), valore: 'ok', primario: true }],
-  });
-  if (!r) return false;
-  if (await improntaIA(String(r.testo).trim()) !== IMPRONTA_PASSWORD_IA) {
-    await avvisa(tr('Password sbagliata'), tr('Non è quella giusta: niente è cambiato.'));
-    return false;
-  }
-  segnaSbloccoIA(true);
-  stato(tr('«Genera con l\'IA» sbloccata.'), 'ok');
-  return true;
-}
 
 /* ---------------------------------------------------------------- la domanda */
 

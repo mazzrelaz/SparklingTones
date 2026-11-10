@@ -343,7 +343,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   automatico** col backup di sicurezza. **Al prossimo «pubblica» il guscio va oltre v148.**
 - **«Genera con l'IA» tornata solo sul PC** (10 novembre, chiesto dall'utente; `src/pc/11-genera-ia.js`, non
   pubblicata): **copia e incolla, niente API né chiavi** (la domanda va nella sua chat, la risposta torna qui),
-  nascosta dietro la sua password (`pc-ia-sbloccata`). Nell'app del telefono resta tolta. **Fermo per sua scelta**: il
+  **visibile a tutti nel menu** (la password l'ha tolta lui). Nell'app del telefono resta tolta. **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
   che ricorda il pedale da GarageBand gli si ricollega e occupa il posto dell'adattatore: Bluetooth dell'iPad spento.

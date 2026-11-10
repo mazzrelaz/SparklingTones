@@ -1578,7 +1578,7 @@ Chiesta dall'utente «come il Pulze editor» (`..Pulze Controleditor`). Scelte s
   con le manopole per indice, forma del JSON) e la copia negli appunti; lui la incolla nella chat che usa già e
   incolla la risposta. Il preset si costruisce sopra uno vero della libreria (`scheletroPerIA`), un modello fuori da
   `MODELLI` non passa, i parametri si copiano da un blocco dell'ampli (`campioneModello`); va sul palco **non
-  salvato** (con l'ampli: `loadPreset` e rilettura) e resta solo con «Salva…». Nascosta: Impostazioni → «Funzioni
-  nascoste», la stessa password di ottobre (nel codice solo l'impronta), chiave `pc-ia-sbloccata` perché
-  `ia-sbloccata` la cancella l'app del telefono a ogni avvio. Scartata l'IA dentro il browser (Edge/Chrome): ancora
+  salvato** (con l'ampli: `loadPreset` e rilettura) e resta solo con «Salva…». **Visibile a tutti nel menu**, sotto
+  Libreria: all'inizio era nascosta dietro la password di ottobre, ma la password nessuno la ricordava più (nel codice
+  c'era solo l'impronta) e l'utente ha detto di togliere le «Funzioni nascoste». Scartata l'IA dentro il browser (Edge/Chrome): ancora
   sperimentale e troppo piccola per 89 modelli. Provata col finto; **con una chat vera e lo Spark: da provare**.

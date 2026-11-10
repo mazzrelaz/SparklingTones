@@ -474,16 +474,6 @@ async function apriImpostazioni() {
     if (ora) ora.toccato = false;
     Lingua.imposta(v);
   });
-  // Le funzioni in prova (oggi «Genera con l'IA»): si sbloccano con la password dell'utente.
-  riga(tr('Funzioni nascoste'), iaSbloccata() ? [['via', tr('Nascondi')]] : [['sblocca', tr('Sblocca…')]], null, async v => {
-    chiudiFinestra(null);
-    if (v === 'via') {
-      segnaSbloccoIA(false);
-      stato(tr('«Genera con l\'IA» di nuovo nascosta.'), 'ok');
-    } else {
-      await sbloccaIA();
-    }
-  });
   await finestra({ titolo: tr('Impostazioni'), corpo });
 }
 
@@ -558,8 +548,7 @@ $('menu').addEventListener('click', e => apriTendina(e.currentTarget, t => {
   t.insertAdjacentHTML('beforeend', `<div class="famiglia">${tr('Libreria')}</div>`);
   voceTendina(t, icona('cartella') + tr('Categorie e famiglie…'), apriCategorie);
   voceTendina(t, icona('doppioni') + tr('Doppioni…'), () => apriDoppioni('suono'));
-  // Nascosta finché non la si sblocca in Impostazioni (`11-genera-ia.js`).
-  if (iaSbloccata()) voceTendina(t, icona('ia') + tr('Genera con l\'IA…'), apriGeneraIA);
+  voceTendina(t, icona('ia') + tr('Genera con l\'IA…'), apriGeneraIA);
   voceTendina(t, icona('backup') + tr('Backup e Dropbox…'), apriBackup);
   voceTendina(t, icona('cestino') + tr('Elimina tutti i preset…'), svuotaLibreria, { classe: 'pericolo' });
   t.insertAdjacentHTML('beforeend', '<hr>');

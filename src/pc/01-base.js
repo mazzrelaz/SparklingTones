@@ -122,7 +122,7 @@ function finestra({ titolo, testo, campo, azioni, corpo, larga }) {
     let input = null;
     if (campo) {
       input = document.createElement('input');
-      input.type = campo.tipo === 'password' ? 'password' : 'text';
+      input.type = 'text';
       input.value = campo.valore || '';
       if (campo.invito) input.placeholder = campo.invito;
       if (campo.max) input.maxLength = campo.max;
