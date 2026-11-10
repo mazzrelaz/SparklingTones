@@ -4,8 +4,16 @@
 # L'inglese: non si legge finché l'utente non chiede di aggiornarlo (vedi CLAUDE.md).
 src/lingua-en.js
 *.en.md
+*.en.html
 
 # Grossi e consultati di rado: una ricerca per parola li riversava in contesto.
 captures/
 reference/
 pcb/
+design/
+foto/
+docs/diario.md
+docs/looper.md
+tools/explorer*.html
+tools/*-probe.html
+tools/video-demo/

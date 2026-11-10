@@ -22,17 +22,18 @@ ripercorrere una strada chiusa**, più il lavoro in corso. Il ragionamento sta i
 | `docs/diario.md` | sessioni passate; **le versioni lunghe di questo file** |
 | `docs/sito.md` · `docs/sicurezza.md` | `sparklingtones.com` · audit del 17 settembre 2026 |
 
-**I documenti grossi non si leggono interi** (`pedale.md` 173 KB, `decisioni-ui.md` ~90 KB,
-`HANDOFF` 45 KB): `grep -n '^#'` per l'indice, poi solo la sezione. **Si sposta, non si butta**:
-ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 9 novembre 2026, da 26 a
-25 KB). Si rimisura con `wc -c CLAUDE.md`: sopra i 25 KB si sfoltisce.
+**I documenti grossi non si leggono interi** (`pedale.md` 175 KB, `decisioni-ui.md` 115 KB, `diario.md`
+100 KB, `HANDOFF` 45 KB): `grep -n '^#'` per l'indice, poi solo la sezione. **Si sposta, non si butta**:
+ciò che si accorcia va parola per parola in `docs/diario.md` (l'ultima il 10 novembre 2026, da 25,6 a
+23,8 KB). Si rimisura con `wc -c CLAUDE.md`: sopra i 25 KB si sfoltisce. **Le ricerche saltano** ciò che
+sta in `.ignore` (inglese, diario, bozze, sonde vecchie): ci si arriva con Read o `rg --no-ignore`.
 
 ## Struttura
 
 ```
 index.html                        HTML e l'unico <style>: Preset e Live nello stesso documento
 pc.html / src/pc/01-…11-*.js       la versione per il PC (9 novembre 2026): editor, libreria, banchi, pedale, tuner
-src/app/01-…16-*.js               lo script dell'app, in fila (16: il tuner)
+src/app/01-…17-*.js               lo script dell'app, in fila (16: il tuner, 17: l'editor classico)
 guida.html / guida.en.html        guida all'uso (guida.css, guida.js); guida-pedale(.en).html
 manifest.webmanifest / sw.js      PWA; guscio in cache, offline
 src/spark-protocol.js             encoder/decoder puro — il cuore del progetto
@@ -54,7 +55,8 @@ captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte g
 **Lo script dell'app sta in `src/app/`, un file per sezione**, caricati in fila da `index.html` come
 script classici: const, let e funzioni si vedono fra un file e l'altro, ma **il codice che gira
 al caricamento usa solo quello dei file prima**. Un file nuovo va anche nel guscio di `sw.js`.
-`index.html` (90 KB) e `10-editor-disegno.js` (~1.700 righe) non si leggono interi.
+**Non si leggono interi** (`grep -n` e poi `offset`/`limit`): `index.html` (170 KB, 2.500 righe),
+`10-editor-disegno.js` (93 KB), `spark-immagini.js` (65 KB), `preset-store.js` (56 KB), `guida*.html`.
 
 Niente build, tutto da `file://`: i moduli sono classic script (`window.Spark`, …). **IndexedDB di
 `file://`, di https e di ogni indirizzo locale sono origini diverse**: la libreria non passa
@@ -188,7 +190,7 @@ riceve il clic e il menu non si chiude): senza ampli rispondono con `senzaAmpli(
 
 **Regola dell'utente: app e sito si cambiano solo in italiano, e la parte inglese non si legge
 né si tocca finché non è lui a dire di aggiornarla**: `src/lingua-en.js`, i `*.en.md`
-(`README` dei due repo, protocollo), `sparklingtones-sito/en/`. Grep li salta da solo
+(`README` dei due repo, protocollo), i `*.en.html`, `sparklingtones-sito/en/`. Grep li salta da solo
 (`.ignore`, verificato; Glob ne mostra solo i nomi); con Read o `rg --no-ignore` ci si arriva
 lo stesso, quando serve.
 
@@ -249,10 +251,8 @@ nessuno slot. Mentre suona il preset software il LED dell'ampli lampeggia. **8 s
 non serve (misurato). **Cavare la chiave dall'app ufficiale non si fa.** Non è un difetto
 nostro. I comandi non richiedono autenticazione (misurato).
 
-**Looper**: `0x0175` + un byte (`04` rec, `05` stop rec, `08` play, `09` stop, `0b` dub, `0c`
-stop dub, `0a` delete); si leggono `0x0377`, `0x0363`, `0x0376`. **Il conteggio col click non
-si comanda** (`02` ignorato). **Non aggiungere sonde sui byte**: l'unica strada rimasta è
-chiedere a Ignitron. Tutto in `docs/looper.md`.
+**Looper** (`0x0175` + un byte, archiviato, tutto in `docs/looper.md`): **non aggiungere sonde sui
+byte**, l'unica strada rimasta è chiedere a Ignitron.
 
 **Metodo**: una cattura d'ascolto dice cosa l'ampli racconta, non cosa accetta; si registra
 prima e si interpreta dopo; i dati finti sono marcati `demo` e non finiscono nelle catture;
@@ -283,12 +283,9 @@ i quattro suoni della metà corrente, il quinto cambia metà senza toccare il su
   compresa (FNV-1a 32 bit, `bancoImpronta` / `impronta`). `banchi.h` legge byte non nostri:
   offset e lunghezze vanno verificati.
 - **Il tasto banco cambia banco al rilascio**; tenuto 2 s apre il tuner (2.24, verificato).
-- **Quattro modalità, scelte da un menu: FS4 tenuto 2 s** (2.28, 23 ottobre 2026; FS1+FS4 non fa più niente):
-  Spark / **Pulze** (2.37, Pulze Mini: `13-pulze.ino`) / **Play Acoustic** / MIDI (ordine dell'utente), tasti banco, FS5 conferma.
-  **All'accensione il menu** (2.38, regola dell'utente del 5 novembre; prima sempre Spark), aperto finché FS5 non sceglie. Play Acoustic = il pedale comanda un TC-Helicon Play
-  Acoustic attraverso l'adattatore di `..\MIdiAdapter` (XIAO C6 che finge un Switch-6): **CC 20+n a 127
-  alla pressione e a 0 al rilascio**, n = pulsante 1–6 del Switch-6; numero del CC e adattatore cambiano
-  insieme. Nel looper FS4 tenuto resta «cancella». Dettaglio in `docs/pedale-lavoro.md`.
+- **Quattro modalità da un menu** (FS4 tenuto 2 s, e **all'accensione**, regola dell'utente): Spark /
+  Pulze / Play Acoustic / MIDI. Play Acoustic, via l'adattatore di `..\MIdiAdapter`: **CC 20+n a 127 alla
+  pressione e a 0 al rilascio**; CC e adattatore cambiano insieme. Dettaglio in `docs/pedale-lavoro.md`.
 - **Scatola nera** sul pedale per l'ampli che s'inceppa (causa ignota): comando `M` col pedale al PC.
 - **La mappa di pulsanti e LED non si scrive a mente** (mappatura guidata di `prova-espansore`, e
   si chiede la foto). **I nomi dei pezzi sono fissi** (basetta, XIAO, espansore, pista, pettine,
@@ -314,11 +311,9 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 
 ## Dropbox e sito
 
-**Sync Dropbox automatico** dal 9 novembre 2026 (`src/sync-auto.js`; «Manda su» e «Prendi» tolti, chiesto
-dall'utente): per ogni preset vince la modifica più recente, la data di chi arriva non si tocca, gli slot non
-viaggiano, banchi e categorie vincono interi da chi li ha cambiati per ultimo, oltre 5 cancellazioni si chiede.
-**Backup di sicurezza** manuale e separato (`/spark-sicurezza.json`), che il sync non tocca. OAuth PKCE senza
-server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Provato col Dropbox vero il 9 novembre: funziona** (l'utente).
+**Sync Dropbox automatico** (`src/sync-auto.js`, provato col Dropbox vero il 9 novembre): vince la modifica
+più recente, gli slot non viaggiano, oltre 5 cancellazioni si chiede; il **backup di sicurezza**
+(`/spark-sicurezza.json`) è manuale e il sync non lo tocca. Tutto in `docs/dropbox.md`, «Il sync automatico».
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
@@ -331,28 +326,18 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
 - **Basetta** `pcb/basetta/`: generata **solo** da `tools/genera-basetta.py`, mai a mano; **ordinata il 29
   ottobre**. A scheda arrivata: `docs/pedale-lavoro.md`, «La basetta stampata»; il punto intero nel diario (9 novembre).
-- **La versione per il PC** (9 novembre, `pc.html` + `src/pc/`, **pubblicata il 10 novembre, v148**, su suo comando):
-  pagina a parte, l'app del telefono non si tocca; tutto quello che fa l'app nella veste del Pulze editor, immagini
-  nuove in `immagini/pc/` (`IMMAGINI_PC`), **niente scritte guida** (le odia), banchi spostabili come le Songlist.
-  Nessun link dall'app: si apre a mano `…/pc.html`; non registra un service worker suo, ma quello dell'app la serve
-  (è nel guscio). La prima prova in locale ha dato ‹ › fermi, nome fuori centro e lentezza, corretti; **il resto
-  con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto` (riempie la libreria: poi va svuotata).
-  Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: da v148 `main` e `origin/main` vanno di nuovo insieme, niente più worktree coi soli file del
-  telefono. Pubblicati il 9 novembre (v145–v147): «Cambia» al posto di «Elimina» sui preset dell'ampli e il **sync
-  automatico** col backup di sicurezza. **Al prossimo «pubblica» il guscio va oltre v149.**
-- **«Genera con l'IA» tornata solo sul PC** (10 novembre, chiesto dall'utente; `src/pc/11-genera-ia.js`,
-  pubblicata v149): **copia e incolla, niente API né chiavi** (la domanda va nella sua chat, la risposta torna qui),
-  nome «XX - Titolo» e famiglia dall'IA, **tasto nella barra in alto** accanto a ⟳ (niente password). Nell'app del telefono resta tolta. **Fermo per sua scelta**: il
-  tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
-- **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
-  che ricorda il pedale da GarageBand gli si ricollega e occupa il posto dell'adattatore: Bluetooth dell'iPad spento.
-- **Pedale d'espressione** (30 ottobre–1° novembre): EX-P sulla presa **H**, solo volume (deciso dall'utente;
-  Control X finto e wah scartati), CC 11 in MIDI, Master dell'ampli modellato in Spark (2.34, verificato).
-  **Mai il volume del finale (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore del Play
-  Acoustic. Il punto intero: `docs/diario.md`, estratto del 9 novembre.
-- **Batteria** (2.32): una riga al minuto in memoria (`U`); 130 mA agganciato. Prossimo: carica piena, scarica
-  fino allo spegnimento, tacche rimesse; la corrente di carica a cella bassa (`docs/pedale-lavoro.md`, punto 3).
+- **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
+  si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
+  (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
+- **Pubblicazione**: `main` e `origin/main` vanno insieme. **Al prossimo «pubblica» il guscio va oltre v149.**
+- **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
+  **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
+- **Trappola del Play Acoustic**: un iPad che ricorda il pedale da GarageBand gli si ricollega e occupa il posto
+  dell'adattatore: Bluetooth dell'iPad spento.
+- **Pedale d'espressione**: EX-P sulla presa **H**, solo volume (deciso dall'utente). **Mai il volume del finale
+  (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore.
+- **Batteria** (2.32): prossimo, carica piena e scarica fino allo spegnimento (`docs/pedale-lavoro.md`, punto 3).
+- Le voci lunghe di questa sezione: `docs/diario.md`, estratti del 9 e del 10 novembre.
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
 - **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key): **mai più catture o

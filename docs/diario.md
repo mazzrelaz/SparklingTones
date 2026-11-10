@@ -1299,3 +1299,48 @@ Sostituito quando l'utente ha scartato Control X e wah (il pedale d'espressione 
 
 - **Il wah al posto del LA Comp** (22 ottobre): non è un difetto; rimedio dato, **da sentire se ha funzionato**.
   Dettaglio: `docs/diario.md`, estratto del 29 ottobre (sera).
+
+## Estratto di CLAUDE.md del 10 novembre 2026: looper, modalità del pedale, Dropbox e «Dove si riprende»
+
+Sfoltita per consumare meno (da 25,6 KB). Le voci com'erano, parola per parola.
+
+**Looper**: `0x0175` + un byte (`04` rec, `05` stop rec, `08` play, `09` stop, `0b` dub, `0c`
+stop dub, `0a` delete); si leggono `0x0377`, `0x0363`, `0x0376`. **Il conteggio col click non
+si comanda** (`02` ignorato). **Non aggiungere sonde sui byte**: l'unica strada rimasta è
+chiedere a Ignitron. Tutto in `docs/looper.md`.
+
+- **Quattro modalità, scelte da un menu: FS4 tenuto 2 s** (2.28, 23 ottobre 2026; FS1+FS4 non fa più niente):
+  Spark / **Pulze** (2.37, Pulze Mini: `13-pulze.ino`) / **Play Acoustic** / MIDI (ordine dell'utente), tasti banco, FS5 conferma.
+  **All'accensione il menu** (2.38, regola dell'utente del 5 novembre; prima sempre Spark), aperto finché FS5 non sceglie. Play Acoustic = il pedale comanda un TC-Helicon Play
+  Acoustic attraverso l'adattatore di `..\MIdiAdapter` (XIAO C6 che finge un Switch-6): **CC 20+n a 127
+  alla pressione e a 0 al rilascio**, n = pulsante 1–6 del Switch-6; numero del CC e adattatore cambiano
+  insieme. Nel looper FS4 tenuto resta «cancella». Dettaglio in `docs/pedale-lavoro.md`.
+
+**Sync Dropbox automatico** dal 9 novembre 2026 (`src/sync-auto.js`; «Manda su» e «Prendi» tolti, chiesto
+dall'utente): per ogni preset vince la modifica più recente, la data di chi arriva non si tocca, gli slot non
+viaggiano, banchi e categorie vincono interi da chi li ha cambiati per ultimo, oltre 5 cancellazioni si chiede.
+**Backup di sicurezza** manuale e separato (`/spark-sicurezza.json`), che il sync non tocca. OAuth PKCE senza
+server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Provato col Dropbox vero il 9 novembre: funziona** (l'utente).
+
+- **La versione per il PC** (9 novembre, `pc.html` + `src/pc/`, **pubblicata il 10 novembre, v148**, su suo comando):
+  pagina a parte, l'app del telefono non si tocca; tutto quello che fa l'app nella veste del Pulze editor, immagini
+  nuove in `immagini/pc/` (`IMMAGINI_PC`), **niente scritte guida** (le odia), banchi spostabili come le Songlist.
+  Nessun link dall'app: si apre a mano `…/pc.html`; non registra un service worker suo, ma quello dell'app la serve
+  (è nel guscio). La prima prova in locale ha dato ‹ › fermi, nome fuori centro e lentezza, corretti; **il resto
+  con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto` (riempie la libreria: poi va svuotata).
+  Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
+- **Pubblicazione**: da v148 `main` e `origin/main` vanno di nuovo insieme, niente più worktree coi soli file del
+  telefono. Pubblicati il 9 novembre (v145–v147): «Cambia» al posto di «Elimina» sui preset dell'ampli e il **sync
+  automatico** col backup di sicurezza. **Al prossimo «pubblica» il guscio va oltre v149.**
+- **«Genera con l'IA» tornata solo sul PC** (10 novembre, chiesto dall'utente; `src/pc/11-genera-ia.js`,
+  pubblicata v149): **copia e incolla, niente API né chiavi** (la domanda va nella sua chat, la risposta torna qui),
+  nome «XX - Titolo» e famiglia dall'IA, **tasto nella barra in alto** accanto a ⟳ (niente password). Nell'app del telefono resta tolta. **Fermo per sua scelta**: il
+  tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
+- **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
+  che ricorda il pedale da GarageBand gli si ricollega e occupa il posto dell'adattatore: Bluetooth dell'iPad spento.
+- **Pedale d'espressione** (30 ottobre–1° novembre): EX-P sulla presa **H**, solo volume (deciso dall'utente;
+  Control X finto e wah scartati), CC 11 in MIDI, Master dell'ampli modellato in Spark (2.34, verificato).
+  **Mai il volume del finale (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore del Play
+  Acoustic. Il punto intero: `docs/diario.md`, estratto del 9 novembre.
+- **Batteria** (2.32): una riga al minuto in memoria (`U`); 130 mA agganciato. Prossimo: carica piena, scarica
+  fino allo spegnimento, tacche rimesse; la corrente di carica a cella bassa (`docs/pedale-lavoro.md`, punto 3).
