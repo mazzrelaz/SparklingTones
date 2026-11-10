@@ -331,16 +331,16 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
 - **Basetta** `pcb/basetta/`: generata **solo** da `tools/genera-basetta.py`, mai a mano; **ordinata il 29
   ottobre**. A scheda arrivata: `docs/pedale-lavoro.md`, «La basetta stampata»; il punto intero nel diario (9 novembre).
-- **La versione per il PC** (9 novembre, `pc.html` + `src/pc/`, **non pubblicata**, si pubblica solo su suo comando):
+- **La versione per il PC** (9 novembre, `pc.html` + `src/pc/`, **pubblicata il 10 novembre, v148**, su suo comando):
   pagina a parte, l'app del telefono non si tocca; tutto quello che fa l'app nella veste del Pulze editor, immagini
   nuove in `immagini/pc/` (`IMMAGINI_PC`), **niente scritte guida** (le odia), banchi spostabili come le Songlist.
-  L'utente la prova **in locale** (`localhost:8099/pc.html`, Edge): la prima prova ha dato ‹ › fermi, nome fuori
-  centro e lentezza, corretti; **il resto con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
-  (riempie la libreria di localhost: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **9 novembre, pubblicato** (v145–v147, solo la parte del telefono: il lavoro del PC resta fuori, e ogni volta
-  si pubblica da un worktree su `origin/main` con i soli file del telefono, poi `rebase -X theirs`): «Cambia» al
-  posto di «Elimina» sui preset dell'ampli (uno slot non si svuota, si riscrive) e il **sync automatico** col
-  backup di sicurezza (v147). **Al prossimo «pubblica» il guscio va oltre v147.**
+  Nessun link dall'app: si apre a mano `…/pc.html`; non registra un service worker suo, ma quello dell'app la serve
+  (è nel guscio). La prima prova in locale ha dato ‹ › fermi, nome fuori centro e lentezza, corretti; **il resto
+  con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto` (riempie la libreria: poi va svuotata).
+  Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
+- **Pubblicazione**: da v148 `main` e `origin/main` vanno di nuovo insieme, niente più worktree coi soli file del
+  telefono. Pubblicati il 9 novembre (v145–v147): «Cambia» al posto di «Elimina» sui preset dell'ampli e il **sync
+  automatico** col backup di sicurezza. **Al prossimo «pubblica» il guscio va oltre v148.**
 - **Tolta, non si rimette** se non lo chiede lui: «Genera con l'IA» (19 ottobre). **Fermo per sua scelta**: il
   tap tempo con l'ampli acceso. Il MIDI del pedale l'ha riaperto l'utente il 23 ottobre, per il Play Acoustic.
 - **Play Acoustic** (2.29): verificato il 27 ottobre col Play Acoustic vero e l'adattatore. **Trappola**: un iPad
