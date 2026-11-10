@@ -1,0 +1,19 @@
+{
+  "id": "./pc.html",
+  "name": "SparklingTones PC",
+  "short_name": "SparklingTones PC",
+  "description": "Editor e libreria per amplificatore Spark 2, per il computer",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./pc.html",
+  "scope": "./pc.html",
+  "display": "standalone",
+  "background_color": "#1e232b",
+  "theme_color": "#1e232b",
+  "categories": ["music", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SparklingTones PC</title>
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="manifest" href="pc.webmanifest">
+<meta name="theme-color" content="#1e232b">
 <style>
   /* La versione per il PC (9 novembre 2026): la disposizione e i colori del Pulze Mazz Editor
      (grigio-blu ardesia, selezioni blu), le manopole dell'editor classico, le immagini del neon.
@@ -486,5 +488,9 @@
 <script src="src/pc/09-accordatore.js"></script>
 <script src="src/pc/10-partenza.js"></script>
 <script src="src/pc/11-genera-ia.js"></script>
+<script>
+  // Installabile come app a parte (pc.webmanifest): lo stesso service worker dell'app, che ha già la pagina nel guscio.
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
 </body>
 </html>

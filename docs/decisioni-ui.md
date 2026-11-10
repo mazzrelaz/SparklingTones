@@ -1572,6 +1572,10 @@ Chiesta dall'utente «come il Pulze editor» (`..Pulze Controleditor`). Scelte s
   tutte le scritte guida** («le odio») e la scritta «PC» accanto al logo; **i banchi si spostano prendendoli per la
   testa** come le Songlist del Pulze (`spostaBanco`: riscrive `settings.banchi` nel nuovo ordine, che vale anche
   per la vista Live dell'app).
+- **Installabile come app a parte** (10 novembre, chiesto dall'utente: Chrome non offriva «Installa» dalla pagina PC,
+  che non aveva un manifest). `pc.webmanifest` con `id`, `start_url` e `scope` su `./pc.html`: è un'app distinta da quella
+  del telefono (che ha `id` = `./index.html` e scope `./`), e lo scope stretto fa sì che i link verso `index.html` non
+  finiscano nella finestra del PC. Il service worker è lo stesso `sw.js`, registrato da pc.html solo in https.
 - **«Genera con l'IA», copia e incolla** (10 novembre, `11-genera-ia.js`). L'utente l'ha voluta di nuovo, solo qui,
   e **senza API**: la versione di ottobre (chiavi OpenAI e Anthropic, tolta il 19 ottobre perché «mi crea solo
   problemi») chiedeva chiavi e crediti. Adesso la pagina prepara la domanda intera (descrizione, catalogo dei modelli

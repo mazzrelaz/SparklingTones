@@ -329,7 +329,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: `main` e `origin/main` vanno insieme. **Al prossimo «pubblica» il guscio va oltre v149.**
+- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v150 pronta e non pubblicata** (10 novembre): la
+  pagina PC si installa come app a parte (`pc.webmanifest`, scope `./pc.html`). Dopo, il guscio va oltre v150.
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
 - **Trappola del Play Acoustic**: un iPad che ricorda il pedale da GarageBand gli si ricollega e occupa il posto
