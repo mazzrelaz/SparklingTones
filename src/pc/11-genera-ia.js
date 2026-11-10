@@ -88,13 +88,20 @@ function domandaIA(descrizione) {
     'Blocks that are off still need a model and sensible values.',
     '',
     'Aim for a tone that really works with a guitar plugged in: reasonable master volume',
-    '(not above 0.7), effects mixed with taste. "name" is a short preset name (max 20',
-    `characters); "why" is one or two sentences in ${lingua} saying what you chose and why;`,
-    '"bpm" is the tempo for the delay (60-200).',
+    '(not above 0.7), effects mixed with taste.',
+    '',
+    '"initials" are two capital letters for the artist or band the tone comes from: first',
+    'name and surname for a person (Brian May = BM, Steve Vai = SV, Carlos Santana = CS),',
+    'the first two words for a band (Pink Floyd = PF), and for a one-word band its first',
+    'letter plus a strong consonant (Metallica = MT). If the request names no artist, use',
+    'the one whose sound you based the tone on. "title" is the song, or a short name for',
+    'the tone if there is no song (max 18 characters, without the initials).',
+    `"why" is one or two sentences in ${lingua} saying what you chose and why; "bpm" is the`,
+    'tempo for the delay (60-200).',
     '',
     'Answer with the JSON object only, in one code block, exactly in this shape:',
     '{',
-    '  "name": "...", "why": "...", "bpm": 120,',
+    '  "initials": "BM", "title": "...", "why": "...", "bpm": 120,',
     ...POSTI_IA.map((k, i) => `  "${k}": ${blocco}${i < POSTI_IA.length - 1 ? ',' : ''}`),
     '}',
     '',
@@ -159,6 +166,22 @@ function valoreSicuroIA(id, indice, valore) {
   return Math.round(v * 1000) / 1000;
 }
 
+/**
+ * Il nome nel formato dell'utente (10 novembre 2026): «XX - Titolo», XX le iniziali
+ * dell'artista o della band («BM - Bijou», «PF - Comfortably Numb», «MT - …»). Le iniziali e
+ * il titolo l'IA li dà a parte, e il nome lo compone la pagina: così il formato non dipende
+ * da quanto la chat è stata attenta.
+ */
+function nomeDaIA(risposta) {
+  const iniziali = String(risposta.initials || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+  let titolo = String(risposta.title || risposta.name || '').replace(/\s+/g, ' ').trim();
+  // Se la chat ha messo le iniziali anche nel titolo («BM - Bijou»), non si ripetono.
+  if (iniziali.length === 2) titolo = titolo.replace(new RegExp('^' + iniziali + '\\s*[-–—]\\s*', 'i'), '');
+  if (titolo) titolo = titolo[0].toUpperCase() + titolo.slice(1);
+  else titolo = tr('Preset IA');
+  return iniziali.length === 2 ? `${iniziali} - ${titolo}` : titolo;
+}
+
 /** Un nome che in libreria non c'è ancora: «Blues» → «Blues 2», «Blues 3»… */
 function nomeLiberoIA(nome) {
   const presi = new Set(tutti.map(r => PresetStore.chiaveNome(r.name)));
@@ -209,7 +232,7 @@ function presetDaIA(risposta, scheletro) {
   const bpm = Number(risposta.bpm);
   const preset = {
     uuid: nuovoUuid(),
-    name: nomeLiberoIA(String(risposta.name || '').replace(/\s+/g, ' ').trim() || tr('Preset IA')),
+    name: nomeLiberoIA(nomeDaIA(risposta)),
     version: scheletro.version || '0.7',
     description: scheletro.description || '',
     icon: scheletro.icon || 'icon.png',

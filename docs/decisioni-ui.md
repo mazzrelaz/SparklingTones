@@ -1580,5 +1580,7 @@ Chiesta dall'utente «come il Pulze editor» (`..Pulze Controleditor`). Scelte s
   `MODELLI` non passa, i parametri si copiano da un blocco dell'ampli (`campioneModello`); va sul palco **non
   salvato** (con l'ampli: `loadPreset` e rilettura) e resta solo con «Salva…». **Visibile a tutti nel menu**, sotto
   Libreria: all'inizio era nascosta dietro la password di ottobre, ma la password nessuno la ricordava più (nel codice
-  c'era solo l'impronta) e l'utente ha detto di togliere le «Funzioni nascoste». Scartata l'IA dentro il browser (Edge/Chrome): ancora
+  c'era solo l'impronta) e l'utente ha detto di togliere le «Funzioni nascoste». **Il nome è sempre «XX - Titolo»**
+  (regola dell'utente): XX le iniziali dell'artista o della band (Brian May BM, Pink Floyd PF, Santana CS, Steve Vai
+  SV, Metallica MT); l'IA dà `initials` e `title` separati e il nome lo compone `nomeDaIA`. Scartata l'IA dentro il browser (Edge/Chrome): ancora
   sperimentale e troppo piccola per 89 modelli. Provata col finto; **con una chat vera e lo Spark: da provare**.
