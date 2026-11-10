@@ -96,12 +96,15 @@ function domandaIA(descrizione) {
     'letter plus a strong consonant (Metallica = MT). If the request names no artist, use',
     'the one whose sound you based the tone on. "title" is the song, or a short name for',
     'the tone if there is no song (max 18 characters, without the initials).',
+    '"family" is exactly one of: "clean", "drive", "acoustic", "bass" — the kind of tone',
+    '(drive for anything from crunch to high gain, acoustic for acoustic-guitar tones, bass',
+    'for bass guitar).',
     `"why" is one or two sentences in ${lingua} saying what you chose and why; "bpm" is the`,
     'tempo for the delay (60-200).',
     '',
     'Answer with the JSON object only, in one code block, exactly in this shape:',
     '{',
-    '  "initials": "BM", "title": "...", "why": "...", "bpm": 120,',
+    '  "initials": "BM", "title": "...", "family": "drive", "why": "...", "bpm": 120,',
     ...POSTI_IA.map((k, i) => `  "${k}": ${blocco}${i < POSTI_IA.length - 1 ? ',' : ''}`),
     '}',
     '',
@@ -239,14 +242,17 @@ function presetDaIA(risposta, scheletro) {
     bpm: Number.isFinite(bpm) ? Math.min(250, Math.max(40, Math.round(bpm))) : bpmDi(scheletro),
     effects: effetti,
   };
-  return { preset, avvisi };
+  // La famiglia (clean, drive, acoustic, bass): solo una che in libreria c'è davvero.
+  const fam = String(risposta.family || '').trim().toLowerCase();
+  const famiglia = famiglie.some(f => f.id === fam) ? fam : null;
+  return { preset, famiglia, avvisi };
 }
 
 /**
  * Il preset generato sul palco, non salvato: con l'ampli va nel preset software e si rilegge
  * (come `apriRecord`), senza si regola sulla copia in memoria.
  */
-async function mettiGeneratoSulPalco(preset) {
+async function mettiGeneratoSulPalco(preset, famiglia) {
   if (!spark.connected) {
     mettiSulPalco({ record: null, slot: null, letto: preset, offline: true });
   } else {
@@ -273,6 +279,8 @@ async function mettiGeneratoSulPalco(preset) {
   ora.nome = preset.name;
   ora.meta = { uuid: preset.uuid, version: preset.version, description: preset.description, icon: preset.icon };
   ora.toccato = true;
+  // La famiglia la mette «Salva…» quando il preset entra in libreria (`salva`, 05-file.js).
+  ora.famigliaNuovo = famiglia || null;
   disegnaTutto();
   return true;
 }
@@ -323,11 +331,13 @@ async function apriGeneraIA() {
       continue;
     }
     if (!await chiediPrimaDiLasciare()) return;
-    if (!await mettiGeneratoSulPalco(fatto.preset)) return;
+    if (!await mettiGeneratoSulPalco(fatto.preset, fatto.famiglia)) return;
 
     const risposta = leggiRispostaIA(bozzaIA.risposta);
     const motivo = String(risposta.why || '').trim();
+    const fam = fatto.famiglia && famiglie.find(f => f.id === fatto.famiglia);
     stato(tr('«{0}» dall\'IA, partendo da «{1}»', fatto.preset.name, scheletro.name) +
+      (fam ? ' — ' + fam.nome : '') +
       (fatto.avvisi.length ? ' — ' + fatto.avvisi.join('; ') : '') + (motivo ? ' — ' + motivo : ''),
       fatto.avvisi.length ? 'errore' : 'ok');
     bozzaIA.risposta = '';

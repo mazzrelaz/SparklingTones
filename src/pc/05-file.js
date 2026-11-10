@@ -93,6 +93,8 @@ async function salva(nome, comeNuovo, slot) {
       const nuovo = Object.assign(presetDiOra(nome),
         { uuid: ora.record ? nuovoUuid() : ((ora.meta && ora.meta.uuid) || nuovoUuid()), slots: [] });
       const id = await store.add(nuovo);
+      // Un preset di «Genera con l'IA» entra già con la sua famiglia (`ora.famigliaNuovo`).
+      if (ora.famigliaNuovo) await store.setFamiglia(id, ora.famigliaNuovo);
       record = await store.get(id);
     } else {
       record = await store.get(ora.record.id);
