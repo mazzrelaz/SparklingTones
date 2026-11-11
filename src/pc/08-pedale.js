@@ -354,3 +354,6 @@ async function aggiornaTuttiPedale() {
 }
 
 $('apri-pedale').addEventListener('click', () => apriPedale());
+// `hidden` non basta sui bottoni della barra: il loro display lo batte.
+function mostraSezionePedale() { $('apri-pedale').style.display = haPedale() ? '' : 'none'; }
+mostraSezionePedale();

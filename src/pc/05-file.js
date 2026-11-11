@@ -518,6 +518,12 @@ async function apriImpostazioni() {
       try { localStorage.setItem('hendrix', v === 'no' ? 'no' : 'si'); } catch (e) { /* resta per questa volta */ }
       disegnaTutto();
     });
+  riga(tr('Pedale SparklingTones'),
+    tr('Hai il pedale? Se no, la sezione Pedale non si vede.'),
+    [['sì', tr('Sì')], ['no', tr('No')]], haPedale() ? 'sì' : 'no', v => {
+      try { localStorage.setItem('pedale-pc', v === 'sì' ? 'si' : 'no'); } catch (e) { /* resta per questa volta */ }
+      mostraSezionePedale();
+    });
   const backup = document.createElement('div');
   corpo.appendChild(backup);
   await riempiBackup(backup);
@@ -606,7 +612,6 @@ $('menu').addEventListener('click', e => apriTendina(e.currentTarget, t => {
   voceTendina(t, icona('telefono') + tr('Apri l\'app per il telefono'), () => window.open('index.html', '_blank', 'noopener'));
   t.insertAdjacentHTML('beforeend', '<hr>');
   voceTendina(t, icona('posta') + tr('Segnala un problema'), segnalaProblema);
-  voceTendina(t, icona('gioco') + tr('Fai una pausa'), () => SnakePedali.apri());
   // In un'altra scheda: lasciare la pagina farebbe cadere l'ampli.
   voceTendina(t, icona('caffe') + tr('Offrimi un caffè'), () => window.open(PAGINA_CAFFE, '_blank', 'noopener'), { classe: 'voce-caffe' });
 }, { destra: true }));

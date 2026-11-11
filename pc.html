@@ -53,6 +53,9 @@
   .numero { width:3.6em; font-family:var(--strumento); font-size:0.95rem; font-weight:600; color:var(--text);
             background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:2px 5px; text-align:center; }
   .numero:disabled { color:var(--faint); }
+  .gruppo .tap { font-family:var(--strumento); font-size:0.75rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+    padding:3px 9px; border-radius:6px; }
+  .gruppo .tap.battuto { background:var(--rialzo); }
   #nome-ampli { font-family:var(--strumento); font-size:0.78rem; color:var(--dim); }
   .lampada { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--faint); margin-right:7px; vertical-align:1px; }
   #collega.attivo { background:var(--rialzo); border-color:var(--line); color:var(--text); }
@@ -389,7 +392,7 @@
   <span id="stato"></span>
   <button id="genera-ia" title="Genera con l'IA"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg><span>Genera con l'IA</span></button>
   <button id="rileggi" title="Rileggi dall'ampli il suono che sta facendo"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
-  <div class="gruppo" title="Il tempo del preset: gli effetti a tempo lo seguono"><span class="etichetta">BPM</span><input class="numero" id="bpm" inputmode="numeric" autocomplete="off"></div>
+  <div class="gruppo" title="Il tempo del preset: gli effetti a tempo lo seguono"><span class="etichetta">BPM</span><input class="numero" id="bpm" inputmode="numeric" autocomplete="off"><button class="tap" id="tap" title="Batti il tempo">Tap</button></div>
   <span id="nome-ampli"></span>
   <button id="collega" class="primario"><span class="lampada"></span><span id="collega-testo">Collega</span></button>
   <button id="menu" title="Menu"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -484,7 +487,6 @@
 <script src="src/pc/04-ampli.js"></script>
 <script src="src/pc/05-file.js"></script>
 <script src="src/pedale-ponte.js"></script>
-<script src="src/snake-pedali.js"></script>
 <script src="src/pc/06-libreria.js"></script>
 <script src="src/pc/07-banchi.js"></script>
 <script src="src/pc/08-pedale.js"></script>

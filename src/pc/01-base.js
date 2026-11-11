@@ -196,4 +196,9 @@ function haHendrix() {
   try { return localStorage.getItem('hendrix') !== 'no'; } catch (e) { return true; }
 }
 
+// La sezione Pedale serve solo a chi ha il pedale: spenta finché non la si accende.
+function haPedale() {
+  try { return localStorage.getItem('pedale-pc') === 'si'; } catch (e) { return false; }
+}
+
 const mostraValore = v => (v * 10).toFixed(1);

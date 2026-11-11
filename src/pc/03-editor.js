@@ -484,6 +484,21 @@ $('bpm').addEventListener('keydown', e => {
   }
 });
 
+// Il tap tempo: la media degli ultimi intervalli; una pausa di oltre 2 s ricomincia la conta.
+const colpiTap = [];
+$('tap').addEventListener('click', () => {
+  if (!ora || $('bpm').disabled) return;
+  const adesso = performance.now();
+  if (colpiTap.length && adesso - colpiTap[colpiTap.length - 1] > 2000) colpiTap.length = 0;
+  colpiTap.push(adesso);
+  if (colpiTap.length > 5) colpiTap.shift();
+  $('tap').classList.add('battuto');
+  setTimeout(() => $('tap').classList.remove('battuto'), 90);
+  if (colpiTap.length < 2) return;
+  const passo = (colpiTap[colpiTap.length - 1] - colpiTap[0]) / (colpiTap.length - 1);
+  cambiaTempo(60000 / passo);
+});
+
 /* ---------------------------------------------------------------- il cambio di modello */
 
 /**
