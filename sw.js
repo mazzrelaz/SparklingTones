@@ -77,6 +77,7 @@ const GUSCIO = [
   './src/pc/10-partenza.js',
   './src/pc/11-genera-ia.js',
   './src/pc/12-live.js',
+  './src/pc/13-benvenuto.js',
   './immagini/classico/ampli.webp',
   './icons/icon-192.png',
   './icons/icon-512.png',

@@ -419,6 +419,21 @@
   .lv-logo { position:relative; display:block; isolation:isolate; }
   .lv-logo .alone { position:absolute; inset:0; z-index:-1; filter:drop-shadow(0 0 3px rgba(140,10,20,0.9)) drop-shadow(0 0 10px rgba(120,0,15,0.7));
     animation:lv-logo-alone 2.6s ease-in-out infinite; will-change:opacity; }
+  /* le finestre di benvenuto dell'app Windows (13-benvenuto.js) */
+  .benvenuto-velo { position:fixed; inset:0; z-index:900; background:rgba(8,10,14,0.72); display:flex; align-items:center; justify-content:center; padding:16px; }
+  .benvenuto { width:min(460px,100%); background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:36px 34px 26px;
+    text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+  .benvenuto-logo { display:inline-block; margin-bottom:22px; }
+  .benvenuto-logo img { height:64px; width:auto; display:block; }
+  .benvenuto h2 { font-family:var(--strumento); font-size:1.35rem; margin:0 0 12px; }
+  .benvenuto p { color:var(--dim); line-height:1.55; margin:0 0 12px; }
+  .benvenuto .benvenuto-firma { font-style:italic; color:var(--faint); font-size:0.85rem; margin:6px 0 22px; }
+  .benvenuto-azioni { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .benvenuto-azioni .grande { min-width:220px; padding:11px 20px; font-size:0.95rem; }
+  .benvenuto-azioni .caffe { background:#f2c14e; border-color:#f2c14e; color:#2a1f05; }
+  .benvenuto-azioni .discreto { background:none; border:none; color:var(--faint); font-weight:500; }
+  .benvenuto-link { color:#f2c14e; font-size:0.82rem; text-decoration:none; }
+  .benvenuto-link:hover { text-decoration:underline; }
   .lv-midi { font-family:var(--strumento); font-size:0.78rem; color:var(--dim); margin-right:8px; }
   .lampada.accesa { background:var(--green); box-shadow:0 0 7px rgba(76,211,138,0.7); }
   .lv-corpo { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:center; padding:8px 10px 20px; }
@@ -595,6 +610,7 @@
 <script src="src/pc/10-partenza.js"></script>
 <script src="src/pc/11-genera-ia.js"></script>
 <script src="src/pc/12-live.js"></script>
+<script src="src/pc/13-benvenuto.js"></script>
 <script>
   // Installabile come app a parte (pc.webmanifest): lo stesso service worker dell'app, che ha già la pagina nel guscio.
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
