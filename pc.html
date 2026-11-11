@@ -53,6 +53,10 @@
   .numero { width:3.6em; font-family:var(--strumento); font-size:0.95rem; font-weight:600; color:var(--text);
             background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:2px 5px; text-align:center; }
   .numero:disabled { color:var(--faint); }
+  .aiuto, .sotto-barra .gruppo button.aiuto { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; padding:0; margin-left:6px;
+    border-radius:50%; font:600 0.72rem var(--strumento); color:var(--text); background:var(--rialzo); border:1px solid var(--dim);
+    vertical-align:middle; cursor:pointer; flex:none; position:relative; top:-1px; }
+  .aiuto:hover, .sotto-barra .gruppo button.aiuto:hover:not(:disabled) { background:var(--accent); border-color:var(--accent); color:var(--su-accent); }
   .gruppo .tap { font-family:var(--strumento); font-size:0.75rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
     padding:3px 9px; border-radius:6px; }
   .gruppo .tap.battuto { background:var(--rialzo); }
@@ -143,7 +147,7 @@
   /* ---------------------------------------------------------------- le schermate a tutta finestra (Banchi, Pedale, Tuner) */
   .schermo { position:fixed; inset:0; z-index:25; background:var(--bg); display:flex; flex-direction:column; gap:14px; padding:16px 18px; }
   .sch-cima { display:flex; align-items:center; gap:8px; flex:none; }
-  .sch-cima h2 { margin:0; font-family:var(--strumento); font-size:1.3rem; }
+  .sch-cima h2 { margin:0; font-family:var(--strumento); font-size:1.55rem; font-weight:700; letter-spacing:-0.01em; display:flex; align-items:center; }
   .sch-cima .nota { color:var(--faint); font-size:0.8rem; }
   .sch-corpo { flex:1; min-height:0; display:grid; grid-template-columns:300px minmax(0, 1fr); gap:16px; }
   .sl-preset { display:flex; flex-direction:column; min-height:0; background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
@@ -362,6 +366,19 @@
   .finestra { width:min(560px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--panel);
               border:1px solid var(--line); border-radius:14px; padding:20px 22px; box-shadow:0 20px 50px rgba(0,0,0,0.6); }
   .finestra h2 { font-family:var(--strumento); font-size:1.15rem; margin:0 0 12px; }
+  /* i titoli: più grandi, con una linea sotto che li stacca dal contenuto */
+  .finestra > h2, .carta-aiuto h2 { display:flex; align-items:center; gap:10px; font-size:1.4rem; font-weight:700; letter-spacing:-0.01em;
+    margin:-2px 0 16px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+  .finestra > h2 .aiuto { margin-left:2px; }
+  .icona-titolo { display:inline-grid; place-items:center; width:34px; height:34px; border-radius:10px; flex:none;
+    background:color-mix(in srgb, var(--accent) 18%, transparent); color:var(--accent-chiaro); }
+  .icona-titolo svg.ico { width:20px; height:20px; }
+  .velo-aiuto { position:fixed; inset:0; z-index:60; background:rgba(10,13,18,0.5); display:grid; place-items:center; }
+  .carta-aiuto { width:min(500px, calc(100vw - 32px)); max-height:calc(100vh - 40px); overflow-y:auto; background:var(--panel);
+              border:1px solid var(--line); border-radius:14px; padding:20px 22px; box-shadow:0 20px 50px rgba(0,0,0,0.6); }
+  .carta-aiuto h2 { font-family:var(--strumento); font-size:1.1rem; margin:0 0 10px; }
+  .testo-aiuto p { margin:0 0 10px; line-height:1.5; color:var(--dim); }
+  .testo-aiuto strong { color:var(--text); }
   .finestra h3 { font-family:var(--strumento); font-size:0.74rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); margin:18px 0 8px; }
   .finestra p, .finestra .testo { color:var(--dim); line-height:1.5; margin:0 0 10px; font-size:0.88rem; }
   .finestra strong { color:var(--text); }
@@ -406,7 +423,7 @@
     <div class="gruppo">
       <button id="annulla" title="Annulla"><svg class="ico" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
       <button id="ripeti" title="Ripeti"><svg class="ico" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
-      <button id="confronta" title="Confronta con il preset salvato">A/B</button>
+      <button id="confronta" title="Confronta con il preset salvato">A/B</button><button type="button" class="aiuto" data-aiuto="ab">?</button>
     </div>
     <div class="gruppo">
       <button id="importa" title="Importa un file"><svg class="ico" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M4 15v5h16v-5"/></svg><span class="testo">Importa</span></button>

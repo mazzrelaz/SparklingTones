@@ -315,6 +315,8 @@ async function apriGeneraIA() {
 
     const scelta = await finestra({
       titolo: tr('Genera con l\'IA'),
+      icona: document.querySelector('#genera-ia svg').innerHTML,
+      aiutoDi: 'ia',
       corpo,
       larga: true,
       azioni: [{ testo: tr('Chiudi'), valore: null }, { testo: tr('Metti sul palco'), valore: 'costruisci', primario: true }],

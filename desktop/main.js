@@ -1,7 +1,7 @@
 // SparklingTones per Windows: la stessa pc.html, dentro una finestra Electron.
 // I file si servono da un protocollo nostro (spark://app/), così l'origine resta
 // sempre la stessa e la libreria in IndexedDB non si perde fra un avvio e l'altro.
-const { app, BrowserWindow, protocol, net, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, protocol, net, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
 const { pathToFileURL } = require('url');
 
@@ -63,6 +63,20 @@ function apriFinestra() {
     if (url.startsWith('spark://')) return;
     event.preventDefault();
     if (/^(https?|mailto):/.test(url)) shell.openExternal(url);
+  });
+
+  // Lavoro non salvato: la pagina chiede di restare (beforeunload). Il browser mostra la
+  // domanda, Electron invece bloccherebbe la chiusura in silenzio: la domanda la facciamo noi.
+  win.webContents.on('will-prevent-unload', (event) => {
+    const scelta = dialog.showMessageBoxSync(win, {
+      type: 'question',
+      buttons: ['Esci senza salvare', 'Resta'],
+      defaultId: 1, cancelId: 1,
+      title: 'SparklingTones',
+      message: 'Il preset ha modifiche non salvate.',
+      detail: 'Se esci adesso le modifiche si perdono.'
+    });
+    if (scelta === 0) event.preventDefault();   // ignora il beforeunload: si chiude
   });
 
   win.loadURL('spark://app/pc.html');

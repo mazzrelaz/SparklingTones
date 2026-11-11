@@ -64,7 +64,7 @@ function apriPedale(bancoId) {
   schermoPedale.className = 'schermo';
   schermoPedale.innerHTML = `
     <div class="sch-cima">
-      <h2>${tr('Pedale')}</h2>
+      <h2>${tr('Pedale')}${aiuto('pedale')}</h2>
       <span class="spazio"></span>
       <button data-f="chiudi" title="${tr('Chiudi')}">✕</button>
     </div>

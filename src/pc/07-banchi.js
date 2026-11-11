@@ -15,7 +15,7 @@ function apriBanchi() {
   schermoBanchi.className = 'schermo';
   schermoBanchi.innerHTML = `
     <div class="sch-cima">
-      <h2>${tr('Banchi')}</h2>
+      <h2>${tr('Banchi')}${aiuto('banchi')}</h2>
       <span class="spazio"></span>
       <button data-f="nuovo" class="primario">${tr('Nuovo banco')}</button>
       <button data-f="chiudi" title="${tr('Chiudi')}">✕</button>

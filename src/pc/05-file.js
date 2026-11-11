@@ -320,10 +320,10 @@ async function riempiBackup(corpo) {
       <h3>${tr('Sul PC')}</h3>
       <div class="riga-azioni"><button class="primario" data-f="scarica">${tr('Scarica il backup')}</button>
         <button data-f="ripristina">${tr('Ripristina da un file…')}</button></div>
-      <h3>Dropbox</h3>
+      <h3>Dropbox${aiuto('dropbox')}</h3>
       <div class="scatola">${collegato ? `
         <div class="stato-db"><span class="lampada on"></span><span data-f="quando">${tr('Collegato.')}</span></div>
-        <div class="stato-db" data-f="sicurezza"></div>
+        <div class="stato-db"><span data-f="sicurezza"></span>${aiuto('sicurezza')}</div>
         <div class="riga-azioni"><button class="primario" data-f="sicFai">${tr('Fai un backup di sicurezza')}</button>
           <button data-f="sicRimetti">${tr('Ripristina il backup di sicurezza')}</button>
           <button data-f="via">${tr('Scollega')}</button></div>` : `
@@ -517,17 +517,17 @@ async function apriImpostazioni() {
     [['sì', tr('Sì')], ['no', tr('No')]], haHendrix() ? 'sì' : 'no', v => {
       try { localStorage.setItem('hendrix', v === 'no' ? 'no' : 'si'); } catch (e) { /* resta per questa volta */ }
       disegnaTutto();
-    });
+    }).querySelector('span').insertAdjacentHTML('afterend', aiuto('hendrix'));
   riga(tr('Pedale SparklingTones'),
     tr('Hai il pedale? Se no, la sezione Pedale non si vede.'),
     [['sì', tr('Sì')], ['no', tr('No')]], haPedale() ? 'sì' : 'no', v => {
       try { localStorage.setItem('pedale-pc', v === 'sì' ? 'si' : 'no'); } catch (e) { /* resta per questa volta */ }
       mostraSezionePedale();
-    });
+    }).querySelector('span').insertAdjacentHTML('afterend', aiuto('pedale'));
   const backup = document.createElement('div');
   corpo.appendChild(backup);
   await riempiBackup(backup);
-  await finestra({ titolo: tr('Impostazioni e backup'), corpo, larga: true });
+  await finestra({ titolo: tr('Impostazioni e backup'), icona: ICONE.impost, corpo, larga: true });
 }
 
 /* ================================================================ il menu ☰ */
