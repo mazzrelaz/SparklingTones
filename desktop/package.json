@@ -22,6 +22,7 @@
       { "from": "../pc.webmanifest", "to": "web/pc.webmanifest" },
       { "from": "../icons", "to": "web/icons" },
       { "from": "../fonts", "to": "web/fonts" },
+      { "from": "../immagini", "to": "web/immagini" },
       { "from": "../src", "to": "web/src", "filter": ["**/*", "!app/**"] }
     ],
     "win": {
