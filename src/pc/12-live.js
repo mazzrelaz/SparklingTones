@@ -109,7 +109,9 @@ async function apriLive() {
   schermoLive.className = 'schermo live';
   schermoLive.innerHTML = `
     <div class="sch-cima">
-      <h2>${tr('Live')}</h2>
+      <span class="lv-logo"><img class="logo" src="icons/logo.svg" alt="SparklingTones"><img class="logo alone" src="icons/logo.svg" alt=""></span>
+      <h2 class="lv-titolo">${tr('Live')}</h2>
+      <span data-f="casa-schede"></span>
       <div class="lv-schede">
         <button data-f="v-live">${tr('Live')}</button><button data-f="v-ped">${tr('Pedaliera')}</button>
       </div>
@@ -150,8 +152,15 @@ function disegnaLive() {
   const fonti = [midi.usb ? tr('MIDI USB') : '', midi.bleNome].filter(Boolean);
   q('midi').innerHTML = fonti.length ? `<span class="lampada accesa"></span>${testoConNome(fonti.join(' · '))}` : '';
   const corpo = q('corpo');
+  const schede = schermoLive.querySelector('.lv-schede');
+  q('casa-schede').after(schede);                     // prima di svuotare il corpo, le schede tornano in cima
   corpo.textContent = '';
   if (live.vista === 'live') disegnaPalcoLive(corpo); else disegnaPedaliera(corpo);
+  const testa = corpo.querySelector('.lv-testa');
+  if (testa) testa.querySelector('.lv-banco').after(schede);   // nel Live: banco, poi le schede
+  schermoLive.querySelector('.lv-titolo').style.visibility = live.vista === 'live' ? '' : 'hidden';   // «Live» solo nel Live
+  const pedali = corpo.querySelector('.lv-pedali');
+  if (pedali) pedali.prepend(schede);                           // nella Pedaliera: sulla riga dei pedali
 }
 
 /** Le etichette degli switch che comandano una cosa. */
@@ -236,11 +245,10 @@ function disegnaPedaliera(corpo) {
   const box = document.createElement('div');
   box.className = 'lv-ped';
   box.innerHTML = `
-    <h3>${tr('Pedali')}</h3>
-    <div class="lv-pedali">
-      <button data-a="ble">${midi.ble ? tr('Stacca {0}', testoConNome(midi.bleNome)) : tr('Collega un pedale Bluetooth')}</button>
-      <button data-a="usb">${midi.usb ? tr('MIDI USB attivo') : tr('Usa i pedali USB')}</button>
-    </div>
+    <div class="lv-pedali"><div class="lv-blocco">
+      <button data-a="ble" class="${midi.ble ? 'sì' : ''}">${midi.ble ? tr('Stacca {0}', testoConNome(midi.bleNome)) : tr('Collega un pedale Bluetooth')}</button>
+      <button data-a="usb" class="${midi.usb ? 'sì' : ''}">${midi.usb ? tr('MIDI USB attivo') : tr('Usa i pedali USB')}</button>
+    </div></div>
     <h3>${tr('Switch')}</h3>`;
   box.querySelector('[data-a="ble"]').addEventListener('click', () => (midi.ble ? staccaBle() : collegaBle()));
   box.querySelector('[data-a="usb"]').addEventListener('click', attivaUsb);
@@ -282,9 +290,15 @@ function disegnaPedaliera(corpo) {
     if (!midi.usb && !midi.ble) { avvisa(tr('nessun pedale'), tr('Collega prima un pedale Bluetooth o attiva i pedali USB.')); return; }
     live.impara = !live.impara; disegnaLive();
   });
-  piede.appendChild(impara);
+  const bloccoImpara = document.createElement('div');
+  bloccoImpara.className = 'lv-blocco';
+  bloccoImpara.appendChild(impara);
+  piede.appendChild(bloccoImpara);
   piede.insertAdjacentHTML('beforeend', `<span class="lv-durata-et">${tr('Pressione lunga')}</span>`);
-  piede.appendChild(scelta(pedaliera.durata, '', v => tr('dopo {0} s', String(v / 1000).replace('.', ',')), DURATE,
+  const bloccoDurata = document.createElement('div');
+  bloccoDurata.className = 'lv-blocco';
+  piede.appendChild(bloccoDurata);
+  bloccoDurata.appendChild(scelta(pedaliera.durata, '', v => tr('dopo {0} s', String(v / 1000).replace('.', ',')), DURATE,
     v => { pedaliera.durata = v; salvaPedaliera(); disegnaLive(); }));
   box.appendChild(piede);
   corpo.appendChild(box);
