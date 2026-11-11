@@ -331,7 +331,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   «Spark Controller». Provata dall'utente con lo Spark: BLE, immagini, Dropbox, guida, mail. **Non ancora
   pubblicata** (rilascio GitHub + pulsante sul sito, con bozza): l'utente dirà lui quando. Nello stesso giro, sul PC
   e in locale: Tap tempo, sezione Pedale a scelta (spenta), via StompSnake, i «?» (`AIUTI` in `01-base.js`), titoli
-  delle finestre, `guida-pc.html` (schermate da `tools/scatti-guida-pc/`: i numeri si misurano, mai a occhio).
+  delle finestre, `guida-pc.html` (schermate da `tools/scatti-guida-pc/`: i numeri si misurano, mai a occhio). Inglese di
+  tutto questo (guida, «?»): non fatto, aspetta il suo via.
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
