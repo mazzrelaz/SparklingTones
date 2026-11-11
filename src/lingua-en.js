@@ -1683,4 +1683,6 @@ window.LINGUA_EN = {
     "The reply",
   "incolla qui la risposta":
     "paste the reply here",
+  "Impostazioni e backup…":
+    "Settings and backup…",
 };

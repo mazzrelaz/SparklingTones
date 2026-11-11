@@ -311,8 +311,8 @@ function disegnaSincro() {
   if (riga && sincro) riga.textContent = testoSincro(sincro.ultimo);
 }
 
-async function apriBackup() {
-  const corpo = document.createElement('div');
+/** La parte Backup e Dropbox delle Impostazioni: la scrive dentro `corpo`, e la riscrive quando Dropbox cambia. */
+async function riempiBackup(corpo) {
   const ridisegna = async () => {
     const collegato = dropbox && dropbox.autorizzato();
     const inSospeso = !collegato && await store.getSetting('dropboxVerifier', null);
@@ -439,7 +439,6 @@ async function apriBackup() {
     }
   };
   await ridisegna();
-  await finestra({ titolo: tr('Backup e Dropbox'), corpo, larga: true });
 }
 
 /* ================================================================ Lingua */
@@ -464,31 +463,65 @@ const BANDIERE = {
 
 /* ================================================================ Impostazioni */
 
+/**
+ * Impostazioni e backup, in una finestra sola come sul telefono: in cima le scelte (lingua,
+ * pacchetto Hendrix), sotto il backup sul PC e Dropbox.
+ */
 async function apriImpostazioni() {
   const corpo = document.createElement('div');
-  const riga = (etichetta, voci, attuale, quando) => {
+  const generale = document.createElement('div');
+  generale.className = 'scatola';
+  corpo.appendChild(generale);
+  const riga = (etichetta, nota, voci, attuale, quando) => {
     const r = document.createElement('div');
     r.className = 'riga-impost';
-    r.innerHTML = `<span>${etichetta}</span>`;
+    const testo = document.createElement('div');
+    const e = document.createElement('span');
+    e.textContent = etichetta;
+    testo.appendChild(e);
+    if (nota) {
+      const p = document.createElement('p');
+      p.className = 'nota-impost';
+      p.textContent = nota;
+      testo.appendChild(p);
+    }
+    r.appendChild(testo);
     const seg = document.createElement('div');
     seg.className = 'segmenti';
-    for (const [valore, testo] of voci) {
+    for (const [valore, scritta] of voci) {
       const b = document.createElement('button');
       b.type = 'button';
-      b.textContent = testo;
+      b.textContent = scritta;
       if (valore === attuale) b.classList.add('sì');
-      b.addEventListener('click', () => quando(valore));
+      b.addEventListener('click', async () => {
+        const segna = scelto => seg.querySelectorAll('button').forEach(x => x.classList.toggle('sì', x === scelto));
+        const prima = seg.querySelector('button.sì');
+        segna(b);
+        // `false`: la scelta non è passata (una conferma rifiutata), si torna a quella di prima.
+        if (await quando(valore) === false) segna(prima);
+      });
       seg.appendChild(b);
     }
     r.appendChild(seg);
-    corpo.appendChild(r);
+    generale.appendChild(r);
+    return r;
   };
-  riga(tr('Pacchetto Jimi Hendrix'), [['sì', tr('Sì')], ['no', tr('No')]], haHendrix() ? 'sì' : 'no', v => {
-    try { localStorage.setItem('hendrix', v === 'no' ? 'no' : 'si'); } catch (e) { /* resta per questa volta */ }
-    chiudiFinestra(null);
-    disegnaTutto();
-  });
-  await finestra({ titolo: tr('Impostazioni'), corpo });
+  // La lingua scritta nelle due lingue, come sul telefono: la trova anche chi l'altra non la legge.
+  riga('Lingua · Language', null, [['it', 'Italiano'], ['en', 'English']], Lingua.attuale,
+    // Se la lingua cambia la pagina si ricarica; se siamo ancora qui, non è cambiata.
+    async v => { await cambiaLingua(v); return false; })
+    .setAttribute('translate', 'no');
+  riga(tr('Pacchetto Jimi Hendrix'),
+    tr('Ce l\'hai sbloccato sull\'ampli? Se no, gli effetti Hendrix e i preset che li usano non si vedono, ' +
+       'e il wah è l\'Auto Wah gratuito.'),
+    [['sì', tr('Sì')], ['no', tr('No')]], haHendrix() ? 'sì' : 'no', v => {
+      try { localStorage.setItem('hendrix', v === 'no' ? 'no' : 'si'); } catch (e) { /* resta per questa volta */ }
+      disegnaTutto();
+    });
+  const backup = document.createElement('div');
+  corpo.appendChild(backup);
+  await riempiBackup(backup);
+  await finestra({ titolo: tr('Impostazioni e backup'), corpo, larga: true });
 }
 
 /* ================================================================ il menu ☰ */
@@ -565,10 +598,9 @@ $('menu').addEventListener('click', e => apriTendina(e.currentTarget, t => {
   t.insertAdjacentHTML('beforeend', `<div class="famiglia">${tr('Libreria')}</div>`);
   voceTendina(t, icona('cartella') + tr('Categorie e famiglie…'), apriCategorie);
   voceTendina(t, icona('doppioni') + tr('Doppioni…'), () => apriDoppioni('suono'));
-  voceTendina(t, icona('backup') + tr('Backup e Dropbox…'), apriBackup);
   voceTendina(t, icona('cestino') + tr('Elimina tutti i preset…'), svuotaLibreria, { classe: 'pericolo' });
   t.insertAdjacentHTML('beforeend', '<hr>');
-  voceTendina(t, icona('impost') + tr('Impostazioni…'), apriImpostazioni);
+  voceTendina(t, icona('impost') + tr('Impostazioni e backup…'), apriImpostazioni);
   voceTendina(t, icona('guida') + tr('Guida'), () => window.open(Lingua.attuale === 'en' ? 'guida.en.html' : 'guida.html', '_blank', 'noopener'));
   voceTendina(t, icona('info') + tr('Informazioni, licenze e responsabilità'), apriInformazioni);
   voceTendina(t, icona('telefono') + tr('Apri l\'app per il telefono'), () => window.open('index.html', '_blank', 'noopener'));
