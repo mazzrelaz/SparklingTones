@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>SparklingTones — Guida per il computer</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<!--
+  La guida della versione per il computer (11 novembre 2026, chiesta dall'utente):
+  vale per pc.html nel browser e per l'app Windows, che sono la stessa pagina.
+  Stessa grafica e comportamento della guida del telefono (guida.css, guida.js).
+  L'inglese verrà quando l'utente dirà di aggiornarlo.
+-->
+<link rel="stylesheet" href="guida.css">
+<style>
+  /* le tre guide in fila */
+  .sezioni.tre { grid-template-columns:repeat(3, 1fr); max-width:760px; }
+  @media (max-width:520px) { .sezioni.tre .sezione > span:last-child { display:none; } .sezioni.tre .sezione b { font-size:1.1rem; } }
+  /* le schermate del computer: la foto vera, coi numeri sopra */
+  .pc-foto { position:relative; border-radius:12px; border:1px solid #2c2f36; background:#1e222a;
+             box-shadow:0 0 0 5px #0b0c0e, 0 0 0 6px #24262c, 0 24px 60px rgba(0,0,0,0.6); }
+  .pc-foto img { display:block; width:100%; height:auto; border-radius:12px; }
+  .cap > figure.schermo { margin:18px 0 22px; }
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <img src="icons/logo.svg" alt="SparklingTones" onerror="this.remove()">
+  <nav class="sezioni tre" aria-label="sezioni della guida">
+    <span class="sezione qui" aria-current="page"><span class="ico">💻</span><b>Computer</b><span>browser e app Windows</span></span>
+    <a class="sezione" href="guida.html"><span class="ico">📱</span><b>Telefono</b><span>preset, Live, manopole</span></a>
+    <a class="sezione" href="guida-pedale.html"><span class="ico">🎛️</span><b>Pedale</b><span>costruirlo e usarlo</span></a>
+  </nav>
+  <h1>Guida <span>per il computer</span></h1>
+  <p>Collegare l'ampli, regolare il suono con mouse e tastiera, tenere in ordine la libreria e preparare
+    i banchi. Vale per la versione nel browser e per l'app per Windows: sono la stessa cosa.</p>
+  <div class="fuori" hidden>
+    <a class="apri-app" href="pc.html">Apri l'app →</a>
+  </div>
+
+  <div class="tre-passi">
+    <div class="passo-grande">
+      <span class="ico">🔌</span>
+      <span class="num">PASSO 1</span>
+      <h3>Collega</h3>
+      <p>Un clic su <b>Collega</b>, in alto a destra: l'app trova l'ampli e legge gli otto preset che ha dentro.</p>
+    </div>
+    <div class="passo-grande">
+      <span class="ico">🎚️</span>
+      <span class="num">PASSO 2</span>
+      <h3>Regola</h3>
+      <p>Scegli un blocco della catena e gira le manopole: il suono cambia mentre suoni.</p>
+    </div>
+    <div class="passo-grande">
+      <span class="ico">💾</span>
+      <span class="num">PASSO 3</span>
+      <h3>Salva</h3>
+      <p><b>Salva…</b> lo mette in libreria, e se vuoi in uno degli otto slot dell'ampli.</p>
+    </div>
+  </div>
+</header>
+
+<nav class="indice" aria-label="indice">
+  <div class="scorre">
+    <a href="#inizio">Prima di cominciare</a>
+    <a href="#collegare">Collegare</a>
+    <a href="#schermata">La schermata</a>
+    <a href="#suono">Regolare il suono</a>
+    <a href="#salvare">Salvare</a>
+    <a href="#libreria">La libreria</a>
+    <a href="#banchi">Banchi</a>
+    <a href="#ia">Genera con l'IA</a>
+    <a href="#tuner">Tuner</a>
+    <a href="#sicuro">Al sicuro</a>
+    <a href="#impostazioni">Impostazioni</a>
+    <a href="#pedale">Pedale</a>
+    <a href="#problemi">Se qualcosa non va</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ===================================================================== -->
+<section class="cap" id="inizio">
+  <div class="cap-testa"><span class="cap-num">1</span><h2>Prima di cominciare</h2></div>
+  <p class="sotto">Due modi di usarla sul computer, con le stesse funzioni.</p>
+
+  <div class="due">
+    <div>
+      <h3>Nel browser</h3>
+      <ul>
+        <li>Apri l'app per il computer in <strong>Chrome o Edge</strong>: sono i browser che sanno parlare col
+          Bluetooth. Firefox e Safari no.</li>
+        <li>Se vuoi, installala: menu del browser → <em>Installa SparklingTones</em>. Si apre in una finestra sua,
+          con l'icona nel menu Start, e funziona anche senza rete.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>L'app per Windows</h3>
+      <ol class="passi">
+        <li>Scarica <code>SparklingTones-Setup.exe</code> e aprilo.</li>
+        <li>Windows può mostrare <em>«Windows ha protetto il PC»</em>: è normale per un programma nuovo.
+          Clicca <strong>Ulteriori informazioni</strong> → <strong>Esegui comunque</strong>.</li>
+        <li>Scegli la cartella e finisci l'installazione: trovi <strong>SparklingTones</strong> sul desktop e nel
+          menu Start.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="nota att">
+    <p><strong>Serve il Bluetooth sul computer.</strong> Quasi tutti i portatili ce l'hanno; un fisso spesso no, e
+      basta una chiavetta Bluetooth USB. Niente account e niente iscrizioni.</p>
+  </div>
+  <div class="nota">
+    <p><strong>Ogni versione ha la sua libreria</strong>: il browser, l'app per Windows e il telefono non si
+      vedono fra loro. Per avere gli stessi preset ovunque usa Dropbox o Esporta / Importa: vedi
+      <a href="#sicuro">Mettere al sicuro</a>.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="collegare">
+  <div class="cap-testa"><span class="cap-num">2</span><h2>Collegare l'ampli</h2></div>
+  <p class="sotto">Una volta per sessione; poi l'app ricorda tutto il resto.</p>
+
+  <ol class="passi">
+    <li>Accendi lo Spark. Chiudi l'app ufficiale di Positive Grid e l'app sul telefono: <strong>l'ampli parla con un
+      solo apparecchio alla volta</strong>.</li>
+    <li>Clicca <span class="tasto rosso">Collega</span> in alto a destra.</li>
+    <li>Si apre l'elenco dei dispositivi Bluetooth: scegli lo Spark.</li>
+    <li>La lampadina diventa verde e accanto compare il nome dell'ampli. Gli otto preset degli slot si leggono da soli
+      e compaiono in cima alla libreria, a destra.</li>
+  </ol>
+  <div class="nota">
+    <p><strong>Senza ampli</strong> l'app funziona lo stesso: modifichi le copie in libreria, e le senti quando ti
+      colleghi.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="schermata">
+  <div class="cap-testa"><span class="cap-num">3</span><h2>La schermata</h2></div>
+  <p class="sotto">Cinque zone, da sopra a sotto.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(42.06% - 11px);top:calc(2.92% - 11px)">1</span>
+      <span class="pin" style="left:calc(35.25% - 11px);top:calc(8.44% - 11px)">2</span>
+      <span class="pin" style="left:calc(2.65% - 11px);top:calc(14.98% - 11px)">3</span>
+      <span class="pin" style="left:calc(88.96% - 11px);top:calc(61.26% - 11px)">4</span>
+      <span class="pin" style="left:calc(95.89% - 11px);top:calc(76.52% - 11px)">5</span>
+      <img src="immagini/guida/pc-principale.webp" width="1440" height="900" loading="lazy" alt="La schermata principale: in alto la barra con Genera con l'IA, BPM, Tap e Collegato; sotto Salva, A/B, Importa, Esporta, il nome del preset e Banchi, Pedale, Tuner; al centro l'ampli Black Duo con le sue manopole e l'elenco dei modelli; a destra la libreria con gli otto slot; in basso la catena dei sette blocchi">
+    </div>
+    <figcaption>La schermata principale, con l'ampli collegato</figcaption>
+  </figure>
+  <ol class="pin-elenco">
+    <li><strong>La barra in alto</strong>: <em>Genera con l'IA</em>, il tasto ↻ che rilegge dall'ampli il suono che sta
+      facendo, i <strong>BPM</strong> con il <strong>Tap</strong>, il nome dell'ampli, <em>Collega</em> e il menu ☰.</li>
+    <li><strong>La seconda barra</strong>: <em>Salva…</em>, Annulla e Ripeti, <em>A/B</em>, Importa ed Esporta; al
+      centro il nome del preset sul palco con le frecce ‹ › per passare allo slot prima o dopo; a destra
+      <em>Banchi</em>, <em>Pedale</em> e <em>Tuner</em>.</li>
+    <li><strong>Il palco</strong>, al centro: l'immagine del blocco scelto, le sue manopole e, a destra, l'elenco dei
+      modelli.</li>
+    <li><strong>La libreria</strong>, a destra: prima gli otto slot dell'ampli (A1–A4 in rosso, B1–B4 in verde), poi
+      tutti gli altri preset.</li>
+    <li><strong>La catena</strong>, in basso: i sette blocchi nell'ordine del suono, dall'ingresso all'uscita.</li>
+  </ol>
+  <div class="nota">
+    <p>Accanto ad alcune funzioni c'è un tondino <strong>?</strong>: un clic e si apre la spiegazione.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="suono" style="--c:#ffd21e">
+  <div class="cap-testa"><span class="cap-num" style="color:#000">4</span><h2>Regolare il suono</h2></div>
+  <p class="sotto">Con l'ampli collegato, ogni cambio si sente subito.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(32.02% - 11px);top:calc(78.86% - 11px)">1</span>
+      <span class="pin" style="left:calc(29.87% - 11px);top:calc(95.44% - 11px)">2</span>
+      <span class="pin" style="left:calc(23.32% - 11px);top:calc(33.07% - 11px)">3</span>
+      <span class="pin" style="left:calc(58.47% - 11px);top:calc(17% - 11px)">4</span>
+      <span class="pin" style="left:calc(78.78% - 11px);top:calc(7.94% - 11px)">5</span>
+      <img src="immagini/guida/pc-suono.webp" width="1440" height="900" loading="lazy" alt="Il palco e la catena: le etichette colorate sopra i blocchi, i blocchi coi loro pedali, le manopole dell'ampli e l'elenco dei modelli">
+    </div>
+    <figcaption>1 acceso / spento · 2 il modello · 3 le manopole · 4 cerca un modello · 5 BPM e Tap</figcaption>
+  </figure>
+
+  <div class="due">
+    <div>
+      <h3>La catena</h3>
+      <ul>
+        <li>Un clic su un blocco (Gate, Comp, Drive, Amp, Mod, Delay, Reverb) lo porta sul palco.</li>
+        <li>L'etichetta colorata sopra il blocco lo <strong>accende e spegne</strong>. Un blocco spento è grigio.</li>
+        <li>Il nome sotto il blocco è il modello: cliccalo per sceglierne un altro.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Le manopole</h3>
+      <ul>
+        <li><strong>Trascina</strong> in su o in giù, oppure usa la <strong>rotellina</strong> del mouse. Con <kbd>Maiusc</kbd> premuto il trascinamento è più fine.</li>
+        <li><strong>Doppio clic</strong> la riporta a metà.</li>
+        <li>Sotto ogni manopola c'è il valore, da 0 a 10.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Cambiare modello</h3>
+  <p>L'elenco a destra del palco mostra i modelli del blocco scelto, raggruppati per tipo. Scrivi in <em>Cerca
+    modello…</em> per trovarlo subito. Un clic e il modello cambia, sull'ampli e sul palco.</p>
+
+  <h3>Il tempo</h3>
+  <p>Gli effetti a tempo (delay, tremolo…) seguono i <strong>BPM</strong> in alto. Scrivi il numero, usa le frecce ↑ ↓
+    della tastiera, oppure clicca <strong>Tap</strong> a tempo almeno due volte: l'app calcola i BPM dalla media degli
+    ultimi colpi. Se aspetti più di due secondi, la conta ricomincia.</p>
+
+  <h3>Annulla, Ripeti e A/B</h3>
+  <ul>
+    <li><strong>Annulla / Ripeti</strong> tornano indietro e avanti fra le tue modifiche.</li>
+    <li><strong>A/B</strong> ti fa ascoltare il preset <em>com'era salvato</em>; premilo di nuovo e torni alle tue
+      modifiche. Così senti se il ritocco migliora davvero il suono.</li>
+  </ul>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="salvare">
+  <div class="cap-testa"><span class="cap-num">5</span><h2>Salvare</h2></div>
+  <p class="sotto">Finché non salvi, accanto al nome c'è scritto «modificato · non salvato».</p>
+
+  <ol class="passi">
+    <li>Clicca <strong>Salva…</strong>.</li>
+    <li>Scegli il nome e, se vuoi, uno degli <strong>otto slot dell'ampli</strong>: è quello che suona quando premi i
+      tasti sull'ampli, anche senza computer.</li>
+    <li>Se in quello slot c'era un altro preset, <strong>non si perde</strong>: esce dallo slot e resta in libreria.</li>
+  </ol>
+  <div class="nota att">
+    <p>Se chiudi la finestra con modifiche non salvate, l'app chiede prima di uscire.</p>
+  </div>
+  <p><strong>Esporta</strong> salva il preset sul palco in un file, da tenere o da dare a qualcuno.
+    <strong>Importa</strong> legge un file: un preset singolo, un backup intero o il <code>preset_backup.zip</code>
+    dell'app ufficiale.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="libreria">
+  <div class="cap-testa"><span class="cap-num">6</span><h2>La libreria</h2></div>
+  <p class="sotto">Tutti i preset che vuoi, non solo gli otto dell'ampli.</p>
+
+  <ul>
+    <li><strong>Un clic</strong> su un preset lo fa suonare e lo porta sul palco. Se è in uno slot il cambio è
+      istantaneo; altrimenti ci mette circa un secondo.</li>
+    <li><strong>Il tasto ⋯</strong> accanto a un preset, o il <strong>tasto destro</strong>, apre le sue azioni:
+      metterlo in uno slot o in un banco, rinominarlo, duplicarlo, sceglierne famiglia, categorie e note, esportarlo,
+      eliminarlo.</li>
+    <li><strong>Cerca</strong> in cima filtra per nome; il tasto accanto sceglie l'ordine (nome, aggiunti o modificati
+      di recente, famiglia). Sotto, i filtri per famiglia e categoria.</li>
+  </ul>
+  <div class="nota">
+    <p><strong>Famiglia</strong> è che tipo di suono è (clean, drive, acustico, basso); <strong>categorie</strong> sono
+      lo stile o il pezzo. Si gestiscono da ☰ → <em>Categorie e famiglie…</em>. Da lì trovi anche
+      <em>Doppioni…</em> per togliere i preset uguali, ed <em>Elimina tutti i preset…</em>, che risparmia sempre gli
+      otto dell'ampli.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="banchi" style="--c:var(--blu)">
+  <div class="cap-testa"><span class="cap-num">7</span><h2>Banchi</h2></div>
+  <p class="sotto">Gruppi di otto preset, come una scaletta per un concerto.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(11.67% - 11px);top:calc(79.6% - 11px)">1</span>
+      <span class="pin" style="left:calc(36.18% - 11px);top:calc(6.43% - 11px)">2</span>
+      <span class="pin" style="left:calc(61.04% - 11px);top:calc(6.43% - 11px)">3</span>
+      <span class="pin" style="left:calc(85.65% - 11px);top:calc(4.71% - 11px)">4</span>
+      <img src="immagini/guida/pc-banchi.webp" width="1440" height="700" loading="lazy" alt="La schermata Banchi: a sinistra la libreria da cui trascinare; a destra il banco Ampli e due banchi dell'utente, Concerto sabato e Prove, con i loro otto posti e Manda al pedale">
+    </div>
+    <figcaption>1 la libreria da trascinare · 2 il banco Ampli · 3 un tuo banco · 4 Nuovo banco</figcaption>
+  </figure>
+
+  <ol class="passi">
+    <li>Clicca <strong>Banchi</strong> nella seconda barra, poi <strong>Nuovo banco</strong>.</li>
+    <li><strong>Trascina</strong> i preset dalla libreria, a sinistra, nei posti del banco.</li>
+    <li>Un clic su un posto fa suonare quel preset. Per cambiare l'ordine dei banchi, prendili per la testa e
+      spostali.</li>
+  </ol>
+  <div class="nota att">
+    <p><strong>I banchi non scrivono mai negli slot dell'ampli</strong>: stanno solo in libreria. Il banco «Ampli» è
+      un'altra cosa: mostra gli otto preset degli slot e qui non si modifica.</p>
+  </div>
+  <p>I banchi sono gli stessi della vista Live del telefono (se tieni le librerie allineate con Dropbox) e sono
+    quello che suona il <a href="#pedale">pedale</a>.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="ia" style="--c:#7b5cff">
+  <div class="cap-testa"><span class="cap-num">8</span><h2>Genera con l'IA</h2></div>
+  <p class="sotto">Un preset nuovo da una descrizione, con la chat che usi già.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(27.08% - 11px);top:calc(38.5% - 11px)">1</span>
+      <span class="pin" style="left:calc(42.71% - 11px);top:calc(46.83% - 11px)">2</span>
+      <span class="pin" style="left:calc(27.08% - 11px);top:calc(60.44% - 11px)">3</span>
+      <span class="pin" style="left:calc(66.43% - 11px);top:calc(65.83% - 11px)">4</span>
+      <img src="immagini/guida/pc-ia.webp" width="1440" height="900" loading="lazy" alt="La finestra Genera con l'IA: la descrizione del suono, Copia la domanda, il riquadro della risposta, Chiudi e Metti sul palco">
+    </div>
+    <figcaption>1 descrivi il suono · 2 copia la domanda · 3 incolla la risposta · 4 mettilo sul palco</figcaption>
+  </figure>
+
+  <ol class="passi">
+    <li>Clicca <strong>Genera con l'IA</strong> in alto e descrivi il suono: «crunch anni '70 con un po' di delay»,
+      «il clean di un pezzo», «un lead alla Santana».</li>
+    <li><strong>Copia la domanda</strong>: negli appunti finisce una richiesta completa, con l'elenco degli effetti che
+      il tuo ampli ha davvero.</li>
+    <li>Incollala nella chat che usi (ChatGPT, Claude, Gemini…), copia la risposta e incollala in <em>La
+      risposta</em>.</li>
+    <li><strong>Metti sul palco</strong>: il preset suona sull'ampli, <strong>non ancora salvato</strong>. Ritoccalo, e
+      se ti piace salvalo con <em>Salva…</em>.</li>
+  </ol>
+  <div class="nota">
+    <p>L'app non manda niente a nessuno e non chiede chiavi né abbonamenti: la chat la apri tu. Serve almeno un
+      preset letto dall'ampli, da cui partire.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="tuner">
+  <div class="cap-testa"><span class="cap-num">9</span><h2>Accordare</h2></div>
+  <p class="sotto">L'accordatore dell'ampli, sullo schermo grande.</p>
+  <p>Clicca <strong>Tuner</strong> e suona una corda alla volta. <strong>Mentre il Tuner è aperto l'ampli
+    tace</strong>: chiudilo con ✕ e il suono torna.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="sicuro" style="--c:#17a85a">
+  <div class="cap-testa"><span class="cap-num">10</span><h2>Mettere al sicuro, e portarla altrove</h2></div>
+  <p class="sotto">Tutto sta in ☰ → <em>Impostazioni e backup</em>.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <img src="immagini/guida/pc-impostazioni.webp" width="1440" height="900" loading="lazy" alt="La finestra Impostazioni e backup: lingua, pacchetto Jimi Hendrix, pedale SparklingTones, il backup sul PC e Dropbox">
+    </div>
+    <figcaption>Impostazioni e backup</figcaption>
+  </figure>
+
+  <div class="confronto">
+    <div>
+      <h4>💾 Sul PC</h4>
+      <p><strong>Scarica il backup</strong> salva un file <code>.json</code> con tutto: preset, famiglie, categorie,
+        note, banchi. <strong>Ripristina da un file…</strong> lo rimette, anche su un altro apparecchio: l'app chiede
+        conferma prima di unirlo.</p>
+    </div>
+    <div>
+      <h4>☁️ Dropbox</h4>
+      <p>La stessa libreria su telefono, browser e app per Windows, <strong>da sola</strong>. Se lo stesso preset è
+        cambiato in due posti vince la modifica più recente; gli slot dell'ampli non viaggiano. Se in un colpo solo
+        sparirebbero più di cinque preset, l'app prima chiede.</p>
+      <p><strong>Fai un backup di sicurezza</strong> mette da parte la libreria in un file che il sync non tocca;
+        <strong>Ripristina il backup di sicurezza</strong> la riporta com'era. Ce n'è uno solo: uno nuovo sostituisce il
+        vecchio.</p>
+    </div>
+  </div>
+
+  <h3>Collegare Dropbox (una volta per apparecchio)</h3>
+  <ol class="passi">
+    <li>Su <code>dropbox.com/developers</code>: <em>Create app</em> → <em>Scoped access</em> →
+      <em>App folder</em>, con un nome a piacere.</li>
+    <li>Nella scheda <em>Permissions</em> spunta <code>files.content.write</code> e
+      <code>files.content.read</code>, e salva.</li>
+    <li>Nella scheda <em>Settings</em> copia la <strong>App key</strong> (l'app secret non serve).</li>
+    <li>Nell'app: ☰ → <strong>Impostazioni e backup</strong> → incolla la chiave → <span class="tasto rosso">Collega
+      Dropbox</span>.</li>
+    <li>Si apre Dropbox nel browser: autorizza, copia il codice che ti mostra, incollalo nell'app e premi
+      <strong>Fatto</strong>.</li>
+  </ol>
+  <div class="nota">
+    <p>Il <code>preset_backup.zip</code> dell'app ufficiale sta nella cartella di Positive Grid sul tuo Dropbox.
+      Positive Grid ha annunciato la fine di quel backup nel 2027: <strong>copialo in un posto tuo</strong> finché c'è,
+      e importalo qui.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="impostazioni" style="--c:#5a5f68">
+  <div class="cap-testa"><span class="cap-num">11</span><h2>Le altre impostazioni</h2></div>
+  <p class="sotto">Sempre in ☰ → <em>Impostazioni e backup</em>.</p>
+  <ul>
+    <li><strong>Lingua · Language</strong>: italiano o inglese.</li>
+    <li><strong>Pacchetto Jimi Hendrix</strong>: <em>Sì</em> se l'hai comprato e sbloccato con l'app ufficiale (lo
+      sblocco resta nell'ampli; questa app non lo può fare). Gli effetti Hendrix compaiono segnati «JH». Con
+      <em>No</em> spariscono, e anche i preset che li usano, perché sull'ampli non suonerebbero.</li>
+    <li><strong>Pedale SparklingTones</strong>: <em>Sì</em> fa comparire la sezione Pedale. Se il pedale non ce
+      l'hai, lasciala spenta.</li>
+  </ul>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="pedale" style="--c:#c02030">
+  <div class="cap-testa"><span class="cap-num">12</span><h2>Il pedale SparklingTones</h2></div>
+  <p class="sotto">Solo per chi l'ha costruito. Come farlo è nella <a class="sezione" href="guida-pedale.html">guida del
+    pedale</a>.</p>
+
+  <p>Il pedale è una pedaliera Bluetooth che parla direttamente con lo Spark: suona i tuoi
+    <a href="#banchi">banchi</a> senza telefono né computer. Il computer serve solo a <strong>caricarci i banchi</strong>
+    e a riordinarli.</p>
+
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(41.56% - 11px);top:calc(24.1% - 11px)">1</span>
+      <span class="pin" style="left:calc(15.05% - 11px);top:calc(55.6% - 11px)">2</span>
+      <span class="pin" style="left:calc(74.76% - 11px);top:calc(45.5% - 11px)">3</span>
+      <img src="immagini/guida/pc-pedale.webp" width="1440" height="500" loading="lazy" alt="La schermata Pedale: a sinistra lo stato del pedale con Cerca, Manda un banco col banco e lo slot, e il Registro; a destra Nel pedale con gli otto posti">
+    </div>
+    <figcaption>1 Cerca il pedale · 2 manda un banco · 3 cosa c'è nel pedale</figcaption>
+  </figure>
+
+  <h3>Accendere la sezione</h3>
+  <p>☰ → <strong>Impostazioni e backup</strong> → <strong>Pedale SparklingTones</strong> → <em>Sì</em>. Nella seconda
+    barra compare il tasto <strong>Pedale</strong>.</p>
+
+  <h3>Collegare il pedale al computer</h3>
+  <ol class="passi">
+    <li>Sul pedale tieni premuti <strong>insieme i due tasti banco per un secondo e mezzo</strong>: il pedale si apre al
+      computer per <strong>due minuti</strong>.</li>
+    <li>Nell'app clicca <strong>Pedale</strong>, poi <strong>Cerca</strong>, e scegli il pedale dall'elenco.</li>
+    <li>La lampadina diventa verde. <strong>Mentre è collegato al computer il pedale lascia l'ampli</strong>: è normale.</li>
+  </ol>
+
+  <h3>Mandare un banco</h3>
+  <ol class="passi">
+    <li>In <strong>Manda un banco</strong> scegli il banco e il posto del pedale in cui metterlo.</li>
+    <li>Clicca <strong>Manda al pedale</strong> e aspetta che la barra arrivi in fondo.</li>
+    <li>In <strong>Nel pedale</strong> vedi cosa c'è dentro. Se intanto un banco è cambiato nell'app, è segnato da
+      aggiornare: <strong>Aggiorna tutti</strong> li rimanda in un colpo solo. Anche il pallino sul tasto Pedale ti
+      avvisa.</li>
+  </ol>
+
+  <h3>Riordinare</h3>
+  <p>In <strong>Nel pedale</strong> sposti in su o in giù i banchi, o li togli. Gli spostamenti restano in sospeso
+    finché non clicchi <strong>Aggiorna il pedale</strong>: allora vanno sul pedale tutti insieme. <em>Annulla</em>
+    li scarta.</p>
+
+  <h3>Finito</h3>
+  <p>Clicca <strong>Stacca</strong>, o chiudi l'app: il pedale torna da solo allo Spark e i footswitch suonano i banchi
+    nuovi.</p>
+
+  <div class="nota att">
+    <p><strong>Se un footswitch non fa niente</strong>, il primo sospetto è che il pedale sia ancora collegato al
+      computer: staccalo. <strong>Copia il log del pedale</strong>, nel riquadro Registro, serve se qualcosa va storto
+      e vuoi segnalarlo.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="problemi" style="--c:#3a3d45">
+  <div class="cap-testa"><span class="cap-num">?</span><h2>Se qualcosa non va</h2></div>
+  <p class="sotto">Le domande che capitano davvero.</p>
+
+  <details class="faq">
+    <summary>Clicco Collega ma l'ampli non compare nell'elenco</summary>
+    <div class="dentro">
+      <ol>
+        <li>L'ampli è già collegato a qualcun altro? L'app ufficiale, l'app sul telefono o il pedale se lo tengono:
+          chiudili o staccali.</li>
+        <li>Il Bluetooth del computer è acceso? Impostazioni di Windows → Bluetooth e dispositivi.</li>
+        <li>Nel browser: sei su Chrome o Edge? Firefox e Safari non hanno il Bluetooth per le pagine web.</li>
+        <li>Ancora niente: spegni e riaccendi l'ampli.</li>
+      </ol>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>L'ampli è muto ma l'app è collegata</summary>
+    <div class="dentro">
+      <p>Hai il <a href="#tuner">Tuner</a> aperto? Mentre è aperto l'ampli tace: chiudilo.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>L'ampli non risponde più</summary>
+    <div class="dentro">
+      <p>Può capitare, soprattutto girando molte manopole in fretta. Stacca la corrente dell'ampli, riattaccala, e
+        ricollegati. La libreria non perde niente.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Nell'app per Windows non ho i preset che avevo nel browser</summary>
+    <div class="dentro">
+      <p>Sono due librerie diverse. Portale con <strong>Scarica il backup</strong> / <strong>Ripristina da un
+        file…</strong>, o tienile allineate con <strong>Dropbox</strong>: vedi <a href="#sicuro">Mettere al
+        sicuro</a>.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Ho importato un preset ma non è comparso</summary>
+    <div class="dentro">
+      <p>Se in libreria c'è già un preset con lo stesso nome (spazi e maiuscole non contano), non entra una seconda
+        volta. Rinomina quello che hai, e importa di nuovo.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Un preset JH suona senza il suo effetto</summary>
+    <div class="dentro">
+      <p>Il pacchetto Hendrix non è sbloccato su questo ampli: si sblocca solo con l'app ufficiale di Positive
+        Grid.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Qualcosa d'altro</summary>
+    <div class="dentro">
+      <p>☰ → <strong>Segnala un problema</strong> apre un'email già pronta: scrivi cosa stavi facendo e cosa è
+        successo.</p>
+    </div>
+  </details>
+</section>
+
+</main>
+<script src="guida.js"></script>
+</body>
+</html>
