@@ -1,0 +1,13 @@
+{
+  "name": "spark-controller-desktop",
+  "version": "0.1.0",
+  "description": "Spark 2 Controller per Windows: la pagina PC dentro Electron",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "33.2.1"
+  }
+}
