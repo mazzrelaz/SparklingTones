@@ -1209,4 +1209,478 @@ window.LINGUA_EN = {
     "Neon",
   "Classico":
     "Classic",
+  "Fai un backup di sicurezza":
+    "Make a safety backup",
+  "Ripristina il backup di sicurezza":
+    "Restore the safety backup",
+  "Toglie dalla libreria tutti i preset <strong>tranne gli otto caricati sull'ampli</strong>, che restano coi loro tag e le loro note. L'ampli non viene toccato. Con Dropbox collegato spariscono anche di là.":
+    "Removes every preset from the library <strong>except the eight loaded on the amp</strong>, which keep their tags and notes. The amp is not touched. With Dropbox connected they disappear from there too.",
+  "il file su Dropbox non è una libreria":
+    "the file on Dropbox is not a library",
+  "al posto di «{0}» in {1}":
+    "in place of «{0}» in {1}",
+  "cambiare il preset di uno slot":
+    "change a slot's preset",
+  "Scrivere <strong>{0}</strong> in {1} al posto di <strong>{2}</strong>? «{2}» resta in libreria e ricompare nella lista qui sotto.":
+    "Write <strong>{0}</strong> to {1} in place of <strong>{2}</strong>? «{2}» stays in the library and reappears in the list below.",
+  "mette un altro preset in questo slot; questo resta in libreria":
+    "puts another preset in this slot; this one stays in the library",
+  "cancellare anche qui":
+    "delete here too",
+  "Sull'altro apparecchio sono stati cancellati <strong>{0} preset</strong>, fra cui {1}. Cancellarli anche qui? Se rispondi di no restano, e tornano anche di là.":
+    "<strong>{0} presets</strong> were deleted on the other device, including {1}. Delete them here too? If you say no they stay, and come back over there as well.",
+  "Cancella {0} preset":
+    "Delete {0} presets",
+  "{0} nuovi":
+    "{0} new",
+  "{0} cambiati":
+    "{0} changed",
+  "{0} cancellati":
+    "{0} deleted",
+  "dall'altro apparecchio: {0}":
+    "from the other device: {0}",
+  "allineo la libreria con Dropbox…":
+    "syncing the library with Dropbox…",
+  "Libreria allineata con Dropbox alle {0}.":
+    "Library synced with Dropbox at {0}.",
+  "Senza rete: le modifiche partono quando torna.":
+    "No network: changes will go out when it's back.",
+  "Il sync con Dropbox si è fermato: {0}":
+    "Dropbox sync has stopped: {0}",
+  "Backup di sicurezza del {0}.":
+    "Safety backup of {0}.",
+  "Nessun backup di sicurezza.":
+    "No safety backup.",
+  "backup di sicurezza":
+    "safety backup",
+  "Sostituire il backup di sicurezza del {0} con la libreria di adesso, <strong>{1} preset</strong>?":
+    "Replace the safety backup of {0} with the current library, <strong>{1} presets</strong>?",
+  "Mettere da parte su Dropbox la libreria di adesso, <strong>{0} preset</strong>?":
+    "Put the current library aside on Dropbox, <strong>{0} presets</strong>?",
+  "Fai il backup":
+    "Back up",
+  "faccio il backup di sicurezza…":
+    "making the safety backup…",
+  "backup di sicurezza fatto: {0} preset":
+    "safety backup done: {0} presets",
+  "non sono riuscito a fare il backup: {0}":
+    "couldn't make the backup: {0}",
+  "nessun backup di sicurezza":
+    "no safety backup",
+  "Su Dropbox non c'è ancora un backup di sicurezza.":
+    "There is no safety backup on Dropbox yet.",
+  "ripristinare il backup di sicurezza":
+    "restore the safety backup",
+  "Rimettere in libreria i <strong>{0} preset</strong> del backup di sicurezza del {1}? Quelli che hai già tornano come erano allora. Non viene cancellato niente.":
+    "Put the <strong>{0} presets</strong> of the safety backup of {1} back into the library? The ones you already have go back to how they were then. Nothing is deleted.",
+  "Ripristina":
+    "Restore",
+  "rimetto il backup di sicurezza…":
+    "restoring the safety backup…",
+  "{0} preset rimessi dal backup di sicurezza":
+    "{0} presets restored from the safety backup",
+  "non sono riuscito a rimetterlo: {0}":
+    "couldn't restore it: {0}",
+  "<strong>{0} preset, e non si torna indietro.</strong> Con Dropbox collegato spariscono anche dagli altri apparecchi.":
+    "<strong>{0} presets, and there's no going back.</strong> With Dropbox connected they disappear from your other devices too.",
+  "Genera con l'IA":
+    "Generate with AI",
+  "Rileggi dall'ampli il suono che sta facendo":
+    "Read back from the amp the sound it's making",
+  "Il tempo del preset: gli effetti a tempo lo seguono":
+    "The preset's tempo: tempo-synced effects follow it",
+  "BPM":
+    "BPM",
+  "Menu":
+    "Menu",
+  "Salva…":
+    "Save…",
+  "Ripeti":
+    "Redo",
+  "Confronta con il preset salvato":
+    "Compare with the saved preset",
+  "A/B":
+    "A/B",
+  "Esporta il preset":
+    "Export the preset",
+  "Esporta":
+    "Export",
+  "Slot prima":
+    "Previous slot",
+  "Slot dopo":
+    "Next slot",
+  "modificato · non salvato":
+    "modified · not saved",
+  "I banchi, come le Songlist":
+    "Banks, like Songlists",
+  "Banchi":
+    "Banks",
+  "Il pedale SparklingTones":
+    "The SparklingTones pedal",
+  "L'accordatore dell'ampli":
+    "The amp's tuner",
+  "Acceso / spento":
+    "On / off",
+  "Cerca modello…":
+    "Search model…",
+  "Catena":
+    "Chain",
+  "<b></b>IN":
+    "<b></b>IN",
+  "<b></b>OUT":
+    "<b></b>OUT",
+  "Chiudi":
+    "Close",
+  "Parametro {0}":
+    "Parameter {0}",
+  "Questo browser non ha il Bluetooth per le pagine web. Apri questa pagina con <b>Chrome</b> o <b>Edge</b> aggiornati.":
+    "This browser has no Bluetooth for web pages. Open this page with an up-to-date <b>Chrome</b> or <b>Edge</b>.",
+  "Sto leggendo l'ampli…":
+    "Reading the amp…",
+  "senza ampli":
+    "no amp",
+  "software":
+    "software",
+  "copia in libreria: non si sente niente":
+    "library copy: you won't hear anything",
+  "lo slot dell'ampli da cui viene":
+    "the amp slot it comes from",
+  "il preset software dell'ampli":
+    "the amp's software preset",
+  "ascolti il preset salvato":
+    "you're hearing the saved preset",
+  "ispirato a {0}":
+    "inspired by {0}",
+  "acceso / spento":
+    "on / off",
+  "sul palco":
+    "on stage",
+  "senza ampli non posso mettere {0}: non so quante manopole abbia.":
+    "without the amp I can't put in {0}: I don't know how many knobs it has.",
+  "{0} → {1}, con le manopole che aveva in «{2}». Senza ampli non si sente.":
+    "{0} → {1}, with the knobs it had in «{2}». Without the amp you won't hear it.",
+  "{0} → {1}. Senza ampli non si sente.":
+    "{0} → {1}. Without the amp you won't hear it.",
+  "ampli non collegato: il cambio non è partito.":
+    "amp not connected: the change wasn't sent.",
+  "non riesco a leggere la catena dall'ampli: il cambio non è partito.":
+    "I can't read the chain from the amp: the change wasn't sent.",
+  "comando mandato, ma non riesco a rileggere la catena.":
+    "command sent, but I can't read the chain back.",
+  "il comando è partito ma quel blocco riporta ancora {0}.":
+    "the command was sent but that block still shows {0}.",
+  "Collegato":
+    "Connected",
+  "collego…":
+    "connecting…",
+  "scollega l'ampli":
+    "disconnect the amp",
+  "l'ampli si è scollegato: le modifiche restano qui, salvale in libreria.":
+    "the amp has disconnected: your changes stay here, save them to the library.",
+  "Hai delle modifiche non salvate: restano sullo schermo, ma l'ampli non le riceverà più. Scollegare?":
+    "You have unsaved changes: they stay on screen, but the amp won't receive them any more. Disconnect?",
+  "Scollegare l'ampli?":
+    "Disconnect the amp?",
+  "scollegare":
+    "disconnect",
+  "niente Bluetooth":
+    "no Bluetooth",
+  "Questo browser non ha il Bluetooth per le pagine web: apri la pagina con Chrome o Edge aggiornati.":
+    "This browser has no Bluetooth for web pages: open the page with an up-to-date Chrome or Edge.",
+  "letti {0} slot dall'ampli":
+    "read {0} slots from the amp",
+  ", {0} nuovi in libreria":
+    ", {0} new in the library",
+  " ({0} con un nome che c'era già: non copiati)":
+    " ({0} with a name already there: not copied)",
+  "non riesco a rileggere il suono corrente: riprova con ⟳.":
+    "I can't read back the current sound: try again with ⟳.",
+  "di {0} non so niente: collega l'ampli per leggerlo.":
+    "I know nothing about {0}: connect the amp to read it.",
+  "«{0}» — {1}":
+    "«{0}» — {1}",
+  "non si può mandare":
+    "can't be sent",
+  "«{0}» non è mandabile così com'è: {1}.":
+    "«{0}» can't be sent as it is: {1}.",
+  "non riesco a rileggere il suono corrente.":
+    "I can't read back the current sound.",
+  "Hai girato qualcosa in <strong>{0}</strong> e non l'hai ancora salvato.":
+    "You've changed something in <strong>{0}</strong> and haven't saved it yet.",
+  "Andando avanti così le modifiche vanno perse.":
+    "If you go on, the changes are lost.",
+  "Andando avanti così le perdi: in libreria e negli slot non ne resta niente.":
+    "If you go on, you lose them: nothing of them is left in the library or in the slots.",
+  "Torna al preset":
+    "Back to the preset",
+  "slot prima":
+    "previous slot",
+  "ultimo slot":
+    "last slot",
+  "slot dopo":
+    "next slot",
+  "primo slot":
+    "first slot",
+  "rileggere dall'ampli":
+    "read back from the amp",
+  "Rileggendo, sullo schermo torna quello che l'ampli sta suonando adesso. Le modifiche non salvate restano sull'ampli finché non cambi preset, ma qui spariscono.":
+    "Reading back puts on screen what the amp is playing right now. Unsaved changes stay on the amp until you change preset, but they disappear from here.",
+  "Rileggi":
+    "Read back",
+  "No, solo in libreria":
+    "No, library only",
+  "Salva come nuovo":
+    "Save as new",
+  "salvare il preset":
+    "save the preset",
+  "nome del preset":
+    "preset name",
+  "manca il nome":
+    "name missing",
+  "Scrivi un nome per il preset.":
+    "Type a name for the preset.",
+  "nome già usato":
+    "name already used",
+  "In libreria c'è già un preset che si chiama <strong>{0}</strong>: scegli un altro nome.":
+    "There's already a preset called <strong>{0}</strong> in the library: choose another name.",
+  "salvataggio fallito: {0}":
+    "saving failed: {0}",
+  "«{0}» salvato in libreria.":
+    "«{0}» saved to the library.",
+  "«{0}» non si può scrivere sull'ampli: {1}":
+    "«{0}» can't be written to the amp: {1}",
+  "scrivo «{0}» in {1}: chunk {2} di {3}…":
+    "writing «{0}» to {1}: chunk {2} of {3}…",
+  "scrittura interrotta: {0}. Rileggi per controllare.":
+    "writing interrupted: {0}. Read back to check.",
+  "«{0}» è in {1}. Verificato rileggendo lo slot.":
+    "«{0}» is in {1}. Verified by reading the slot back.",
+  "in libreria è salvato, ma {0} riporta ancora «{1}»: lo slot non è cambiato.":
+    "it's saved in the library, but {0} still shows «{1}»: the slot hasn't changed.",
+  "«{0}» esportato nei Download.":
+    "«{0}» exported to Downloads.",
+  "importare il backup dell'app ufficiale":
+    "import the official app's backup",
+  "Mettere in libreria <strong>{0} preset</strong> da <strong>{1}</strong>? Quelli che hai già prendono il suono nuovo; tag, note e famiglia restano.":
+    "Add <strong>{0} presets</strong> from <strong>{1}</strong> to the library? The ones you already have take the new sound; tags, notes and family stay.",
+  "{0} preset dal backup: {1} nuovi, {2} aggiornati{3}. Li trovi nell'app.":
+    "{0} presets from the backup: {1} new, {2} updated{3}. You'll find them in the app.",
+  ", {0} saltati":
+    ", {0} skipped",
+  "importare":
+    "import",
+  "Mettere in libreria <strong>{0}</strong> e aprirlo qui? Se ce l'hai già, ne prende suono, tag e note.":
+    "Add <strong>{0}</strong> to the library and open it here? If you already have it, it takes its sound, tags and notes.",
+  "Importa e apri":
+    "Import and open",
+  "nessun preset leggibile":
+    "no readable preset",
+  "Mettere in libreria <strong>{0}</strong> e aprirlo qui? Se ce l'hai già, se ne aggiorna il suono.":
+    "Add <strong>{0}</strong> to the library and open it here? If you already have it, its sound is updated.",
+  "Mettere in libreria <strong>{0} preset</strong>? Quelli che hai già prendono il suono nuovo.":
+    "Add <strong>{0} presets</strong> to the library? The ones you already have take the new sound.",
+  "da {0}: {1} nuovi, {2} aggiornati":
+    "from {0}: {1} new, {2} updated",
+  "{0} preset scaricati nei Download.":
+    "{0} presets downloaded to Downloads.",
+  "Dropbox scollegato.":
+    "Dropbox disconnected.",
+  "Dropbox scollegato qui; lassù toglilo da dropbox.com, nelle app collegate.":
+    "Dropbox disconnected here; on Dropbox's side, remove it at dropbox.com, under connected apps.",
+  "Dropbox collegato.":
+    "Dropbox connected.",
+  "Dropbox non ha accettato il codice ({0}). Un codice vale una volta sola: riapri la pagina e incolla quello nuovo.":
+    "Dropbox didn't accept the code ({0}). A code works only once: reopen the page and paste the new one.",
+  "Backup e Dropbox":
+    "Backup and Dropbox",
+  "Impostazioni":
+    "Settings",
+  "serve l'ampli":
+    "the amp is needed",
+  "Premi «Collega» in alto e riprova.":
+    "Press «Connect» at the top and try again.",
+  "Cosa è successo:":
+    "What happened:",
+  "ultime righe del registro":
+    "last lines of the log",
+  "Rileggi gli slot dell'ampli":
+    "Read the amp's slots again",
+  "Prendi in libreria il suono dell'ampli":
+    "Add the amp's sound to the library",
+  "Categorie e famiglie…":
+    "Categories and families…",
+  "Doppioni…":
+    "Duplicates…",
+  "Backup e Dropbox…":
+    "Backup and Dropbox…",
+  "Elimina tutti i preset…":
+    "Delete all presets…",
+  "Impostazioni…":
+    "Settings…",
+  "Apri l'app per il telefono":
+    "Open the phone app",
+  "famiglia":
+    "family",
+  "tutte le famiglie":
+    "all families",
+  "categoria":
+    "category",
+  "tutte le categorie":
+    "all categories",
+  "non ancora letto":
+    "not read yet",
+  "Sull'ampli":
+    "On the amp",
+  "ultima lettura":
+    "last read",
+  "Seleziona {0} e apri":
+    "Select {0} and open",
+  "Suona e apri":
+    "Play and open",
+  "Metti in uno slot…":
+    "Put in a slot…",
+  "Nel banco…":
+    "To a bank…",
+  "Rinomina…":
+    "Rename…",
+  "Famiglia…":
+    "Family…",
+  "Categorie…":
+    "Categories…",
+  "Note…":
+    "Notes…",
+  "Cambia…":
+    "Change…",
+  "Elimina dalla libreria":
+    "Delete from the library",
+  "Per cambiare il preset di uno slot serve l'amplificatore: premi «Collega» in alto e riprova.":
+    "To change a slot's preset you need the amplifier: press «Connect» at the top and try again.",
+  "Scrivere <strong>{0}</strong> in {1} al posto di <strong>{2}</strong>? «{2}» resta in libreria e ricompare fra gli altri preset.":
+    "Write <strong>{0}</strong> to {1} in place of <strong>{2}</strong>? «{2}» stays in the library and reappears among the other presets.",
+  "Per scrivere in uno slot serve l'amplificatore: premi «Collega» in alto e riprova.":
+    "To write to a slot you need the amplifier: press «Connect» at the top and try again.",
+  "Scrivi":
+    "Write",
+  "nessun banco":
+    "no banks",
+  "Non hai ancora banchi: creane uno in «Banchi», nella barra in alto.":
+    "You have no banks yet: create one in «Banks», in the top bar.",
+  "<strong>{0}</strong> ha tutti e otto i posti occupati: liberane uno in «Banchi».":
+    "<strong>{0}</strong> has all eight places taken: free one in «Banks».",
+  "In libreria c'è già un preset che si chiama <strong>{0}</strong>.":
+    "There's already a preset called <strong>{0}</strong> in the library.",
+  "rinominato in «{0}»":
+    "renamed to «{0}»",
+  "categorie di «{0}»":
+    "categories of «{0}»",
+  "note di «{0}»":
+    "notes of «{0}»",
+  "Salva le note":
+    "Save the notes",
+  "note salvate":
+    "notes saved",
+  "categoria «{0}» eliminata: {1} preset la perdono, e restano in libreria":
+    "category «{0}» deleted: {1} presets lose it, and stay in the library",
+  "Togliere tutte e {0} le categorie? <strong>I preset restano tutti</strong>, perdono solo l'etichetta.":
+    "Remove all {0} categories? <strong>All the presets stay</strong>, they only lose the label.",
+  "Categorie e famiglie":
+    "Categories and families",
+  "Sta sull'ampli in {0}: l'ampli non viene toccato.":
+    "It's on the amp in {0}: the amp is not touched.",
+  "<strong>Sta nei banchi {0}</strong>: quel posto resterà vuoto.":
+    "<strong>It's in the banks {0}</strong>: that place will be left empty.",
+  "Eliminare <strong>{0}</strong>, entrato il {1}? Gli altri restano.":
+    "Delete <strong>{0}</strong>, added on {1}? The others stay.",
+  "niente da togliere":
+    "nothing to remove",
+  "In libreria ci sono solo i preset dell'ampli.":
+    "The library holds only the amp's presets.",
+  "{0} preset eliminati dalla libreria; quelli dell'ampli restano":
+    "{0} presets deleted from the library; the amp's ones stay",
+  "<p><strong>SparklingTones</strong> organizza i preset di un amplificatore Spark 2 e li manda\n    all'amplificatore via Bluetooth. Gira per intero dentro il browser: non c'è un server, non c'è un account, e la\n    libreria resta sull'apparecchio che stai usando.</p><p>Scritto da <strong>Massimo Togni</strong>.</p>\n    <h3>Uso libero</h3><p>Questo software è di <strong>libero utilizzo</strong>: si può usare, copiare, modificare e\n    ridistribuire, alle condizioni della licenza MIT, di cui trovi il testo nel file <code>LICENSE</code> insieme al codice.</p>\n    <h3>Nessuna garanzia, nessuna responsabilità</h3><p>Il software è fornito <strong>«così com'è»</strong>, senza garanzie\n    di alcun tipo, esplicite o implicite. <strong>L'autore non si assume alcuna responsabilità</strong> per danni diretti o\n    indiretti derivanti dall'uso di questo software: fra questi la perdita o l'alterazione dei preset salvati nell'amplificatore\n    o nella libreria, malfunzionamenti dell'apparecchio, e qualunque conseguenza di un comando mandato via Bluetooth.\n    <strong>Lo usi a tuo rischio.</strong></p><p>Scrivere un preset in uno slot <strong>sovrascrive</strong> quello che c'era,\n    e un amplificatore può smettere di rispondere e richiedere di essere spento e riacceso. Tieni un backup dei preset a cui tieni.</p>\n    <h3>Nessun rapporto con Positive Grid</h3><p>Questo software è un progetto indipendente e <strong>non ha alcun rapporto con\n    Positive Grid Inc.</strong>: non è prodotto, approvato, sponsorizzato, verificato né supportato da Positive Grid, e non ne usa\n    codice. «Positive Grid» e «Spark» sono marchi dei rispettivi titolari, citati unicamente per indicare con quale apparecchio\n    questo software funziona.</p>\n    <h3>Su cosa è stato provato</h3><p>Provato <strong>solo su Spark 2</strong>, e su un solo esemplare. Il protocollo è stato\n    ricostruito osservando l'apparecchio, non è documentazione ufficiale.</p>\n    <h3>Cosa esce da qui</h3><p>Niente. Nessun dato viene raccolto né inviato: l'unica cosa che il programma comunica sono i\n    comandi all'amplificatore e al pedale, via Bluetooth, e — solo se lo colleghi tu — il backup sul tuo Dropbox.</p>\n    <h3>Grazie a, e licenze</h3><p><strong>Soundshed</strong> — <em>licenza MIT</em>. Da lì vengono i nomi in chiaro degli\n    effetti e delle loro manopole: <code>sparkFxCatalog.ts</code>, Copyright (c) Soundshed contributors.\n    <a href=\"https://github.com/soundshed/soundshed-app\" target=\"_blank\" rel=\"noopener noreferrer\">github.com/soundshed/soundshed-app</a></p>\n    <p><strong>paulhamsh/Spark</strong> — <em>licenza Apache 2.0</em>. Il riferimento funzionante da cui è stata capita la\n    struttura dei messaggi. <a href=\"https://github.com/paulhamsh/Spark\" target=\"_blank\" rel=\"noopener noreferrer\">github.com/paulhamsh/Spark</a></p>\n    <p>I nomi dei modelli di riverbero e degli altri modelli sono quelli che si leggono nell'app ufficiale, trascritti a mano per\n    poterli riconoscere: sono citazioni, non codice.</p>":
+    "<p><strong>SparklingTones</strong> organises the presets of a Spark 2 amplifier and sends them\n    to the amp over Bluetooth. It runs entirely inside the browser: there is no server, no account, and the\n    library stays on the device you are using.</p><p>Written by <strong>Massimo Togni</strong>.</p>\n    <h3>Free to use</h3><p>This software is <strong>free to use</strong>: you may use, copy, modify and\n    redistribute it under the terms of the MIT licence, whose text you'll find in the <code>LICENSE</code> file together with the code.</p>\n    <h3>No warranty, no liability</h3><p>The software is provided <strong>«as is»</strong>, without warranty\n    of any kind, express or implied. <strong>The author accepts no liability</strong> for direct or\n    indirect damage arising from the use of this software: including the loss or alteration of presets saved on the amplifier\n    or in the library, malfunctions of the device, and any consequence of a command sent over Bluetooth.\n    <strong>You use it at your own risk.</strong></p><p>Writing a preset to a slot <strong>overwrites</strong> what was there,\n    and an amplifier may stop responding and need to be switched off and on again. Keep a backup of the presets you care about.</p>\n    <h3>No affiliation with Positive Grid</h3><p>This software is an independent project and <strong>has no affiliation with\n    Positive Grid Inc.</strong>: it is not made, approved, sponsored, verified or supported by Positive Grid, and uses none of its\n    code. «Positive Grid» and «Spark» are trademarks of their respective owners, mentioned only to indicate which device\n    this software works with.</p>\n    <h3>What it has been tested on</h3><p>Tested <strong>only on Spark 2</strong>, and on a single unit. The protocol was\n    reconstructed by observing the device; it is not official documentation.</p>\n    <h3>What leaves this app</h3><p>Nothing. No data is collected or sent: the only things the program communicates are the\n    commands to the amplifier and to the pedal, over Bluetooth, and — only if you connect it — the backup to your Dropbox.</p>\n    <h3>Thanks, and licences</h3><p><strong>Soundshed</strong> — <em>MIT licence</em>. The plain names of the\n    effects and their knobs come from there: <code>sparkFxCatalog.ts</code>, Copyright (c) Soundshed contributors.\n    <a href=\"https://github.com/soundshed/soundshed-app\" target=\"_blank\" rel=\"noopener noreferrer\">github.com/soundshed/soundshed-app</a></p>\n    <p><strong>paulhamsh/Spark</strong> — <em>Apache 2.0 licence</em>. The working reference from which the\n    structure of the messages was understood. <a href=\"https://github.com/paulhamsh/Spark\" target=\"_blank\" rel=\"noopener noreferrer\">github.com/paulhamsh/Spark</a></p>\n    <p>The names of the reverb models and of the other models are the ones shown in the official app, transcribed by hand so\n    they can be recognised: they are quotations, not code.</p>",
+  "＋ nuovo banco":
+    "＋ new bank",
+  "rinomina o elimina il banco":
+    "rename or delete the bank",
+  "gli slot dell'ampli: sempre istantanei. Si cambiano scrivendo un preset in uno slot.":
+    "the amp's slots: always instant. You change them by writing a preset to a slot.",
+  "togli dal banco (il preset resta in libreria)":
+    "remove from the bank (the preset stays in the library)",
+  "Manda al pedale…":
+    "Send to the pedal…",
+  "banco":
+    "bank",
+  "eliminare il banco":
+    "delete the bank",
+  "Eliminare il banco <strong>{0}</strong>? I preset restano in libreria.":
+    "Delete the bank <strong>{0}</strong>? The presets stay in the library.",
+  "<strong>{0}</strong> ha tutti e otto i posti occupati: lascialo su un posto per sostituirlo.":
+    "<strong>{0}</strong> has all eight places taken: drop it on a place to replace it.",
+  "nessun banco: creane uno in «Banchi»":
+    "no banks: create one in «Banks»",
+  "slot {0}":
+    "slot {0}",
+  "ampli non collegato":
+    "amp not connected",
+  "ampli finto: niente parla col Bluetooth":
+    "fake amp: nothing talks to Bluetooth",
+  "questo browser non ha il Bluetooth per le pagine web: usa Chrome o Edge":
+    "this browser has no Bluetooth for web pages: use Chrome or Edge",
+  "nella risposta non c'è un preset: incollala intera.":
+    "there's no preset in the reply: paste all of it.",
+  "la risposta non è un preset leggibile: incollala intera, dal primo «{» all'ultimo «}».":
+    "the reply isn't a readable preset: paste all of it, from the first «{» to the last «}».",
+  "Preset IA":
+    "AI preset",
+  "{0}: modello non valido, resta quello di partenza":
+    "{0}: invalid model, the starting one stays",
+  "serve un preset da cui partire":
+    "a preset to start from is needed",
+  "In libreria non c'è ancora un preset letto dall'ampli: premi «Collega», i suoi slot si leggono da soli.":
+    "There's no preset read from the amp in the library yet: press «Connect», its slots are read automatically.",
+  "manca la descrizione":
+    "description missing",
+  "copiata":
+    "copied",
+  "copiala da qui sotto":
+    "copy it from below",
+  "Metti sul palco":
+    "Put on stage",
+  "la risposta non va":
+    "the reply doesn't work",
+  "«{0}» dall'IA, partendo da «{1}»":
+    "«{0}» from AI, starting from «{1}»",
+  "Nessun modello":
+    "No model",
+  "Anche nello slot dell'ampli":
+    "Also in the amp's slot",
+  "Sul PC":
+    "On the PC",
+  "Scarica il backup":
+    "Download the backup",
+  "Ripristina da un file…":
+    "Restore from a file…",
+  "Collegato.":
+    "Connected.",
+  "Collega Dropbox":
+    "Connect Dropbox",
+  "Apri Dropbox":
+    "Open Dropbox",
+  "codice":
+    "code",
+  "Nessuna categoria.":
+    "No categories.",
+  "Nuovo banco":
+    "New bank",
+  "Registro":
+    "Log",
+  "che suono vuoi":
+    "the sound you want",
+  "Copia la domanda":
+    "Copy the request",
+  "La risposta":
+    "The reply",
+  "incolla qui la risposta":
+    "paste the reply here",
 };

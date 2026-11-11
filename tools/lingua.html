@@ -13,9 +13,9 @@
   senza traduzione compare in italiano (vedi `src/lingua.js`).
 
   Le chiavi le raccoglie come le usa l'app:
-  - dall'HTML di `index.html`, con lo stesso `Lingua.raccogli` che all'avvio
+  - dall'HTML di `index.html` e di `pc.html`, con lo stesso `Lingua.raccogli` che all'avvio
     traduce la pagina — quindi le due cose non possono andare in disaccordo;
-  - dal JavaScript (quello dentro `index.html` e i moduli che carica), ogni
+  - dal JavaScript (quello dentro le due pagine e i moduli che caricano), ogni
     `tr('…')`, `tr('…' + '…', x)` e `` tr`…${x}…` ``.
 
   Da `file://` va aperto con `--allow-file-access-from-files` (Edge headless:
@@ -50,9 +50,9 @@
 
 /* Un tokenizzatore piccolo: quanto basta per trovare le chiamate a `tr` senza
    farsi ingannare da commenti, stringhe e regex. */
-function chiamateTr(src, file) {
+function chiamateTr(src, file, lineaIniziale = 1) {
   const chiavi = [], dinamiche = [];
-  let i = 0, linea = 1, ultimo = '';
+  let i = 0, linea = lineaIniziale, ultimo = '';
   const n = src.length;
   const regexDopo = /^(|[(,=:\[!&|?{};+\-*%<>~^]|return|typeof|case|in|of|new|delete|void|throw|else|do|=>)$/;
   const avanza = k => { for (let j = 0; j < k; j++) { if (src[i] === '\n') linea++; i++; } };
@@ -72,6 +72,7 @@ function chiamateTr(src, file) {
       if (src[i] === '$' && src[i + 1] === '{') {
         parti.push(pezzo); pezzo = '';
         avanza(2); let prof = 1;
+        const inizio = i, lineaInizio = linea;
         while (i < n && prof > 0) {
           const c = src[i];
           if (c === "'" || c === '"') { saltaStringa(c); continue; }
@@ -80,6 +81,9 @@ function chiamateTr(src, file) {
           else if (c === '}') { prof--; if (!prof) break; }
           avanza(1);
         }
+        // Anche dentro `${…}` ci possono essere delle tr(…): si cercano lì.
+        const dentro = chiamateTr(src.slice(inizio, i), file, lineaInizio);
+        chiavi.push(...dentro.chiavi); dinamiche.push(...dentro.dinamiche);
         avanza(1);
         continue;
       }
@@ -170,23 +174,28 @@ function chiamateTr(src, file) {
 (async function () {
   const esci = (id, testo) => { document.getElementById(id).textContent = testo; };
   try {
-    const html = await (await fetch('../index.html')).text();
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-
     const trovate = [];
-    for (const chiave of Lingua.raccogli(doc.body)) trovate.push({ chiave, dove: 'index.html (HTML)' });
-
     const dinamiche = [];
-    const inLinea = Array.from(doc.querySelectorAll('script:not([src])')).map(s => s.textContent).join('\n');
-    const r0 = chiamateTr(inLinea, 'index.html');
-    trovate.push(...r0.chiavi); dinamiche.push(...r0.dinamiche);
+    const letti = new Set();
+    // Le due pagine dell'app: quella del telefono e quella per il PC.
+    for (const pagina of ['index.html', 'pc.html']) {
+      const html = await (await fetch('../' + pagina)).text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
 
-    const moduli = Array.from(doc.querySelectorAll('script[src]'))
-      .map(s => s.getAttribute('src'))
-      .filter(s => !/lingua/.test(s));
-    for (const m of moduli) {
-      const r = chiamateTr(await (await fetch('../' + m)).text(), m);
-      trovate.push(...r.chiavi); dinamiche.push(...r.dinamiche);
+      for (const chiave of Lingua.raccogli(doc.body)) trovate.push({ chiave, dove: pagina + ' (HTML)' });
+
+      const inLinea = Array.from(doc.querySelectorAll('script:not([src])')).map(s => s.textContent).join('\n');
+      const r0 = chiamateTr(inLinea, pagina);
+      trovate.push(...r0.chiavi); dinamiche.push(...r0.dinamiche);
+
+      const moduli = Array.from(doc.querySelectorAll('script[src]'))
+        .map(s => s.getAttribute('src'))
+        .filter(s => !/lingua/.test(s) && !letti.has(s));
+      for (const m of moduli) {
+        letti.add(m);
+        const r = chiamateTr(await (await fetch('../' + m)).text(), m);
+        trovate.push(...r.chiavi); dinamiche.push(...r.dinamiche);
+      }
     }
 
     const viste = new Map();
