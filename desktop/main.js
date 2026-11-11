@@ -58,6 +58,13 @@ function apriFinestra() {
     return { action: 'deny' };
   });
 
+  // «Segnala un problema» cambia location.href verso mailto: va al programma di posta.
+  win.webContents.on('will-navigate', (event, url) => {
+    if (url.startsWith('spark://')) return;
+    event.preventDefault();
+    if (/^(https?|mailto):/.test(url)) shell.openExternal(url);
+  });
+
   win.loadURL('spark://app/pc.html');
 }
 
