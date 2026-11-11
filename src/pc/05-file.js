@@ -442,6 +442,26 @@ async function apriBackup() {
   await finestra({ titolo: tr('Backup e Dropbox'), corpo, larga: true });
 }
 
+/* ================================================================ Lingua */
+
+/** Cambia lingua: la pagina si ricarica, quindi prima si salva il lavoro e si avvisa dell'ampli. */
+async function cambiaLingua(v) {
+  if (v === Lingua.attuale) return;
+  if (ora && ora.toccato && !await chiediPrimaDiLasciare()) return;
+  if (spark.connected && !await conferma(tr('Cambiare lingua?'), tr('La pagina si ricarica e l\'ampli si scollega.'),
+    { ok: tr('Cambia') })) return;
+  if (ora) ora.toccato = false;
+  Lingua.imposta(v);
+}
+
+const BANDIERE = {
+  en: '<svg class="bandiera" viewBox="0 0 60 30"><rect width="60" height="30" fill="#012169"/>' +
+    '<path d="M0 0L60 30M60 0L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0L60 30M60 0L0 30" stroke="#c8102e" stroke-width="2"/>' +
+    '<path d="M30 0V30M0 15H60" stroke="#fff" stroke-width="10"/><path d="M30 0V30M0 15H60" stroke="#c8102e" stroke-width="6"/></svg>',
+  it: '<svg class="bandiera" viewBox="0 0 60 30"><rect width="20" height="30" fill="#009246"/>' +
+    '<rect x="20" width="20" height="30" fill="#fff"/><rect x="40" width="20" height="30" fill="#ce2b37"/></svg>',
+};
+
 /* ================================================================ Impostazioni */
 
 async function apriImpostazioni() {
@@ -468,14 +488,6 @@ async function apriImpostazioni() {
     chiudiFinestra(null);
     disegnaTutto();
   });
-  riga(tr('Lingua'), [['it', 'Italiano'], ['en', 'English']], Lingua.attuale, async v => {
-    if (v === Lingua.attuale) return;
-    if (ora && ora.toccato && !await chiediPrimaDiLasciare()) return;
-    if (spark.connected && !await conferma(tr('Cambiare lingua?'), tr('La pagina si ricarica e l\'ampli si scollega.'),
-      { ok: tr('Cambia') })) return;
-    if (ora) ora.toccato = false;
-    Lingua.imposta(v);
-  });
   await finestra({ titolo: tr('Impostazioni'), corpo });
 }
 
@@ -491,6 +503,7 @@ const ICONE = {
   cartella: '<path d="M3 5h7l2 2h9v12H3z"/>',
   doppioni: '<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/>',
   cestino: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  mondo: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 2.8 15.4 0 18M12 3c-2.8 2.6-2.8 15.4 0 18"/>',
   info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>',
   gioco: '<rect x="3" y="8" width="18" height="10" rx="5"/><path d="M8 13h.01M16 13h.01"/>',};
 
@@ -537,6 +550,10 @@ function segnalaProblema() {
 
 $('menu').addEventListener('click', e => apriTendina(e.currentTarget, t => {
   t.style.minWidth = '260px';
+  // Prima riga: l'altra lingua, col suo nome e la sua bandiera (nome non tradotto: si riconosce da sé).
+  const altra = Lingua.attuale === 'en' ? 'it' : 'en';
+  voceTendina(t, icona('mondo') + (altra === 'en' ? 'English' : 'Italiano') + BANDIERE[altra], () => cambiaLingua(altra));
+  t.insertAdjacentHTML('beforeend', '<hr>');
   t.insertAdjacentHTML('beforeend', `<div class="famiglia">${tr('Ampli')}</div>`);
   // Nessuna voce si spegne (regola dell'app): senza ampli rispondono spiegando cosa serve.
   voceTendina(t, icona('ampli') + tr('Rileggi gli slot dell\'ampli'), async () => {

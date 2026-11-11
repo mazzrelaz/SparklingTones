@@ -352,6 +352,7 @@
   .tendina button.sì .quanti { color:var(--su-accent); opacity:0.8; }
   .tendina hr { border:0; border-top:1px solid var(--line); margin:6px 4px; }
   .tendina svg { width:18px; height:18px; flex:none; fill:none; stroke:var(--dim); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .tendina svg.bandiera { width:26px; height:18px; stroke:none; border-radius:3px; box-shadow:0 0 0 1px rgba(255,255,255,0.25); }
   .tendina .voce-caffe { color:#f2c14e; font-weight:700; }
   .tendina .voce-caffe svg { stroke:#f2c14e; }
   .velo { position:fixed; inset:0; z-index:30; background:rgba(10,13,18,0.6); display:grid; place-items:center; }
@@ -465,6 +466,7 @@
 
 <input type="file" id="file-importa" hidden>
 
+<script>window.LINGUA_PREDEFINITA = 'en'; /* la prima volta si apre in inglese; la scelta dell'utente poi vince */</script>
 <script src="src/lingua.js"></script>
 <script src="src/lingua-en.js"></script>
 <script src="src/dropbox-sync.js"></script>

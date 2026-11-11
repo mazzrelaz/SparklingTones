@@ -53,6 +53,8 @@
       const salvata = localStorage.getItem(CHIAVE);
       if (LINGUE.includes(salvata)) return salvata;
     } catch (_) { /* idem */ }
+    // Una pagina può chiedere una lingua di partenza sua (la versione per il PC: inglese).
+    if (LINGUE.includes(window.LINGUA_PREDEFINITA)) return window.LINGUA_PREDEFINITA;
     return /^it\b/i.test(navigator.language || 'it') ? 'it' : 'en';
   }
 
