@@ -1590,3 +1590,22 @@ Chiesta dall'utente «come il Pulze editor» (`..Pulze Controleditor`). Scelte s
   (clean, drive, acoustic, bass, chiesto dall'utente): l'IA la dà in `family`, una fuori elenco si scarta, e «Salva…»
   la mette al preset nuovo (`ora.famigliaNuovo` → `store.setFamiglia`). Scartata l'IA dentro il browser (Edge/Chrome): ancora
   sperimentale e troppo piccola per 89 modelli. Provata col finto; **con una chat vera e lo Spark: da provare**.
+
+## La parte Live del PC e la pedaliera (11 novembre 2026, in bozza)
+
+Costruito l'11 novembre in `src/pc/12-live.js` (pulsante «Live» della pagina PC). Non ancora pubblicato.
+
+- **8 posti** per banco (come il telefono e il pedale), divisi in due metà da 4 (A rosso, B verde).
+- **Due modalità**: Preset (il tocco suona un posto: `0x0138` se è già in uno slot, altrimenti invio intero)
+  e Stomp (il tocco accende/spegne un blocco con `0x0115`). **Stomp solo su 5 blocchi**: Compressor, Drive,
+  Mod, Delay, Reverb (gate, amp e cab non hanno senso). **Stesse assegnazioni per tutti i preset**: la catena
+  dello Spark ha l'ordine fisso.
+- **La pedaliera la costruisce l'utente** (riferimento: M-Vave Chocolate Plus, 4 switch): «Impara» uno switch
+  alla volta; per ognuno tre assegnazioni: posto in Preset (fisso 1–8 o «della metà» 1–4), blocco in Stomp,
+  gesto sulla pressione lunga (entra/esci Stomp, cambia metà, banco successivo/precedente). Gesti assegnabili;
+  cambio di banco dallo schermo e, se assegnato, dal pedale.
+- **La pressione lunga la misura l'app**: serve un pedale che mandi CC 127 alla pressione e 0 al rilascio.
+- **BLE MIDI**: Web MIDI di Windows non vede i pedali BLE; l'app si collega da sola con Web Bluetooth al servizio
+  standard `03b80e5a-ede8-4b33-a751-6ce34ec4c700` (dati `7772e5db-…`), accanto allo Spark. Via cavo USB, Web MIDI.
+- **Il nostro pedale come test**: in modalità MIDI usa il servizio standard, ma manda solo alla pressione
+  (Program Change in preset, CC a giro in stomp): niente rilascio, quindi niente pressione lunga senza ritocco.

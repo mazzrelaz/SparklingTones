@@ -39,6 +39,7 @@ function chiudiSchermi() {
   if (schermoBanchi) { schermoBanchi.remove(); schermoBanchi = null; }
   if (typeof chiudiPedale === 'function') chiudiPedale();
   if (typeof chiudiAccordatore === 'function') chiudiAccordatore();
+  if (typeof chiudiLive === 'function') chiudiLive();
 }
 
 addEventListener('keydown', e => {

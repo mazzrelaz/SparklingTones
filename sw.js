@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v153';
+const VERSIONE = 'v154';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -76,6 +76,7 @@ const GUSCIO = [
   './src/pc/09-accordatore.js',
   './src/pc/10-partenza.js',
   './src/pc/11-genera-ia.js',
+  './src/pc/12-live.js',
   './immagini/classico/ampli.webp',
   './icons/icon-192.png',
   './icons/icon-512.png',
