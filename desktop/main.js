@@ -1,4 +1,4 @@
-// Spark 2 Controller per Windows: la stessa pc.html, dentro una finestra Electron.
+// SparklingTones per Windows: la stessa pc.html, dentro una finestra Electron.
 // I file si servono da un protocollo nostro (spark://app/), così l'origine resta
 // sempre la stessa e la libreria in IndexedDB non si perde fra un avvio e l'altro.
 const { app, BrowserWindow, protocol, net, ipcMain, shell } = require('electron');
@@ -21,7 +21,7 @@ function apriFinestra() {
     width: 1400,
     height: 900,
     backgroundColor: '#111111',
-    icon: path.join(RADICE, 'icons', 'favicon-32.png'),
+    icon: path.join(__dirname, 'build', 'icon.png'),
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

@@ -1,8 +1,8 @@
 {
   "name": "spark-controller-desktop",
   "version": "0.1.0",
-  "description": "Spark 2 Controller per Windows",
-  "author": "Spark Controller",
+  "description": "SparklingTones per Windows",
+  "author": "SparklingTones",
   "main": "main.js",
   "private": true,
   "scripts": {
@@ -15,26 +15,53 @@
   },
   "build": {
     "appId": "com.sparklingtones.controller",
-    "productName": "Spark Controller",
-    "files": ["main.js", "preload.js", "package.json"],
+    "productName": "SparklingTones",
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "build/icon.png"
+    ],
     "extraResources": [
-      { "from": "../pc.html", "to": "web/pc.html" },
-      { "from": "../pc.webmanifest", "to": "web/pc.webmanifest" },
-      { "from": "../icons", "to": "web/icons" },
-      { "from": "../fonts", "to": "web/fonts" },
-      { "from": "../immagini", "to": "web/immagini" },
-      { "from": "../src", "to": "web/src", "filter": ["**/*", "!app/**"] }
+      {
+        "from": "../pc.html",
+        "to": "web/pc.html"
+      },
+      {
+        "from": "../pc.webmanifest",
+        "to": "web/pc.webmanifest"
+      },
+      {
+        "from": "../icons",
+        "to": "web/icons"
+      },
+      {
+        "from": "../fonts",
+        "to": "web/fonts"
+      },
+      {
+        "from": "../immagini",
+        "to": "web/immagini"
+      },
+      {
+        "from": "../src",
+        "to": "web/src",
+        "filter": [
+          "**/*",
+          "!app/**"
+        ]
+      }
     ],
     "win": {
       "target": "nsis",
-      "icon": "../icons/icon-512.png"
+      "icon": "build/icon.png"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "shortcutName": "Spark Controller",
-      "artifactName": "SparkController-Setup-${version}.exe"
+      "shortcutName": "SparklingTones",
+      "artifactName": "SparklingTones-Setup-${version}.exe"
     }
   }
 }
