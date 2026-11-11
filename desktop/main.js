@@ -48,8 +48,13 @@ function apriFinestra() {
   });
 
   // I link esterni (caffè, guida online, Dropbox) si aprono nel browser.
+  // Le pagine nostre (la guida) si aprono nell'app pubblicata.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (!url.startsWith('spark://')) shell.openExternal(url);
+    if (url.startsWith('spark://app/')) {
+      shell.openExternal('https://mazzrelaz.github.io/SparklingTones/' + url.slice('spark://app/'.length));
+    } else if (/^(https?|mailto):/.test(url)) {
+      shell.openExternal(url);
+    }
     return { action: 'deny' };
   });
 
