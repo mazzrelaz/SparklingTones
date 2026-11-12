@@ -64,7 +64,9 @@ static uint32_t ultimaBatteria = 0;
  * CORREZIONE_MV, e la media corre piu' lenta. Col cavo l'icona legge alto: non importa,
  * li' carica. Le soglie seguono la curva di una 18650 sotto ~130 mA, a occhio fino alla
  * scarica completa registrata. */
-static const uint16_t CORREZIONE_MV = 150;
+// 2.41: con le letture distribuite (2.40) il pedale legge 3,615-3,641 col tester a 3,738
+// sul LOAD, collegato allo Spark: +100 mV.
+static const uint16_t CORREZIONE_MV = 100;
 
 static uint8_t tacche(uint16_t mv) {
   return mv >= 3950 ? 4 : mv >= 3800 ? 3 : mv >= 3680 ? 2 : mv >= 3550 ? 1 : 0;
@@ -72,17 +74,31 @@ static uint8_t tacche(uint16_t mv) {
 
 static void avvisa(const char* testo);
 
+/* 2.40: le 32 letture non piu' di fila (in un millesimo il piedino, dietro 50 kOhm, non si
+ * riprende, e un disturbo le prende tutte: 3,48-3,67 V col tester a 3,70) ma una ogni 60 ms,
+ * dal loop; ogni due secondi la mediana delle ultime 32. */
+static uint16_t campioniBatt[32];
+static uint8_t quantiBatt = 0, prossimoBatt = 0;
+static uint32_t ultimoCampioneBatt = 0;
+
 static void leggiBatteria() {
+  if (millis() - ultimoCampioneBatt >= 60) {
+    ultimoCampioneBatt = millis();
+    campioniBatt[prossimoBatt] = analogReadMilliVolts(PIN_BATTERIA);
+    prossimoBatt = (prossimoBatt + 1) % 32;
+    if (quantiBatt < 32) quantiBatt++;
+  }
+  if (quantiBatt < 8) return;                            // all'accensione: almeno mezzo secondo
   if (ultimaBatteria && millis() - ultimaBatteria < 2000) return;
   ultimaBatteria = millis();
   uint16_t v[32];
-  for (uint8_t i = 0; i < 32; i++) {                    // inserimento ordinato: mediana
-    uint16_t x = analogReadMilliVolts(PIN_BATTERIA);
+  for (uint8_t i = 0; i < quantiBatt; i++) {             // inserimento ordinato: mediana
+    uint16_t x = campioniBatt[i];
     int8_t j = (int8_t)i - 1;
     while (j >= 0 && v[j] > x) { v[j + 1] = v[j]; j--; }
     v[j + 1] = x;
   }
-  mvGrezzo = (uint16_t)(v[15] + v[16]);                  // mediana (media dei due di mezzo) x2 del partitore
+  mvGrezzo = (uint16_t)(v[(quantiBatt - 1) / 2] + v[quantiBatt / 2]);   // mediana x2 del partitore
   const uint16_t corretto = mvGrezzo + CORREZIONE_MV;
   const uint16_t prima = mvBatteria;
   if (mvGrezzo < 2800 || mvGrezzo > 4600) mvBatteria = 0;

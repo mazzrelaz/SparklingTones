@@ -350,7 +350,10 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
 - **Pedale d'espressione**: EX-P sulla presa **H**, solo volume (deciso dall'utente). **Mai il volume del finale
   (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore.
-- **Batteria** (2.32): prossimo, carica piena e scarica fino allo spegnimento (`docs/pedale-lavoro.md`, punto 3).
+- **Batteria** (2.41, 12 novembre): a batteria D0 leggeva 0,1–0,25 V basso e ballava; ora letture ogni 60 ms,
+  mediana, **+100 mV** (verificato col tester a 3,74 V); niente icona collegato a un PC. Soglie a occhio fino a una
+  scarica completa. Carica misurata 150–200 mA a cella 3,85: misura non affidabile (puntali sulla molla), da rifare a ~3,5 V.
+- **Basetta arrivata il 12 novembre** con i pezzi TME; foto: nessun difetto visibile. Montaggio rimandato dall'utente.
 - Le voci lunghe di questa sezione: `docs/diario.md`, estratti del 9 e del 10 novembre.
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
