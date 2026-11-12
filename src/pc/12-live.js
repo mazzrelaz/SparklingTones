@@ -78,6 +78,9 @@ function cambiaBanco(passo) {
 
 /** Il posto che suona ora, nel banco mostrato (o -1). */
 function postoAttivo(banco) {
+  // Il pulsantone premuto si accende subito: aspettare la rilettura dall'ampli lo faceva
+  // accendere molto dopo il suono (12 novembre 2026).
+  if (live.scelto && live.scelto.banco === live.banco) return live.scelto.i;
   if (!ora) return -1;
   return banco.posti.findIndex(p => p.record ? suonaOra(p.record) : p.slot !== null && ora.slot === p.slot);
 }
@@ -86,9 +89,13 @@ function suonaPosto(i) {
   const p = bancoLive().posti[i];
   if (!p) return;
   live.meta = Math.floor(i / 4);
-  if (p.slot !== null) apriSlot(p.slot);
-  else if (p.record) suonaDalBanco(p.record);
+  const scelto = live.scelto = { banco: live.banco, i };
+  const fatto = p.slot !== null ? apriSlot(p.slot) : p.record ? suonaDalBanco(p.record) : null;
   disegnaLive();
+  // A lavoro finito decide di nuovo quello che suona davvero (un invio fallito non resta acceso).
+  Promise.resolve(fatto).finally(() => {
+    if (live.scelto === scelto) { live.scelto = null; live.firma = ''; if (schermoLive) disegnaLive(); }
+  });
 }
 
 function cambiaStomp(id) {

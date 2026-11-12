@@ -49,8 +49,7 @@ addEventListener('keydown', e => {
 /** Suona un preset da un banco, come un pulsantone della vista Live, e lo porta sul palco. */
 function suonaDalBanco(record) {
   if (!record) return;
-  if (residente(record)) apriSlot(slotsDi(record)[0]);
-  else apriRecord(record);
+  return residente(record) ? apriSlot(slotsDi(record)[0]) : apriRecord(record);
 }
 
 const suonaOra = record => !!(ora && record && (ora.record && ora.record.id === record.id ||
