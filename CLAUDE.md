@@ -339,9 +339,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **La Pedaliera è pensata per pedali MIDI commerciali, non per
   il nostro** (regola dell'utente, 12 novembre). **Trappola: un `filter` animato rompe il disegno
   in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
-- **Beta test della Pedaliera** (12 novembre): modulo Google in inglese (`forms.gle/3DzkaDQffPNPgNNw8`) e post per i gruppi
-  Spark; si sceglie un tester per marca di pedale; ai tester l'exe gratis; il web resta gratis. Control X e AirStep esclusi
-  (parlano con l'ampli, non col PC). Da fare: registro dei messaggi MIDI ricevuti, da copiare e mandare.
+- **Beta test della Pedaliera** (12 novembre): modulo `forms.gle/3DzkaDQffPNPgNNw8`, un tester per marca, exe gratis ai
+  tester. Control X e AirStep esclusi. Da fare: registro dei MIDI ricevuti, da copiare e mandare.
 - **Exe e web si separano** (decisione del 12 novembre): l'exe forse a pagamento (prova 7 giorni, 14,99 €, codice
   aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account Individual **a nome della moglie**, aperto e nome
   prenotato il 12; `npm.cmd run store` configurato, **manca makeappx**: l'utente installa il Windows SDK), **il Live del PC solo nell'exe**. `main` ha 15
