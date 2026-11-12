@@ -326,13 +326,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
 - **Basetta** `pcb/basetta/`: generata **solo** da `tools/genera-basetta.py`, mai a mano; **ordinata il 29
   ottobre**. A scheda arrivata: `docs/pedale-lavoro.md`, «La basetta stampata»; il punto intero nel diario (9 novembre).
-- **App Windows** (11 novembre, `desktop/`, Electron): la stessa `pc.html` servita da `spark://app/`; `npm start` per
-  provare, `npm run dist` fa `dist/SparklingTones-Setup-x.exe` (non firmato). Il nome è **SparklingTones**, mai
-  «Spark Controller». Provata dall'utente con lo Spark: BLE, immagini, Dropbox, guida, mail. **Non ancora
-  pubblicata** (rilascio GitHub + pulsante sul sito, con bozza): l'utente dirà lui quando. Nello stesso giro, sul PC
-  e in locale: Tap tempo, sezione Pedale a scelta (spenta), via StompSnake, i «?» (`AIUTI` in `01-base.js`), titoli
-  delle finestre, `guida-pc.html` (schermate da `tools/scatti-guida-pc/`: i numeri si misurano, mai a occhio). Inglese di
-  tutto questo (guida, «?»): non fatto, aspetta il suo via.
+- **App Windows** (`desktop/`, Electron): `npm.cmd start` per provare (`npm` da PowerShell è bloccato), `npm run dist`
+  per l'installer. Il nome è **SparklingTones**, mai «Spark Controller». Inglese di guida e «?» del PC: aspetta il suo via.
+  Il resto: `docs/diario.md`, estratto del 12 novembre (sera).
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».

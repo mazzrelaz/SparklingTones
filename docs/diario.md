@@ -1355,3 +1355,13 @@ server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Provato col Dropbo
   l'utente** (commit locale, non pushato): blocchi uguali su una riga, logo con alone rosso scuro pulsante anche nella
   barra, neon blu sul pulsantone che suona. **Trappola: un `filter` animato rompe il disegno in Chromium**: si anima
   solo l'opacità di una copia (`.lv-logo .alone`). **Benvenuto dell'exe** (`src/pc/13-benvenuto.js`, solo `spark:`; 1° e 10° avvio, prova `pc.html#benvenuto1/2`), exe rifatto. **Il 12 novembre, in fila**: prove del pedale, guide, i «?», lingue, sito e pubblicazione.
+
+## Estratto da CLAUDE.md — 12 novembre 2026 (sera)
+
+- **App Windows** (11 novembre, `desktop/`, Electron): la stessa `pc.html` servita da `spark://app/`; `npm start` per
+  provare, `npm run dist` fa `dist/SparklingTones-Setup-x.exe` (non firmato). Il nome è **SparklingTones**, mai
+  «Spark Controller». Provata dall'utente con lo Spark: BLE, immagini, Dropbox, guida, mail. **Non ancora
+  pubblicata** (rilascio GitHub + pulsante sul sito, con bozza): l'utente dirà lui quando. Nello stesso giro, sul PC
+  e in locale: Tap tempo, sezione Pedale a scelta (spenta), via StompSnake, i «?» (`AIUTI` in `01-base.js`), titoli
+  delle finestre, `guida-pc.html` (schermate da `tools/scatti-guida-pc/`: i numeri si misurano, mai a occhio). Inglese di
+  tutto questo (guida, «?»): non fatto, aspetta il suo via.
