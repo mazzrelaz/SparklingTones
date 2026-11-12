@@ -1373,3 +1373,5 @@ server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Provato col Dropbo
 - **Batteria** (2.41, 12 novembre): a batteria D0 leggeva 0,1–0,25 V basso e ballava; ora letture ogni 60 ms,
   mediana, **+100 mV** (provato a 3,74 V); niente icona collegato a un PC. Soglie a occhio. Corrente di
   carica da rimisurare a ~3,5 V con i coccodrilli. **Basetta e pezzi TME arrivati** (12 novembre): montaggio rimandato.
+- **Pedale d'espressione**: EX-P sulla presa **H**, solo volume (deciso dall'utente). **Mai il volume del finale
+  (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore.

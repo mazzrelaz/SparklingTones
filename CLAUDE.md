@@ -351,8 +351,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   intervallo da 30 a 15 ms, un preset dei banchi da ~1300 a **~530–600 ms**. Solo nell'exe.
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
-- **Pedale d'espressione**: EX-P sulla presa **H**, solo volume (deciso dall'utente). **Mai il volume del finale
-  (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore.
+- **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - **Batteria** (2.41): letture a mediana, +100 mV; dettaglio nel diario (12 novembre). **Basetta e pezzi TME arrivati**: montaggio rimandato.
 - Voci lunghe: `docs/diario.md`, 9 e 10 novembre.
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
