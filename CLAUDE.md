@@ -343,10 +343,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account sviluppatore Individual **a nome della moglie**, nome
   pubblico SparklingTones, da aprire la sera del 12; poi pacchetto MSIX coi dati del Partner Center), **il Live del PC solo nell'exe**. `main` ha 15
   commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.
-- **Live del PC provato il 12 novembre con lo Spark**. **Ritardo dei banchi**: ~77 ms a chunk, 1,15–1,3 s,
-  è l'intervallo BLE di Windows (30 ms). **In prova, non verificata**: `desktop/connessione-veloce.ps1`,
-  lanciato da `main.js` scegliendo uno Spark, chiede a Windows `ThroughputOptimized` (righe «veloce:» nel terminale);
-  la misura «N chunk · M ms» sotto il nome nel Live (`misuraInvio`, `04-ampli.js`) va tolta dopo la prova.
+- **Live del PC provato il 12 novembre con lo Spark**, pedaliera in BLE e via cavo. **Connessione veloce, verificata**:
+  `desktop/connessione-veloce.ps1` (uno per dispositivo, da `main.js`) chiede a Windows `ThroughputOptimized`:
+  intervallo da 30 a 15 ms, un preset dei banchi da ~1300 a **~530–600 ms**. Solo nell'exe.
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
 - **Pedale d'espressione**: EX-P sulla presa **H**, solo volume (deciso dall'utente). **Mai il volume del finale

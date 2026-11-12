@@ -161,7 +161,6 @@ async function apriSlot(n) {
  * Un preset della libreria che non sta (per forza) in uno slot: con l'ampli va nel preset
  * software e si rilegge, come «Regola» nell'app; senza, si apre la copia in libreria.
  */
-let misuraInvio = null;
 async function apriRecord(record) {
   if (!await chiediPrimaDiLasciare()) return;
   if (!spark.connected) {
@@ -179,16 +178,14 @@ async function apriRecord(record) {
     const t0 = performance.now();
     const esito = await spark.loadPreset(record, (i, tot) => stato(tr('invio «{0}»: chunk {1} di {2}…', record.name, i + 1, tot)));
     if (!esito.ok) { stato(tr('invio interrotto: {0}', esito.error), 'errore'); return; }
-    // Misura del ritardo nel Live (12 novembre 2026): quanto ci mette il suono a partire.
+    // Quanto ci mette il suono a partire, nel registro (12 novembre 2026: ~600 ms con la connessione veloce).
     const ms = Math.round(performance.now() - t0);
     console.log(`[tempo] «${record.name}»: ${esito.total} chunk, ${esito.acks} ack, ${ms} ms`);
-    misuraInvio = { nome: record.name, chunk: esito.total, ms };
     await attendi(400);
     const letto = await spark.readLiveState();
     if (!letto) { stato(tr('non riesco a rileggere il suono corrente.'), 'errore'); return; }
     mettiSulPalco({ record, slot: null, letto, offline: false });
-    stato(tr('«{0}» è sull\'ampli: gira pure.', record.name) +
-      ` (${misuraInvio.chunk} chunk · ${misuraInvio.ms} ms · ${Math.round(performance.now() - t0)} ms)`, 'ok');
+    stato(tr('«{0}» è sull\'ampli: gira pure.', record.name), 'ok');
     if (schermoLive) { live.firma = ''; disegnaLive(); }
   });
 }
