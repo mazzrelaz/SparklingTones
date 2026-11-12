@@ -70,10 +70,7 @@ function apriFinestra() {
   ipcMain.on('bt-scelto', (_e, id) => {
     if (scegli) { scegli(id || ''); scegli = null; }   // '' = annullato
     const d = visti.find(x => x.deviceId === id);
-    // Solo l'ampli: un pedale non ne ha bisogno, e trasmettendo ogni 15 ms invece di 60 i
-    // pick-up della chitarra lo sentono come ronzio (12 novembre 2026, «SparkPedale»).
-    const nome = (d && d.deviceName) || '';
-    if (/spark/i.test(nome) && !/pedal/i.test(nome)) connessioneVeloce(id);
+    if (d && /spark/i.test(d.deviceName || '')) connessioneVeloce(id);
   });
 
   // I link esterni (caffè, guida online, Dropbox) si aprono nel browser.
