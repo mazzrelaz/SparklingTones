@@ -21,20 +21,23 @@ protocol.registerSchemesAsPrivileged([{
  * Spark e resta acceso finché serve (la richiesta vale finché è aperta). Se non riesce, si va
  * avanti come prima. */
 const { spawn } = require('child_process');
-let veloce = null;
+// Uno per dispositivo: scegliere il pedale Bluetooth spegneva quello dello Spark, che tornava
+// lento (12 novembre 2026: 1292 ms invece di ~600).
+const veloci = new Map();
 function connessioneVeloce(id) {
   if (!/^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$/i.test(id)) { console.log('veloce: id non è un indirizzo:', id); return; }
-  if (veloce) { veloce.kill(); veloce = null; }
+  if (veloci.has(id)) return;   // già acceso: si richiede da solo a ogni ricollegamento
   const script = app.isPackaged
     ? path.join(process.resourcesPath, 'connessione-veloce.ps1')
     : path.join(__dirname, 'connessione-veloce.ps1');
-  veloce = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, '-Indirizzo', id],
+  const p = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, '-Indirizzo', id],
     { windowsHide: true });
-  veloce.stdout.on('data', b => console.log(String(b).trim()));
-  veloce.stderr.on('data', b => console.log('veloce (errore):', String(b).trim()));
-  veloce.on('exit', () => { veloce = null; });
+  veloci.set(id, p);
+  p.stdout.on('data', b => console.log(String(b).trim()));
+  p.stderr.on('data', b => console.log('veloce (errore):', String(b).trim()));
+  p.on('exit', () => veloci.delete(id));
 }
-app.on('will-quit', () => { if (veloce) veloce.kill(); });
+app.on('will-quit', () => { for (const p of veloci.values()) p.kill(); });
 
 function apriFinestra() {
   const win = new BrowserWindow({
