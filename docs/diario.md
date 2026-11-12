@@ -1365,3 +1365,5 @@ server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Provato col Dropbo
   e in locale: Tap tempo, sezione Pedale a scelta (spenta), via StompSnake, i «?» (`AIUTI` in `01-base.js`), titoli
   delle finestre, `guida-pc.html` (schermate da `tools/scatti-guida-pc/`: i numeri si misurano, mai a occhio). Inglese di
   tutto questo (guida, «?»): non fatto, aspetta il suo via.
+- **Trappola del Play Acoustic**: un iPad che ricorda il pedale da GarageBand gli si ricollega e occupa il posto
+  dell'adattatore: Bluetooth dell'iPad spento.

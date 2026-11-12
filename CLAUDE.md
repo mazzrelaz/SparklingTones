@@ -343,15 +343,12 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account sviluppatore Individual **a nome della moglie**, nome
   pubblico SparklingTones, da aprire la sera del 12; poi pacchetto MSIX coi dati del Partner Center), **il Live del PC solo nell'exe**. `main` ha 15
   commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.
-- **Live del PC provato il 12 novembre con lo Spark**: corretti Stomp che chiedeva di salvare e seconda metà
-  irraggiungibile (nomi «Banco A · n», «Banco B · n», «Banco A o B · n»). **Ritardo dei banchi misurato**: ~77 ms
-  a chunk, 1,15–1,3 s, è l'intervallo BLE di Windows (30 ms). **In prova, non verificata**: `desktop/connessione-veloce.ps1`,
+- **Live del PC provato il 12 novembre con lo Spark**. **Ritardo dei banchi**: ~77 ms a chunk, 1,15–1,3 s,
+  è l'intervallo BLE di Windows (30 ms). **In prova, non verificata**: `desktop/connessione-veloce.ps1`,
   lanciato da `main.js` scegliendo uno Spark, chiede a Windows `ThroughputOptimized` (righe «veloce:» nel terminale);
   la misura «N chunk · M ms» sotto il nome nel Live (`misuraInvio`, `04-ampli.js`) va tolta dopo la prova.
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
-- **Trappola del Play Acoustic**: un iPad che ricorda il pedale da GarageBand gli si ricollega e occupa il posto
-  dell'adattatore: Bluetooth dell'iPad spento.
 - **Pedale d'espressione**: EX-P sulla presa **H**, solo volume (deciso dall'utente). **Mai il volume del finale
   (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore.
 - **Batteria** (2.32): prossimo, carica piena e scarica fino allo spegnimento (`docs/pedale-lavoro.md`, punto 3).
