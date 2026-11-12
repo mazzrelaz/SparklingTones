@@ -45,11 +45,11 @@ static void disegnaAvvio() {
  * Chiesta dall'utente il 4 ottobre 2026. Partitore 1:2 su D0 (A0, GPIO1): due
  * 100 kΩ, dal + della batteria **dopo l'interruttore** a D0 e da D0 al −, cosi'
  * a pedale spento non consumano niente. Si legge ogni due secondi, sedici
- * campioni, media mobile lenta: la tensione di un litio sotto carico balla.
+ * campioni (dalla 2.39: mediana di 32 piu' la correzione, sotto), media mobile lenta: la tensione di un litio sotto carico balla.
  *
  * Quattro tacche e niente percentuali (docs/pedale.md: la tensione di un litio
  * resta piatta sui 3,7 per gran parte della scarica, un «73%» sarebbe
- * inventato): >= 4,05 / 3,85 / 3,70 / 3,50 V. Sotto 3,50 l'icona lampeggia e
+ * inventato): >= 3,95 / 3,80 / 3,68 / 3,55 V (2.39). Sotto 3,55 l'icona lampeggia e
  * per un attimo lo dice. Fuori da 2,8-4,6 V il partitore non c'e' (o il piedino
  * e' per aria) e l'icona non compare. */
 static const uint8_t PIN_BATTERIA = A0;
@@ -57,8 +57,17 @@ static uint16_t mvBatteria = 0;          // 0 = nessuna lettura sensata
 static uint16_t mvGrezzo   = 0;          // l'ultima media, per il seriale
 static uint32_t ultimaBatteria = 0;
 
+/* 2.39 (12 novembre 2026): a batteria il pedale leggeva 0,10-0,25 V meno del tester e
+ * ballava (3,49-3,64 con la cella ferma a 3,74 sul LOAD; col cavo USB +0,06): il partitore
+ * da 100 kOhm e i picchi della radio. Scelta dell'utente: correzione solo nel firmware
+ * (niente condensatore su D0). Si prende la mediana di 32 letture, si aggiunge
+ * CORREZIONE_MV, e la media corre piu' lenta. Col cavo l'icona legge alto: non importa,
+ * li' carica. Le soglie seguono la curva di una 18650 sotto ~130 mA, a occhio fino alla
+ * scarica completa registrata. */
+static const uint16_t CORREZIONE_MV = 150;
+
 static uint8_t tacche(uint16_t mv) {
-  return mv >= 4050 ? 4 : mv >= 3850 ? 3 : mv >= 3700 ? 2 : mv >= 3500 ? 1 : 0;
+  return mv >= 3950 ? 4 : mv >= 3800 ? 3 : mv >= 3680 ? 2 : mv >= 3550 ? 1 : 0;
 }
 
 static void avvisa(const char* testo);
@@ -66,14 +75,23 @@ static void avvisa(const char* testo);
 static void leggiBatteria() {
   if (ultimaBatteria && millis() - ultimaBatteria < 2000) return;
   ultimaBatteria = millis();
-  uint32_t somma = 0;
-  for (uint8_t i = 0; i < 16; i++) somma += analogReadMilliVolts(PIN_BATTERIA);
-  mvGrezzo = (uint16_t)(somma / 16 * 2);                 // partitore 1:2
+  uint16_t v[32];
+  for (uint8_t i = 0; i < 32; i++) {                    // inserimento ordinato: mediana
+    uint16_t x = analogReadMilliVolts(PIN_BATTERIA);
+    int8_t j = (int8_t)i - 1;
+    while (j >= 0 && v[j] > x) { v[j + 1] = v[j]; j--; }
+    v[j + 1] = x;
+  }
+  mvGrezzo = (uint16_t)(v[15] + v[16]);                  // mediana (media dei due di mezzo) x2 del partitore
+  const uint16_t corretto = mvGrezzo + CORREZIONE_MV;
   const uint16_t prima = mvBatteria;
   if (mvGrezzo < 2800 || mvGrezzo > 4600) mvBatteria = 0;
-  else mvBatteria = prima ? (uint16_t)((prima * 7u + mvGrezzo) / 8u) : mvGrezzo;
-  if ((prima == 0) != (mvBatteria == 0) || tacche(prima) != tacche(mvBatteria)) schermoSporco = true;
-  if (prima >= 3500 && mvBatteria && mvBatteria < 3500) avvisa(TESTO("batteria scarica", "battery low"));
+  else mvBatteria = prima ? (uint16_t)((prima * 15u + corretto) / 16u) : corretto;
+  static bool usbPrima = false;
+  const bool usb = (bool)USB;
+  if ((prima == 0) != (mvBatteria == 0) || tacche(prima) != tacche(mvBatteria) || usb != usbPrima) schermoSporco = true;
+  usbPrima = usb;
+  if (!usb && prima >= 3550 && mvBatteria && mvBatteria < 3550) avvisa(TESTO("batteria scarica", "battery low"));
 }
 
 /* Il registro della batteria (2.32, chiesto dall'utente il 30 ottobre 2026, per
@@ -123,6 +141,10 @@ static void stampaRegistroBatteria() {
 
 /** L'icona, a sinistra del quadratino: 15x8 piu' il polo. */
 static void disegnaBatteria() {
+  // Collegato a un PC (l'USB riconosciuto da un computer) l'icona non dice niente: col cavo
+  // la tensione sale e si vedevano sempre tre tacche finte. Chiesto dall'utente, 2.39.
+  // Un caricatore da muro non riconosce il pedale: li' l'icona resta.
+  if (USB) return;
   if (!mvBatteria) return;
   const uint8_t t = tacche(mvBatteria);
   if (t == 0 && (millis() / 500) % 2) return;              // scarica: lampeggia
