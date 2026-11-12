@@ -112,10 +112,21 @@ window.SparkTransport = (function () {
       });
 
       this.onStatus('connecting', tr('Connessione GATT…'));
-      const server  = await this.device.gatt.connect();
-      const service = await server.getPrimaryService(SERVICE_UUID);
-      this.writeChar  = await service.getCharacteristic(CHAR_WRITE_UUID);
-      this.notifyChar = await service.getCharacteristic(CHAR_NOTIFY_UUID);
+      // Su Windows la connessione a volte cade appena aperta («GATT Server is disconnected»,
+      // 12 novembre 2026, al primo tentativo): si riprova da soli, fino a tre volte.
+      for (let prova = 1; ; prova++) {
+        try {
+          const server  = await this.device.gatt.connect();
+          const service = await server.getPrimaryService(SERVICE_UUID);
+          this.writeChar  = await service.getCharacteristic(CHAR_WRITE_UUID);
+          this.notifyChar = await service.getCharacteristic(CHAR_NOTIFY_UUID);
+          break;
+        } catch (err) {
+          if (prova >= 3 || !/disconnect/i.test((err && err.message) || '')) throw err;
+          this.onLog(tr('connessione caduta appena aperta, riprovo ({0})', prova + 1));
+          await sleep(500);
+        }
+      }
 
       await this.notifyChar.startNotifications();
       this.notifyChar.addEventListener('characteristicvaluechanged', e => {

@@ -36,6 +36,9 @@ $giaDetto = ''
 while ($true) {
   $connesso = $dev.ConnectionStatus -eq [Windows.Devices.Bluetooth.BluetoothConnectionStatus]::Connected
   if ($connesso -and -not $richiesta) {
+    # Si lascia finire all'app la lettura dei servizi: cambiare l'intervallo proprio
+    # in quel momento sembra far cadere la connessione appena aperta (12 novembre 2026).
+    Start-Sleep -Seconds 3
     try {
       $richiesta = $dev.RequestPreferredConnectionParameters([Windows.Devices.Bluetooth.BluetoothLEPreferredConnectionParameters]::ThroughputOptimized)
       Write-Output "veloce: richiesta a $($dev.Name): $($richiesta.Status)"
