@@ -7,7 +7,8 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win nsis"
+    "dist": "electron-builder --win nsis",
+    "store": "electron-builder --win appx"
   },
   "devDependencies": {
     "electron": "33.2.1",
@@ -59,6 +60,16 @@
     "win": {
       "target": "nsis",
       "icon": "build/icon.png"
+    },
+    "appx": {
+      "identityName": "SparklingTones.SparklingTones",
+      "publisher": "CN=3B8D03E0-256E-47E8-9FD7-4EB353A197CF",
+      "publisherDisplayName": "SparklingTones",
+      "applicationId": "SparklingTones",
+      "displayName": "SparklingTones",
+      "backgroundColor": "#111111",
+      "languages": ["it-IT", "en-US"],
+      "artifactName": "SparklingTones-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
