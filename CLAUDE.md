@@ -351,10 +351,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Pedale d'espressione**: EX-P sulla presa **H**, solo volume (deciso dall'utente). **Mai il volume del finale
   (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore.
 - **Batteria** (2.41, 12 novembre): a batteria D0 leggeva 0,1–0,25 V basso e ballava; ora letture ogni 60 ms,
-  mediana, **+100 mV** (verificato col tester a 3,74 V); niente icona collegato a un PC. Soglie a occhio fino a una
-  scarica completa. Carica misurata 150–200 mA a cella 3,85: misura non affidabile (puntali sulla molla), da rifare a ~3,5 V.
-- **Basetta arrivata il 12 novembre** con i pezzi TME; foto: nessun difetto visibile. Montaggio rimandato dall'utente.
-- Le voci lunghe di questa sezione: `docs/diario.md`, estratti del 9 e del 10 novembre.
+  mediana, **+100 mV** (provato a 3,74 V); niente icona collegato a un PC. Soglie a occhio. Corrente di
+  carica da rimisurare a ~3,5 V con i coccodrilli. **Basetta e pezzi TME arrivati** (12 novembre): montaggio rimandato.
+- Voci lunghe: `docs/diario.md`, 9 e 10 novembre.
 - **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
   file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
 - **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key): **mai più catture o
