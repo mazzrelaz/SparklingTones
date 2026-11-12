@@ -16,6 +16,26 @@ protocol.registerSchemesAsPrivileged([{
   privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true }
 }]);
 
+/* La connessione veloce (12 novembre 2026): Windows tiene l'intervallo Bluetooth a 30 ms e un
+ * preset dei banchi ci mette ~1,2 s; uno script PowerShell chiede a Windows quello corto per lo
+ * Spark e resta acceso finché serve (la richiesta vale finché è aperta). Se non riesce, si va
+ * avanti come prima. */
+const { spawn } = require('child_process');
+let veloce = null;
+function connessioneVeloce(id) {
+  if (!/^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$/i.test(id)) { console.log('veloce: id non è un indirizzo:', id); return; }
+  if (veloce) { veloce.kill(); veloce = null; }
+  const script = app.isPackaged
+    ? path.join(process.resourcesPath, 'connessione-veloce.ps1')
+    : path.join(__dirname, 'connessione-veloce.ps1');
+  veloce = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, '-Indirizzo', id],
+    { windowsHide: true });
+  veloce.stdout.on('data', b => console.log(String(b).trim()));
+  veloce.stderr.on('data', b => console.log('veloce (errore):', String(b).trim()));
+  veloce.on('exit', () => { veloce = null; });
+}
+app.on('will-quit', () => { if (veloce) veloce.kill(); });
+
 function apriFinestra() {
   const win = new BrowserWindow({
     width: 1400,
@@ -32,11 +52,12 @@ function apriFinestra() {
 
   // Web Bluetooth: Electron non mostra la scelta del dispositivo, la facciamo noi.
   // L'evento arriva più volte mentre la ricerca trova dispositivi nuovi.
-  let scegli = null;
+  let scegli = null, visti = [];
   win.webContents.on('select-bluetooth-device', (event, dispositivi, callback) => {
     event.preventDefault();
     const nuovaRicerca = !scegli;
     scegli = callback;
+    visti = dispositivi;
     win.webContents.send('bt-dispositivi', {
       nuovaRicerca,
       dispositivi: dispositivi.map(d => ({ id: d.deviceId, nome: d.deviceName || '' }))
@@ -45,6 +66,8 @@ function apriFinestra() {
   ipcMain.removeAllListeners('bt-scelto');
   ipcMain.on('bt-scelto', (_e, id) => {
     if (scegli) { scegli(id || ''); scegli = null; }   // '' = annullato
+    const d = visti.find(x => x.deviceId === id);
+    if (d && /spark/i.test(d.deviceName || '')) connessioneVeloce(id);
   });
 
   // I link esterni (caffè, guida online, Dropbox) si aprono nel browser.

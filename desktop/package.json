@@ -24,6 +24,10 @@
     ],
     "extraResources": [
       {
+        "from": "connessione-veloce.ps1",
+        "to": "connessione-veloce.ps1"
+      },
+      {
         "from": "../pc.html",
         "to": "web/pc.html"
       },

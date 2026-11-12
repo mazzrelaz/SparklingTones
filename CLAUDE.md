@@ -340,12 +340,18 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   completo (v152; `tools/lingua.html` legge anche `pc.html` e le `tr` dentro i `${…}`) e, sul PC, «Impostazioni e
   backup» in una finestra (lingua, Hendrix, backup, Dropbox). Dopo, il guscio va oltre v153.
 - **Vista Live del PC** (11 novembre, `src/pc/12-live.js`): Preset/Stomp e pedaliera MIDI; **con lo Spark e un pedale
-  veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **Trappola: un `filter` animato rompe il disegno
+  veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **La Pedaliera è pensata per pedali MIDI commerciali, non per
+  il nostro** (regola dell'utente, 12 novembre). **Trappola: un `filter` animato rompe il disegno
   in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
 - **Exe e web si separano** (decisione del 12 novembre): l'exe forse a pagamento (prova 7 giorni, 14,99 €, codice
   aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account sviluppatore Individual **a nome della moglie**, nome
   pubblico SparklingTones, da aprire la sera del 12; poi pacchetto MSIX coi dati del Partner Center), **il Live del PC solo nell'exe**. `main` ha 15
   commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.
+- **Live del PC provato il 12 novembre con lo Spark**: corretti Stomp che chiedeva di salvare e seconda metà
+  irraggiungibile (nomi «Banco A · n», «Banco B · n», «Banco A o B · n»). **Ritardo dei banchi misurato**: ~77 ms
+  a chunk, 1,15–1,3 s, è l'intervallo BLE di Windows (30 ms). **In prova, non verificata**: `desktop/connessione-veloce.ps1`,
+  lanciato da `main.js` scegliendo uno Spark, chiede a Windows `ThroughputOptimized` (righe «veloce:» nel terminale);
+  la misura «N chunk · M ms» sotto il nome nel Live (`misuraInvio`, `04-ampli.js`) va tolta dopo la prova.
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
 - **Trappola del Play Acoustic**: un iPad che ricorda il pedale da GarageBand gli si ricollega e occupa il posto

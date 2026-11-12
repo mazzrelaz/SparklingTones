@@ -187,7 +187,8 @@ function disegnaPalcoLive(corpo) {
   testa.innerHTML = `
     <div class="lv-banco"><button data-a="prima" title="${tr('Banco precedente')}">◀</button><b>${testoConNome(banco.nome)}</b><button data-a="dopo" title="${tr('Banco successivo')}">▶</button></div>
     <div class="lv-modo"><button data-a="preset" class="${live.stomp ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp ? 'sì' : ''}">${tr('Stomp')}</button></div>
-    <div class="lv-suona"><small>${live.stomp ? tr('Stomp su') : tr('Suona')}</small><span>${ora ? testoConNome(ora.nome) : '—'}</span></div>`;
+    <div class="lv-suona"><small>${live.stomp ? tr('Stomp su') : tr('Suona')}</small><span>${ora ? testoConNome(ora.nome) : '—'}</span>${misuraInvio && ora && misuraInvio.nome === ora.nome
+      ? `<small>${misuraInvio.chunk} chunk · ${misuraInvio.ms} ms</small>` : ''}</div>`;
   testa.querySelector('[data-a="prima"]').addEventListener('click', () => cambiaBanco(-1));
   testa.querySelector('[data-a="dopo"]').addEventListener('click', () => cambiaBanco(1));
   testa.querySelector('[data-a="preset"]').addEventListener('click', () => { live.stomp = false; disegnaLive(); });
