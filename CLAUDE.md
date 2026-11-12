@@ -346,6 +346,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   l'utente** (commit locale, non pushato): blocchi uguali su una riga, logo con alone rosso scuro pulsante anche nella
   barra, neon blu sul pulsantone che suona. **Trappola: un `filter` animato rompe il disegno in Chromium**: si anima
   solo l'opacità di una copia (`.lv-logo .alone`). **Benvenuto dell'exe** (`src/pc/13-benvenuto.js`, solo `spark:`; 1° e 10° avvio, prova `pc.html#benvenuto1/2`), exe rifatto. **Il 12 novembre, in fila**: prove del pedale, guide, i «?», lingue, sito e pubblicazione.
+- **Exe e web si separano** (decisione del 12 novembre): l'exe forse a pagamento (prova 7 giorni, 14,99 €, codice
+  aperto; firma SignPath in attesa di risposta, o Microsoft Store), **il Live del PC solo nell'exe**. `main` ha 15
+  commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
 - **Trappola del Play Acoustic**: un iPad che ricorda il pedale da GarageBand gli si ricollega e occupa il posto
