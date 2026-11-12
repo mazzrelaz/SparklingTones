@@ -339,13 +339,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Pubblicazione**: `main` e `origin/main` vanno insieme. **v153 pubblicata** (11 novembre): inglese
   completo (v152; `tools/lingua.html` legge anche `pc.html` e le `tr` dentro i `${…}`) e, sul PC, «Impostazioni e
   backup» in una finestra (lingua, Hendrix, backup, Dropbox). Dopo, il guscio va oltre v153.
-- **Vista Live del PC** (11 novembre, `src/pc/12-live.js`, pulsante «Live»): Preset/Stomp (5 blocchi) e pedaliera MIDI
-  (USB con Web MIDI, BLE collegandoci noi al servizio standard). Provata con l'ampli finto e MIDI simulato; **con lo
-  Spark e un pedale veri è da provare**. Il nostro pedale manda solo alla pressione: niente pressione lunga. Disegno in
-  `docs/decisioni-ui.md`, ultima sezione. Non pubblicata (guscio v154 in locale). **Grafica rifatta la sera dell'11 con
-  l'utente** (commit locale, non pushato): blocchi uguali su una riga, logo con alone rosso scuro pulsante anche nella
-  barra, neon blu sul pulsantone che suona. **Trappola: un `filter` animato rompe il disegno in Chromium**: si anima
-  solo l'opacità di una copia (`.lv-logo .alone`). **Benvenuto dell'exe** (`src/pc/13-benvenuto.js`, solo `spark:`; 1° e 10° avvio, prova `pc.html#benvenuto1/2`), exe rifatto. **Il 12 novembre, in fila**: prove del pedale, guide, i «?», lingue, sito e pubblicazione.
+- **Vista Live del PC** (11 novembre, `src/pc/12-live.js`): Preset/Stomp e pedaliera MIDI; **con lo Spark e un pedale
+  veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **Trappola: un `filter` animato rompe il disegno
+  in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
 - **Exe e web si separano** (decisione del 12 novembre): l'exe forse a pagamento (prova 7 giorni, 14,99 €, codice
   aperto; firma SignPath in attesa di risposta, o Microsoft Store), **il Live del PC solo nell'exe**. `main` ha 15
   commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.

@@ -1344,3 +1344,14 @@ server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Provato col Dropbo
   Acoustic. Il punto intero: `docs/diario.md`, estratto del 9 novembre.
 - **Batteria** (2.32): una riga al minuto in memoria (`U`); 130 mA agganciato. Prossimo: carica piena, scarica
   fino allo spegnimento, tacche rimesse; la corrente di carica a cella bassa (`docs/pedale-lavoro.md`, punto 3).
+
+
+## Estratto da CLAUDE.md — 12 novembre 2026
+
+- **Vista Live del PC** (11 novembre, `src/pc/12-live.js`, pulsante «Live»): Preset/Stomp (5 blocchi) e pedaliera MIDI
+  (USB con Web MIDI, BLE collegandoci noi al servizio standard). Provata con l'ampli finto e MIDI simulato; **con lo
+  Spark e un pedale veri è da provare**. Il nostro pedale manda solo alla pressione: niente pressione lunga. Disegno in
+  `docs/decisioni-ui.md`, ultima sezione. Non pubblicata (guscio v154 in locale). **Grafica rifatta la sera dell'11 con
+  l'utente** (commit locale, non pushato): blocchi uguali su una riga, logo con alone rosso scuro pulsante anche nella
+  barra, neon blu sul pulsantone che suona. **Trappola: un `filter` animato rompe il disegno in Chromium**: si anima
+  solo l'opacità di una copia (`.lv-logo .alone`). **Benvenuto dell'exe** (`src/pc/13-benvenuto.js`, solo `spark:`; 1° e 10° avvio, prova `pc.html#benvenuto1/2`), exe rifatto. **Il 12 novembre, in fila**: prove del pedale, guide, i «?», lingue, sito e pubblicazione.
