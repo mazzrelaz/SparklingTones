@@ -96,7 +96,12 @@ function cambiaStomp(id) {
   if (!b) return;
   if (!ora || !ora.effetti || !ora.effetti[b.pos]) { stato(tr('prima fai suonare un preset.'), 'errore'); return; }
   if (!ora.offline && ora.attendibile === false) return;   // la rilettura non è ancora arrivata
+  // Nel Live accendere e spegnere è suonare, non lavoro da salvare: niente domanda cambiando
+  // preset (regola dell'utente, 12 novembre 2026). Il lavoro fatto prima nell'editor resta segnato.
+  const prima = ora.toccato;
   cambiaAcceso(b.pos);
+  ora.toccato = prima;
+  disegnaTesta();
   disegnaLive();
 }
 
@@ -169,7 +174,7 @@ function etichetteSwitch(prova) {
   return nomi.length ? `<span class="lv-tag">${testoConNome(nomi.join(' '))}</span>` : '';
 }
 function postoDiSwitch(s) {
-  if (!s.preset) return -1;
+  if (!s.preset || s.preset.startsWith('g:')) return -1;
   const n = +s.preset.slice(1) - 1;
   return s.preset[0] === 'm' ? live.meta * 4 + n : n;
 }
@@ -222,8 +227,10 @@ function disegnaPalcoLive(corpo) {
 
 /* ---------------------------------------------------------------- la pedaliera */
 
-const nomePreset = v => !v ? tr('Nessuno') : v[0] === 'p' ? tr('Posto {0}', v.slice(1)) : tr('Posto della metà · {0}', v.slice(1));
-const nomeStomp = v => { const b = STOMP.find(s => s.id === v); return b ? tr(b.nome) : tr('Nessuno'); };
+// Un tocco può anche fare un gesto ('g:meta', …): il nostro pedale manda solo alla pressione,
+// e senza questo non arrivava mai alla seconda metà del banco.
+const nomePreset = v => !v ? tr('Nessuno') : v.startsWith('g:') ? nomeGesto(v.slice(2)) : v[0] === 'p' ? tr('Posto {0}', v.slice(1)) : tr('Posto della metà · {0}', v.slice(1));
+const nomeStomp = v => { if (v && v.startsWith('g:')) return nomeGesto(v.slice(2)); const b = STOMP.find(s => s.id === v); return b ? tr(b.nome) : tr('Nessuno'); };
 const nomeGesto = v => (GESTI.find(g => g.id === v) || GESTI[0]).nome();
 function descriviMessaggio(chiave) {
   const [tipo, canale, numero] = chiave.split(':');
@@ -257,8 +264,9 @@ function disegnaPedaliera(corpo) {
   tab.className = 'lv-tabella';
   tab.innerHTML = `<thead><tr><th>${tr('Switch')}</th><th>${tr('Messaggio')}</th><th>${tr('Preset · tocco')}</th><th>${tr('Stomp · tocco')}</th><th>${tr('Tenuto premuto')}</th><th></th></tr></thead>`;
   const tb = document.createElement('tbody');
-  const voci = { preset: [null, ...[1, 2, 3, 4, 5, 6, 7, 8].map(n => 'p' + n), ...[1, 2, 3, 4].map(n => 'm' + n)],
-    stomp: [null, ...STOMP.map(s => s.id)], lungo: GESTI.map(g => g.id) };
+  const gestiTocco = GESTI.filter(g => g.id).map(g => 'g:' + g.id);
+  const voci = { preset: [null, ...[1, 2, 3, 4, 5, 6, 7, 8].map(n => 'p' + n), ...[1, 2, 3, 4].map(n => 'm' + n), ...gestiTocco],
+    stomp: [null, ...STOMP.map(s => s.id), ...gestiTocco], lungo: GESTI.map(g => g.id) };
   pedaliera.switch.forEach((s, k) => {
     const tr_ = document.createElement('tr');
     tr_.innerHTML = `<td><button class="lv-nome-sw" title="${tr('Rinomina')}">${testoConNome(s.nome)}</button></td><td class="lv-msg">${descriviMessaggio(s.chiave)}</td><td></td><td></td><td></td><td></td>`;
@@ -323,7 +331,7 @@ function arrivoMidi(stato_, d1, d2) {
     live.impara = false;
     if (!pedaliera.switch.some(s => s.chiave === chiave)) {
       const n = pedaliera.switch.length;
-      pedaliera.switch.push({ nome: String.fromCharCode(65 + (n % 26)), chiave, preset: n < 4 ? 'm' + (n + 1) : null, stomp: null, lungo: null });
+      pedaliera.switch.push({ nome: String.fromCharCode(65 + (n % 26)), chiave, preset: n < 4 ? 'm' + (n + 1) : n === 4 ? 'g:meta' : null, stomp: null, lungo: null });
       salvaPedaliera();
     } else stato(tr('questo switch c\'è già.'));
     disegnaLive();
@@ -348,6 +356,8 @@ function arrivoMidi(stato_, d1, d2) {
 
 function tocco(s) {
   if (live.vista !== 'live') return;
+  const azione = live.stomp ? s.stomp : s.preset;
+  if (azione && azione.startsWith('g:')) { gesto(azione.slice(2)); return; }
   if (live.stomp) { if (s.stomp) cambiaStomp(s.stomp); }
   else { const i = postoDiSwitch(s); if (i >= 0) suonaPosto(i); }
 }

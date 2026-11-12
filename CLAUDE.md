@@ -343,7 +343,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **Trappola: un `filter` animato rompe il disegno
   in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
 - **Exe e web si separano** (decisione del 12 novembre): l'exe forse a pagamento (prova 7 giorni, 14,99 €, codice
-  aperto; firma SignPath in attesa di risposta, o Microsoft Store), **il Live del PC solo nell'exe**. `main` ha 15
+  aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account sviluppatore Individual **a nome della moglie**, nome
+  pubblico SparklingTones, da aprire la sera del 12; poi pacchetto MSIX coi dati del Partner Center), **il Live del PC solo nell'exe**. `main` ha 15
   commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
