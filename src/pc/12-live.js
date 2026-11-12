@@ -28,7 +28,7 @@ const STOMP = [
 const GESTI = [
   { id: null, nome: () => tr('Nessuno') },
   { id: 'stomp', nome: () => tr('Entra/esci dallo Stomp') },
-  { id: 'meta', nome: () => tr('Cambia metà del banco') },
+  { id: 'meta', nome: () => tr('Passa da banco A a banco B') },
   { id: 'banco+', nome: () => tr('Banco successivo') },
   { id: 'banco-', nome: () => tr('Banco precedente') },
 ];
@@ -229,7 +229,8 @@ function disegnaPalcoLive(corpo) {
 
 // Un tocco può anche fare un gesto ('g:meta', …): il nostro pedale manda solo alla pressione,
 // e senza questo non arrivava mai alla seconda metà del banco.
-const nomePreset = v => !v ? tr('Nessuno') : v.startsWith('g:') ? nomeGesto(v.slice(2)) : v[0] === 'p' ? tr('Posto {0}', v.slice(1)) : tr('Posto della metà · {0}', v.slice(1));
+const nomePreset = v => !v ? tr('Nessuno') : v.startsWith('g:') ? nomeGesto(v.slice(2)) : v[0] === 'p' ? (+v[1] <= 4 ? tr('Banco A · {0}', v[1]) : tr('Banco B · {0}', +v[1] - 4))
+  : tr('Banco A o B · {0}', v.slice(1));
 const nomeStomp = v => { if (v && v.startsWith('g:')) return nomeGesto(v.slice(2)); const b = STOMP.find(s => s.id === v); return b ? tr(b.nome) : tr('Nessuno'); };
 const nomeGesto = v => (GESTI.find(g => g.id === v) || GESTI[0]).nome();
 function descriviMessaggio(chiave) {
