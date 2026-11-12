@@ -340,8 +340,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   il nostro** (regola dell'utente, 12 novembre). **Trappola: un `filter` animato rompe il disegno
   in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
 - **Exe e web si separano** (decisione del 12 novembre): l'exe forse a pagamento (prova 7 giorni, 14,99 €, codice
-  aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account sviluppatore Individual **a nome della moglie**, nome
-  pubblico SparklingTones, da aprire la sera del 12; poi pacchetto MSIX coi dati del Partner Center), **il Live del PC solo nell'exe**. `main` ha 15
+  aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account Individual **a nome della moglie**, aperto e nome
+  prenotato il 12; `npm.cmd run store` configurato, **manca makeappx**: l'utente installa il Windows SDK), **il Live del PC solo nell'exe**. `main` ha 15
   commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.
 - **Live del PC provato il 12 novembre con lo Spark**, pedaliera in BLE e via cavo. **Connessione veloce, verificata**:
   `desktop/connessione-veloce.ps1` (uno per dispositivo, da `main.js`) chiede a Windows `ThroughputOptimized`:
