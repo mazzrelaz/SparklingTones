@@ -12,6 +12,14 @@
 
 const NOVITA = [
   {
+    versione: 'v155',
+    data: '13 novembre 2026',
+    voci: [
+      { icona: '▶️', titolo: tr('Video brevi su YouTube'),
+        testo: tr('Sette video brevi, uno per sezione dell\'app: collegarsi, la libreria, la scheda del preset, l\'editor, il Live, l\'accordatore e il backup. Li trovi dalla guida, sul canale SparklingTones.') },
+    ],
+  },
+  {
     versione: 'v154',
     data: '13 novembre 2026',
     voci: [
