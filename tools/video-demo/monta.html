@@ -18,7 +18,11 @@
 // Va in tempo reale, perché MediaRecorder prende i tempi dall'orologio.
 'use strict';
 
-const L = 1080, H = 1920, FPS = 30;
+// In orizzontale (i video del PC, `linea.orizzontale`) 1920×1080: L e H cambiano
+// in monta(), e le altezze del titolo passano da Y().
+let L = 1080, H = 1920, ORIZ = false;
+const FPS = 30;
+const Y = v => ORIZ ? Math.round(v * 0.5625) : v;
 const INTRO = 3.0;
 let OUTRO = 4.5;
 const tela = document.getElementById('tela');
@@ -32,6 +36,7 @@ async function monta() {
   await document.fonts.load('500 40px Inter');
   await new Promise(r => { if (logo.complete) r(); else logo.onload = logo.onerror = r; });
   if (linea.outro) OUTRO = linea.outro;
+  if (linea.orizzontale) { ORIZ = true; L = 1920; H = 1080; tela.width = L; tela.height = H; }
   // La voce, se c'è: decodificata tutta prima, a 48 kHz.
   let voce = null;
   if (linea.voce) {
@@ -72,8 +77,8 @@ async function avvia(linea, voce) {
   };
 
   // il telefono
-  const s = 0.95, w = linea.largo * s, h = linea.alto * s;
-  const x0 = (L - w) / 2, y0 = H - h - 56;
+  const s = ORIZ ? (H - 190) / linea.alto : 0.95, w = linea.largo * s, h = linea.alto * s;
+  const x0 = (L - w) / 2, y0 = ORIZ ? H - h - 40 : H - h - 56;
 
   function rettangoloTondo(x, y, w, h, r) {
     g.beginPath();
@@ -114,18 +119,18 @@ async function avvia(linea, voce) {
     if (d && d.testo) {
       const a = dolce((t - d.t) / 0.3);
       g.save(); g.globalAlpha = a;
-      g.fillStyle = '#e11d2e'; g.fillRect(L / 2 - 40, 70, 80, 6);
+      g.fillStyle = '#e11d2e'; g.fillRect(L / 2 - 40, ORIZ ? 34 : 70, 80, 6);
       g.restore();
-      testoCentrato(d.testo, 150, '600 46px Inter', '#f4f4f5', a);
+      testoCentrato(d.testo, ORIZ ? 92 : 150, '600 46px Inter', '#f4f4f5', a);
     }
     // il telefono
     g.save();
     g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = 50;
-    rettangoloTondo(x0 - 6, y0 - 6, w + 12, h + 12, 44);
+    rettangoloTondo(x0 - 6, y0 - 6, w + 12, h + 12, ORIZ ? 16 : 44);
     g.fillStyle = '#1b1b1f'; g.fill();
     g.restore();
     g.save();
-    rettangoloTondo(x0, y0, w, h, 38); g.clip();
+    rettangoloTondo(x0, y0, w, h, ORIZ ? 12 : 38); g.clip();
     g.fillStyle = '#000'; g.fillRect(x0, y0, w, h);
     if (ultimaBitmap) g.drawImage(ultimaBitmap, x0, y0, w, h);
     g.restore();
@@ -136,13 +141,13 @@ async function avvia(linea, voce) {
       const a = Math.min(dolce((t - c.t0) / 0.5), dolce((c.t1 - t) / 0.5));
       g.save(); g.globalAlpha = a * 0.95; g.fillStyle = '#060607'; g.fillRect(0, 0, L, H); g.restore();
       if (logo.complete && logo.naturalWidth) {
-        g.save(); g.globalAlpha = a; g.drawImage(logo, L / 2 - 70, 560, 140, 140); g.restore();
+        g.save(); g.globalAlpha = a; g.drawImage(logo, L / 2 - 70, Y(560), 140, 140); g.restore();
       }
-      testoCentrato(c.righe[0], 800, '700 84px "Space Grotesk"', '#ffffff', a);
+      testoCentrato(c.righe[0], Y(800), '700 84px "Space Grotesk"', '#ffffff', a);
       c.righe.slice(1).forEach((r, k) => {
         // le righe entrano una dopo l'altra
         const ak = a * dolce((t - c.t0 - 0.8 - k * 0.9) / 0.5);
-        testoCentrato(r, 930 + k * 80, '500 46px Inter', k === c.righe.length - 2 ? '#f43f5e' : '#d4d4d8', ak);
+        testoCentrato(r, Y(930) + k * 80, '500 46px Inter', k === c.righe.length - 2 ? '#f43f5e' : '#d4d4d8', ak);
       });
     }
 
@@ -154,15 +159,15 @@ async function avvia(linea, voce) {
       g.save(); g.globalAlpha = velo * 0.94; g.fillStyle = '#060607'; g.fillRect(0, 0, L, H); g.restore();
       const T = linea.testi;
       if (logo.complete && logo.naturalWidth) {
-        g.save(); g.globalAlpha = velo; g.drawImage(logo, L / 2 - 90, 620, 180, 180); g.restore();
+        g.save(); g.globalAlpha = velo; g.drawImage(logo, L / 2 - 80, Y(620) - 60, 160, 160); g.restore();
       }
-      testoCentrato(quale === 'intro' ? T.titolo : T.fine1, 900, '700 96px "Space Grotesk"', '#ffffff', velo);
+      testoCentrato(quale === 'intro' ? T.titolo : T.fine1, Y(900), '700 96px "Space Grotesk"', '#ffffff', velo);
       if (quale === 'intro') {
-        testoCentrato(T.sottotitolo, 1000, '500 46px Inter', '#d4d4d8', velo);
+        testoCentrato(T.sottotitolo, Y(1000) + 20, '500 46px Inter', '#d4d4d8', velo);
       } else {
-        testoCentrato(T.fine2, 1000, '500 44px Inter', '#d4d4d8', velo);
-        testoCentrato(T.fine3, 1080, '600 40px Inter', '#f43f5e', velo);
-        testoCentrato(T.nota, 1800, '400 28px Inter', '#71717a', velo);
+        testoCentrato(T.fine2, Y(1000) + 20, '500 44px Inter', '#d4d4d8', velo);
+        testoCentrato(T.fine3, Y(1080) + 30, '600 40px Inter', '#f43f5e', velo);
+        testoCentrato(T.nota, Y(1800) + 20, '400 28px Inter', '#71717a', velo);
       }
     }
   }

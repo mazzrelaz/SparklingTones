@@ -15,3 +15,6 @@ pcb/~*.lck
 
 # Arduino: i binari compilati che arduino-cli lascia nella cartella dello sketch
 pedale/*/build/
+
+# I video per YouTube (tools/video-demo, --scena): MP4 e fotogrammi, troppo pesanti
+video-youtube/

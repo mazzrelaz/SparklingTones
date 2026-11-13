@@ -33,12 +33,17 @@ const RADICE = path.resolve(__dirname, '..', '..');
 const USCITA = path.resolve(process.argv[2] || path.join(require('os').tmpdir(), 'spark-video'));
 const LINGUA = process.argv[3] === 'en' ? 'en' : 'it';
 const iVoce = process.argv.indexOf('--voce');
+// --scena connetti: un video corto, solo quella sezione (la serie per YouTube)
+const iScena = process.argv.indexOf('--scena');
+const SCENA = iScena > 0 ? process.argv[iScena + 1] : null;
 const SOLO_MONTAGGIO = process.argv.includes('--solo-montaggio');
 const VOCE = iVoce > 0 ? JSON.parse(fs.readFileSync(path.resolve(USCITA, process.argv[iVoce + 1]), 'utf8')) : null;
 const FOTO = path.join(USCITA, 'fotogrammi');
 const PORTA_WEB = 8123, PORTA_CDP = 9333;
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-const LARGO = 390, ALTO = 844, DPR = 2;
+// I video del PC (scene «pc-…»): pc.html in una finestra 1440×810, fotogrammi 1920×1080.
+const PC = !!(SCENA && SCENA.startsWith('pc-'));
+const LARGO = PC ? 1440 : 390, ALTO = PC ? 810 : 844, DPR = PC ? 4 / 3 : 2;
 
 const dorme = ms => new Promise(r => setTimeout(r, ms));
 
@@ -185,9 +190,67 @@ const TESTI = {
     fine3: 'mazzrelaz.github.io/SparklingTones',
     nota: 'recorded with a simulated amp and pedal',
     bancoPronto: 'Gig', bancoNuovo: 'Rehearsal',
+    libSuona: '▶ plays it on the amp at once',
+    libCerca: 'Search by name',
+    libFiltri: 'Or filter by family: clean, drive, acoustic',
+    libOrdina: 'Sort it the way you like',
+    schApri: 'Tap a preset: its card opens',
+    schSuona: '«Play» sends it to the amp',
+    schDuplica: '«Copy» makes a copy to play with',
+    schSlot: '«Put in a slot» writes it into the amp',
+    schFatto: 'The old preset stays safe in your library',
+    edApri: '«Tweak» opens the editor',
+    edManopole: 'Drag a knob up or down: the amp follows',
+    edBlocco: 'Tap a block in the chain to edit it',
+    edModello: 'Tap the name to swap the model',
+    edSalva: 'Save when you like it',
+    edNeon: 'Prefer pedals? Settings → Editor: Neon',
+    edNeonVisto: 'The same preset, drawn as real pedals',
+    liveAmpli: 'Your banks never write to the amp',
+    tunApri: 'The tuner, one tap away',
+    tunNota: 'Play a string: note and needle from the amp',
+    bakApri: 'More → Settings and backup',
+    bakEsporta: 'Export the library to a file, import it anywhere',
+    bakDropbox: 'Or keep it in sync with Dropbox',
+    pcCollega: 'One click on «Connect»',
+    pcLetti: 'The amp’s eight presets, read by themselves',
+    pcFrecce: 'The arrows step through the slots',
+    pcLibreria: 'Your library on the right: click to play',
+    pcCatena: 'The whole chain, always in view',
+    pcBlocco: 'Click a pedal to edit it',
+    pcManopola: 'Drag a knob, or use the mouse wheel',
+    pcModello: 'Pick another model from the list',
+    pcAcceso: 'Switch a block on and off',
+    pcAB: 'A/B: compare with the saved preset',
+    pcAnnulla: 'Undo and redo every change',
+    pcCerca: 'Search the library',
+    pcMenu: 'More actions for every preset',
+    pcBanchi: 'Banks: build your set lists',
+    pcLive: 'Live view: big tiles for the stage',
+    pcLiveTocca: 'Click a tile and it plays',
+    pcPedaliera: 'Map a MIDI footswitch to every tile',
+    pcIa: 'Generate with AI: describe the sound you want',
+    pcIaCopia: 'Copy the request into your AI chat',
+    pcIaIncolla: 'Paste the answer back: a new preset',
   },
 };
 const T = TESTI[LINGUA] || TESTI.it;
+const SCENE = {
+  connetti: { it: '1 · Collegarsi allo Spark', en: '1 · Connecting to your Spark' },
+  libreria: { it: '2 · La libreria', en: '2 · Your library' },
+  scheda: { it: '3 · La scheda del preset', en: '3 · The preset card' },
+  editor: { it: '4 · L’editor', en: '4 · The editor' },
+  live: { it: '5 · Live e banchi', en: '5 · Live view and banks' },
+  tuner: { it: '6 · L’accordatore', en: '6 · The tuner' },
+  backup: { it: '7 · Backup e Dropbox', en: '7 · Backup and Dropbox' },
+  'pc-prova': { it: 'prova', en: 'test' },
+  'pc-collega': { it: 'PC 1 · Panoramica', en: 'Desktop 1 · Overview and connecting' },
+  'pc-editor': { it: 'PC 2 · L’editor', en: 'Desktop 2 · The editor' },
+  'pc-libreria': { it: 'PC 3 · Libreria e banchi', en: 'Desktop 3 · Library and banks' },
+  'pc-live': { it: 'PC 4 · Live', en: 'Desktop 4 · Live view and MIDI footswitch' },
+  'pc-ia': { it: 'PC 5 · Genera con l’IA', en: 'Desktop 5 · Generate with AI' },
+};
+if (SCENA) T.sottotitolo = SCENE[SCENA][LINGUA];
 // Una voce fatta da un'IA di un servizio (OpenAI): le sue regole vogliono che il video lo dica.
 if (VOCE && VOCE.modello) T.nota += LINGUA === 'en' ? ' · AI-generated voice' : ' · voce generata con IA';
 
@@ -201,9 +264,11 @@ async function main() {
   try {
     await cdp.manda('Page.enable');
     await cdp.manda('Runtime.enable');
+    // «Vuoi uscire?» (il PC con modifiche non salvate) bloccherebbe il passaggio al montaggio.
+    cdp.ascolti.push(m => { if (m.method === 'Page.javascriptDialogOpening') cdp.manda('Page.handleJavaScriptDialog', { accept: true }).catch(() => {}); });
     if (!SOLO_MONTAGGIO) {
     await cdp.manda('Emulation.setDeviceMetricsOverride',
-      { width: LARGO, height: ALTO, deviceScaleFactor: DPR, mobile: true });
+      { width: LARGO, height: ALTO, deviceScaleFactor: DPR, mobile: !PC });
 
     const catture = JSON.parse(fs.readFileSync(path.join(RADICE, 'captures/2026-08-10-libreria-8-preset.json'), 'utf8'));
     const slot = Array.isArray(catture) ? catture : Object.values(catture);
@@ -216,7 +281,7 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
       fs.readFileSync(path.join(__dirname, 'dito.js'), 'utf8');
     await cdp.manda('Page.addScriptToEvaluateOnNewDocument', { source: prima });
 
-    const app = `http://localhost:${PORTA_WEB}/index.html?lang=${LINGUA}`;
+    const app = `http://localhost:${PORTA_WEB}/${PC ? 'pc.html' : 'index.html'}?lang=${LINGUA}`;
     let carico = cdp.evento('Page.loadEventFired');
     await cdp.manda('Page.navigate', { url: app });
     await carico; await dorme(1500);
@@ -383,8 +448,251 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     const bottone = async t => centro(`[...document.querySelectorAll('button')].find(b => b.offsetParent && b.textContent.trim() === ${JSON.stringify(await tradotto(t))})`);
     const conTesto = (sel, t) => centro(`[...document.querySelectorAll(${JSON.stringify(sel)})].find(e => e.offsetParent && e.textContent.includes(${JSON.stringify(t)}))`);
 
+    async function scenaLibreria() {
+      await dici('libSuona');
+      await scorri(260, 900);
+      await dorme(500);
+      await tocca(await centro(`[...document.querySelectorAll('#listaLibreria .row')].find(r => r.textContent.includes('Blues Breaker')).querySelector('.via')`), 1800);
+      await tocca(await centro(`[...document.querySelectorAll('#listaLibreria .row')].find(r => r.textContent.includes('Jazz Clean')).querySelector('.via')`), 1500);
+      await dici('libCerca');
+      await scorri(-(await cdp.js('scrollY')), 700);
+      await tocca(await centro("document.getElementById('search')"), 300);
+      await scrivi('crunch');
+      await dorme(1800);
+      await cdp.js("const s = document.getElementById('search'); s.value = ''; s.dispatchEvent(new Event('input', { bubbles: true })); s.blur()");
+      await dorme(600);
+      await dici('libFiltri');
+      await tocca(await conTesto('#filtriCategoria > *', await tradotto('Drive')), 1600);
+      await tocca(await conTesto('#filtriCategoria > *', await tradotto('Clean')), 1600);
+      await tocca(await conTesto('#filtriCategoria > *', await tradotto('tutti')), 900);
+      await dici('libOrdina');
+      await tocca(await centro("document.getElementById('btnOrdina')"), 1800);
+      await cdp.manda('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+      await cdp.manda('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+      await dorme(800);
+    }
+
+    async function scenaScheda() {
+      const riga = n => centro(`[...document.querySelectorAll('#listaLibreria .row')].find(r => r.textContent.includes(${JSON.stringify(n)})).querySelector('.name, .nome') || [...document.querySelectorAll('#listaLibreria .row')].find(r => r.textContent.includes(${JSON.stringify(n)}))`);
+      await scorri(260, 900);
+      await dici('schApri');
+      await tocca(await riga('Blues Breaker'), 1800);
+      await dici('schSuona');
+      await tocca(await bottone('Suona'), 2400);
+      await dici('schDuplica');
+      await tocca(await bottone('Duplica'), 2200);
+      await tocca(await centro("document.querySelector('#foglioPreset [aria-label=\"' + tr('chiudi') + '\"]')"), 900);
+      await tocca(await riga('Crunch Rock'), 1500);
+      await dici('schSlot');
+      await tocca(await bottone('Metti in uno slot'), 1300);
+      await tocca(await conTesto('.elenco-voce', 'B3'), 1300);
+      await tocca(await centro(`[...document.querySelectorAll('button')].filter(b => b.offsetParent && b.textContent.includes('B3 (slot')).pop()`), 3500);
+      await dici('schFatto');
+      await tocca(await centro("document.querySelector('#foglioPreset [aria-label=\"' + tr('chiudi') + '\"]')"), 900);
+      await scorri(-(await cdp.js('scrollY')), 800);
+      await dorme(1500);
+      await scorri(330, 900);
+      await dorme(1500);
+    }
+
+    async function scenaEditor() {
+      const riga = n => centro(`[...document.querySelectorAll('#listaLibreria .row')].find(r => r.textContent.includes(${JSON.stringify(n)})).querySelector('.name')`);
+      const regola = async () => tocca(await centro(`[...document.querySelectorAll('#foglioPreset button')].find(b => b.textContent.trim() === ${JSON.stringify(await tradotto('Regola'))})`), 2400);
+      await scorri(260, 900);
+      await tocca(await riga('Blues Breaker'), 1200);
+      await dici('edApri');
+      await regola();
+      await dici('edManopole');
+      await trascina(await centro("document.querySelectorAll('#pannelloEditor .pomello')[0]"), -80, 1000);
+      await dorme(300);
+      await trascina(await centro("document.querySelectorAll('#pannelloEditor .pomello')[2]"), 60, 900);
+      await dorme(800);
+      await dici('edBlocco');
+      await cdp.js(`[...document.querySelectorAll('#pannelloEditor .tassello')].find(t => t.querySelector('.cat') && t.querySelector('.cat').textContent.trim() === ${JSON.stringify(await tradotto('Drive'))}).scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })`);
+      await dorme(700);
+      await tocca(await centro(`[...document.querySelectorAll('#pannelloEditor .tassello')].find(t => t.querySelector('.cat') && t.querySelector('.cat').textContent.trim() === ${JSON.stringify(await tradotto('Drive'))})`), 1600);
+      await trascina(await centro("document.querySelectorAll('#pannelloEditor .pomello')[0]"), -60, 800);
+      await dorme(600);
+      await dici('edModello');
+      await tocca(await centro("document.querySelector('#pannelloEditor .nome-modello')"), 1300);
+      await cdp.js("[...document.querySelectorAll('.elenco-voce')].find(e => e.textContent.includes('Tube Drive')).scrollIntoView({ block: 'center', behavior: 'smooth' })");
+      await dorme(700);
+      await tocca(await conTesto('.elenco-voce', 'Tube Drive'), 1600);
+      await dici('edSalva');
+      await tocca(await centro("document.getElementById('btnSalvaModifiche')"), 1500);
+      await tocca(await centro("document.querySelector('[data-chiudi=pannelloEditor]')"), 1000);
+      await dici('edNeon');
+      await tocca(await centro("document.getElementById('tabAltro')"), 900);
+      await tocca(await centro("document.getElementById('btnAltro')"), 1300);
+      await cdp.js("document.getElementById('sceltaEditor').scrollIntoView({ block: 'center', behavior: 'smooth' })");
+      await dorme(900);
+      await tocca(await centro("document.querySelector('#sceltaEditor [data-editor=neon]')"), 1300);
+      await cdp.manda('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+      await cdp.manda('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+      await dorme(800);
+      await tocca(await centro("document.getElementById('tabPreset')"), 1000);
+      await scorri(260 - (await cdp.js('scrollY')), 700);
+      await dorme(500);
+      await tocca(await riga('Blues Breaker'), 1200);
+      if (await cdp.js("document.getElementById('foglioPreset').hidden")) await tocca(await riga('Blues Breaker'), 1200);
+      await dici('edNeonVisto');
+      await regola();
+      await trascina(await centro("document.querySelectorAll('.manopola-img')[0]"), -60, 900);
+      await dorme(2500);
+    }
+
+    async function scenaLive() {
+      await dici('live');
+      await tocca(await centro("document.getElementById('tabLive')"), 1000);
+      for (const s of ['A2', 'B1', 'A4']) await tocca(await conTesto('.pad', s), 1100);
+      await dici('banco');
+      await tocca(await conTesto('#banchi .banco', T.bancoPronto), 1000);
+      await tocca(await conTesto('.pad', 'Blues'), 1500);
+      await tocca(await conTesto('.pad', 'Lead'), 1500);
+      await dici('tieni');
+      const funk = await conTesto('.pad', 'Funk');
+      await muovi(funk.x, funk.y);
+      await dorme(140);
+      await cdp.js('__dito.premi(true)');
+      await mouse('mousePressed', funk.x, funk.y, { clickCount: 1, buttons: 1 });
+      await dorme(2400);
+      await mouse('mouseReleased', funk.x, funk.y, { clickCount: 1 });
+      await cdp.js('__dito.premi(false)');
+      await dorme(2200);
+      await tocca(await centro("document.querySelector('[data-chiudi=pannelloEditor]')"), 900);
+      await dici('nuovoBanco');
+      await tocca(await conTesto('#banchi .banco', '＋'), 900);
+      await cdp.js("document.querySelector('.elenco-campo').select()");
+      await scrivi(T.bancoNuovo);
+      await dorme(500);
+      await tocca(await bottone('Crea il banco'), 900);
+      await dici('riempi');
+      for (const [i, nome] of [[0, 'Funk Rhythm'], [1, 'Crunch Rock'], [2, 'Lead Hendrix'], [3, 'Jazz Clean']]) {
+        await tocca(await centro(`document.querySelectorAll('.pad')[${i}]`), 650);
+        await tocca(await conTesto('#elencoScegli .voce', nome), 700);
+      }
+      await tocca(await centro("document.getElementById('btnModifica')"), 800);
+      await dici('liveAmpli');
+      await tocca(await conTesto('.pad', 'Crunch'), 1500);
+      await tocca(await conTesto('.pad', 'Jazz'), 2000);
+    }
+    async function scenaTuner() {
+      await dici('tunApri');
+      await tocca(await centro("document.getElementById('tabAccordatore')"), 6000);
+      await dici('tunNota');
+      await dorme(6000);
+    }
+    async function scenaBackup() {
+      await dici('bakApri');
+      await tocca(await centro("document.getElementById('tabAltro')"), 900);
+      await tocca(await centro("document.getElementById('btnAltro')"), 1500);
+      await cdp.js("[...document.querySelectorAll('h2, .imp-titolo, .sezione-titolo')].find(e => /backup/i.test(e.textContent)).scrollIntoView({ block: 'start', behavior: 'smooth' })");
+      await dorme(1500);
+      await dici('bakEsporta');
+      await dorme(3500);
+      await dici('bakDropbox');
+      await cdp.js("[...document.querySelectorAll('h2, .imp-titolo, .sezione-titolo')].find(e => /dropbox/i.test(e.textContent)).scrollIntoView({ block: 'start', behavior: 'smooth' })");
+      await dorme(5000);
+    }
+
+    const rigaPc = async n => {
+      await cdp.js(`(() => { const r = [...document.querySelectorAll('#elenco-corpo .riga-preset')].find(r => r.textContent.includes(${JSON.stringify(n)})); r && r.scrollIntoView({ block: 'center', behavior: 'smooth' }); })()`);
+      await dorme(600);
+      return rigaPcSubito(n);
+    };
+    const rigaPcSubito = n => centro(`[...document.querySelectorAll('#elenco-corpo .riga-preset')].find(r => r.textContent.includes(${JSON.stringify(n)}))`);
+    const miniatura = i => centro(`document.querySelectorAll('#catena .miniatura')[${i}]`);
+    const esc = async () => {
+      await cdp.manda('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+      await cdp.manda('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    };
+    async function scenaPcCollega() {
+      await dici('pcCollega');
+      await tocca(await centro("document.getElementById('collega')"), 300);
+      await dici('pcLetti');
+      await dorme(4500);
+      await dici('pcFrecce');
+      await tocca(await centro("document.getElementById('dopo')"), 1400);
+      await tocca(await centro("document.getElementById('dopo')"), 1400);
+      await tocca(await centro("document.getElementById('prima')"), 1400);
+      await dici('pcLibreria');
+      await tocca(await rigaPc('Blues Breaker'), 1800);
+      await tocca(await rigaPc('Jazz Clean'), 1800);
+      await dici('pcCatena');
+      await muovi(LARGO * 0.2, ALTO * 0.8, 700); await muovi(LARGO * 0.75, ALTO * 0.8, 1600);
+      await dorme(1500);
+    }
+    async function scenaPcEditor() {
+      await tocca(await rigaPc('Blues Breaker'), 1500);
+      await dici('pcBlocco');
+      await tocca(await miniatura(2), 1500);
+      await dici('pcManopola');
+      await trascina(await centro("document.querySelectorAll('#manopole .girevole')[0]"), -70, 1000);
+      await dorme(300);
+      await trascina(await centro("document.querySelectorAll('#manopole .girevole')[1]"), 50, 800);
+      await dorme(700);
+      await dici('pcModello');
+      await tocca(await centro("[...document.querySelectorAll('#lista-modelli button')].filter(b => !b.classList.contains('sì'))[2]"), 1800);
+      await tocca(await miniatura(3), 1300);
+      await tocca(await centro("[...document.querySelectorAll('#lista-modelli button')].filter(b => !b.classList.contains('sì'))[5]"), 1800);
+      await dici('pcAcceso');
+      await tocca(await centro("document.querySelectorAll('#catena .chip')[4]"), 1300);
+      await tocca(await centro("document.querySelectorAll('#catena .chip')[4]"), 1300);
+      await dici('pcAB');
+      await tocca(await centro("document.getElementById('confronta')"), 1800);
+      await tocca(await centro("document.getElementById('confronta')"), 1500);
+      await dici('pcAnnulla');
+      await tocca(await centro("document.getElementById('annulla')"), 1000);
+      await tocca(await centro("document.getElementById('annulla')"), 1000);
+      await tocca(await centro("document.getElementById('ripeti')"), 1500);
+    }
+    async function scenaPcLibreria() {
+      await dici('pcLibreria');
+      await tocca(await rigaPc('Funk Rhythm'), 1500);
+      await dici('pcCerca');
+      await tocca(await centro("document.getElementById('elenco-cerca')"), 300);
+      await scrivi('lead');
+      await dorme(1800);
+      await cdp.js("const s = document.getElementById('elenco-cerca'); s.value = ''; s.dispatchEvent(new Event('input', { bubbles: true })); s.blur()");
+      await dorme(600);
+      await dici('pcMenu');
+      await tocca(await centro("[...document.querySelectorAll('#elenco-corpo .riga-preset')].find(r => r.textContent.includes('Crunch Rock')).querySelector('.altro')"), 2400);
+      await esc(); await dorme(600);
+      await dici('pcBanchi');
+      await tocca(await centro("document.getElementById('apri-banchi')"), 4000);
+    }
+    async function scenaPcLive() {
+      await dici('pcLive');
+      await tocca(await centro("document.getElementById('apri-live')"), 1800);
+      await dici('pcLiveTocca');
+      for (const i of [1, 4, 2]) await tocca(await centro(`document.querySelectorAll('.lv-griglia > *')[${i}]`), 1400);
+      await dici('pcPedaliera');
+      await tocca(await conTesto('button', 'Foot controller'), 4500);
+    }
+    async function scenaPcIa() {
+      await dici('pcIa');
+      await tocca(await centro("document.getElementById('genera-ia')"), 1500);
+      const area = await cdp.js("!![...document.querySelectorAll('textarea')].find(t => t.offsetParent)");
+      if (area) {
+        await tocca(await centro("[...document.querySelectorAll('textarea')].find(t => t.offsetParent)"), 300);
+        await scrivi('warm blues lead, like a Strat into a cranked Fender');
+      }
+      await dorme(1500);
+      await dici('pcIaCopia');
+      await tocca(await conTesto('button', 'Copy the request'), 3000);
+      await dici('pcIaIncolla');
+      await dorme(3500);
+    }
+
     /* ---------- il copione ---------- */
 
+    if (SCENA === 'editor') await cdp.js("localStorage.setItem('editor', 'classico')");
+    if (SCENA && SCENA !== 'connetti' && SCENA !== 'pc-collega') {
+      await cdp.js(PC ? "document.getElementById('collega').click()" : "document.getElementById('status').click()");
+      if (PC) await dorme(4000);
+      else for (let i = 0; i < 100 && await cdp.js("!document.querySelector('.slotcard') || [...document.querySelectorAll('.slotcard')].some(e => e.textContent.includes(tr('non letto')))"); i++) await dorme(100);
+      await dorme(1500);
+    }
     await cdp.manda('Page.startScreencast',
       { format: 'jpeg', quality: 88, maxWidth: LARGO * DPR, maxHeight: ALTO * DPR, everyNthFrame: 1 });
     const inizio = ora();
@@ -392,6 +700,19 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await cdp.js('__dito.mostra(-100,-100)');
     await dorme(3200);                                        // sotto il titolo
 
+    if (SCENA === 'libreria') await scenaLibreria();
+    else if (SCENA === 'scheda') await scenaScheda();
+    else if (SCENA === 'editor') await scenaEditor();
+    else if (SCENA === 'live') await scenaLive();
+    else if (SCENA === 'tuner') await scenaTuner();
+    else if (SCENA === 'backup') await scenaBackup();
+    else if (SCENA === 'pc-prova') await dorme(3000);
+    else if (SCENA === 'pc-collega') await scenaPcCollega();
+    else if (SCENA === 'pc-editor') await scenaPcEditor();
+    else if (SCENA === 'pc-libreria') await scenaPcLibreria();
+    else if (SCENA === 'pc-live') await scenaPcLive();
+    else if (SCENA === 'pc-ia') await scenaPcIa();
+    else {
     await dici('connetti');
     await tocca(await centro("document.getElementById('status')"), 300);
     await cdp.js('__dito.nascondi()');
@@ -408,7 +729,9 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
 
     await dici('libreria');
     await scorri(420, 1100);
-    await dorme(1200);
+    await dorme(SCENA ? 2600 : 1200);
+    }
+    if (!SCENA) {
     await dici('suona');
     await tocca(await centro(`[...document.querySelectorAll('#listaLibreria .row')].find(r => r.textContent.includes('Blues Breaker')).querySelector('.via')`), 2400);
 
@@ -490,6 +813,7 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     await dici('inviato');
     await scorri(320, 1000, '#pannelloPedale');
     await dorme(3200);
+    }
     await cdp.js('__dito.nascondi()');
     await dici(null);
     let outro = 4.5;                                          // sotto il finale
@@ -510,7 +834,7 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
 
     const linea = { inizio, fine, outro, voce: VOCE && { file: VOCE.file, taglio: VOCE.taglio, silenzi: VOCE.silenzi || [],
                                       pezzi: VOCE.pezzi, momenti },
-                    fotogrammi, didascalie, cartelli, testi: T, largo: LARGO * DPR, alto: ALTO * DPR };
+                    fotogrammi, didascalie, cartelli, testi: T, largo: LARGO * DPR, alto: ALTO * DPR, orizzontale: PC };
     fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
     console.log(`registrati ${fotogrammi.length} fotogrammi in ${(fine - inizio).toFixed(1)} s`);
 
@@ -536,9 +860,15 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     const mp4 = require('./scrivi-mp4')(USCITA);
     console.log('salvato', mp4.file, `(${mp4.secondi} s, ${mp4.fotogrammi} fotogrammi, ${mp4.pacchettiAudio} pacchetti audio)`);
   } finally {
+    // edge.kill() lascia vivi i figli, che tengono la porta e la cache del
+    // profilo: il video dopo si montava coi dati di quello prima. Si chiudono
+    // tutti gli Edge col profilo di questa cartella.
     edge.kill();
+    require('child_process').spawnSync('powershell', ['-NoProfile', '-Command',
+      "Get-CimInstance Win32_Process -Filter \"Name='msedge.exe'\" | Where-Object { $_.CommandLine -like '*" +
+      path.join(USCITA, 'profilo-edge').replace(/'/g, "''") + "*' } | ForEach-Object { try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop } catch {} }"]);
     server.close();
   }
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().then(() => process.exit(0), e => { console.error(e); process.exit(1); });

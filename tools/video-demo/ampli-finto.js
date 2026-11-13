@@ -43,6 +43,7 @@
       }
     }
 
+    let accordatore = null;
     async function gestisci(m) {
       const k = m.cmd * 256 + m.sub;
       const d = m.data;
@@ -87,6 +88,22 @@
             if (e) e.name = nuovo;
           } catch (e) { /* lo stato resta com'era */ }
           return ack(0x06, m.seq);
+        }
+        // L'accordatore: acceso, manda `0x0364` (nota, scostamento) ~13 volte al
+        // secondo. Qui una corda di Mi un po' calante che si accorda, poi il La.
+        case 0x0165: {
+          clearInterval(accordatore);
+          await ack(0x65, m.seq);
+          if (d[0] !== 0xc3) return;
+          const t0 = Date.now();
+          accordatore = setInterval(() => {
+            const t = (Date.now() - t0) / 1000, giro = t % 12;
+            const nota = giro < 6 ? 4 : 9;
+            const k = (giro % 6) / 6;
+            const sc = 0.5 + (giro < 6 ? -0.28 : 0.22) * Math.max(0, 1 - k * 1.6) + Math.sin(t * 9) * 0.008;
+            manda(0x03, 0x64, [nota, ...S.encFloat(sc)], 0x60);
+          }, 75);
+          return;
         }
         case 0x0176:
           impostazioniLooper.splice(0, impostazioniLooper.length, ...d);

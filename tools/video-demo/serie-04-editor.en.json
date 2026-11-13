@@ -1,0 +1,11 @@
+[
+  ["titolo", "Sparkling Tones, part four: the editor."],
+  ["edApri", "Open a preset's card and tap \"Tweak\". The preset goes to the amp, and the editor opens."],
+  ["edManopole", "Drag a knob up or down. The amp follows while you play, so you hear every change."],
+  ["edBlocco", "The strip at the top is your signal chain. Tap a block, and its knobs come up."],
+  ["edModello", "Tap the model's name to swap it: a different drive, a different amp, anything the Spark has."],
+  ["edSalva", "Nothing is stored until you decide. When you like it, tap \"Save\"."],
+  ["edNeon", "There's a second look, too. In Settings, set the editor to Neon."],
+  ["edNeonVisto", "Same preset, same knobs, drawn as real pedals and amps. Pick the one you prefer."],
+  ["finale", "Sparkling Tones: free, and it works offline. Next: live view and banks."]
+]
