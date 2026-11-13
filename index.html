@@ -1930,6 +1930,14 @@
   .novita-ok { display:block; width:calc(100% - 44px); margin:6px 22px 22px; padding:13px; border:0;
     border-radius:12px; background:var(--accent); color:#fff; font:600 15px var(--font); cursor:pointer; }
   @keyframes novita-entra { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:none; } }
+
+  /* I tondini «?» (18-aiuti.js): piccoli, discreti, accanto a un titolo. */
+  .aiuto { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    min-width:0; min-height:0; padding:0; margin-left:6px; vertical-align:middle; border-radius:50%;
+    border:1px solid var(--bordo-forte); background:transparent; color:var(--dim);
+    font:700 12px/1 var(--font); letter-spacing:0; text-transform:none; cursor:pointer; box-shadow:none; }
+  .aiuto:active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .riga-banchi .aiuto { flex:none; align-self:center; }
 </style>
 </head>
 <body>
@@ -1978,7 +1986,7 @@
 <main id="vistaPreset">
   <div id="senzaBluetooth" class="avviso-grosso" hidden></div>
   <div class="sezione" id="sezAmpli">
-    <h2>HW PRESET</h2>
+    <h2>HW PRESET <button type="button" class="aiuto" data-aiuto="ampli" aria-label="Spiegazione">?</button></h2>
     <div id="listaAmpli"></div>
   </div>
   <!-- La ricerca sta qui e non nell'intestazione (14 ottobre 2026): filtra la
@@ -2004,6 +2012,7 @@
     <div id="banchi"></div>
     <button id="btnModifica" class="solo-live" aria-label="modifica il banco">
       <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.5 3.5l3 3L7 16H4v-3z"/></svg><span id="testoModifica">Modifica</span></button>
+    <button type="button" class="aiuto" data-aiuto="live" aria-label="Spiegazione">?</button>
   </div>
   <div id="pads"></div>
 </div>
@@ -2142,7 +2151,7 @@
     </div>
   </div>
 
-  <h3 class="imp-titolo">Backup</h3>
+  <h3 class="imp-titolo">Backup <button type="button" class="aiuto" data-aiuto="backup" aria-label="Spiegazione">?</button></h3>
   <div class="imp-gruppo">
     <button id="btnExport" class="imp-voce">Esporta la libreria</button>
     <button id="btnImport" class="imp-voce">Importa un file</button>
@@ -2161,7 +2170,7 @@
     bollino dell'ampli in alto.</p>
 
   <!-- Dropbox: la stessa libreria sul computer e sul telefono. -->
-  <h3 class="imp-titolo">Dropbox</h3>
+  <h3 class="imp-titolo">Dropbox <button type="button" class="aiuto" data-aiuto="dropbox" aria-label="Spiegazione">?</button></h3>
   <div class="imp-gruppo">
     <div id="dropboxCollegato" hidden>
       <button id="btnSicurezzaFai" class="imp-voce imp-principale">Fai un backup di sicurezza</button>
@@ -2485,7 +2494,7 @@
   </div>
 
   <div class="sezione-pedale">
-    <h3 class="eti-sezione">Manda un banco</h3>
+    <h3 class="eti-sezione">Manda un banco <button type="button" class="aiuto" data-aiuto="pedale" aria-label="Spiegazione">?</button></h3>
     <div class="scelte-pedale">
       <!-- Le due tendine le monta il JS: tendine nostre, non del sistema. -->
       <span id="postoBancoDaMandare"></span>
@@ -2545,6 +2554,7 @@
 <script src="src/app/15-partenza.js"></script>
 <script src="src/app/16-accordatore.js"></script>
 <script src="src/app/17-editor-classico.js"></script>
+<script src="src/app/18-aiuti.js"></script>
 <script src="src/novita.js"></script>
 </body>
 </html>

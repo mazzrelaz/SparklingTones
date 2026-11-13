@@ -209,6 +209,14 @@ function haPedale() {
    Un tondino accanto alla funzione; il clic apre la spiegazione. Chiesti dall'utente l'11
    novembre 2026 per IA, Dropbox, backup di sicurezza, Hendrix, banchi, pedale, A/B. */
 const AIUTI = {
+  live: () => [tr('Preset e Stomp'),
+    tr('<p>In <strong>Preset</strong> ogni pulsantone suona un preset del banco. Se il preset è già in uno slot dell\'ampli cambia all\'istante, altrimenti ci mette un momento. Il Live non scrive mai negli slot.</p>' +
+       '<p>In <strong>Stomp</strong> i pulsantoni accendono e spengono i blocchi del preset che suona (Compressor, Drive, Mod, Delay, Reverb), come i pedali sul pavimento.</p>')],
+  pedaliera: () => [tr('La pedaliera MIDI'),
+    tr('<p>Con <strong>Impara</strong> premi uno switch del tuo pedale MIDI e l\'app lo riconosce. Poi scegli cosa fa in Preset, cosa fa in Stomp e cosa fa la pressione lunga.</p>' +
+       '<p>La <strong>pressione lunga</strong> funziona con i pedali che mandano un messaggio quando premi e uno quando rilasci (un CC a 127 e poi a 0). Con un Program Change c\'è solo la pressione breve. Qui scegli quanto deve durare.</p>')],
+  tap: () => [tr('Tap'),
+    tr('<p>Clicca <strong>Tap</strong> a tempo, almeno due volte: l\'app calcola i BPM dalla media dei colpi e il delay li segue. Dopo due secondi di pausa ricomincia da capo.</p>')],
   ia: () => [tr('Genera con l\'IA'),
     tr('<p>Descrivi il suono che vuoi, per esempio «crunch anni \'70 con un po\' di delay».</p>' +
        '<p>«Copia la domanda» mette negli appunti una richiesta completa per l\'IA, con l\'elenco degli effetti che il tuo ampli ha davvero. ' +
