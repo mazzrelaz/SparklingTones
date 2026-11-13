@@ -1685,4 +1685,180 @@ window.LINGUA_EN = {
     "paste the reply here",
   "Impostazioni e backup…":
     "Settings and backup…",
+  "connessione caduta appena aperta, riprovo ({0})":
+    "connection dropped right after opening, retrying ({0})",
+  "<p>Sono gli otto preset salvati dentro l'ampli: A1–A4 in rosso, B1–B4 in verde, come i LED dello Spark. Si leggono da soli quando colleghi l'ampli.</p><p>Sotto c'è la tua libreria: tutti gli altri preset, che stanno nell'app e non occupano posti nell'ampli. Se un preset va in uno slot sale qui sopra; se lo slot viene sovrascritto torna giù, non si perde.</p>":
+    "<p>These are the eight presets stored inside the amp: A1–A4 in red, B1–B4 in green, like the Spark's LEDs. They are read automatically when you connect the amp.</p><p>Below is your library: all your other presets, which live in the app and take up no space in the amp. When a preset goes into a slot it moves up here; if the slot is overwritten it goes back down, nothing is lost.</p>",
+  "<p>Otto pulsantoni per suonare: un tocco e parte il preset. Se il preset è già in uno slot dell'ampli cambia all'istante, altrimenti ci mette circa un secondo.</p><p>Il banco <strong>Ampli</strong> mostra gli otto slot. I banchi tuoi li prepari con <strong>Modifica</strong>: sono scalette di preset e non scrivono mai negli slot dell'ampli.</p><p>Tieni premuto un pulsantone per due secondi e si apre l'editor di quel preset.</p>":
+    "<p>Eight big buttons for playing: one tap and the preset starts. If the preset is already in an amp slot it changes instantly, otherwise it takes about a second.</p><p>The <strong>Amp</strong> bank shows the eight slots. You build your own banks with <strong>Edit</strong>: they are setlists of presets and never write to the amp's slots.</p><p>Hold a button down for two seconds to open that preset in the editor.</p>",
+  "<p><strong>Esporta la libreria</strong> salva tutti i tuoi preset, con banchi, categorie e note, in un file sul telefono. Tienilo da parte: se cambi telefono o browser, lo riapri con <strong>Importa un file</strong>.</p>":
+    "<p><strong>Export the library</strong> saves all your presets, with banks, categories and notes, to a file on your phone. Keep it somewhere safe: if you change phone or browser, open it again with <strong>Import a file</strong>.</p>",
+  "<p>Collegando Dropbox la libreria resta uguale su tutti i tuoi apparecchi: telefono, tablet, computer. Una modifica fatta su uno arriva sugli altri; se lo stesso preset cambia in due posti, vince la modifica più recente.</p><p>Il <strong>backup di sicurezza</strong> è un'altra cosa: una copia ferma che fai tu quando vuoi, e che la sincronizzazione non tocca. Se qualcosa va storto, la ripristini.</p>":
+    "<p>With Dropbox connected your library stays the same on all your devices: phone, tablet, computer. A change made on one reaches the others; if the same preset changes in two places, the most recent change wins.</p><p>The <strong>safety backup</strong> is something else: a fixed copy you make whenever you want, which syncing never touches. If something goes wrong, you restore it.</p>",
+  "<p>Scegli uno dei tuoi banchi e il posto del pedale dove metterlo, poi <strong>Manda al pedale</strong>. Il banco resta nel pedale anche a corrente staccata.</p><p>Dopo, il pedale suona da solo con lo Spark, senza telefono.</p>":
+    "<p>Choose one of your banks and the place on the pedal to put it in, then <strong>Send to the pedal</strong>. The bank stays in the pedal even with the power off.</p><p>From then on the pedal plays with the Spark on its own, no phone needed.</p>",
+  "Live (beta)":
+    "Live (beta)",
+  "Una vista per suonare dal vivo: banchi di preset o pedali stomp, da comandare col mouse o con una pedaliera MIDI, via cavo o Bluetooth. È in prova: se qualcosa non va, scrivimi.":
+    "A view for playing live: banks of presets or stomp pedals, controlled with the mouse or with a MIDI foot controller, by cable or Bluetooth. It's still being tested: if something doesn't work, write to me.",
+  "Tap tempo":
+    "Tap tempo",
+  "Accanto ai BPM c'è il pulsante Tap: batti il tempo e il delay lo segue.":
+    "Next to the BPM there is the Tap button: tap the tempo and the delay follows it.",
+  "Guida e spiegazioni":
+    "Guide and explanations",
+  "Una guida per il computer con le schermate vere, e un «?» accanto alle funzioni più complesse.":
+    "A guide for the computer with real screenshots, and a «?» next to the more complex features.",
+  "Connessione più tenace":
+    "A sturdier connection",
+  "Se il collegamento con l'ampli cade appena aperto, l'app riprova da sola.":
+    "If the connection to the amp drops right after opening, the app tries again on its own.",
+  "Sempre gratis":
+    "Always free",
+  "L'app resta gratuita. Se ti è utile, un caffè dal menu Altro aiuta a farla crescere.":
+    "The app stays free. If you find it useful, a coffee from the More menu helps it grow.",
+  "L'app resta gratuita. Se ti è utile, un caffè dal menu in alto a destra aiuta a farla crescere.":
+    "The app stays free. If you find it useful, a coffee from the menu at the top right helps it grow.",
+  "Novità":
+    "New",
+  "Cosa c'è di nuovo":
+    "What's new",
+  "Preset e Stomp":
+    "Presets and Stomp",
+  "<p>In <strong>Preset</strong> ogni pulsantone suona un preset del banco. Se il preset è già in uno slot dell'ampli cambia all'istante, altrimenti ci mette un momento. Il Live non scrive mai negli slot.</p><p>In <strong>Stomp</strong> i pulsantoni accendono e spengono i blocchi del preset che suona (Compressor, Drive, Mod, Delay, Reverb), come i pedali sul pavimento.</p>":
+    "<p>In <strong>Presets</strong> each big button plays a preset from the bank. If the preset is already in an amp slot it changes instantly, otherwise it takes a moment. Live never writes to the slots.</p><p>In <strong>Stomp</strong> the buttons switch the blocks of the playing preset on and off (Compressor, Drive, Mod, Delay, Reverb), like pedals on the floor.</p>",
+  "La pedaliera MIDI":
+    "The MIDI foot controller",
+  "<p>Con <strong>Impara</strong> premi uno switch del tuo pedale MIDI e l'app lo riconosce. Poi scegli cosa fa in Preset, cosa fa in Stomp e cosa fa la pressione lunga.</p><p>La <strong>pressione lunga</strong> funziona con i pedali che mandano un messaggio quando premi e uno quando rilasci (un CC a 127 e poi a 0). Con un Program Change c'è solo la pressione breve. Qui scegli quanto deve durare.</p>":
+    "<p>With <strong>Learn</strong> you press a switch on your MIDI pedal and the app recognises it. Then choose what it does in Presets, what it does in Stomp and what a long press does.</p><p>The <strong>long press</strong> works with pedals that send one message when pressed and one when released (a CC at 127 and then at 0). With a Program Change there is only the short press. Here you choose how long it must last.</p>",
+  "Tap":
+    "Tap",
+  "<p>Clicca <strong>Tap</strong> a tempo, almeno due volte: l'app calcola i BPM dalla media dei colpi e il delay li segue. Dopo due secondi di pausa ricomincia da capo.</p>":
+    "<p>Click <strong>Tap</strong> in time, at least twice: the app works out the BPM from the average of your taps and the delay follows. After a two-second pause it starts over.</p>",
+  "<p>Descrivi il suono che vuoi, per esempio «crunch anni '70 con un po' di delay».</p><p>«Copia la domanda» mette negli appunti una richiesta completa per l'IA, con l'elenco degli effetti che il tuo ampli ha davvero. Incollala nella chat che usi già (ChatGPT, Claude, Gemini…), poi copia la sua risposta e incollala qui sotto.</p><p>Il preset nuovo va sull'ampli <strong>senza essere salvato</strong>: lo provi, lo ritocchi, e resta in libreria solo se premi «Salva…». L'app non manda niente a nessuno: la chat la apri tu.</p>":
+    "<p>Describe the sound you want, for example «70s crunch with a little delay».</p><p>«Copy the request» puts a complete request for the AI on the clipboard, with the list of effects your amp really has. Paste it into the chat you already use (ChatGPT, Claude, Gemini…), then copy its reply and paste it below.</p><p>The new preset goes to the amp <strong>without being saved</strong>: you try it, tweak it, and it stays in the library only if you press «Save…». The app sends nothing to anyone: you open the chat yourself.</p>",
+  "<p>Con Dropbox collegato la libreria si tiene allineata da sola fra i tuoi dispositivi: telefono, browser del computer, app per Windows.</p><p>Se lo stesso preset è cambiato in due posti vince la modifica più recente. Gli slot dell'ampli non viaggiano: ogni dispositivo li legge dall'ampli. Se in un colpo solo sparirebbero più di 5 preset, l'app prima chiede.</p><p>Per collegarlo serve una «app key» di Dropbox, che si crea una volta sola: la guida spiega i passi. Poi «Collega Dropbox», autorizzi nel browser e incolli qui il codice che Dropbox ti mostra.</p>":
+    "<p>With Dropbox connected the library keeps itself in step across your devices: phone, computer browser, Windows app.</p><p>If the same preset changed in two places, the most recent change wins. The amp's slots don't travel: each device reads them from the amp. If more than 5 presets would disappear in one go, the app asks first.</p><p>To connect it you need a Dropbox «app key», created once: the guide explains the steps. Then «Connect Dropbox», authorise in the browser and paste here the code Dropbox shows you.</p>",
+  "Backup di sicurezza":
+    "Safety backup",
+  "<p>È una copia della libreria messa da parte su Dropbox, in un file suo. Il sync automatico non la tocca mai.</p><p>Fanne una prima di un grosso riordino: se qualcosa va storto, «Ripristina il backup di sicurezza» riporta la libreria com'era. Ce n'è una sola: farne una nuova sostituisce la vecchia.</p>":
+    "<p>It's a copy of the library set aside on Dropbox, in its own file. Automatic sync never touches it.</p><p>Make one before a big tidy-up: if something goes wrong, «Restore the safety backup» puts the library back as it was. There is only one: making a new one replaces the old one.</p>",
+  "<p>Positive Grid vende a parte un pacchetto di effetti Hendrix. Si sblocca con l'app ufficiale Spark e lo sblocco resta nell'ampli: questa app non lo può sbloccare.</p><p>Scegli «Sì» se ce l'hai: gli effetti Hendrix compaiono nelle liste, segnati «JH». Scegli «No» se non ce l'hai: spariscono, e i preset che li usano non si vedono, perché sull'ampli non suonerebbero.</p>":
+    "<p>Positive Grid sells a pack of Hendrix effects separately. It is unlocked with the official Spark app and the unlock stays in the amp: this app cannot unlock it.</p><p>Choose «Yes» if you have it: the Hendrix effects appear in the lists, marked «JH». Choose «No» if you don't: they disappear, and the presets that use them are hidden, because they wouldn't play on the amp.</p>",
+  "<p>Un banco è un gruppo di otto preset, come una scaletta per un concerto o una prova. Trascini i preset dalla libreria nei suoi posti.</p><p>Un clic su un posto fa suonare quel preset. I banchi stanno solo in libreria: <strong>non scrivono mai negli slot dell'ampli</strong>. Il banco «Ampli» è un'altra cosa: mostra gli otto preset salvati negli slot, e qui non si modifica.</p><p>I banchi sono anche quello che suona il pedale SparklingTones.</p>":
+    "<p>A bank is a group of eight presets, like a setlist for a gig or a rehearsal. Drag presets from the library into its places.</p><p>A click on a place plays that preset. Banks live only in the library: <strong>they never write to the amp's slots</strong>. The «Amp» bank is something else: it shows the eight presets stored in the slots, and can't be edited here.</p><p>Banks are also what the SparklingTones pedal plays.</p>",
+  "<p>Il pedale è una pedaliera da costruire, collegata allo Spark in Bluetooth: suona i tuoi banchi senza telefono né computer. Se non ce l'hai, spegni questa sezione in Impostazioni.</p><p><strong>Collegarlo.</strong> Sul pedale tieni premuti insieme i due tasti banco per un secondo e mezzo: resta aperto per due minuti. Poi qui premi «Cerca» e sceglilo dalla lista. Mentre è collegato al computer il pedale lascia l'ampli; quando lo stacchi torna da solo allo Spark.</p><p><strong>Mandare un banco.</strong> Scegli il banco e il posto del pedale, poi «Manda al pedale». Se un banco cambia nell'app, qui lo vedi segnato da aggiornare.</p><p><strong>Riordinare.</strong> In «Nel pedale» sposti o togli i banchi; le modifiche vanno sul pedale tutte insieme con «Aggiorna il pedale».</p><p>Se un footswitch non fa niente, controlla prima che il pedale non sia ancora collegato qui.</p>":
+    "<p>The pedal is a build-it-yourself footswitch board, connected to the Spark over Bluetooth: it plays your banks without a phone or computer. If you don't have one, switch this section off in Settings.</p><p><strong>Connecting it.</strong> On the pedal hold both bank buttons together for a second and a half: it stays open for two minutes. Then press «Search» here and pick it from the list. While connected to the computer the pedal lets go of the amp; when you disconnect it goes back to the Spark on its own.</p><p><strong>Sending a bank.</strong> Choose the bank and the place on the pedal, then «Send to the pedal». If a bank changes in the app, you'll see it marked here as needing an update.</p><p><strong>Rearranging.</strong> In «In the pedal» you move or remove banks; the changes go to the pedal all together with «Update the pedal».</p><p>If a footswitch does nothing, first check that the pedal isn't still connected here.</p>",
+  "<p>Mentre ritocchi un preset, A/B ti fa ascoltare com'era salvato. Premilo di nuovo e torni alle tue modifiche.</p><p>Così senti se la modifica migliora davvero il suono, prima di salvarla. Mentre ascolti la versione salvata i comandi sono fermi.</p>":
+    "<p>While you tweak a preset, A/B lets you hear it as it was saved. Press it again to go back to your changes.</p><p>That way you hear whether the change really improves the sound before saving it. While you listen to the saved version the controls are locked.</p>",
+  "Hai il pedale? Se no, la sezione Pedale non si vede.":
+    "Do you have the pedal? If not, the Pedal section is hidden.",
+  "Nessuno":
+    "None",
+  "Entra/esci dallo Stomp":
+    "Enter/leave Stomp",
+  "Passa da banco A a banco B":
+    "Switch between bank A and bank B",
+  "Banco successivo":
+    "Next bank",
+  "Banco precedente":
+    "Previous bank",
+  "prima fai suonare un preset.":
+    "play a preset first.",
+  "Pedaliera":
+    "Foot controller",
+  "MIDI USB":
+    "USB MIDI",
+  "Stomp":
+    "Stomp",
+  "Stomp su":
+    "Stomp on",
+  "(da leggere)":
+    "(to be read)",
+  "Banco A · {0}":
+    "Bank A · {0}",
+  "Banco B · {0}":
+    "Bank B · {0}",
+  "Banco A o B · {0}":
+    "Bank A or B · {0}",
+  "canale {0}":
+    "channel {0}",
+  "Stacca {0}":
+    "Disconnect {0}",
+  "Collega un pedale Bluetooth":
+    "Connect a Bluetooth pedal",
+  "MIDI USB attivo":
+    "USB MIDI on",
+  "Usa i pedali USB":
+    "Use USB pedals",
+  "Switch":
+    "Switch",
+  "Messaggio":
+    "Message",
+  "Preset · tocco":
+    "Presets · tap",
+  "Stomp · tocco":
+    "Stomp · tap",
+  "Tenuto premuto":
+    "Held down",
+  "Togli":
+    "Remove",
+  "nome dello switch":
+    "switch name",
+  "Nessuno switch.":
+    "No switches.",
+  "Premi uno switch del pedale…":
+    "Press a switch on the pedal…",
+  "＋ Impara uno switch":
+    "＋ Learn a switch",
+  "nessun pedale":
+    "no pedal",
+  "Collega prima un pedale Bluetooth o attiva i pedali USB.":
+    "Connect a Bluetooth pedal first, or turn on USB pedals.",
+  "Pressione lunga":
+    "Long press",
+  "dopo {0} s":
+    "after {0} s",
+  "OK":
+    "OK",
+  "questo switch c'è già.":
+    "this switch is already there.",
+  "Questo browser non ha il MIDI.":
+    "This browser has no MIDI.",
+  "pedali USB in ascolto.":
+    "listening to USB pedals.",
+  "MIDI USB non disponibile: {0}":
+    "USB MIDI not available: {0}",
+  "Bluetooth":
+    "Bluetooth",
+  "Questo browser non ha il Bluetooth.":
+    "This browser has no Bluetooth.",
+  "il pedale Bluetooth si è staccato.":
+    "the Bluetooth pedal disconnected.",
+  "«{0}» collegato.":
+    "«{0}» connected.",
+  "pedale non collegato: {0}":
+    "pedal not connected: {0}",
+  "Benvenuto in SparklingTones":
+    "Welcome to SparklingTones",
+  "Grazie per averlo installato! SparklingTones è e resterà gratuito. Dietro però ci sono centinaia di ore di lavoro: notti passate a decifrare il protocollo dello Spark, a provare e riprovare sull'ampli vero.":
+    "Thanks for installing it! SparklingTones is and will stay free. Behind it, though, are hundreds of hours of work: nights spent decoding the Spark's protocol, trying again and again on the real amp.",
+  "Se l'app ti piace, un caffè è il modo più bello per dirmelo e per farla crescere.":
+    "If you like the app, a coffee is the nicest way to tell me and to help it grow.",
+  "— Massimo, chitarrista. Con metà del tempo passato sugli effetti, oggi suonerebbe meglio di Hendrix.":
+    "— Massimo, guitarist. With half the time he spent on effects, he'd play better than Hendrix by now.",
+  "Cominciamo":
+    "Let's start",
+  "Ti sta tornando utile?":
+    "Is it coming in handy?",
+  "SparklingTones è e resterà gratuito. Dietro però ci sono centinaia di ore di lavoro: notti passate a decifrare il protocollo dello Spark, a provare e riprovare sull'ampli vero.":
+    "SparklingTones is and will stay free. Behind it, though, are hundreds of hours of work: nights spent decoding the Spark's protocol, trying again and again on the real amp.",
+  "Magari più avanti":
+    "Maybe later",
+  "Spiegazione":
+    "Explanation",
+  "Batti il tempo":
+    "Tap the tempo",
+  "La vista Live, con la pedaliera":
+    "The Live view, with the foot controller",
 };
