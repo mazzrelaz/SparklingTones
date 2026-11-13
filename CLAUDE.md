@@ -342,7 +342,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
   l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
   moglie**; `npm.cmd run store`, **manca makeappx**: Windows SDK). **Ogni pubblicazione ha la splash «Novità»**
-  (`src/novita.js`: voce in cima con la versione di `sw.js`).
+  (`src/novita.js`: voce in cima con la versione di `sw.js`). **A Store aperto**: riscrivere «L'app per Windows» in `guida-pc.html`.
 - **Live del PC provato il 12 novembre con lo Spark**, pedaliera in BLE e via cavo. **Connessione veloce, verificata**:
   `desktop/connessione-veloce.ps1` (uno per dispositivo, da `main.js`) chiede a Windows `ThroughputOptimized`:
   intervallo da 30 a 15 ms, un preset dei banchi da ~1300 a **~530–600 ms**. Solo nell'exe.
