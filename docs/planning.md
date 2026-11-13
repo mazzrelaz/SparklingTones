@@ -13,6 +13,12 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [ ] Pubblicazione: **quando lo dice l'utente**. L'exe apre la guida dal sito: la guida inglese del computer
   si vede solo dopo.
 
+## 1b. Home page del sito, da rifare (14 novembre, l'utente: «troppo indietro»)
+
+- [ ] `sparklingtones-sito/index.html` e `en/`: video vecchi (al posto dello Short di ottobre i sette nuovi, e
+  i cinque del PC quando sono su YouTube), **manca l'editor Classico** e **manca la versione desktop** (PC ed exe).
+  Grafica: prima la bozza. Tutte e due le lingue.
+
 ## 2. Microsoft Store
 
 - [x] Windows SDK installato; `npm.cmd run store` usa il suo makeappx (`desktop/pacchetto-store.ps1`).
