@@ -190,40 +190,39 @@
     <figcaption>1 acceso / spento · 2 il modello · 3 le manopole · 4 cerca un modello · 5 BPM e Tap</figcaption>
   </figure>
 
-  <div class="due">
-    <div>
-      <h3>La catena</h3>
-      <ul>
-        <li>Un clic su un blocco (Gate, Comp, Drive, Amp, Mod, Delay, Reverb) lo porta sul palco.</li>
-        <li>L'etichetta colorata sopra il blocco lo <strong>accende e spegne</strong>. Un blocco spento è grigio.</li>
-        <li>Il nome sotto il blocco è il modello: cliccalo per sceglierne un altro.</li>
-      </ul>
-    </div>
-    <div>
-      <h3>Le manopole</h3>
-      <ul>
-        <li><strong>Trascina</strong> in su o in giù, oppure usa la <strong>rotellina</strong> del mouse. Con <kbd>Maiusc</kbd> premuto il trascinamento è più fine.</li>
-        <li><strong>Doppio clic</strong> la riporta a metà.</li>
-        <li>Sotto ogni manopola c'è il valore, da 0 a 10.</li>
-      </ul>
-    </div>
-  </div>
+  <h3>La catena</h3>
+  <ul>
+    <li><strong>Clic su un blocco</strong> (Gate, Comp, Drive, Amp, Mod, Delay, Reverb): va sul palco.</li>
+    <li><strong>Clic sull'etichetta colorata</strong> sopra il blocco: lo accende o lo spegne. Spento è grigio.</li>
+    <li><strong>Clic sul nome</strong> sotto il blocco: scegli un altro modello.</li>
+  </ul>
+
+  <h3>Le manopole</h3>
+  <ul>
+    <li><strong>Trascina</strong> in su o in giù, o usa la <strong>rotellina</strong>. Con <kbd>Maiusc</kbd> va più fine.</li>
+    <li><strong>Doppio clic</strong>: torna a metà.</li>
+  </ul>
 
   <h3>Cambiare modello</h3>
-  <p>L'elenco a destra del palco mostra i modelli del blocco scelto, raggruppati per tipo. Scrivi in <em>Cerca
-    modello…</em> per trovarlo subito. Un clic e il modello cambia, sull'ampli e sul palco.</p>
+  <ol class="passi">
+    <li>Scegli il blocco.</li>
+    <li>Nell'elenco a destra del palco clicca il modello, o scrivi in <em>Cerca modello…</em>.</li>
+  </ol>
+  <p>Il modello cambia subito, sull'ampli e sul palco.</p>
 
-  <h3>Il tempo</h3>
-  <p>Gli effetti a tempo (delay, tremolo…) seguono i <strong>BPM</strong> in alto. Scrivi il numero, usa le frecce ↑ ↓
-    della tastiera, oppure clicca <strong>Tap</strong> a tempo almeno due volte: l'app calcola i BPM dalla media degli
-    ultimi colpi. Se aspetti più di due secondi, la conta ricomincia.</p>
-
-  <h3>Annulla, Ripeti e A/B</h3>
+  <h3 id="suono-tempo">Il tempo: BPM e Tap</h3>
+  <p>Delay, tremolo e gli altri effetti a tempo seguono i <strong>BPM</strong> in alto.</p>
   <ul>
-    <li><strong>Annulla / Ripeti</strong> tornano indietro e avanti fra le tue modifiche.</li>
-    <li><strong>A/B</strong> ti fa ascoltare il preset <em>com'era salvato</em>; premilo di nuovo e torni alle tue
-      modifiche. Così senti se il ritocco migliora davvero il suono.</li>
+    <li>Scrivi il numero, o usa le frecce ↑ ↓.</li>
+    <li>Oppure clicca <strong>Tap</strong> a tempo, almeno due volte. Dopo due secondi di pausa la conta ricomincia.</li>
   </ul>
+
+  <h3 id="suono-ab">Annulla, Ripeti e A/B</h3>
+  <ul>
+    <li><strong>Annulla / Ripeti</strong>: indietro e avanti fra le modifiche.</li>
+    <li><strong>A/B</strong>: senti il preset <em>com'era salvato</em>. Premilo di nuovo e torni alle modifiche.</li>
+  </ul>
+  <div class="nota"><p>Usa A/B prima di salvare: senti se il ritocco migliora davvero il suono.</p></div>
 </section>
 
 <!-- ===================================================================== -->
@@ -251,20 +250,25 @@
   <p class="sotto">Tutti i preset che vuoi, non solo gli otto dell'ampli.</p>
 
   <ul>
-    <li><strong>Un clic</strong> su un preset lo fa suonare e lo porta sul palco. Se è in uno slot il cambio è
-      istantaneo; altrimenti ci mette circa un secondo.</li>
-    <li><strong>Il tasto ⋯</strong> accanto a un preset, o il <strong>tasto destro</strong>, apre le sue azioni:
-      metterlo in uno slot o in un banco, rinominarlo, duplicarlo, sceglierne famiglia, categorie e note, esportarlo,
-      eliminarlo.</li>
-    <li><strong>Cerca</strong> in cima filtra per nome; il tasto accanto sceglie l'ordine (nome, aggiunti o modificati
-      di recente, famiglia). Sotto, i filtri per famiglia e categoria.</li>
+    <li><strong>Clic su un preset</strong>: suona e va sul palco. Se è in uno slot cambia all'istante, altrimenti
+      in circa un secondo.</li>
+    <li><strong>Tasto ⋯ o tasto destro</strong>: le sue azioni (slot, banco, rinomina, duplica, famiglia, categorie,
+      note, esporta, elimina).</li>
+    <li><strong>Cerca</strong>, in cima: filtra per nome. Il tasto accanto sceglie l'ordine; sotto ci sono i filtri.</li>
   </ul>
-  <div class="nota">
-    <p><strong>Famiglia</strong> è che tipo di suono è (clean, drive, acustico, basso); <strong>categorie</strong> sono
-      lo stile o il pezzo. Si gestiscono da ☰ → <em>Categorie e famiglie…</em>. Da lì trovi anche
-      <em>Doppioni…</em> per togliere i preset uguali, ed <em>Elimina tutti i preset…</em>, che risparmia sempre gli
-      otto dell'ampli.</p>
-  </div>
+
+  <h3>Famiglie e categorie</h3>
+  <ul>
+    <li><strong>Famiglia</strong>: che suono è (clean, drive, acustico, basso).</li>
+    <li><strong>Categorie</strong>: lo stile o il pezzo.</li>
+  </ul>
+  <p>Si gestiscono da ☰ → <em>Categorie e famiglie…</em>.</p>
+
+  <h3>Fare pulizia</h3>
+  <ul>
+    <li>☰ → <em>Doppioni…</em>: trova i preset uguali.</li>
+    <li>☰ → <em>Elimina tutti i preset…</em>: risparmia sempre gli otto dell'ampli.</li>
+  </ul>
 </section>
 
 <!-- ===================================================================== -->
@@ -319,19 +323,19 @@
     <p>Come i banchi, <strong>il Live non scrive mai negli slot dell'ampli</strong>.</p>
   </div>
 
-  <h3>La pedaliera MIDI</h3>
+  <h3 id="live-pedaliera">La pedaliera MIDI</h3>
   <ol class="passi">
-    <li>Apri <strong>Pedaliera</strong> e collega il pedale: <strong>via cavo</strong> (USB) o
-      <strong>Bluetooth</strong>. Lo Spark resta collegato insieme.</li>
-    <li>Clicca <strong>＋ Impara uno switch</strong> e premi uno switch del pedale: l'app lo riconosce.</li>
-    <li>Per ogni switch scegli cosa fa in Preset, cosa fa in Stomp e cosa fa la <strong>pressione lunga</strong>:
-      entrare o uscire dallo Stomp, passare da A a B, banco successivo o precedente.</li>
+    <li>Apri <strong>Pedaliera</strong> e collega il pedale, via cavo USB o Bluetooth. Lo Spark resta collegato.</li>
+    <li>Clicca <strong>＋ Impara uno switch</strong> e premi uno switch del pedale.</li>
+    <li>Scegli cosa fa quello switch in Preset, in Stomp e con la <strong>pressione lunga</strong>.</li>
   </ol>
-  <p>La pressione lunga funziona con i pedali che mandano un messaggio quando premi e uno quando rilasci (un
-    CC a 127 e poi a 0). Con un Program Change c'è solo la pressione breve. Quanto dura la pressione lunga lo
-    scegli tu, da 1 a 3 secondi.</p>
-  <p>Nell'<strong>app per Windows</strong> il cambio di preset è più veloce (circa mezzo secondo invece di uno):
-    l'app chiede a Windows un collegamento Bluetooth più rapido, cosa che il browser non può fare.</p>
+  <ul>
+    <li><strong>Pressione lunga</strong>: solo coi pedali che mandano un CC a 127 premendo e a 0 rilasciando. La
+      durata la scegli tu, da 1 a 3 secondi.</li>
+    <li><strong>Program Change</strong>: solo la pressione breve.</li>
+  </ul>
+  <div class="nota"><p>Nell'<strong>app per Windows</strong> il cambio di preset è più veloce: circa mezzo secondo
+    invece di uno.</p></div>
 </section>
 
 <!-- ===================================================================== -->
@@ -386,23 +390,28 @@
     <figcaption>Impostazioni e backup</figcaption>
   </figure>
 
-  <div class="confronto">
-    <div>
-      <h4>💾 Sul PC</h4>
-      <p><strong>Scarica il backup</strong> salva un file <code>.json</code> con tutto: preset, famiglie, categorie,
-        note, banchi. <strong>Ripristina da un file…</strong> lo rimette, anche su un altro apparecchio: l'app chiede
-        conferma prima di unirlo.</p>
-    </div>
-    <div>
-      <h4>☁️ Dropbox</h4>
-      <p>La stessa libreria su telefono, browser e app per Windows, <strong>da sola</strong>. Se lo stesso preset è
-        cambiato in due posti vince la modifica più recente; gli slot dell'ampli non viaggiano. Se in un colpo solo
-        sparirebbero più di cinque preset, l'app prima chiede.</p>
-      <p><strong>Fai un backup di sicurezza</strong> mette da parte la libreria in un file che il sync non tocca;
-        <strong>Ripristina il backup di sicurezza</strong> la riporta com'era. Ce n'è uno solo: uno nuovo sostituisce il
-        vecchio.</p>
-    </div>
-  </div>
+  <h3 id="sicuro-pc">Il backup sul PC</h3>
+  <ul>
+    <li><strong>Scarica il backup</strong>: un file <code>.json</code> con tutto (preset, famiglie, categorie, note,
+      banchi).</li>
+    <li><strong>Ripristina da un file…</strong>: lo rimette, anche su un altro apparecchio. Prima chiede conferma.</li>
+  </ul>
+
+  <h3 id="sicuro-dropbox">Dropbox</h3>
+  <p>La stessa libreria su telefono, browser e app per Windows, <strong>da sola</strong>.</p>
+  <ul>
+    <li>Stesso preset cambiato in due posti: vince la modifica più recente.</li>
+    <li>Gli slot dell'ampli non viaggiano.</li>
+    <li>Se sparirebbero più di cinque preset in un colpo, prima chiede.</li>
+  </ul>
+
+  <h3 id="sicuro-sicurezza">Il backup di sicurezza</h3>
+  <ul>
+    <li><strong>Fai un backup di sicurezza</strong>: mette da parte la libreria su Dropbox, in un file che il sync
+      non tocca.</li>
+    <li><strong>Ripristina il backup di sicurezza</strong>: la riporta com'era.</li>
+  </ul>
+  <div class="nota att"><p>Ce n'è uno solo: quello nuovo sostituisce il vecchio.</p></div>
 
   <h3>Collegare Dropbox (una volta per apparecchio)</h3>
   <ol class="passi">
@@ -427,14 +436,19 @@
 <section class="cap" id="impostazioni" style="--c:#5a5f68">
   <div class="cap-testa"><span class="cap-num">12</span><h2>Le altre impostazioni</h2></div>
   <p class="sotto">Sempre in ☰ → <em>Impostazioni e backup</em>.</p>
+  <h3>Lingua · Language</h3>
+  <p>Italiano o inglese.</p>
+
+  <h3 id="imp-hendrix">Pacchetto Jimi Hendrix</h3>
   <ul>
-    <li><strong>Lingua · Language</strong>: italiano o inglese.</li>
-    <li><strong>Pacchetto Jimi Hendrix</strong>: <em>Sì</em> se l'hai comprato e sbloccato con l'app ufficiale (lo
-      sblocco resta nell'ampli; questa app non lo può fare). Gli effetti Hendrix compaiono segnati «JH». Con
-      <em>No</em> spariscono, e anche i preset che li usano, perché sull'ampli non suonerebbero.</li>
-    <li><strong>Pedale SparklingTones</strong>: <em>Sì</em> fa comparire la sezione Pedale. Se il pedale non ce
-      l'hai, lasciala spenta.</li>
+    <li><strong>Sì</strong>: se l'hai comprato e sbloccato con l'app ufficiale. Gli effetti Hendrix compaiono segnati
+      «JH».</li>
+    <li><strong>No</strong>: spariscono, e con loro i preset che li usano, perché sull'ampli non suonerebbero.</li>
   </ul>
+  <div class="nota"><p>Lo sblocco si fa solo con l'app ufficiale e resta nell'ampli.</p></div>
+
+  <h3>Pedale SparklingTones</h3>
+  <p><strong>Sì</strong> fa comparire la sezione Pedale. Se il pedale non ce l'hai, lascia <strong>No</strong>.</p>
 </section>
 
 <!-- ===================================================================== -->

@@ -567,6 +567,13 @@
   #guida-testo .confronto { overflow-x:auto; }
   #guida-testo table { border-collapse:collapse; margin:10px 0; }
   #guida-testo th, #guida-testo td { border:1px solid var(--line); padding:6px 10px; text-align:left; color:#c9d1dc; }
+  #guida-testo { overflow-x:hidden; }
+  @media (max-width:900px) {
+    .guida-corpo { grid-template-columns:minmax(0, 1fr); }
+    #guida-indice { display:none; }
+    .carta-guida { width:calc(100vw - 24px); height:calc(100vh - 24px); padding:14px; }
+    #guida-testo { padding:4px 18px 50vh; }
+  }
   #guida-testo .lampeggia { animation:guidaLampo 1.4s ease-out; }
   @keyframes guidaLampo { 0% { background:rgba(47,127,232,0.45); } 100% { background:transparent; } }
 </style>

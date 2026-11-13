@@ -4,10 +4,10 @@
 // «Guida» nel menu la apre dall'inizio; ogni «?» (data-aiuto) alla sua sezione, per GUIDA_DI.
 'use strict';
 
-/** Il «?» → la sezione di guida-pc.html dove si spiega. */
+/** Il «?» → la sezione (o il titolo h3) di guida-pc.html dove si spiega: anche gli id degli h3 prendono «g-». */
 const GUIDA_DI = {
-  live: 'live', pedaliera: 'live', tap: 'suono', ab: 'suono', ia: 'ia',
-  dropbox: 'sicuro', sicurezza: 'sicuro', hendrix: 'impostazioni', banchi: 'banchi', pedale: 'pedale',
+  live: 'live', pedaliera: 'live-pedaliera', tap: 'suono-tempo', ab: 'suono-ab', ia: 'ia',
+  dropbox: 'sicuro-dropbox', sicurezza: 'sicuro-sicurezza', hendrix: 'imp-hendrix', banchi: 'banchi', pedale: 'pedale',
 };
 
 let guidaPronta = null;
@@ -25,6 +25,7 @@ function caricaGuida() {
         const h2 = testa.querySelector('h2');
         testa.replaceWith(h2);
         s.id = 'g-' + s.id;
+        for (const h of s.querySelectorAll('[id]')) h.id = 'g-' + h.id;
         s.removeAttribute('style');
         // «schermo» nell'app è una schermata a tutta pagina: qui le figure prendono un nome loro.
         for (const f of s.querySelectorAll('figure.schermo')) f.className = 'foto-guida';
