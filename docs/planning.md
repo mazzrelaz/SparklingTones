@@ -15,7 +15,7 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 
 ## 1b. Home page del sito, da rifare (14 novembre, l'utente: «troppo indietro»)
 
-- [ ] `sparklingtones-sito/index.html` e `en/`: video vecchi (al posto dello Short di ottobre i sette nuovi, e
+- [x] (14 novembre, pubblicata) `sparklingtones-sito/index.html` e `en/`: video vecchi (al posto dello Short di ottobre i sette nuovi, e
   i cinque del PC quando sono su YouTube), **manca l'editor Classico** e **manca la versione desktop** (PC ed exe).
   Grafica: prima la bozza. Tutte e due le lingue.
 
