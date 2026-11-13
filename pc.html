@@ -519,6 +519,56 @@
   .novita-ok { display:block; width:calc(100% - 44px); margin:6px 22px 22px; padding:13px; border:0;
     border-radius:12px; background:var(--accent); color:#fff; font:600 15px var(--font); cursor:pointer; }
   @keyframes novita-entra { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:none; } }
+
+  /* ================================================================ la guida dentro l'app (bozza 13 novembre 2026)
+     Come in Pulze Control: finestra grande, indice a sinistra, testo a destra. Il testo è quello di guida-pc.html. */
+  #velo-guida { position:fixed; inset:0; z-index:70; background:rgba(10,13,18,0.6); display:grid; place-items:center; }
+  #velo-guida[hidden] { display:none; }
+  .carta-guida { width:min(1180px, calc(100vw - 48px)); height:calc(100vh - 48px); display:flex; flex-direction:column; gap:14px;
+                 background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:18px 20px;
+                 box-shadow:0 24px 60px rgba(0,0,0,0.55); }
+  .guida-testa { display:flex; align-items:center; gap:12px; }
+  .guida-testa h2 { margin:0; font-family:var(--strumento); font-size:1.35rem; }
+  .guida-testa button { margin-left:auto; }
+  .guida-corpo { flex:1; min-height:0; display:grid; grid-template-columns:240px minmax(0, 1fr); gap:18px; }
+  #guida-indice { overflow-y:auto; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:10px; }
+  #guida-indice a { display:block; padding:7px 10px; border-radius:7px; color:var(--dim); text-decoration:none; font-size:0.92rem; }
+  #guida-indice a:hover { background:var(--rialzo); color:var(--text); }
+  #guida-indice a.qui { background:var(--accent); color:var(--su-accent); }
+  #guida-testo { position:relative; overflow-y:auto; overscroll-behavior:contain; background:var(--panel);
+                 border:1px solid var(--line); border-radius:12px; padding:4px 28px 50vh; line-height:1.55; }
+  #guida-testo section { max-width:780px; padding-top:18px; }
+  #guida-testo section + section { border-top:1px solid var(--line-soft); margin-top:26px; }
+  #guida-testo h2 { font-family:var(--strumento); font-size:1.45rem; margin:6px 0 10px; color:var(--text); border-radius:6px; }
+  #guida-testo h2 .beta { font-size:0.6em; vertical-align:middle; padding:1px 7px; border-radius:999px; border:1px solid var(--line); color:var(--dim); }
+  #guida-testo h3 { font-family:var(--strumento); font-size:1.02rem; margin:22px 0 6px; color:var(--accent-chiaro); }
+  #guida-testo p, #guida-testo li { color:#c9d1dc; }
+  #guida-testo p { margin:0 0 10px; }
+  #guida-testo .sotto { color:var(--dim); font-size:1.02rem; }
+  #guida-testo ul, #guida-testo ol { margin:0 0 12px; padding-left:1.4em; }
+  #guida-testo li { margin:5px 0; }
+  #guida-testo strong, #guida-testo b { color:var(--text); }
+  #guida-testo a { color:var(--accent-chiaro); }
+  #guida-testo code { font-size:0.85em; background:var(--incavo); border:1px solid var(--line); border-radius:4px; padding:0 5px; }
+  #guida-testo .due { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  #guida-testo .nota { border-radius:10px; padding:10px 14px; margin:12px 0; background:var(--incavo);
+                       border:1px solid var(--line); border-left:4px solid var(--accent); }
+  #guida-testo .nota.att { border-left-color:var(--ambra); }
+  #guida-testo .nota p:last-child { margin:0; }
+  #guida-testo figure { margin:14px 0; }
+  #guida-testo figcaption { color:var(--faint); font-size:0.85rem; margin-top:6px; }
+  #guida-testo .pc-foto { position:relative; }
+  #guida-testo .pc-foto img { display:block; width:100%; height:auto; border-radius:8px; border:1px solid var(--line); }
+  #guida-testo .pin { position:absolute; width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff;
+                      font-size:0.75rem; font-weight:700; display:grid; place-items:center; box-shadow:0 0 0 2px var(--bg); }
+  #guida-testo .faq { border:1px solid var(--line); border-radius:10px; margin:8px 0; background:var(--incavo); }
+  #guida-testo .faq summary { cursor:pointer; padding:10px 14px; color:var(--text); font-weight:600; }
+  #guida-testo .faq .dentro { padding:0 14px 6px; }
+  #guida-testo .confronto { overflow-x:auto; }
+  #guida-testo table { border-collapse:collapse; margin:10px 0; }
+  #guida-testo th, #guida-testo td { border:1px solid var(--line); padding:6px 10px; text-align:left; color:#c9d1dc; }
+  #guida-testo .lampeggia { animation:guidaLampo 1.4s ease-out; }
+  @keyframes guidaLampo { 0% { background:rgba(47,127,232,0.45); } 100% { background:transparent; } }
 </style>
 </head>
 <body>
@@ -607,6 +657,10 @@
 
 <input type="file" id="file-importa" hidden>
 
+<div id="velo-guida" hidden><div class="carta-guida" role="dialog" aria-label="Guida">
+  <div class="guida-testa"><h2>Guida</h2><button type="button" id="guida-chiudi">Chiudi</button></div>
+  <div class="guida-corpo"><nav id="guida-indice" aria-label="Indice della guida"></nav><div id="guida-testo"></div></div>
+</div></div>
 <script>window.LINGUA_PREDEFINITA = 'en'; /* la prima volta si apre in inglese; la scelta dell'utente poi vince */</script>
 <script src="src/lingua.js"></script>
 <script src="src/lingua-en.js"></script>
@@ -632,6 +686,7 @@
 <script src="src/pc/11-genera-ia.js"></script>
 <script src="src/pc/12-live.js"></script>
 <script src="src/pc/13-benvenuto.js"></script>
+<script src="src/pc/14-guida.js"></script>
 <script src="src/novita.js"></script>
 <script>
   // Installabile come app a parte (pc.webmanifest): lo stesso service worker dell'app, che ha già la pagina nel guscio.
