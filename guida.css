@@ -434,3 +434,5 @@ footer { border-top:1px solid var(--line-soft); color:var(--faint); text-align:c
 .con-foto .foto { border-radius:25px; overflow:hidden; }
 .con-foto .foto img { display:block; width:100%; height:auto; }
 
+/* il bollino «beta» accanto a un titolo (Live del PC) */
+.beta { font-size:.45em; vertical-align:middle; padding:.15em .55em; border-radius:999px; background:var(--c, #e30613); color:#fff; letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
