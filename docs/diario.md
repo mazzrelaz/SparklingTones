@@ -1386,3 +1386,9 @@ Il post del beta test non ha avuto risposta: l'app resta tutta gratuita, con don
   aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account Individual **a nome della moglie**, aperto e nome
   prenotato il 12; `npm.cmd run store` configurato, **manca makeappx**: l'utente installa il Windows SDK), **il Live del PC solo nell'exe**. `main` ha 15
   commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.
+
+## 13 novembre 2026 — la voce della pubblicazione v153 tolta da CLAUDE.md
+
+- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v153 pubblicata** (11 novembre): inglese
+  completo (v152; `tools/lingua.html` legge anche `pc.html` e le `tr` dentro i `${…}`) e, sul PC, «Impostazioni e
+  backup» in una finestra (lingua, Hendrix, backup, Dropbox). Dopo, il guscio va oltre v153.

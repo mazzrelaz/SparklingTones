@@ -334,18 +334,17 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v153 pubblicata** (11 novembre): inglese
-  completo (v152; `tools/lingua.html` legge anche `pc.html` e le `tr` dentro i `${…}`) e, sul PC, «Impostazioni e
-  backup» in una finestra (lingua, Hendrix, backup, Dropbox). Dopo, il guscio va oltre v153.
+- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v154 pubblicata** (13 novembre): Live del PC, tap
+  tempo, guida del PC dentro l'app, «?», splash «Novità». Dopo, il guscio va oltre v154.
 - **Guida del PC dentro l'app** (13 novembre, come Pulze Control; `src/pc/14-guida.js`): prende i capitoli di
-  `guida-pc(.en).html`; i «?» vanno al titolo con `GUIDA_DI` (id degli h3). **La guida del telefono resta com'è** (scelta dell'utente). Non pubblicata.
+  `guida-pc(.en).html`; i «?» vanno al titolo con `GUIDA_DI` (id degli h3). **La guida del telefono resta com'è** (scelta dell'utente). Pubblicata (v154).
 - **Vista Live del PC** (11 novembre, `src/pc/12-live.js`): Preset/Stomp e pedaliera MIDI; **con lo Spark e un pedale
   veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **La Pedaliera è pensata per pedali MIDI commerciali, non per
   il nostro** (regola dell'utente, 12 novembre). **Trappola: un `filter` animato rompe il disegno
   in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
 - **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
   l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
-  moglie**; `npm.cmd run store`, **manca makeappx**: Windows SDK). **Ogni pubblicazione ha la splash «Novità»**
+  moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.0 inviata in certificazione il 13 novembre**. **Ogni pubblicazione ha la splash «Novità»**
   (`src/novita.js`: voce in cima con la versione di `sw.js`). **A Store aperto**: riscrivere «L'app per Windows» in `guida-pc.html`.
 - **Live del PC provato il 12 novembre con lo Spark**, pedaliera in BLE e via cavo. **Connessione veloce, verificata**:
   `desktop/connessione-veloce.ps1` (uno per dispositivo, da `main.js`) chiede a Windows `ThroughputOptimized`:
