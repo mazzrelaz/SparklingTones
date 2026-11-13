@@ -13,8 +13,7 @@ const AIUTI_APP = {
        '<p>Il banco <strong>Ampli</strong> mostra gli otto slot. I banchi tuoi li prepari con <strong>Modifica</strong>: sono scalette di preset e non scrivono mai negli slot dell\'ampli.</p>' +
        '<p>Tieni premuto un pulsantone per due secondi e si apre l\'editor di quel preset.</p>')],
   backup: () => [tr('Backup'),
-    tr('<p><strong>Esporta la libreria</strong> salva tutti i tuoi preset, con banchi, categorie e note, in un file sul telefono. Tienilo da parte: se cambi telefono o browser, lo riapri con <strong>Importa un file</strong>.</p>' +
-       '<p>Importa un file accetta anche un preset singolo o un file dell\'app ufficiale.</p>')],
+    tr('<p><strong>Esporta la libreria</strong> salva tutti i tuoi preset, con banchi, categorie e note, in un file sul telefono. Tienilo da parte: se cambi telefono o browser, lo riapri con <strong>Importa un file</strong>.</p>')],
   dropbox: () => [tr('Dropbox'),
     tr('<p>Collegando Dropbox la libreria resta uguale su tutti i tuoi apparecchi: telefono, tablet, computer. Una modifica fatta su uno arriva sugli altri; se lo stesso preset cambia in due posti, vince la modifica più recente.</p>' +
        '<p>Il <strong>backup di sicurezza</strong> è un\'altra cosa: una copia ferma che fai tu quando vuoi, e che la sincronizzazione non tocca. Se qualcosa va storto, la ripristini.</p>')],
