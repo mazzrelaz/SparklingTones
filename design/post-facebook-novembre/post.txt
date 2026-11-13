@@ -1,0 +1,19 @@
+SparklingTones news 🎸
+
+🎛️ Live mode on the computer (beta)
+Your presets as big tiles, like a pedalboard. Click one and it plays.
+
+🦶 Use your MIDI footswitch (beta)
+Works with standard MIDI pedals like the M-Wave Chocolate, over USB or Bluetooth: press "Learn a switch", step on it, done. Not for dedicated Spark controllers like Control X or AirStep, which connect straight to the amp.
+It's beta because I can't test every pedal out there. If you try it, tell me which one you used and how it went 🙏
+
+💻 Windows app coming soon
+In review on the Microsoft Store right now. Until then it runs in Chrome or Edge.
+
+🎬 Short videos for every feature, on the new channel:
+https://www.youtube.com/@SparklingTones
+
+👉 sparklingtones.com
+Free, no ads, no account. Like it? ☕ https://buymeacoffee.com/mazzgear
+
+#PositiveGrid #Spark2 #MIDI #GuitarPedals
