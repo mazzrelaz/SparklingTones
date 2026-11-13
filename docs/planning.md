@@ -15,8 +15,8 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 
 ## 2. Microsoft Store
 
-- [ ] L'utente installa il **Windows SDK** (serve `makeappx`).
-- [ ] `npm.cmd run store` in `desktop/`, e prova del pacchetto.
+- [x] Windows SDK installato; `npm.cmd run store` usa il suo makeappx (`desktop/pacchetto-store.ps1`).
+- [x] `npm.cmd run store`: `desktop/dist/SparklingTones-1.0.0.appx` (13 novembre, guida del PC compresa).
 - [ ] L'utente lo manda allo Store (account Individual a nome della moglie, nome prenotato).
 - [ ] A Store aperto: riscrivere «L'app per Windows» in `guida-pc.html` e `guida-pc.en.html` (oggi parla
   del Setup.exe e di «Esegui comunque»).

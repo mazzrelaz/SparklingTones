@@ -1,6 +1,6 @@
 {
   "name": "spark-controller-desktop",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "SparklingTones per Windows",
   "author": "SparklingTones",
   "main": "main.js",
@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win nsis",
-    "store": "electron-builder --win appx"
+    "store": "powershell -ExecutionPolicy Bypass -File pacchetto-store.ps1"
   },
   "devDependencies": {
     "electron": "33.2.1",
@@ -35,6 +35,14 @@
       {
         "from": "../pc.webmanifest",
         "to": "web/pc.webmanifest"
+      },
+      {
+        "from": "../guida-pc.html",
+        "to": "web/guida-pc.html"
+      },
+      {
+        "from": "../guida-pc.en.html",
+        "to": "web/guida-pc.en.html"
       },
       {
         "from": "../icons",
