@@ -17,7 +17,7 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 
 - [x] Windows SDK installato; `npm.cmd run store` usa il suo makeappx (`desktop/pacchetto-store.ps1`).
 - [x] `npm.cmd run store`: `desktop/dist/SparklingTones-1.0.0.appx` (13 novembre, guida del PC compresa).
-- [ ] L'utente lo manda allo Store (account Individual a nome della moglie, nome prenotato).
+- [x] Inviato allo Store il 13 novembre 2026 (In certification; si pubblica da solo se passa). Scheda IT+EN, età 3+, testi in `design/store/`.
 - [ ] A Store aperto: riscrivere «L'app per Windows» in `guida-pc.html` e `guida-pc.en.html` (oggi parla
   del Setup.exe e di «Esegui comunque»).
 
