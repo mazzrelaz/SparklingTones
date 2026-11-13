@@ -184,6 +184,8 @@
     <li><strong>LEDs above the footswitches</strong>: they show what's playing, red for half A and green for half B.</li>
     <li><strong>Tempo LED</strong> and <strong>click</strong>: they beat the looper's tempo and count in before recording.</li>
     <li><strong>MIDI mode</strong>: the same pedal controls a program on a computer or an iPad.</li>
+    <li><strong>Pulze mode</strong>: controls a Hotone Pulze Mini over Bluetooth, with no phone in between.</li>
+    <li><strong>Play Acoustic mode</strong>: controls a TC-Helicon Play Acoustic (looper, HIT, presets) through a Bluetooth adapter.</li>
   </ul>
 
   <h3>The names of the parts</h3>
@@ -857,7 +859,7 @@
       <tr><td><span class="tasto">bank L</span> or <span class="tasto">bank R</span> held 2 s</td><td>opens the <a href="#tuner">tuner</a>; any button closes it.</td></tr>
       <tr><td><span class="tasto">FS5</span> held 3 s</td><td>enters the looper, and leaves it (Spark 2 only).</td></tr>
       <tr><td><span class="tasto">bank L</span> + <span class="tasto">bank R</span> held 1.5 s</td><td>opens the bridge to the app for two minutes: it's for sending banks.</td></tr>
-      <tr><td><span class="tasto">FS1</span> + <span class="tasto">FS4</span> held 1.5 s</td><td>switches to MIDI mode, and back.</td></tr>
+      <tr><td><span class="tasto">FS4</span> held 2 s</td><td>opens the mode menu: <a href="#midi">Spark, Pulze, Play Acoustic, MIDI</a>. In the looper it clears the loop instead.</td></tr>
     </tbody>
   </table></div>
 
@@ -1038,8 +1040,12 @@
   <div class="cap-testa"><span class="cap-num">14</span><h2>MIDI mode</h2></div>
   <p class="sotto">The same pedal for a program on a computer (AmpliTube, for example) or on an iPad (BIAS FX).</p>
 
-  <p><span class="tasto">FS1</span> + <span class="tasto">FS4</span> held for a second and a half: the pedal switches to MIDI, lets go of the Spark,
-    and an <strong>M</strong> appears in the top right. Same combination to go back. The pedal remembers which mode it was in.</p>
+  <p><span class="tasto">FS4</span> held for two seconds opens the <strong>mode menu</strong>: <strong>Spark</strong>, <strong>Pulze</strong>,
+    <strong>Play Acoustic</strong>, <strong>MIDI</strong>, one at a time and large. The bank buttons change it (left back, right forward), <span class="tasto">FS5</span> confirms;
+    FS1–FS4 leave without changing, and after ten seconds without a touch the menu closes by itself. In MIDI and Play Acoustic the pedal
+    lets go of the Spark, and an <strong>M</strong> appears in the top right, filled when something is connected.
+    <strong>At power-on, after the logo, the menu opens by itself</strong> and stays open until you choose with
+    <span class="tasto">FS5</span>: there it doesn't close on a timer or with FS1–FS4. Choosing Spark, the pedal looks for the amp.</p>
 
   <div class="tab"><table>
     <thead><tr><th>page</th><th>footswitches 1–4</th><th>LEDs</th></tr></thead>
@@ -1056,6 +1062,39 @@
     <li><strong>From an iPad, over Bluetooth</strong>: BIAS FX has no menu to connect it; connect it from <strong>GarageBand</strong>
       (gear → Advanced → Bluetooth MIDI Devices) or from midimittr, and it stays connected for the whole iPad.</li>
   </ul>
+
+  <h3>Pulze</h3>
+  <p>For a <strong>Hotone Pulze Mini</strong>: the pedal connects to the Mini by itself over Bluetooth, with no phone or app.</p>
+  <div class="tab"><table>
+    <thead><tr><th>button</th><th>on the Pulze Mini</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tasto">FS1</span>–<span class="tasto">FS4</span></td><td>the four tones of the group</td></tr>
+      <tr><td><span class="tasto">FS5</span></td><td>the next group; held for a second, the stomps (PRE, EQ, Fx1, Fx2)</td></tr>
+      <tr><td><span class="tasto">bank L</span> <span class="tasto">bank R</span></td><td>the Songlist, back and forward; held 2 s, the Mini's tuner</td></tr>
+      <tr><td>expression pedal</td><td>the volume (Inst Volume)</td></tr>
+    </tbody>
+  </table></div>
+  <p>The pedal remembers the tone you were on and goes back to it. <span class="tasto">FS4</span> held 2 s opens the mode menu and
+    restores the previous tone.</p>
+
+  <h3>Play Acoustic</h3>
+  <p>For a <strong>TC-Helicon Play Acoustic</strong>: a Bluetooth adapter (a XIAO ESP32-C6) connects to the pedal and, on the
+    Play Acoustic's <strong>PEDAL</strong> jack, acts as a <strong>Switch-6</strong>. On the Play Acoustic: Setup → Switch-6,
+    with buttons 1 Loop Rec/Play, 2 Loop Stop/Clear, 3 HIT, 4 Preset Down, 5 Preset Up, 6 Loop Undo.</p>
+  <div class="tab"><table>
+    <thead><tr><th>button</th><th>on the Play Acoustic</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tasto">FS1</span></td><td>Loop Rec/Play</td></tr>
+      <tr><td><span class="tasto">FS2</span></td><td>Loop Stop/Clear: a tap stops, held clears</td></tr>
+      <tr><td><span class="tasto">FS3</span></td><td>Loop Undo</td></tr>
+      <tr><td><span class="tasto">FS4</span></td><td>nothing (held 2 s: the menu)</td></tr>
+      <tr><td><span class="tasto">FS5</span></td><td>HIT</td></tr>
+      <tr><td><span class="tasto">bank L</span> <span class="tasto">bank R</span></td><td>preset down and up</td></tr>
+    </tbody>
+  </table></div>
+  <p>The display shows what each button does, as icons in footswitch order (REC, STOP, UNDO, MENU, HIT) and in the top right
+    PRESET − +; the one pressed turns negative, and the LED above FS1–FS3 is red while you hold it down.
+    The pedal sends Control Change 21–26 (channel 1), at 127 when pressed and at 0 when released.</p>
 </section>
 
 <!-- ===================================================================== -->

@@ -199,6 +199,7 @@
     <li><strong>LED sopra i footswitch</strong>: dicono cosa suona, rosso per la metà A e verde per la B.</li>
     <li><strong>LED del tempo</strong> e <strong>click</strong>: battono il tempo del looper e contano prima di registrare.</li>
     <li><strong>Modalità MIDI</strong>: lo stesso pedale comanda un programma sul computer o sull'iPad.</li>
+    <li><strong>Modalità Pulze</strong>: comanda un Hotone Pulze Mini in Bluetooth, senza telefono in mezzo.</li>
     <li><strong>Modalità Play Acoustic</strong>: comanda un TC-Helicon Play Acoustic (looper, HIT, preset) attraverso un adattatore Bluetooth.</li>
   </ul>
 
@@ -897,7 +898,7 @@
       <tr><td><span class="tasto">banco SX</span> o <span class="tasto">banco DX</span> tenuto 2 s</td><td>apre il <a href="#tuner">tuner</a>; un tasto qualunque lo chiude.</td></tr>
       <tr><td><span class="tasto">FS5</span> tenuto 3 s</td><td>entra nel looper, ed esce (solo Spark 2).</td></tr>
       <tr><td><span class="tasto">banco SX</span> + <span class="tasto">banco DX</span> tenuti 1,5 s</td><td>apre il ponte verso l'app per due minuti: serve a mandare i banchi.</td></tr>
-      <tr><td><span class="tasto">FS4</span> tenuto 2 s</td><td>apre il menu delle modalità: <a href="#midi">Spark, MIDI, Play Acoustic</a>. Nel looper invece cancella il loop.</td></tr>
+      <tr><td><span class="tasto">FS4</span> tenuto 2 s</td><td>apre il menu delle modalità: <a href="#midi">Spark, Pulze, Play Acoustic, MIDI</a>. Nel looper invece cancella il loop.</td></tr>
     </tbody>
   </table></div>
 
@@ -1078,11 +1079,12 @@
   <div class="cap-testa"><span class="cap-num">14</span><h2>Modalità MIDI</h2></div>
   <p class="sotto">Lo stesso pedale per un programma sul computer (AmpliTube, ad esempio) o sull'iPad (BIAS FX).</p>
 
-  <p><span class="tasto">FS4</span> tenuto due secondi apre il <strong>menu delle modalità</strong>: <strong>Spark</strong>, <strong>MIDI</strong>,
-    <strong>Play Acoustic</strong>, una alla volta e grande. I tasti banco la cambiano (sinistro indietro, destro avanti), <span class="tasto">FS5</span> conferma;
+  <p><span class="tasto">FS4</span> tenuto due secondi apre il <strong>menu delle modalità</strong>: <strong>Spark</strong>, <strong>Pulze</strong>,
+    <strong>Play Acoustic</strong>, <strong>MIDI</strong>, una alla volta e grande. I tasti banco la cambiano (sinistro indietro, destro avanti), <span class="tasto">FS5</span> conferma;
     FS1–FS4 escono senza cambiare, e dopo dieci secondi senza tocchi il menu si chiude da solo. In MIDI e in Play Acoustic il pedale
     lascia lo Spark, e in alto a destra compare una <strong>M</strong>, piena quando qualcuno è collegato.
-    <strong>All'accensione il pedale parte sempre in Spark.</strong></p>
+    <strong>All'accensione, dopo il logo, il menu si apre da solo</strong> e resta aperto finché non scegli con
+    <span class="tasto">FS5</span>: lì non si chiude col tempo né con FS1–FS4. Scegliendo Spark il pedale cerca l'ampli.</p>
 
   <div class="tab"><table>
     <thead><tr><th>pagina</th><th>footswitch 1–4</th><th>LED</th></tr></thead>
@@ -1099,6 +1101,20 @@
     <li><strong>Dall'iPad, in Bluetooth</strong>: BIAS FX non ha un menu per collegarlo; si collega da <strong>GarageBand</strong>
       (ingranaggio → Avanzate → Dispositivi MIDI Bluetooth) o da midimittr, e resta collegato per tutto l'iPad.</li>
   </ul>
+
+  <h3>Pulze</h3>
+  <p>Per un <strong>Hotone Pulze Mini</strong>: il pedale si collega da solo al Mini in Bluetooth, senza telefono né app.</p>
+  <div class="tab"><table>
+    <thead><tr><th>tasto</th><th>sul Pulze Mini</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tasto">FS1</span>–<span class="tasto">FS4</span></td><td>i quattro tone del gruppo</td></tr>
+      <tr><td><span class="tasto">FS5</span></td><td>il gruppo dopo; tenuto un secondo, gli stomp (PRE, EQ, Fx1, Fx2)</td></tr>
+      <tr><td><span class="tasto">banco SX</span> <span class="tasto">banco DX</span></td><td>la Songlist, indietro e avanti; tenuto 2 s, l'accordatore del Mini</td></tr>
+      <tr><td>pedale d'espressione</td><td>il volume (Inst Volume)</td></tr>
+    </tbody>
+  </table></div>
+  <p>Il pedale si ricorda il tone su cui eri e ci torna. <span class="tasto">FS4</span> tenuto 2 s apre il menu delle modalità e
+    rimette il tone di prima.</p>
 
   <h3>Play Acoustic</h3>
   <p>Per un <strong>TC-Helicon Play Acoustic</strong>: un adattatore Bluetooth (una XIAO ESP32-C6) si collega al pedale e, sulla
