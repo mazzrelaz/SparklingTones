@@ -1729,6 +1729,10 @@ window.LINGUA_EN = {
     "Short videos on YouTube",
   "Sette video brevi, uno per sezione dell'app: collegarsi, la libreria, la scheda del preset, l'editor, il Live, l'accordatore e il backup. Li trovi dalla guida, sul canale SparklingTones.":
     "Seven short videos, one for each part of the app: connecting, the library, the preset card, the editor, Live, the tuner and backup. You'll find them from the guide, on the SparklingTones channel.",
+  "Un video per capitolo":
+    "A video for each chapter",
+  "Nella guida, sotto il titolo di molti capitoli, c'è il video breve che mostra come si fa.":
+    "In the guide, under the title of many chapters, there's a short video that shows how it's done.",
   "Guida e video":
     "Guide and videos",
   "La guida, in italiano e in inglese, ora porta dritta ai video brevi su YouTube.":

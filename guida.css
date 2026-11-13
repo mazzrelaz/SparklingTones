@@ -57,6 +57,7 @@ kbd, .tasto { font-family:var(--strumento); font-size:0.82em; font-weight:700;
 .video-guida::before { content:''; width:24px; height:24px; border-radius:50%; flex:none;
                        background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.5 7v10l8-5z' fill='%23fff'/%3E%3C/svg%3E") center / 24px; }
 .video-guida:hover { background:rgba(227,6,19,0.15); }
+.video-cap { margin:0 0 16px; font-size:0.85rem; }
 
 /* tre passi */
 .tre-passi { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; max-width:760px;

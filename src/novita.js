@@ -12,6 +12,14 @@
 
 const NOVITA = [
   {
+    versione: 'v157',
+    data: '14 novembre 2026',
+    voci: [
+      { icona: '▶️', titolo: tr('Un video per capitolo'),
+        testo: tr('Nella guida, sotto il titolo di molti capitoli, c\'è il video breve che mostra come si fa.') },
+    ],
+  },
+  {
     versione: 'v156',
     data: '14 novembre 2026',
     voci: [
