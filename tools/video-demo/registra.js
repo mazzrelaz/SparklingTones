@@ -842,7 +842,8 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     if (SOLO_MONTAGGIO && VOCE) {
       // la voce di adesso, che può avere silenzi nuovi
       const linea = JSON.parse(fs.readFileSync(path.join(USCITA, 'linea.json'), 'utf8'));
-      linea.voce = { file: VOCE.file, taglio: VOCE.taglio, silenzi: VOCE.silenzi || [] };
+      // pezzi e momenti restano: senza, la voce perdeva i tempi delle scene
+      linea.voce = { ...linea.voce, file: VOCE.file, taglio: VOCE.taglio, silenzi: VOCE.silenzi || [] };
       fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
     }
 
