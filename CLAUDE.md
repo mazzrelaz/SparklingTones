@@ -251,8 +251,11 @@ nessuno slot. Mentre suona il preset software il LED dell'ampli lampeggia. **8 s
 non serve (misurato). **Cavare la chiave dall'app ufficiale non si fa.** Non è un difetto
 nostro. I comandi non richiedono autenticazione (misurato).
 
-**Looper** (`0x0175` + un byte, archiviato, tutto in `docs/looper.md`): **non aggiungere sonde sui
-byte**, l'unica strada rimasta è chiedere a Ignitron.
+**Looper: FUNZIONA sul pedale** (`pedale/prova-ble/07-looper.ino`, tutto in `docs/looper.md`): comanda
+il looper dell'ampli con `0x0175`, legge lo stato da `0x0375` e bpm/click da `0x0376`. **L'escamotage
+del click**: il conteggio prima del rec (quattro tempi, a loop vuoto) lo suona un **piezo su D3**, e
+il loop si taglia a battute. **Da portare sul PC** (13 novembre, idea dell'utente): stessa logica in JS,
+tasti dal pedale MIDI, click del conteggio da Web Audio. **Non aggiungere sonde sui byte.**
 
 **Metodo**: una cattura d'ascolto dice cosa l'ampli racconta, non cosa accetta; si registra
 prima e si interpreta dopo; i dati finti sono marcati `demo` e non finiscono nelle catture;
