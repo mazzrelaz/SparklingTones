@@ -1375,3 +1375,14 @@ server. Tutto in `docs/dropbox.md`, «Il sync automatico». **Provato col Dropbo
   carica da rimisurare a ~3,5 V con i coccodrilli. **Basetta e pezzi TME arrivati** (12 novembre): montaggio rimandato.
 - **Pedale d'espressione**: EX-P sulla presa **H**, solo volume (deciso dall'utente). **Mai il volume del finale
   (0x72) in punta**: un botto. Da riprovare iPad/GarageBand e adattatore.
+
+## 13 novembre 2026: estratto da CLAUDE.md (beta test e pagamento, chiusi)
+
+Il post del beta test non ha avuto risposta: l'app resta tutta gratuita, con donazioni, e web ed exe tornano uguali.
+
+- **Beta test della Pedaliera** (12 novembre): modulo `forms.gle/3DzkaDQffPNPgNNw8`, un tester per marca, exe gratis ai
+  tester. Control X e AirStep esclusi. Da fare: registro dei MIDI ricevuti, da copiare e mandare.
+- **Exe e web si separano** (decisione del 12 novembre): l'exe forse a pagamento (prova 7 giorni, 14,99 €, codice
+  aperto; **si pubblica sul Microsoft Store**, deciso il 12 novembre: SignPath non serve più; account Individual **a nome della moglie**, aperto e nome
+  prenotato il 12; `npm.cmd run store` configurato, **manca makeappx**: l'utente installa il Windows SDK), **il Live del PC solo nell'exe**. `main` ha 15
+  commit non pushati col Live dentro: **prima di pushare, il Live va tolto dalla `pc.html` del sito**.

@@ -65,7 +65,10 @@ function mostraNovita(n) {
   try { vista = localStorage.getItem(CHIAVE_NOVITA); } catch (e) { return; }
   // Prima apertura in assoluto: niente splash, si segna e basta.
   // Si riconosce da un localStorage ancora vuoto.
-  const giaUsata = vista !== null || localStorage.length > 0;
+  // Nell'app Windows il benvenuto del primo avvio (pc/13-benvenuto.js, che gira
+  // prima) ha già scritto la sua chiave: se è aperto, è un primo avvio.
+  const giaUsata = (vista !== null || localStorage.length > 0) &&
+    !document.querySelector('.benvenuto-velo');
   try { localStorage.setItem(CHIAVE_NOVITA, ultima.versione); } catch (e) {}
   const prova = location.hash === '#novita';   // per le bozze: la mostra sempre
   if (!prova && (vista === ultima.versione || !giaUsata)) return;
