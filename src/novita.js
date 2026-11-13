@@ -15,17 +15,23 @@ const NOVITA = [
     versione: 'v154',
     data: '13 novembre 2026',
     voci: [
+      { icona: '🎛️', titolo: tr('Live (beta)'),
+        testo: tr('Una vista per suonare dal vivo: banchi di preset o pedali stomp, da comandare col mouse o con una pedaliera MIDI, via cavo o Bluetooth. È in prova: se qualcosa non va, scrivimi.'), dove: 'pc' },
+      { icona: '⏱️', titolo: tr('Tap tempo'),
+        testo: tr('Accanto ai BPM c\'è il pulsante Tap: batti il tempo e il delay lo segue.'), dove: 'pc' },
+      { icona: '❓', titolo: tr('Guida e spiegazioni'),
+        testo: tr('Una guida per il computer con le schermate vere, e un «?» accanto alle funzioni più complesse.'), dove: 'pc' },
       { icona: '🔁', titolo: tr('Connessione più tenace'),
         testo: tr('Se il collegamento con l\'ampli cade appena aperto, l\'app riprova da sola.') },
-      { icona: '🎛️', titolo: tr('Live sul PC'),
-        testo: tr('Nella versione per il computer: preset e stomp dal vivo, anche con una pedaliera MIDI.'), dove: 'pc' },
       { icona: '☕', titolo: tr('Sempre gratis'),
-        testo: tr('L\'app resta gratuita. Se ti è utile, un caffè dal menu Altro aiuta a farla crescere.') },
+        testo: tr('L\'app resta gratuita. Se ti è utile, un caffè dal menu Altro aiuta a farla crescere.'), dove: 'telefono' },
+      { icona: '☕', titolo: tr('Sempre gratis'),
+        testo: tr('L\'app resta gratuita. Se ti è utile, un caffè dal menu in alto a destra aiuta a farla crescere.'), dove: 'pc' },
     ],
   },
 ];
 
-const NOVITA_PC = /pc.html$/.test(location.pathname);
+const NOVITA_PC = /pc\.html$/.test(location.pathname);
 const NOVITA_QUI = NOVITA_PC ? 'pc' : 'telefono';
 // Telefono e PC stanno sulla stessa origine: ognuno tiene il suo segno.
 const CHIAVE_NOVITA = NOVITA_PC ? 'spark.novitaViste.pc' : 'spark.novitaViste';
