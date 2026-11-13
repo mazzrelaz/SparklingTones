@@ -11,6 +11,10 @@ const RADICE = app.isPackaged
   ? path.join(process.resourcesPath, 'web')
   : path.join(__dirname, '..');
 
+// Per le prove (solo in sviluppo): SPARK_PROFILO=<cartella> parte con un profilo pulito,
+// come un'installazione nuova, senza toccare quello vero.
+if (!app.isPackaged && process.env.SPARK_PROFILO) app.setPath('userData', process.env.SPARK_PROFILO);
+
 protocol.registerSchemesAsPrivileged([{
   scheme: 'spark',
   privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true }
