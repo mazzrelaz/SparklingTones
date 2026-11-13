@@ -11,6 +11,12 @@
  * spostare ma non togliere.
  */
 window.LINGUA_EN = {
+  "risposta {0}":
+    "response {0}",
+  "Non riesco a caricare la guida ({0}).":
+    "I can't load the guide ({0}).",
+  "Indice della guida":
+    "Guide contents",
   "torna ai preset":
     "back to presets",
   "SparklingTones":

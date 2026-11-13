@@ -188,40 +188,39 @@
     <figcaption>1 on / off · 2 the model · 3 the knobs · 4 search for a model · 5 BPM and Tap</figcaption>
   </figure>
 
-  <div class="due">
-    <div>
-      <h3>The chain</h3>
-      <ul>
-        <li>A click on a block (Gate, Comp, Drive, Amp, Mod, Delay, Reverb) brings it on stage.</li>
-        <li>The coloured label above the block switches it <strong>on and off</strong>. A block that's off is grey.</li>
-        <li>The name under the block is the model: click it to choose another one.</li>
-      </ul>
-    </div>
-    <div>
-      <h3>The knobs</h3>
-      <ul>
-        <li><strong>Drag</strong> up or down, or use the mouse <strong>wheel</strong>. Holding <kbd>Shift</kbd> makes dragging finer.</li>
-        <li>A <strong>double click</strong> brings it back to the middle.</li>
-        <li>Under each knob is its value, from 0 to 10.</li>
-      </ul>
-    </div>
-  </div>
+  <h3>The chain</h3>
+  <ul>
+    <li><strong>Click a block</strong> (Gate, Comp, Drive, Amp, Mod, Delay, Reverb): it goes on stage.</li>
+    <li><strong>Click the coloured label</strong> above the block: switches it on or off. Off is grey.</li>
+    <li><strong>Click the name</strong> under the block: choose another model.</li>
+  </ul>
+
+  <h3>The knobs</h3>
+  <ul>
+    <li><strong>Drag</strong> up or down, or use the <strong>wheel</strong>. With <kbd>Shift</kbd> it's finer.</li>
+    <li><strong>Double click</strong>: back to the middle.</li>
+  </ul>
 
   <h3>Changing model</h3>
-  <p>The list to the right of the stage shows the models of the chosen block, grouped by type. Type in <em>Search
-    model…</em> to find one straight away. One click and the model changes, on the amp and on stage.</p>
+  <ol class="passi">
+    <li>Choose the block.</li>
+    <li>In the list to the right of the stage click the model, or type in <em>Search model…</em>.</li>
+  </ol>
+  <p>The model changes straight away, on the amp and on stage.</p>
 
-  <h3>The tempo</h3>
-  <p>Time-based effects (delay, tremolo…) follow the <strong>BPM</strong> at the top. Type the number, use the ↑ ↓
-    keys, or click <strong>Tap</strong> in time at least twice: the app works out the BPM from the average of the last
-    taps. If you wait more than two seconds, the count starts over.</p>
-
-  <h3>Undo, Redo and A/B</h3>
+  <h3 id="suono-tempo">The tempo: BPM and Tap</h3>
+  <p>Delay, tremolo and the other time-based effects follow the <strong>BPM</strong> at the top.</p>
   <ul>
-    <li><strong>Undo / Redo</strong> go back and forward through your changes.</li>
-    <li><strong>A/B</strong> lets you hear the preset <em>as it was saved</em>; press it again to go back to your
-      changes. That way you hear whether the tweak really improves the sound.</li>
+    <li>Type the number, or use the ↑ ↓ keys.</li>
+    <li>Or click <strong>Tap</strong> in time, at least twice. After two seconds of pause the count starts over.</li>
   </ul>
+
+  <h3 id="suono-ab">Undo, Redo and A/B</h3>
+  <ul>
+    <li><strong>Undo / Redo</strong>: back and forward through your changes.</li>
+    <li><strong>A/B</strong>: hear the preset <em>as it was saved</em>. Press it again to go back to your changes.</li>
+  </ul>
+  <div class="nota"><p>Use A/B before saving: you hear whether the tweak really improves the sound.</p></div>
 </section>
 
 <!-- ===================================================================== -->
@@ -249,20 +248,25 @@
   <p class="sotto">As many presets as you want, not just the amp's eight.</p>
 
   <ul>
-    <li><strong>One click</strong> on a preset plays it and brings it on stage. If it's in a slot the change is
-      instant; otherwise it takes about a second.</li>
-    <li><strong>The ⋯ button</strong> next to a preset, or a <strong>right click</strong>, opens its actions:
-      put it in a slot or a bank, rename it, duplicate it, choose its family, categories and notes, export it,
-      delete it.</li>
-    <li><strong>Search</strong> at the top filters by name; the button next to it chooses the order (name, recently added
-      or modified, family). Below are the filters by family and category.</li>
+    <li><strong>Click a preset</strong>: it plays and goes on stage. If it's in a slot it changes instantly,
+      otherwise in about a second.</li>
+    <li><strong>⋯ button or right click</strong>: its actions (slot, bank, rename, duplicate, family, categories,
+      notes, export, delete).</li>
+    <li><strong>Search</strong>, at the top: filters by name. The button next to it chooses the order; the filters are below.</li>
   </ul>
-  <div class="nota">
-    <p><strong>Family</strong> is what kind of sound it is (clean, drive, acoustic, bass); <strong>categories</strong> are
-      the style or the song. They're managed from ☰ → <em>Categories and families…</em>. There you'll also find
-      <em>Duplicates…</em> to remove identical presets, and <em>Delete all presets…</em>, which always spares the
-      amp's eight.</p>
-  </div>
+
+  <h3>Families and categories</h3>
+  <ul>
+    <li><strong>Family</strong>: what sound it is (clean, drive, acoustic, bass).</li>
+    <li><strong>Categories</strong>: the style or the song.</li>
+  </ul>
+  <p>They're managed from ☰ → <em>Categories and families…</em>.</p>
+
+  <h3>Tidying up</h3>
+  <ul>
+    <li>☰ → <em>Duplicates…</em>: finds identical presets.</li>
+    <li>☰ → <em>Delete all presets…</em>: always spares the amp's eight.</li>
+  </ul>
 </section>
 
 <!-- ===================================================================== -->
@@ -317,19 +321,19 @@
     <p>Like banks, <strong>Live never writes to the amp's slots</strong>.</p>
   </div>
 
-  <h3>The MIDI foot controller</h3>
+  <h3 id="live-pedaliera">The MIDI foot controller</h3>
   <ol class="passi">
-    <li>Open <strong>Foot controller</strong> and connect the pedal: <strong>by cable</strong> (USB) or
-      <strong>Bluetooth</strong>. The Spark stays connected at the same time.</li>
-    <li>Click <strong>＋ Learn a switch</strong> and press a switch on the pedal: the app recognises it.</li>
-    <li>For each switch choose what it does in Presets, what it does in Stomp and what a <strong>long press</strong> does:
-      enter or leave Stomp, switch between A and B, next or previous bank.</li>
+    <li>Open <strong>Foot controller</strong> and connect the pedal, by USB cable or Bluetooth. The Spark stays connected.</li>
+    <li>Click <strong>＋ Learn a switch</strong> and press a switch on the pedal.</li>
+    <li>Choose what that switch does in Presets, in Stomp and with a <strong>long press</strong>.</li>
   </ol>
-  <p>The long press works with pedals that send one message when you press and one when you release (a
-    CC at 127 and then at 0). With a Program Change there is only the short press. How long the long press lasts is
-    up to you, from 1 to 3 seconds.</p>
-  <p>In the <strong>Windows app</strong> changing preset is faster (about half a second instead of one):
-    the app asks Windows for a quicker Bluetooth link, something the browser can't do.</p>
+  <ul>
+    <li><strong>Long press</strong>: only with pedals that send a CC at 127 on press and at 0 on release. You choose
+      how long, from 1 to 3 seconds.</li>
+    <li><strong>Program Change</strong>: short press only.</li>
+  </ul>
+  <div class="nota"><p>In the <strong>Windows app</strong> changing preset is faster: about half a second
+    instead of one.</p></div>
 </section>
 
 <!-- ===================================================================== -->
@@ -384,23 +388,28 @@
     <figcaption>Settings and backup</figcaption>
   </figure>
 
-  <div class="confronto">
-    <div>
-      <h4>💾 On the PC</h4>
-      <p><strong>Download the backup</strong> saves a <code>.json</code> file with everything: presets, families, categories,
-        notes, banks. <strong>Restore from a file…</strong> puts it back, on another device too: the app asks for
-        confirmation before merging it.</p>
-    </div>
-    <div>
-      <h4>☁️ Dropbox</h4>
-      <p>The same library on phone, browser and Windows app, <strong>on its own</strong>. If the same preset changed
-        in two places the most recent change wins; the amp's slots don't travel. If more than five presets would
-        disappear in one go, the app asks first.</p>
-      <p><strong>Make a safety backup</strong> sets the library aside in a file that sync never touches;
-        <strong>Restore the safety backup</strong> puts it back as it was. There is only one: a new one replaces the
-        old one.</p>
-    </div>
-  </div>
+  <h3 id="sicuro-pc">The backup on the PC</h3>
+  <ul>
+    <li><strong>Download the backup</strong>: a <code>.json</code> file with everything (presets, families, categories,
+      notes, banks).</li>
+    <li><strong>Restore from a file…</strong>: puts it back, on another device too. It asks for confirmation first.</li>
+  </ul>
+
+  <h3 id="sicuro-dropbox">Dropbox</h3>
+  <p>The same library on phone, browser and Windows app, <strong>on its own</strong>.</p>
+  <ul>
+    <li>Same preset changed in two places: the most recent change wins.</li>
+    <li>The amp's slots don't travel.</li>
+    <li>If more than five presets would disappear in one go, it asks first.</li>
+  </ul>
+
+  <h3 id="sicuro-sicurezza">The safety backup</h3>
+  <ul>
+    <li><strong>Make a safety backup</strong>: sets the library aside on Dropbox, in a file that sync never
+      touches.</li>
+    <li><strong>Restore the safety backup</strong>: puts it back as it was.</li>
+  </ul>
+  <div class="nota att"><p>There is only one: a new one replaces the old one.</p></div>
 
   <h3>Connecting Dropbox (once per device)</h3>
   <ol class="passi">
@@ -425,14 +434,19 @@
 <section class="cap" id="impostazioni" style="--c:#5a5f68">
   <div class="cap-testa"><span class="cap-num">12</span><h2>The other settings</h2></div>
   <p class="sotto">Also in ☰ → <em>Settings and backup</em>.</p>
+  <h3>Lingua · Language</h3>
+  <p>Italian or English.</p>
+
+  <h3 id="imp-hendrix">Jimi Hendrix pack</h3>
   <ul>
-    <li><strong>Lingua · Language</strong>: Italian or English.</li>
-    <li><strong>Jimi Hendrix pack</strong>: <em>Yes</em> if you bought it and unlocked it with the official app (the
-      unlock stays in the amp; this app can't do it). The Hendrix effects appear marked «JH». With
-      <em>No</em> they disappear, and so do the presets that use them, because they wouldn't play on the amp.</li>
-    <li><strong>SparklingTones pedal</strong>: <em>Yes</em> shows the Pedal section. If you don't have the pedal,
-      leave it off.</li>
+    <li><strong>Yes</strong>: if you bought it and unlocked it with the official app. The Hendrix effects appear marked
+      «JH».</li>
+    <li><strong>No</strong>: they disappear, and so do the presets that use them, because they wouldn't play on the amp.</li>
   </ul>
+  <div class="nota"><p>The unlock is done only with the official app, and it stays in the amp.</p></div>
+
+  <h3>SparklingTones pedal</h3>
+  <p><strong>Yes</strong> shows the Pedal section. If you don't have the pedal, leave <strong>No</strong>.</p>
 </section>
 
 <!-- ===================================================================== -->
