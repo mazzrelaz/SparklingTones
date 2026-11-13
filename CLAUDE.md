@@ -188,7 +188,8 @@ riceve il clic e il menu non si chiude): senza ampli rispondono con `senzaAmpli(
 
 ### L'inglese — lingua secondaria (dal 24 settembre 2026)
 
-**Regola dell'utente: app e sito si cambiano solo in italiano, e la parte inglese non si legge
+**Dal 14 novembre 2026 ogni pubblicazione esce in tutte e due le lingue, in automatico** (regola dell'utente,
+supera quella che segue per ciò che si pubblica). Prima: **app e sito si cambiano solo in italiano, e la parte inglese non si legge
 né si tocca finché non è lui a dire di aggiornarla**: `src/lingua-en.js`, i `*.en.md`
 (`README` dei due repo, protocollo), i `*.en.html`, `sparklingtones-sito/en/`. Grep li salta da solo
 (`.ignore`, verificato; Glob ne mostra solo i nomi); con Read o `rg --no-ignore` ci si arriva

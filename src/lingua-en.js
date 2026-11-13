@@ -1725,6 +1725,14 @@ window.LINGUA_EN = {
     "The app stays free. If you find it useful, a coffee from the More menu helps it grow.",
   "L'app resta gratuita. Se ti è utile, un caffè dal menu in alto a destra aiuta a farla crescere.":
     "The app stays free. If you find it useful, a coffee from the menu at the top right helps it grow.",
+  "Video brevi su YouTube":
+    "Short videos on YouTube",
+  "Sette video brevi, uno per sezione dell'app: collegarsi, la libreria, la scheda del preset, l'editor, il Live, l'accordatore e il backup. Li trovi dalla guida, sul canale SparklingTones.":
+    "Seven short videos, one for each part of the app: connecting, the library, the preset card, the editor, Live, the tuner and backup. You'll find them from the guide, on the SparklingTones channel.",
+  "Guida e video":
+    "Guide and videos",
+  "La guida, in italiano e in inglese, ora porta dritta ai video brevi su YouTube.":
+    "The guide, in Italian and English, now takes you straight to the short videos on YouTube.",
   "Novità":
     "New",
   "Cosa c'è di nuovo":

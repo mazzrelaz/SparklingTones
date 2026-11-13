@@ -12,6 +12,14 @@
 
 const NOVITA = [
   {
+    versione: 'v156',
+    data: '14 novembre 2026',
+    voci: [
+      { icona: '▶️', titolo: tr('Guida e video'),
+        testo: tr('La guida, in italiano e in inglese, ora porta dritta ai video brevi su YouTube.') },
+    ],
+  },
+  {
     versione: 'v155',
     data: '13 novembre 2026',
     voci: [
