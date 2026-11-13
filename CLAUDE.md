@@ -319,6 +319,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 
 ## Dove si riprende — 1° novembre 2026
 
+**Si riparte da `docs/planning.md`** (13 novembre): le cose aperte in ordine di priorità, da spuntare lì.
+
 - **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
   neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
   `17-editor-classico.js`; **il classico non scorre mai** (`adattaClassico`). Immagini, guscio e il resto:
