@@ -24,6 +24,7 @@ const GUSCIO = [
   './guida.html',
   './guida.en.html',
   './guida-pc.html',
+  './guida-pc.en.html',
   './guida-pedale.html',
   './guida-pedale.en.html',
   './guida.css',

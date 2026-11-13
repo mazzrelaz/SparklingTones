@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>SparklingTones — Guide for the computer</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<!--
+  The English version of guida-pc.html (13 November 2026, asked for by the user).
+  Italian is the main language: this page follows guida-pc.html, chapter by chapter.
+-->
+<link rel="stylesheet" href="guida.css">
+<style>
+  /* the three guides in a row */
+  .sezioni.tre { grid-template-columns:repeat(3, 1fr); max-width:760px; }
+  @media (max-width:520px) { .sezioni.tre .sezione > span:last-child { display:none; } .sezioni.tre .sezione b { font-size:1.1rem; } }
+  /* the computer screenshots: the real picture, with the numbers on top */
+  .pc-foto { position:relative; border-radius:12px; border:1px solid #2c2f36; background:#1e222a;
+             box-shadow:0 0 0 5px #0b0c0e, 0 0 0 6px #24262c, 0 24px 60px rgba(0,0,0,0.6); }
+  .pc-foto img { display:block; width:100%; height:auto; border-radius:12px; }
+  .cap > figure.schermo { margin:18px 0 22px; }
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <img src="icons/logo.svg" alt="SparklingTones" onerror="this.remove()">
+  <nav class="sezioni tre" aria-label="guide sections">
+    <span class="sezione qui" aria-current="page"><span class="ico">💻</span><b>Computer</b><span>browser and Windows app</span></span>
+    <a class="sezione" href="guida.en.html"><span class="ico">📱</span><b>Phone</b><span>presets, Live, knobs</span></a>
+    <a class="sezione" href="guida-pedale.en.html"><span class="ico">🎛️</span><b>Pedal</b><span>build it and use it</span></a>
+  </nav>
+  <h1>Guide <span>for the computer</span></h1>
+  <p>Connecting the amp, shaping the sound with mouse and keyboard, keeping the library in order and preparing
+    banks. It applies to the browser version and to the Windows app: they are the same thing.</p>
+  <div class="fuori" hidden>
+    <a class="apri-app" href="pc.html">Open the app →</a>
+    <a class="altra-lingua" href="guida-pc.html" lang="it">Italiano</a>
+  </div>
+
+  <div class="tre-passi">
+    <div class="passo-grande">
+      <span class="ico">🔌</span>
+      <span class="num">STEP 1</span>
+      <h3>Connect</h3>
+      <p>One click on <b>Connect</b>, top right: the app finds the amp and reads the eight presets inside it.</p>
+    </div>
+    <div class="passo-grande">
+      <span class="ico">🎚️</span>
+      <span class="num">STEP 2</span>
+      <h3>Shape</h3>
+      <p>Pick a block in the chain and turn the knobs: the sound changes while you play.</p>
+    </div>
+    <div class="passo-grande">
+      <span class="ico">💾</span>
+      <span class="num">STEP 3</span>
+      <h3>Save</h3>
+      <p><b>Save…</b> puts it in the library and, if you like, in one of the amp's eight slots.</p>
+    </div>
+  </div>
+</header>
+
+<nav class="indice" aria-label="contents">
+  <div class="scorre">
+    <a href="#inizio">Before you start</a>
+    <a href="#collegare">Connecting</a>
+    <a href="#schermata">The screen</a>
+    <a href="#suono">Shaping the sound</a>
+    <a href="#salvare">Saving</a>
+    <a href="#libreria">The library</a>
+    <a href="#banchi">Banks</a>
+    <a href="#live">Live</a>
+    <a href="#ia">Generate with AI</a>
+    <a href="#tuner">Tuner</a>
+    <a href="#sicuro">Keeping it safe</a>
+    <a href="#impostazioni">Settings</a>
+    <a href="#pedale">Pedal</a>
+    <a href="#problemi">If something goes wrong</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ===================================================================== -->
+<section class="cap" id="inizio">
+  <div class="cap-testa"><span class="cap-num">1</span><h2>Before you start</h2></div>
+  <p class="sotto">Two ways to use it on a computer, with the same features.</p>
+
+  <div class="due">
+    <div>
+      <h3>In the browser</h3>
+      <ul>
+        <li>Open the computer app in <strong>Chrome or Edge</strong>: they are the browsers that can talk to
+          Bluetooth. Firefox and Safari can't.</li>
+        <li>If you like, install it: browser menu → <em>Install SparklingTones</em>. It opens in its own window,
+          with an icon in the Start menu, and works without a connection too.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>The Windows app</h3>
+      <ol class="passi">
+        <li>Download <code>SparklingTones-Setup.exe</code> and open it.</li>
+        <li>Windows may show <em>«Windows protected your PC»</em>: that's normal for a new program.
+          Click <strong>More info</strong> → <strong>Run anyway</strong>.</li>
+        <li>Choose the folder and finish the installation: you'll find <strong>SparklingTones</strong> on the desktop
+          and in the Start menu.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="nota att">
+    <p><strong>The computer needs Bluetooth.</strong> Almost every laptop has it; a desktop often doesn't, and a
+      USB Bluetooth dongle is enough. No accounts and no sign-ups.</p>
+  </div>
+  <div class="nota">
+    <p><strong>Each version has its own library</strong>: the browser, the Windows app and the phone don't see
+      each other. To have the same presets everywhere use Dropbox or Export / Import: see
+      <a href="#sicuro">Keeping it safe</a>.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="collegare">
+  <div class="cap-testa"><span class="cap-num">2</span><h2>Connecting the amp</h2></div>
+  <p class="sotto">Once per session; the app remembers everything else.</p>
+
+  <ol class="passi">
+    <li>Switch on the Spark. Close Positive Grid's official app and the app on your phone: <strong>the amp talks to
+      only one device at a time</strong>.</li>
+    <li>Click <span class="tasto rosso">Connect</span> at the top right.</li>
+    <li>The list of Bluetooth devices opens: choose the Spark.</li>
+    <li>The light turns green and the amp's name appears next to it. The eight presets in the slots are read
+      automatically and appear at the top of the library, on the right.</li>
+  </ol>
+  <div class="nota">
+    <p><strong>Without the amp</strong> the app works anyway: you edit the copies in the library, and hear them when
+      you connect.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="schermata">
+  <div class="cap-testa"><span class="cap-num">3</span><h2>The screen</h2></div>
+  <p class="sotto">Five areas, from top to bottom.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(42.06% - 11px);top:calc(2.92% - 11px)">1</span>
+      <span class="pin" style="left:calc(35.25% - 11px);top:calc(8.44% - 11px)">2</span>
+      <span class="pin" style="left:calc(2.65% - 11px);top:calc(14.98% - 11px)">3</span>
+      <span class="pin" style="left:calc(88.96% - 11px);top:calc(61.26% - 11px)">4</span>
+      <span class="pin" style="left:calc(95.89% - 11px);top:calc(76.52% - 11px)">5</span>
+      <img src="immagini/guida/pc-principale.webp" width="1440" height="900" loading="lazy" alt="The main screen: at the top the bar with Generate with AI, BPM, Tap and Connected; below it Save, A/B, Import, Export, the preset's name and Banks, Pedal, Tuner; in the middle the Black Duo amp with its knobs and the list of models; on the right the library with the eight slots; at the bottom the chain of seven blocks">
+    </div>
+    <figcaption>The main screen, with the amp connected</figcaption>
+  </figure>
+  <ol class="pin-elenco">
+    <li><strong>The top bar</strong>: <em>Generate with AI</em>, the ↻ button that reads back from the amp the sound
+      it's making, the <strong>BPM</strong> with <strong>Tap</strong>, the amp's name, <em>Connect</em> and the ☰ menu.</li>
+    <li><strong>The second bar</strong>: <em>Save…</em>, Undo and Redo, <em>A/B</em>, Import and Export; in the
+      middle the name of the preset on stage, with the ‹ › arrows to go to the previous or next slot; on the right
+      <em>Banks</em>, <em>Pedal</em> and <em>Tuner</em>.</li>
+    <li><strong>The stage</strong>, in the middle: the picture of the chosen block, its knobs and, on the right, the list
+      of models.</li>
+    <li><strong>The library</strong>, on the right: first the amp's eight slots (A1–A4 in red, B1–B4 in green), then
+      all your other presets.</li>
+    <li><strong>The chain</strong>, at the bottom: the seven blocks in the order of the sound, from input to output.</li>
+  </ol>
+  <div class="nota">
+    <p>Next to some features there is a small round <strong>?</strong>: one click and the explanation opens.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="suono" style="--c:#ffd21e">
+  <div class="cap-testa"><span class="cap-num" style="color:#000">4</span><h2>Shaping the sound</h2></div>
+  <p class="sotto">With the amp connected, every change is heard right away.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(32.02% - 11px);top:calc(78.86% - 11px)">1</span>
+      <span class="pin" style="left:calc(29.87% - 11px);top:calc(95.44% - 11px)">2</span>
+      <span class="pin" style="left:calc(23.32% - 11px);top:calc(33.07% - 11px)">3</span>
+      <span class="pin" style="left:calc(58.47% - 11px);top:calc(17% - 11px)">4</span>
+      <span class="pin" style="left:calc(78.78% - 11px);top:calc(7.94% - 11px)">5</span>
+      <img src="immagini/guida/pc-suono.webp" width="1440" height="900" loading="lazy" alt="The stage and the chain: the coloured labels above the blocks, the blocks with their pedals, the amp's knobs and the list of models">
+    </div>
+    <figcaption>1 on / off · 2 the model · 3 the knobs · 4 search for a model · 5 BPM and Tap</figcaption>
+  </figure>
+
+  <div class="due">
+    <div>
+      <h3>The chain</h3>
+      <ul>
+        <li>A click on a block (Gate, Comp, Drive, Amp, Mod, Delay, Reverb) brings it on stage.</li>
+        <li>The coloured label above the block switches it <strong>on and off</strong>. A block that's off is grey.</li>
+        <li>The name under the block is the model: click it to choose another one.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>The knobs</h3>
+      <ul>
+        <li><strong>Drag</strong> up or down, or use the mouse <strong>wheel</strong>. Holding <kbd>Shift</kbd> makes dragging finer.</li>
+        <li>A <strong>double click</strong> brings it back to the middle.</li>
+        <li>Under each knob is its value, from 0 to 10.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Changing model</h3>
+  <p>The list to the right of the stage shows the models of the chosen block, grouped by type. Type in <em>Search
+    model…</em> to find one straight away. One click and the model changes, on the amp and on stage.</p>
+
+  <h3>The tempo</h3>
+  <p>Time-based effects (delay, tremolo…) follow the <strong>BPM</strong> at the top. Type the number, use the ↑ ↓
+    keys, or click <strong>Tap</strong> in time at least twice: the app works out the BPM from the average of the last
+    taps. If you wait more than two seconds, the count starts over.</p>
+
+  <h3>Undo, Redo and A/B</h3>
+  <ul>
+    <li><strong>Undo / Redo</strong> go back and forward through your changes.</li>
+    <li><strong>A/B</strong> lets you hear the preset <em>as it was saved</em>; press it again to go back to your
+      changes. That way you hear whether the tweak really improves the sound.</li>
+  </ul>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="salvare">
+  <div class="cap-testa"><span class="cap-num">5</span><h2>Saving</h2></div>
+  <p class="sotto">Until you save, next to the name it says «modified · not saved».</p>
+
+  <ol class="passi">
+    <li>Click <strong>Save…</strong>.</li>
+    <li>Choose the name and, if you like, one of the <strong>amp's eight slots</strong>: that's what plays when you press
+      the buttons on the amp, even without the computer.</li>
+    <li>If another preset was in that slot, <strong>it isn't lost</strong>: it leaves the slot and stays in the library.</li>
+  </ol>
+  <div class="nota att">
+    <p>If you close the window with unsaved changes, the app asks before leaving.</p>
+  </div>
+  <p><strong>Export</strong> saves the preset on stage to a file, to keep or to give to someone.
+    <strong>Import</strong> reads a file: a single preset, a whole backup or the official app's
+    <code>preset_backup.zip</code>.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="libreria">
+  <div class="cap-testa"><span class="cap-num">6</span><h2>The library</h2></div>
+  <p class="sotto">As many presets as you want, not just the amp's eight.</p>
+
+  <ul>
+    <li><strong>One click</strong> on a preset plays it and brings it on stage. If it's in a slot the change is
+      instant; otherwise it takes about a second.</li>
+    <li><strong>The ⋯ button</strong> next to a preset, or a <strong>right click</strong>, opens its actions:
+      put it in a slot or a bank, rename it, duplicate it, choose its family, categories and notes, export it,
+      delete it.</li>
+    <li><strong>Search</strong> at the top filters by name; the button next to it chooses the order (name, recently added
+      or modified, family). Below are the filters by family and category.</li>
+  </ul>
+  <div class="nota">
+    <p><strong>Family</strong> is what kind of sound it is (clean, drive, acoustic, bass); <strong>categories</strong> are
+      the style or the song. They're managed from ☰ → <em>Categories and families…</em>. There you'll also find
+      <em>Duplicates…</em> to remove identical presets, and <em>Delete all presets…</em>, which always spares the
+      amp's eight.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="banchi" style="--c:var(--blu)">
+  <div class="cap-testa"><span class="cap-num">7</span><h2>Banks</h2></div>
+  <p class="sotto">Groups of eight presets, like a setlist for a gig.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(11.67% - 11px);top:calc(79.6% - 11px)">1</span>
+      <span class="pin" style="left:calc(36.18% - 11px);top:calc(6.43% - 11px)">2</span>
+      <span class="pin" style="left:calc(61.04% - 11px);top:calc(6.43% - 11px)">3</span>
+      <span class="pin" style="left:calc(85.65% - 11px);top:calc(4.71% - 11px)">4</span>
+      <img src="immagini/guida/pc-banchi.webp" width="1440" height="700" loading="lazy" alt="The Banks screen: on the left the library to drag from; on the right the Amp bank and two of the user's banks, with their eight places and Send to the pedal">
+    </div>
+    <figcaption>1 the library to drag from · 2 the Amp bank · 3 one of your banks · 4 New bank</figcaption>
+  </figure>
+
+  <ol class="passi">
+    <li>Click <strong>Banks</strong> in the second bar, then <strong>New bank</strong>.</li>
+    <li><strong>Drag</strong> presets from the library, on the left, into the bank's places.</li>
+    <li>A click on a place plays that preset. To change the order of the banks, grab them by the header and
+      move them.</li>
+  </ol>
+  <div class="nota att">
+    <p><strong>Banks never write to the amp's slots</strong>: they live only in the library. The «Amp» bank is
+      something else: it shows the eight presets in the slots and can't be edited here.</p>
+  </div>
+  <p>Banks are the same as in the phone's Live view (if you keep the libraries in step with Dropbox) and they are
+    what the <a href="#pedale">pedal</a> plays.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="live" style="--c:#e30613">
+  <div class="cap-testa"><span class="cap-num">8</span><h2>Live <span class="beta">beta</span></h2></div>
+  <p class="sotto">For playing: your banks on eight big buttons, controlled with the mouse or a MIDI foot controller.</p>
+
+  <div class="nota">
+    <p><strong>Live is still being tested.</strong> If something doesn't work, or your MIDI pedal doesn't respond, write
+      to me from <strong>Report a problem</strong> in the ☰ menu: every report helps.</p>
+  </div>
+
+  <h3>Presets and Stomp</h3>
+  <ol class="passi">
+    <li>Click <strong>Live</strong> in the second bar. With ◀ ▶ choose the bank: <strong>Amp</strong> (the eight slots)
+      or one of your <a href="#banchi">banks</a>.</li>
+    <li>In <strong>Presets</strong> each big button plays its preset: A1–A4 in red, B1–B4 in green.</li>
+    <li>In <strong>Stomp</strong> the buttons switch the blocks of the playing preset on and off: Compressor,
+      Drive, Mod, Delay, Reverb, like pedals on the floor.</li>
+  </ol>
+  <div class="nota att">
+    <p>Like banks, <strong>Live never writes to the amp's slots</strong>.</p>
+  </div>
+
+  <h3>The MIDI foot controller</h3>
+  <ol class="passi">
+    <li>Open <strong>Foot controller</strong> and connect the pedal: <strong>by cable</strong> (USB) or
+      <strong>Bluetooth</strong>. The Spark stays connected at the same time.</li>
+    <li>Click <strong>＋ Learn a switch</strong> and press a switch on the pedal: the app recognises it.</li>
+    <li>For each switch choose what it does in Presets, what it does in Stomp and what a <strong>long press</strong> does:
+      enter or leave Stomp, switch between A and B, next or previous bank.</li>
+  </ol>
+  <p>The long press works with pedals that send one message when you press and one when you release (a
+    CC at 127 and then at 0). With a Program Change there is only the short press. How long the long press lasts is
+    up to you, from 1 to 3 seconds.</p>
+  <p>In the <strong>Windows app</strong> changing preset is faster (about half a second instead of one):
+    the app asks Windows for a quicker Bluetooth link, something the browser can't do.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="ia" style="--c:#7b5cff">
+  <div class="cap-testa"><span class="cap-num">9</span><h2>Generate with AI</h2></div>
+  <p class="sotto">A new preset from a description, with the chat you already use.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(27.08% - 11px);top:calc(38.5% - 11px)">1</span>
+      <span class="pin" style="left:calc(42.71% - 11px);top:calc(46.83% - 11px)">2</span>
+      <span class="pin" style="left:calc(27.08% - 11px);top:calc(60.44% - 11px)">3</span>
+      <span class="pin" style="left:calc(66.43% - 11px);top:calc(65.83% - 11px)">4</span>
+      <img src="immagini/guida/pc-ia.webp" width="1440" height="900" loading="lazy" alt="The Generate with AI window: the description of the sound, Copy the request, the box for the reply, Close and Put on stage">
+    </div>
+    <figcaption>1 describe the sound · 2 copy the request · 3 paste the reply · 4 put it on stage</figcaption>
+  </figure>
+
+  <ol class="passi">
+    <li>Click <strong>Generate with AI</strong> at the top and describe the sound: «70s crunch with a little delay»,
+      «the clean tone of a song», «a Santana-style lead».</li>
+    <li><strong>Copy the request</strong>: a complete request goes to the clipboard, with the list of effects your
+      amp really has.</li>
+    <li>Paste it into the chat you use (ChatGPT, Claude, Gemini…), copy the reply and paste it into <em>The
+      reply</em>.</li>
+    <li><strong>Put on stage</strong>: the preset plays on the amp, <strong>not saved yet</strong>. Tweak it, and
+      if you like it save it with <em>Save…</em>.</li>
+  </ol>
+  <div class="nota">
+    <p>The app sends nothing to anyone and asks for no keys or subscriptions: you open the chat yourself. You need at
+      least one preset read from the amp, to start from.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="tuner">
+  <div class="cap-testa"><span class="cap-num">10</span><h2>Tuning</h2></div>
+  <p class="sotto">The amp's tuner, on the big screen.</p>
+  <p>Click <strong>Tuner</strong> and play one string at a time. <strong>While the Tuner is open the amp is
+    silent</strong>: close it with ✕ and the sound comes back.</p>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="sicuro" style="--c:#17a85a">
+  <div class="cap-testa"><span class="cap-num">11</span><h2>Keeping it safe, and taking it elsewhere</h2></div>
+  <p class="sotto">It's all in ☰ → <em>Settings and backup</em>.</p>
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <img src="immagini/guida/pc-impostazioni.webp" width="1440" height="900" loading="lazy" alt="The Settings and backup window: language, Jimi Hendrix pack, SparklingTones pedal, the backup on the PC and Dropbox">
+    </div>
+    <figcaption>Settings and backup</figcaption>
+  </figure>
+
+  <div class="confronto">
+    <div>
+      <h4>💾 On the PC</h4>
+      <p><strong>Download the backup</strong> saves a <code>.json</code> file with everything: presets, families, categories,
+        notes, banks. <strong>Restore from a file…</strong> puts it back, on another device too: the app asks for
+        confirmation before merging it.</p>
+    </div>
+    <div>
+      <h4>☁️ Dropbox</h4>
+      <p>The same library on phone, browser and Windows app, <strong>on its own</strong>. If the same preset changed
+        in two places the most recent change wins; the amp's slots don't travel. If more than five presets would
+        disappear in one go, the app asks first.</p>
+      <p><strong>Make a safety backup</strong> sets the library aside in a file that sync never touches;
+        <strong>Restore the safety backup</strong> puts it back as it was. There is only one: a new one replaces the
+        old one.</p>
+    </div>
+  </div>
+
+  <h3>Connecting Dropbox (once per device)</h3>
+  <ol class="passi">
+    <li>On <code>dropbox.com/developers</code>: <em>Create app</em> → <em>Scoped access</em> →
+      <em>App folder</em>, with any name you like.</li>
+    <li>In the <em>Permissions</em> tab tick <code>files.content.write</code> and
+      <code>files.content.read</code>, and save.</li>
+    <li>In the <em>Settings</em> tab copy the <strong>App key</strong> (the app secret isn't needed).</li>
+    <li>In the app: ☰ → <strong>Settings and backup</strong> → paste the key → <span class="tasto rosso">Connect
+      Dropbox</span>.</li>
+    <li>Dropbox opens in the browser: authorise, copy the code it shows you, paste it into the app and press
+      <strong>Done</strong>.</li>
+  </ol>
+  <div class="nota">
+    <p>The official app's <code>preset_backup.zip</code> is in Positive Grid's folder on your Dropbox.
+      Positive Grid has announced the end of that backup in 2027: <strong>copy it somewhere of your own</strong> while
+      it's there, and import it here.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="impostazioni" style="--c:#5a5f68">
+  <div class="cap-testa"><span class="cap-num">12</span><h2>The other settings</h2></div>
+  <p class="sotto">Also in ☰ → <em>Settings and backup</em>.</p>
+  <ul>
+    <li><strong>Lingua · Language</strong>: Italian or English.</li>
+    <li><strong>Jimi Hendrix pack</strong>: <em>Yes</em> if you bought it and unlocked it with the official app (the
+      unlock stays in the amp; this app can't do it). The Hendrix effects appear marked «JH». With
+      <em>No</em> they disappear, and so do the presets that use them, because they wouldn't play on the amp.</li>
+    <li><strong>SparklingTones pedal</strong>: <em>Yes</em> shows the Pedal section. If you don't have the pedal,
+      leave it off.</li>
+  </ul>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="pedale" style="--c:#c02030">
+  <div class="cap-testa"><span class="cap-num">13</span><h2>The SparklingTones pedal</h2></div>
+  <p class="sotto">Only for those who built it. How to make it is in the <a class="sezione" href="guida-pedale.en.html">pedal
+    guide</a>.</p>
+
+  <p>The pedal is a Bluetooth footswitch board that talks directly to the Spark: it plays your
+    <a href="#banchi">banks</a> without a phone or computer. The computer is only needed to <strong>load banks onto it</strong>
+    and rearrange them.</p>
+
+
+  <figure class="schermo">
+    <div class="pc-foto">
+      <span class="pin" style="left:calc(41.56% - 11px);top:calc(24.1% - 11px)">1</span>
+      <span class="pin" style="left:calc(15.05% - 11px);top:calc(55.6% - 11px)">2</span>
+      <span class="pin" style="left:calc(74.76% - 11px);top:calc(45.5% - 11px)">3</span>
+      <img src="immagini/guida/pc-pedale.webp" width="1440" height="500" loading="lazy" alt="The Pedal screen: on the left the pedal's status with Search, Send a bank with the bank and the slot, and the Log; on the right In the pedal with the eight places">
+    </div>
+    <figcaption>1 Search for the pedal · 2 send a bank · 3 what's in the pedal</figcaption>
+  </figure>
+
+  <h3>Turning the section on</h3>
+  <p>☰ → <strong>Settings and backup</strong> → <strong>SparklingTones pedal</strong> → <em>Yes</em>. The
+    <strong>Pedal</strong> button appears in the second bar.</p>
+
+  <h3>Connecting the pedal to the computer</h3>
+  <ol class="passi">
+    <li>On the pedal hold <strong>both bank buttons together for a second and a half</strong>: the pedal opens up to the
+      computer for <strong>two minutes</strong>.</li>
+    <li>In the app click <strong>Pedal</strong>, then <strong>Search</strong>, and choose the pedal from the list.</li>
+    <li>The light turns green. <strong>While it's connected to the computer the pedal lets go of the amp</strong>: that's normal.</li>
+  </ol>
+
+  <h3>Sending a bank</h3>
+  <ol class="passi">
+    <li>In <strong>Send a bank</strong> choose the bank and the place on the pedal to put it in.</li>
+    <li>Click <strong>Send to the pedal</strong> and wait for the bar to reach the end.</li>
+    <li>In <strong>In the pedal</strong> you see what's inside. If a bank has changed in the app in the meantime, it's marked
+      as needing an update: <strong>Update all</strong> sends them again in one go. The dot on the Pedal button also
+      tells you.</li>
+  </ol>
+
+  <h3>Rearranging</h3>
+  <p>In <strong>In the pedal</strong> you move banks up or down, or remove them. The moves stay pending
+    until you click <strong>Update the pedal</strong>: then they go to the pedal all together. <em>Cancel</em>
+    discards them.</p>
+
+  <h3>Done</h3>
+  <p>Click <strong>Disconnect</strong>, or close the app: the pedal goes back to the Spark on its own and the footswitches play the
+    new banks.</p>
+
+  <div class="nota att">
+    <p><strong>If a footswitch does nothing</strong>, the first suspect is that the pedal is still connected to the
+      computer: disconnect it. <strong>Copy the pedal log</strong>, in the Log box, is useful if something goes wrong
+      and you want to report it.</p>
+  </div>
+</section>
+
+<!-- ===================================================================== -->
+<section class="cap" id="problemi" style="--c:#3a3d45">
+  <div class="cap-testa"><span class="cap-num">?</span><h2>If something goes wrong</h2></div>
+  <p class="sotto">The questions that really come up.</p>
+
+  <details class="faq">
+    <summary>I click Connect but the amp isn't in the list</summary>
+    <div class="dentro">
+      <ol>
+        <li>Is the amp already connected to something else? The official app, the app on your phone or the pedal hold on
+          to it: close or disconnect them.</li>
+        <li>Is the computer's Bluetooth on? Windows Settings → Bluetooth &amp; devices.</li>
+        <li>In the browser: are you on Chrome or Edge? Firefox and Safari don't have Bluetooth for web pages.</li>
+        <li>Still nothing: switch the amp off and on again.</li>
+      </ol>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>The amp is silent but the app is connected</summary>
+    <div class="dentro">
+      <p>Is the <a href="#tuner">Tuner</a> open? While it's open the amp is silent: close it.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>The amp doesn't respond any more</summary>
+    <div class="dentro">
+      <p>It can happen, especially when turning lots of knobs quickly. Unplug the amp's power, plug it back in, and
+        connect again. The library loses nothing.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>In the Windows app I don't have the presets I had in the browser</summary>
+    <div class="dentro">
+      <p>They are two different libraries. Move them with <strong>Download the backup</strong> / <strong>Restore from a
+        file…</strong>, or keep them in step with <strong>Dropbox</strong>: see <a href="#sicuro">Keeping it
+        safe</a>.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>I imported a preset but it didn't appear</summary>
+    <div class="dentro">
+      <p>If the library already has a preset with the same name (spaces and capitals don't count), it doesn't go in a
+        second time. Rename the one you have, and import again.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>A JH preset plays without its effect</summary>
+    <div class="dentro">
+      <p>The Hendrix pack isn't unlocked on this amp: it can only be unlocked with Positive Grid's official
+        app.</p>
+    </div>
+  </details>
+  <details class="faq">
+    <summary>Something else</summary>
+    <div class="dentro">
+      <p>☰ → <strong>Report a problem</strong> opens a ready-made email: write what you were doing and what
+        happened.</p>
+    </div>
+  </details>
+</section>
+
+</main>
+<script src="guida.js"></script>
+</body>
+</html>

@@ -607,7 +607,7 @@ $('menu').addEventListener('click', e => apriTendina(e.currentTarget, t => {
   voceTendina(t, icona('cestino') + tr('Elimina tutti i preset…'), svuotaLibreria, { classe: 'pericolo' });
   t.insertAdjacentHTML('beforeend', '<hr>');
   voceTendina(t, icona('impost') + tr('Impostazioni e backup…'), apriImpostazioni);
-  voceTendina(t, icona('guida') + tr('Guida'), () => window.open('guida-pc.html', '_blank', 'noopener'));
+  voceTendina(t, icona('guida') + tr('Guida'), () => window.open(Lingua.attuale === 'en' ? 'guida-pc.en.html' : 'guida-pc.html', '_blank', 'noopener'));
   voceTendina(t, icona('info') + tr('Informazioni, licenze e responsabilità'), apriInformazioni);
   voceTendina(t, icona('telefono') + tr('Apri l\'app per il telefono'), () => window.open('index.html', '_blank', 'noopener'));
   t.insertAdjacentHTML('beforeend', '<hr>');
