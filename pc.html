@@ -480,6 +480,51 @@
   .lv-posto.blocco .lv-nome { min-height:0; font-size:0.92rem; }
   .lv-stato { color:var(--dim); font-size:0.8rem; min-height:1em; }
   .lv-tag { position:absolute; top:10px; right:10px; font:700 0.66rem var(--strumento); background:var(--accent); color:var(--su-accent); border-radius:5px; padding:2px 6px; }
+  /* il looper (15-looper.js): lo stile del tuner — tacche al neon, numero grande, tasti tondi */
+  .lp { flex:1; display:grid; grid-template-columns:minmax(260px, 420px) minmax(0, 1fr); gap:40px; align-items:center; padding:8px 12px; }
+  .lp-cerchio svg { width:100%; height:auto; display:block; overflow:visible; }
+  .lp-fondo { fill:rgba(123,92,255,0.05); stroke:rgba(123,92,255,0.18); stroke-width:1; }
+  .lp-tacca { stroke:currentColor; stroke-width:4; stroke-linecap:round; opacity:0.16; }
+  .lp-tacca.accesa { opacity:1; filter:drop-shadow(0 0 5px currentColor); }
+  .lp-tacca.uno { stroke-width:5; }
+  .lp-tacca.ora { stroke:#fff; opacity:1; stroke-width:5; filter:drop-shadow(0 0 9px #fff); }
+  .st-rec .lp-tacca.accesa:not(.ora), .st-conta .lp-tacca.accesa:not(.ora) { stroke:#ff3b6b; color:#ff3b6b; }
+  .st-dub .lp-tacca.accesa:not(.ora) { stroke:#ffb02b; color:#ffb02b; }
+  .st-fermo .lp-tacca.accesa { opacity:0.45; filter:none; }
+  .lp-grande { fill:var(--text); text-anchor:middle; font:700 76px var(--strumento); }
+  .lp-grande .lp-tempo { font-size:40px; fill:var(--dim); }
+  .st-conta .lp-grande { fill:#ff3b6b; filter:drop-shadow(0 0 14px rgba(255,59,107,0.7)); font-size:104px; }
+  .st-rec .lp-grande { fill:#ff3b6b; } .st-dub .lp-grande { fill:#ffb02b; } .st-suona .lp-grande { fill:#2be4ff; }
+  .lp-piccolo { fill:var(--faint); text-anchor:middle; font:600 14px var(--strumento); letter-spacing:0.14em; text-transform:uppercase; }
+  .lp-lato { display:flex; flex-direction:column; gap:26px; min-width:0; }
+  .lp-stato { display:flex; align-items:center; gap:12px; font:700 2rem var(--strumento); text-transform:lowercase; color:var(--dim); }
+  .lp-led { width:14px; height:14px; border-radius:50%; background:var(--faint); }
+  .lp-stato.st-rec, .lp-stato.st-conta { color:#ff3b6b; } .lp-stato.st-dub { color:#ffb02b; } .lp-stato.st-suona { color:#2be4ff; } .lp-stato.st-fermo { color:#7b5cff; }
+  .lp-stato:not(.st-vuoto) .lp-led { background:currentColor; box-shadow:0 0 12px currentColor; }
+  .lp-bpm { margin-left:auto; font-size:0.95rem; color:var(--faint); font-weight:600; }
+  .lp-bpm b { font-size:1.9rem; color:var(--text); margin-right:4px; }
+  .lp-imp { display:flex; flex-direction:column; gap:14px; }
+  .lp-imp.bloccate .lp-riga:first-child { opacity:0.35; pointer-events:none; }
+  .lp-riga { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .lp-riga small { width:6.5em; color:var(--faint); font:600 0.7rem var(--strumento); letter-spacing:0.12em; text-transform:uppercase; }
+  .lp-chip { display:flex; gap:4px; padding:4px; background:var(--incavo); border:1px solid var(--line); border-radius:12px; }
+  .lp-chip button { border:0; background:none; color:var(--dim); min-width:40px; height:34px; padding:0 12px; border-radius:8px; font:600 0.86rem var(--strumento); text-transform:none; }
+  .lp-chip button:hover { color:var(--text); }
+  .lp-chip button.sì { color:#fff; background:linear-gradient(135deg, rgba(43,228,255,0.25), rgba(123,92,255,0.35)); box-shadow:0 0 0 1px rgba(123,92,255,0.8) inset, 0 0 12px rgba(123,92,255,0.35); }
+  .lp-tasti { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:14px; margin-top:6px; }
+  .lp-tasto { position:relative; display:flex; flex-direction:column; align-items:center; gap:10px; background:none; border:0; padding:0; color:var(--c); text-transform:none; }
+  .lp-tasto.c-rosso { --c:#ff3b6b; } .lp-tasto.c-ambra { --c:#ffb02b; } .lp-tasto.c-ciano { --c:#2be4ff; } .lp-tasto.c-viola { --c:#9b7cff; } .lp-tasto.c-fucsia { --c:#ff2bd6; }
+  .lp-bottone { width:min(88px, 100%); aspect-ratio:1; border-radius:50%; display:grid; place-items:center; background:radial-gradient(circle at 50% 35%, #353d4b, #1d222b 70%);
+    border:2px solid color-mix(in srgb, var(--c) 45%, transparent); box-shadow:0 6px 16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08); transition:transform 0.08s, box-shadow 0.15s; }
+  .lp-ico { width:38%; height:38%; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .lp-tasto:hover .lp-bottone { border-color:var(--c); }
+  .lp-tasto:active .lp-bottone { transform:scale(0.95); }
+  .lp-tasto.sì .lp-bottone { border-color:var(--c); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 25%, transparent), 0 0 26px color-mix(in srgb, var(--c) 55%, transparent); background:radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--c) 35%, #2a303b), #1d222b 75%); }
+  .lp-nome { color:var(--dim); font:600 0.8rem var(--strumento); text-align:center; }
+  .lp-tasto.sì .lp-nome { color:var(--c); }
+  .lp-tasto.spento { opacity:0.3; }
+  .lp-tasto .lv-tag { top:-4px; right:4px; }
+  @media (max-width:900px) { .lp { grid-template-columns:1fr; } .lp-cerchio { max-width:300px; margin:0 auto; } }
   .lv-ped h3 { font:600 0.72rem var(--strumento); letter-spacing:0.1em; text-transform:uppercase; color:var(--dim); margin:10px 0 12px; }
   .lv-pedali { display:flex; align-items:center; gap:14px; margin:6px 0 26px; }
   .lv-blocco button:not(.sì):hover { color:var(--text); }
@@ -692,6 +737,7 @@
 <script src="src/pc/10-partenza.js"></script>
 <script src="src/pc/11-genera-ia.js"></script>
 <script src="src/pc/12-live.js"></script>
+<script src="src/pc/15-looper.js"></script>
 <script src="src/pc/13-benvenuto.js"></script>
 <script src="src/pc/14-guida.js"></script>
 <script src="src/novita.js"></script>

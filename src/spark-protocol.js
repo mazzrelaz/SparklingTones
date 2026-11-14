@@ -284,6 +284,15 @@ window.Spark = (function () {
     setLooperSettings: d  => ({ cmd: CMD_ACTION, sub: 0x76, data: Array.from(d) }),
 
     /**
+     * Il looper (`docs/looper.md`): `0x0175` con un byte solo, **senza** `0x00` in coda.
+     * `04` rec, `05` chiude, `08` suona, `09` ferma, `0a` cancella, `0b` sovraincide,
+     * `0c` chiude la sovraincisione, `0d` annulla, `0e` ripete. Verificati sul pedale.
+     * `0x0275` chiede lo stato: torna un `0x0375` col byte dello stato.
+     */
+    looper:         c  => ({ cmd: CMD_ACTION, sub: 0x75, data: [c & 0x7f] }),
+    getLooperState: () => ({ cmd: CMD_QUERY,  sub: 0x75, data: [] }),
+
+    /**
      * L'accordatore (20 ottobre 2026, misurato sullo Spark 2): `0x0165` col
      * booleano, **senza** lo `0x00` in coda. Acceso, l'ampli tace e manda
      * `0x0364` circa 13 volte al secondo (vedi `letturaAccordatore`).

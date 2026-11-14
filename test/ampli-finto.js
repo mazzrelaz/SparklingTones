@@ -15,7 +15,9 @@ window.AmpliFinto = (function () {
   const C = Spark.commands;
   // Il segno sui comandi: la pagina li costruisce con Spark.commands, il finto li legge da `_finto`.
   for (const [nome, chiave] of [['changePreset', 'slot'], ['effectOnOff', 'onoff'], ['changeParam', 'param'],
-                                ['changeEffectModel', 'modello'], ['tuner', 'tuner']]) {
+                                ['changeEffectModel', 'modello'], ['tuner', 'tuner'], ['looper', 'looper'],
+                                ['getLooperState', 'statoLooper'], ['getLooperSettings', 'leggiLooper'],
+                                ['setLooperSettings', 'scriviLooper']]) {
     const orig = C[nome];
     C[nome] = (...a) => Object.assign(orig(...a), { _finto: [chiave, ...a] });
   }
@@ -110,6 +112,8 @@ window.AmpliFinto = (function () {
       else if (tipo === 'modello') {
         const i = this.vivo.effects.findIndex(e => e.name === a);
         if (i >= 0) this.vivo.effects[i] = blocco(b, this.vivo.effects[i].enabled, 0.5);
+      } else if (tipo === 'looper' || tipo === 'statoLooper' || tipo === 'leggiLooper' || tipo === 'scriviLooper') {
+        this._looper(tipo, a);
       } else if (tipo === 'tuner') {
         clearInterval(this._accordatore);
         if (a) {
@@ -125,6 +129,35 @@ window.AmpliFinto = (function () {
           }, 77);
         }
       }
+    },
+    /* Il looper finto: risponde come l'ampli vero (`docs/looper.md`). Registra per le battute
+       impostate (o finché non si chiude, in «libero»), poi suona e manda `0x0377` cinque volte
+       al secondo. Come il vero, a `09` e `0b` dà solo l'ack, senza `0x0375`. */
+    _looper(tipo, a) {
+      const L = this._lp || (this._lp = { imp: [0x78, 0x04, 0x04, 0xc2, 0xc3, 0xc2, 0x3c], stato: 0x00, durata: 0, t0: 0, flusso: null, fine: null });
+      const di = (sub, data) => setTimeout(() => this.onMessage({ cmd: Spark.CMD_NOTIFY, sub, data }), 20);
+      const stato = s => { L.stato = s; di(0x75, [s]); };
+      const suona = () => {
+        clearInterval(L.flusso);
+        L.flusso = setInterval(() => {
+          const p = ((Date.now() - L.t0) % L.durata) / L.durata;
+          const dv = new DataView(new ArrayBuffer(4)); dv.setFloat32(0, p);
+          this.onMessage({ cmd: Spark.CMD_NOTIFY, sub: 0x77, data: [0xca, ...new Uint8Array(dv.buffer)] });
+        }, 190);
+      };
+      const chiudi = () => { clearTimeout(L.fine); L.durata = Date.now() - L.t0; L.t0 = Date.now(); stato(0x07); stato(0x08); suona(); };
+      if (tipo === 'leggiLooper') { di(0x76, L.imp.slice()); return; }
+      if (tipo === 'scriviLooper') { L.imp = Array.from(a); return; }
+      if (tipo === 'statoLooper') { di(0x75, [L.stato]); return; }
+      if (a === 0x04) {
+        stato(0x04); L.t0 = Date.now();
+        if (L.imp[3] !== 0xc3) L.fine = setTimeout(chiudi, L.imp[2] * 4 * 60000 / L.imp[0]);
+      } else if (a === 0x05) chiudi();
+      else if (a === 0x08) { L.stato = 0x08; L.t0 = Date.now(); suona(); }
+      else if (a === 0x09) { L.stato = 0x09; clearInterval(L.flusso); }
+      else if (a === 0x0b) { L.stato = 0x0b; if (!L.flusso) suona(); }
+      else if (a === 0x0c) L.stato = 0x08;
+      else if (a === 0x0a) { clearInterval(L.flusso); L.flusso = null; L.durata = 0; stato(0x0a); setTimeout(() => stato(0x00), 1200); }
     },
     async loadPreset(p, onProgress) {
       for (let i = 0; i < 4; i++) { if (onProgress) onProgress(i, 4); await sleep(60); }

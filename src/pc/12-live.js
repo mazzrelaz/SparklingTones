@@ -28,6 +28,7 @@ const STOMP = [
 const GESTI = [
   { id: null, nome: () => tr('Nessuno') },
   { id: 'stomp', nome: () => tr('Entra/esci dallo Stomp') },
+  { id: 'looper', nome: () => tr('Entra/esci dal Looper') },
   { id: 'meta', nome: () => tr('Passa da banco A a banco B') },
   { id: 'banco+', nome: () => tr('Banco successivo') },
   { id: 'banco-', nome: () => tr('Banco precedente') },
@@ -40,6 +41,7 @@ const live = {
   banco: 0,             // 0 = Ampli, poi i banchi dell'utente
   meta: 0,
   stomp: false,
+  looper: false,       // il looper sta sopra a Preset e Stomp: quando è acceso, `stomp` non conta
   impara: false,
   firma: '',
 };
@@ -150,7 +152,7 @@ function chiudiLive() {
 function firmaLive() {
   const accesi = ora && ora.effetti ? ora.effetti.map(e => (e && e.enabled ? 1 : 0)).join('') : '';
   const nomi = ora && ora.effetti ? ora.effetti.map(e => e && e.name).join(',') : '';
-  return [live.vista, live.banco, live.meta, live.stomp, live.impara, ora && ora.nome, ora && ora.slot, accesi, nomi,
+  return [live.vista, live.banco, live.meta, live.stomp, live.looper, live.impara, ora && ora.nome, ora && ora.slot, accesi, nomi,
     banchi.length, suAmpli.map(r => r && r.id).join(','), spark.connected, !!midi.usb, midi.bleNome, pedaliera.switch.length].join('|');
 }
 setInterval(() => { if (schermoLive && firmaLive() !== live.firma) disegnaLive(); }, 300);
@@ -193,13 +195,15 @@ function disegnaPalcoLive(corpo) {
   testa.className = 'lv-testa';
   testa.innerHTML = `
     <div class="lv-banco"><button data-a="prima" title="${tr('Banco precedente')}">◀</button><b>${testoConNome(banco.nome)}</b><button data-a="dopo" title="${tr('Banco successivo')}">▶</button></div>
-    <div class="lv-modo"><button data-a="preset" class="${live.stomp ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp ? 'sì' : ''}">${tr('Stomp')}</button>${aiuto('live')}</div>
-    <div class="lv-suona"><small>${live.stomp ? tr('Stomp su') : tr('Suona')}</small><span>${ora ? testoConNome(ora.nome) : '—'}</span></div>`;
+    <div class="lv-modo"><button data-a="preset" class="${live.stomp || live.looper ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp && !live.looper ? 'sì' : ''}">${tr('Stomp')}</button><button data-a="looper" class="${live.looper ? 'sì' : ''}">${tr('Looper')}</button>${aiuto('live')}</div>
+    <div class="lv-suona"><small>${live.stomp && !live.looper ? tr('Stomp su') : tr('Suona')}</small><span>${ora ? testoConNome(ora.nome) : '—'}</span></div>`;
   testa.querySelector('[data-a="prima"]').addEventListener('click', () => cambiaBanco(-1));
   testa.querySelector('[data-a="dopo"]').addEventListener('click', () => cambiaBanco(1));
-  testa.querySelector('[data-a="preset"]').addEventListener('click', () => { live.stomp = false; disegnaLive(); });
-  testa.querySelector('[data-a="stomp"]').addEventListener('click', () => { live.stomp = true; disegnaLive(); });
+  testa.querySelector('[data-a="preset"]').addEventListener('click', () => { live.stomp = false; live.looper = false; disegnaLive(); });
+  testa.querySelector('[data-a="stomp"]').addEventListener('click', () => { live.stomp = true; live.looper = false; disegnaLive(); });
+  testa.querySelector('[data-a="looper"]').addEventListener('click', () => { if (!live.looper) { live.looper = true; chiediLooper(); } disegnaLive(); });
   corpo.appendChild(testa);
+  if (live.looper) { disegnaLooper(corpo); return; }
 
   const griglia = document.createElement('div');
   griglia.className = 'lv-griglia' + (live.stomp ? ' stomp' : '');
@@ -239,6 +243,7 @@ function disegnaPalcoLive(corpo) {
 const nomePreset = v => !v ? tr('Nessuno') : v.startsWith('g:') ? nomeGesto(v.slice(2)) : v[0] === 'p' ? (+v[1] <= 4 ? tr('Banco A · {0}', v[1]) : tr('Banco B · {0}', +v[1] - 4))
   : tr('Banco A o B · {0}', v.slice(1));
 const nomeStomp = v => { if (v && v.startsWith('g:')) return nomeGesto(v.slice(2)); const b = STOMP.find(s => s.id === v); return b ? tr(b.nome) : tr('Nessuno'); };
+const nomeLooper = v => { if (v && v.startsWith('g:')) return nomeGesto(v.slice(2)); const a = AZIONI_LOOPER.find(x => x.id === v); return a ? a.nome() : tr('Nessuno'); };
 const nomeGesto = v => (GESTI.find(g => g.id === v) || GESTI[0]).nome();
 function descriviMessaggio(chiave) {
   const [tipo, canale, numero] = chiave.split(':');
@@ -270,30 +275,31 @@ function disegnaPedaliera(corpo) {
 
   const tab = document.createElement('table');
   tab.className = 'lv-tabella';
-  tab.innerHTML = `<thead><tr><th>${tr('Switch')}</th><th>${tr('Messaggio')}</th><th>${tr('Preset · tocco')}</th><th>${tr('Stomp · tocco')}</th><th>${tr('Tenuto premuto')}</th><th></th></tr></thead>`;
+  tab.innerHTML = `<thead><tr><th>${tr('Switch')}</th><th>${tr('Messaggio')}</th><th>${tr('Preset · tocco')}</th><th>${tr('Stomp · tocco')}</th><th>${tr('Looper · tocco')}</th><th>${tr('Tenuto premuto')}</th><th></th></tr></thead>`;
   const tb = document.createElement('tbody');
   const gestiTocco = GESTI.filter(g => g.id).map(g => 'g:' + g.id);
   const voci = { preset: [null, ...[1, 2, 3, 4, 5, 6, 7, 8].map(n => 'p' + n), ...[1, 2, 3, 4].map(n => 'm' + n), ...gestiTocco],
-    stomp: [null, ...STOMP.map(s => s.id), ...gestiTocco], lungo: GESTI.map(g => g.id) };
+    stomp: [null, ...STOMP.map(s => s.id), ...gestiTocco], looper: [null, ...AZIONI_LOOPER.map(a => a.id), ...gestiTocco], lungo: GESTI.map(g => g.id) };
   pedaliera.switch.forEach((s, k) => {
     const tr_ = document.createElement('tr');
-    tr_.innerHTML = `<td><button class="lv-nome-sw" title="${tr('Rinomina')}">${testoConNome(s.nome)}</button></td><td class="lv-msg">${descriviMessaggio(s.chiave)}</td><td></td><td></td><td></td><td></td>`;
+    tr_.innerHTML = `<td><button class="lv-nome-sw" title="${tr('Rinomina')}">${testoConNome(s.nome)}</button></td><td class="lv-msg">${descriviMessaggio(s.chiave)}</td><td></td><td></td><td></td><td></td><td></td>`;
     const celle = tr_.querySelectorAll('td');
     const cambia = (campo, v) => { s[campo] = v; salvaPedaliera(); live.firma = ''; disegnaLive(); };
     celle[2].appendChild(scelta(s.preset, tr('Nessuno'), nomePreset, voci.preset, v => cambia('preset', v)));
     celle[3].appendChild(scelta(s.stomp, tr('Nessuno'), nomeStomp, voci.stomp, v => cambia('stomp', v)));
-    celle[4].appendChild(scelta(s.lungo, tr('Nessuno'), nomeGesto, voci.lungo, v => cambia('lungo', v)));
+    celle[4].appendChild(scelta(s.looper || null, tr('Nessuno'), nomeLooper, voci.looper, v => cambia('looper', v)));
+    celle[5].appendChild(scelta(s.lungo, tr('Nessuno'), nomeGesto, voci.lungo, v => cambia('lungo', v)));
     const togli = document.createElement('button');
     togli.textContent = tr('Togli');
     togli.addEventListener('click', () => { pedaliera.switch.splice(k, 1); salvaPedaliera(); disegnaLive(); });
-    celle[5].appendChild(togli);
+    celle[6].appendChild(togli);
     celle[0].firstChild.addEventListener('click', async () => {
       const n = await chiediTesto(tr('nome dello switch'), '', s.nome);
       if (n && n.trim()) cambia('nome', n.trim().slice(0, 6));
     });
     tb.appendChild(tr_);
   });
-  if (!pedaliera.switch.length) tb.innerHTML = `<tr><td colspan="6" class="lv-msg">${tr('Nessuno switch.')}</td></tr>`;
+  if (!pedaliera.switch.length) tb.innerHTML = `<tr><td colspan="7" class="lv-msg">${tr('Nessuno switch.')}</td></tr>`;
   tab.appendChild(tb);
   box.appendChild(tab);
 
@@ -364,15 +370,17 @@ function arrivoMidi(stato_, d1, d2) {
 
 function tocco(s) {
   if (live.vista !== 'live') return;
-  const azione = live.stomp ? s.stomp : s.preset;
+  const azione = live.looper ? s.looper : live.stomp ? s.stomp : s.preset;
   if (azione && azione.startsWith('g:')) { gesto(azione.slice(2)); return; }
+  if (live.looper) { if (azione) azioneLooper(azione); return; }
   if (live.stomp) { if (s.stomp) cambiaStomp(s.stomp); }
   else { const i = postoDiSwitch(s); if (i >= 0) suonaPosto(i); }
 }
 
 function gesto(g) {
-  if (g === 'stomp') live.stomp = !live.stomp;
-  else if (g === 'meta') { if (!live.stomp) live.meta ^= 1; }
+  if (g === 'stomp') { live.stomp = live.looper ? true : !live.stomp; live.looper = false; }
+  else if (g === 'looper') { live.looper = !live.looper; if (live.looper) chiediLooper(); }
+  else if (g === 'meta') { if (!live.stomp && !live.looper) live.meta ^= 1; }
   else if (g === 'banco+') cambiaBanco(1);
   else if (g === 'banco-') cambiaBanco(-1);
   disegnaLive();

@@ -8,7 +8,7 @@ const POSTI = ['GATE', 'COMP', 'DRIVE', 'AMP', 'MOD', 'DELAY', 'REVERB'];
    finto di `test/ampli-finto.js`, che ha la stessa interfaccia. */
 const gestoriAmpli = {
   onStatus: (s, etichetta) => segnaCollegamento(s, etichetta),
-  onMessage: msg => riceviAccordatore(msg),
+  onMessage: msg => { riceviAccordatore(msg); riceviLooper(msg); },
   // Ogni scrittura (`TX …`) resta nella console: girando una manopola sono decine al secondo.
   onLog: msg => { if (msg.startsWith('TX ')) console.debug(msg); else registro.push(msg); },
 };
