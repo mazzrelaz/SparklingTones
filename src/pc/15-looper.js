@@ -31,7 +31,8 @@ const looper = {
   pos: null,          // 0…1 nel giro, dall'ultimo 0x0377 (null: non arriva)
   posQuando: 0,
   imp: null,          // l'ultimo 0x0376
-  bpm: 120, battute: 4, libero: false, click: true,
+  bpm: 120, battute: 4, libero: false,
+  modoClick: 1,       // 0 spento, 1 solo il conteggio, 2 anche per tutta la prima registrazione
   tempoConta: 0,      // nel conteggio: i tempi che mancano (4…1, o 8…1)
   battuteConta: 1,    // il conteggio prima del rec: una o due battute (si ricorda in `looperConta`)
   timerConta: [],
@@ -104,7 +105,7 @@ function azioneLooper(id) {
   if (!spark.connected) { senzaAmpliLooper(); return; }
   const s = looper.stato;
   if (id === 'rec') {
-    if (s === 'vuoto') { if (looper.libero) { if (mandaLooper(LP.REC)) eventoLooper(LP.REC); } else contaERegistra(); }
+    if (s === 'vuoto') contaERegistra();   // anche in «libero»: il conteggio va sul tempo impostato
     else if (s === 'conta') fermaConteggio(true);
     else if (s === 'rec') mandaLooper(LP.CHIUDI);
     else if (s === 'dub') { if (mandaLooper(LP.FINE_DUB)) eventoLooper(LP.FINE_DUB); }
@@ -130,36 +131,74 @@ function azioneLooper(id) {
 
 /* ---------------------------------------------------------------- il conteggio */
 
+/* Il click si programma sull'orologio dell'audio, non coi timer: i timer ritardano a caso di
+   qualche decina di ms, e il primo colpo arrivava con l'audio ancora da svegliare (si
+   «impastava»). Adesso l'audio si sveglia alla pressione, si parte 150 ms dopo, e ogni colpo
+   è fissato in anticipo al suo istante esatto. Un metronomo guarda 120 ms avanti ogni 25 ms. */
 let audioLooper = null;
-function clic(uno, quando) {
+const metro = { gen: 0, t0: 0, passo: 0.5, prossimo: 0, timer: null, nodi: [] };
+
+function audioPronto() {
   try {
     if (!audioLooper) audioLooper = new (window.AudioContext || window.webkitAudioContext)();
     if (audioLooper.state === 'suspended') audioLooper.resume();
-    const t = quando || audioLooper.currentTime;
-    const o = audioLooper.createOscillator(), g = audioLooper.createGain();
-    o.type = 'square';
-    o.frequency.value = uno ? 2700 : 1800;
-    g.gain.setValueAtTime(0.25, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-    o.connect(g).connect(audioLooper.destination);
-    o.start(t); o.stop(t + 0.045);
-  } catch (e) { /* niente audio: il conteggio resta a schermo */ }
+    return audioLooper;
+  } catch (e) { return null; }
+}
+
+function clic(uno, t) {
+  const a = audioLooper;
+  if (!a) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = 'square';
+  o.frequency.value = uno ? 2700 : 1800;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(0.25, t + 0.002);         // un attacco di 2 ms: niente schiocco
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+  o.connect(g).connect(a.destination);
+  o._t = t;
+  o.start(t); o.stop(t + 0.045);
+  metro.nodi.push(o);
+  o.onended = () => { const i = metro.nodi.indexOf(o); if (i >= 0) metro.nodi.splice(i, 1); };
+}
+
+/** Quanti tempi suona il click: il conteggio, e con «tutto il take» anche la prima registrazione. */
+function metronomo() {
+  const a = audioLooper;
+  if (!a) return;
+  const conta = 4 * looper.battuteConta;
+  const vivo = looper.stato === 'conta' || (looper.stato === 'rec' && looper.modoClick === 2);
+  if (!vivo) { fermaMetronomo(); return; }
+  while (metro.t0 + metro.prossimo * metro.passo < a.currentTime + 0.12) {
+    const k = metro.prossimo++;
+    if (k >= conta && looper.modoClick !== 2) continue;
+    if (looper.modoClick) clic(k % 4 === 0, metro.t0 + k * metro.passo);
+  }
+}
+
+function fermaMetronomo() {
+  clearInterval(metro.timer);
+  metro.timer = null;
+  const ora_ = audioLooper ? audioLooper.currentTime : 0;
+  metro.nodi.forEach(o => { try { if (o._t > ora_) o.stop(); } catch (e) {} });
 }
 
 function contaERegistra() {
   fermaConteggio();
-  const passo = 60000 / (looper.bpm || 120);
+  const a = audioPronto();
+  const passo = 60 / (looper.bpm || 120);
   const tempi = 4 * looper.battuteConta;
+  const anticipo = 0.15;                       // il tempo di svegliare l'audio
   looper.stato = 'conta';
-  looper.inizioConta = Date.now();
+  looper.inizioConta = Date.now() + anticipo * 1000;
+  Object.assign(metro, { gen: metro.gen + 1, passo, prossimo: 0, t0: (a ? a.currentTime : 0) + anticipo });
+  if (a) { clearInterval(metro.timer); metro.timer = setInterval(metronomo, 25); metronomo(); }
   for (let n = 0; n < tempi; n++) {
-    looper.timerConta.push(setTimeout(() => {
-      looper.tempoConta = tempi - n;
-      if (looper.click) clic(n % 4 === 0);
-      ridisegnaLooper(true);
-    }, n * passo));
+    looper.timerConta.push(setTimeout(() => { looper.tempoConta = tempi - n; ridisegnaLooper(false); }, (anticipo + n * passo) * 1000));
   }
-  looper.timerConta.push(setTimeout(() => { looper.timerConta = []; if (mandaLooper(LP.REC)) eventoLooper(LP.REC); }, tempi * passo - 40));
+  looper.tempoConta = tempi;
+  looper.timerConta.push(setTimeout(() => { looper.timerConta = []; if (mandaLooper(LP.REC)) eventoLooper(LP.REC); },
+    (anticipo + tempi * passo) * 1000 - 40));
   ridisegnaLooper(true);
 }
 
@@ -167,7 +206,7 @@ function fermaConteggio(annulla) {
   looper.timerConta.forEach(clearTimeout);
   looper.timerConta = [];
   looper.tempoConta = 0;
-  if (annulla && looper.stato === 'conta') looper.stato = 'vuoto';
+  if (annulla && looper.stato === 'conta') { looper.stato = 'vuoto'; fermaMetronomo(); }
 }
 
 /* ---------------------------------------------------------------- battute e tempo, a loop vuoto */
@@ -309,6 +348,7 @@ function disegnaLooper(corpo) {
   if (!contaLetta) {
     contaLetta = true;
     store.getSetting('looperConta', 1).then(v => { looper.battuteConta = v === 2 ? 2 : 1; ridisegnaLooper(true); }).catch(() => {});
+    store.getSetting('looperClick', 1).then(v => { looper.modoClick = [0, 1, 2].includes(v) ? v : 1; ridisegnaLooper(true); }).catch(() => {});
   }
 }
 
@@ -340,8 +380,9 @@ function riempiLooper(box) {
       <div class="lp-imp${vuoto ? '' : ' bloccate'}">
         <div class="lp-riga"><small>${tr('Lunghezza')}</small><div class="lp-chip">${BATTUTE.map(b => chip('b', b, b ? String(b) : '∞', looper.libero ? !b : b === looper.battute)).join('')}</div></div>
         <div class="lp-riga"><small>${tr('Conteggio')}</small><div class="lp-chip">${chip('c', 1, tr('1 battuta'), looper.battuteConta === 1)}${chip('c', 2, tr('2 battute'), looper.battuteConta === 2)}</div>
-          <div class="lp-chip">${chip('click', 1, tr('Click'), looper.click)}</div>
+          
 </div>
+        <div class="lp-riga"><small>${tr('Click')}</small><div class="lp-chip">${chip('click', 0, tr('Spento'), looper.modoClick === 0)}${chip('click', 1, tr('Solo conteggio'), looper.modoClick === 1)}${chip('click', 2, tr('Tutto il primo take'), looper.modoClick === 2)}</div></div>
         <div class="lp-riga blocca"><small>${tr('Tempo')}</small><div class="lp-chip lp-tempo-chip">${chip('bpm', -1, '◀', false)}<b>${looper.bpm} <small>bpm</small></b>${chip('bpm', 1, '▶', false)}</div>
           <div class="lp-chip">${chip('tap', 1, tr('Tap'), false)}</div></div>
       </div>
@@ -368,7 +409,11 @@ function riempiLooper(box) {
     store.setSetting('looperConta', looper.battuteConta).catch(() => {});
     ridisegnaLooper(true);
   }));
-  box.querySelector('[data-click]').addEventListener('click', () => { looper.click = !looper.click; ridisegnaLooper(true); });
+  box.querySelectorAll('[data-click]').forEach(b => b.addEventListener('click', () => {
+    looper.modoClick = +b.dataset.click;
+    store.setSetting('looperClick', looper.modoClick).catch(() => {});
+    ridisegnaLooper(true);
+  }));
   box.querySelector('[data-tap]').addEventListener('click', tapLooper);
   // Le frecce del tempo: un bpm a clic, cinque con Maiusc; tenute premute vanno da sole.
   box.querySelectorAll('[data-bpm]').forEach(b => {
