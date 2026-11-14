@@ -382,16 +382,42 @@ const ICONE_LP = {
 };
 const iconaLp = n => `<svg viewBox="0 0 24 24" class="lp-ico">${ICONE_LP[n]}</svg>`;
 
+/* I tasti a schermo nell'ordine degli switch del pedale MIDI: il primo switch che ha un'azione
+   del looper dà il primo tasto, e così via; le azioni senza switch vengono dopo, nell'ordine
+   solito. Così il tasto a sinistra è il pedale a sinistra. */
+/** Le etichette degli switch su un tasto: «D» al tocco, «D…» tenuto premuto. */
+function etichetteLooper(id) {
+  const nomi = (typeof pedaliera !== 'undefined' ? pedaliera.switch : []).flatMap(sw =>
+    [sw.looper === id ? sw.nome : null, sw.looperLungo === id ? sw.nome + '…' : null]).filter(Boolean);
+  return nomi.length ? `<span class="lv-tag">${testoConNome(nomi.join(' '))}</span>` : '';
+}
+
+function ordineTasti() {
+  const tutti = ['rec', 'suona', 'ferma', 'annulla', 'cancella'];
+  const dalPedale = [];
+  for (const sw of (typeof pedaliera !== 'undefined' ? pedaliera.switch : [])) {
+    for (const v of [sw.looper, sw.looperLungo]) if (tutti.includes(v) && !dalPedale.includes(v)) dalPedale.push(v);
+  }
+  return [...dalPedale, ...tutti.filter(id => !dalPedale.includes(id))];
+}
+
 function riempiLooper(box) {
   const s = looper.stato, vuoto = loopVuoto();
   const tasto = (id, ico, testo, colore, acceso, spento) =>
-    `<button type="button" class="lp-tasto c-${colore}${acceso ? ' sì' : ''}${spento ? ' spento' : ''}" data-l="${id}">${etichetteSwitch(x => x.looper === id)}<span class="lp-bottone">${iconaLp(ico)}</span><span class="lp-nome">${testo}</span></button>`;
+    `<button type="button" class="lp-tasto c-${colore}${acceso ? ' sì' : ''}${spento ? ' spento' : ''}" data-l="${id}">${etichetteLooper(id)}<span class="lp-bottone">${iconaLp(ico)}</span><span class="lp-nome">${testo}</span></button>`;
   const chip = (gruppo, v, testo, sì) => `<button type="button" data-${gruppo}="${v}" class="${sì ? 'sì' : ''}">${testo}</button>`;
   const recIco = s === 'rec' || s === 'dub' ? 'chiudi' : vuoto || s === 'conta' ? 'rec' : 'dub';
   const recTesto = s === 'rec' || s === 'dub' ? tr('Chiudi') : s === 'conta' ? tr('Annulla il conteggio') : vuoto ? tr('Registra') : tr('Sovraincidi');
   firmaLp = anelloLooper();
   // I tasti si rifanno solo se cambiano: rifarli sotto il mouse perde il clic (premuto sul
   // vecchio, rilasciato sul nuovo), e il conteggio e l'ampli chiedono di ridisegnare spesso.
+  const tasti = {
+    rec: tasto('rec', recIco, recTesto, s === 'dub' || (!vuoto && s !== 'rec' && s !== 'conta') ? 'ambra' : 'rosso', s === 'rec' || s === 'dub' || s === 'conta'),
+    suona: tasto('suona', 'suona', tr('Suona'), 'ciano', s === 'suona', s !== 'fermo'),
+    ferma: tasto('ferma', 'ferma', tr('Ferma'), 'viola', s === 'fermo', vuoto && s !== 'conta'),
+    annulla: tasto('annulla', looper.annullato ? 'ripeti' : 'annulla', looper.annullato ? tr('Ripeti') : tr('Annulla'), 'viola', false, vuoto || s === 'rec' || s === 'conta'),
+    cancella: tasto('cancella', 'cancella', tr('Cancella'), 'fucsia', false, vuoto && s !== 'conta'),
+  };
   const lato = `
     <div class="lp-lato">
       <div class="lp-stato st-${s}"><span class="lp-led"></span><span>${NOMI_STATO[s]()}</span><span class="lp-bpm"><b>${looper.bpm}</b> bpm</span></div>
@@ -404,12 +430,7 @@ function riempiLooper(box) {
         <div class="lp-riga blocca"><small>${tr('Tempo')}</small><div class="lp-chip lp-tempo-chip">${chip('bpm', -1, '◀', false)}<b>${looper.bpm} <small>bpm</small></b>${chip('bpm', 1, '▶', false)}</div>
           <div class="lp-chip">${chip('tap', 1, tr('Tap'), false)}</div></div>
       </div>
-      <div class="lp-tasti">
-        ${tasto('rec', recIco, recTesto, s === 'dub' || (!vuoto && s !== 'rec' && s !== 'conta') ? 'ambra' : 'rosso', s === 'rec' || s === 'dub' || s === 'conta')}
-        ${tasto('suona', 'suona', tr('Suona'), 'ciano', s === 'suona', s !== 'fermo')}
-        ${tasto('ferma', 'ferma', tr('Ferma'), 'viola', s === 'fermo', vuoto && s !== 'conta')}
-        ${tasto('annulla', looper.annullato ? 'ripeti' : 'annulla', looper.annullato ? tr('Ripeti') : tr('Annulla'), 'viola', false, vuoto || s === 'rec' || s === 'conta')}
-        ${tasto('cancella', 'cancella', tr('Cancella'), 'fucsia', false, vuoto && s !== 'conta')}
+      <div class="lp-tasti">${ordineTasti().map(id => tasti[id]).join('')}
       </div>
     </div>`;
   if (box._lato === lato && box.querySelector('.lp-cerchio')) { box.querySelector('.lp-cerchio').innerHTML = firmaLp; return; }
