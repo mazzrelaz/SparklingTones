@@ -61,6 +61,7 @@ function riceviLooper(msg) {
     try { const v = new Spark.Reader(msg.data).float(); if (isFinite(v) && loopVuoto()) looper.bpm = Math.round(v); } catch (e) {}
     ridisegnaLooper(true);
   } else if (msg.sub === 0x77) {
+    if (Date.now() - (looper.cancellato || 0) < 1500) return;   // gli ultimi del loop appena cancellato
     try { looper.pos = new Spark.Reader(msg.data).float(); looper.posQuando = Date.now(); } catch (e) {}
     if (looper.stato === 'vuoto' || looper.stato === 'fermo') { looper.stato = 'suona'; ridisegnaLooper(true); }
   } else if (msg.sub === 0x75 && msg.data.length) {
@@ -71,7 +72,10 @@ function riceviLooper(msg) {
 /** Uno stato, detto dall'ampli o segnato da noi quando l'ampli tace. */
 function eventoLooper(c) {
   const prima = looper.stato;
-  if (c === LP.VUOTO || c === LP.CANCELLA) { looper.stato = 'vuoto'; looper.pos = null; looper.annullato = false; }
+  // L'ampli dice «vuoto» ~1,2 s dopo una cancellazione: se nel frattempo è partito il conteggio,
+  // quel «vuoto» è vecchio e non deve fermarlo (era il cerchio che s'impallava).
+  if ((c === LP.VUOTO || c === LP.CANCELLA) && prima === 'conta') return;
+  if (c === LP.VUOTO || c === LP.CANCELLA) { if (c === LP.CANCELLA) looper.cancellato = Date.now(); looper.stato = 'vuoto'; looper.pos = null; looper.annullato = false; }
   else if (c === LP.REC) { if (prima !== 'conta' || !looper.timerConta.length) fermaConteggio(); looper.stato = 'rec'; looper.pos = 0; looper.posQuando = Date.now(); }
   else if (c === LP.FATTO || c === LP.SUONA || c === LP.FINE_DUB) looper.stato = 'suona';
   else if (c === LP.FERMA) looper.stato = 'fermo';
@@ -119,7 +123,7 @@ function azioneLooper(id) {
     stato(looper.annullato ? tr('sovraincisione annullata') : tr('sovraincisione ripetuta'));
   } else if (id === 'cancella') {
     if (s === 'conta') fermaConteggio(true);
-    if (s !== 'vuoto') mandaLooper(LP.CANCELLA);
+    if (s !== 'vuoto' && mandaLooper(LP.CANCELLA)) looper.cancellato = Date.now();
   } else if (id === 'tap') tapLooper();
   ridisegnaLooper(true);
 }
@@ -130,6 +134,7 @@ let audioLooper = null;
 function clic(uno, quando) {
   try {
     if (!audioLooper) audioLooper = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioLooper.state === 'suspended') audioLooper.resume();
     const t = quando || audioLooper.currentTime;
     const o = audioLooper.createOscillator(), g = audioLooper.createGain();
     o.type = 'square';
@@ -316,8 +321,9 @@ function riempiLooper(box) {
   const recIco = s === 'rec' || s === 'dub' ? 'chiudi' : vuoto || s === 'conta' ? 'rec' : 'dub';
   const recTesto = s === 'rec' || s === 'dub' ? tr('Chiudi') : s === 'conta' ? tr('Annulla il conteggio') : vuoto ? tr('Registra') : tr('Sovraincidi');
   firmaLp = anelloLooper();
-  box.innerHTML = `
-    <div class="lp-cerchio">${firmaLp}</div>
+  // I tasti si rifanno solo se cambiano: rifarli sotto il mouse perde il clic (premuto sul
+  // vecchio, rilasciato sul nuovo), e il conteggio e l'ampli chiedono di ridisegnare spesso.
+  const lato = `
     <div class="lp-lato">
       <div class="lp-stato st-${s}"><span class="lp-led"></span><span>${NOMI_STATO[s]()}</span><span class="lp-bpm"><b>${looper.bpm}</b> bpm</span></div>
       <div class="lp-imp${vuoto ? '' : ' bloccate'}">
@@ -334,6 +340,9 @@ function riempiLooper(box) {
         ${tasto('cancella', 'cancella', tr('Cancella'), 'fucsia', false, vuoto && s !== 'conta')}
       </div>
     </div>`;
+  if (box._lato === lato && box.querySelector('.lp-cerchio')) { box.querySelector('.lp-cerchio').innerHTML = firmaLp; return; }
+  box._lato = lato;
+  box.innerHTML = `<div class="lp-cerchio">${firmaLp}</div>${lato}`;
   box.querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', async () => {
     const id = b.dataset.l;
     if (id === 'cancella') { if (await conferma(tr('cancellare il loop?'), '', { ok: tr('Cancella'), pericolo: true })) azioneLooper('cancella'); }
