@@ -10,12 +10,26 @@
 // VERSIONE in sw.js.
 'use strict';
 
+// La data è scritta in italiano («14 novembre 2026»): in inglese diventa
+// «14 November 2026».
+const MESI_NOVITA = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio',
+  'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+const MONTHS_NOVITA = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+  'August', 'September', 'October', 'November', 'December'];
+function dataNovita(d) {
+  if (!window.Lingua || Lingua.attuale !== 'en') return d;
+  return d.replace(/[a-z]+/, m => {
+    const i = MESI_NOVITA.indexOf(m);
+    return i < 0 ? m : MONTHS_NOVITA[i];
+  });
+}
+
 const NOVITA = [
   {
     versione: 'v158',
     data: '14 novembre 2026',
     voci: [
-      { icona: '🪟', titolo: tr('Sul Microsoft Store'),
+      { icona: '🖥️', titolo: tr('Sul Microsoft Store'),
         testo: tr('L\'app per Windows ora è sul Microsoft Store: gratis, si installa con un clic e si aggiorna da sola. Il link è nella guida del PC e su sparklingtones.com.') },
     ],
   },
@@ -76,7 +90,7 @@ function mostraNovita(n) {
       '<div class="novita-testa">' +
         '<div class="novita-sopra">' + tr('Novità') + ' · ' + n.versione + '</div>' +
         '<div class="novita-titolo">' + tr('Cosa c\'è di nuovo') + '</div>' +
-        '<div class="novita-data">' + n.data + '</div>' +
+        '<div class="novita-data">' + dataNovita(n.data) + '</div>' +
       '</div>' +
       '<ul class="novita-voci">' +
         n.voci.filter(v => !v.dove || v.dove === NOVITA_QUI).map(v =>
