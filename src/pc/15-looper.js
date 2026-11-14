@@ -77,8 +77,11 @@ function eventoLooper(c) {
   // quel «vuoto» è vecchio e non deve fermarlo (era il cerchio che s'impallava).
   if ((c === LP.VUOTO || c === LP.CANCELLA) && prima === 'conta') return;
   if (c === LP.VUOTO || c === LP.CANCELLA) { if (c === LP.CANCELLA) looper.cancellato = Date.now(); looper.stato = 'vuoto'; looper.pos = null; looper.annullato = false; }
-  else if (c === LP.REC) { if (prima !== 'conta' || !looper.timerConta.length) fermaConteggio(); looper.stato = 'rec'; looper.pos = 0; looper.posQuando = Date.now(); }
-  else if (c === LP.FATTO || c === LP.SUONA || c === LP.FINE_DUB) looper.stato = 'suona';
+  else if (c === LP.REC) { if (prima !== 'conta' || !looper.timerConta.length) fermaConteggio(); looper.stato = 'rec'; looper.pos = 0; looper.posQuando = looper.recInizio = Date.now(); }
+  else if (c === LP.FATTO || c === LP.SUONA || c === LP.FINE_DUB) {
+    if (prima === 'rec' && looper.recInizio) { looper.durataLoop = Date.now() - looper.recInizio; looper.pos = 0; looper.posQuando = Date.now(); }
+    looper.stato = 'suona';
+  }
   else if (c === LP.FERMA) looper.stato = 'fermo';
   else if (c === LP.DUB) { looper.stato = 'dub'; looper.annullato = false; }
   if (looper.stato === 'vuoto' && prima !== 'vuoto') spark.send(Spark.commands.getLooperSettings()).catch(() => {});
@@ -185,6 +188,9 @@ function fermaMetronomo() {
 
 function contaERegistra() {
   fermaConteggio();
+  // Un «libero» scritto prima (anche da noi, fino al 14 novembre) può avere solo quattro battute:
+  // l'ampli si fermerebbe lì. Si riscrive prima di partire.
+  if (looper.libero && looper.battute < Math.floor(looper.bpm / 4)) scriviImpostazioniLooper({});
   const a = audioPronto();
   const passo = 60 / (looper.bpm || 120);
   const tempi = 4 * looper.battuteConta;
@@ -220,9 +226,12 @@ function scriviImpostazioniLooper(cambia) {
   try {
     nuove = Spark.impostazioniConBpm(d, cambia.bpm || looper.bpm);
     const k = nuove[0] === 0xcc ? 2 : 1;
-    if (cambia.battute !== undefined) {
-      if (cambia.battute) { nuove[k + 1] = cambia.battute; nuove[k + 2] = 0xc2; } else nuove[k + 2] = 0xc3;
-    }
+    // In «libero» l'ampli si ferma comunque alle battute scritte: come il pedale (2.20) se ne
+    // mettono bpm/4, cioè circa un minuto, il massimo che l'ampli registra.
+    const libero = cambia.battute !== undefined ? !cambia.battute : looper.libero;
+    const bpm = cambia.bpm || looper.bpm;
+    if (libero) { nuove[k + 1] = Math.max(1, Math.min(127, Math.floor(bpm / 4))); nuove[k + 2] = 0xc3; }
+    else { if (cambia.battute) nuove[k + 1] = cambia.battute; nuove[k + 2] = 0xc2; }
   } catch (e) { stato(e.message, 'errore'); return; }
   spark.send(Spark.commands.setLooperSettings(nuove)).catch(() => {});
   looper.imp = nuove;
@@ -270,7 +279,7 @@ const NOMI_STATO = { vuoto: () => tr('pronto'), conta: () => tr('conteggio'), re
 function posLooper() {
   if (looper.pos === null) return null;
   if (looper.stato === 'fermo') return looper.pos;
-  const giro = looper.libero ? 0 : looper.battute * 4 * 60000 / looper.bpm;
+  const giro = looper.libero ? (looper.durataLoop || 0) : looper.battute * 4 * 60000 / looper.bpm;
   const p = looper.pos + (giro ? (Date.now() - looper.posQuando) / giro : 0);
   return Math.min(p, 0.999);
 }
@@ -291,6 +300,11 @@ function taccheLooper() {
     const f = Math.min(0.999, Math.max(0, (Date.now() - looper.inizioConta) / (tempi * 60000 / (looper.bpm || 120))));
     const k = Math.floor(f * n);
     return { n, accese: k + 1, ora: k, battuta: 4 * per };
+  }
+  // In «libero» mentre registra la lunghezza non c'è ancora: gira una battuta alla volta, a tempo.
+  if (looper.libero && s === 'rec' && looper.recInizio) {
+    const tempo = Math.floor((Date.now() - looper.recInizio) / (60000 / looper.bpm));
+    return { n: 4, accese: tempo % 4 + 1, ora: tempo % 4, battuta: 4, battutaN: Math.floor(tempo / 4) + 1 };
   }
   const n = looper.libero ? 32 : 4 * Math.max(1, looper.battute);
   const p = posLooper();
@@ -319,6 +333,7 @@ function anelloLooper() {
   let grande, piccolo;
   if (s === 'conta') { grande = String(looper.tempoConta % 4 || 4); piccolo = looper.battuteConta > 1 ? tr('battuta {0} di {1}', String(looper.battuteConta - Math.ceil(looper.tempoConta / 4) + 1), String(looper.battuteConta)) : ''; }
   else if (s === 'vuoto') { grande = looper.libero ? '∞' : String(looper.battute); piccolo = looper.libero ? tr('libero') : looper.battute === 1 ? tr('battuta') : tr('battute'); }
+  else if (t.battutaN) { grande = `${t.battutaN}<tspan class="lp-tempo">/${t.ora + 1}</tspan>`; piccolo = tr('libero'); }
   else if (t.ora >= 0 && !looper.libero) { grande = `${Math.floor(t.ora / 4) + 1}<tspan class="lp-tempo">/${t.ora % 4 + 1}</tspan>`; piccolo = tr('di {0}', String(looper.battute)); }
   else { grande = { rec: '●', dub: '◉', suona: '▶', fermo: '■' }[s] || ''; piccolo = ''; }
   return `<svg viewBox="0 0 320 320" class="lp-anello st-${s}">
