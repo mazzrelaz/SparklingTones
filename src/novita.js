@@ -12,6 +12,14 @@
 
 const NOVITA = [
   {
+    versione: 'v158',
+    data: '14 novembre 2026',
+    voci: [
+      { icona: '🪟', titolo: tr('Sul Microsoft Store'),
+        testo: tr('L\'app per Windows ora è sul Microsoft Store: gratis, si installa con un clic e si aggiorna da sola. Il link è nella guida del PC e su sparklingtones.com.') },
+    ],
+  },
+  {
     versione: 'v157',
     data: '14 novembre 2026',
     voci: [

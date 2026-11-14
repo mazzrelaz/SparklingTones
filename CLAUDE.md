@@ -338,7 +338,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v157 pubblicata** (14 novembre: un video per capitolo nelle guide; home del sito rifatta; v155: link ai 7 Short di YouTube, video in `tools/video-demo` con `--scena`; v154: Live del PC, tap
+- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v158 pubblicata** (14 novembre: link al Microsoft Store; v157: un video per capitolo nelle guide; home del sito rifatta; v155: link ai 7 Short di YouTube, video in `tools/video-demo` con `--scena`; v154: Live del PC, tap
   tempo, guida del PC dentro l'app, «?», splash «Novità». Dopo, il guscio va oltre v154.
 - **Guida del PC dentro l'app** (13 novembre, come Pulze Control; `src/pc/14-guida.js`): prende i capitoli di
   `guida-pc(.en).html`; i «?» vanno al titolo con `GUIDA_DI` (id degli h3). **La guida del telefono resta com'è** (scelta dell'utente). Pubblicata (v154).
@@ -348,8 +348,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
 - **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
   l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
-  moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.0 inviata in certificazione il 13 novembre**. **Ogni pubblicazione ha la splash «Novità»**
-  (`src/novita.js`: voce in cima con la versione di `sw.js`). **A Store aperto**: riscrivere «L'app per Windows» in `guida-pc.html`.
+  moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.0 pubblicata il 14 novembre** (PEGI 3): `https://apps.microsoft.com/detail/9PLB9RG9VLNX`, già nelle guide
+  del PC e nella home del sito. **Ogni pubblicazione ha la splash «Novità»** (`src/novita.js`: voce in cima con la versione di `sw.js`).
 - **Live del PC provato il 12 novembre con lo Spark**, pedaliera in BLE e via cavo. **Connessione veloce, verificata**:
   `desktop/connessione-veloce.ps1` (uno per dispositivo, da `main.js`) chiede a Windows `ThroughputOptimized`:
   intervallo da 30 a 15 ms, un preset dei banchi da ~1300 a **~530–600 ms**. Solo nell'exe.
