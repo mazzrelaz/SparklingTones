@@ -64,7 +64,10 @@ function riceviLooper(msg) {
   } else if (msg.sub === 0x77) {
     if (Date.now() - (looper.cancellato || 0) < 1500) return;   // gli ultimi del loop appena cancellato
     try { looper.pos = new Spark.Reader(msg.data).float(); looper.posQuando = Date.now(); } catch (e) {}
-    if (looper.stato === 'vuoto' || looper.stato === 'fermo') { looper.stato = 'suona'; ridisegnaLooper(true); }
+    // Dopo un «ferma» l'ampli manda ancora qualche posizione: quelle non rimettono il loop in
+    // «suona» (era il tasto Ferma da premere due volte). Passato un secondo sì: è il PLAY del pannello.
+    const appenaFermato = looper.stato === 'fermo' && Date.now() - (looper.fermato || 0) < 1000;
+    if ((looper.stato === 'vuoto' || looper.stato === 'fermo') && !appenaFermato) { looper.stato = 'suona'; ridisegnaLooper(true); }
   } else if (msg.sub === 0x75 && msg.data.length) {
     eventoLooper(msg.data[msg.data.length - 1]);
   }
@@ -82,7 +85,7 @@ function eventoLooper(c) {
     if (prima === 'rec' && looper.recInizio) { looper.durataLoop = Date.now() - looper.recInizio; looper.pos = 0; looper.posQuando = Date.now(); }
     looper.stato = 'suona';
   }
-  else if (c === LP.FERMA) looper.stato = 'fermo';
+  else if (c === LP.FERMA) { looper.stato = 'fermo'; looper.fermato = Date.now(); }
   else if (c === LP.DUB) { looper.stato = 'dub'; looper.annullato = false; }
   if (looper.stato === 'vuoto' && prima !== 'vuoto') spark.send(Spark.commands.getLooperSettings()).catch(() => {});
   ridisegnaLooper(true);
