@@ -275,31 +275,32 @@ function disegnaPedaliera(corpo) {
 
   const tab = document.createElement('table');
   tab.className = 'lv-tabella';
-  tab.innerHTML = `<thead><tr><th>${tr('Switch')}</th><th>${tr('Messaggio')}</th><th>${tr('Preset · tocco')}</th><th>${tr('Stomp · tocco')}</th><th>${tr('Looper · tocco')}</th><th>${tr('Tenuto premuto')}</th><th></th></tr></thead>`;
+  tab.innerHTML = `<thead><tr><th>${tr('Switch')}</th><th>${tr('Messaggio')}</th><th>${tr('Preset · tocco')}</th><th>${tr('Stomp · tocco')}</th><th>${tr('Looper · tocco')}</th><th>${tr('Looper · tenuto')}</th><th>${tr('Tenuto premuto')}</th><th></th></tr></thead>`;
   const tb = document.createElement('tbody');
   const gestiTocco = GESTI.filter(g => g.id).map(g => 'g:' + g.id);
   const voci = { preset: [null, ...[1, 2, 3, 4, 5, 6, 7, 8].map(n => 'p' + n), ...[1, 2, 3, 4].map(n => 'm' + n), ...gestiTocco],
-    stomp: [null, ...STOMP.map(s => s.id), ...gestiTocco], looper: [null, ...AZIONI_LOOPER.map(a => a.id), ...gestiTocco], lungo: GESTI.map(g => g.id) };
+    stomp: [null, ...STOMP.map(s => s.id), ...gestiTocco], looper: [null, ...AZIONI_LOOPER.map(a => a.id), ...gestiTocco], looperLungo: [null, ...AZIONI_LOOPER.map(a => a.id), ...gestiTocco], lungo: GESTI.map(g => g.id) };
   pedaliera.switch.forEach((s, k) => {
     const tr_ = document.createElement('tr');
-    tr_.innerHTML = `<td><button class="lv-nome-sw" title="${tr('Rinomina')}">${testoConNome(s.nome)}</button></td><td class="lv-msg">${descriviMessaggio(s.chiave)}</td><td></td><td></td><td></td><td></td><td></td>`;
+    tr_.innerHTML = `<td><button class="lv-nome-sw" title="${tr('Rinomina')}">${testoConNome(s.nome)}</button></td><td class="lv-msg">${descriviMessaggio(s.chiave)}</td><td></td><td></td><td></td><td></td><td></td><td></td>`;
     const celle = tr_.querySelectorAll('td');
     const cambia = (campo, v) => { s[campo] = v; salvaPedaliera(); live.firma = ''; disegnaLive(); };
     celle[2].appendChild(scelta(s.preset, tr('Nessuno'), nomePreset, voci.preset, v => cambia('preset', v)));
     celle[3].appendChild(scelta(s.stomp, tr('Nessuno'), nomeStomp, voci.stomp, v => cambia('stomp', v)));
     celle[4].appendChild(scelta(s.looper || null, tr('Nessuno'), nomeLooper, voci.looper, v => cambia('looper', v)));
-    celle[5].appendChild(scelta(s.lungo, tr('Nessuno'), nomeGesto, voci.lungo, v => cambia('lungo', v)));
+    celle[5].appendChild(scelta(s.looperLungo || null, tr('Nessuno'), nomeLooper, voci.looperLungo, v => cambia('looperLungo', v)));
+    celle[6].appendChild(scelta(s.lungo, tr('Nessuno'), nomeGesto, voci.lungo, v => cambia('lungo', v)));
     const togli = document.createElement('button');
     togli.textContent = tr('Togli');
     togli.addEventListener('click', () => { pedaliera.switch.splice(k, 1); salvaPedaliera(); disegnaLive(); });
-    celle[6].appendChild(togli);
+    celle[7].appendChild(togli);
     celle[0].firstChild.addEventListener('click', async () => {
       const n = await chiediTesto(tr('nome dello switch'), '', s.nome);
       if (n && n.trim()) cambia('nome', n.trim().slice(0, 6));
     });
     tb.appendChild(tr_);
   });
-  if (!pedaliera.switch.length) tb.innerHTML = `<tr><td colspan="7" class="lv-msg">${tr('Nessuno switch.')}</td></tr>`;
+  if (!pedaliera.switch.length) tb.innerHTML = `<tr><td colspan="8" class="lv-msg">${tr('Nessuno switch.')}</td></tr>`;
   tab.appendChild(tb);
   box.appendChild(tab);
 
@@ -316,6 +317,11 @@ function disegnaPedaliera(corpo) {
   bloccoImpara.className = 'lv-blocco';
   bloccoImpara.appendChild(impara);
   piede.appendChild(bloccoImpara);
+  const bloccoPedale = document.createElement('div');
+  bloccoPedale.className = 'lv-blocco';
+  bloccoPedale.innerHTML = `<button>${tr('Looper come il nostro pedale')}</button>`;
+  bloccoPedale.firstChild.addEventListener('click', looperComeIlPedale);
+  piede.appendChild(bloccoPedale);
   piede.insertAdjacentHTML('beforeend', `<span class="lv-durata-et">${tr('Pressione lunga')}${aiuto('pedaliera')}</span>`);
   const bloccoDurata = document.createElement('div');
   bloccoDurata.className = 'lv-blocco';
@@ -357,9 +363,10 @@ function arrivoMidi(stato_, d1, d2) {
 
   if (premuto) {
     if (midi.premuti.has(chiave)) return;
-    if (!s.lungo) { midi.premuti.set(chiave, { fatto: true }); tocco(s); return; }   // niente da aspettare
+    const lungo = live.looper && live.vista === 'live' && s.looperLungo ? s.looperLungo : s.lungo;
+    if (!lungo) { midi.premuti.set(chiave, { fatto: true }); tocco(s); return; }   // niente da aspettare
     const p = { fatto: false };
-    p.timer = setTimeout(() => { p.fatto = true; gesto(s.lungo); }, pedaliera.durata);
+    p.timer = setTimeout(() => { p.fatto = true; lungoSwitch(lungo); }, pedaliera.durata);
     midi.premuti.set(chiave, p);
   } else {
     const p = midi.premuti.get(chiave);
@@ -375,6 +382,35 @@ function tocco(s) {
   if (live.looper) { if (azione) azioneLooper(azione); return; }
   if (live.stomp) { if (s.stomp) cambiaStomp(s.stomp); }
   else { const i = postoDiSwitch(s); if (i >= 0) suonaPosto(i); }
+}
+
+/** Una pressione lunga: un gesto, o (nel looper) un'azione del looper. */
+function lungoSwitch(v) {
+  if (v.startsWith('g:')) gesto(v.slice(2));
+  else if (AZIONI_LOOPER.some(a => a.id === v)) { if (live.vista === 'live') azioneLooper(v); }
+  else gesto(v);
+}
+
+/* Le combinazioni del nostro pedale (`docs/looper.md`): i primi cinque switch imparati diventano
+   FS1…FS5. FS1 registra/sovraincide/chiude, FS2 annulla/ripete, FS3 suona, FS4 ferma e tenuto
+   cancella, FS5 tap e tenuto entra/esce dal looper. Si cambia tutto dopo, switch per switch. */
+const LOOPER_PEDALE = [
+  { looper: 'rec' }, { looper: 'annulla' }, { looper: 'suona' },
+  { looper: 'ferma', looperLungo: 'cancella' }, { looper: 'tap', looperLungo: 'g:looper', lungo: 'looper' },
+];
+async function looperComeIlPedale() {
+  if (!pedaliera.switch.length) { avvisa(tr('nessuno switch'), tr('Impara prima gli switch del pedale.')); return; }
+  const giàFatti = pedaliera.switch.slice(0, 5).some(s => s.looper || s.looperLungo);
+  if (giàFatti && !await conferma(tr('assegnare il looper come il nostro pedale?'), tr('Le assegnazioni del looper dei primi cinque switch vengono sostituite.'), { ok: tr('Assegna') })) return;
+  pedaliera.switch.slice(0, 5).forEach((s, i) => {
+    const p = LOOPER_PEDALE[i];
+    s.looper = p.looper; s.looperLungo = p.looperLungo || null;
+    if (p.lungo && !s.lungo) s.lungo = p.lungo;
+  });
+  salvaPedaliera();
+  live.firma = '';
+  disegnaLive();
+  stato(tr('looper assegnato come il nostro pedale'));
 }
 
 function gesto(g) {
