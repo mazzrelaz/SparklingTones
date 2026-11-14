@@ -51,8 +51,10 @@ const midi = { usb: null, ble: null, bleNome: '', premuti: new Map() };
 
 async function caricaPedaliera() {
   if (pedalieraLetta) return;
-  pedalieraLetta = true;
+  // Il segno si mette solo a lettura riuscita: se la libreria non era ancora aperta, si riprova
+  // alla prossima apertura della Live invece di partire per sempre da una pedaliera vuota.
   const p = await store.getSetting('pedaliera', null);
+  pedalieraLetta = true;
   if (p && Array.isArray(p.switch)) pedaliera = { switch: p.switch, durata: DURATE.includes(p.durata) ? p.durata : 2000 };
   live.banco = await store.getSetting('liveBanco', 0);
 }
