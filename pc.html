@@ -533,12 +533,13 @@
   .lv-blocco .lv-impara, .lv-blocco .lv-impara.attesa { border:0; background:none; }
   .lv-blocco .lv-impara.attesa { color:var(--ambra); }
   .lv-blocco .lv-scegli { background:none; height:100%; align-items:center; padding:0 14px; min-width:150px; }
-  .lv-tabella { width:100%; border-collapse:separate; border-spacing:0; background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  .lv-tabella th { font:600 0.68rem var(--strumento); letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); text-align:left; padding:10px 14px; background:var(--panel2); }
-  .lv-tabella td { padding:9px 14px; border-top:1px solid var(--line-soft); }
+  .lv-tabella { width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0; background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .lv-tabella th { font:600 0.68rem var(--strumento); letter-spacing:0.1em; text-transform:uppercase; color:var(--faint); text-align:left; padding:10px 8px; background:var(--panel2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .lv-tabella th:first-child { width:64px; } .lv-tabella th:nth-child(2) { width:92px; } .lv-tabella th:last-child { width:100px; }
+  .lv-tabella td { padding:9px 8px; border-top:1px solid var(--line-soft); }
   .lv-msg { font:0.78rem var(--strumento); color:var(--dim); }
-  .lv-scegli { min-width:170px; text-align:left; display:flex; justify-content:space-between; gap:10px; background:var(--incavo); }
-  .lv-scegli::after { content:'▾'; color:var(--faint); }
+  .lv-scegli { width:100%; min-width:0; min-height:34px; font-size:0.78rem; padding:4px 10px; align-items:center; text-align:left; display:flex; justify-content:space-between; gap:10px; background:var(--incavo); }
+  .lv-scegli { overflow:hidden; } .lv-scegli::after { flex:none; content:'▾'; color:var(--faint); }
   .lv-scegli.vuoto { color:var(--faint); }
   .lv-nome-sw { min-width:44px; }
   .lv-piede { display:flex; align-items:center; gap:12px; margin-top:16px; }
