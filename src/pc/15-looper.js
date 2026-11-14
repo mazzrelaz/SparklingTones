@@ -198,6 +198,17 @@ function cambiaBattute(passo) {
   scriviImpostazioniLooper({ battute: BATTUTE[j] });
 }
 
+/** Il tempo con le frecce: subito a schermo, all'ampli quando ci si ferma (un 0x0176 solo). */
+let bpmInAttesa = null;
+function cambiaBpm(passo) {
+  if (!loopVuoto()) { stato(tr('con un loop registrato battute e tempo non si cambiano')); return; }
+  looper.bpm = Math.max(40, Math.min(250, looper.bpm + passo));
+  const b = schermoLive && schermoLive.querySelector('.lp-tempo-chip b');
+  if (b) b.innerHTML = `${looper.bpm} <small>bpm</small>`;
+  clearTimeout(bpmInAttesa);
+  bpmInAttesa = setTimeout(() => scriviImpostazioniLooper({ bpm: looper.bpm }), 300);
+}
+
 function tapLooper() {
   const ora_ = Date.now();
   looper.tap = looper.tap.filter(t => ora_ - t < 2500).concat(ora_);
@@ -330,6 +341,8 @@ function riempiLooper(box) {
         <div class="lp-riga"><small>${tr('Lunghezza')}</small><div class="lp-chip">${BATTUTE.map(b => chip('b', b, b ? String(b) : '∞', looper.libero ? !b : b === looper.battute)).join('')}</div></div>
         <div class="lp-riga"><small>${tr('Conteggio')}</small><div class="lp-chip">${chip('c', 1, tr('1 battuta'), looper.battuteConta === 1)}${chip('c', 2, tr('2 battute'), looper.battuteConta === 2)}</div>
           <div class="lp-chip">${chip('click', 1, tr('Click'), looper.click)}</div>
+</div>
+        <div class="lp-riga blocca"><small>${tr('Tempo')}</small><div class="lp-chip lp-tempo-chip">${chip('bpm', -1, '◀', false)}<b>${looper.bpm} <small>bpm</small></b>${chip('bpm', 1, '▶', false)}</div>
           <div class="lp-chip">${chip('tap', 1, tr('Tap'), false)}</div></div>
       </div>
       <div class="lp-tasti">
@@ -357,4 +370,12 @@ function riempiLooper(box) {
   }));
   box.querySelector('[data-click]').addEventListener('click', () => { looper.click = !looper.click; ridisegnaLooper(true); });
   box.querySelector('[data-tap]').addEventListener('click', tapLooper);
+  // Le frecce del tempo: un bpm a clic, cinque con Maiusc; tenute premute vanno da sole.
+  box.querySelectorAll('[data-bpm]').forEach(b => {
+    let ripeti = null;
+    const passo = e => cambiaBpm(+b.dataset.bpm * (e.shiftKey ? 5 : 1));
+    const basta = () => { clearTimeout(ripeti); clearInterval(ripeti); ripeti = null; };
+    b.addEventListener('pointerdown', e => { passo(e); basta(); ripeti = setTimeout(() => { ripeti = setInterval(() => passo(e), 70); }, 400); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, basta));
+  });
 }

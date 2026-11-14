@@ -504,7 +504,9 @@
   .lp-bpm { margin-left:auto; font-size:0.95rem; color:var(--faint); font-weight:600; }
   .lp-bpm b { font-size:1.9rem; color:var(--text); margin-right:4px; }
   .lp-imp { display:flex; flex-direction:column; gap:14px; }
-  .lp-imp.bloccate .lp-riga:first-child { opacity:0.35; pointer-events:none; }
+  .lp-imp.bloccate .lp-riga:first-child, .lp-imp.bloccate .lp-riga.blocca { opacity:0.35; pointer-events:none; }
+  .lp-tempo-chip b { min-width:5.2em; text-align:center; font:700 1.05rem var(--strumento); color:var(--text); align-self:center; }
+  .lp-tempo-chip b small { font-size:0.7rem; color:var(--faint); font-weight:600; }
   .lp-riga { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .lp-riga small { width:6.5em; color:var(--faint); font:600 0.7rem var(--strumento); letter-spacing:0.12em; text-transform:uppercase; }
   .lp-chip { display:flex; gap:4px; padding:4px; background:var(--incavo); border:1px solid var(--line); border-radius:12px; }
