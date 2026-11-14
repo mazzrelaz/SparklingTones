@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v159',
+    data: '14 novembre 2026',
+    voci: [
+      { icona: '🔧', titolo: tr('Piccole correzioni'),
+        testo: tr('Questa finestra delle novità ora mostra bene data e icone anche in inglese.') },
+    ],
+  },
+  {
     versione: 'v158',
     data: '14 novembre 2026',
     voci: [

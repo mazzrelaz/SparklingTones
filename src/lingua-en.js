@@ -1729,6 +1729,10 @@ window.LINGUA_EN = {
     "Short videos on YouTube",
   "Sette video brevi, uno per sezione dell'app: collegarsi, la libreria, la scheda del preset, l'editor, il Live, l'accordatore e il backup. Li trovi dalla guida, sul canale SparklingTones.":
     "Seven short videos, one for each part of the app: connecting, the library, the preset card, the editor, Live, the tuner and backup. You'll find them from the guide, on the SparklingTones channel.",
+  "Piccole correzioni":
+    "Small fixes",
+  "Questa finestra delle novità ora mostra bene data e icone anche in inglese.":
+    "This What's new window now shows dates and icons correctly in English too.",
   "Sul Microsoft Store":
     "On the Microsoft Store",
   "L'app per Windows ora è sul Microsoft Store: gratis, si installa con un clic e si aggiorna da sola. Il link è nella guida del PC e su sparklingtones.com.":
