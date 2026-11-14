@@ -255,8 +255,8 @@ nostro. I comandi non richiedono autenticazione (misurato).
 **Looper: FUNZIONA sul pedale** (`pedale/prova-ble/07-looper.ino`, tutto in `docs/looper.md`): comanda
 il looper dell'ampli con `0x0175`, legge lo stato da `0x0375` e bpm/click da `0x0376`. **L'escamotage
 del click**: il conteggio prima del rec (quattro tempi, a loop vuoto) lo suona un **piezo su D3**, e
-il loop si taglia a battute. **Da portare sul PC** (13 novembre, idea dell'utente): stessa logica in JS,
-tasti dal pedale MIDI, click del conteggio da Web Audio. **Non aggiungere sonde sui byte.**
+il loop si taglia a battute. **Sul PC** (14 novembre, `src/pc/15-looper.js`, terzo modo della Live): tutto
+in `docs/looper.md`, «Il looper sul PC»; **con lo Spark vero è da provare**. **Non aggiungere sonde sui byte.**
 
 **Metodo**: una cattura d'ascolto dice cosa l'ampli racconta, non cosa accetta; si registra
 prima e si interpreta dopo; i dati finti sono marcati `demo` e non finiscono nelle catture;
@@ -338,10 +338,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v159 pubblicata** (14 novembre: splash inglese corretta; v158: link al Microsoft Store; v157: un video per capitolo nelle guide; home del sito rifatta; v155: link ai 7 Short di YouTube, video in `tools/video-demo` con `--scena`; v154: Live del PC, tap
-  tempo, guida del PC dentro l'app, «?», splash «Novità». Dopo, il guscio va oltre v154.
-- **Guida del PC dentro l'app** (13 novembre, come Pulze Control; `src/pc/14-guida.js`): prende i capitoli di
-  `guida-pc(.en).html`; i «?» vanno al titolo con `GUIDA_DI` (id degli h3). **La guida del telefono resta com'è** (scelta dell'utente). Pubblicata (v154).
+- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v159 pubblicata** (14 novembre); le uscite prima nel diario.
+  **In `main` e non pubblicato**: il looper del PC e il tasto «Pedale BT» della Live (14 novembre, sera). Il guscio va oltre v159.
 - **Vista Live del PC** (11 novembre, `src/pc/12-live.js`): Preset/Stomp e pedaliera MIDI; **con lo Spark e un pedale
   veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **La Pedaliera è pensata per pedali MIDI commerciali, non per
   il nostro** (regola dell'utente, 12 novembre). **Trappola: un `filter` animato rompe il disegno
@@ -350,15 +348,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
   moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.0 pubblicata il 14 novembre** (PEGI 3): `https://apps.microsoft.com/detail/9PLB9RG9VLNX`, già nelle guide
   del PC e nella home del sito. **Ogni pubblicazione ha la splash «Novità»** (`src/novita.js`: voce in cima con la versione di `sw.js`).
-- **Live del PC provato il 12 novembre con lo Spark**, pedaliera in BLE e via cavo. **Connessione veloce, verificata**:
-  `desktop/connessione-veloce.ps1` (uno per dispositivo, da `main.js`) chiede a Windows `ThroughputOptimized`:
-  intervallo da 30 a 15 ms, un preset dei banchi da ~1300 a **~530–600 ms**. Solo nell'exe.
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
-- **Batteria** (2.41): letture a mediana, +100 mV; dettaglio nel diario (12 novembre). **Basetta e pezzi TME arrivati**: montaggio rimandato.
-- Voci lunghe: `docs/diario.md`, 9 e 10 novembre.
-- **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
-  file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
+- Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key): **mai più catture o
   strumenti con la chiave `0x0170` nel repository.** Copia oraria dei progetti in `Desktop\Cloud Backup`.

@@ -742,3 +742,43 @@ registrazione era contato dal resto di `millis() - registraDa`, e `registraDa` s
 due volte: al nostro `04` (40 ms prima dell'«uno») e alla conferma dell'ampli ~35 ms dopo.
 Adesso un click per tempo, deciso dal **numero** del tempo: la rimessa a punto non ne fa
 partire un altro. **Verificata dall'utente lo stesso giorno, insieme alla 2.20** (cerchio in «libero» e click per tutta la registrazione).
+
+## Il looper sul PC — 14 novembre 2026
+
+Terzo modo della Live del PC, accanto a Preset e Stomp (`src/pc/15-looper.js`; nel protocollo
+`looper()` e `getLooperState()`; nell'ampli finto un looper per le prove). Stessa logica del pedale.
+**Provato con l'ampli finto e, dall'utente, con lo Spark e un pedale MIDI dall'app Windows locale**
+(`npm.cmd start` in `desktop/`: carica i file del repository, quindi si prova senza pubblicare).
+
+- **Grafica** (scelta dall'utente, dopo una prima versione «orrenda»): lo stile del tuner, un anello di
+  ~72 tacche al neon ciano → viola → fucsia, accese un tempo alla volta, l'«uno» più lungo, il tempo di
+  adesso bianco; rosso mentre conta e registra, arancione in sovraincisione. Al centro battuta/tempo
+  scritto **«1/3»** (non «1.3»). Tasti tondi colorati, **nell'ordine degli switch del pedale MIDI**
+  (`ordineTasti`), etichetta «D» al tocco e «D…» tenuto.
+- **Conteggio**: 1 o 2 battute; **anche in libero**. L'anello gira di continuo nel conteggio.
+- **Click** a tre vie: spento / solo conteggio / **tutto il primo take**. Si programma
+  **sull'orologio dell'audio** (metronomo che guarda 120 ms avanti ogni 25 ms), l'audio si sveglia
+  alla pressione e si parte 150 ms dopo: coi `setTimeout` il primo colpo «si impastava».
+- **Tempo** con frecce (1 bpm, 5 con Maiusc, tenute scorrono) e Tap; all'ampli un solo `0x0176`
+  quando ci si ferma. Battute e tempo solo a loop vuoto.
+- **Pedaliera**: colonne «Looper · tocco» e «Looper · tenuto» (la seconda vale solo nel looper),
+  e il tasto «Looper come il nostro pedale» (FS1 rec, FS2 annulla, FS3 suona, FS4 ferma / tenuto
+  cancella, FS5 tap / tenuto entra-esce). Nella Live il tasto rapido **«Pedale BT»**.
+
+**Trappole trovate qui:**
+
+- **In libero l'ampli si ferma comunque alle battute scritte**: se ne mettono bpm/4 (circa un
+  minuto), come il pedale 2.20; un libero rimasto con poche battute si riscrive prima di partire.
+- **Il «vuoto» (`0x0375 00`) arriva ~1,2 s dopo una cancellazione**: se nel frattempo è partito il
+  conteggio, va ignorato (il cerchio s'impallava).
+- **Dopo `09` arrivano ancora posizioni `0x0377`**: per un secondo non rimettono il loop in «suona»
+  (serviva premere Ferma due volte). Lo stesso dopo una cancellazione.
+- **Rifare i tasti sotto il mouse perde il clic**: si rifanno solo se cambia il loro HTML.
+- **Un pedale che manda Program Change non ha il rilascio**: niente pressione lunga (FS4 tenuto non
+  cancella). Serve un pedale in CC momentaneo (127 premuto, 0 rilasciato). Visto dall'utente col suo
+  pedale, 14 novembre.
+- Nel riquadro del browser l'IndexedDB di `localhost:8099` si è bloccato (anche un `open` a mano non
+  risponde, un database nuovo sì): ambiente, non app. `caricaPedaliera` ora rilegge se fallisce.
+
+**Da fare**: le frasi inglesi nuove (`tr`) alla pubblicazione («Annulla» deve diventare «Undo», non
+«Cancel»); il tasto Ferma e il libero da riverificare con lo Spark.

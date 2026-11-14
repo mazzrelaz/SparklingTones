@@ -1392,3 +1392,23 @@ Il post del beta test non ha avuto risposta: l'app resta tutta gratuita, con don
 - **Pubblicazione**: `main` e `origin/main` vanno insieme. **v153 pubblicata** (11 novembre): inglese
   completo (v152; `tools/lingua.html` legge anche `pc.html` e le `tr` dentro i `${…}`) e, sul PC, «Impostazioni e
   backup» in una finestra (lingua, Hendrix, backup, Dropbox). Dopo, il guscio va oltre v153.
+
+## Estratto di CLAUDE.md, 14 novembre 2026 (sera)
+
+- **Guida del PC dentro l'app** (13 novembre, come Pulze Control; `src/pc/14-guida.js`): prende i capitoli di
+  `guida-pc(.en).html`; i «?» vanno al titolo con `GUIDA_DI` (id degli h3). **La guida del telefono resta com'è** (scelta dell'utente). Pubblicata (v154).
+
+- **Live del PC provato il 12 novembre con lo Spark**, pedaliera in BLE e via cavo. **Connessione veloce, verificata**:
+  `desktop/connessione-veloce.ps1` (uno per dispositivo, da `main.js`) chiede a Windows `ThroughputOptimized`:
+  intervallo da 30 a 15 ms, un preset dei banchi da ~1300 a **~530–600 ms**. Solo nell'exe.
+
+il loop si taglia a battute. **Da portare sul PC** (13 novembre, idea dell'utente): stessa logica in JS,
+tasti dal pedale MIDI, click del conteggio da Web Audio. **Non aggiungere sonde sui byte.**
+
+- **Batteria** (2.41): letture a mediana, +100 mV; dettaglio nel diario (12 novembre). **Basetta e pezzi TME arrivati**: montaggio rimandato.
+
+- **Collaudi aperti** (editor con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa un
+  file» con un preset vero, il NEO): `docs/diario.md`, estratto del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
+
+- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v159 pubblicata** (14 novembre: splash inglese corretta; v158: link al Microsoft Store; v157: un video per capitolo nelle guide; home del sito rifatta; v155: link ai 7 Short di YouTube, video in `tools/video-demo` con `--scena`; v154: Live del PC, tap
+  tempo, guida del PC dentro l'app, «?», splash «Novità». Dopo, il guscio va oltre v154.
