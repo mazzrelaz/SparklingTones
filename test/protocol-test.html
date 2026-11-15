@@ -206,6 +206,9 @@ check('lo Spark NEO ha quattro slot senza banchi',
 check('lo Spark Mini ha quattro slot, in qualunque forma si chiami',
       ['Spark MINI', 'Spark Mini', 'Spark MINI BLE'].map(n => Spark.profiloAmpli(n).slot + (Spark.profiloAmpli(n).banchi ? 'b' : '')),
       ['4', '4', '4']);
+check('lo Spark 40 ha quattro slot; lo Spark 2 resta a otto',
+      ['Spark 40', 'Spark 40 Audio', 'Spark 40 BLE', 'Spark 2'].map(n => Spark.profiloAmpli(n).slot),
+      [4, 4, 4, 8]);
 check('un nome sconosciuto vale come lo Spark 2',
       Spark.profiloAmpli('Spark Qualcosa'), { nome: 'Spark Qualcosa', slot: 8, banchi: true });
 check('sul NEO gli slot sono CH1-CH4, senza colore',
