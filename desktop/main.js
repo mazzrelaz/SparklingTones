@@ -115,11 +115,32 @@ function apriFinestra() {
   win.loadURL('spark://app/pc.html');
 }
 
+/* I permessi (audit del 15 novembre 2026): da solo Electron li concede tutti senza chiedere
+ * (microfono, posizione, notifiche, MIDI con SysEx…). Alla pagina servono il MIDI della Live,
+ * gli appunti («Genera con l'IA», il registro del pedale) e il programma di posta di «Segnala un
+ * problema»; il resto no. Il Bluetooth non passa da qui: lo sceglie select-bluetooth-device.
+ * `midiSysex` serve anche al MIDI semplice: col Chromium di Electron 45 requestMIDIAccess() senza
+ * SysEx arriva qui con quel nome (provato: con il solo `midi` la Pedaliera USB era negata). */
+const PERMESSI = new Set(['midi', 'midiSysex', 'clipboard-sanitized-write', 'fullscreen']);
+function permesso(nome, dettagli) {
+  if (PERMESSI.has(nome)) return true;
+  if (nome === 'openExternal') return /^mailto:/i.test((dettagli && dettagli.externalURL) || '');
+  console.log('permesso negato:', nome);
+  return false;
+}
+
 app.whenReady().then(() => {
+  const { session } = require('electron');
+  session.defaultSession.setPermissionRequestHandler((_wc, nome, risposta, dettagli) => risposta(permesso(nome, dettagli)));
+  session.defaultSession.setPermissionCheckHandler((_wc, nome, _origine, dettagli) => permesso(nome, dettagli));
+
   protocol.handle('spark', (req) => {
-    const rel = decodeURIComponent(new URL(req.url).pathname).replace(/^\/+/, '');
+    let rel;
+    try { rel = decodeURIComponent(new URL(req.url).pathname).replace(/^\/+/, ''); }
+    catch { return new Response('no', { status: 400 }); }
     const file = path.normalize(path.join(RADICE, rel));
-    if (!file.startsWith(RADICE)) return new Response('no', { status: 403 });
+    // Col separatore in coda: senza, passerebbe anche una cartella sorella che comincia allo stesso modo.
+    if (!file.startsWith(RADICE + path.sep)) return new Response('no', { status: 403 });
     return net.fetch(pathToFileURL(file).toString());
   });
   apriFinestra();
