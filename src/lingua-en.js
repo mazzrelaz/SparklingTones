@@ -2007,4 +2007,8 @@ window.LINGUA_EN = {
     "Independent project, not affiliated with Positive Grid. Provided as is, without warranty: you use it at your own risk.",
   "Prima di cominciare":
     "Before you start",
+  "Un promemoria ben visibile: SparklingTones è un progetto indipendente, senza garanzie e senza alcun rapporto con Positive Grid.":
+    "A clear reminder: SparklingTones is an independent project, without warranty and not affiliated with Positive Grid.",
+  "Il looper del PC in inglese, e la finestra delle novità che non si apriva.":
+    "The PC looper in English, and the what's new window that didn't open.",
 };

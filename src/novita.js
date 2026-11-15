@@ -26,6 +26,16 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v161',
+    data: '15 novembre 2026',
+    voci: [
+      { icona: '⚠️', titolo: tr('Lo usi a tuo rischio'),
+        testo: tr('Un promemoria ben visibile: SparklingTones è un progetto indipendente, senza garanzie e senza alcun rapporto con Positive Grid.') },
+      { icona: '🔧', titolo: tr('Piccole correzioni'),
+        testo: tr('Il looper del PC in inglese, e la finestra delle novità che non si apriva.'), dove: 'pc' },
+    ],
+  },
+  {
     versione: 'v160',
     data: '15 novembre 2026',
     voci: [
