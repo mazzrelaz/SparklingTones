@@ -303,8 +303,8 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 
 ## Convenzioni
 
-- **I commit li faccio io** (suite verdi, messaggi in italiano su cosa e perché) e **quelli visibili li
-  pusho senza chiedere**. **La grafica** (colori, sfondo, disposizione) passa prima da una bozza e si
+- **I commit li faccio io** (suite verdi, messaggi in italiano su cosa e perché) , ma **il push di `main` è
+  pubblicare: mai senza il consenso dell'utente** (15 novembre 2026). **La grafica** (colori, sfondo, disposizione) passa prima da una bozza e si
   pubblica solo dopo il suo sì.
 - All'utente: cosa è successo e cosa cambia per lui, passo passo; il racconto va in `docs/`.
 - **In locale la libreria è vuota** (altra origine): preset finti con `store.importFromAmp([...])`.
