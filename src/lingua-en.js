@@ -2037,4 +2037,14 @@ window.LINGUA_EN = {
     "The looper in the guide",
   "La guida del PC spiega il looper della Live: lunghezza, conteggio, click e tutti i tasti.":
     "The PC guide explains the Live looper: length, count-in, click and every button.",
+  "Versione {0}":
+    "Version {0}",
+  "La versione si vede":
+    "The version is shown",
+  "In Informazioni c'è il numero di versione dell'app, scritto come 1.6.6.":
+    "About now shows the app's version number, written like 1.6.6.",
+  "Il logo nella schermata iniziale":
+    "The logo on the start screen",
+  "Prima di collegare l'ampli, il logo inciso nello sfondo e la versione sotto «Collega».":
+    "Before you connect the amp, the logo engraved in the background and the version under «Connect».",
 };

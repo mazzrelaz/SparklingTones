@@ -26,6 +26,16 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v166',
+    data: '15 novembre 2026',
+    voci: [
+      { icona: '🔢', titolo: tr('La versione si vede'),
+        testo: tr('In Informazioni c\'è il numero di versione dell\'app, scritto come 1.6.6.') },
+      { icona: '✨', titolo: tr('Il logo nella schermata iniziale'), dove: 'pc',
+        testo: tr('Prima di collegare l\'ampli, il logo inciso nello sfondo e la versione sotto «Collega».') },
+    ],
+  },
+  {
     versione: 'v165',
     data: '15 novembre 2026',
     voci: [
@@ -177,6 +187,18 @@ function mostraNovita(n) {
   document.addEventListener('keydown', tasto);
   document.body.appendChild(velo);
 }
+
+// La versione dell'app: la voce in cima a NOVITA ha per regola quella di sw.js.
+// Si scrive in ogni `.versione-app` (Informazioni, schermata vuota del PC).
+// Per le persone si scrive a cifre puntate (15 novembre 2026, chiesto dall'utente):
+// v165 → 1.6.5. La cache e le Novità restano su «v165».
+const VERSIONE_APP = NOVITA[0].versione.replace(/^v/, '').split('').join('.');
+function scriviVersione(radice) {
+  (radice || document).querySelectorAll('.versione-app').forEach(el => {
+    el.textContent = tr('Versione {0}', VERSIONE_APP);
+  });
+}
+scriviVersione();
 
 (function controllaNovita() {
   const ultima = NOVITA[0];

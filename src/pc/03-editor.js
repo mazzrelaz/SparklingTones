@@ -34,6 +34,10 @@ function disegnaVuoto() {
     b.addEventListener('click', collega);
     testo.appendChild(b);
   }
+  const v = document.createElement('p');
+  v.className = 'versione-app';
+  testo.appendChild(v);
+  if (typeof scriviVersione === "function") scriviVersione(testo);
 }
 
 /** Il nome, dove sta, «modificato», il tempo e i tasti che dipendono dallo stato. */

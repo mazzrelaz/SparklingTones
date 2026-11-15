@@ -28,6 +28,8 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [x] (15 novembre, 1.0.1, nero pieno scelto dall utente) **Al prossimo aggiornamento dello Store: rifare l icona** (l'utente: «orrenda con quegli angoli neri»).
   Sulla pagina dello Store l'icona ha gli angoli neri: va fatta senza angoli (sfondo pieno fino al bordo o
   trasparente), in `desktop/build/appx/` e nelle immagini della scheda. Prima una bozza da fargli vedere.
+- [ ] **Al prossimo aggiornamento dello Store: allineare la versione** a quella dell'app (dal 15 novembre l'app
+  mostra v166 come «1.6.6», in `src/novita.js`; lo Store è a 1.0.2). Deciso dall'utente.
 
 ## 3. Collaudi con l'ampli
 

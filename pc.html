@@ -268,6 +268,16 @@
   #palco-vuoto div { color:var(--dim); line-height:1.6; max-width:560px; text-align:center; }
   #palco-vuoto b { color:var(--text); }
   #palco-vuoto button { margin-top:14px; }
+  /* Il logo grande in trasparenza dietro al «Collega», e la versione sotto. */
+  #palco-vuoto { position:relative; overflow:hidden; }
+  /* Inciso nello sfondo: la sagoma scura, e sotto di lei la stessa un pixel più in basso, chiara, come la luce sul bordo. */
+  #palco-vuoto::before, #palco-vuoto::after { content:''; position:absolute; inset:0; pointer-events:none;
+    -webkit-mask:url(icons/logo.svg) center calc(50% - 70px) / min(70%, 900px) no-repeat; mask:url(icons/logo.svg) center calc(50% - 70px) / min(70%, 900px) no-repeat; }
+  #palco-vuoto::before { background:rgba(255,255,255,.06); transform:translate(1px, 2px); }
+  #palco-vuoto::after { background:rgba(0,0,0,.30); }
+  #palco-vuoto > div { position:relative; z-index:1; margin-top:200px; }
+  #palco-vuoto .versione-app { margin:14px 0 0; font-size:.78rem; color:var(--faint); }
+  .about .versione-app { color:var(--faint); font-size:.8rem; }
   #foto { display:flex; align-items:center; justify-content:center; border-radius:10px; padding:18px; min-height:0; position:relative;
           background:radial-gradient(circle at 50% 45%, #3b4452, #252b34 72%); overflow:hidden; }
   #foto img { max-width:100%; max-height:100%; object-fit:contain; filter:drop-shadow(0 14px 22px rgba(0,0,0,0.55)); transition:filter 0.2s; }

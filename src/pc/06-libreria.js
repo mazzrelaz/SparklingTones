@@ -631,6 +631,8 @@ async function svuotaLibreria() {
 async function apriInformazioni() {
   const corpo = document.createElement('div');
   corpo.className = 'about';
+  corpo.insertAdjacentHTML('beforeend', '<p class="versione-app"></p>');
+  scriviVersione(corpo);
   corpo.insertAdjacentHTML('beforeend', '<p class="novita-rischio">⚠️ <strong>' + tr("Progetto indipendente, senza alcun rapporto con Positive Grid. Fornito così com'è, senza garanzie: lo usi a tuo rischio.") + '</strong></p>');
   corpo.insertAdjacentHTML('beforeend', tr(`<p><strong>SparklingTones</strong> organizza i preset di un amplificatore Spark 2 e li manda
     all'amplificatore via Bluetooth. Gira per intero dentro il browser: non c'è un server, non c'è un account, e la
