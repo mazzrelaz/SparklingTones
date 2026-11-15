@@ -191,13 +191,15 @@ function postoDiSwitch(s) {
 }
 
 function disegnaPalcoLive(corpo) {
+  // Il NEO non ha il looper: il modo sparisce, e se era acceso si torna ai preset.
+  if (!profilo.banchi) live.looper = false;
   const banco = bancoLive();
   const attivo = postoAttivo(banco);
   const testa = document.createElement('div');
   testa.className = 'lv-testa';
   testa.innerHTML = `
     <div class="lv-banco"><button data-a="prima" title="${tr('Banco precedente')}">◀</button><b>${testoConNome(banco.nome)}</b><button data-a="dopo" title="${tr('Banco successivo')}">▶</button></div>
-    <div class="lv-modo"><button data-a="preset" class="${live.stomp || live.looper ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp && !live.looper ? 'sì' : ''}">${tr('Stomp')}</button><button data-a="looper" class="${live.looper ? 'sì' : ''}">${tr('Looper')}</button>${aiuto('live')}</div>
+    <div class="lv-modo"><button data-a="preset" class="${live.stomp || live.looper ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp && !live.looper ? 'sì' : ''}">${tr('Stomp')}</button>${profilo.banchi ? `<button data-a="looper" class="${live.looper ? 'sì' : ''}">${tr('Looper')}</button>` : ''}${aiuto('live')}</div>
     <div class="lv-blocco lv-bt"><button data-a="bt" class="${midi.ble ? 'sì' : ''}" title="${midi.ble ? tr('Stacca il pedale Bluetooth') : tr('Collega un pedale Bluetooth')}">${midi.ble ? '● ' + tr('MIDI controller connesso') : tr('Collega Pedale BT')}</button></div>
     <div class="lv-suona"><small>${live.stomp && !live.looper ? tr('Stomp su') : tr('Suona')}</small><span>${ora ? testoConNome(ora.nome) : '—'}</span></div>`;
   // Il pedale Bluetooth a portata di mano, senza passare dal Foot controller.
@@ -206,7 +208,7 @@ function disegnaPalcoLive(corpo) {
   testa.querySelector('[data-a="dopo"]').addEventListener('click', () => cambiaBanco(1));
   testa.querySelector('[data-a="preset"]').addEventListener('click', () => { live.stomp = false; live.looper = false; disegnaLive(); });
   testa.querySelector('[data-a="stomp"]').addEventListener('click', () => { live.stomp = true; live.looper = false; disegnaLive(); });
-  testa.querySelector('[data-a="looper"]').addEventListener('click', () => { if (!live.looper) { live.looper = true; chiediLooper(); } disegnaLive(); });
+  if (profilo.banchi) testa.querySelector('[data-a="looper"]').addEventListener('click', () => { if (!live.looper) { live.looper = true; chiediLooper(); } disegnaLive(); });
   corpo.appendChild(testa);
   if (live.looper) { disegnaLooper(corpo); return; }
 
@@ -216,9 +218,9 @@ function disegnaPalcoLive(corpo) {
     banco.posti.forEach((p, i) => {
       const el = document.createElement('button');
       el.type = 'button';
-      el.className = `lv-posto ${i < 4 ? 'meta-a' : 'meta-b'}${i === attivo ? ' sì' : ''}${Math.floor(i / 4) !== live.meta ? ' fuori' : ''}${p.record || p.slot !== null ? '' : ' vuoto'}`;
+      el.className = `lv-posto ${i < 4 ? 'meta-a' : 'meta-b'}${i === attivo ? ' sì' : ''}${banco.posti.length > 4 && Math.floor(i / 4) !== live.meta ? ' fuori' : ''}${p.record || p.slot !== null ? '' : ' vuoto'}`;
       const nome = p.record ? p.record.name : p.slot !== null ? tr('(da leggere)') : tr('vuoto');
-      el.innerHTML = `${etichetteSwitch(s => postoDiSwitch(s) === i)}<span class="lv-num">${i < 4 ? 'A' : 'B'}${i % 4 + 1}</span>
+      el.innerHTML = `${etichetteSwitch(s => postoDiSwitch(s) === i)}<span class="lv-num">${p.slot !== null ? nomeSlot(p.slot) : `${i < 4 ? 'A' : 'B'}${i % 4 + 1}`}</span>
         <span class="lv-led"></span><span class="lv-nome">${testoConNome(nome)}</span><span class="lv-sw"></span>`;
       el.addEventListener('click', () => suonaPosto(i));
       griglia.appendChild(el);
@@ -420,7 +422,7 @@ async function looperComeIlPedale() {
 
 function gesto(g) {
   if (g === 'stomp') { live.stomp = live.looper ? true : !live.stomp; live.looper = false; }
-  else if (g === 'looper') { live.looper = !live.looper; if (live.looper) chiediLooper(); }
+  else if (g === 'looper') { if (!profilo.banchi) return; live.looper = !live.looper; if (live.looper) chiediLooper(); }
   else if (g === 'meta') { if (!live.stomp && !live.looper) live.meta ^= 1; }
   else if (g === 'banco+') cambiaBanco(1);
   else if (g === 'banco-') cambiaBanco(-1);

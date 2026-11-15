@@ -48,6 +48,8 @@ async function collega() {
     await spark.connect();
     await spark.identify();
     if (spark.state.name) await store.setSetting('ultimoAmpli', spark.state.name);
+    // Il profilo subito: prima la lettura chiedeva otto slot anche al NEO, che ne ha quattro.
+    profilo = Spark.profiloAmpli(spark.state.name);
     segnaCollegamento('connected');
     await leggiSlot();
     const s = spark.state.currentPreset;
