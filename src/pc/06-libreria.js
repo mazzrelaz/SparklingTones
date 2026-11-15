@@ -631,7 +631,8 @@ async function svuotaLibreria() {
 async function apriInformazioni() {
   const corpo = document.createElement('div');
   corpo.className = 'about';
-  corpo.innerHTML = tr(`<p><strong>SparklingTones</strong> organizza i preset di un amplificatore Spark 2 e li manda
+  corpo.insertAdjacentHTML('beforeend', '<p class="novita-rischio">⚠️ <strong>' + tr("Progetto indipendente, senza alcun rapporto con Positive Grid. Fornito così com'è, senza garanzie: lo usi a tuo rischio.") + '</strong></p>');
+  corpo.insertAdjacentHTML('beforeend', tr(`<p><strong>SparklingTones</strong> organizza i preset di un amplificatore Spark 2 e li manda
     all'amplificatore via Bluetooth. Gira per intero dentro il browser: non c'è un server, non c'è un account, e la
     libreria resta sull'apparecchio che stai usando.</p><p>Scritto da <strong>Massimo Togni</strong>.</p>
     <h3>Uso libero</h3><p>Questo software è di <strong>libero utilizzo</strong>: si può usare, copiare, modificare e
@@ -656,6 +657,6 @@ async function apriInformazioni() {
     <p><strong>paulhamsh/Spark</strong> — <em>licenza Apache 2.0</em>. Il riferimento funzionante da cui è stata capita la
     struttura dei messaggi. <a href="https://github.com/paulhamsh/Spark" target="_blank" rel="noopener noreferrer">github.com/paulhamsh/Spark</a></p>
     <p>I nomi dei modelli di riverbero e degli altri modelli sono quelli che si leggono nell'app ufficiale, trascritti a mano per
-    poterli riconoscere: sono citazioni, non codice.</p>`);
+    poterli riconoscere: sono citazioni, non codice.</p>`));
   await finestra({ titolo: tr('Informazioni, licenze e responsabilità'), corpo, larga: true });
 }

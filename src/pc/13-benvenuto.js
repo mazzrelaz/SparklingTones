@@ -24,6 +24,7 @@ function mostraBenvenuto(quale) {
       '<p>' + tr("Grazie per averlo installato! SparklingTones è e resterà gratuito. Dietro però ci sono centinaia di ore di lavoro: notti passate a decifrare il protocollo dello Spark, a provare e riprovare sull'ampli vero.") + '</p>' +
       '<p>' + tr("Se l'app ti piace, un caffè è il modo più bello per dirmelo e per farla crescere.") + '</p>' +
       '<p class="benvenuto-firma">' + tr('— Massimo, chitarrista. Con metà del tempo passato sugli effetti, oggi suonerebbe meglio di Hendrix.') + '</p>' +
+      '<p class="novita-rischio">⚠️ ' + tr('Progetto indipendente, senza alcun rapporto con Positive Grid. Fornito così com\'è, senza garanzie: lo usi a tuo rischio.') + '</p>' +
       '<div class="benvenuto-azioni"><button class="primario grande" data-a="chiudi">' + tr('Cominciamo') + '</button>' +
       '<a href="#" class="benvenuto-link" data-a="caffe">☕ ' + tr('Offrimi un caffè') + '</a></div></div>'
     : '<div class="benvenuto">' + logo +

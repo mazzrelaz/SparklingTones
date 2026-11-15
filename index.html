@@ -1909,6 +1909,16 @@
     #pannelloEditor > .barra-alta { flex-wrap:nowrap; gap:8px; }
   }
 
+  /* Lo scarico di responsabilità (src/avvertenza.js): sopra a tutto, e una riga in fondo alle Novità. */
+  .velo-novita.velo-avvertenza { z-index:10000; }
+  .avvertenza .novita-testa { background:linear-gradient(160deg, rgba(225,29,46,.38), transparent 75%); }
+  .avvertenza .novita-sopra { color:#ff5a67; }
+  .avvertenza-corpo { padding:14px 22px 4px; }
+  .avvertenza-corpo p { color:var(--text); font-size:14.5px; line-height:1.5; margin:0 0 12px; }
+  .avvertenza-corpo strong { color:#fff; }
+  .avvertenza .novita-ok { background:#e11d2e; }
+  .novita-rischio { margin:0 22px 18px; padding:10px 12px; border-radius:10px; font-size:12.5px; line-height:1.45;
+    color:var(--text); background:rgba(225,29,46,.12); border:1px solid rgba(225,29,46,.4); }
   /* La splash «Novità» (src/novita.js): una volta per aggiornamento. */
   .velo-novita { position:fixed; inset:0; z-index:9999; display:flex; align-items:center;
     justify-content:center; padding:16px; background:rgba(0,0,0,.72);
@@ -2248,6 +2258,7 @@
 <!-- informazioni, licenze, responsabilità -->
 <div class="pannello" id="pannelloAbout">
   <div class="about">
+    <p class="novita-rischio">⚠️ <strong>Progetto indipendente, senza alcun rapporto con Positive Grid. Fornito così com'è, senza garanzie: lo usi a tuo rischio.</strong></p>
     <p><strong>SparklingTones</strong> organizza i preset di un amplificatore Spark 2 e li
       manda all'amplificatore via Bluetooth. Gira per intero dentro il browser: non c'è un
       server, non c'è un account, e la libreria resta sull'apparecchio che stai usando.</p>
@@ -2556,5 +2567,6 @@
 <script src="src/app/17-editor-classico.js"></script>
 <script src="src/app/18-aiuti.js"></script>
 <script src="src/novita.js"></script>
+<script src="src/avvertenza.js"></script>
 </body>
 </html>

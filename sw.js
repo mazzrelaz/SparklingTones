@@ -66,6 +66,7 @@ const GUSCIO = [
   './src/app/17-editor-classico.js',
   './src/app/18-aiuti.js',
   './src/novita.js',
+  './src/avvertenza.js',
   // La versione per il PC (9 novembre 2026).
   './pc.html',
   './src/pc/01-base.js',

@@ -1993,4 +1993,18 @@ window.LINGUA_EN = {
     "of {0}",
   "{0}Annulla":
     "{0}Undo",
+  "Lo usi a tuo rischio":
+    "Use it at your own risk",
+  "SparklingTones è un progetto <strong>amatoriale e indipendente</strong>, gratuito, <strong>senza alcun rapporto con Positive Grid</strong>.":
+    "SparklingTones is a <strong>hobby, independent project</strong>, free of charge, with <strong>no affiliation with Positive Grid</strong>.",
+  "È fornito <strong>così com'è, senza garanzie di alcun tipo</strong>. L'autore <strong>non risponde di nessun danno</strong>: preset persi o sovrascritti, un amplificatore che si blocca o si guasta, qualunque conseguenza dei comandi mandati via Bluetooth.":
+    "It is provided <strong>as is, without warranty of any kind</strong>. The author <strong>accepts no liability for any damage</strong>: lost or overwritten presets, an amplifier that freezes or breaks down, any consequence of the commands sent over Bluetooth.",
+  "Tieni un backup dei preset a cui tieni. Continuando accetti di usare l'app <strong>a tuo rischio</strong>.":
+    "Keep a backup of the presets you care about. By continuing you agree to use the app <strong>at your own risk</strong>.",
+  "Ho capito: lo uso a mio rischio":
+    "I understand: I use it at my own risk",
+  "Progetto indipendente, senza alcun rapporto con Positive Grid. Fornito così com'è, senza garanzie: lo usi a tuo rischio.":
+    "Independent project, not affiliated with Positive Grid. Provided as is, without warranty: you use it at your own risk.",
+  "Prima di cominciare":
+    "Before you start",
 };

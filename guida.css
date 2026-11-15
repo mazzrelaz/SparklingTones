@@ -115,6 +115,7 @@ section.cap { padding:56px 0 8px; scroll-margin-top:56px; }
 .nota::before { content:'💡'; position:absolute; left:15px; top:13px; font-size:1.15rem; }
 .nota.att { background:#1a0d0f; border-color:#4a1e24; }
 .nota.att::before { content:'⚠️'; }
+.nota.rischio { text-align:left; border-width:2px; border-color:#e11d2e; background:#2a0b10; font-size:1.02rem; }
 .nota p:last-child { margin-bottom:0; }
 
 /* ---- disegni delle schermate ----------------------------------------- */

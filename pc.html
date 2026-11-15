@@ -546,6 +546,16 @@
   .lv-durata-et { margin-left:auto; color:var(--dim); font-size:0.85rem; }
   .lv-impara { border:1px dashed var(--faint); background:none; color:var(--dim); }
   .lv-impara.attesa { border-color:var(--ambra); color:var(--ambra); }
+  /* Lo scarico di responsabilità (src/avvertenza.js): sopra a tutto, e una riga in fondo alle Novità. */
+  .velo-novita.velo-avvertenza { z-index:10000; }
+  .avvertenza .novita-testa { background:linear-gradient(160deg, rgba(225,29,46,.38), transparent 75%); }
+  .avvertenza .novita-sopra { color:#ff5a67; }
+  .avvertenza-corpo { padding:14px 22px 4px; }
+  .avvertenza-corpo p { color:var(--text); font-size:14.5px; line-height:1.5; margin:0 0 12px; }
+  .avvertenza-corpo strong { color:#fff; }
+  .avvertenza .novita-ok { background:#e11d2e; }
+  .novita-rischio { margin:0 22px 18px; padding:10px 12px; border-radius:10px; font-size:12.5px; line-height:1.45;
+    color:var(--text); background:rgba(225,29,46,.12); border:1px solid rgba(225,29,46,.4); }
   /* La splash «Novità» (src/novita.js): una volta per aggiornamento. */
   .velo-novita { position:fixed; inset:0; z-index:9999; display:flex; align-items:center;
     justify-content:center; padding:16px; background:rgba(0,0,0,.72);
@@ -744,6 +754,7 @@
 <script src="src/pc/13-benvenuto.js"></script>
 <script src="src/pc/14-guida.js"></script>
 <script src="src/novita.js"></script>
+<script src="src/avvertenza.js"></script>
 <script>
   // Installabile come app a parte (pc.webmanifest): lo stesso service worker dell'app, che ha già la pagina nel guscio.
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
