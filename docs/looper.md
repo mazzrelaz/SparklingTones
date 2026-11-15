@@ -14,14 +14,14 @@ impostazioni (`0x0376`).
 **Sul conteggio siamo arrivati al fondo, e adesso anche oltre la chiave.**
 Escluso per misura, tutto: il valore del byte (sedici provati), il byte `0x00` finale,
 le impostazioni scritte prima, la coppia `02`+`04` in due distanze, le interrogazioni
-prima, l'intera sequenza di avvio dell'app rigiocata con e senza chiave, e
+prima, l'intera sequenza di avvio dell'app rigiocata, e
 l'intestazione di blocco. Ogni messaggio rigiocato riceve dall'ampli la **stessa
 identica risposta** che riceve l'app: la riproduzione è fedele, il comando è byte per
 byte lo stesso, e non funziona.
 
 **E il 28 agosto 2026 è caduta anche l'ultima**, che era la license key: misurata, non
 più supposta. Il come sta in fondo, in «L'ultima ipotesi è caduta». Il riassunto: con
-l'ampli **sbloccato davvero** — non con la chiave rigiocata — `02` riceve l'ack e non
+l'ampli **sbloccato davvero**, `02` riceve l'ack e non
 fa niente esattamente come prima. **La chiave abilita il contenuto a pagamento, non i
 comandi.**
 
@@ -165,13 +165,11 @@ manda in riproduzione (`07` `08`, poi 155 messaggi di posizione, poi `09`).
 | `02`+`04` a 1,8 s (come il pannello) | registra regolare, senza click |
 | `01`, `03`, `0f`, `10` (buchi dell'enum e oltre) | nessun effetto |
 | `0x0278`+`0x0275`+`0x0276` prima, poi `02` | ack, nessun effetto |
-| sequenza di avvio dell'app rigiocata, con e senza license key | ack, nessun effetto |
+| sequenza di avvio dell'app rigiocata | ack, nessun effetto |
 | intestazione di blocco da 16 byte + ATT da 20 | `04` funziona, `02` no |
 
 `captures/2026-08-13-looper-click-tentativi.json`,
-`captures/2026-08-13-looper-coppia-02-04.json`,
-`captures/2026-08-14-looper-contesto.json`,
-`captures/2026-08-14-looper-rigioco-avvio.json`.
+`captures/2026-08-13-looper-coppia-02-04.json`.
 
 **Il fatto che regge tutto: `02` non è un comando.** In nessuna delle prove ha mai
 prodotto un `0x0375` di ritorno, mentre `04` lo produce sempre entro 40 ms. Riceve
@@ -190,7 +188,7 @@ aprire un'altra sonda, e la risposta ha riaperto il capitolo invece di chiuderlo
 
 ## Lo snoop log ha risposto — 14 agosto 2026
 
-`captures/2026-08-14-app-ufficiale-looper.txt`, ricavato col rapporto di bug del
+Ricavato col rapporto di bug del
 telefono e letto da `tools/leggi-btsnoop.ps1`. **Il comando del conteggio è `0x0175`
 con `02`, cioè esattamente quello che mandiamo noi.**
 
@@ -206,21 +204,17 @@ number**. Quindi non è il comando a essere sbagliato — **è il contesto**, e 
 quale. Tre differenze, in ordine di sospetto:
 
 1. **L'app manda la license key `0x0170`** appena connessa, e l'ampli risponde `0x0470`
-   con `00 00`. Noi non l'abbiamo mai mandata. Il payload della chiave **cambia da
-   sessione a sessione**, quindi rigiocarlo tale e quale non basta.
+   con `00 00`. Noi non l'abbiamo mai mandata, e **cambia da sessione a sessione**.
 2. **Subito prima del comando l'app interroga il looper**: `0x0278`, `0x0275`, `0x0276`,
    tutti e tre entro 200 ms e 2,3 s prima del `02`.
 3. Tutta la sequenza di avvio: `0x022f`, `0x0223`, `0x0211`, `0x022b`, tre letture di
    preset, `0x0210`, `0x0296`, `0x0271` due volte, `0x0201` sullo stato live, `0x0265`.
 
-**Il contesto è escluso** (`captures/2026-08-14-looper-rigioco-avvio.json`). Rigiocata
+**Il contesto è escluso.** Rigiocata
 tutta la sequenza di avvio — ventiquattro messaggi, nell'ordine e con le distanze vere
-— due volte, con e senza license key. **Ogni messaggio ha ricevuto la risposta giusta**,
+— due volte. **Ogni messaggio ha ricevuto la risposta giusta**,
 quindi la riproduzione è fedele; e tutte e due le volte `0x0175` con `02` ha ricevuto
 l'ack e non ha fatto niente.
-
-**La license key rigiocata viene ricevuta e rifiutata**: `0x0470` con payload `fe`, cioè
-−2, mentre all'app risponde `00 00`. Non è replicabile — è legata alla sessione.
 
 **Anche l'intestazione di blocco è esclusa, e la prova è pulita.** L'app avvolge ogni
 scrittura in 16 byte (`01 fe 00 00 53 fe <len> 00 …`, che `wrapBlock` produce identici)
@@ -233,9 +227,8 @@ e spezza in ATT da 20. Mandati così tutti e due i comandi: **`04` funziona** �
 comandi, non uno: `SPK_LOOPER_CMD_COUNTIN` *se il click è acceso*, e subito dopo
 `SPK_LOOPER_CMD_REC`. Provata in due distanze, fallita in tutte e due.
 
-**«La prova sulla license key era valida».** Non lo era, ed era un difetto nostro:
-l'abbiamo mandata in **una write sola da 109 byte**, e l'ampli **non ha risposto nemmeno
-l'ack** — non era un rifiuto, il messaggio non è mai arrivato. Da lì è nata la scoperta
+**«Un messaggio lungo arriva anche in una write sola».** No: uno da **109 byte in una
+write sola** non riceve nemmeno l'ack — non è un rifiuto, il messaggio non arriva. Da lì è nata la scoperta
 di `sendSpezzato` (vedi `CLAUDE.md`, che è il pezzo di questo capitolo che vale oltre il
 looper).
 
@@ -243,9 +236,8 @@ looper).
 
 **Il fatto nuovo non è venuto dal looper**: è venuto dagli Hendrix, il 26 agosto. Lì si è
 scoperto che lo sblocco della license key **resta nell'ampli anche dopo che l'app
-ufficiale si è disconnessa** — è stato dell'ampli, non della sessione BLE. Il 14 agosto
-non lo sapevamo, e per questo la chiave sembrava non verificabile: si pensava di doverla
-derivare. Non serve derivarla. **Basta arrivare dopo.**
+ufficiale si è disconnessa** — è stato dell'ampli, non della sessione BLE. **Basta
+arrivare dopo** l'app ufficiale.
 
 La prova, senza mai staccare la corrente all'ampli: app ufficiale connessa fino in fondo
 → app ufficiale chiusa, radio libera → `tools/looper-probe.html` connesso → COUNTIN.

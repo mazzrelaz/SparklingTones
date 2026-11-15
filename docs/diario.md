@@ -921,11 +921,6 @@ ampli finto):
    Il racconto per intero in `docs/diario.md` (estratto del 14 ottobre 2026) e
    `docs/protocollo-spark2.md`, «Spark NEO».
 
-**La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key):
-i codici dei commit di prima non esistono più. **Resta all'utente** chiedere al supporto di
-GitHub di togliere i commit vecchi dalla cache (`docs/sicurezza.md`, punto 1). **Mai più
-catture o strumenti con la chiave `0x0170` nel repository.**
-
 **Discussi e non aperti, da non rifare** (la modalità MIDI non è più qui: è lavoro in
 programma, vedi sopra — resta valido il ragionamento in `docs/pedale.md`, e le due trappole:
 Windows non sa fare BLE-MIDI, PowerShell 5.1 non sottoscrive eventi WinRT): preset creati con l'AI
@@ -1117,8 +1112,7 @@ con l'ampli sul telefono, l'ampli che si pianta girando le manopole, «Importa u
 preset vero, il NEO), **discussi e non aperti**, e il resto del pedale: `docs/diario.md`, estratto
 del 15 ottobre (sera), e `docs/pedale-lavoro.md`.
 
-**La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key). **Mai più
-catture o strumenti con la chiave `0x0170` nel repository.** I progetti stanno in
+I progetti stanno in
 `C:\Users\massi\Progetti Claude` (copia ogni ora in `Desktop\Cloud Backup`, su Google Drive).
 
 ## Estratto di CLAUDE.md del 22 ottobre 2026 (sera): Live, editor, segnalazioni, bollo JH

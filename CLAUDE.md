@@ -354,5 +354,4 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
-- **La cronologia di git è stata riscritta il 17 settembre 2026** (tolta la license key): **mai più catture o
-  strumenti con la chiave `0x0170` nel repository.** Copia oraria dei progetti in `Desktop\Cloud Backup`.
+- Copia oraria dei progetti in `Desktop\Cloud Backup`.

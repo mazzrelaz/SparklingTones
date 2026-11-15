@@ -102,7 +102,7 @@ pronta. Questi segnaposto servono solo a separare due prove, o a marcare un sile
 <h2>4 — Il click: le prove che restano</h2>
 <div class="sub" style="margin-bottom:8px"><code>0x0175</code> con <code>02</code> è
 confermato e ignorato: byte identici a quelli dell'app, con e senza intestazione di blocco,
-con e senza license key, con l'ampli sbloccato davvero e col loop vuoto. Quello che resta
+con l'ampli sbloccato davvero e col loop vuoto. Quello che resta
 non è nei byte ma <b>nel canale</b>: <b>⑧</b> dice cosa <code>0xFFC1</code> dichiara e prova
 la write <i>con</i> risposta, che non abbiamo mai usato — e che nello snoop log non abbiamo
 mai controllato quale fosse.</div>
@@ -301,8 +301,8 @@ function riga(tipo, testo, extra) {
 }
 
 /* Per i messaggi lunghi: la write BLE va spezzata, o l'ampli li scarta in silenzio.
-   Verificato sulla license key da 109 byte, che in una write sola non riceve
-   nemmeno l'ack — mentre l'app ufficiale la manda in write ATT da 20 byte. */
+   Verificato su un messaggio da 109 byte, che in una write sola non riceve
+   nemmeno l'ack — mentre l'app ufficiale scrive in write ATT da 20 byte. */
 function inviaSpezzato(cmd, sub, data, etichetta) {
   riga('tx', `TX 0x${hex(cmd)}${hex(sub)} ${etichetta} — ${data.length}B spezzati in write da 20`,
        { cmd, sub, data: data.slice() });
@@ -417,11 +417,6 @@ function scriviBpm(bpm) {
    10, che stanno subito oltre la fine dell'elenco. */
 const NON_ELENCATI = [0x01, 0x03, 0x0f, 0x10];
 
-/* La license key `0x0170` dell'app ufficiale è stata tolta dal repository il 17
-   settembre 2026, anche dalla cronologia: è materiale della protezione di un prodotto a
-   pagamento, e rigiocata l'ampli la rifiuta comunque (`0x0470` con `fe`). Le prove che
-   la mandavano non ci sono più; il loro esito sta in `docs/looper.md`. */
-
 /* Le tre interrogazioni che l'app fa **subito prima** del conteggio, nell'ordine e con
    le distanze che ha nel log: 0x0278, poi 0x0275 e 0x0276 quasi insieme, e 2,3 s dopo
    il comando. Noi quelle interrogazioni le avevamo fatte solo dopo. */
@@ -465,7 +460,7 @@ const AVVIO_APP = [
 
 function rigiocaAvvio() {
   const passi = AVVIO_APP;
-  riga('mk', `———— rigioco l'avvio dell'app (senza license key): ` +
+  riga('mk', `———— rigioco l'avvio dell'app: ` +
              `${passi.length} messaggi in ${(AVVIO_APP[AVVIO_APP.length-1].t/1000).toFixed(1)}s ————`);
   for (const p of passi) {
     setTimeout(() => {
@@ -540,7 +535,7 @@ const PROVE = [
     f: () => inviaComeLApp(0x01, 0x75, [0x02], 'COUNTIN') },
   { n: '⑦ REC come lo manda l\'app', d: 'idem con 04, per confronto',
     f: () => inviaComeLApp(0x01, 0x75, [0x04], 'REC') },
-  { n: '⑤ rigioca l\'avvio senza la chiave', d: 'i messaggi dell\'avvio dell\'app, senza 0x0170',
+  { n: '⑤ rigioca l\'avvio', d: 'i messaggi dell\'avvio dell\'app',
     f: () => rigiocaAvvio() },
   { n: '① interroga ▸ poi COUNTIN', d: '0x0278 0x0275 0x0276, poi 0x0175 02',
     f: () => interrogaLooper(() => invia(0x01, 0x75, [0x02], 'COUNTIN')) },

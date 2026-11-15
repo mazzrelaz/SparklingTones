@@ -384,8 +384,7 @@ Profiles», e il menu dei pedali (icona a sinistra di ToneCloud) lo gestisce. Il
 `72` e `75`. «Control Wah LFO» su EXP1 arriva come `… 07 80 01 05 01 70`. Nell'Auto Wah l'app scrive
 «Parameter Controlled by Spark Control» e spegne le regolazioni.
 
-**Btsnoop dell'app ufficiale** (bugreport del telefono, 25 ottobre; grezzo **fuori dal repository**: c'è la
-chiave 0x0170, l'ampli ha risposto `0x0470 00 00`). Comandi nuovi app → ampli su FFC0:
+**Btsnoop dell'app ufficiale** (bugreport del telefono, 25 ottobre). Comandi nuovi app → ampli su FFC0:
 - `0x019a`: scrive nell'ampli un profilo del Control X (nome «Profile #1», poi `08 00 00 01 0c 02 03 08 70
   72` — i sei tasti e i due pedali, quello che il finto aveva detto); otto volte, ack `0x049a`.
 - `0x019f [01 nn]`: **la calibrazione del pedale d'espressione**. Mandato dalla pagina, l'ampli lo gira al

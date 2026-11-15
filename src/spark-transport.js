@@ -208,10 +208,9 @@ window.SparkTransport = (function () {
      * il messaggio resta uno solo e si spezza soltanto la write. L'ampli riassembla
      * da sé cercando `f0` … `f7`, esattamente come facciamo noi in ricezione.
      *
-     * Serve per i messaggi lunghi. La license key `0x0170` è 109 byte, e mandata in
-     * una write sola l'ampli **non risponde nemmeno l'ack** — verificato il 14 agosto
-     * 2026. L'app ufficiale la manda in write ATT da 20 byte, come si vede nello snoop
-     * log (`captures/2026-08-14-app-ufficiale-looper.txt`).
+     * Serve per i messaggi lunghi: uno da 109 byte, mandato in una write sola, non
+     * riceve **nemmeno l'ack** — verificato il 14 agosto 2026. L'app ufficiale scrive in
+     * write ATT da 20 byte.
      *
      * @returns il sequence number usato
      */

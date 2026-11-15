@@ -419,22 +419,11 @@ Status: **complete and verified on the amp**. `0x0201` read, `0x0138` preset cha
   it for a moment and changed his mind). **Connecting the official app** is enough instead:
   from then on everything works, and **the unlock stays in the amp even after the official
   app has disconnected**. He did buy the pack.
-  It's the Spark 2's only paid content, and what enables it is the **license key
-  `0x0170`** the official app sends as soon as it connects. **It can't be forged**: unpacked
-  from the two captures in `captures/2026-08-14-app-ufficiale-looper.txt` it's **exactly 64
-  bytes, completely different between the two sessions**, i.e. a signature with a nonce in
-  it — and when replayed the amp rejects it (`0x0470` with `fe` instead of `00 00`, see
-  `docs/looper.md`). Extracting the key from the official app is circumventing protection of
-  paid content and isn't done.
-  In the official app the Hendrix sounds are visible **only after logging in**, but
-  **logging in from our app would be useless, and that's measured**: in the capture the app
-  sends the key **14 ms after** the amp's reply to `0x022f` — twice, at 0.060 s and at
-  589.246 s — and a network round trip doesn't fit in 14 ms. And if it were a token taken
-  from the server at login, the two connections would send the same one; instead they
-  differ. **The app signs it locally, with a key it carries inside.** It follows that **the
-  amp doesn't verify the purchase: it verifies a signature** — it has no account and
-  doesn't talk to the internet. Login serves the official app to *show* the sounds, not the
-  amp to enable them.
+  It's the Spark 2's only paid content, and what enables it is the **license key `0x0170`**
+  the official app sends as soon as it connects: signed by the app and different at every
+  connection, **it can't be forged**, and it isn't a door we open (it's protection of paid
+  content). **Logging in from our app would be useless**: the amp doesn't verify the
+  purchase, it verifies a signature, and it doesn't talk to the internet.
   **The thing to remember is that it isn't our bug**, so nobody goes back over it.
   And one lesson remains that holds beyond the Hendrix effects: **the re-read chain confirms
   the model's name, not that the block plays** — that's what had «verified» the change to

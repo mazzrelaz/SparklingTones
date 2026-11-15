@@ -413,20 +413,11 @@ Stato: **completo e verificato sull'ampli**. `0x0201` lettura, `0x0138` cambio p
   (ci ha creduto per un momento e si è ricreduto). Basta invece **connettere l'app
   ufficiale**: da lì in poi funziona tutto, e **lo sblocco resta nell'ampli anche dopo
   che l'app ufficiale si è disconnessa**. Il pacchetto lui ce l'ha comprato.
-  È l'unico contenuto a pagamento dello Spark 2, e chi lo abilita è la **license key
-  `0x0170`** che l'app ufficiale manda appena connessa. **Non è forgiabile**: spacchettata
-  dalle due catture in `captures/2026-08-14-app-ufficiale-looper.txt` sono **64 byte tondi,
-  completamente diversi fra le due sessioni**, cioè una firma con dentro un nonce — e
-  rigiocata l'ampli la rifiuta (`0x0470` con `fe` invece di `00 00`, vedi `docs/looper.md`).
-  Cavare la chiave dall'app ufficiale è protezione di contenuto a pagamento e non si fa.
-  Sull'app ufficiale i suoni Hendrix si vedono **solo dopo il login**, ma **fare il login
-  dalla nostra app non servirebbe a niente, ed è misurato**: nella cattura l'app manda la
-  chiave **14 ms dopo** la risposta dell'ampli a `0x022f` — due volte, a 0,060s e a
-  589,246s — e in 14 ms non ci sta un giro in rete. E se fosse un gettone preso dal server
-  al login le due connessioni manderebbero lo stesso; invece sono diversi. **L'app la firma
-  in locale, con una chiave che si porta dentro.** Ne segue che **l'ampli non verifica
-  l'acquisto: verifica una firma** — non ha account e non parla con internet. Il login
-  serve all'app ufficiale per *mostrare* i suoni, non all'ampli per abilitarli.
+  È l'unico contenuto a pagamento dello Spark 2, e lo abilita la **license key `0x0170`**
+  che l'app ufficiale manda appena connessa: firmata dall'app e diversa a ogni collegamento,
+  **non è forgiabile**, e non è una porta che apriamo (è protezione di contenuto a pagamento).
+  **Fare il login dalla nostra app non servirebbe**: l'ampli non verifica l'acquisto,
+  verifica una firma, e non parla con internet.
   **La cosa da ricordare è che non è un difetto nostro**, così non ci si torna sopra.
   E ne resta una lezione che vale oltre gli Hendrix: **la catena riletta conferma il nome
   del modello, non che quel blocco suoni** — è quello che aveva «verificato» il cambio a

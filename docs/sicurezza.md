@@ -15,7 +15,7 @@ Play Acoustic e Pulze del pedale, gli strumenti dei video.
 
 ### Le correzioni — lo stesso giorno
 
-Tutti e sei i punti sotto sono stati corretti il 15 novembre (il 4 resta in mano all'utente):
+Tutti i punti sotto sono stati corretti il 15 novembre:
 
 - **1. Electron 45.3.2** (ed `electron-builder` 26.18.0), app Windows **1.0.2**. `npm audit`: da 18
   falle (una critica, 13 gravi) a 6 moderate, tutte di `minimatch` dentro gli attrezzi per compilare.
@@ -75,11 +75,6 @@ manca, non una falla aperta. Ci sono due `<script>` in linea da spostare in un f
 predefinita e la registrazione del service worker); poi la stessa regola di `index.html`. Nell'exe
 `'self'` è `spark://app`.
 
-**4. I commit con la license key si aprono ancora — legale, aperto dal 17 settembre.** Oggi
-`github.com/mazzrelaz/SparklingTones/commit/6ef64ed` e `raw/6ef64ed/tools/looper-probe.html`
-rispondono 200. Resta una cosa che **solo l'utente può fare**: chiedere al supporto di GitHub di
-togliere le viste in cache e i commit non raggiungibili (vedi «Ricontrollo del 17 ottobre»).
-
 **5. L'app Windows dà ogni permesso senza chiedere — basso.** Senza
 `session.setPermissionRequestHandler`, Electron concede da solo microfono, fotocamera, posizione,
 notifiche, MIDI con SysEx. La pagina è nostra e non chiede niente di questo, quindi oggi non
@@ -109,8 +104,7 @@ staccare `ricDati` prima del lavoro pesante, e in PEZZO scartare se c'è un FINE
 ### A posto
 
 - **Nessun segreto nel repository**: cercati chiavi OpenAI e Anthropic, token Dropbox e GitHub,
-  chiavi AWS, chiavi private, `LICENSE_KEY`; le catture dopo il 17 settembre non hanno payload
-  `0x0170`, e quelle di agosto hanno le righe svuotate. Nessun certificato o `.pfx`;
+  chiavi AWS, chiavi private. Nessun certificato o `.pfx`;
   `desktop/dist` e `node_modules` fuori da git. Il publisher dello Store nel `package.json` è il
   codice che lo Store mostra comunque, senza nomi di persona.
 - **Foto**: 333 immagini fra i due repository, **nessuna con EXIF o GPS**.
@@ -135,7 +129,7 @@ staccare `ricDati` prima del lavoro pesante, e in PEZZO scartare se c'è un FINE
 ### Voto
 
 **Buono**, con due cose da fare davvero: aggiornare Electron (1) e chiudere il server dei video (2).
-La CSP di `pc.html` (3) e i permessi dell'exe (5) sono rinforzi; il punto 4 è in mano all'utente.
+La CSP di `pc.html` (3) e i permessi dell'exe (5) sono rinforzi.
 
 ## «Genera con l'IA» col copia e incolla, sulla pagina PC — 10 novembre 2026
 
@@ -257,56 +251,13 @@ o senza CSP** (stesso errore su una pagina di controllo senza regola). **Sull'ap
 (`mazzrelaz.github.io/SparklingTones`, dopo il push) la CSP c'è, il service worker si registra
 e si attiva con la cache `spark-v119`, e la console non ha errori.
 
-### I commit vecchi con la license key — ancora aperti
-
-Il 17 ottobre 2026 `github.com/mazzrelaz/SparklingTones/commit/6ef64ed` **si apre ancora**, e
-`raw/6ef64ed/tools/looper-probe.html` scarica il probe di prima della riscrittura con la
-costante `LICENSE_KEY` dentro. Dal nostro lato non si può fare altro: **solo l'utente può
-chiedere al supporto di GitHub** di togliere i commit non più raggiungibili («remove cached
-views» e garbage collection del repository, indicando `6ef64ed` e che la storia è stata
-riscritta il 17 settembre 2026 per togliere dati sensibili).
-
 ### Voto
 
 Per un'app personale senza server, **buono**: nessun segreto nostro nel repository, niente
 dipendenze, testo esterno mai interpretato come HTML, una CSP stretta sugli script e sulla
-rete. I punti deboli rimasti sono strutturali (chiavi dell'IA nel browser) o fuori dalle
-nostre mani (la cache di GitHub).
+rete. I punti deboli rimasti sono strutturali (chiavi dell'IA nel browser).
 
-## Da correggere — nessuno: tutti e sei corretti
-
-### 1. La license key dell'app ufficiale è pubblicata — medio, legale
-
-**Corretto il 17 settembre 2026.** Tolta dal probe e dalle tre catture, e dalla cronologia di git riscritta.
-
-Come si è fatto: `git filter-branch --index-filter` su tutti i 311 commit di `main`,
-sostituendo i blob delle 7 versioni del probe che contenevano la chiave e delle tre catture
-con le loro versioni pulite; verificato che nessun commit contenga più i byte, che l'albero
-finale sia identico a prima, e poi push forzato (`6ef64ed` → `87de95e`). **Tutti i codici dei
-commit sono cambiati**: quelli citati in `docs/` prima del 17 settembre non esistono più.
-
-**Resta una cosa che solo GitHub può fare**: i commit vecchi non sono più raggiungibili da
-nessun ramo, ma **si aprono ancora conoscendone il codice** (`/commit/6ef64ed…` risponde
-200). Per toglierli serve una richiesta al supporto di GitHub («remove cached views» /
-garbage collection del repository). La copia completa di prima della riscrittura sta in un
-`.bundle` nello scratchpad della sessione, e contiene ancora la chiave. **Ancora aperti il 17
-ottobre 2026**: vedi il ricontrollo, sopra.
-
-La chiave `0x0170` catturata dall'app ufficiale il 14 agosto sta in tre file pubblici:
-
-- `tools/looper-probe.html`: la costante `LICENSE_KEY` e i pulsanti ②, ③ e ④ che la
-  rigiocano;
-- `captures/2026-08-14-app-ufficiale-looper.txt`: le righe `APP 0x0170`;
-- `captures/2026-08-14-looper-rigioco-avvio.json`: la sequenza di avvio rigiocata.
-
-Rigiocata, l'ampli la rifiuta (`0x0470` con `fe`), quindi non serve a sbloccare niente. Resta
-però materiale della protezione di un prodotto a pagamento, pubblicato, e contraddice la
-regola «cavare la chiave dall'app ufficiale non si fa». Il capitolo del looper è chiuso, e a
-quei file la chiave non serve più.
-
-**Correzione**: togliere la costante e i pulsanti dal probe, e le righe `0x0170` dalle
-catture. **Resta nella storia di git**: toglierla anche da lì vuol dire riscrivere la storia
-e fare un push forzato, e la decisione è dell'utente.
+## Da correggere — nessuno: tutti corretti
 
 ### 2. Il pedale accetta chiunque via Bluetooth — medio, sul palco
 
@@ -406,8 +357,7 @@ Controllo dopo le prove del pedale d'espressione (`docs/pedale-lavoro.md`, «Il 
   stampa e basta. È una prova, non va sul pedale vero così.
 - **25 ottobre**: `tools/wah.html` si collega anche **direttamente all'ampli** col Bluetooth del PC e manda
   comandi interi (0x0104, 0x0115, 0x0128, 0x01a0, 0x019f): solo da pulsanti fissi della pagina, nessun campo
-  libero. Il btsnoop dell'app ufficiale (con la chiave 0x0170) è rimasto nello scratchpad, fuori dal
-  repository.
+  libero.
 
 ## La versione per il PC — 9 novembre 2026
 
