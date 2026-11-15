@@ -30,7 +30,7 @@ const NOVITA = [
     data: '15 novembre 2026',
     voci: [
       { icona: '🔁', titolo: tr('Il looper sul PC'), dove: 'pc',
-        testo: tr('Nella vista Live c'è il Looper: conteggio, click a tempo e i tasti nello stesso ordine degli switch del pedale.') },
+        testo: tr('Nella vista Live c\'è il Looper: conteggio, click a tempo e i tasti nello stesso ordine degli switch del pedale.') },
       { icona: '🎛️', titolo: tr('Pedale Bluetooth a portata di mano'), dove: 'pc',
         testo: tr('Nella vista Live un tasto collega il pedale Bluetooth senza passare dal Foot controller.') },
       { icona: '🎧', titolo: tr('Spark NEO, Mini, GO e 40'),
@@ -117,6 +117,7 @@ function mostraNovita(n) {
           '<li><span class="novita-icona">' + v.icona + '</span>' +
           '<div><strong>' + v.titolo + '</strong><span>' + v.testo + '</span></div></li>').join('') +
       '</ul>' +
+      '<p class="novita-rischio">⚠️ ' + tr('Progetto indipendente, senza alcun rapporto con Positive Grid. Fornito così com\'è, senza garanzie: lo usi a tuo rischio.') + '</p>' +
       '<button class="novita-ok">' + tr('Ho capito') + '</button>' +
     '</div>';
   const chiudi = () => {
