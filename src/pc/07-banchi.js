@@ -52,6 +52,17 @@ function suonaDalBanco(record) {
   return residente(record) ? apriSlot(slotsDi(record)[0]) : apriRecord(record);
 }
 
+/**
+ * Doppio clic su un preset (15 novembre 2026, chiesto dall'utente): lo porta sul palco e chiude i
+ * Banchi, così si ha davanti l'editor. Nei posti dei banchi il primo clic l'ha già fatto partire:
+ * `giaPartito` evita di mandarlo una seconda volta.
+ */
+async function apriNellEditor(record, giaPartito) {
+  if (!record) return;
+  if (!giaPartito) await suonaDalBanco(record);
+  chiudiSchermi();
+}
+
 const suonaOra = record => !!(ora && record && (ora.record && ora.record.id === record.id ||
   ora.slot !== null && slotsDi(record).includes(ora.slot)));
 
@@ -76,7 +87,7 @@ function disegnaBanchi() {
     }
     li.insertAdjacentHTML('beforeend', `<span class="nome">${testoConNome(r.name)}</span>`);
     for (const s of slotsDi(r)) li.appendChild(etichettaAmpli(s));
-    li.addEventListener('dblclick', () => suonaDalBanco(r));
+    li.addEventListener('dblclick', () => apriNellEditor(r));
     trascinabile(li, { record: r });
     elenco.appendChild(li);
   }
@@ -155,7 +166,11 @@ function bloccoBanco(banco) {
         trascinabile(li, { record, banco, posto });
       }
     }
-    if (record) li.addEventListener('click', () => { if (!trascinato) suonaDalBanco(record); });
+    if (record) {
+      // `detail` conta i clic ravvicinati: il secondo di un doppio clic non rimanda il preset.
+      li.addEventListener('click', e => { if (!trascinato && e.detail < 2) suonaDalBanco(record); });
+      li.addEventListener('dblclick', () => { if (!trascinato) apriNellEditor(record, true); });
+    }
     ul.appendChild(li);
   });
   box.appendChild(ul);
