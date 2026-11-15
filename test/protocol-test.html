@@ -158,6 +158,45 @@ check('un messaggio troncato non si fonde con quello dopo',
 check('e quello dopo arriva intatto',
       dopoIlTroncone[0] && dopoIlTroncone[0].raw, KNOB_REVERB);
 
+/* Lo Spark 40 (paulhamsh, non provato su un ampli vero): i chunk viaggiano in blocchi da
+   al più 0x6a byte, ognuno con 16 byte `01 fe 00 00 41 ff <lunghezza> 00 …` davanti, e un
+   chunk sta spesso a cavallo di due blocchi. L'intestazione va tolta anche lì in mezzo. */
+const bloccoSpark40 = dati => [0x01, 0xfe, 0x00, 0x00, 0x41, 0xff, 16 + dati.length,
+                               0, 0, 0, 0, 0, 0, 0, 0, 0, ...dati];
+const flusso40 = [];
+for (let i = 0; i < flusso.length; i += 0x6a - 16) flusso40.push(...bloccoSpark40(flusso.slice(i, i + 0x6a - 16)));
+{
+  const confini = new Set([0]);
+  PRESET0_CHUNKS.reduce((fine, c) => { confini.add(fine + c.length); return fine + c.length; }, 0);
+  let tagliati = 0;
+  for (let i = 0x6a - 16; i < flusso.length; i += 0x6a - 16) if (!confini.has(i)) tagliati++;
+  check('Spark 40: nel flusso di prova ci sono chunk tagliati da un\'intestazione', tagliati > 3, true);
+}
+for (const taglio of [1, 7, 20, 0x6a]) {
+  const arrivati = [];
+  const a = new Spark.MessageAssembler(m => arrivati.push(m));
+  for (let i = 0; i < flusso40.length; i += taglio) a.feed(flusso40.slice(i, i + taglio));
+  check(`Spark 40, frammenti da ${taglio}: arrivano tutti i sedici`, arrivati.length, PRESET0_CHUNKS.length);
+  check(`Spark 40, frammenti da ${taglio}: identici a quelli senza intestazioni`,
+        arrivati.map(m => m.raw), PRESET0_CHUNKS.map(c => Array.from(c)));
+  check(`Spark 40, frammenti da ${taglio}: il preset si ricompone`,
+        Spark.assemblePresetPayload(arrivati).complete, true);
+}
+{
+  // Un'intestazione subito dopo `f0` e subito dopo `f0 01`: i due casi limite.
+  const c = Array.from(KNOB_REVERB), h = bloccoSpark40([]).slice(0, 16);
+  for (const dove of [1, 2]) {
+    const arrivati = [];
+    new Spark.MessageAssembler(m => arrivati.push(m)).feed([...c.slice(0, dove), ...h, ...c.slice(dove)]);
+    check(`Spark 40: intestazione dopo ${dove} byte del chunk, messaggio intatto`,
+          arrivati.length === 1 && arrivati[0].raw, c);
+  }
+}
+check('block header solo per lo Spark 40',
+      ['Spark 40 BLE', 'Spark 40', 'Spark 2', 'Spark NEO Control', 'Spark MINI BLE', 'Spark GO BLE', '', null]
+        .map(Spark.vuoleBlockHeader),
+      [true, true, false, false, false, false, false, false]);
+
 /* ---------- preset ---------- */
 
 const messages = PRESET0_CHUNKS.map(Spark.parseMessage);
