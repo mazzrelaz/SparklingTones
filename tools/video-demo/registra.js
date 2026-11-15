@@ -68,9 +68,13 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
-  let file = url.pathname.startsWith('/__uscita/')
-    ? path.join(USCITA, decodeURIComponent(url.pathname.slice(10)))
-    : path.join(RADICE, decodeURIComponent(url.pathname));
+  // Audit del 15 novembre 2026: «..%2f» passa il controllo dell'URL e, decodificato, risale le
+  // cartelle. Si serve solo ciò che sta dentro la propria cartella.
+  const base = url.pathname.startsWith('/__uscita/') ? USCITA : RADICE;
+  let file;
+  try { file = path.join(base, decodeURIComponent(url.pathname.slice(base === USCITA ? 10 : 0))); }
+  catch { res.statusCode = 400; return res.end(); }
+  if (file !== base && !file.startsWith(base + path.sep)) { res.statusCode = 403; return res.end(); }
   if (file.endsWith(path.sep)) file = path.join(file, 'index.html');
   fs.readFile(file, (err, dati) => {
     if (err) { res.statusCode = 404; return res.end(); }
@@ -264,7 +268,7 @@ async function main() {
   fs.mkdirSync(FOTO, { recursive: true });
   // in «solo montaggio» i fotogrammi sono proprio quello che serve: guai a toglierli
   if (!SOLO_MONTAGGIO) for (const f of fs.readdirSync(FOTO)) fs.unlinkSync(path.join(FOTO, f));
-  await new Promise(r => server.listen(PORTA_WEB, r));
+  await new Promise(r => server.listen(PORTA_WEB, '127.0.0.1', r));   // solo questo PC, non la rete di casa
   const { edge, cdp } = await apriEdge();
 
   try {

@@ -15,10 +15,12 @@ const tipi = {
 };
 
 http.createServer((req, res) => {
-  let p = decodeURIComponent(req.url.split('?')[0]);
+  let p;
+  try { p = decodeURIComponent(req.url.split('?')[0]); } catch { res.writeHead(400); res.end(); return; }
   if (p.endsWith('/')) p += 'index.html';
   const file = path.join(radice, p);
-  if (!file.startsWith(radice)) { res.writeHead(403); res.end(); return; }
+  // Col separatore in coda: senza, passerebbe anche una cartella sorella che comincia allo stesso modo.
+  if (!file.startsWith(radice + path.sep)) { res.writeHead(403); res.end(); return; }
   fs.readFile(file, (err, dati) => {
     if (err) { res.writeHead(404); res.end('non trovato'); return; }
     res.writeHead(200, {

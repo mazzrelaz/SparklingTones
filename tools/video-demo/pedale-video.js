@@ -44,9 +44,13 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
-  const file = url.pathname.startsWith('/__uscita/')
-    ? path.join(USCITA, decodeURIComponent(url.pathname.slice(10)))
-    : path.join(RADICE, decodeURIComponent(url.pathname));
+  // Audit del 15 novembre 2026: «..%2f» passa il controllo dell'URL e, decodificato, risale le
+  // cartelle. Si serve solo ciò che sta dentro la propria cartella.
+  const base = url.pathname.startsWith('/__uscita/') ? USCITA : RADICE;
+  let file;
+  try { file = path.join(base, decodeURIComponent(url.pathname.slice(base === USCITA ? 10 : 0))); }
+  catch { res.statusCode = 400; return res.end(); }
+  if (file !== base && !file.startsWith(base + path.sep)) { res.statusCode = 403; return res.end(); }
   fs.readFile(file, (err, dati) => {
     if (err) { res.statusCode = 404; return res.end(); }
     res.setHeader('Content-Type', TIPI[path.extname(file)] || 'application/octet-stream');
@@ -58,7 +62,7 @@ const server = http.createServer((req, res) => {
 async function main() {
   fs.mkdirSync(USCITA, { recursive: true });
   for (const f of ['fatto.json', 'errore.txt', 'video.bin', 'audio.bin']) fs.rmSync(path.join(USCITA, f), { force: true });
-  await new Promise(r => server.listen(PORTA_WEB, r));
+  await new Promise(r => server.listen(PORTA_WEB, '127.0.0.1', r));   // solo questo PC, non la rete di casa
   const profilo = path.join(USCITA, 'profilo-edge');
   fs.rmSync(profilo, { recursive: true, force: true });
   const edge = spawn(EDGE, ['--headless=new', `--remote-debugging-port=${PORTA_CDP}`, `--user-data-dir=${profilo}`,
