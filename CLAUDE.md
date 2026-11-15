@@ -341,8 +341,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v163 pubblicata**
-  (audit del 15 novembre: CSP di `pc.html`, bollo JH). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire. **Store 1.0.1
+- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v166 pubblicata**
+  (15 novembre: looper nella guida del PC, versione visibile «1.6.6» calcolata da `NOVITA[0]`, logo inciso). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire. **Store 1.0.1
   online**; **1.0.2** (Electron 45, permessi, fuse) **in certificazione dal 15 novembre**. **npm 11 non scarica
   Electron**: dopo `npm install`, `node node_modules/electron/install.js`. Uscite prima: diario.
 - **Live del PC** (`src/pc/12-live.js`): **la Pedaliera è per pedali MIDI commerciali, non per il nostro**, che ha solo lui.
