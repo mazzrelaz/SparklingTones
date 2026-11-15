@@ -420,7 +420,7 @@ function disegnaCatena() {
     const mod = document.createElement('button');
     mod.type = 'button';
     mod.className = 'mod';
-    mod.innerHTML = testoConNome(nomeBlocco(effetto)) + bolloJH(effetto.name);
+    mod.innerHTML = `<span class="mod-nome">${testoConNome(nomeBlocco(effetto))}</span>` + bolloJH(effetto.name);
     if (eRiverbero(effetto)) {
       mod.addEventListener('click', () => apriTendina(mod, t => {
         for (const r of modelliRiverbero(effetto)) {
