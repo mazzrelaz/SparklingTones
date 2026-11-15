@@ -69,6 +69,7 @@ const GUSCIO = [
   './src/avvertenza.js',
   // La versione per il PC (9 novembre 2026).
   './pc.html',
+  './src/pc/00-pagina.js',
   './src/pc/01-base.js',
   './src/pc/02-stato.js',
   './src/pc/03-editor.js',

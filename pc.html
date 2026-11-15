@@ -2,6 +2,11 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
+<!-- La Content-Security-Policy (audit del 15 novembre 2026), la stessa di index.html: la pagina
+     carica solo i suoi file e parla solo con Dropbox. Nessuno script in linea (le due righe che
+     c'erano stanno in src/pc/00-pagina.js). Un indirizzo nuovo chiamato con fetch va aggiunto a
+     connect-src. Nell'exe 'self' è spark://app. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.dropboxapi.com https://content.dropboxapi.com; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SparklingTones PC</title>
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -354,7 +359,11 @@
   .anello.spento .miniatura img { filter:grayscale(0.9) brightness(0.45); }
   .anello.scelto .miniatura { border-color:var(--accent); background:rgba(47,127,232,0.2); }
   .anello .mod { width:100%; max-width:140px; font-size:0.78rem; color:var(--text); background:var(--incavo); border-radius:6px; padding:5px 6px;
-                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+                 /* Il bollo «JH» resta intero: i puntini li prende solo il nome (15 novembre 2026). */
+                 display:flex; align-items:center; justify-content:center; gap:4px; }
+  .anello .mod .mod-nome { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+  .anello .mod .jh { flex-shrink:0; vertical-align:0; }
   .anello .mod:disabled { opacity:1; cursor:default; }
   .anello.spento .mod { color:var(--faint); }
 
@@ -740,7 +749,7 @@
   <div class="guida-testa"><h2>Guida</h2><button type="button" id="guida-chiudi">Chiudi</button></div>
   <div class="guida-corpo"><nav id="guida-indice" aria-label="Indice della guida"></nav><div id="guida-testo"></div></div>
 </div></div>
-<script>window.LINGUA_PREDEFINITA = 'en'; /* la prima volta si apre in inglese; la scelta dell'utente poi vince */</script>
+<script src="src/pc/00-pagina.js"></script>
 <script src="src/lingua.js"></script>
 <script src="src/lingua-en.js"></script>
 <script src="src/dropbox-sync.js"></script>
@@ -769,9 +778,5 @@
 <script src="src/pc/14-guida.js"></script>
 <script src="src/novita.js"></script>
 <script src="src/avvertenza.js"></script>
-<script>
-  // Installabile come app a parte (pc.webmanifest): lo stesso service worker dell'app, che ha già la pagina nel guscio.
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
-</script>
 </body>
 </html>
