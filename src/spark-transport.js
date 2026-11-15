@@ -54,8 +54,6 @@ window.SparkTransport = (function () {
     this.notifyChar = null;
 
     this.seq = 0x01;
-    // Block header di 16 byte su ogni invio: solo per lo Spark 40 (`_scegliFormato`).
-    this.bloccoHeader = false;
     this.waiters = [];
     this.sendChain = Promise.resolve();
 
@@ -87,7 +85,6 @@ window.SparkTransport = (function () {
         filters: [{ services: [SERVICE_UUID] }],
         optionalServices: [SERVICE_UUID],
       });
-      this._scegliFormato(this.device.name);
       this.device.addEventListener('gattserverdisconnected', () => {
         /* Quando cade si scrive nel registro come e quando: prima diceva solo
            «Disconnesso» in alto, e il registro non ne sapeva niente. L'utente
@@ -146,15 +143,6 @@ window.SparkTransport = (function () {
       return this.device.name;
     },
 
-    /**
-     * Il formato dei messaggi, dal nome Bluetooth, prima del primo invio: lo Spark 40
-     * vuole il block header (`Spark.vuoleBlockHeader`), gli altri no.
-     */
-    _scegliFormato(nome) {
-      this.bloccoHeader = Spark.vuoleBlockHeader(nome);
-      if (this.bloccoHeader) this.onLog(tr('Spark 40: messaggi col block header'));
-    },
-
     async disconnect() {
       if (this.connected) { this._chiusoDaNoi = true; this.device.gatt.disconnect(); }
     },
@@ -181,8 +169,7 @@ window.SparkTransport = (function () {
     send(command, forcedSeq, withBlockHeader) {
       if (!this.writeChar) return Promise.reject(new Error(tr('non connesso')));
       const seq   = forcedSeq === undefined ? this._nextSeq() : forcedSeq;
-      const bytes = new Uint8Array(Spark.encode(command, seq,
-        withBlockHeader === undefined ? this.bloccoHeader : !!withBlockHeader));
+      const bytes = new Uint8Array(Spark.encode(command, seq, !!withBlockHeader));
 
       if (bytes.length > SAFE_WRITE_BYTES) {
         this.onLog(tr('attenzione: messaggio da {0} byte, oltre i ' +
@@ -230,8 +217,7 @@ window.SparkTransport = (function () {
     sendSpezzato(command, max, forcedSeq, withBlockHeader) {
       if (!this.writeChar) return Promise.reject(new Error(tr('non connesso')));
       const seq   = forcedSeq === undefined ? this._nextSeq() : forcedSeq;
-      const bytes = new Uint8Array(Spark.encode(command, seq,
-        withBlockHeader === undefined ? this.bloccoHeader : !!withBlockHeader));
+      const bytes = new Uint8Array(Spark.encode(command, seq, !!withBlockHeader));
       const passo = Math.max(1, max || 20);
 
       this.sendChain = this.sendChain.then(async () => {

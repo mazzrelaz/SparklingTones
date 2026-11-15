@@ -643,25 +643,3 @@ Comandi FFC0 nuovi, visti nel btsnoop dell'app ufficiale col Control X finto agg
 al pedale come `0x0E`); `0x0128 [nome, bool, 00]` mai confermato, ignoto; `0x01a0 [bool]` dopo
 `0x029c`, ignoto; `0x03a1 [n, bool]` pedale n inserito. Dettaglio, byte e prove in
 `docs/pedale-lavoro.md`, «Il pedale d'espressione».
-
-## Spark 40 — 15 novembre 2026, NON provato
-
-Un utente: «lo Spark 40 non si collega». Nessuno Spark 40 per provare: quello che segue viene da
-`reference/paulhamsh/` (scritto proprio sullo Spark 40, su BLE) e da Ignitron.
-
-- **Lo Spark 40 incornicia tutto nel block header di 16 byte**, anche su BLE. Verso l'ampli
-  `01 fe 00 00 53 fe <lunghezza> 00…`, dall'ampli `01 fe 00 00 41 ff <lunghezza> 00…`.
-  paulhamsh legge le notifiche **solo** dentro questi blocchi (`BlockIn::process`, un byte fuori
-  posto è «bad block header»), e Ignitron toglie le intestazioni da ogni notifica.
-- **Dall'ampli i blocchi sono da 0x6a byte e i chunk da 0x19**: un chunk sta spesso a cavallo di
-  due blocchi, e l'intestazione cade **in mezzo** al chunk. Il nostro riassemblatore la prendeva per
-  dati: su un preset di prova 6 chunk su 16 storpiati, lettura fallita («attesa stringa»). I messaggi
-  corti (nome, seriale) arrivano interi, quindi l'ampli sembrava connesso e poi non leggeva niente.
-- **Correzione**: `MessageAssembler` toglie i 16 byte che cominciano con `01 fe`, dovunque siano.
-  `fe` non può comparire in un messaggio, quindi su Spark 2 e NEO non cambia niente (test). In
-  invio, il block header si mette **solo** se il nome Bluetooth contiene «40»
-  (`Spark.vuoleBlockHeader`, deciso in `connect` prima del primo invio): Spark 2, NEO, Mini e GO
-  restano come prima.
-- **Da verificare con lo Spark 40 vero**: che col block header risponda a `0x0211`; che i preset
-  da 25 byte di payload (55 con l'intestazione) li accetti; nome Bluetooth esatto («Spark 40 BLE»
-  secondo paulhamsh, che lo usa per farsi passare per l'ampli).
