@@ -7,6 +7,21 @@ riprende» pesava da sola 13 KB.
 
 Le voci sono in ordine dal più recente al più vecchio.
 
+## Estratto di CLAUDE.md, 15 novembre 2026 — editor, basetta, Live del PC
+
+Tolti da «Dove si riprende» per stare sotto i 25 KB, parola per parola:
+
+- **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
+  neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
+  `17-editor-classico.js`; **il classico non scorre mai** (`adattaClassico`). Immagini, guscio e il resto:
+  `docs/diario.md`, estratto del 9 novembre (gli editor).
+- **Basetta** `pcb/basetta/`: generata **solo** da `tools/genera-basetta.py`, mai a mano; **ordinata il 29
+  ottobre**. A scheda arrivata: `docs/pedale-lavoro.md`, «La basetta stampata»; il punto intero nel diario (9 novembre).
+- **Vista Live del PC** (11 novembre, `src/pc/12-live.js`): Preset/Stomp e pedaliera MIDI; **con lo Spark e un pedale
+  veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **La Pedaliera è pensata per pedali MIDI commerciali, non per
+  il nostro** (regola dell'utente, 12 novembre). **Trappola: un `filter` animato rompe il disegno
+  in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
+
 ## Estratto di CLAUDE.md, 9 novembre 2026 — gli editor
 
 Stava in «Dove si riprende» fino al 9 novembre 2026, parola per parola (e sotto, la basetta):

@@ -331,13 +331,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 
 **Si riparte da `docs/planning.md`** (13 novembre): le cose aperte in ordine di priorità, da spuntare lì.
 
-- **Due editor**: Impostazioni → «Editor: Neon / Classico» (`editorClassico()`). **Ritoccando il classico il
-  neon non si tocca mai** (regola dell'utente): regole sotto `#pannelloEditor.classico`, codice in
-  `17-editor-classico.js`; **il classico non scorre mai** (`adattaClassico`). Immagini, guscio e il resto:
-  `docs/diario.md`, estratto del 9 novembre (gli editor).
+- **Due editor** (Neon / Classico): **ritoccando il classico il neon non si tocca mai**; il classico non scorre mai. Diario, 9 e 15 novembre.
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
-- **Basetta** `pcb/basetta/`: generata **solo** da `tools/genera-basetta.py`, mai a mano; **ordinata il 29
-  ottobre**. A scheda arrivata: `docs/pedale-lavoro.md`, «La basetta stampata»; il punto intero nel diario (9 novembre).
+- **Basetta** `pcb/basetta/`: **solo** da `tools/genera-basetta.py`, mai a mano. Diario, 15 novembre.
 - **App Windows** (`desktop/`, Electron): `npm.cmd start` per provare (`npm` da PowerShell è bloccato), `npm run dist`
   per l'installer. Il nome è **SparklingTones**, mai «Spark Controller». Inglese di guida e «?» del PC: aspetta il suo via.
   Il resto: `docs/diario.md`, estratto del 12 novembre (sera).
@@ -347,10 +343,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v161 pubblicata** (15 novembre: scarico di responsabilità,
   looper del PC, NEO/Mini/GO/40 a quattro preset senza looper — Mini, GO e 40 **non provati**, LIVE ed EDGE da capire). **Store 1.0.1**
   (icona nera) **inviato alla certificazione il 15 novembre**; i commit di `desktop/` non sono pushati. Uscite prima: diario.
-- **Vista Live del PC** (11 novembre, `src/pc/12-live.js`): Preset/Stomp e pedaliera MIDI; **con lo Spark e un pedale
-  veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **La Pedaliera è pensata per pedali MIDI commerciali, non per
-  il nostro** (regola dell'utente, 12 novembre). **Trappola: un `filter` animato rompe il disegno
-  in Chromium.** Il resto: `docs/diario.md`, estratto del 12 novembre.
+- **Live del PC** (`src/pc/12-live.js`): **la Pedaliera è per pedali MIDI commerciali, non per il nostro**, che ha solo lui.
+  **Trappola: un `filter` animato rompe il disegno in Chromium.** Diario, 15 novembre.
 - **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
   l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
   moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.0 il 14 novembre, 1.0.1 in certificazione** (PEGI 3): `https://apps.microsoft.com/detail/9PLB9RG9VLNX`, già nelle guide
