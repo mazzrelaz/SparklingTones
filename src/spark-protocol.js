@@ -385,6 +385,8 @@ window.Spark = (function () {
    */
   function MessageAssembler(onMessage) {
     this.buffer = [];
+    this.salta = 0;          // byte d'intestazione di blocco ancora da saltare
+    this.precedente = null;  // l'ultimo byte visto, per riconoscere `01 fe`
     this.onMessage = onMessage;
   }
 
@@ -407,6 +409,20 @@ window.Spark = (function () {
    */
   MessageAssembler.prototype.feed = function (bytes) {
     for (const b of bytes) {
+      /* Lo Spark 40 (15 novembre 2026, NON provato: lo dice paulhamsh, nato su di lui,
+         e Ignitron) manda i suoi chunk dentro blocchi da al più 0x6a byte, ognuno con
+         un'intestazione di 16 byte `01 fe 00 00 41 ff <lunghezza> 00 …`, e un chunk può
+         stare a cavallo di due blocchi: l'intestazione finisce **in mezzo** al chunk.
+         Si toglie dovunque sia. `fe` non può comparire in un messaggio (vedi sopra),
+         quindi su Spark 2 e NEO, che le intestazioni non le mandano, non cambia niente. */
+      if (this.salta > 0) { this.salta--; continue; }
+      if (b === 0xfe && this.precedente === 0x01) {
+        if (this.buffer.length > 1 && this.buffer[this.buffer.length - 1] === 0x01) this.buffer.pop();
+        this.salta = 14;                           // il resto dei 16 byte
+        this.precedente = null;
+        continue;
+      }
+      this.precedente = b;
       if (b === 0xf0) {
         this.buffer = [b];                         // sempre inizio di messaggio
         continue;
@@ -421,7 +437,11 @@ window.Spark = (function () {
     }
   };
 
-  MessageAssembler.prototype.reset = function () { this.buffer = []; };
+  MessageAssembler.prototype.reset = function () {
+    this.buffer = [];
+    this.salta = 0;
+    this.precedente = null;
+  };
 
   function parseMessage(msg) {
     const packed = Array.from(msg.slice(6, msg.length - 1));
@@ -555,6 +575,17 @@ window.Spark = (function () {
     const quattro = /mini|\b40\b|\bgo\b/i.test(nome || '');
     const profilo = PROFILI_AMPLI[nome] || (quattro ? PROFILO_MINI : PROFILO_SPARK2);
     return Object.assign({ nome: nome || null }, profilo);
+  }
+
+  /**
+   * Se i messaggi verso quest'ampli vanno chiusi nel block header di 16 byte, dal nome
+   * Bluetooth (`device.name`, noto prima di mandare qualunque cosa). **Solo lo Spark 40**
+   * («Spark 40 BLE»): paulhamsh, scritto su di lui, lo mette sempre. NON provato.
+   * Spark 2 e NEO vanno senza (misurato), e così restano; Mini e GO non li conosciamo e
+   * restano come prima.
+   */
+  function vuoleBlockHeader(nomeBluetooth) {
+    return /\b40\b/.test(nomeBluetooth || '');
   }
 
   function slotLabel(n, profilo) {
@@ -781,7 +812,7 @@ window.Spark = (function () {
     controllaPreset,
     presetChecksum, PARAM_MARKER, PRESET_CHUNK_SIZE,
     LIVE_TARGET, slotTarget, SOFTWARE_PRESET, SOFTWARE_TARGET, CATENA,
-    slotLabel, SLOTS_PER_BANK, profiloAmpli,
+    slotLabel, SLOTS_PER_BANK, profiloAmpli, vuoleBlockHeader,
     bpmDaImpostazioni, impostazioniConBpm, BPM_MIN, BPM_MAX, letturaAccordatore,
     CMD_ACTION, CMD_QUERY, CMD_NOTIFY, CMD_ACK, TYPE,
   };

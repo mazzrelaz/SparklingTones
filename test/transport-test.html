@@ -167,6 +167,29 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     check('sendAndAwaitAck riceve l\'ack', ack && ack.cmd, Spark.CMD_ACK);
   }
 
+  /* ---------- block header: solo per lo Spark 40 ---------- */
+  {
+    const scritto = async nome => {
+      const t = new SparkTransport({ onLog: () => {} });
+      const scritture = [];
+      t.writeChar = { writeValueWithoutResponse: async b => { scritture.push(Array.from(b)); } };
+      t._scegliFormato(nome);
+      // l'inizio di ciò che arriva all'ampli, per `send` e per `sendSpezzato`
+      await t.send(Spark.commands.getName());
+      const primo = [].concat(...scritture);
+      scritture.length = 0;
+      await t.sendSpezzato(Spark.commands.getName(), 20);
+      const secondo = [].concat(...scritture);
+      return [primo.slice(0, 2), secondo.slice(0, 2), primo.length];
+    };
+    check('Spark 2: invii senza block header, come sempre',
+          await scritto('Spark 2'), [[0xf0, 0x01], [0xf0, 0x01], 7]);
+    check('Spark NEO: invii senza block header, come sempre',
+          await scritto('Spark NEO Control'), [[0xf0, 0x01], [0xf0, 0x01], 7]);
+    check('Spark 40: invii col block header 01 fe',
+          await scritto('Spark 40 BLE'), [[0x01, 0xfe], [0x01, 0xfe], 23]);
+  }
+
   /* ---------- sequence number ---------- */
   {
     const t = new SparkTransport({ onLog: () => {} });
