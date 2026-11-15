@@ -40,11 +40,29 @@ static const uint8_t RSP_ERRORE   = 0x8f;
 static uint8_t* ricDati   = nullptr;
 static size_t   ricAttesi = 0, ricAvuti = 0;
 static uint8_t  ricSlot   = 0;
+/* Audit del 15 novembre 2026 (2.42): INIZIA e PEZZO lavorano su `ricDati` nel callback BLE, FINE
+ * nel loop. Prima il loop chiudeva il banco usando `ricDati`, e «Aggiorna tutti» (che non aspetta
+ * la risposta a FINE) faceva arrivare l'INIZIA del banco dopo proprio in quel momento: il callback
+ * liberava il buffer che il loop stava salvando. Adesso, quando FINE entra in coda, **il callback
+ * consegna il blocco al loop** (`chiu…`) e `ricDati` torna libero per il banco dopo: ognuno dei
+ * due lavora sul suo buffer. Un secondo FINE prima che il loop abbia chiuso il primo si rifiuta. */
+static uint8_t* chiuDati   = nullptr;
+static size_t   chiuAttesi = 0, chiuAvuti = 0;
+static uint8_t  chiuSlot   = 0;
+static volatile bool chiuInAttesa = false;
 
 static void ricAnnulla() {
   if (ricDati) free(ricDati);
   ricDati = nullptr;
   ricAttesi = ricAvuti = 0;
+}
+
+/** Il loop ha finito col blocco consegnato: lo libera e lascia posto al prossimo FINE. */
+static void chiuLibera() {
+  if (chiuDati) free(chiuDati);
+  chiuDati = nullptr;
+  chiuAttesi = chiuAvuti = 0;
+  chiuInAttesa = false;
 }
 
 static BLECharacteristic* chStato = nullptr;
@@ -91,6 +109,12 @@ class Ponte : public BLECharacteristicCallbacks {
     if (d[0] != CMD_INIZIA && d[0] != CMD_PEZZO) {
       const uint8_t prossimo = (uint8_t)((codaFondo + 1) % CODA_MAX);
       if (prossimo == codaTesta) { rispondi(RSP_ERRORE, "coda dei comandi piena"); return; }
+      if (d[0] == CMD_FINE) {
+        if (chiuInAttesa) { ricAnnulla(); rispondi(RSP_ERRORE, "sto ancora salvando il banco di prima"); return; }
+        chiuDati = ricDati; chiuAttesi = ricAttesi; chiuAvuti = ricAvuti; chiuSlot = ricSlot;
+        ricDati = nullptr; ricAttesi = ricAvuti = 0;       // il prossimo INIZIA ne fa uno nuovo
+        chiuInAttesa = true;
+      }
       const uint8_t quanti = (n < sizeof(codaDati[0])) ? (uint8_t)n : (uint8_t)sizeof(codaDati[0]);
       memcpy(codaDati[codaFondo], d, quanti);
       codaLung[codaFondo] = quanti;
@@ -161,31 +185,33 @@ static void eseguiComandoPesante(const uint8_t* d, size_t n) {
       }
 
       case CMD_FINE: {
-        if (!ricDati) { rispondi(RSP_ERRORE, "FINE senza INIZIA"); break; }
-        if (ricAvuti != ricAttesi) {
+        // Qui si lavora solo sul blocco consegnato dal callback (chiu…), mai su ricDati.
+        if (!chiuDati) { chiuLibera(); rispondi(RSP_ERRORE, "FINE senza INIZIA"); break; }
+        if (chiuAvuti != chiuAttesi) {
           char msg[64];
-          snprintf(msg, sizeof(msg), "arrivati %u byte su %u", ricAvuti, ricAttesi);
-          ricAnnulla(); rispondi(RSP_ERRORE, msg); break;
+          snprintf(msg, sizeof(msg), "arrivati %u byte su %u", chiuAvuti, chiuAttesi);
+          chiuLibera(); rispondi(RSP_ERRORE, msg); break;
         }
         uint8_t somma = 0;
-        for (size_t k = 0; k < ricAttesi; k++) somma ^= ricDati[k];
-        if (n >= 2 && somma != d[1]) { ricAnnulla(); rispondi(RSP_ERRORE, "checksum sbagliato"); break; }
+        for (size_t k = 0; k < chiuAttesi; k++) somma ^= chiuDati[k];
+        if (n >= 2 && somma != d[1]) { chiuLibera(); rispondi(RSP_ERRORE, "checksum sbagliato"); break; }
 
         // Si verifica che sia interpretabile PRIMA di scriverlo: un banco che
         // non si riesce a leggere non deve nemmeno entrare in memoria.
         BancoCaricato prova = {};
-        prova.dati = ricDati; prova.quanti = ricAttesi;
+        prova.dati = chiuDati; prova.quanti = chiuAttesi;
         const bool buono = bancoInterpreta(prova);
-        prova.dati = nullptr;              // il buffer resta di ricDati
-        if (!buono) { ricAnnulla(); rispondi(RSP_ERRORE, "blocco non interpretabile"); break; }
+        prova.dati = nullptr;              // il buffer resta di chiuDati
+        if (!buono) { chiuLibera(); rispondi(RSP_ERRORE, "blocco non interpretabile"); break; }
 
-        const bool salvato = bancoSalva(ricSlot, ricDati, ricAttesi);
+        const uint8_t slot = chiuSlot;
+        const bool salvato = bancoSalva(slot, chiuDati, chiuAttesi);
         // Un banco appena mandato e' quello che si vuole usare: se il pedale
         // non ne aveva nessuno, diventa il suo, e si riaccendera' con quello.
         if (salvato && slotBanco < 0) {
-          if (bancoCarica(ricSlot, bancoAttivo)) {
-            slotBanco = (int8_t)ricSlot;
-            ricordaBanco((int8_t)ricSlot);
+          if (bancoCarica(slot, bancoAttivo)) {
+            slotBanco = (int8_t)slot;
+            ricordaBanco((int8_t)slot);
             metaMostrata = 0;
             bersaglio = 0;
             aggiornaLed();
@@ -195,9 +221,9 @@ static void eseguiComandoPesante(const uint8_t* d, size_t n) {
         char msg[80];
         snprintf(msg, sizeof(msg), salvato ? "banco \"%s\" salvato nello slot %u"
                                            : "scrittura fallita per \"%s\" (slot %u)",
-                 prova.nome, ricSlot);
+                 prova.nome, slot);
         Serial.printf("ponte: %s\n", msg);
-        ricAnnulla();
+        chiuLibera();
         rispondi(salvato ? RSP_INFO : RSP_ERRORE, msg);
         break;
       }
