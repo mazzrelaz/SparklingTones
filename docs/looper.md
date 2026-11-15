@@ -772,5 +772,5 @@ Terzo modo della Live del PC, accanto a Preset e Stomp (`src/pc/15-looper.js`; n
 - Nel riquadro del browser l'IndexedDB di `localhost:8099` si è bloccato (anche un `open` a mano non
   risponde, un database nuovo sì): ambiente, non app. `caricaPedaliera` ora rilegge se fallisce.
 
-**Da fare**: le frasi inglesi nuove (`tr`) alla pubblicazione («Annulla» deve diventare «Undo», non
-«Cancel»); il tasto Ferma e il libero da riverificare con lo Spark.
+**Inglese**: tutte le frasi del looper sono in `lingua-en.js` («Annulla» → «Undo»), controllato il 15 novembre.
+**Da fare**: il tasto Ferma e il libero da riverificare con lo Spark.
