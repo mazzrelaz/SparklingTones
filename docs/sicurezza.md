@@ -1,8 +1,110 @@
-# Audit di sicurezza — 17 settembre 2026
+# Audit di sicurezza — 17 settembre e 15 novembre 2026
 
 Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync Dropbox,
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
+
+## Audit completo — 15 novembre 2026
+
+Il secondo audit intero, due mesi e ~720 commit dopo il primo. Guardato: app del telefono e del PC
+(`src/`, `index.html`, `pc.html`), app Windows (`desktop/`), service worker, firmware del pedale
+(`pedale/prova-ble/`), strumenti (`tools/`), sito (`..\sparklingtones-sito`), segreti e foto nel
+repository, dipendenze npm. Le novità che parlano con l'esterno dall'ultima volta: **l'app Windows
+(Electron, sul Microsoft Store)**, il MIDI della Live del PC (USB e Bluetooth), le modalità MIDI,
+Play Acoustic e Pulze del pedale, gli strumenti dei video.
+
+### Da correggere
+
+**1. Electron è fermo alla 33.2.1 — medio.** L'ultima è la 45.3.2. `npm audit` dà per la 33 una
+quarantina di falle note, una dozzina gravi (uso di memoria già liberata, uscite dalla sandbox,
+letture fra origini diverse), e dentro c'è il Chromium di fine 2024 senza due anni di correzioni.
+Quello che le rende poco raggiungibili: la finestra carica solo i file nostri, niente pagine da
+fuori, niente iframe né webview, `contextIsolation` e `sandbox` accesi. Restano i dati che la
+pagina elabora (un backup importato, Dropbox, i nomi dei dispositivi Bluetooth a portata), letti
+da un motore vecchio, e lo Store distribuisce questa versione. **Correzione**: passare alla 45,
+rifare l'installer e il pacchetto per lo Store (1.0.2) e riprovare la scelta del Bluetooth con lo
+Spark vero, perché `select-bluetooth-device` e `protocol.handle` sono le parti che cambiano fra
+una versione e l'altra. Con l'aggiornamento si sistemano anche le falle di `electron-builder`
+(`tar`, `extract-zip`: contano solo sul PC dove si compila, mentre si compila).
+
+**2. Il server degli strumenti dei video lascia leggere ogni file del PC — medio-basso.**
+`tools/video-demo/registra.js` e `pedale-video.js` ricavano il file da
+`path.join(RADICE, decodeURIComponent(url.pathname))` senza controllare dove finisce: `..%2f`
+(la barra scritta in codice) supera il controllo dell'URL e poi risale le cartelle. Provato a
+tavolino: `/..%2f..%2fWindows/win.ini` porta fuori dalla radice. E il server ascolta **su tutte
+le interfacce** (`listen(porta)` senza indirizzo): **finché si registra un video, chiunque sulla
+rete di casa può scaricare qualsiasi file dell'utente.** **Correzione**: `listen(porta,
+'127.0.0.1')` e lo stesso controllo di `server-rete.js`, con il separatore in coda
+(`file.startsWith(RADICE + path.sep)`).
+
+**3. `pc.html` non ha la Content-Security-Policy — basso-medio.** `index.html` ce l'ha dal 17
+ottobre (verificato anche sulla pagina pubblicata); `pc.html` no, ed è la pagina del web **e**
+dell'exe. Oggi nessun testo da fuori finisce crudo nell'HTML (sotto), quindi è il rinforzo che
+manca, non una falla aperta. Ci sono due `<script>` in linea da spostare in un file (la lingua
+predefinita e la registrazione del service worker); poi la stessa regola di `index.html`. Nell'exe
+`'self'` è `spark://app`.
+
+**4. I commit con la license key si aprono ancora — legale, aperto dal 17 settembre.** Oggi
+`github.com/mazzrelaz/SparklingTones/commit/6ef64ed` e `raw/6ef64ed/tools/looper-probe.html`
+rispondono 200. Resta una cosa che **solo l'utente può fare**: chiedere al supporto di GitHub di
+togliere le viste in cache e i commit non raggiungibili (vedi «Ricontrollo del 17 ottobre»).
+
+**5. L'app Windows dà ogni permesso senza chiedere — basso.** Senza
+`session.setPermissionRequestHandler`, Electron concede da solo microfono, fotocamera, posizione,
+notifiche, MIDI con SysEx. La pagina è nostra e non chiede niente di questo, quindi oggi non
+succede nulla; è una porta da chiudere: permettere solo `midi` (e gli appunti per «Genera con
+l'IA»). Nella stessa occasione si possono spegnere i «fuse» che non servono (`RunAsNode`,
+`EnableNodeCliInspectArguments`), che lasciano usare l'exe come un Node qualunque.
+
+**6. Il pedale: un PEZZO che arriva dopo FINE — basso.** INIZIA e PEZZO girano nel callback BLE,
+FINE nel `loop()`, che libera `ricDati`: un client che mandasse un PEZZO mentre il loop sta
+chiudendo il banco scriverebbe in memoria già liberata. La nostra app non lo fa, e serve il ponte
+aperto coi due tasti banco. **Correzione**, la prossima volta che si tocca il firmware: in FINE
+staccare `ricDati` prima del lavoro pesante, e in PEZZO scartare se c'è un FINE in coda.
+
+### Accettati, da sapere
+
+- **In modalità MIDI chiunque a portata può collegarsi al pedale** (niente accoppiamento, come
+  ogni pedale BLE MIDI) e occupare il posto dell'iPad. Non scrive banchi (`onWrite` vuole
+  `appCollegata`) e l'ampli lì non c'è.
+- **`testoConNome` non protegge le virgolette**: va bene nel testo, **mai dentro un attributo**.
+  Controllato con una ricerca su `src/`: oggi nessun valore dei dati sta in un attributo HTML.
+- **`server-rete.js`** (la bozza sul telefono) ascolta sulla rete di casa per scelta; serve solo la
+  cartella della bozza, codice che è già pubblico. Il controllo `startsWith(radice)` senza
+  separatore lascerebbe passare una cartella sorella che comincia con lo stesso nome: da mettere
+  a posto insieme al punto 2. Lo stesso nel `protocol.handle` dell'app Windows, dove però accanto
+  a `resources\web` non c'è niente.
+
+### A posto
+
+- **Nessun segreto nel repository**: cercati chiavi OpenAI e Anthropic, token Dropbox e GitHub,
+  chiavi AWS, chiavi private, `LICENSE_KEY`; le catture dopo il 17 settembre non hanno payload
+  `0x0170`, e quelle di agosto hanno le righe svuotate. Nessun certificato o `.pfx`;
+  `desktop/dist` e `node_modules` fuori da git. Il publisher dello Store nel `package.json` è il
+  codice che lo Store mostra comunque, senza nomi di persona.
+- **Foto**: 333 immagini fra i due repository, **nessuna con EXIF o GPS**.
+- **Iniezione di HTML nel codice del PC**: nomi di preset, banchi, switch e sorgenti MIDI passano
+  da `testoConNome` o `textContent`; il titolo delle finestre è `textContent`; le immagini dei
+  blocchi vengono da tabelle nostre. Niente `eval` né `new Function`.
+- **MIDI della Live**: si accettano solo CC e Program Change, senza SysEx, e portano solo ad azioni
+  che ci sono già (un posto del banco, uno stomp, il looper); la pedaliera resta in locale, non
+  viaggia nei backup né su Dropbox. Un pacchetto BLE MIDI monco dà al più un valore vuoto.
+- **App Windows**: `contextIsolation` e `sandbox` accesi, niente `nodeIntegration`; il preload non
+  espone niente alla pagina (nessun `contextBridge`) e scrive i nomi dei dispositivi con
+  `textContent`; l'indirizzo Bluetooth passa da un'espressione regolare prima di arrivare a
+  PowerShell, lanciato senza shell; la finestra non naviga fuori da `spark://`, e fuori si apre
+  solo `http(s)` e `mailto` nel browser di sistema; il protocollo nostro non risale le cartelle.
+- **Guida del PC**: si legge dalla stessa origine, file nostro.
+- **Pedale**: ponte chiuso alla partenza, `frameAccettabile` su ogni frame, nessuna scrittura di
+  banchi da chi non è l'app; il parser dei SysEx del Pulze controlla lunghezze e destinazione.
+- **Sito**: nessuno script, nessun modulo, nessun iframe (i video sono link); GitHub Pages porta
+  da `http` a `https` (301).
+- **Service worker** e **Dropbox**: come al controllo del 9 novembre.
+
+### Voto
+
+**Buono**, con due cose da fare davvero: aggiornare Electron (1) e chiudere il server dei video (2).
+La CSP di `pc.html` (3) e i permessi dell'exe (5) sono rinforzi; il punto 4 è in mano all'utente.
 
 ## «Genera con l'IA» col copia e incolla, sulla pagina PC — 10 novembre 2026
 

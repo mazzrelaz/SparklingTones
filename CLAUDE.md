@@ -20,7 +20,7 @@ ripercorrere una strada chiusa**, più il lavoro in corso. Il ragionamento sta i
 | `docs/looper.md` · `docs/snake.md` | il looper (archiviato) · StompSnake |
 | `docs/HANDOFF-2026-08-10.md` | ricerca originale: comandi, tipi dati, catture |
 | `docs/diario.md` | sessioni passate; **le versioni lunghe di questo file** |
-| `docs/sito.md` · `docs/sicurezza.md` | `sparklingtones.com` · audit del 17 settembre 2026 |
+| `docs/sito.md` · `docs/sicurezza.md` | `sparklingtones.com` · audit del 15 novembre 2026 |
 
 **I documenti grossi non si leggono interi** (`pedale.md` 175 KB, `decisioni-ui.md` 115 KB, `diario.md`
 100 KB, `HANDOFF` 45 KB): `grep -n '^#'` per l'indice, poi solo la sezione. **Si sposta, non si butta**:
@@ -316,7 +316,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 - **In locale la libreria è vuota** (altra origine): preset finti con `store.importFromAmp([...])`.
 - **Questa memoria la aggiorno io a fine sessione**, ipotesi escluse comprese; si segna cosa è
   verificato sull'hardware. **Controllo di sicurezza** dopo ogni novità che parla con l'esterno, esito
-  in `docs/sicurezza.md` (ultimo audit intero 17 settembre 2026).
+  in `docs/sicurezza.md` (ultimo audit intero 15 novembre 2026).
 - Italiano in commenti e UI. Byte in hex minuscolo separato da spazi.
 
 ## Dropbox e sito
