@@ -26,6 +26,18 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v160',
+    data: '15 novembre 2026',
+    voci: [
+      { icona: '🔁', titolo: tr('Il looper sul PC'), dove: 'pc',
+        testo: tr('Nella vista Live c'è il Looper: conteggio, click a tempo e i tasti nello stesso ordine degli switch del pedale.') },
+      { icona: '🎛️', titolo: tr('Pedale Bluetooth a portata di mano'), dove: 'pc',
+        testo: tr('Nella vista Live un tasto collega il pedale Bluetooth senza passare dal Foot controller.') },
+      { icona: '🎧', titolo: tr('Spark NEO, Mini, GO e 40'),
+        testo: tr('Con questi ampli si vedono quattro preset (CH1–CH4) e il looper non compare.') },
+    ],
+  },
+  {
     versione: 'v159',
     data: '14 novembre 2026',
     voci: [

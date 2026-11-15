@@ -1887,4 +1887,106 @@ window.LINGUA_EN = {
     "Tap the tempo",
   "La vista Live, con la pedaliera":
     "The Live view, with the foot controller",
+  "Il looper sul PC":
+    "The looper on the PC",
+  "Nella vista Live c'è il Looper: conteggio, click a tempo e i tasti nello stesso ordine degli switch del pedale.":
+    "The Live view now has the Looper: count-in, a click in time and the buttons in the same order as the pedal's switches.",
+  "Pedale Bluetooth a portata di mano":
+    "Bluetooth pedal at hand",
+  "Nella vista Live un tasto collega il pedale Bluetooth senza passare dal Foot controller.":
+    "In the Live view a button connects the Bluetooth pedal without going through the Foot controller.",
+  "Spark NEO, Mini, GO e 40":
+    "Spark NEO, Mini, GO and 40",
+  "Con questi ampli si vedono quattro preset (CH1–CH4) e il looper non compare.":
+    "With these amps you see four presets (CH1–CH4) and the looper doesn't appear.",
+  "Entra/esci dal Looper":
+    "Enter/exit the Looper",
+  "Looper":
+    "Looper",
+  "Stacca il pedale Bluetooth":
+    "Disconnect the Bluetooth pedal",
+  "MIDI controller connesso":
+    "MIDI controller connected",
+  "Collega Pedale BT":
+    "Connect BT pedal",
+  "Looper · tocco":
+    "Looper · tap",
+  "Looper · tenuto":
+    "Looper · hold",
+  "Looper come il nostro pedale":
+    "Looper like our pedal",
+  "nessuno switch":
+    "no switches",
+  "Impara prima gli switch del pedale.":
+    "Learn the pedal's switches first.",
+  "assegnare il looper come il nostro pedale?":
+    "assign the looper like our pedal?",
+  "Le assegnazioni del looper dei primi cinque switch vengono sostituite.":
+    "The looper assignments of the first five switches will be replaced.",
+  "Assegna":
+    "Assign",
+  "looper assegnato come il nostro pedale":
+    "looper assigned like our pedal",
+  "Registra / sovraincidi":
+    "Record / overdub",
+  "Ferma":
+    "Stop",
+  "Annulla / ripeti":
+    "Undo / redo",
+  "Cancella il loop":
+    "Clear the loop",
+  "Collega lo Spark 2 per usare il looper.":
+    "Connect the Spark 2 to use the looper.",
+  "sovraincisione annullata":
+    "overdub undone",
+  "sovraincisione ripetuta":
+    "overdub redone",
+  "con un loop registrato battute e tempo non si cambiano":
+    "bars and tempo can't change while a loop is recorded",
+  "l'ampli non ha ancora detto le impostazioni del looper":
+    "the amp hasn't sent the looper settings yet",
+  "pronto":
+    "ready",
+  "conteggio":
+    "count-in",
+  "registra":
+    "recording",
+  "sovraincide":
+    "overdubbing",
+  "fermo":
+    "stopped",
+  "libero":
+    "free",
+  "battuta":
+    "bar",
+  "battute":
+    "bars",
+  "Annulla il conteggio":
+    "Cancel the count-in",
+  "Registra":
+    "Record",
+  "Sovraincidi":
+    "Overdub",
+  "Cancella":
+    "Clear",
+  "Lunghezza":
+    "Length",
+  "Conteggio":
+    "Count-in",
+  "1 battuta":
+    "1 bar",
+  "2 battute":
+    "2 bars",
+  "Click":
+    "Click",
+  "Spento":
+    "Off",
+  "Solo conteggio":
+    "Count-in only",
+  "Tutto il primo take":
+    "The whole first take",
+  "Tempo":
+    "Tempo",
+  "cancellare il loop?":
+    "clear the loop?",
 };
