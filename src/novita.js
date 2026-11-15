@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v164',
+    data: '15 novembre 2026',
+    voci: [
+      { icona: '🖱️', titolo: tr('Dai banchi all\'editor'), dove: 'pc',
+        testo: tr('Nei Banchi un doppio clic su un preset lo apre nell\'editor.') },
+    ],
+  },
+  {
     versione: 'v163',
     data: '15 novembre 2026',
     voci: [

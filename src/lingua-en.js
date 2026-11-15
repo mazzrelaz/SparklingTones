@@ -2029,4 +2029,8 @@ window.LINGUA_EN = {
     "Safer",
   "L'app per Windows passa a una base più recente e chiede solo i permessi che le servono. La pagina per il PC carica solo i suoi file.":
     "The Windows app moves to a newer foundation and only asks for the permissions it needs. The PC page only loads its own files.",
+  "Dai banchi all'editor":
+    "From banks to the editor",
+  "Nei Banchi un doppio clic su un preset lo apre nell'editor.":
+    "In Banks, double-click a preset to open it in the editor.",
 };
