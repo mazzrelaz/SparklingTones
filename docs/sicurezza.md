@@ -40,8 +40,9 @@ Tutti e sei i punti sotto sono stati corretti il 15 novembre (il 4 resta in mano
 - **6.** Firmware **2.42**, caricato: a FINE **il callback consegna il blocco al loop** (`chiu…`) e
   `ricDati` torna libero per il banco dopo. La corsa non era solo teorica: **«Aggiorna tutti» manda
   i banchi uno dopo l'altro senza aspettare la risposta a FINE**, quindi l'INIZIA del secondo poteva
-  liberare il buffer che il loop stava salvando. **Da provare**: «Aggiorna tutti» con più banchi
-  cambiati.
+  liberare il buffer che il loop stava salvando. **Verificato lo stesso giorno**: «Aggiorna tutti»
+  con due banchi cambiati, uno dopo l'altro, tutti e due salvati (seriale del pedale: «Pink Floyd»
+  nello slot 0, «Brian May» nello slot 1, nessun errore).
 
 ### Da correggere (com'era la mattina)
 

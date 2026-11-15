@@ -1437,4 +1437,4 @@ firmware 2.42 (il blocco che si chiude ha il suo buffer: «Aggiorna tutti» pote
 Durante le prove l'utente ha visto nell'editor del PC **il bollo «JH» tagliato** sul bordo del
 riquadro del modello nella catena: ora i puntini li prende solo il nome (`.mod-nome`), il bollo resta
 intero. Provato con lo Spark vero: l'app Windows su Electron 45 si collega e legge gli otto slot.
-Da provare: l'installer 1.0.2, «Aggiorna tutti» col pedale 2.42.
+«Aggiorna tutti» col pedale 2.42 verificato (due banchi di fila, salvati tutti e due). Da provare: l'installer 1.0.2.
