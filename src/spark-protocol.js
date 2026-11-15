@@ -543,9 +543,13 @@ window.Spark = (function () {
     'Spark NEO': { slot: 4, banchi: false },
   };
   const PROFILO_SPARK2 = { slot: 8, banchi: true };
+  // Lo Spark Mini (15 novembre 2026, NON provato: l'utente non ce l'ha): in Bluetooth si chiama
+  // «Spark MINI BLE», ma il nome che risponde a `0x0211` non l'abbiamo mai visto. Come il NEO:
+  // quattro preset e niente looper. Si riconosce da «mini» in qualunque forma.
+  const PROFILO_MINI = { slot: 4, banchi: false };
 
   function profiloAmpli(nome) {
-    const profilo = PROFILI_AMPLI[nome] || PROFILO_SPARK2;
+    const profilo = PROFILI_AMPLI[nome] || (/mini/i.test(nome || '') ? PROFILO_MINI : PROFILO_SPARK2);
     return Object.assign({ nome: nome || null }, profilo);
   }
 

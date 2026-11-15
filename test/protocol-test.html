@@ -203,6 +203,9 @@ check('il banco A è rosso', Spark.slotLabel(0).color, 'rosso');
 // Lo Spark NEO: 4 slot, nessun LED, si chiamano CH1-CH4 (misurato il 2 ottobre 2026).
 check('lo Spark NEO ha quattro slot senza banchi',
       Spark.profiloAmpli('Spark NEO'), { nome: 'Spark NEO', slot: 4, banchi: false });
+check('lo Spark Mini ha quattro slot, in qualunque forma si chiami',
+      ['Spark MINI', 'Spark Mini', 'Spark MINI BLE'].map(n => Spark.profiloAmpli(n).slot + (Spark.profiloAmpli(n).banchi ? 'b' : '')),
+      ['4', '4', '4']);
 check('un nome sconosciuto vale come lo Spark 2',
       Spark.profiloAmpli('Spark Qualcosa'), { nome: 'Spark Qualcosa', slot: 8, banchi: true });
 check('sul NEO gli slot sono CH1-CH4, senza colore',
