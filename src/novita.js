@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v165',
+    data: '15 novembre 2026',
+    voci: [
+      { icona: '🔁', titolo: tr('Il looper nella guida'), dove: 'pc',
+        testo: tr('La guida del PC spiega il looper della Live: lunghezza, conteggio, click e tutti i tasti.') },
+    ],
+  },
+  {
     versione: 'v164',
     data: '15 novembre 2026',
     voci: [

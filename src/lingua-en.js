@@ -2033,4 +2033,8 @@ window.LINGUA_EN = {
     "From banks to the editor",
   "Nei Banchi un doppio clic su un preset lo apre nell'editor.":
     "In Banks, double-click a preset to open it in the editor.",
+  "Il looper nella guida":
+    "The looper in the guide",
+  "La guida del PC spiega il looper della Live: lunghezza, conteggio, click e tutti i tasti.":
+    "The PC guide explains the Live looper: length, count-in, click and every button.",
 };
