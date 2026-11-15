@@ -26,6 +26,16 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v163',
+    data: '15 novembre 2026',
+    voci: [
+      { icona: '🏷️', titolo: tr('Bollo JH intero'), dove: 'pc',
+        testo: tr('Nella catena dell\'editor, con un nome lungo il bollo dei modelli Hendrix non si taglia più.') },
+      { icona: '🔒', titolo: tr('Più sicura'), dove: 'pc',
+        testo: tr('L\'app per Windows passa a una base più recente e chiede solo i permessi che le servono. La pagina per il PC carica solo i suoi file.') },
+    ],
+  },
+  {
     versione: 'v162',
     data: '15 novembre 2026',
     voci: [

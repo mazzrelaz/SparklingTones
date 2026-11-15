@@ -2021,4 +2021,12 @@ window.LINGUA_EN = {
     "looper: {0}",
   "battuta {0} di {1}":
     "bar {0} of {1}",
+  "Bollo JH intero":
+    "Full JH badge",
+  "Nella catena dell'editor, con un nome lungo il bollo dei modelli Hendrix non si taglia più.":
+    "In the editor's chain, the Hendrix models' badge no longer gets cut off on long names.",
+  "Più sicura":
+    "Safer",
+  "L'app per Windows passa a una base più recente e chiede solo i permessi che le servono. La pagina per il PC carica solo i suoi file.":
+    "The Windows app moves to a newer foundation and only asks for the permissions it needs. The PC page only loads its own files.",
 };

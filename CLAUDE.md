@@ -340,14 +340,15 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v161 pubblicata** (15 novembre: scarico di responsabilità,
-  looper del PC, NEO/Mini/GO/40 a quattro preset senza looper — Mini, GO e 40 **non provati**, LIVE ed EDGE da capire). **Store 1.0.1**
-  (icona nera) **inviato alla certificazione il 15 novembre**; i commit di `desktop/` non sono pushati. Uscite prima: diario.
+- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v162 pubblicata**; **v163 pronta e non pushata**
+  (audit del 15 novembre: CSP di `pc.html`, bollo JH). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire. **Store 1.0.1
+  online**; **1.0.2** (Electron 45, permessi, fuse; provata dall'utente) in `desktop/dist`, da inviare. **npm 11 non scarica
+  Electron**: dopo `npm install`, `node node_modules/electron/install.js`. Uscite prima: diario.
 - **Live del PC** (`src/pc/12-live.js`): **la Pedaliera è per pedali MIDI commerciali, non per il nostro**, che ha solo lui.
   **Trappola: un `filter` animato rompe il disegno in Chromium.** Diario, 15 novembre.
 - **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
   l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
-  moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.0 il 14 novembre, 1.0.1 in certificazione** (PEGI 3): `https://apps.microsoft.com/detail/9PLB9RG9VLNX`, già nelle guide
+  moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.1 online** (PEGI 3): `https://apps.microsoft.com/detail/9PLB9RG9VLNX`, già nelle guide
   del PC e nella home del sito. **Ogni pubblicazione ha la splash «Novità»** (`src/novita.js`: voce in cima con la versione di `sw.js`).
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
