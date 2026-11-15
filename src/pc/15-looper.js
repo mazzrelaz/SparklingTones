@@ -411,11 +411,12 @@ function riempiLooper(box) {
   firmaLp = anelloLooper();
   // I tasti si rifanno solo se cambiano: rifarli sotto il mouse perde il clic (premuto sul
   // vecchio, rilasciato sul nuovo), e il conteggio e l'ampli chiedono di ridisegnare spesso.
+  // «{0}Annulla»: in italiano è «Annulla», ma in inglese qui è «Undo», non il «Cancel» delle finestre.
   const tasti = {
     rec: tasto('rec', recIco, recTesto, s === 'dub' || (!vuoto && s !== 'rec' && s !== 'conta') ? 'ambra' : 'rosso', s === 'rec' || s === 'dub' || s === 'conta'),
     suona: tasto('suona', 'suona', tr('Suona'), 'ciano', s === 'suona', s !== 'fermo'),
     ferma: tasto('ferma', 'ferma', tr('Ferma'), 'viola', s === 'fermo', vuoto && s !== 'conta'),
-    annulla: tasto('annulla', looper.annullato ? 'ripeti' : 'annulla', looper.annullato ? tr('Ripeti') : tr('Annulla'), 'viola', false, vuoto || s === 'rec' || s === 'conta'),
+    annulla: tasto('annulla', looper.annullato ? 'ripeti' : 'annulla', looper.annullato ? tr('Ripeti') : tr('{0}Annulla', ''), 'viola', false, vuoto || s === 'rec' || s === 'conta'),
     cancella: tasto('cancella', 'cancella', tr('Cancella'), 'fucsia', false, vuoto && s !== 'conta'),
   };
   const lato = `

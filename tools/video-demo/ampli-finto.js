@@ -21,6 +21,18 @@
     let corrente = 0;
     const impostazioniLooper = [120, 0x00, 0x04, 0x00, 0x00, 0x00, 0x3c];
     const ricevuti = {};                         // seq → chunk di un 0x0101 in arrivo
+    let statoLoop = 0x00, inizioLoop = 0, lunghezzaLoop = 0, timerChiudi = null, timerPos = null;
+    const durataBattute = () => impostazioniLooper[2] * 4 * 60000 / (impostazioniLooper[0] || 120);
+    function giraLoop() {
+      const t0 = Date.now();
+      timerPos = setInterval(() => manda(0x03, 0x77, S.encFloat(((Date.now() - t0) % lunghezzaLoop) / lunghezzaLoop), 0x60), 100);
+    }
+    function chiudiLoop() {
+      clearTimeout(timerChiudi);
+      lunghezzaLoop = Date.now() - inizioLoop; statoLoop = 0x07;
+      manda(0x03, 0x75, [0x07], 0x60);
+      giraLoop();
+    }
 
     const ascoltatori = [];
     const notifica = async bytes => {
@@ -108,6 +120,29 @@
         case 0x0176:
           impostazioniLooper.splice(0, impostazioniLooper.length, ...d);
           return ack(0x76, m.seq);
+        // Il looper (15 novembre 2026, per il video del looper del PC): come l'ampli vero dice
+        // 04 all'inizio del rec, 07 quando il loop si chiude (da solo a fine battute, o col 05),
+        // 0a e poi 00 alla cancellazione; mentre suona manda la posizione nel giro con 0x0377.
+        // A 08, 09, 0b, 0c, 0d, 0e risponde solo l'ack, come lui.
+        case 0x0275: return manda(0x03, 0x75, [statoLoop], m.seq);
+        case 0x0175: {
+          await ack(0x75, m.seq);
+          const c = d[d.length - 1];
+          if (c === 0x04) {
+            statoLoop = 0x04; inizioLoop = Date.now();
+            manda(0x03, 0x75, [0x04], 0x60);
+            const libero = impostazioniLooper[3] === 0xc3;
+            if (!libero) timerChiudi = setTimeout(chiudiLoop, durataBattute());
+          } else if (c === 0x05 && statoLoop === 0x04) chiudiLoop();
+          else if (c === 0x09) { clearInterval(timerPos); timerPos = null; }
+          else if (c === 0x08 && !timerPos && lunghezzaLoop) giraLoop();
+          else if (c === 0x0a) {
+            clearTimeout(timerChiudi); clearInterval(timerPos); timerPos = null; lunghezzaLoop = 0; statoLoop = 0x00;
+            manda(0x03, 0x75, [0x0a], 0x60);
+            setTimeout(() => manda(0x03, 0x75, [0x00], 0x60), 1200);
+          }
+          return;
+        }
         default:
           return ack(m.sub, m.seq);
       }

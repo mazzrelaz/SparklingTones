@@ -1989,4 +1989,8 @@ window.LINGUA_EN = {
     "Tempo",
   "cancellare il loop?":
     "clear the loop?",
+  "di {0}":
+    "of {0}",
+  "{0}Annulla":
+    "{0}Undo",
 };

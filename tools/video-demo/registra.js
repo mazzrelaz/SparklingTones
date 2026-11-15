@@ -232,6 +232,11 @@ const TESTI = {
     pcIa: 'Generate with AI: describe the sound you want',
     pcIaCopia: 'Copy the request into your AI chat',
     pcIaIncolla: 'Paste the answer back: a new preset',
+    pcLooper: 'Live → Looper: the Spark 2 looper',
+    pcLooperImposta: 'Bars, tempo, count-in and click',
+    pcLooperRec: 'Record: count-in, then the loop',
+    pcLooperSovra: 'Overdub, undo, stop, clear',
+    pcLooperPedale: 'One click: the looper on your footswitch',
   },
 };
 const T = TESTI[LINGUA] || TESTI.it;
@@ -249,6 +254,7 @@ const SCENE = {
   'pc-libreria': { it: 'PC 3 · Libreria e banchi', en: 'Desktop 3 · Library and banks' },
   'pc-live': { it: 'PC 4 · Live', en: 'Desktop 4 · Live view and MIDI footswitch' },
   'pc-ia': { it: 'PC 5 · Genera con l’IA', en: 'Desktop 5 · Generate with AI' },
+  'pc-looper': { it: 'PC 6 · Il looper', en: 'Desktop 6 · The looper' },
 };
 if (SCENA) T.sottotitolo = SCENE[SCENA][LINGUA];
 // Una voce fatta da un'IA di un servizio (OpenAI): le sue regole vogliono che il video lo dica.
@@ -669,6 +675,31 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
       await dici('pcPedaliera');
       await tocca(await conTesto('button', 'Foot controller'), 4500);
     }
+    async function scenaPcLooper() {
+      const lp = id => centro(`document.querySelector('[data-l="${id}"]')`);
+      await dici('pcLooper');
+      await tocca(await centro("document.getElementById('apri-live')"), 1500);
+      await tocca(await centro("document.querySelector('.lv-modo [data-a=looper]')"), 2000);
+      await dici('pcLooperImposta');
+      await tocca(await centro("document.querySelector('[data-b=\"2\"]')"), 1000);
+      await tocca(await centro("document.querySelector('[data-click=\"2\"]')"), 1000);
+      await tocca(await centro("document.querySelector('[data-c=\"1\"]')"), 1500);
+      await dici('pcLooperRec');
+      await tocca(await lp('rec'), 9000);          // conteggio 2 s, rec 4 s, poi gira
+      await dici('pcLooperSovra');
+      await tocca(await lp('rec'), 3500);
+      await tocca(await lp('rec'), 1500);
+      await tocca(await lp('annulla'), 1800);
+      await tocca(await lp('ferma'), 1800);
+      await tocca(await lp('cancella'), 900);
+      // il «Clear» della finestra di conferma, non il tasto del looper: è l'ultimo nella pagina
+      await tocca(await centro("[...document.querySelectorAll('button')].filter(b => b.offsetParent && b.textContent.trim() === 'Clear').pop()"), 2000);
+      await dici('pcLooperPedale');
+      await tocca(await conTesto('button', 'Foot controller'), 1500);
+      const p = await conTesto('button', 'Looper like our pedal');
+      if (p) await muovi(p.x, p.y, 800);
+      await dorme(3000);
+    }
     async function scenaPcIa() {
       await dici('pcIa');
       await tocca(await centro("document.getElementById('genera-ia')"), 1500);
@@ -712,6 +743,7 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     else if (SCENA === 'pc-libreria') await scenaPcLibreria();
     else if (SCENA === 'pc-live') await scenaPcLive();
     else if (SCENA === 'pc-ia') await scenaPcIa();
+    else if (SCENA === 'pc-looper') await scenaPcLooper();
     else {
     await dici('connetti');
     await tocca(await centro("document.getElementById('status')"), 300);
