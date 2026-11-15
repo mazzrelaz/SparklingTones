@@ -1,9 +1,8 @@
 [
-  ["titolo", "Sparkling Tones for desktop, part six: the looper."],
-  ["pcLooper", "In the live view, click \"Looper\": it drives the looper built into your Spark 2."],
-  ["pcLooperImposta", "Pick the length in bars, the tempo, or tap it in, and whether you want a count-in and a click."],
-  ["pcLooperRec", "Hit \"Record\": the count-in plays, then the amp records, and the ring shows where you are in the loop."],
-  ["pcLooperSovra", "Hit it again to overdub. \"Undo\" takes back the last layer, \"Stop\" halts the loop, \"Clear\" starts over."],
-  ["pcLooperPedale", "With a MIDI footswitch, one click lays out the looper on your switches, just like our pedal."],
-  ["finale", "Sparkling Tones: free, for Windows and in your browser."]
+  ["titolo","Sparkling Tones for desktop, part six: the looper."],
+  ["pcLooper","In the live view, click \"Looper\": it drives the looper built into your Spark 2."],
+  ["pcLooperImposta","Pick the length in bars, the tempo, or tap it in, and whether you want a count-in and a click."],
+  ["pcLooperRec","Hit \"Record\": the count-in plays, then the amp records, and the ring shows where you are in the loop."],
+  ["pcLooperSovra","Hit it again to overdub. \"Undo\" takes back the last layer, \"Stop\" halts the loop, \"Clear\" starts over."],
+  ["finale","Sparkling Tones: free, for Windows and in your browser."]
 ]

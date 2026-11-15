@@ -236,7 +236,6 @@ const TESTI = {
     pcLooperImposta: 'Bars, tempo, count-in and click',
     pcLooperRec: 'Record: count-in, then the loop',
     pcLooperSovra: 'Overdub, undo, stop, clear',
-    pcLooperPedale: 'One click: the looper on your footswitch',
   },
 };
 const T = TESTI[LINGUA] || TESTI.it;
@@ -677,6 +676,9 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
     }
     async function scenaPcLooper() {
       const lp = id => centro(`document.querySelector('[data-l="${id}"]')`);
+      // Il click del looper suona con Web Audio, che lo screencast non registra: si annota
+      // ogni colpo (quando e se è l'«uno») e il montaggio lo rimette nell'audio.
+      await cdp.js("window.__clic = []; { const v = window.clic; window.clic = function (uno, t) { if (audioLooper) __clic.push([uno ? 1 : 0, Date.now() + (t - audioLooper.currentTime) * 1000]); return v.apply(this, arguments); }; }");
       await dici('pcLooper');
       await tocca(await centro("document.getElementById('apri-live')"), 1500);
       await tocca(await centro("document.querySelector('.lv-modo [data-a=looper]')"), 2000);
@@ -693,12 +695,7 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
       await tocca(await lp('ferma'), 1800);
       await tocca(await lp('cancella'), 900);
       // il «Clear» della finestra di conferma, non il tasto del looper: è l'ultimo nella pagina
-      await tocca(await centro("[...document.querySelectorAll('button')].filter(b => b.offsetParent && b.textContent.trim() === 'Clear').pop()"), 2000);
-      await dici('pcLooperPedale');
-      await tocca(await conTesto('button', 'Foot controller'), 1500);
-      const p = await conTesto('button', 'Looper like our pedal');
-      if (p) await muovi(p.x, p.y, 800);
-      await dorme(3000);
+      await tocca(await centro("[...document.querySelectorAll('button')].filter(b => b.offsetParent && b.textContent.trim() === 'Clear').pop()"), 2500);
     }
     async function scenaPcIa() {
       await dici('pcIa');
@@ -866,6 +863,7 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
 
     const linea = { inizio, fine, outro, voce: VOCE && { file: VOCE.file, taglio: VOCE.taglio, silenzi: VOCE.silenzi || [],
                                       pezzi: VOCE.pezzi, momenti },
+                    clic: ((await cdp.js('window.__clic || []')) || []).map(([uno, ms]) => [uno, ms / 1000 - inizio]),
                     fotogrammi, didascalie, cartelli, testi: T, largo: LARGO * DPR, alto: ALTO * DPR, orizzontale: PC };
     fs.writeFileSync(path.join(USCITA, 'linea.json'), JSON.stringify(linea));
     console.log(`registrati ${fotogrammi.length} fotogrammi in ${(fine - inizio).toFixed(1)} s`);

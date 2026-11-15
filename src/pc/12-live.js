@@ -324,11 +324,6 @@ function disegnaPedaliera(corpo) {
   bloccoImpara.className = 'lv-blocco';
   bloccoImpara.appendChild(impara);
   piede.appendChild(bloccoImpara);
-  const bloccoPedale = document.createElement('div');
-  bloccoPedale.className = 'lv-blocco';
-  bloccoPedale.innerHTML = `<button>${tr('Looper come il nostro pedale')}</button>`;
-  bloccoPedale.firstChild.addEventListener('click', looperComeIlPedale);
-  piede.appendChild(bloccoPedale);
   piede.insertAdjacentHTML('beforeend', `<span class="lv-durata-et">${tr('Pressione lunga')}${aiuto('pedaliera')}</span>`);
   const bloccoDurata = document.createElement('div');
   bloccoDurata.className = 'lv-blocco';
@@ -396,28 +391,6 @@ function lungoSwitch(v) {
   if (v.startsWith('g:')) gesto(v.slice(2));
   else if (AZIONI_LOOPER.some(a => a.id === v)) { if (live.vista === 'live') azioneLooper(v); }
   else gesto(v);
-}
-
-/* Le combinazioni del nostro pedale (`docs/looper.md`): i primi cinque switch imparati diventano
-   FS1…FS5. FS1 registra/sovraincide/chiude, FS2 annulla/ripete, FS3 suona, FS4 ferma e tenuto
-   cancella, FS5 tap e tenuto entra/esce dal looper. Si cambia tutto dopo, switch per switch. */
-const LOOPER_PEDALE = [
-  { looper: 'rec' }, { looper: 'annulla' }, { looper: 'suona' },
-  { looper: 'ferma', looperLungo: 'cancella' }, { looper: 'tap', looperLungo: 'g:looper', lungo: 'looper' },
-];
-async function looperComeIlPedale() {
-  if (!pedaliera.switch.length) { avvisa(tr('nessuno switch'), tr('Impara prima gli switch del pedale.')); return; }
-  const giàFatti = pedaliera.switch.slice(0, 5).some(s => s.looper || s.looperLungo);
-  if (giàFatti && !await conferma(tr('assegnare il looper come il nostro pedale?'), tr('Le assegnazioni del looper dei primi cinque switch vengono sostituite.'), { ok: tr('Assegna') })) return;
-  pedaliera.switch.slice(0, 5).forEach((s, i) => {
-    const p = LOOPER_PEDALE[i];
-    s.looper = p.looper; s.looperLungo = p.looperLungo || null;
-    if (p.lungo && !s.lungo) s.lungo = p.lungo;
-  });
-  salvaPedaliera();
-  live.firma = '';
-  disegnaLive();
-  stato(tr('looper assegnato come il nostro pedale'));
 }
 
 function gesto(g) {

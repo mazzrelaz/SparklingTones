@@ -762,8 +762,8 @@ Terzo modo della Live del PC, accanto a Preset e Stomp (`src/pc/15-looper.js`; n
 - **Tempo** con frecce (1 bpm, 5 con Maiusc, tenute scorrono) e Tap; all'ampli un solo `0x0176`
   quando ci si ferma. Battute e tempo solo a loop vuoto.
 - **Pedaliera**: colonne «Looper · tocco» e «Looper · tenuto» (la seconda vale solo nel looper),
-  e il tasto «Looper come il nostro pedale» (FS1 rec, FS2 annulla, FS3 suona, FS4 ferma / tenuto
-  cancella, FS5 tap / tenuto entra-esce). Nella Live il tasto rapido **«Pedale BT»**.
+  assegnate switch per switch. Il tasto «Looper come il nostro pedale» **è stato tolto il 15 novembre**
+  (l'utente: la Pedaliera è per pedali MIDI commerciali, non per il nostro). Nella Live il tasto rapido **«Pedale BT»**.
 
 **Trappole trovate qui:**
 

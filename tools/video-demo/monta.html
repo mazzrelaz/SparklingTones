@@ -235,6 +235,17 @@ async function avvia(linea, voce) {
         pcm[c].set(sorgente.subarray(da, da + n));
       }
     }
+    // Il click del looper (annotato da registra.js): un'onda quadra di 40 ms, 2700 Hz sull'«uno»
+    // e 1800 sugli altri, come nell'app.
+    for (const [uno, quando] of (linea.clic || [])) {
+      const p = Math.round(quando * sr), f = uno ? 2700 : 1800, lung = Math.round(0.04 * sr);
+      for (let j = 0; j < lung && p + j < n; j++) {
+        if (p + j < 0) continue;
+        const inv = j < 96 ? j / 96 : Math.pow(0.001 / 0.25, (j - 96) / (lung - 96));
+        const v = 0.18 * inv * (Math.sin(2 * Math.PI * f * j / sr) >= 0 ? 1 : -1);
+        for (const canale of pcm) canale[p + j] += v;
+      }
+    }
     const rampa = 480;                                   // 10 ms, niente clic
     for (const [x0, x1] of voce.silenzi) {
       const p = Math.max(0, Math.round((x0 - voce.taglio) * sr));
