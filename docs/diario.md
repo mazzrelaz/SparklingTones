@@ -1427,3 +1427,14 @@ tasti dal pedale MIDI, click del conteggio da Web Audio. **Non aggiungere sonde 
 
 - **Pubblicazione**: `main` e `origin/main` vanno insieme. **v159 pubblicata** (14 novembre: splash inglese corretta; v158: link al Microsoft Store; v157: un video per capitolo nelle guide; home del sito rifatta; v155: link ai 7 Short di YouTube, video in `tools/video-demo` con `--scena`; v154: Live del PC, tap
   tempo, guida del PC dentro l'app, «?», splash «Novità». Dopo, il guscio va oltre v154.
+
+## 15 novembre 2026 — audit completo e correzioni
+
+Audit intero (il secondo, dopo il 17 settembre) e tutte le correzioni lo stesso giorno: esito in
+`docs/sicurezza.md`, «Audit completo — 15 novembre 2026». Electron 45.3.2 e app Windows 1.0.2
+(permessi e fuse), CSP su `pc.html` (`src/pc/00-pagina.js`), server dei video chiusi su `127.0.0.1`,
+firmware 2.42 (il blocco che si chiude ha il suo buffer: «Aggiorna tutti» poteva liberarlo a metà).
+Durante le prove l'utente ha visto nell'editor del PC **il bollo «JH» tagliato** sul bordo del
+riquadro del modello nella catena: ora i puntini li prende solo il nome (`.mod-nome`), il bollo resta
+intero. Provato con lo Spark vero: l'app Windows su Electron 45 si collega e legge gli otto slot.
+Da provare: l'installer 1.0.2, «Aggiorna tutti» col pedale 2.42.

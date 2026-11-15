@@ -13,7 +13,37 @@ repository, dipendenze npm. Le novità che parlano con l'esterno dall'ultima vol
 (Electron, sul Microsoft Store)**, il MIDI della Live del PC (USB e Bluetooth), le modalità MIDI,
 Play Acoustic e Pulze del pedale, gli strumenti dei video.
 
-### Da correggere
+### Le correzioni — lo stesso giorno
+
+Tutti e sei i punti sotto sono stati corretti il 15 novembre (il 4 resta in mano all'utente):
+
+- **1. Electron 45.3.2** (ed `electron-builder` 26.18.0), app Windows **1.0.2**. `npm audit`: da 18
+  falle (una critica, 13 gravi) a 6 moderate, tutte di `minimatch` dentro gli attrezzi per compilare.
+  **Provato**: in sviluppo **collegato allo Spark vero** (scelta del Bluetooth, lettura degli otto
+  slot, connessione veloce a 15 ms); l'exe impacchettato parte con i fuse e il controllo
+  d'integrità dell'`app.asar`. **npm 11 non lancia da solo lo script che scarica Electron**: dopo un
+  `npm install` va lanciato `node node_modules/electron/install.js`. **Da provare dall'utente**:
+  l'installer 1.0.2 sul PC e il pacchetto per lo Store.
+- **2.** `registra.js` e `pedale-video.js` ascoltano solo su `127.0.0.1` e servono solo dentro la
+  loro cartella; `server-rete.js` e il `protocol.handle` col separatore in coda. Provato con
+  `..%2f` e `..%5c`: 403.
+- **3.** `pc.html` ha la stessa CSP di `index.html`; i due script in linea stanno in
+  `src/pc/00-pagina.js` (nel guscio di `sw.js`). Tolto l'`onerror=` del logo da `guida-pc*.html`,
+  che la pagina legge col DOMParser e che la CSP segnalava. Provato nel browser e nell'exe: nessuna
+  violazione, la guida si apre, una `fetch` fuori da Dropbox è bloccata.
+- **5.** Permessi dell'exe: solo MIDI, appunti, schermo intero e `mailto`. **Il MIDI semplice, col
+  Chromium di Electron 45, arriva come `midiSysex`**: con il solo `midi` la Pedaliera USB era negata
+  (provato), quindi si concede anche quello. Microfono e resto negati (provato). Fuse spenti:
+  `RunAsNode` (provato: `ELECTRON_RUN_AS_NODE` non fa più niente), `NODE_OPTIONS`, `--inspect`,
+  privilegi di `file://`; accesi la cifratura dei cookie, l'integrità dell'asar e «solo
+  dall'asar».
+- **6.** Firmware **2.42**, caricato: a FINE **il callback consegna il blocco al loop** (`chiu…`) e
+  `ricDati` torna libero per il banco dopo. La corsa non era solo teorica: **«Aggiorna tutti» manda
+  i banchi uno dopo l'altro senza aspettare la risposta a FINE**, quindi l'INIZIA del secondo poteva
+  liberare il buffer che il loop stava salvando. **Da provare**: «Aggiorna tutti» con più banchi
+  cambiati.
+
+### Da correggere (com'era la mattina)
 
 **1. Electron è fermo alla 33.2.1 — medio.** L'ultima è la 45.3.2. `npm audit` dà per la 33 una
 quarantina di falle note, una dozzina gravi (uso di memoria già liberata, uscite dalla sandbox,
