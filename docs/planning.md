@@ -25,7 +25,7 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [x] `npm.cmd run store`: `desktop/dist/SparklingTones-1.0.0.appx` (13 novembre, guida del PC compresa).
 - [x] Inviato allo Store il 13 novembre 2026 (In certification; si pubblica da solo se passa). Scheda IT+EN, età 3+, testi in `design/store/`.
 - [x] Pubblicata il 14 novembre 2026 (PEGI 3): https://apps.microsoft.com/detail/9PLB9RG9VLNX. Guide e sito col link (v158).
-- [ ] **Al prossimo aggiornamento dello Store: rifare l'icona** (l'utente: «orrenda con quegli angoli neri»).
+- [x] (15 novembre, 1.0.1, nero pieno scelto dall utente) **Al prossimo aggiornamento dello Store: rifare l icona** (l'utente: «orrenda con quegli angoli neri»).
   Sulla pagina dello Store l'icona ha gli angoli neri: va fatta senza angoli (sfondo pieno fino al bordo o
   trasparente), in `desktop/build/appx/` e nelle immagini della scheda. Prima una bozza da fargli vedere.
 
