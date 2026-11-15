@@ -236,6 +236,7 @@ const TESTI = {
     pcLooperImposta: 'Bars, tempo, count-in and click',
     pcLooperRec: 'Record: count-in, then the loop',
     pcLooperSovra: 'Overdub, undo, stop, clear',
+    pcLooperPedale: 'Footswitch: a looper action on every switch',
   },
 };
 const T = TESTI[LINGUA] || TESTI.it;
@@ -695,7 +696,16 @@ window.__BANCO_PEDALE = ${JSON.stringify(T.bancoPronto)};
       await tocca(await lp('ferma'), 1800);
       await tocca(await lp('cancella'), 900);
       // il «Clear» della finestra di conferma, non il tasto del looper: è l'ultimo nella pagina
-      await tocca(await centro("[...document.querySelectorAll('button')].filter(b => b.offsetParent && b.textContent.trim() === 'Clear').pop()"), 2500);
+      await tocca(await centro("[...document.querySelectorAll('button')].filter(b => b.offsetParent && b.textContent.trim() === 'Clear').pop()"), 1500);
+      // Il Foot controller con cinque switch finti, già assegnati al looper (solo per il video:
+      // non si salvano), così la tabella non è vuota.
+      await cdp.js(`pedaliera.switch = [
+        { nome: 'A', chiave: 'cc:0:80', looper: 'rec' }, { nome: 'B', chiave: 'cc:0:81', looper: 'annulla' },
+        { nome: 'C', chiave: 'cc:0:82', looper: 'suona' }, { nome: 'D', chiave: 'cc:0:83', looper: 'ferma', looperLungo: 'cancella' },
+        { nome: 'E', chiave: 'cc:0:84', looper: 'tap', lungo: 'looper' },
+      ].map(s => Object.assign({ preset: null, stomp: null, looperLungo: null, lungo: null }, s))`);
+      await dici('pcLooperPedale');
+      await tocca(await conTesto('button', 'Foot controller'), 5500);
     }
     async function scenaPcIa() {
       await dici('pcIa');
