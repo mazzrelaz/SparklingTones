@@ -548,10 +548,11 @@ window.Spark = (function () {
   // quattro preset e niente looper. Si riconosce da «mini» in qualunque forma.
   // Lo Spark 40, uguale (stesso giorno, NON provato): in Bluetooth «Spark 40 Audio» o «Spark 40 BLE»,
   // il nome di `0x0211` non l'abbiamo visto; si riconosce dal «40» come parola a sé.
+  // Lo Spark GO, uguale (quattro preset, niente looper; NON provato): «go» come parola a sé.
   const PROFILO_MINI = { slot: 4, banchi: false };
 
   function profiloAmpli(nome) {
-    const quattro = /mini|\b40\b/i.test(nome || '');
+    const quattro = /mini|\b40\b|\bgo\b/i.test(nome || '');
     const profilo = PROFILI_AMPLI[nome] || (quattro ? PROFILO_MINI : PROFILO_SPARK2);
     return Object.assign({ nome: nome || null }, profilo);
   }
