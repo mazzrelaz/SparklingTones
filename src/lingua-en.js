@@ -2011,4 +2011,14 @@ window.LINGUA_EN = {
     "A clear reminder: SparklingTones is an independent project, without warranty and not affiliated with Positive Grid.",
   "Il looper del PC in inglese, e la finestra delle novità che non si apriva.":
     "The PC looper in English, and the what's new window that didn't open.",
+  "Editor del PC più ordinato":
+    "A tidier PC editor",
+  "Negli ampli Gain e Master stanno sopra, Bass, Middle e Treble sotto. I due equalizzatori si regolano a cursori, con Level in fondo.":
+    "On amps, Gain and Master sit on top, Bass, Middle and Treble below. The two equalizers now use sliders, with Level at the end.",
+  "Nell'app per Windows la scelta del Bluetooth e l'avviso di chiusura ora sono anche in inglese.":
+    "In the Windows app, the Bluetooth picker and the quit warning are now in English too.",
+  "looper: {0}":
+    "looper: {0}",
+  "battuta {0} di {1}":
+    "bar {0} of {1}",
 };

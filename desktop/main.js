@@ -97,14 +97,17 @@ function apriFinestra() {
 
   // Lavoro non salvato: la pagina chiede di restare (beforeunload). Il browser mostra la
   // domanda, Electron invece bloccherebbe la chiusura in silenzio: la domanda la facciamo noi.
+  let inglese = false;
+  ipcMain.removeAllListeners('lingua');
+  ipcMain.on('lingua', (_e, l) => { inglese = l === 'en'; });
   win.webContents.on('will-prevent-unload', (event) => {
     const scelta = dialog.showMessageBoxSync(win, {
       type: 'question',
-      buttons: ['Esci senza salvare', 'Resta'],
+      buttons: inglese ? ['Quit without saving', 'Stay'] : ['Esci senza salvare', 'Resta'],
       defaultId: 1, cancelId: 1,
       title: 'SparklingTones',
-      message: 'Il preset ha modifiche non salvate.',
-      detail: 'Se esci adesso le modifiche si perdono.'
+      message: inglese ? 'The preset has unsaved changes.' : 'Il preset ha modifiche non salvate.',
+      detail: inglese ? 'If you quit now, the changes will be lost.' : 'Se esci adesso le modifiche si perdono.'
     });
     if (scelta === 0) event.preventDefault();   // ignora il beforeunload: si chiude
   });

@@ -280,6 +280,10 @@
   #palco.spento #det-nome { color:var(--dim); }
   #det-sotto { color:var(--dim); margin:4px 0 0; }
   #manopole { list-style:none; margin:20px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:18px 10px; align-content:flex-start; }
+  /* ampli: Gain e Master sopra al centro, Bass Middle Treble sotto */
+  #manopole.frontale { display:grid; grid-template-columns:repeat(6, 57px); justify-content:center; }
+  #manopole.frontale > .comando { grid-column:span 2; justify-self:center; }
+  #manopole.frontale > .comando:first-child { grid-column:2 / 4; }
   #palco.spento #manopole { opacity:0.45; }
   .det-piede { margin:auto 0 0; padding-top:16px; color:var(--faint); font-size:0.75rem; }
 
@@ -296,6 +300,16 @@
   .girevole .corpo { fill:#2c2b2a; stroke:#8f8a84; stroke-width:1.5; }
   .girevole .denti { fill:#1c1b1a; stroke:#c9c4bc; stroke-width:1.3; stroke-linejoin:round; }
   .girevole .anello { fill:#121212; stroke:#4a4744; stroke-width:1; }
+  #manopole.eq { flex-wrap:nowrap; column-gap:4px; }
+  .comando.a-cursore { width:54px; flex-shrink:0; }
+  .comando.a-cursore.level { margin-left:32px; }
+  .cursore { position:relative; width:34px; height:210px; margin-bottom:6px; cursor:ns-resize; touch-action:none; }
+  .cursore .pista { position:absolute; left:50%; top:10px; bottom:10px; width:6px; margin-left:-3px; border-radius:3px;
+    background:rgba(255,255,255,0.13); overflow:hidden; display:flex; align-items:flex-end; }
+  .cursore .riempito { width:100%; background:var(--crema); }
+  .cursore .cappuccio { position:absolute; left:0; width:34px; height:20px; border-radius:4px; background:#2c2b2a;
+    border:1.5px solid #8f8a84; box-shadow:0 4px 6px rgba(0,0,0,0.7); cursor:grab; }
+  .cursore .cappuccio::after { content:''; position:absolute; left:5px; right:5px; top:50%; height:2.5px; margin-top:-1.25px; background:#fff; border-radius:2px; }
   .girevole .tacca { stroke:#fff; stroke-width:3.5; stroke-linecap:round; }
   .comando.leva { cursor:pointer; }
   .comando.leva svg { margin-bottom:4px; filter:drop-shadow(0 6px 8px rgba(0,0,0,0.75)); }

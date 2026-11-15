@@ -114,8 +114,15 @@ function disegnaManopole(effetto) {
   // Gain, Bass, Middle, Treble, Master: l'ordine del frontale, non quello degli indici (come l'app).
   const frontale = vere.length === 5 &&
     TONI.every((t, i) => SparkEffetti.manopola(effetto.name, vere[i].index, vere.length) === t);
-  const ordine = frontale ? [0, 3, 2, 1, 4] : vere.map((_, i) => i);
+  // Ampli: Gain e Master sopra, Bass, Middle, Treble sotto (griglia in pc.html).
+  const ordine = frontale ? [0, 4, 3, 2, 1] : vere.map((_, i) => i);
+  // Equalizzatori: Level (il primo) va in fondo, staccato dalle bande (`.a-cursore.level`).
+  const eq = SparkEffetti.aCursori(effetto.name) && ordine.length > 1;
+  if (eq) ordine.push(ordine.shift());
+  ul.classList.toggle('eq', eq);
+  ul.classList.toggle('frontale', frontale);
   for (const i of ordine) ul.appendChild(comando(effetto, vere[i]));
+  if (eq) ul.lastChild.classList.add('level');
 }
 
 function comando(effetto, param) {
@@ -164,13 +171,62 @@ function comando(effetto, param) {
   }
 
   const val = testoIn('val', mostraValore(param.value));
-  li.append(girevole(param.value, v => {
+  const cambia = v => {
     registra(effetto.name + '#' + param.index);
     param.value = v;
     val.textContent = mostraValore(v);
     mandaParametro(effetto.name, param.index, v);
-  }), testoIn('nome', nome), val);
+  };
+  // Gli equalizzatori si regolano a cursori, come sul pedale vero.
+  if (SparkEffetti.aCursori(effetto.name)) {
+    li.classList.add('a-cursore');
+    li.append(cursore(param.value, cambia), testoIn('nome', nome), val);
+    return li;
+  }
+  li.append(girevole(param.value, cambia), testoIn('nome', nome), val);
   return li;
+}
+
+/* Il cursore degli equalizzatori: pista verticale e cappuccio. Si prende il cappuccio o si
+   clicca sulla pista; la rotella, il Maiusc per andare piano e il doppio clic come la manopola. */
+const PISTA_PX = 210;
+function cursore(valore, cambia) {
+  const box = document.createElement('div');
+  box.className = 'cursore';
+  box.innerHTML = '<div class="pista"><div class="riempito"></div></div><div class="cappuccio"></div>';
+  const riempito = box.querySelector('.riempito'), capp = box.querySelector('.cappuccio');
+  const disegna = () => {
+    riempito.style.height = (valore * 100) + '%';
+    capp.style.bottom = `calc(${valore * 100}% * ${PISTA_PX - 20} / ${PISTA_PX})`;
+  };
+  const metti = v => {
+    v = Math.min(1, Math.max(0, Math.round(v * 1000) / 1000));
+    if (v === valore) return;
+    valore = v;
+    disegna();
+    cambia(v);
+  };
+  disegna();
+  const daY = y => {
+    const r = box.getBoundingClientRect();
+    return (r.bottom - 10 - y) / (r.height - 20);
+  };
+  let y0 = null, v0 = 0;
+  box.addEventListener('pointerdown', e => {
+    box.setPointerCapture(e.pointerId);
+    if (!capp.contains(e.target) && !e.shiftKey) metti(daY(e.clientY));
+    y0 = e.clientY; v0 = valore;
+  });
+  box.addEventListener('pointermove', e => {
+    if (y0 === null) return;
+    metti(v0 + (y0 - e.clientY) / (PISTA_PX - 20) * (e.shiftKey ? 0.2 : 1));
+  });
+  const fine = () => { y0 = null; };
+  box.addEventListener('pointerup', fine);
+  box.addEventListener('pointercancel', fine);
+  box.addEventListener('wheel', e => { e.preventDefault(); metti(valore + (e.deltaY < 0 ? 0.01 : -0.01)); }, { passive: false });
+  box.addEventListener('dblclick', () => metti(0.5));
+  return box;
 }
 
 function testoIn(classe, testo) {

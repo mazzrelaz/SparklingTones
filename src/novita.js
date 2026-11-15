@@ -26,6 +26,16 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v162',
+    data: '15 novembre 2026',
+    voci: [
+      { icona: '🎛️', titolo: tr('Editor del PC più ordinato'), dove: 'pc',
+        testo: tr('Negli ampli Gain e Master stanno sopra, Bass, Middle e Treble sotto. I due equalizzatori si regolano a cursori, con Level in fondo.') },
+      { icona: '🔧', titolo: tr('Piccole correzioni'), dove: 'pc',
+        testo: tr("Nell'app per Windows la scelta del Bluetooth e l'avviso di chiusura ora sono anche in inglese.") },
+    ],
+  },
+  {
     versione: 'v161',
     data: '15 novembre 2026',
     voci: [

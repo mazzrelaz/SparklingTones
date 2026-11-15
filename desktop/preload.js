@@ -4,6 +4,11 @@ const { ipcRenderer } = require('electron');
 
 let box = null, lista = null;
 
+// La lingua è quella che l'app ha scelto (`src/lingua.js` la mette su <html lang>).
+const inglese = () => document.documentElement.lang === 'en';
+const T = (it, en) => inglese() ? en : it;
+addEventListener('DOMContentLoaded', () => ipcRenderer.send('lingua', document.documentElement.lang));
+
 function chiudi(id) {
   ipcRenderer.send('bt-scelto', id || '');
   if (box) { box.remove(); box = null; lista = null; }
@@ -15,10 +20,10 @@ function apri() {
     'display:flex;align-items:center;justify-content:center;font:15px system-ui,sans-serif';
   box.innerHTML =
     '<div style="background:#1c1c1c;color:#eee;border-radius:10px;padding:18px 20px;min-width:340px;max-width:90vw">' +
-    '<div style="font-weight:600;margin-bottom:10px">Dispositivi Bluetooth</div>' +
-    '<div class="bt-lista" style="max-height:50vh;overflow:auto"><div style="opacity:.6">Ricerca…</div></div>' +
+    '<div style="font-weight:600;margin-bottom:10px">' + T('Dispositivi Bluetooth', 'Bluetooth devices') + '</div>' +
+    '<div class="bt-lista" style="max-height:50vh;overflow:auto"><div style="opacity:.6">' + T('Ricerca…', 'Searching…') + '</div></div>' +
     '<div style="text-align:right;margin-top:14px"><button class="bt-annulla" ' +
-    'style="background:#333;color:#eee;border:0;border-radius:6px;padding:7px 14px;cursor:pointer">Annulla</button></div></div>';
+    'style="background:#333;color:#eee;border:0;border-radius:6px;padding:7px 14px;cursor:pointer">' + T('Annulla', 'Cancel') + '</button></div></div>';
   box.addEventListener('click', e => { if (e.target === box) chiudi(''); });
   box.querySelector('.bt-annulla').onclick = () => chiudi('');
   lista = box.querySelector('.bt-lista');
