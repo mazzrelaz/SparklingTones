@@ -338,8 +338,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v159 pubblicata** (14 novembre); le uscite prima nel diario.
-  **In `main` e non pubblicato**: il looper del PC e il tasto «Pedale BT» della Live (14 novembre, sera). Il guscio va oltre v159.
+- **Pubblicazione**: `main` e `origin/main` vanno insieme. **v160 pubblicata** (15 novembre: looper del PC, Pedale BT,
+  NEO/Mini/GO/40 a quattro preset senza looper; Mini, GO e 40 **non provati**, LIVE ed EDGE da capire); le uscite prima nel diario.
 - **Vista Live del PC** (11 novembre, `src/pc/12-live.js`): Preset/Stomp e pedaliera MIDI; **con lo Spark e un pedale
   veri è da provare**. Benvenuto dell'exe in `src/pc/13-benvenuto.js`. **La Pedaliera è pensata per pedali MIDI commerciali, non per
   il nostro** (regola dell'utente, 12 novembre). **Trappola: un `filter` animato rompe il disegno
