@@ -165,6 +165,12 @@ Il perché di ognuna è in `docs/decisioni-ui.md`.
   (`chiediPrimaDiUscire()`); **se il salvataggio fallisce non si chiude niente**.
 - **Ogni pannello che parla con l'ampli ha la sua `.stato-pannello`** (`statoDelPannello`).
 
+### Scarico di responsabilità — ovunque (regola dell'utente, 15 novembre 2026)
+
+«Tutti devono sapere che lo usano a loro rischio»: `src/avvertenza.js` (alla prima apertura, si chiude solo
+accettando), riga in fondo a Novità e benvenuto, in cima a Informazioni, riquadro in testa alle guide e sul
+sito. **Ogni schermata, guida o pagina nuova per gli altri lo porta.**
+
 ### Segnala un problema e donazioni
 
 Menu Altro: mailto a `mazzbackup@gmail.com` (solo email); «☕ Offrimi un caffè» con `window.open`
