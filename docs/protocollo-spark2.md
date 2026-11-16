@@ -538,6 +538,18 @@ L'utente ha uno Spark NEO (cuffie con l'ampli dentro). Misurato con `tools/neo-s
 - Secondo Ignitron (non misurato) il NEO accetta chunk da 128 e write da 173 come lo Spark
   40: non serve, i nostri vanno bene.
 
+### Spark NEO, 16 novembre 2026: la lettura che si ferma a metà
+
+- **Riletto 120 ms dopo un `0x0138`, il NEO si ferma dentro un pezzo** (quasi sempre il 13°,
+  dopo 33 byte) e non riprende più: niente `f7`, silenzio. Non è la radio: il punto è sempre lo
+  stesso. **Con 600 ms di attesa dopo il cambio (PC, `apriSlot`) dieci cambi su dieci letti**
+  (provato dall'utente).
+- Resta qualche fermata rara (16 pezzi su 17): `_readPresetVia` riprova una volta, dopo 1,5 s di
+  silenzio e 600 ms di pausa, e nella prova è sempre bastato. Nel registro finiscono le ultime
+  notifiche grezze e i byte rimasti nel riassemblatore.
+- Causa vera ignota (il NEO occupato a caricare il suono è l'ipotesi). L'app del telefono non ha
+  ancora l'attesa dopo il cambio.
+
 ### Spark NEO, 4 ottobre 2026: perché i banchi sono lenti
 
 - **Il NEO digerisce un pezzo ogni ~90 ms.** Dal pedale: giro `0x0138`→ack ~100 ms anche a
