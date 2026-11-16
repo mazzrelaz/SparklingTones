@@ -151,7 +151,9 @@ async function apriSlot(n) {
       ora.attendibile = false;
       stato(tr('«{0}» — {1}', record.name, nomeSlot(n)));
     }
-    await attendi(120);
+    // Il NEO, letto subito dopo il cambio, si ferma a metà risposta (16 novembre 2026,
+    // sempre al pezzo 13): gli si lascia più tempo per caricare il suono. Da verificare.
+    await attendi(/neo/i.test(profilo.nome || '') ? 600 : 120);
     if (!await apriDalVivo(n) && record) {
       ora = null;          // senza la rilettura non si regola niente
       disegnaTutto();
