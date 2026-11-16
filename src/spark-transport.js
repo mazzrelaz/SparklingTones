@@ -433,7 +433,13 @@ window.SparkTransport = (function () {
       let timer = null;
       const done = new Promise(resolve => {
         const scade = () => { if (this._removeWaiter(waiter)) { clearTimeout(tetto); resolve(null); } };
-        const arma  = () => { clearTimeout(timer); timer = setTimeout(scade, timeout); };
+        // Una volta che i pezzi arrivano, 1,5 s di silenzio vuol dire che l'ampli si è
+        // fermato a metà (NEO, 16 novembre 2026: tace per sempre dentro un pezzo): meglio
+        // riprovare subito che aspettare tutto il tempo. Un pezzo del NEO ne vuole ~90 ms.
+        const arma  = () => {
+          clearTimeout(timer);
+          timer = setTimeout(scade, chunks.length ? Math.min(timeout, 1500) : timeout);
+        };
         const waiter = {
           match: msg => {
             if (msg.cmd !== Spark.CMD_NOTIFY || msg.sub !== 0x01) return false;
