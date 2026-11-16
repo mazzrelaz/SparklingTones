@@ -821,6 +821,12 @@ window.LINGUA_EN = {
     "the amp didn't send its settings: tempo not written",
   "{0}: nessuna risposta completa ({1} chunk buoni, {2} messaggi arrivati in tutto)":
     "{0}: no complete answer ({1} good chunks, {2} messages received in all)",
+  "{0}: risposta a metà, rileggo":
+    "{0}: half an answer, reading again",
+  "{0}: ultime notifiche grezze — {1}":
+    "{0}: last raw notifications — {1}",
+  "{0}: nel riassemblatore {1} byte in sospeso":
+    "{0}: {1} bytes pending in the reassembler",
   "{0}: errore di parsing — {1} (payload di {2} byte conservato)":
     "{0}: parsing error — {1} ({2}-byte payload kept)",
   "slot {0}: vuoto o non risponde":

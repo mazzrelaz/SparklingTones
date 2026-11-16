@@ -33,6 +33,8 @@ window.SparkTransport = (function () {
 
   const SEND_GAP_MS        = 30;    // pausa fra invii consecutivi
   const DEFAULT_TIMEOUT    = 2500;
+  /** Una lettura di preset arrivata a metà: da ritentare una volta. */
+  const PARZIALE = Symbol('parziale');
   const PRESET_ACK_TIMEOUT = 700;   // il firmware si sblocca da solo dopo 500 ms
   const CMD_ACK_FINAL      = 0x05;  // ack dell'ultimo chunk di un preset
 
@@ -66,6 +68,7 @@ window.SparkTransport = (function () {
     this.rxTotali = 0;
 
     this.assembler = new Spark.MessageAssembler(this._handleMessage.bind(this));
+    this.ultimeNotifiche = [];
 
     // stato riportato dall'ampli
     this.state = { name: null, serial: null, firmware: null, currentPreset: null };
@@ -136,7 +139,12 @@ window.SparkTransport = (function () {
         // Con offset e lunghezza: un DataView può guardare solo un pezzo del
         // suo buffer (non in Chrome, ma non è garantito dagli altri browser).
         const dv = e.target.value;
-        this.assembler.feed(new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength));
+        const pezzo = new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength);
+        // Le ultime notifiche grezze, per capire cosa arriva quando una lettura
+        // resta senza coda (Spark NEO, 16 novembre 2026).
+        this.ultimeNotifiche.push(Array.from(pezzo));
+        if (this.ultimeNotifiche.length > 4) this.ultimeNotifiche.shift();
+        this.assembler.feed(pezzo);
       });
 
       this._connessoDa = Date.now();
@@ -396,7 +404,21 @@ window.SparkTransport = (function () {
       return true;
     },
 
+    /**
+     * Lo Spark NEO a volte manda tutti i pezzi tranne l'ultimo (16 su 17, 16
+     * novembre 2026; 13 su 16 il 4 ottobre). Se la risposta è arrivata a metà
+     * si chiede ancora una volta: l'ampli c'è e sta parlando. Se non è arrivato
+     * niente non si insiste, perché un ampli muto non risponde al secondo giro.
+     */
     async _readPresetVia(command, label, timeoutMs) {
+      const primo = await this._leggiUnaVolta(command, label, timeoutMs);
+      if (primo !== PARZIALE) return primo;
+      this.onLog(tr('{0}: risposta a metà, rileggo', label));
+      const secondo = await this._leggiUnaVolta(command, label, timeoutMs);
+      return secondo === PARZIALE ? null : secondo;
+    },
+
+    async _leggiUnaVolta(command, label, timeoutMs) {
       const timeout = timeoutMs || 4000;
       const chunks = [];
       const rxPrima = this.rxTotali;
@@ -446,6 +468,12 @@ window.SparkTransport = (function () {
           for (let i = 0; i < asm.total; i++) if (!visti.has(i)) mancano.push(i);
           this.onLog(tr('{0}: ne aspettavo {1}, mancano i pezzi {2} (dopo {3} ms)',
                      label, asm.total, mancano.join(' ') || '—', Date.now() - partenza));
+          const esa = b => b.toString(16).padStart(2, '0');
+          this.onLog(tr('{0}: ultime notifiche grezze — {1}', label,
+            this.ultimeNotifiche.map(n => n.slice(-24).map(esa).join(' ')).join(' | ')));
+          this.onLog(tr('{0}: nel riassemblatore {1} byte in sospeso', label,
+            this.assembler.buffer.length));
+          return PARZIALE;
         }
         return null;
       }
