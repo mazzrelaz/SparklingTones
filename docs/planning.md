@@ -39,8 +39,8 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [ ] Spark NEO.
 - [ ] Versione PC con lo Spark vero, fuori dal Live.
 - [ ] **Spark 40 «non si collega»** (15 novembre, segnalato da un utente). Correzione pronta nel ramo
-  **`spark-40`** (`30cf20c`: block header in invio solo per lo Spark 40, tolto in ricezione), **tolta da
-  `main`** con un revert: **in standby finché qualcuno con uno Spark 40 non la prova.** Perché e cosa
+  **`spark-40`** (`30cf20c`: block header in invio solo per lo Spark 40, tolto in ricezione), **ripubblicata in
+  v167** (16 novembre) per la prova con lo Spark 40 di un amico: **esito da segnare qui.** Perché e cosa
   verificare: `docs/protocollo-spark2.md`, «Spark 40», nel ramo. Per riprenderla: `git cherry-pick 30cf20c`.
   Al tester: telefono o PC e browser, nome esatto nell'elenco Bluetooth, messaggio d'errore, registro (Altro).
 
