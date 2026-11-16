@@ -2045,6 +2045,10 @@ window.LINGUA_EN = {
     "The PC guide explains the Live looper: length, count-in, click and every button.",
   "Versione {0}":
     "Version {0}",
+  "Spark NEO più affidabile":
+    "A more reliable Spark NEO",
+  "Cambiando canale il suono si rilegge senza errori, e se l'ampli si ferma a metà risposta l'app riprova da sola.":
+    "Switching channels now reads the sound back without errors, and if the amp stops halfway through an answer the app tries again on its own.",
   "Prima prova di collegamento con lo Spark 40. Se qualcosa non va, «Segnala un problema» in Altro.":
     "First connection test with the Spark 40. If something goes wrong, use «Report a problem» in More.",
   "La versione si vede":

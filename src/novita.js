@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v168',
+    data: '16 novembre 2026',
+    voci: [
+      { icona: '🔌', titolo: tr('Spark NEO più affidabile'),
+        testo: tr('Cambiando canale il suono si rilegge senza errori, e se l\'ampli si ferma a metà risposta l\'app riprova da sola.') },
+    ],
+  },
+  {
     versione: 'v167',
     data: '16 novembre 2026',
     voci: [
