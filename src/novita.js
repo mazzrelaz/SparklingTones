@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v167',
+    data: '16 novembre 2026',
+    voci: [
+      { icona: '🔌', titolo: tr('Spark 40'),
+        testo: tr('Prima prova di collegamento con lo Spark 40. Se qualcosa non va, «Segnala un problema» in Altro.') },
+    ],
+  },
+  {
     versione: 'v166',
     data: '15 novembre 2026',
     voci: [

@@ -2039,6 +2039,8 @@ window.LINGUA_EN = {
     "The PC guide explains the Live looper: length, count-in, click and every button.",
   "Versione {0}":
     "Version {0}",
+  "Prima prova di collegamento con lo Spark 40. Se qualcosa non va, «Segnala un problema» in Altro.":
+    "First connection test with the Spark 40. If something goes wrong, use «Report a problem» in More.",
   "La versione si vede":
     "The version is shown",
   "In Informazioni c'è il numero di versione dell'app, scritto come 1.6.6.":
