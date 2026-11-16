@@ -414,6 +414,7 @@ window.SparkTransport = (function () {
       const primo = await this._leggiUnaVolta(command, label, timeoutMs);
       if (primo !== PARZIALE) return primo;
       this.onLog(tr('{0}: risposta a metà, rileggo', label));
+      await sleep(600);                          // il NEO, incalzato, si ferma di nuovo
       const secondo = await this._leggiUnaVolta(command, label, timeoutMs);
       return secondo === PARZIALE ? null : secondo;
     },
