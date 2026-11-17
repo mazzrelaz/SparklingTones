@@ -2045,6 +2045,10 @@ window.LINGUA_EN = {
     "The PC guide explains the Live looper: length, count-in, click and every button.",
   "Versione {0}":
     "Version {0}",
+  "Spark Mini, GO e 40 sul PC":
+    "Spark Mini, GO and 40 on the PC",
+  "Cambiando preset l'app aspetta un attimo prima di rileggere il suono, come già sul NEO.":
+    "When you switch presets the app now waits a moment before reading the sound back, as it already did on the NEO.",
   "Spark NEO più affidabile":
     "A more reliable Spark NEO",
   "Cambiando canale il suono si rilegge senza errori, e se l'ampli si ferma a metà risposta l'app riprova da sola.":

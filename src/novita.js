@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v169',
+    data: '17 novembre 2026',
+    voci: [
+      { icona: '🔌', titolo: tr('Spark Mini, GO e 40 sul PC'), dove: 'pc',
+        testo: tr('Cambiando preset l\'app aspetta un attimo prima di rileggere il suono, come già sul NEO.') },
+    ],
+  },
+  {
     versione: 'v168',
     data: '16 novembre 2026',
     voci: [
