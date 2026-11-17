@@ -153,7 +153,9 @@ async function apriSlot(n) {
     }
     // Il NEO, letto subito dopo il cambio, si ferma a metà risposta (16 novembre 2026,
     // sempre al pezzo 13): gli si lascia più tempo per caricare il suono. Da verificare.
-    await attendi(/neo/i.test(profilo.nome || '') ? 600 : 120);
+    // Mini, GO e 40 (17 novembre, NON provati) fanno lo stesso per prudenza: tutti
+    // tranne lo Spark 2, che con 120 ms va (misurato).
+    await attendi(profilo.slot === 4 ? 600 : 120);
     if (!await apriDalVivo(n) && record) {
       ora = null;          // senza la rilettura non si regola niente
       disegnaTutto();
