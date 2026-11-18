@@ -354,7 +354,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   del PC e nella home del sito. **Ogni pubblicazione ha la splash «Novità»** (`src/novita.js`: voce in cima con la versione di `sw.js`).
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso. **Pickup consigliati** (18 novembre, come Pulze v8.8):
-  `src/pc/16-pickup.js`, campo `pickup` del record (fra gli `USER_FIELDS`; tolto = `null`); un'icona in cima al palco, mai un riquadro (niente scroll, sua regola); non pubblicato.
+  `src/pc/16-pickup.js`, campo `pickup` del record (fra gli `USER_FIELDS`; tolto = `null`); un'icona in cima al palco, mai un riquadro (niente scroll, sua regola). «La mia chitarra»
+  (anche Custom: `-` posto vuoto, `M` mini humbucker) regola il preset sulla sua. Solo Spark, non Pulze. Non pubblicato.
 - **Scene** (18 novembre): **solo nel ramo `scene`, mai in `main` finché lui non lo dice**. Solo PC, grafica
   approvata. Tutto, anche cosa manca, in `git show scene:docs/scene.md`; si riprende con `git worktree add`.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
