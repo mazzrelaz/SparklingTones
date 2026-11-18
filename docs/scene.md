@@ -10,6 +10,10 @@ Prima si misura con `tools/scene-sonda.html` (da Chrome o Edge, anche da `http:/
 riquadro del browser non apre la scelta Bluetooth). La sonda muove solo manopole con un nome, mai interruttori,
 posizioni, «Mode», «Master», gate, comp e riverbero; ogni raffica si verifica rileggendo il suono attivo.
 
+**18 novembre, l'utente: le scene solo nella versione per il PC** (`pc.html`), non sul telefono: «troppo
+piccolo per gestire tutte ste robe». La prima bozza (fila sotto i pulsantoni della Live del telefono, ramo
+`bozza-scene`) è scartata per questo.
+
 ## Prima misura — 18 novembre 2026, Spark 2
 
 Cattura `captures/2026-11-18-scene-sonda.json`, preset «On the turning away» (drive, chorus, delay accesi),
