@@ -2079,4 +2079,6 @@ window.LINGUA_EN = {
     "Hide suggested pickups",
   "Mostra pickup consigliati":
     "Show suggested pickups",
+  "Scarta":
+    "Discard",
 };

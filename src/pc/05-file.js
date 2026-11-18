@@ -534,7 +534,8 @@ async function apriImpostazioni() {
 
 /* ================================================================ il menu ☰ */
 const ICONE = {
-  chitarra: '<path d="M14 10 20 4M19 3l2 2M8.5 11.5c-2-1-4.5 0-5 2.5-.6 3 2 6.5 5 6.5 2.5 0 4-2 3.5-4 2 .5 3-1.5 2-3.5-1-2-3.5-2-5.5-1.5zM8 15.5h.01"/>',
+  // Un humbucker visto da sopra: due bobine, sei poli ciascuna (18 novembre: la chitarra non si riconosceva).
+  chitarra: '<rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 12h19M5.6 8.75h.01M8.2 8.75h.01M10.7 8.75h.01M13.3 8.75h.01M15.8 8.75h.01M18.4 8.75h.01M5.6 15.25h.01M8.2 15.25h.01M10.7 15.25h.01M13.3 15.25h.01M15.8 15.25h.01M18.4 15.25h.01"/>',
   backup: '<path d="M7 18a5 5 0 0 1-.5-10A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9M12 12v8M9 15l3-3 3 3"/>',
   impost: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
   guida: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>',

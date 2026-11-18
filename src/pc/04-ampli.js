@@ -211,7 +211,8 @@ async function chiediPrimaDiLasciare() {
                    : tr('Andando avanti così le perdi: in libreria e negli slot non ne resta niente.')),
     azioni: [
       { testo: tr('Torna al preset'), valore: null },
-      { testo: tr('Annulla'), valore: 'via', pericolo: true },
+      // «Scarta», non «Annulla» (18 novembre): sembrava uguale a «Torna al preset», e invece butta le modifiche e va avanti.
+      { testo: tr('Scarta'), valore: 'via', pericolo: true },
       { testo: tr('Salva…'), valore: 'salva', primario: true },
     ],
   });
