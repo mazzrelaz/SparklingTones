@@ -6,6 +6,22 @@ Scene e Looper, l'utente ha scelto la **strada C**: un modo **Concerto** che uni
 prima dovremmo studiare come fare la scaletta». **Qui non c'è niente di deciso**: quello che c'è già, la proposta,
 e le domande per l'utente.
 
+## L'idea dell'utente (18 novembre, sera) — **ci sta ancora pensando, non si costruisce niente**
+
+Le sue parole: «fermiamoci, devo studiarmela bene». Come la vede adesso:
+
+1. **Le scalette si creano fuori dalla Live**, in una schermata loro, coi nomi delle canzoni.
+2. **A ogni canzone si assegna un preset.**
+3. **Nella schermata Scene**, il selettore in alto (oggi «◀ Amp ▶», il banco) mostra **il nome della scaletta**.
+4. **A sinistra dei pulsantoni, la lista delle canzoni** della scaletta scelta.
+5. **Ogni canzone richiama il suo preset con la sua scena.**
+
+Quindi la Concerto non è un quinto modo: è la schermata Scene con la scaletta accanto. Risponde alle domande
+3 (più scalette, si scelgono dal selettore) e 6 (schermata sua, fuori dalla Live).
+
+Da chiarire con lui: al punto 5, «la sua scena» vuol dire che **la canzone parte da una scena scelta**
+(per esempio «Ritmica» invece della Base), o che porta con sé **le tre scene del preset**?
+
 ## Il modo Concerto (strada C, scelta dell'utente)
 
 Un brano della scaletta è un preset con le sue scene. Con 4 switch:
