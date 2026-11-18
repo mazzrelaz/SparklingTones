@@ -79,12 +79,12 @@
 
 <h1>2 — Una manopola, un acceso/spento (ascolto)</h1>
 <div class="sub">
-  Come sopra, ma cambia una sola manopola dell'ampli (di 0,3) o accende/spegne la
-  modulazione. Premi due volte per tornare com'era.
+  Come sopra, ma con un solo comando: il gain del drive cambia di molto (il drive dev'essere acceso),
+  oppure il delay si spegne e si riaccende. Premi due volte per tornare com'era.
 </div>
 <div class="row">
-  <button id="btnManopola" disabled>Cambia una manopola</button>
-  <button id="btnOnOff" disabled>Modulazione accesa/spenta</button>
+  <button id="btnManopola" disabled>Cambia il gain del drive</button>
+  <button id="btnOnOff" disabled>Delay acceso/spento</button>
 </div>
 <div class="row" data-ascolto="2"></div>
 
@@ -126,7 +126,6 @@ const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const GAP_TRASPORTO = 30;
 const PASSO = 0.05;              // spostamento delle manopole nelle raffiche
-const PASSO_ASCOLTO = 0.3;       // nella prova 2, perché si senta (0,15 non si sentiva, 18 novembre)
 const BLOCCHI = [2, 3, 4, 5];    // drive, ampli, modulazione, delay: gate, comp e riverbero no
 const NOMI_VIETATI = /mode|modalit|select|bpm|nota|note|tipo|type|master|volume/i;
 const RAFFICHE = [[5, 90], [10, 90], [20, 90], [5, 50], [10, 50], [20, 50], [5, 0], [10, 0], [20, 0]];
@@ -258,11 +257,16 @@ $('btnIntero').addEventListener('click', async () => {
 /* ---------------- 2: una manopola, un acceso/spento ---------------- */
 
 $('btnManopola').addEventListener('click', async () => {
-  const c = candidati.find(x => x.blocco === 3) || candidati[0];
-  if (!c) { scrivi('nessuna manopola usabile in questo suono', 'fuori'); return; }
+  // Sul drive, e la manopola che si sente di più: gain/drive/distortion/fuzz/sustain.
+  // Mai level o output, che alzano solo il volume.
+  const delDrive = candidati.filter(x => x.blocco === 2);
+  const c = delDrive.find(x => /gain|drive|dist|fuzz|sustain|satur|overdrive/i.test(x.etichetta.split(' · ')[1]))
+         || delDrive.find(x => !/level|output|vol/i.test(x.etichetta.split(' · ')[1]));
+  if (!c) { scrivi(`il drive di questo suono (${base.effects[2].name}) non ha una manopola che conosco: scegli un altro suono`, 'fuori'); return; }
+  if (!base.effects[2].enabled) scrivi('attenzione: il drive è spento, il cambio non si sentirà. Accendilo e riconnetti.', 'fuori');
   const prima = valoreBase(c);
   const su = !spostato.manopola;
-  const v = su ? spostaDi(prima, PASSO_ASCOLTO) : prima;
+  const v = su ? (prima < 0.5 ? prima + 0.5 : prima - 0.5) : prima;
   scrivi(`— prova 2: ${c.etichetta} ${prima.toFixed(3)} → ${v.toFixed(3)}`, 'fuori');
   const t0 = performance.now();
   await spark.send(Spark.commands.changeParam(c.nome, c.indice, v));
@@ -283,7 +287,7 @@ $('btnManopola').addEventListener('click', async () => {
 });
 
 $('btnOnOff').addEventListener('click', async () => {
-  const e = base.effects[4];
+  const e = base.effects[5];
   const acceso = spostato.onoff ? e.enabled : !e.enabled;
   scrivi(`— prova 2: ${e.name} ${acceso ? 'acceso' : 'spento'}`, 'fuori');
   const t0 = performance.now();
