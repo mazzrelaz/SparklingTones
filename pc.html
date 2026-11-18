@@ -314,19 +314,13 @@
   .pickup-disegno text.acceso { fill:var(--text); font-weight:600; }
   .pickup-disegno .pk-zona { fill:transparent; cursor:pointer; }
   .pickup-disegno .pk-cliccabile:hover .pk-spento { stroke:var(--accent-chiaro); }
-  .pk-pannello { flex:none; margin-top:auto; padding:10px 12px; background:var(--incavo); border:1px solid var(--line); border-radius:12px;
-                 display:grid; grid-template-columns:minmax(140px, 190px) 1fr; gap:4px 14px; align-items:center; }
-  .pk-pannello[hidden] { display:none; }
-  .pk-pannello > .pk-cima { grid-column:1 / -1; }
-  .pk-pannello.senza { display:block; }
-  .pk-pannello.senza .pickup-disegno { display:none; }
-  #manopole { margin-bottom:2px; }
-  .pk-cima { display:flex; align-items:flex-start; gap:10px; }
-  .pk-cima > div { flex:1; min-width:0; }
-  .pk-cima h3 { font-family:var(--strumento); font-size:0.85rem; margin:0; }
-  .pk-cima p { margin:1px 0 0; font-size:0.75rem; color:var(--dim); }
-  .pk-cima button { flex:none; padding:5px 7px; }
-  #pk-nota { margin:0; font-size:0.8rem; color:var(--dim); line-height:1.4; }
+  /* l'icona dei pickup, in cima a destra sul palco: accesa se il preset li ha */
+  #pk-apri { margin-left:auto; flex:none; padding:5px 7px; color:var(--faint); }
+  #pk-apri[hidden] { display:none; }
+  #pk-apri.ha { color:var(--accent-chiaro); border-color:var(--accent); }
+  #pk-apri svg.ico { width:18px; height:18px; }
+  .pk-vista .pk-sotto { margin:0 0 8px; font-size:0.85rem; color:var(--dim); }
+  .pk-vista .pk-nota { margin:10px 0 0; font-size:0.9rem; line-height:1.45; }
   .pk-finestra { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
   .pk-finestra .pickup-disegno svg { max-width:380px; }
   .pk-scelte { display:flex; flex-wrap:wrap; gap:4px; padding:4px; background:var(--incavo); border:1px solid var(--line); border-radius:12px; align-self:flex-start; }
@@ -757,18 +751,10 @@
   <section id="palco" hidden>
     <div id="foto"></div>
     <div class="dettaglio">
-      <div class="det-cima"><button class="etichetta-slot" id="det-chip" title="Acceso / spento"></button><span class="det-pos" id="det-pos"></span></div>
+      <div class="det-cima"><button class="etichetta-slot" id="det-chip" title="Acceso / spento"></button><span class="det-pos" id="det-pos"></span><button id="pk-apri" type="button" hidden title="Pickup consigliati" aria-label="Pickup consigliati"><svg class="ico" viewBox="0 0 24 24"><path d="M14 10 20 4M19 3l2 2M8.5 11.5c-2-1-4.5 0-5 2.5-.6 3 2 6.5 5 6.5 2.5 0 4-2 3.5-4 2 .5 3-1.5 2-3.5-1-2-3.5-2-5.5-1.5zM8 15.5h.01"/></svg></button></div>
       <h2 id="det-nome"></h2>
       <p id="det-sotto"></p>
       <ul id="manopole"></ul>
-      <section id="pk-pannello" class="pk-pannello" hidden>
-        <div class="pk-cima">
-          <div><h3>Pickup consigliati</h3><p id="pk-sotto"></p></div>
-          <button id="pk-modifica" type="button" title="Cambia i pickup consigliati" aria-label="Cambia i pickup consigliati"><svg class="ico" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg></button>
-        </div>
-        <div id="pk-disegno" class="pickup-disegno"></div>
-        <p id="pk-nota" hidden></p>
-      </section>
     </div>
     <div class="modelli">
       <input id="cerca-modello" placeholder="Cerca modello…" autocomplete="off">

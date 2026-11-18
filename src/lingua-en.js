@@ -2067,8 +2067,6 @@ window.LINGUA_EN = {
     "Suggested pickups",
   "Cambia i pickup consigliati":
     "Change the suggested pickups",
-  "Nessuna indicazione per questo preset.":
-    "No suggestion for this preset.",
   "Nota (selettore, manopole…)":
     "Note (selector, knobs…)",
   "Manico":

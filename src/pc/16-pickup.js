@@ -6,9 +6,9 @@
 
    «Genera con l'IA» chiede anche la configurazione dei pickup ideale per il
    suono: che chitarra (SSS, HSS, HH…), quali pickup accesi, lo split, e un
-   consiglio su selettore e manopole. Sul palco, in fondo alle manopole, un
-   riquadro la disegna; con la matita la si cambia o la si aggiunge a
-   qualsiasi preset.
+   consiglio su selettore e manopole. Sul palco un'icona (in cima a destra,
+   accesa se il preset li ha) apre la finestrella che li disegna; da lì
+   «Modifica» li cambia, o li aggiunge a qualsiasi preset.
 
    pk = { layout: 'HSS' (come si scrive: dal ponte al manico), attivi: [indici
    dal manico], split, consiglio }. Sta nel record della libreria (`pickup`,
@@ -108,7 +108,7 @@ function disegnoPickup(pk, alClic) {
   return svg;
 }
 
-/* ---------------------------------------------------------------- il riquadro sul palco */
+/* ---------------------------------------------------------------- l'icona e la finestrella */
 
 function pickupVisibili() {
   try { return localStorage.getItem('pickup-pc') !== 'no'; } catch (e) { return true; }
@@ -119,18 +119,46 @@ function cambiaVistaPickup() {
   disegnaPannelloPickup();
 }
 
+/**
+ * L'icona in cima al palco (18 novembre: il riquadro sotto le manopole faceva scorrere la colonna,
+ * e l'utente non vuole scorrere): accesa se il preset ha i pickup, il clic apre la finestrella.
+ */
 function disegnaPannelloPickup() {
-  const pan = $('pk-pannello');
-  pan.hidden = !ora || !pickupVisibili();
-  if (pan.hidden) return;
+  const b = $('pk-apri');
+  b.hidden = !ora || !pickupVisibili();
+  if (b.hidden) return;
   const pk = pickupValido(ora.pickup);
-  pan.classList.toggle('senza', !pk);
-  const box = $('pk-disegno');
-  box.textContent = '';
-  if (pk) box.appendChild(disegnoPickup(pk));
-  $('pk-sotto').textContent = pk ? descriviPickup(pk) : tr('Nessuna indicazione per questo preset.');
-  $('pk-nota').textContent = (pk && pk.consiglio) || '';
-  $('pk-nota').hidden = !pk || !pk.consiglio;
+  b.classList.toggle('ha', !!pk);
+  b.title = pk ? tr('Pickup consigliati') + ': ' + descriviPickup(pk) : tr('Pickup consigliati');
+}
+
+/** La finestrella: il disegno, la descrizione e il consiglio; «Modifica» apre la matita. */
+async function mostraPickup() {
+  if (!ora) return;
+  const pk = pickupValido(ora.pickup);
+  if (!pk) return modificaPickup();
+  const corpo = document.createElement('div');
+  corpo.className = 'pk-vista';
+  const sotto = document.createElement('p');
+  sotto.className = 'pk-sotto';
+  sotto.textContent = descriviPickup(pk);
+  const disegno = document.createElement('div');
+  disegno.className = 'pickup-disegno';
+  disegno.appendChild(disegnoPickup(pk));
+  corpo.append(sotto, disegno);
+  if (pk.consiglio) {
+    const nota = document.createElement('p');
+    nota.className = 'pk-nota';
+    nota.textContent = pk.consiglio;
+    corpo.appendChild(nota);
+  }
+  const scelta = await finestra({
+    titolo: tr('Pickup consigliati'),
+    icona: ICONE.chitarra,
+    corpo,
+    azioni: [{ testo: tr('Modifica'), valore: 'modifica' }, { testo: tr('Chiudi'), valore: null, primario: true }],
+  });
+  if (scelta === 'modifica') await modificaPickup();
 }
 
 /** I pickup del preset sul palco cambiati: in libreria subito, se il preset c'è. */
@@ -208,4 +236,4 @@ async function modificaPickup() {
   await scriviPickup(pk);
 }
 
-$('pk-modifica').addEventListener('click', modificaPickup);
+$('pk-apri').addEventListener('click', mostraPickup);
