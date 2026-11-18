@@ -27,8 +27,8 @@ Quindi: una scena da 5–10 cambi costa **150–350 ms** contro **1,3 s** del pr
 Il preset intero non lascia buchi, quindi il vantaggio di B è la **velocità**, più le code (da sentire).
 **Non dimostrato**: che 30 ms regga sempre (una sessione), e il caso dell'ampli che si pianta girando le
 manopole nell'editor, che resta aperto. Il ritmo conta: 10 cambi a 80 ms sono 840 ms, quasi quanto il
-preset intero; a 30 ms sono 320 ms. Da decidere con l'utente: 30 ms (più prove prima), o un tetto di
-cambi oltre il quale si manda il preset intero.
+preset intero; a 30 ms sono 320 ms. **Deciso dall'utente il 18 novembre: 80 ms, più prudente.** Ne
+segue un tetto: oltre ~12 cambi (≈ 1 s) la scena costa quanto il preset intero, e allora si manda quello.
 
 ## Cosa sappiamo già (verificato)
 
