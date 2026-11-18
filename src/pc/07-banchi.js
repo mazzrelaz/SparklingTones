@@ -37,13 +37,14 @@ function apriBanchi() {
 
 function chiudiSchermi() {
   if (schermoBanchi) { schermoBanchi.remove(); schermoBanchi = null; }
+  if (typeof chiudiScalette === 'function') chiudiScalette();
   if (typeof chiudiPedale === 'function') chiudiPedale();
   if (typeof chiudiAccordatore === 'function') chiudiAccordatore();
   if (typeof chiudiLive === 'function') chiudiLive();
 }
 
 addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !tendinaAperta && !finestraAperta && (schermoBanchi || schermoPedale || schermoTuner)) chiudiSchermi();
+  if (e.key === 'Escape' && !tendinaAperta && !finestraAperta && (schermoBanchi || schermoPedale || schermoTuner || schermoScalette)) chiudiSchermi();
 });
 
 /** Suona un preset da un banco, come un pulsantone della vista Live, e lo porta sul palco. */

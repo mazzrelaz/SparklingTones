@@ -79,7 +79,8 @@ window.PresetStore = (function () {
    * tutto intero il gruppo cambiato per ultimo, così anche un banco o una
    * categoria tolti spariscono dall'altra parte (9 novembre 2026).
    */
-  const CHIAVI_LIBRERIA = new Set(['categorie', 'coloriFamiglia', 'nomiParametri', 'banchi']);
+  // `scalette`: le scalette della pagina PC (src/pc/17-scalette.js), coi preset per UUID.
+  const CHIAVI_LIBRERIA = new Set(['categorie', 'coloriFamiglia', 'nomiParametri', 'banchi', 'scalette']);
 
   const promisify = request => new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
@@ -279,6 +280,33 @@ window.PresetStore = (function () {
         }
       }
       await this.setBanks(nostri, muto);
+    },
+
+    /* ----------------------------------------------------------------
+       Le scalette (pagina PC, 18 novembre 2026)
+
+       `[{ uuid, nome, canzoni: [{ uuid, nome, preset, partenza }] }]`: `preset`
+       è l'UUID del preset (non l'id, che è locale: così una scaletta passa
+       da un apparecchio all'altro com'è), `partenza` la scena da cui parte
+       la canzone (0–2) o null per la Base. Un preset che non c'è più lascia
+       la canzone senza suono: si vede, non si salta.
+       ---------------------------------------------------------------- */
+
+    getScalette() { return this.getSetting('scalette', []); },
+    setScalette(scalette, muto) { return this.setSetting('scalette', scalette, muto); },
+
+    /** Da un backup: per UUID, quella che arriva vince; quelle solo di qui restano. */
+    async _importaScalette(arrivate, muto) {
+      if (!Array.isArray(arrivate) || !arrivate.length) return;
+      const nostre = await this.getScalette();
+      for (const s of arrivate) {
+        if (!s || !Array.isArray(s.canzoni)) continue;
+        const i = nostre.findIndex(x => s.uuid && x.uuid === s.uuid);
+        const copia = { uuid: s.uuid || nuovoUuid(), nome: String(s.nome || '').trim() || tr('Scaletta'),
+                        canzoni: s.canzoni };
+        if (i >= 0) nostre[i] = copia; else nostre.push(copia);
+      }
+      await this.setScalette(nostre, muto);
     },
 
     async renameBank(id, nome) {
@@ -982,6 +1010,7 @@ window.PresetStore = (function () {
         nomiParametri: await this.getParamNames(),
         coloriFamiglia: await this.getSetting('coloriFamiglia', {}),
         banchi:        await this._banchiPerBackup(),
+        scalette:      await this.getScalette(),
         cancellati:    await this.getSetting('cancellati', {}),
         impostazioniIl: await this.getSetting('impostazioniIl', 0),
         presets:       await this.all(),
@@ -1099,11 +1128,15 @@ window.PresetStore = (function () {
           await this.setSetting('nomiParametri', tutti, true);
         }
         await this._importaBanchi(remoto.banchi, true);
+        await this._importaScalette(remoto.scalette, true);
       } else if (loro > nostre) {
         await this.setSetting('categorie', normalizeTags(remoto.categorie || []), true);
         await this.setSetting('coloriFamiglia', remoto.coloriFamiglia || {}, true);
         await this.setSetting('nomiParametri', remoto.nomiParametri || {}, true);
         await this._sostituisciBanchi(remoto.banchi || []);
+        // Solo se il file le porta: l'app del telefono non le conosce, e un suo
+        // cambio di categorie non deve cancellare le scalette del PC.
+        if (Array.isArray(remoto.scalette)) await this.setSetting('scalette', remoto.scalette, true);
         await this.setSetting('impostazioniIl', loro, true);
         esito.impostazioni = true;
       }
@@ -1234,6 +1267,7 @@ window.PresetStore = (function () {
 
       await this.setSetting('cancellati', tombe);
       await this._importaBanchi(backup.banchi);   // dopo i preset: gli UUID devono esserci
+      await this._importaScalette(backup.scalette);
       return imported;
     },
   };

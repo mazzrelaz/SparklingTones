@@ -207,6 +207,15 @@ addEventListener('resize', () => document.querySelectorAll('.lv-catena').forEach
 
 /** Il quarto modo della Live: Base e tre scene, ognuna con la sua catena sotto. */
 function disegnaScene(corpo) {
+  if (scalettaLive()) {
+    const concerto = document.createElement('div');
+    concerto.className = 'lv-concerto';
+    concerto.appendChild(listaCanzoni());
+    const destra = document.createElement('div');
+    concerto.appendChild(destra);
+    corpo.appendChild(concerto);
+    corpo = destra;
+  }
   const record = recordDiOra();
   if (!record) {
     const vuoto = document.createElement('div');
@@ -397,6 +406,16 @@ if (/bozza/.test(location.search)) {
         { nome: 'Pulito', cambi: gain(ampli, -0.4), accesi: { [drive.name]: false } },
       ];
       await store.put(record);
+    }
+    // E una scaletta finta: «Billie Jean» parte dalla terza scena.
+    if (!(await store.getScalette()).length) {
+      const [a, b, c] = elenco;
+      await store.setScalette([{ uuid: nuovoUuid(), nome: 'Serata di prova', canzoni: [
+        { uuid: nuovoUuid(), nome: 'Billie Jean', preset: a.uuid, partenza: 2 },
+        { uuid: nuovoUuid(), nome: 'Wish You Were Here', preset: b.uuid, partenza: null },
+        { uuid: nuovoUuid(), nome: 'Sunshine of Your Love', preset: (c || a).uuid, partenza: null },
+        { uuid: nuovoUuid(), nome: 'Hotel California', preset: a.uuid, partenza: 1 },
+      ] }]);
     }
     await ricarica(); disegnaTutto();
   }, 1000);

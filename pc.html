@@ -600,6 +600,30 @@
   .lv-posto.carica .lv-carica { transform:scaleX(1); transition:transform .7s linear; }
   /* il riquadro della scena: la catena in fila, il blocco scelto, le sue manopole */
   .riquadro-scena .lv-catena { flex-wrap:nowrap; margin-top:12px; }
+  /* Le scalette (18 novembre 2026): nella schermata Scalette le canzoni, nel modo Scene la lista a sinistra */
+  .bl-blocchi.sc-blocchi { grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); }
+  .sc-canzoni li { gap:8px; }
+  .sc-canzoni li.senza .sc-preset { color:var(--rosso, #e06060); }
+  .sc-canzoni li.sopra { box-shadow:inset 0 0 0 2px var(--accent-chiaro); background:rgba(47,127,232,0.16); }
+  .sc-blocco.sopra { border-color:var(--accent-chiaro); box-shadow:0 0 0 2px var(--accent); }
+  .sc-testi { flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.2; }
+  .sc-testi .nome { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sc-preset { font-size:0.74rem; color:var(--faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sc-partenza { flex:none; padding:2px 8px; font-size:0.72rem; border-radius:999px; background:var(--incavo); border:1px solid var(--line); color:var(--dim);
+    text-transform:none; letter-spacing:0; max-width:110px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sc-partenza:hover:not(:disabled) { border-color:var(--accent-chiaro); color:var(--text); }
+  .sc-quante { font:600 0.7rem var(--strumento); color:var(--dim); background:var(--incavo); border:1px solid var(--line); border-radius:999px; padding:0 6px; }
+  .lv-concerto { display:grid; grid-template-columns:260px minmax(0, 1fr); gap:16px; align-items:start; }
+  .lv-canzoni { background:var(--incavo); border:1px solid var(--line); border-radius:14px; padding:6px; max-height:calc(100vh - 200px); overflow-y:auto; }
+  .lv-canzoni ol { list-style:none; margin:0; padding:0; }
+  .lv-canzoni li { display:flex; align-items:center; gap:8px; padding:8px 8px; border-radius:9px; cursor:pointer; }
+  .lv-canzoni li:hover { background:var(--rialzo); }
+  .lv-canzoni li.sì { background:var(--accent); color:var(--su-accent); }
+  .lv-canzoni li.sì .sc-preset, .lv-canzoni li.sì .n { color:var(--su-accent); }
+  .lv-canzoni li.dopo { box-shadow:inset 3px 0 0 var(--accent-chiaro); }
+  .lv-canzoni li.vuoto { color:var(--faint); font-style:italic; cursor:default; }
+  .lv-canzoni li.senza .sc-preset { color:var(--rosso, #e06060); }
+  .lv-canzoni .n { font-family:var(--strumento); color:var(--faint); min-width:1.6em; text-align:right; font-size:0.78rem; }
   .riquadro-scena .lv-anello { flex:1 1 0; cursor:pointer; }
   .riquadro-scena .lv-anello.scelto { border-color:var(--accent-chiaro); background:rgba(120,170,255,0.08); }
   .rs-testa { display:flex; align-items:center; justify-content:space-between; margin:14px 2px 8px; font-family:var(--strumento); }
@@ -806,6 +830,7 @@
     <div class="gruppo">
       <button id="apri-live" title="La vista Live, con la pedaliera"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="10" rx="2"/><circle cx="8" cy="14" r="2"/><circle cx="16" cy="14" r="2"/><path d="M8 9V6M16 9V6"/></svg><span class="testo">Live</span></button>
       <button id="apri-banchi" title="I banchi, come le Songlist"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="testo">Banchi</span></button>
+      <button id="apri-scalette" title="Le scalette"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/></svg><span class="testo">Scalette</span></button>
       <button id="apri-pedale" title="Il pedale SparklingTones"><svg class="ico" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="13.5" r="2.2"/><circle cx="16" cy="13.5" r="2.2"/></svg><span class="testo">Pedale</span><span class="pallino-pedale" id="pallino-pedale" hidden></span></button>
       <button id="apri-tuner" title="L'accordatore dell'ampli"><svg class="ico" viewBox="0 0 24 24"><path d="M9 3v8a3 3 0 0 0 6 0V3M12 14v7"/></svg><span class="testo">Tuner</span></button>
     </div>
@@ -885,6 +910,7 @@
 <script src="src/pc/13-benvenuto.js"></script>
 <script src="src/pc/14-guida.js"></script>
 <script src="src/pc/16-pickup.js"></script>
+<script src="src/pc/17-scalette.js"></script>
 <script src="src/novita.js"></script>
 <script src="src/avvertenza.js"></script>
 </body>

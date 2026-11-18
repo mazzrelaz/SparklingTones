@@ -22,6 +22,7 @@ let profilo = Spark.profiloAmpli(null);   // Spark 2: otto slot in due banchi; N
 let famiglie = [];       // {id, nome, colore}: clean, drive, acoustic, bass
 let categorie = [];      // {nome, quanti}
 let banchi = [];         // i banchi dell'utente: {id, nome, posti: otto id o null}
+let scalette = [];       // le scalette: {uuid, nome, canzoni: [{uuid, nome, preset (UUID), partenza}]}
 
 async function ricarica() {
   tutti = await store.all();
@@ -31,6 +32,7 @@ async function ricarica() {
   famiglie = await store.getFamiglie();
   categorie = await store.allCategories();
   banchi = await store.getBanks();
+  scalette = await store.getScalette();
   vista.ordine = await store.getSetting('ordineLibreria', vista.ordine);
 }
 

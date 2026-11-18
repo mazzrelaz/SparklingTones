@@ -690,6 +690,24 @@ const DB_NAME = 'spark-test-' + Date.now();
   await scLa.importBackup(await sc.exportAll(), { lapidi: false });
   check('un backup rimesso a mano riporta le scene', (await scLa.byUuid('uuid-sc')).scene, SCENE);
 
+  // Le scalette: i preset per UUID, viaggiano come i banchi.
+  const SERATA = { uuid: 'sl-1', nome: 'Serata', canzoni: [{ uuid: 'c-1', nome: 'Billie Jean', preset: 'uuid-sc', partenza: 2 }] };
+  await attesa(5);
+  await sc.setScalette([SERATA]);
+  check('la scaletta va nel file della libreria', (await sc.exportAll()).scalette, [SERATA]);
+  await scLa.fondiSincro(await sc.exportAll());
+  check('e col sync arriva sull\'altro apparecchio', await scLa.getScalette(), [SERATA]);
+  await attesa(5);
+  await scLa.setSetting('categorie', ['dal telefono']);
+  const senzaScalette = await scLa.exportAll(); delete senzaScalette.scalette;   // l'app del telefono non le conosce
+  await sc.fondiSincro(senzaScalette);
+  check('un file che non porta scalette non cancella quelle di qui', await sc.getScalette(), [SERATA]);
+  await scLa.setScalette([{ uuid: 'sl-2', nome: 'Solo di là', canzoni: [] }]);
+  await scLa.importBackup({ format: 'spark-controller-library', version: 2, presets: [],
+    scalette: [Object.assign({}, SERATA, { nome: 'Serata nuova' })] }, { lapidi: false });
+  check('un backup rimesso a mano aggiorna per UUID e lascia quelle solo di qui',
+        (await scLa.getScalette()).map(s => s.nome), ['Solo di là', 'Serata nuova']);
+
   sc.close(); scLa.close();
   await PresetStore.deleteDatabase(DB_SCENE);
   await PresetStore.deleteDatabase(DB_SCENE + '-la');

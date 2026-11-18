@@ -8,6 +8,7 @@
 const GUIDA_DI = {
   live: 'live', pedaliera: 'live-pedaliera', tap: 'suono-tempo', ab: 'suono-ab', ia: 'ia',
   dropbox: 'sicuro-dropbox', sicurezza: 'sicuro-sicurezza', hendrix: 'imp-hendrix', banchi: 'banchi', pedale: 'pedale',
+  scalette: 'live-scalette',
 };
 
 let guidaPronta = null;

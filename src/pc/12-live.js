@@ -33,6 +33,8 @@ const GESTI = [
   { id: 'meta', nome: () => tr('Passa da banco A a banco B') },
   { id: 'banco+', nome: () => tr('Banco successivo') },
   { id: 'banco-', nome: () => tr('Banco precedente') },
+  { id: 'canzone+', nome: () => tr('Canzone successiva') },
+  { id: 'canzone-', nome: () => tr('Canzone precedente') },
 ];
 const DURATE = [1000, 1500, 2000, 3000];
 
@@ -119,8 +121,10 @@ function cambiaStomp(id) {
 
 /* ---------------------------------------------------------------- la schermata */
 
+let scalettaLetta = false;
 async function apriLive() {
   await caricaPedaliera();
+  if (!scalettaLetta) { scalettaLetta = true; await scalettaDiPrima(); }
   chiudiSchermi();
   schermoLive = document.createElement('div');
   schermoLive.className = 'schermo live';
@@ -156,7 +160,7 @@ function chiudiLive() {
 function firmaLive() {
   const accesi = ora && ora.effetti ? ora.effetti.map(e => (e && e.enabled ? 1 : 0)).join('') : '';
   const nomi = ora && ora.effetti ? ora.effetti.map(e => e && e.name).join(',') : '';
-  return [live.vista, live.banco, live.meta, live.stomp, live.looper, live.scene, ora && ora.scena, ora && ora.record && JSON.stringify(ora.record.scene || null), live.impara, ora && ora.nome, ora && ora.slot, accesi, nomi,
+  return [live.vista, live.banco, live.meta, live.stomp, live.looper, live.scene, ora && ora.scena, ora && ora.record && JSON.stringify(ora.record.scene || null), live.impara, live.scaletta, live.canzone, JSON.stringify(scalette), ora && ora.nome, ora && ora.slot, accesi, nomi,
     banchi.length, suAmpli.map(r => r && r.id).join(','), spark.connected, !!midi.usb, midi.bleNome, pedaliera.switch.length].join('|');
 }
 setInterval(() => { if (schermoLive && firmaLive() !== live.firma) disegnaLive(); }, 300);
@@ -203,16 +207,18 @@ function disegnaPalcoLive(corpo) {
   if (!profilo.banchi) live.looper = false;
   const banco = bancoLive();
   const attivo = postoAttivo(banco);
+  const sc = live.scene && !live.looper;
+  const titoloSel = sc ? (scalettaLive() ? scalettaLive().nome : tr('Nessuna scaletta')) : banco.nome;
   const testa = document.createElement('div');
   testa.className = 'lv-testa';
   testa.innerHTML = `
-    <div class="lv-banco"><button data-a="prima" title="${tr('Banco precedente')}">◀</button><b>${testoConNome(banco.nome)}</b><button data-a="dopo" title="${tr('Banco successivo')}">▶</button></div>
+    <div class="lv-banco"><button data-a="prima" title="${sc ? tr('Scaletta precedente') : tr('Banco precedente')}">◀</button><b>${testoConNome(titoloSel)}</b><button data-a="dopo" title="${sc ? tr('Scaletta successiva') : tr('Banco successivo')}">▶</button></div>
     <div class="lv-modo"><button data-a="preset" class="${live.stomp || live.looper || live.scene ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp && !live.looper && !live.scene ? 'sì' : ''}">${tr('Stomp')}</button><button data-a="scene" class="${live.scene && !live.looper ? 'sì' : ''}">${tr('Scene')}</button>${profilo.banchi ? `<button data-a="looper" class="${live.looper ? 'sì' : ''}">${tr('Looper')}</button>` : ''}${aiuto('live')}</div>
     <div class="lv-blocco lv-bt"><button data-a="bt" class="${midi.ble ? 'sì' : ''}" title="${midi.ble ? tr('Stacca il pedale Bluetooth') : tr('Collega un pedale Bluetooth')}">${midi.ble ? '● ' + tr('MIDI controller connesso') : tr('Collega Pedale BT')}</button></div>`;
   // Il pedale Bluetooth a portata di mano, senza passare dal Foot controller.
   testa.querySelector('[data-a="bt"]').addEventListener('click', () => (midi.ble ? staccaBle() : collegaBle()));
-  testa.querySelector('[data-a="prima"]').addEventListener('click', () => cambiaBanco(-1));
-  testa.querySelector('[data-a="dopo"]').addEventListener('click', () => cambiaBanco(1));
+  testa.querySelector('[data-a="prima"]').addEventListener('click', () => (sc ? cambiaScaletta(-1) : cambiaBanco(-1)));
+  testa.querySelector('[data-a="dopo"]').addEventListener('click', () => (sc ? cambiaScaletta(1) : cambiaBanco(1)));
   testa.querySelector('[data-a="preset"]').addEventListener('click', () => { live.stomp = false; live.looper = false; live.scene = false; disegnaLive(); });
   testa.querySelector('[data-a="stomp"]').addEventListener('click', () => { live.stomp = true; live.looper = false; live.scene = false; disegnaLive(); });
   testa.querySelector('[data-a="scene"]').addEventListener('click', () => { live.scene = true; live.stomp = false; live.looper = false; disegnaLive(); });
@@ -410,6 +416,8 @@ function gesto(g) {
   else if (g === 'meta') { if (!live.stomp && !live.looper && !live.scene) live.meta ^= 1; }
   else if (g === 'banco+') cambiaBanco(1);
   else if (g === 'banco-') cambiaBanco(-1);
+  else if (g === 'canzone+') cambiaCanzone(1);
+  else if (g === 'canzone-') cambiaCanzone(-1);
   disegnaLive();
 }
 

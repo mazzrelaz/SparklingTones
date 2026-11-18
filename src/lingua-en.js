@@ -2120,4 +2120,55 @@ window.LINGUA_EN = {
     "save the scene «{0}»",
   "scena «{0}» di «{1}» salvata.":
     "scene «{0}» of «{1}» saved.",
+  // Le scalette della pagina PC (ramo scene, 18 novembre 2026).
+  "Scaletta":
+    "Setlist",
+  "Le scalette":
+    "Setlists",
+  "Scalette":
+    "Setlists",
+  "Canzone successiva":
+    "Next song",
+  "Canzone precedente":
+    "Previous song",
+  "Nessuna scaletta":
+    "No setlist",
+  "Scaletta precedente":
+    "Previous setlist",
+  "Scaletta successiva":
+    "Next setlist",
+  "Nuova scaletta":
+    "New setlist",
+  "scene":
+    "scenes",
+  "＋ nuova scaletta":
+    "＋ new setlist",
+  "rinomina o elimina la scaletta":
+    "rename or delete the setlist",
+  "preset non più in libreria":
+    "preset no longer in the library",
+  "scena di partenza":
+    "starting scene",
+  "togli dalla scaletta (il preset resta in libreria)":
+    "remove from the setlist (the preset stays in the library)",
+  "nome della canzone":
+    "song name",
+  "nuova scaletta":
+    "new setlist",
+  "Scaletta {0}":
+    "Setlist {0}",
+  "Crea la scaletta":
+    "Create the setlist",
+  "scaletta":
+    "setlist",
+  "Elimina la scaletta":
+    "Delete the setlist",
+  "eliminare la scaletta":
+    "delete the setlist",
+  "Eliminare la scaletta <strong>{0}</strong>? I preset restano in libreria.":
+    "Delete the setlist <strong>{0}</strong>? The presets stay in the library.",
+  "«{0}»: il preset non è più in libreria.":
+    "«{0}»: the preset is no longer in the library.",
+  "scaletta vuota":
+    "empty setlist",
 };
