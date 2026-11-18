@@ -14,11 +14,19 @@ posizioni, «Mode», «Master», gate, comp e riverbero; ogni raffica si verific
 piccolo per gestire tutte ste robe». La prima bozza (fila sotto i pulsantoni della Live del telefono, ramo
 `bozza-scene`) è scartata per questo.
 
-**Bozza sul PC** (ramo `bozza-scene-pc`, `src/pc/16-scene.js`): quarto modo «Scene» della Live, con gli stessi
-pulsantoni del modo Preset; «Salva come scena» nel «Salva…» dell'editor; titolo «Live – modo» con il preset
-sotto, al centro (il nome a destra andava a capo e spostava la Live). **Tutto pensato per un MIDI controller da
-4 switch** (regola dell'utente): **3 scene più la Base**; lo switch del posto n (1–4) suona la Base o la scena
-n−1, e c'è il gesto «Entra/esci dalle Scene» per la pressione lunga.
+**Bozza sul PC** (ramo `scene`, `src/pc/16-scene.js`; **non deve toccare le versioni pubblicate**, regola
+dell'utente del 18 novembre): quarto modo «Scene» della Live, con gli stessi pulsantoni del modo Preset; titolo
+«Live – modo» con il preset sotto, al centro (il nome a destra andava a capo e spostava la Live). **Tutto
+pensato per un MIDI controller da 4 switch** (regola dell'utente): **3 scene più la Base**; lo switch del posto n
+(1–4) suona la Base o la scena n−1, e c'è il gesto «Entra/esci dalle Scene» per la pressione lunga.
+
+**Le scene si fanno solo dalla schermata Scene** (non più da «Salva…» dell'editor): tenendo premuto un
+pulsantone si apre il riquadro (nome, catena in fila con le immagini e la linea come in home, acceso/spento e
+manopole del blocco scelto; la scena suona mentre la si regola). Sulla Base la pressione lunga non fa niente.
+**Sotto ogni pulsantone la catena a quadrati** col nome, 1-3-3 (gate da solo in alto), colori scelti
+dall'utente: gate viola, comp/wah giallo, drive rosso, ampli arancione, mod azzurro, delay blu, riverbero
+bianco; spenti grigio scuro. Scartate prima: immagini a serpente con frecce, immagini a U con la linea.
+Nel riquadro restano le immagini (scelta dell'utente).
 
 ## Prima misura — 18 novembre 2026, Spark 2
 
