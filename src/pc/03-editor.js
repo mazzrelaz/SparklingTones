@@ -106,6 +106,8 @@ function disegnaPalco() {
 
   disegnaManopole(effetto);
   disegnaModelli();
+  // 16-pickup.js arriva dopo: al primo disegno della partenza può non esserci ancora.
+  if (typeof disegnaPannelloPickup === 'function') disegnaPannelloPickup();
 }
 
 const TONI = ['Gain', 'Treble', 'Middle', 'Bass', 'Master'];

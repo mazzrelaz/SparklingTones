@@ -68,7 +68,8 @@ window.PresetStore = (function () {
                         'effects', 'tail', 'checksum'];
 
   /** Campi dell'utente: non vengono mai toccati da un import. */
-  const USER_FIELDS  = ['tags', 'notes', 'favorite', 'order'];
+  // `pickup`: i pickup consigliati della pagina PC (src/pc/16-pickup.js); tolti valgono null.
+  const USER_FIELDS  = ['tags', 'notes', 'favorite', 'order', 'pickup'];
 
   /**
    * Le impostazioni che fanno parte della libreria e viaggiano col sync.

@@ -69,8 +69,9 @@ Ognuna in italiano e inglese e nelle guide, nello stesso lavoro.
   `0x0104`/`0x0115`, invece del preset intero. **L'utente: «va studiata bene» — prima lo studio, poi si decide.**
   Da capire: quanti parametri si possono mandare in fila senza piantare l'ampli (`PAUSA_PARAMETRO`), quando
   conviene il preset intero, cosa succede se la scena cambia un modello (`0x0106`), come si salvano nel record
-  e nel sync, come le vede il pedale. **Studio in `docs/scene.md`** (18 novembre): tre strade, regole e misure da
-  fare con l'ampli; la scelta dipende dalla misura 1 (il preset intero lascia un buco nel suono?).
+  e nel sync, come le vede il pedale. **Tutto nel ramo `scene`** (18 novembre, regola dell'utente: non deve
+  toccare le versioni pubblicate): studio e misure in `docs/scene.md`, sonda, bozza solo per il PC. Copia di
+  lavoro: `git worktree list`.
 - [ ] **Cronologia di un preset**: ogni salvataggio tiene la versione di prima, «torna a com'era». Da decidere
   quante versioni e se viaggiano con Dropbox.
 - [ ] **Condividere con link o QR**: il preset compresso nel `#` dell'indirizzo, nessun server; chi apre lo

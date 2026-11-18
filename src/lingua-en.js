@@ -2063,4 +2063,36 @@ window.LINGUA_EN = {
     "The logo on the start screen",
   "Prima di collegare l'ampli, il logo inciso nello sfondo e la versione sotto «Collega».":
     "Before you connect the amp, the logo engraved in the background and the version under «Connect».",
+  "Pickup consigliati":
+    "Suggested pickups",
+  "Cambia i pickup consigliati":
+    "Change the suggested pickups",
+  "Nota (selettore, manopole…)":
+    "Note (selector, knobs…)",
+  "Manico":
+    "Neck",
+  "Centrale":
+    "Middle",
+  "Ponte":
+    "Bridge",
+  "Nascondi pickup consigliati":
+    "Hide suggested pickups",
+  "Mostra pickup consigliati":
+    "Show suggested pickups",
+  "Scarta":
+    "Discard",
+  "La mia chitarra":
+    "My guitar",
+  "non indicata":
+    "not set",
+  "Nessuna":
+    "None",
+  "niente":
+    "none",
+  "Humbucker splittabili":
+    "Splittable humbuckers",
+  "Configurazione pickup ideale":
+    "Ideal pickup setting",
+  "«{0}» è sul palco":
+    "«{0}» is on stage",
 };

@@ -302,6 +302,65 @@
   #palco.spento #manopole { opacity:0.45; }
   .det-piede { margin:auto 0 0; padding-top:16px; color:var(--faint); font-size:0.75rem; }
 
+  /* i pickup consigliati: il disegno della chitarra, in fondo alle manopole (16-pickup.js) */
+  .pickup-disegno svg { display:block; width:100%; max-width:420px; height:auto; margin:0 auto; }
+  .pickup-disegno .pk-corpo { fill:var(--panel); stroke:var(--line); }
+  .pickup-disegno .pk-corda { stroke:var(--faint); stroke-width:1; opacity:0.6; }
+  .pickup-disegno .pk-spento { fill:var(--rialzo); stroke:var(--traccia); }
+  .pickup-disegno .pk-acceso { fill:var(--accent); stroke:var(--accent-chiaro); filter:drop-shadow(0 0 5px var(--accent)); }
+  .pickup-disegno .pk-polo { fill:var(--incavo); }
+  .pickup-disegno .pk-poli.acceso .pk-polo { fill:var(--su-accent); }
+  .pickup-disegno text { font-family:var(--strumento); font-size:13px; fill:var(--dim); text-anchor:middle; }
+  .pickup-disegno text.acceso { fill:var(--text); font-weight:600; }
+  .pickup-disegno .pk-zona { fill:transparent; cursor:pointer; }
+  .pickup-disegno .pk-cliccabile:hover .pk-spento { stroke:var(--accent-chiaro); }
+  /* l'icona dei pickup, in cima a destra sul palco: accesa se il preset li ha */
+  #pk-apri { margin-left:auto; flex:none; padding:5px 7px; color:var(--faint); }
+  #pk-apri[hidden] { display:none; }
+  #pk-apri.ha { color:var(--accent-chiaro); border-color:var(--accent); }
+  #pk-apri svg.ico { width:18px; height:18px; }
+  .ia-risultato .ia-motivo { margin:0 0 4px; line-height:1.5; color:var(--dim); }
+  .ia-risultato h3 { margin:14px 0 6px; }
+  /* «La mia chitarra»: un pulsante per configurazione, col disegnino dei pickup */
+  .scelta-chitarra { display:grid; grid-template-columns:repeat(auto-fill, minmax(84px, 1fr)); gap:6px; margin-bottom:12px; }
+  .scelta-chitarra button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px 7px;
+    background:var(--incavo); border:1px solid var(--line); border-radius:10px; text-transform:none; color:var(--dim); }
+  .scelta-chitarra button:hover { border-color:var(--accent-chiaro); color:var(--text); }
+  .scelta-chitarra button.sì { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 18%, var(--incavo)); color:var(--text);
+    box-shadow:0 0 0 1px var(--accent) inset; }
+  .scelta-chitarra svg { width:48px; height:22px; margin-bottom:3px; }
+  .scelta-chitarra svg rect { fill:var(--rialzo); stroke:var(--traccia); stroke-width:1; }
+  .scelta-chitarra svg line, .scelta-chitarra svg path { stroke:var(--traccia); stroke-width:1; }
+  .scelta-chitarra svg path { stroke:var(--faint); stroke-width:1.5; stroke-linecap:round; }
+  .scelta-chitarra button.sì svg rect { fill:var(--accent); stroke:var(--accent-chiaro); }
+  .scelta-chitarra button.sì svg line { stroke:var(--accent-chiaro); }
+  .scelta-chitarra b { font:700 0.82rem var(--strumento); letter-spacing:0.04em; }
+  .scelta-chitarra span { font-size:0.68rem; color:var(--faint); white-space:nowrap; }
+  /* «Altra»: il pickup di ogni posizione, e «Humbucker splittabili» */
+  .chitarra-altra { display:flex; flex-direction:column; gap:6px; margin:-4px 0 10px; }
+  .riga-posizione { display:flex; align-items:center; gap:10px; }
+  .riga-posizione[hidden] { display:none; }
+  .riga-posizione > span { width:9.5em; flex:none; font-size:0.8rem; color:var(--dim); }
+  .riga-posizione + .riga-posizione { margin-top:0; }
+  .casella-split { grid-column:span 2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    padding:6px 4px; background:var(--incavo); border:1px dashed var(--line); border-radius:10px; }
+  .casella-split[hidden] { display:none; }
+  .casella-split b { font:700 0.74rem var(--strumento); color:var(--dim); text-align:center; }
+  .casella-split .pk-scelte { align-self:center; }
+  .scelta-chitarra .casella-split .pk-scelte button { display:block; padding:0 14px; height:26px; min-width:44px; border:0; background:none;
+    box-shadow:none; color:var(--dim); font:600 0.8rem var(--strumento); }
+  .scelta-chitarra .casella-split .pk-scelte button.sì { color:var(--su-accent); background:var(--accent); }
+  .pk-vista .pk-sotto { margin:0 0 8px; font-size:0.85rem; color:var(--dim); }
+  .pk-vista .pk-nota { margin:10px 0 0; font-size:0.9rem; line-height:1.45; }
+  .pk-finestra { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+  .pk-finestra .pickup-disegno svg { max-width:380px; }
+  .pk-scelte { display:flex; flex-wrap:wrap; gap:4px; padding:4px; background:var(--incavo); border:1px solid var(--line); border-radius:12px; align-self:flex-start; }
+  .pk-scelte button { border:0; background:none; color:var(--dim); min-width:40px; height:30px; padding:0 10px; border-radius:8px;
+                      font:600 0.82rem var(--strumento); text-transform:none; }
+  .pk-scelte button:hover:not(:disabled) { color:var(--text); }
+  .pk-scelte button.sì { color:var(--su-accent); background:var(--accent); }
+  .pk-scelte button:disabled { opacity:0.4; }
+
   /* le manopole e le levette dell'editor classico (stessi colori e misure) */
   .comando { width:104px; display:flex; flex-direction:column; align-items:center; gap:4px; user-select:none; }
   .comando .nome { font-size:0.8rem; font-weight:500; color:#fff; text-transform:uppercase; letter-spacing:0.03em; text-align:center;
@@ -761,7 +820,7 @@
   <section id="palco" hidden>
     <div id="foto"></div>
     <div class="dettaglio">
-      <div class="det-cima"><button class="etichetta-slot" id="det-chip" title="Acceso / spento"></button><span class="det-pos" id="det-pos"></span></div>
+      <div class="det-cima"><button class="etichetta-slot" id="det-chip" title="Acceso / spento"></button><span class="det-pos" id="det-pos"></span><button id="pk-apri" type="button" hidden title="Pickup consigliati" aria-label="Pickup consigliati"><svg class="ico" viewBox="0 0 24 24"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M2.5 12h19M5.6 8.75h.01M8.2 8.75h.01M10.7 8.75h.01M13.3 8.75h.01M15.8 8.75h.01M18.4 8.75h.01M5.6 15.25h.01M8.2 15.25h.01M10.7 15.25h.01M13.3 15.25h.01M15.8 15.25h.01M18.4 15.25h.01"/></svg></button></div>
       <h2 id="det-nome"></h2>
       <p id="det-sotto"></p>
       <ul id="manopole"></ul>
@@ -825,6 +884,7 @@
 <script src="src/pc/16-scene.js"></script>
 <script src="src/pc/13-benvenuto.js"></script>
 <script src="src/pc/14-guida.js"></script>
+<script src="src/pc/16-pickup.js"></script>
 <script src="src/novita.js"></script>
 <script src="src/avvertenza.js"></script>
 </body>

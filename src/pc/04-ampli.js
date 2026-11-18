@@ -95,6 +95,8 @@ function mettiSulPalco({ record, slot, letto, offline }) {
     scelto: scelto < fonte.effects.length ? scelto : 0,
   };
   ora.meta = { uuid: fonte.uuid, version: fonte.version, description: fonte.description, icon: fonte.icon };
+  // I pickup consigliati stanno nel record della libreria (16-pickup.js).
+  ora.pickup = (record && record.pickup) || null;
   ora.base = istantanea();
   ascoltoBase = false;
   modificheDaParte = null;
@@ -209,7 +211,8 @@ async function chiediPrimaDiLasciare() {
                    : tr('Andando avanti così le perdi: in libreria e negli slot non ne resta niente.')),
     azioni: [
       { testo: tr('Torna al preset'), valore: null },
-      { testo: tr('Annulla'), valore: 'via', pericolo: true },
+      // «Scarta», non «Annulla» (18 novembre): sembrava uguale a «Torna al preset», e invece butta le modifiche e va avanti.
+      { testo: tr('Scarta'), valore: 'via', pericolo: true },
       { testo: tr('Salva…'), valore: 'salva', primario: true },
     ],
   });
