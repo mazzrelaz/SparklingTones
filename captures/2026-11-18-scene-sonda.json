@@ -1,0 +1,604 @@
+{
+  "quando": "2026-11-18T11:36:26.844Z",
+  "ampli": "Spark 2",
+  "base": {
+    "bank": 1,
+    "number": 0,
+    "uuid": "025bbcfc-9fd2-466d-86e5-23232f423469",
+    "name": "On the turning away",
+    "version": "0.7",
+    "description": "",
+    "icon": "icon.png",
+    "bpm": 120,
+    "effects": [
+      {
+        "name": "bias.noisegate",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0
+          },
+          {
+            "index": 1,
+            "value": 0
+          },
+          {
+            "index": 2,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "BlueComp",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.517571747303009
+          },
+          {
+            "index": 1,
+            "value": 0.5321152806282043
+          },
+          {
+            "index": 2,
+            "value": 0.49308472871780396
+          },
+          {
+            "index": 3,
+            "value": 0.7292007207870483
+          }
+        ]
+      },
+      {
+        "name": "Overdrive",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.5380694270133972
+          },
+          {
+            "index": 1,
+            "value": 0.6437085866928101
+          },
+          {
+            "index": 2,
+            "value": 0.46992701292037964
+          }
+        ]
+      },
+      {
+        "name": "AmericanHighGain",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.795973539352417
+          },
+          {
+            "index": 1,
+            "value": 0.641825258731842
+          },
+          {
+            "index": 2,
+            "value": 0.6595152020454407
+          },
+          {
+            "index": 3,
+            "value": 0.5490337610244751
+          },
+          {
+            "index": 4,
+            "value": 0.6332652568817139
+          }
+        ]
+      },
+      {
+        "name": "ChorusAnalog",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.21351654827594757
+          },
+          {
+            "index": 1,
+            "value": 0.19683891534805298
+          },
+          {
+            "index": 2,
+            "value": 0.19387173652648926
+          },
+          {
+            "index": 3,
+            "value": 0.567796528339386
+          }
+        ]
+      },
+      {
+        "name": "DelayMono",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.2603757679462433
+          },
+          {
+            "index": 1,
+            "value": 0.25546351075172424
+          },
+          {
+            "index": 2,
+            "value": 0.6255797743797302
+          },
+          {
+            "index": 3,
+            "value": 0.4000000059604645
+          },
+          {
+            "index": 4,
+            "value": 1
+          }
+        ]
+      },
+      {
+        "name": "bias.reverb",
+        "enabled": true,
+        "params": [
+          {
+            "index": 0,
+            "value": 0.25196850299835205
+          },
+          {
+            "index": 1,
+            "value": 0.3928571343421936
+          },
+          {
+            "index": 2,
+            "value": 0.3044583797454834
+          },
+          {
+            "index": 3,
+            "value": 0.37120118737220764
+          },
+          {
+            "index": 4,
+            "value": 0.6019720435142517
+          },
+          {
+            "index": 5,
+            "value": 0.625758171081543
+          },
+          {
+            "index": 6,
+            "value": 0.30000001192092896
+          },
+          {
+            "index": 7,
+            "value": 1
+          }
+        ]
+      }
+    ],
+    "tail": [],
+    "checksum": 245
+  },
+  "prove": [
+    {
+      "prova": 2,
+      "tipo": "una manopola",
+      "parametro": "Overdrive · Drive",
+      "prima": 0.46992701292037964,
+      "valore": 0.9699270129203796,
+      "ms": 32,
+      "letto": 0.9699270129203796,
+      "arrivato": true,
+      "acceso": true
+    },
+    {
+      "prova": 2,
+      "tipo": "una manopola",
+      "parametro": "Overdrive · Drive",
+      "prima": 0.46992701292037964,
+      "valore": 0.46992701292037964,
+      "ms": 32,
+      "letto": 0.46992701292037964,
+      "arrivato": true,
+      "acceso": true
+    },
+    {
+      "prova": 2,
+      "tipo": "una manopola",
+      "parametro": "Overdrive · Drive",
+      "prima": 0.46992701292037964,
+      "valore": 0.9699270129203796,
+      "ms": 33,
+      "letto": 0.9699270129203796,
+      "arrivato": true,
+      "acceso": true
+    },
+    {
+      "prova": 2,
+      "tipo": "una manopola",
+      "parametro": "Overdrive · Drive",
+      "prima": 0.46992701292037964,
+      "valore": 0.46992701292037964,
+      "ms": 32,
+      "letto": 0.46992701292037964,
+      "arrivato": true,
+      "acceso": true
+    },
+    {
+      "prova": 2,
+      "tipo": "una manopola",
+      "parametro": "Overdrive · Drive",
+      "prima": 0.46992701292037964,
+      "valore": 0.9699270129203796,
+      "ms": 33,
+      "letto": 0.9699270129203796,
+      "arrivato": true,
+      "acceso": true
+    },
+    {
+      "prova": 2,
+      "tipo": "una manopola",
+      "parametro": "Overdrive · Drive",
+      "prima": 0.46992701292037964,
+      "valore": 0.46992701292037964,
+      "ms": 33,
+      "letto": 0.46992701292037964,
+      "arrivato": true,
+      "acceso": true
+    },
+    {
+      "prova": 2,
+      "tipo": "acceso/spento",
+      "effetto": "DelayMono",
+      "acceso": false,
+      "ms": 32
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 5,
+      "comandi": 5,
+      "pausa": 90,
+      "pausaVera": 120,
+      "verso": "sposto",
+      "msInvio": 614,
+      "msLettura": 694,
+      "rx": 17,
+      "arrivate": 5,
+      "attese": 5,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 10,
+      "comandi": 10,
+      "pausa": 90,
+      "pausaVera": 120,
+      "verso": "sposto",
+      "msInvio": 1234,
+      "msLettura": 715,
+      "rx": 17,
+      "arrivate": 10,
+      "attese": 10,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 20,
+      "comandi": 20,
+      "pausa": 90,
+      "pausaVera": 120,
+      "verso": "sposto",
+      "msInvio": 2464,
+      "msLettura": 714,
+      "rx": 17,
+      "arrivate": 14,
+      "attese": 14,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 5,
+      "comandi": 5,
+      "pausa": 50,
+      "pausaVera": 80,
+      "verso": "sposto",
+      "msInvio": 418,
+      "msLettura": 688,
+      "rx": 17,
+      "arrivate": 5,
+      "attese": 5,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 10,
+      "comandi": 10,
+      "pausa": 50,
+      "pausaVera": 80,
+      "verso": "sposto",
+      "msInvio": 840,
+      "msLettura": 689,
+      "rx": 17,
+      "arrivate": 10,
+      "attese": 10,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 20,
+      "comandi": 20,
+      "pausa": 50,
+      "pausaVera": 80,
+      "verso": "sposto",
+      "msInvio": 1674,
+      "msLettura": 694,
+      "rx": 17,
+      "arrivate": 14,
+      "attese": 14,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 5,
+      "comandi": 5,
+      "pausa": 0,
+      "pausaVera": 30,
+      "verso": "sposto",
+      "msInvio": 163,
+      "msLettura": 696,
+      "rx": 17,
+      "arrivate": 5,
+      "attese": 5,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 10,
+      "comandi": 10,
+      "pausa": 0,
+      "pausaVera": 30,
+      "verso": "sposto",
+      "msInvio": 323,
+      "msLettura": 694,
+      "rx": 17,
+      "arrivate": 10,
+      "attese": 10,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 20,
+      "comandi": 20,
+      "pausa": 0,
+      "pausaVera": 30,
+      "verso": "sposto",
+      "msInvio": 649,
+      "msLettura": 715,
+      "rx": 17,
+      "arrivate": 14,
+      "attese": 14,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 3,
+      "tipo": "raffica",
+      "n": 5,
+      "comandi": 5,
+      "pausa": 90,
+      "pausaVera": 120,
+      "verso": "rimetto",
+      "msInvio": 618,
+      "msLettura": 684,
+      "rx": 17,
+      "arrivate": 5,
+      "attese": 5,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 4,
+      "tipo": "mista",
+      "n": 5,
+      "comandi": 7,
+      "pausa": 90,
+      "pausaVera": 120,
+      "verso": "sposto",
+      "msInvio": 873,
+      "msLettura": 707,
+      "rx": 19,
+      "arrivate": 5,
+      "attese": 5,
+      "onoffOk": 2,
+      "onoffAttesi": 2,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 4,
+      "tipo": "mista",
+      "n": 10,
+      "comandi": 12,
+      "pausa": 50,
+      "pausaVera": 80,
+      "verso": "sposto",
+      "msInvio": 997,
+      "msLettura": 703,
+      "rx": 19,
+      "arrivate": 10,
+      "attese": 10,
+      "onoffOk": 2,
+      "onoffAttesi": 2,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 4,
+      "tipo": "mista",
+      "n": 10,
+      "comandi": 12,
+      "pausa": 0,
+      "pausaVera": 30,
+      "verso": "sposto",
+      "msInvio": 389,
+      "msLettura": 711,
+      "rx": 19,
+      "arrivate": 10,
+      "attese": 10,
+      "onoffOk": 2,
+      "onoffAttesi": 2,
+      "mancate": [],
+      "esito": "completa"
+    },
+    {
+      "prova": 1,
+      "tipo": "preset intero",
+      "ms": 1331,
+      "ack": "17/17"
+    }
+  ],
+  "ascolti": [
+    {
+      "prova": 2,
+      "esito": "Cambio pulito",
+      "t": "2026-11-18T11:36:47.516Z"
+    },
+    {
+      "prova": 1,
+      "esito": "Nessun buco",
+      "t": "2026-11-18T11:37:42.019Z"
+    }
+  ],
+  "righe": [
+    "[12:36:30] connesso a Spark 2 BLE",
+    "[12:36:30] TX 0x0211 seq=0x01 7B",
+    "[12:36:30] ampli: Spark 2",
+    "[12:36:30] TX 0x0201 seq=0x02 10B",
+    "[12:36:34] — prova 2: Overdrive · Drive 0.470 → 0.970",
+    "[12:36:34] TX 0x0201 seq=0x04 10B",
+    "[12:36:35] riletto dall'ampli: Overdrive · Drive = 0.970 — arrivato",
+    "[12:36:36] — prova 2: Overdrive · Drive 0.470 → 0.470",
+    "[12:36:36] TX 0x0201 seq=0x06 10B",
+    "[12:36:37] riletto dall'ampli: Overdrive · Drive = 0.470 — arrivato",
+    "[12:36:37] — prova 2: Overdrive · Drive 0.470 → 0.970",
+    "[12:36:38] TX 0x0201 seq=0x08 10B",
+    "[12:36:38] — prova 2: Overdrive · Drive 0.470 → 0.470",
+    "[12:36:38] riletto dall'ampli: Overdrive · Drive = 0.970 — arrivato",
+    "[12:36:39] TX 0x0201 seq=0x0a 10B",
+    "[12:36:39] riletto dall'ampli: Overdrive · Drive = 0.470 — arrivato",
+    "[12:36:40] — prova 2: Overdrive · Drive 0.470 → 0.970",
+    "[12:36:41] TX 0x0201 seq=0x0c 10B",
+    "[12:36:41] riletto dall'ampli: Overdrive · Drive = 0.970 — arrivato",
+    "[12:36:42] — prova 2: Overdrive · Drive 0.470 → 0.470",
+    "[12:36:42] TX 0x0201 seq=0x0e 10B",
+    "[12:36:43] riletto dall'ampli: Overdrive · Drive = 0.470 — arrivato",
+    "[12:36:45] — prova 2: DelayMono spento",
+    "[12:36:47] ascolto, prova 2: Cambio pulito",
+    "[12:36:51] — raffica: 5 comandi, pausa 90 ms (+30), sposto",
+    "[12:36:52] TX 0x0201 seq=0x15 10B",
+    "[12:36:53] 5 comandi in 614 ms; riletto in 694 ms: 5/5 manopole — tutte",
+    "[12:36:55] — raffica: 10 comandi, pausa 90 ms (+30), sposto",
+    "[12:36:57] TX 0x0201 seq=0x20 10B",
+    "[12:36:57] 10 comandi in 1234 ms; riletto in 715 ms: 10/10 manopole — tutte",
+    "[12:36:58] — raffica: 20 comandi, pausa 90 ms (+30), sposto",
+    "[12:37:01] TX 0x0201 seq=0x35 10B",
+    "[12:37:02] 20 comandi in 2464 ms; riletto in 714 ms: 14/14 manopole — tutte",
+    "[12:37:02] — raffica: 5 comandi, pausa 50 ms (+30), sposto",
+    "[12:37:03] TX 0x0201 seq=0x3b 10B",
+    "[12:37:04] 5 comandi in 418 ms; riletto in 688 ms: 5/5 manopole — tutte",
+    "[12:37:05] — raffica: 10 comandi, pausa 50 ms (+30), sposto",
+    "[12:37:07] TX 0x0201 seq=0x08 10B",
+    "[12:37:07] 10 comandi in 840 ms; riletto in 689 ms: 10/10 manopole — tutte",
+    "[12:37:09] — raffica: 20 comandi, pausa 50 ms (+30), sposto",
+    "[12:37:11] TX 0x0201 seq=0x1d 10B",
+    "[12:37:11] 20 comandi in 1674 ms; riletto in 694 ms: 14/14 manopole — tutte",
+    "[12:37:13] — raffica: 5 comandi, pausa 0 ms (+30), sposto",
+    "[12:37:13] TX 0x0201 seq=0x23 10B",
+    "[12:37:14] 5 comandi in 163 ms; riletto in 696 ms: 5/5 manopole — tutte",
+    "[12:37:15] — raffica: 10 comandi, pausa 0 ms (+30), sposto",
+    "[12:37:15] TX 0x0201 seq=0x2e 10B",
+    "[12:37:16] 10 comandi in 323 ms; riletto in 694 ms: 10/10 manopole — tutte",
+    "[12:37:17] — raffica: 20 comandi, pausa 0 ms (+30), sposto",
+    "[12:37:18] TX 0x0201 seq=0x05 10B",
+    "[12:37:19] 20 comandi in 649 ms; riletto in 715 ms: 14/14 manopole — tutte",
+    "[12:37:20] — raffica: 5 comandi, pausa 90 ms (+30), rimetto",
+    "[12:37:21] TX 0x0201 seq=0x0b 10B",
+    "[12:37:22] 5 comandi in 618 ms; riletto in 684 ms: 5/5 manopole — tutte",
+    "[12:37:24] — mista: 7 comandi, pausa 90 ms (+30), sposto",
+    "[12:37:25] TX 0x0201 seq=0x13 10B",
+    "[12:37:26] 7 comandi in 873 ms; riletto in 707 ms: 5/5 manopole, 2/2 acceso/spento — tutte",
+    "[12:37:28] — mista: 12 comandi, pausa 50 ms (+30), sposto",
+    "[12:37:29] TX 0x0201 seq=0x20 10B",
+    "[12:37:30] 12 comandi in 997 ms; riletto in 703 ms: 10/10 manopole, 2/2 acceso/spento — tutte",
+    "[12:37:30] — mista: 12 comandi, pausa 0 ms (+30), sposto",
+    "[12:37:31] TX 0x0201 seq=0x2d 10B",
+    "[12:37:32] 12 comandi in 389 ms; riletto in 711 ms: 10/10 manopole, 2/2 acceso/spento — tutte",
+    "[12:37:39] — prova 1: preset intero",
+    "[12:37:39] invio \"On the turning away\" → bank 0 numero 127: 405 byte in 17 chunk, seq 0x2e per tutti",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:39] TX 0x0101 seq=0x2e 39B",
+    "[12:37:40] TX 0x0101 seq=0x2e 39B",
+    "[12:37:40] TX 0x0101 seq=0x2e 39B",
+    "[12:37:40] TX 0x0101 seq=0x2e 39B",
+    "[12:37:40] TX 0x0101 seq=0x2e 17B",
+    "[12:37:40] TX 0x0138 seq=0x2f 10B",
+    "[12:37:40] passato al preset software",
+    "[12:37:40] preset intero in 1331 ms (17/17 pezzi confermati)",
+    "[12:37:42] ascolto, prova 1: Nessun buco",
+    "[12:37:47] — rimetto il suono di partenza (preset intero)",
+    "[12:37:47] invio \"On the turning away\" → bank 0 numero 127: 405 byte in 17 chunk, seq 0x30 per tutti",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:47] TX 0x0101 seq=0x30 39B",
+    "[12:37:48] TX 0x0101 seq=0x30 39B",
+    "[12:37:48] TX 0x0101 seq=0x30 39B",
+    "[12:37:48] TX 0x0101 seq=0x30 39B",
+    "[12:37:48] TX 0x0101 seq=0x30 39B",
+    "[12:37:48] TX 0x0101 seq=0x30 39B",
+    "[12:37:48] TX 0x0101 seq=0x30 39B",
+    "[12:37:48] TX 0x0101 seq=0x30 39B",
+    "[12:37:48] TX 0x0101 seq=0x30 17B",
+    "[12:37:48] TX 0x0138 seq=0x31 10B",
+    "[12:37:48] passato al preset software"
+  ]
+}

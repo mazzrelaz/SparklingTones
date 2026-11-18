@@ -10,6 +10,26 @@ Prima si misura con `tools/scene-sonda.html` (da Chrome o Edge, anche da `http:/
 riquadro del browser non apre la scelta Bluetooth). La sonda muove solo manopole con un nome, mai interruttori,
 posizioni, «Mode», «Master», gate, comp e riverbero; ogni raffica si verifica rileggendo il suono attivo.
 
+## Prima misura — 18 novembre 2026, Spark 2
+
+Cattura `captures/2026-11-18-scene-sonda.json`, preset «On the turning away» (drive, chorus, delay accesi),
+14 manopole usabili. Una sessione sola, un preset solo.
+
+| prova | risultato |
+|---|---|
+| preset intero | 1331 ms (17 pezzi), **nessun buco** all'ascolto; code di delay e riverbero **non chieste** |
+| una manopola (Drive dell'Overdrive 0,47 → 0,97) | ~32 ms di invio, arrivata 6 volte su 6, **cambio pulito** |
+| delay spento con `0x0115` | ~32 ms; ascolto «pulito» segnato subito dopo, probabilmente su questo |
+| raffiche 5/10/20 a 120, 80 e 30 ms | **tutte arrivate**, anche 20 a 30 ms (649 ms); l'ampli non si è piantato |
+| miste (manopole + 2 acceso/spento) a 120, 80, 30 ms | **tutte arrivate**; 12 comandi a 30 ms = 389 ms |
+
+Quindi: una scena da 5–10 cambi costa **150–350 ms** contro **1,3 s** del preset intero, ed è pulita.
+Il preset intero non lascia buchi, quindi il vantaggio di B è la **velocità**, più le code (da sentire).
+**Non dimostrato**: che 30 ms regga sempre (una sessione), e il caso dell'ampli che si pianta girando le
+manopole nell'editor, che resta aperto. Il ritmo conta: 10 cambi a 80 ms sono 840 ms, quasi quanto il
+preset intero; a 30 ms sono 320 ms. Da decidere con l'utente: 30 ms (più prove prima), o un tetto di
+cambi oltre il quale si manda il preset intero.
+
 ## Cosa sappiamo già (verificato)
 
 - **Preset intero** (`0x0101` su `0x7f` + `0x0138`): ~1 s. Sul pedale l'utente lo ha accettato («non
