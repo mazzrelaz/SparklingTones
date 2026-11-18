@@ -302,6 +302,40 @@
   #palco.spento #manopole { opacity:0.45; }
   .det-piede { margin:auto 0 0; padding-top:16px; color:var(--faint); font-size:0.75rem; }
 
+  /* i pickup consigliati: il disegno della chitarra, in fondo alle manopole (16-pickup.js) */
+  .pickup-disegno svg { display:block; width:100%; max-width:420px; height:auto; margin:0 auto; }
+  .pickup-disegno .pk-corpo { fill:var(--panel); stroke:var(--line); }
+  .pickup-disegno .pk-corda { stroke:var(--faint); stroke-width:1; opacity:0.6; }
+  .pickup-disegno .pk-spento { fill:var(--rialzo); stroke:var(--traccia); }
+  .pickup-disegno .pk-acceso { fill:var(--accent); stroke:var(--accent-chiaro); filter:drop-shadow(0 0 5px var(--accent)); }
+  .pickup-disegno .pk-polo { fill:var(--incavo); }
+  .pickup-disegno .pk-poli.acceso .pk-polo { fill:var(--su-accent); }
+  .pickup-disegno text { font-family:var(--strumento); font-size:13px; fill:var(--dim); text-anchor:middle; }
+  .pickup-disegno text.acceso { fill:var(--text); font-weight:600; }
+  .pickup-disegno .pk-zona { fill:transparent; cursor:pointer; }
+  .pickup-disegno .pk-cliccabile:hover .pk-spento { stroke:var(--accent-chiaro); }
+  .pk-pannello { flex:none; margin-top:auto; padding:10px 12px; background:var(--incavo); border:1px solid var(--line); border-radius:12px;
+                 display:grid; grid-template-columns:minmax(140px, 190px) 1fr; gap:4px 14px; align-items:center; }
+  .pk-pannello[hidden] { display:none; }
+  .pk-pannello > .pk-cima { grid-column:1 / -1; }
+  .pk-pannello.senza { display:block; }
+  .pk-pannello.senza .pickup-disegno { display:none; }
+  #manopole { margin-bottom:2px; }
+  .pk-cima { display:flex; align-items:flex-start; gap:10px; }
+  .pk-cima > div { flex:1; min-width:0; }
+  .pk-cima h3 { font-family:var(--strumento); font-size:0.85rem; margin:0; }
+  .pk-cima p { margin:1px 0 0; font-size:0.75rem; color:var(--dim); }
+  .pk-cima button { flex:none; padding:5px 7px; }
+  #pk-nota { margin:0; font-size:0.8rem; color:var(--dim); line-height:1.4; }
+  .pk-finestra { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+  .pk-finestra .pickup-disegno svg { max-width:380px; }
+  .pk-scelte { display:flex; flex-wrap:wrap; gap:4px; padding:4px; background:var(--incavo); border:1px solid var(--line); border-radius:12px; align-self:flex-start; }
+  .pk-scelte button { border:0; background:none; color:var(--dim); min-width:40px; height:30px; padding:0 10px; border-radius:8px;
+                      font:600 0.82rem var(--strumento); text-transform:none; }
+  .pk-scelte button:hover:not(:disabled) { color:var(--text); }
+  .pk-scelte button.sì { color:var(--su-accent); background:var(--accent); }
+  .pk-scelte button:disabled { opacity:0.4; }
+
   /* le manopole e le levette dell'editor classico (stessi colori e misure) */
   .comando { width:104px; display:flex; flex-direction:column; align-items:center; gap:4px; user-select:none; }
   .comando .nome { font-size:0.8rem; font-weight:500; color:#fff; text-transform:uppercase; letter-spacing:0.03em; text-align:center;
@@ -727,6 +761,14 @@
       <h2 id="det-nome"></h2>
       <p id="det-sotto"></p>
       <ul id="manopole"></ul>
+      <section id="pk-pannello" class="pk-pannello" hidden>
+        <div class="pk-cima">
+          <div><h3>Pickup consigliati</h3><p id="pk-sotto"></p></div>
+          <button id="pk-modifica" type="button" title="Cambia i pickup consigliati" aria-label="Cambia i pickup consigliati"><svg class="ico" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></svg></button>
+        </div>
+        <div id="pk-disegno" class="pickup-disegno"></div>
+        <p id="pk-nota" hidden></p>
+      </section>
     </div>
     <div class="modelli">
       <input id="cerca-modello" placeholder="Cerca modello…" autocomplete="off">
@@ -786,6 +828,7 @@
 <script src="src/pc/15-looper.js"></script>
 <script src="src/pc/13-benvenuto.js"></script>
 <script src="src/pc/14-guida.js"></script>
+<script src="src/pc/16-pickup.js"></script>
 <script src="src/novita.js"></script>
 <script src="src/avvertenza.js"></script>
 </body>

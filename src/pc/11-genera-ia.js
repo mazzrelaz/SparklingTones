@@ -101,10 +101,19 @@ function domandaIA(descrizione) {
     'for bass guitar).',
     `"why" is one or two sentences in ${lingua} saying what you chose and why; "bpm" is the`,
     'tempo for the delay (60-200).',
+    '"pickups" is the ideal pickup setting for the sound. "layout" = the guitar pickups written',
+    'the usual way, from bridge to neck (HSS = humbucker at the bridge): S single coil,',
+    'H humbucker, P P-90 (e.g. "SSS" Strat, "HH" Les Paul, "HSS", "SS" Tele, "PP"): the',
+    'artist\'s own guitar, or the user\'s guitar when they describe it. "on" = the active',
+    'positions among "neck", "middle", "bridge" ("middle" only with three pickups). "split":',
+    `true when a humbucker is coil-split. "tip": one short sentence in ${lingua} with selector`,
+    'position, volume/tone knob and the artist\'s trick if any (e.g. Brian May: bridge + neck',
+    'in phase, treble booster).',
     '',
     'Answer with the JSON object only, in one code block, exactly in this shape:',
     '{',
     '  "initials": "BM", "title": "...", "family": "drive", "why": "...", "bpm": 120,',
+    '  "pickups": { "layout": "SSS", "on": ["bridge", "middle"], "split": false, "tip": "..." },',
     ...POSTI_IA.map((k, i) => `  "${k}": ${blocco}${i < POSTI_IA.length - 1 ? ',' : ''}`),
     '}',
     '',
@@ -245,14 +254,15 @@ function presetDaIA(risposta, scheletro) {
   // La famiglia (clean, drive, acoustic, bass): solo una che in libreria c'è davvero.
   const fam = String(risposta.family || '').trim().toLowerCase();
   const famiglia = famiglie.some(f => f.id === fam) ? fam : null;
-  return { preset, famiglia, avvisi };
+  // I pickup consigliati (16-pickup.js): se la risposta non li ha, niente.
+  return { preset, famiglia, pickup: pickupDaIA(risposta.pickups), avvisi };
 }
 
 /**
  * Il preset generato sul palco, non salvato: con l'ampli va nel preset software e si rilegge
  * (come `apriRecord`), senza si regola sulla copia in memoria.
  */
-async function mettiGeneratoSulPalco(preset, famiglia) {
+async function mettiGeneratoSulPalco(preset, famiglia, pickup) {
   if (!spark.connected) {
     mettiSulPalco({ record: null, slot: null, letto: preset, offline: true });
   } else {
@@ -281,6 +291,8 @@ async function mettiGeneratoSulPalco(preset, famiglia) {
   ora.toccato = true;
   // La famiglia la mette «Salva…» quando il preset entra in libreria (`salva`, 05-file.js).
   ora.famigliaNuovo = famiglia || null;
+  // I pickup consigliati: sul palco subito, in libreria con «Salva…» (`salva`, 05-file.js).
+  ora.pickup = pickup || null;
   disegnaTutto();
   return true;
 }
@@ -333,7 +345,7 @@ async function apriGeneraIA() {
       continue;
     }
     if (!await chiediPrimaDiLasciare()) return;
-    if (!await mettiGeneratoSulPalco(fatto.preset, fatto.famiglia)) return;
+    if (!await mettiGeneratoSulPalco(fatto.preset, fatto.famiglia, fatto.pickup)) return;
 
     const risposta = leggiRispostaIA(bozzaIA.risposta);
     const motivo = String(risposta.why || '').trim();

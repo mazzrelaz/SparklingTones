@@ -85,6 +85,7 @@ const GUSCIO = [
   './src/pc/15-looper.js',
   './src/pc/13-benvenuto.js',
   './src/pc/14-guida.js',
+  './src/pc/16-pickup.js',
   './immagini/classico/ampli.webp',
   './icons/icon-192.png',
   './icons/icon-512.png',

@@ -2063,4 +2063,22 @@ window.LINGUA_EN = {
     "The logo on the start screen",
   "Prima di collegare l'ampli, il logo inciso nello sfondo e la versione sotto «Collega».":
     "Before you connect the amp, the logo engraved in the background and the version under «Connect».",
+  "Pickup consigliati":
+    "Suggested pickups",
+  "Cambia i pickup consigliati":
+    "Change the suggested pickups",
+  "Nessuna indicazione per questo preset.":
+    "No suggestion for this preset.",
+  "Nota (selettore, manopole…)":
+    "Note (selector, knobs…)",
+  "Manico":
+    "Neck",
+  "Centrale":
+    "Middle",
+  "Ponte":
+    "Bridge",
+  "Nascondi pickup consigliati":
+    "Hide suggested pickups",
+  "Mostra pickup consigliati":
+    "Show suggested pickups",
 };

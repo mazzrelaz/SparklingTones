@@ -95,6 +95,8 @@ function mettiSulPalco({ record, slot, letto, offline }) {
     scelto: scelto < fonte.effects.length ? scelto : 0,
   };
   ora.meta = { uuid: fonte.uuid, version: fonte.version, description: fonte.description, icon: fonte.icon };
+  // I pickup consigliati stanno nel record della libreria (16-pickup.js).
+  ora.pickup = (record && record.pickup) || null;
   ora.base = istantanea();
   ascoltoBase = false;
   modificheDaParte = null;

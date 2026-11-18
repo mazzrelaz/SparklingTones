@@ -92,6 +92,8 @@ async function salva(nome, comeNuovo, slot) {
       // Senza record in libreria il preset dell'ampli entra col suo UUID; una copia ne ha uno nuovo.
       const nuovo = Object.assign(presetDiOra(nome),
         { uuid: ora.record ? nuovoUuid() : ((ora.meta && ora.meta.uuid) || nuovoUuid()), slots: [] });
+      // I pickup consigliati (quelli dell'IA, o messi con la matita) entrano col preset.
+      if (ora.pickup) nuovo.pickup = ora.pickup;
       const id = await store.add(nuovo);
       // Un preset di «Genera con l'IA» entra già con la sua famiglia (`ora.famigliaNuovo`).
       if (ora.famigliaNuovo) await store.setFamiglia(id, ora.famigliaNuovo);
@@ -532,6 +534,7 @@ async function apriImpostazioni() {
 
 /* ================================================================ il menu ☰ */
 const ICONE = {
+  chitarra: '<path d="M14 10 20 4M19 3l2 2M8.5 11.5c-2-1-4.5 0-5 2.5-.6 3 2 6.5 5 6.5 2.5 0 4-2 3.5-4 2 .5 3-1.5 2-3.5-1-2-3.5-2-5.5-1.5zM8 15.5h.01"/>',
   backup: '<path d="M7 18a5 5 0 0 1-.5-10A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9M12 12v8M9 15l3-3 3 3"/>',
   impost: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
   guida: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>',
@@ -604,6 +607,9 @@ $('menu').addEventListener('click', e => apriTendina(e.currentTarget, t => {
   t.insertAdjacentHTML('beforeend', `<div class="famiglia">${tr('Libreria')}</div>`);
   voceTendina(t, icona('cartella') + tr('Categorie e famiglie…'), apriCategorie);
   voceTendina(t, icona('doppioni') + tr('Doppioni…'), () => apriDoppioni('suono'));
+  // I pickup consigliati sotto le manopole (16-pickup.js): si nascondono e si rimostrano da qui.
+  voceTendina(t, icona('chitarra') + (pickupVisibili() ? tr('Nascondi pickup consigliati') : tr('Mostra pickup consigliati')),
+    cambiaVistaPickup);
   voceTendina(t, icona('cestino') + tr('Elimina tutti i preset…'), svuotaLibreria, { classe: 'pericolo' });
   t.insertAdjacentHTML('beforeend', '<hr>');
   voceTendina(t, icona('impost') + tr('Impostazioni e backup…'), apriImpostazioni);
