@@ -109,10 +109,11 @@ async function suonaScena(indice) {
 
 /* ---------------------------------------------------------------- la schermata */
 
-// Sotto i pulsantoni la catena va a U (chiesto dall'utente): il noise gate in alto al centro, poi
-// compressore, drive e ampli in colonna a sinistra, e risalendo a destra modulazione, delay e riverbero
-// (dall'alto: 7, 6, 5). [riga, colonna] per blocco.
-const DISPOSIZIONE_U = [[1, '1 / span 2'], [2, 1], [3, 1], [4, 1], [4, 2], [3, 2], [2, 2]];
+// Sotto i pulsantoni la catena è fatta di quadrati pastello col nome dell'effetto (chiesto
+// dall'utente): il noise gate da solo in alto al centro, poi comp, drive, ampli e sotto mod, delay,
+// riverbero. Ogni tipo ha il suo colore; gli spenti sono scuri, col nome spento. [riga, colonna].
+const DISPOSIZIONE_133 = [[1, 2], [2, 1], [2, 2], [2, 3], [3, 1], [3, 2], [3, 3]];
+const COLORI_BLOCCO = ['#d5dae2', '#b9ead7', '#ffc2bd', '#ffdcb5', '#d4c6ec', '#bcd6f0', '#f6cfe4'];
 
 /**
  * La catena di una scena, con gli spenti al buio. `quando` la rende cliccabile (il riquadro, in fila);
@@ -120,17 +121,19 @@ const DISPOSIZIONE_U = [[1, '1 / span 2'], [2, 1], [3, 1], [4, 1], [4, 2], [3, 2
  */
 function catenaScena(effetti, quando) {
   const div = document.createElement('div');
-  div.className = 'lv-catena ' + (quando ? 'fila' : 'a-u');
+  div.className = 'lv-catena ' + (quando ? 'fila' : 'quadri');
   effetti.forEach((e, b) => {
     const img = immagineBlocco(e);
     const el = document.createElement(quando ? 'button' : 'span');
     if (quando) el.type = 'button';
-    else if (DISPOSIZIONE_U[b]) { el.style.gridRow = DISPOSIZIONE_U[b][0]; el.style.gridColumn = DISPOSIZIONE_U[b][1];
-      // le due colonne verso i lati: la linea che risale a destra resta lontana dal gate
-      if (b > 0) el.style.justifySelf = b < 4 ? 'start' : 'end'; }
+    else {
+      el.style.gridRow = DISPOSIZIONE_133[b][0];
+      el.style.gridColumn = DISPOSIZIONE_133[b][1];
+      el.style.setProperty('--colore', COLORI_BLOCCO[b]);
+    }
     el.className = 'lv-anello' + (e.enabled ? '' : ' spento');
     el.title = `${tr(Spark.CATENA[b])} · ${nomeBlocco(e)} · ${e.enabled ? tr('acceso') : tr('spento')}`;
-    el.innerHTML = img ? `<img src="${img}" alt="">` : `<span class="lv-anello-nome">${testoConNome(nomeBlocco(e))}</span>`;
+    el.innerHTML = quando && img ? `<img src="${img}" alt="">` : `<span class="lv-anello-nome">${testoConNome(nomeBlocco(e))}</span>`;
     if (quando) el.addEventListener('click', () => quando(b));
     div.appendChild(el);
   });
@@ -145,7 +148,7 @@ function catenaScena(effetti, quando) {
  * angoli retti: IN a sinistra → gate → giù e a sinistra → 2, 3, 4 → a destra → 5, 6, 7 → su fino a OUT, in alto.
  */
 function tracciaFilo(catena) {
-  if (!catena.isConnected) return;
+  if (!catena.isConnected || !catena.classList.contains('fila')) return;   // la linea solo nel riquadro
   catena.querySelectorAll('.lv-filo').forEach(s => s.remove());
   const base = catena.getBoundingClientRect();
   const c = [...catena.querySelectorAll('.lv-anello')].map(a => {
