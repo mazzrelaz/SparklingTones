@@ -59,4 +59,20 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [ ] Togliere le 23 traduzioni inglesi non più usate (`tools/lingua.html`).
 - [ ] Registro dei MIDI ricevuti per la Pedaliera: era per il beta test, chiuso. Probabilmente da lasciar perdere.
 
+## 6. Funzioni nuove (18 novembre, scelte dall'utente fra otto proposte)
+
+Ognuna in italiano e inglese e nelle guide, nello stesso lavoro.
+
+- [ ] **Scaletta (setlist)**: brani in fila (preset, bpm, nota); la Live avanza di brano in brano, il pedale la
+  segue e mostra il prossimo. Nessun comando nuovo.
+- [ ] **Scene dentro un preset** (ritmica / solo / pulito): solo le manopole e gli on/off che cambiano, con
+  `0x0104`/`0x0115`, invece del preset intero. **L'utente: «va studiata bene» — prima lo studio, poi si decide.**
+  Da capire: quanti parametri si possono mandare in fila senza piantare l'ampli (`PAUSA_PARAMETRO`), quando
+  conviene il preset intero, cosa succede se la scena cambia un modello (`0x0106`), come si salvano nel record
+  e nel sync, come le vede il pedale.
+- [ ] **Cronologia di un preset**: ogni salvataggio tiene la versione di prima, «torna a com'era». Da decidere
+  quante versioni e se viaggiano con Dropbox.
+- [ ] **Condividere con link o QR**: il preset compresso nel `#` dell'indirizzo, nessun server; chi apre lo
+  importa. QR senza dipendenze. Controllo di sicurezza: il preset in arrivo passa da `controllaPreset`.
+
 **Fermo per scelta dell'utente**: il Tap tempo con l'ampli acceso.
