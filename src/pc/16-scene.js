@@ -113,7 +113,9 @@ async function suonaScena(indice) {
 // dall'utente): il noise gate da solo in alto al centro, poi comp, drive, ampli e sotto mod, delay,
 // riverbero. Ogni tipo ha il suo colore; gli spenti sono scuri, col nome spento. [riga, colonna].
 const DISPOSIZIONE_133 = [[1, 2], [2, 1], [2, 2], [2, 3], [3, 1], [3, 2], [3, 3]];
-const COLORI_BLOCCO = ['#d5dae2', '#b9ead7', '#ffc2bd', '#ffdcb5', '#d4c6ec', '#bcd6f0', '#f6cfe4'];
+// I colori li ha scelti l'utente: gate viola, comp/wah giallo, drive rosso, ampli arancione, mod azzurro,
+// delay blu, riverbero bianco. Morbidi, perché il nome sopra si legga.
+const COLORI_BLOCCO = ['#bda6ee', '#f6dc72', '#f08c8c', '#f6b36e', '#93d6f2', '#86a5f2', '#f3f4f6'];
 
 /**
  * La catena di una scena, con gli spenti al buio. `quando` la rende cliccabile (il riquadro, in fila);
