@@ -218,8 +218,7 @@ async function apriRiquadroScena(record, indice) {
   const lavoro = presetConScena(record, scene[indice] || null).effects;
   if (!nuova) await suonaScena(indice);
   else { ora.effetti = copiaEffetti(lavoro); ora.scena = null; }
-  let scelto = lavoro.findIndex((e, b) => b === 2) ;   // si parte dal drive
-  if (scelto < 0) scelto = 0;
+  let scelto = 2;   // si parte dal drive
 
   const corpo = document.createElement('div');
   corpo.className = 'riquadro-scena';

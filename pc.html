@@ -512,10 +512,32 @@
   .lv-posto.blocco:not(.sì) .lv-foto { opacity:0.35; }
   .lv-posto.blocco .lv-nome { min-height:0; font-size:0.92rem; }
   .lv-stato { color:var(--dim); font-size:0.8rem; min-height:1em; }
-  /* Le scene (bozza, 18 novembre 2026): gli stessi pulsantoni del modo Preset, più la matita. */
-  .lv-matita { position:absolute; bottom:8px; right:10px; width:26px; height:26px; border-radius:7px; display:flex; align-items:center;
-    justify-content:center; color:var(--faint); font-size:0.85rem; }
-  .lv-matita:hover { color:var(--testo, #fff); background:rgba(255,255,255,0.08); }
+  /* Le scene (18 novembre 2026): gli stessi pulsantoni del modo Preset e, sotto, la catena della scena:
+     sette immagini su due righe, gli accesi a colori e gli spenti al buio, solo la sagoma. */
+  .lv-colonna { display:flex; flex-direction:column; gap:12px; min-width:0; }
+  .lv-catena { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 6px; padding:10px 8px;
+    background:var(--incavo); border:1px solid var(--line); border-radius:12px; }
+  .lv-catena.vuota { min-height:120px; border-style:dashed; background:none; }
+  .lv-anello { flex:0 0 calc(25% - 6px); aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    background:none; border:1px solid transparent; border-radius:8px; padding:2px; min-width:0; }
+  .lv-anello img { width:100%; height:100%; object-fit:contain; }
+  .lv-anello.spento img { filter:brightness(0.12) saturate(0); opacity:0.75; }
+  .lv-anello-nome { font:600 0.6rem var(--strumento); color:var(--dim); text-align:center; overflow:hidden; }
+  .lv-anello.spento .lv-anello-nome { color:var(--faint); opacity:0.5; }
+  /* tenendo premuto: la barretta si riempie nel tempo della pressione */
+  .lv-carica { position:absolute; left:14px; right:14px; bottom:8px; height:3px; border-radius:2px; background:var(--accent-chiaro);
+    transform:scaleX(0); transform-origin:left; }
+  .lv-posto.carica .lv-carica { transform:scaleX(1); transition:transform .7s linear; }
+  /* il riquadro della scena: la catena in fila, il blocco scelto, le sue manopole */
+  .riquadro-scena .lv-catena { flex-wrap:nowrap; margin-top:12px; }
+  .riquadro-scena .lv-anello { flex:1 1 0; cursor:pointer; }
+  .riquadro-scena .lv-anello.scelto { border-color:var(--accent-chiaro); background:rgba(120,170,255,0.08); }
+  .rs-testa { display:flex; align-items:center; justify-content:space-between; margin:14px 2px 8px; font-family:var(--strumento); }
+  .rs-acceso { min-width:90px; }
+  .rs-acceso.sì { background:var(--accent); color:var(--su-accent); border-color:var(--accent); }
+  .rs-manopole { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px 22px; }
+  .rs-manopola { display:grid; grid-template-columns:110px 1fr 38px; align-items:center; gap:10px; font-size:0.85rem; color:var(--dim); }
+  .rs-manopola output { font-family:var(--strumento); color:var(--text); text-align:right; }
   .lv-scene-vuoto { color:var(--dim); text-align:center; padding:60px 0; font-size:0.95rem; }
   .lv-tag { position:absolute; top:10px; right:10px; font:700 0.66rem var(--strumento); background:var(--accent); color:var(--su-accent); border-radius:5px; padding:2px 6px; }
   /* il looper (15-looper.js): lo stile del tuner — tacche al neon, numero grande, tasti tondi */
