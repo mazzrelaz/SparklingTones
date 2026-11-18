@@ -24,7 +24,7 @@ scene, ritmica, lead, clean: devo poter scegliere che parte col clean».
 sulla canzone dopo tolto: confondeva, chiesto dall'utente). Un clic: `suonaDalBanco` del preset, poi
   `suonaScena(partenza)`. La partenza si cambia anche da lì. Vince l'ultima canzone premuta.
 - **Pedaliera**: due gesti nuovi, «Canzone successiva» e «Canzone precedente» (in fondo ci si ferma).
-- **Provato con l'ampli finto**, non con lo Spark. Grafica da approvare.
+- **Provato con l'ampli finto**, non con lo Spark. **Grafica approvata dall'utente il 18 novembre.**
 
 ## L'idea dell'utente (18 novembre, sera)
 
