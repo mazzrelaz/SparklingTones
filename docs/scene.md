@@ -26,7 +26,23 @@ manopole del blocco scelto; la scena suona mentre la si regola). Sulla Base la p
 **Sotto ogni pulsantone la catena a quadrati** col nome, 1-3-3 (gate da solo in alto), colori scelti
 dall'utente: gate viola, comp/wah giallo, drive rosso, ampli arancione, mod azzurro, delay blu, riverbero
 bianco; spenti grigio scuro. Scartate prima: immagini a serpente con frecce, immagini a U con la linea.
-Nel riquadro restano le immagini (scelta dell'utente).
+Nel riquadro restano le immagini (scelta dell'utente). **Grafica approvata il 18 novembre.**
+
+## Dove si riprende (18 novembre, sessione chiusa dall'utente)
+
+Per vederla: `git worktree add <scratchpad>/scene scene`, una voce in `.claude/launch.json` (non committata)
+con `serve.ps1 -Radice <quella cartella>`, e `pc.html?bozza#finto` (ampli finto: «Collega» riempie la libreria
+e i primi due preset prendono tre scene finte). Il service worker va tolto a ogni ricarica, o `?bozza=N` nuovo.
+
+Manca, prima che vada in `main` (e ci va solo quando lo dice l'utente):
+
+1. **Prova con lo Spark vero**: le scene cambiano il suono? cambio pulito? le code del delay restano?
+2. **Togliere la parte SOLO BOZZA** in fondo a `src/pc/16-scene.js` (le scene finte).
+3. **Inglese** di ogni testo nuovo (`tr`) e **guida del PC** in italiano e inglese.
+4. **Test** in `test/`: le scene sopravvivono a `importFromAmp` (non sono in `SOUND_FIELDS`), al sync Dropbox
+   e a «Duplica».
+5. **«Salva» nell'editor mentre suona una scena**: oggi salverebbe nel preset i valori della scena. Da decidere.
+6. Pedale: fuori, per scelta.
 
 ## Prima misura — 18 novembre 2026, Spark 2
 
