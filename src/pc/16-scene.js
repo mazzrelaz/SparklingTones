@@ -14,7 +14,9 @@
 
 const SCENA_PAUSA = 80;
 const SCENA_TETTO = 12;
-const SCENE_MAX = 4;
+// Tre scene più la Base: quattro, quanti gli switch di un MIDI controller (regola dell'utente,
+// 18 novembre 2026). Lo switch del posto n (1–4 nella metà) suona la Base o la scena n−1.
+const SCENE_MAX = 3;
 
 live.scene = false;     // il modo Scene della Live
 
@@ -108,7 +110,8 @@ function disegnaScene(corpo) {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = `lv-posto meta-a scena${attiva === indice ? ' sì' : ''}`;
-    el.innerHTML = `<span class="lv-num">${indice === null ? tr('Base') : tr('Scena {0}', indice + 1)}</span>
+    const n = indice === null ? 0 : indice + 1;
+    el.innerHTML = `${etichetteSwitch(sw => sw.preset && !sw.preset.startsWith('g:') && postoDiSwitch(sw) % 4 === n)}<span class="lv-num">${indice === null ? tr('Base') : tr('Scena {0}', indice + 1)}</span>
       <span class="lv-led"></span><span class="lv-nome">${s ? testoConNome(s.nome) : testoConNome(record.name)}</span><span class="lv-sw"></span>`;
     el.addEventListener('click', () => suonaScena(indice));
     if (s) {
@@ -149,6 +152,15 @@ async function rinominaOEliminaScena(record, indice) {
   await store.put(fresco);
   await ricarica(); disegnaTutto();
   disegnaLive();
+}
+
+/** Uno switch della pedaliera nel modo Scene: il suo posto nella metà dice quale scena. */
+function scenaDaSwitch(s) {
+  const i = postoDiSwitch(s);
+  if (i < 0) return;
+  const n = i % 4;
+  if (n === 0) { suonaScena(null); return; }
+  if (sceneDi(recordDiOra())[n - 1]) suonaScena(n - 1);
 }
 
 /* ---------------------------------------------------------------- «Salva come scena» */

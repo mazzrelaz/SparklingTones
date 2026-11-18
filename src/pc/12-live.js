@@ -28,6 +28,7 @@ const STOMP = [
 const GESTI = [
   { id: null, nome: () => tr('Nessuno') },
   { id: 'stomp', nome: () => tr('Entra/esci dallo Stomp') },
+  { id: 'scene', nome: () => tr('Entra/esci dalle Scene') },
   { id: 'looper', nome: () => tr('Entra/esci dal Looper') },
   { id: 'meta', nome: () => tr('Passa da banco A a banco B') },
   { id: 'banco+', nome: () => tr('Banco successivo') },
@@ -390,6 +391,7 @@ function tocco(s) {
   const azione = live.looper ? s.looper : live.stomp ? s.stomp : s.preset;
   if (azione && azione.startsWith('g:')) { gesto(azione.slice(2)); return; }
   if (live.looper) { if (azione) azioneLooper(azione); return; }
+  if (live.scene) { scenaDaSwitch(s); return; }   // gli stessi switch dei preset: posto n, scena n
   if (live.stomp) { if (s.stomp) cambiaStomp(s.stomp); }
   else { const i = postoDiSwitch(s); if (i >= 0) suonaPosto(i); }
 }
@@ -402,9 +404,10 @@ function lungoSwitch(v) {
 }
 
 function gesto(g) {
-  if (g === 'stomp') { live.stomp = live.looper ? true : !live.stomp; live.looper = false; }
-  else if (g === 'looper') { if (!profilo.banchi) return; live.looper = !live.looper; if (live.looper) chiediLooper(); }
-  else if (g === 'meta') { if (!live.stomp && !live.looper) live.meta ^= 1; }
+  if (g === 'stomp') { live.stomp = live.looper || live.scene ? true : !live.stomp; live.looper = false; live.scene = false; }
+  else if (g === 'scene') { live.scene = live.looper || live.stomp ? true : !live.scene; live.looper = false; live.stomp = false; }
+  else if (g === 'looper') { if (!profilo.banchi) return; live.looper = !live.looper; if (live.looper) { live.scene = false; chiediLooper(); } }
+  else if (g === 'meta') { if (!live.stomp && !live.looper && !live.scene) live.meta ^= 1; }
   else if (g === 'banco+') cambiaBanco(1);
   else if (g === 'banco-') cambiaBanco(-1);
   disegnaLive();
