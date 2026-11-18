@@ -76,7 +76,7 @@ function adattaLayout(pk, layout) {
 // browser. '' = non detta: l'IA sceglie la chitarra dell'artista; 'altra' = la costruisce l'utente,
 // un pickup per posizione (il ponte c'è sempre, il centrale solo col manico).
 // Niente H, S e P da soli fra i pulsanti: un pickup solo non dice se sta al ponte o al manico
-// (l'utente non li capiva); una chitarra a un pickup si fa in «Altra», col solo ponte.
+// (l'utente non li capiva); una chitarra a un pickup si fa in «Custom», col solo ponte.
 const CHITARRE = ['SSS', 'HSS', 'HSH', 'HH', 'SS', 'PP', 'HS'];
 // Sotto la sigla, la chitarra tipica (nomi di modelli: non si traducono).
 const TIPO_CHITARRA = { SSS: 'Strat', HSS: 'Fat Strat', HSH: 'Superstrat', HH: 'Les Paul', SS: 'Tele',
@@ -107,7 +107,7 @@ function miniChitarra(layout) {
   });
   if (!pezzi.length) {
     const l = document.createElementNS(NS, 'path');
-    // «Altra»: una matita; «Nessuna»: un trattino.
+    // «Custom»: una matita; «Nessuna»: un trattino.
     l.setAttribute('d', layout === 'altra' ? 'M23 21h4l9-9-4-4-9 9zM30.5 10.5l4 4' : 'M22 14h16');
     svg.appendChild(l);
   }
@@ -123,7 +123,7 @@ function sceltaMiaChitarra() {
   return v === 'altra' || CHITARRE.includes(v) ? v : '';
 }
 
-/** La chitarra costruita in «Altra»: { manico, centrale, ponte }, ognuno '' / 'S' / 'H' / 'M' / 'P'. */
+/** La chitarra costruita in «Custom»: { manico, centrale, ponte }, ognuno '' / 'S' / 'H' / 'M' / 'P'. */
 function chitarraAltra() {
   let c = null;
   try { c = JSON.parse(leggi('chitarra-pc-altra', 'null')); } catch (e) { c = null; }
@@ -153,17 +153,18 @@ function miaChitarra() {
 /** Gli humbucker della chitarra si possono splittare? (Sì finché non si dice di no.) */
 const splitPossibile = () => leggi('chitarra-pc-split', 'si') !== 'no';
 
-/** I pulsanti «La mia chitarra»: il disegnino dei pickup, la sigla, la chitarra tipica; in fondo «Altra». */
+/** I pulsanti «La mia chitarra»: il disegnino dei pickup, la sigla, la chitarra tipica; in fondo «Custom». */
 function sceltaChitarra() {
   const tutto = document.createElement('div');
   const griglia = document.createElement('div');
   griglia.className = 'scelta-chitarra';
-  // «Altra»: per ogni posizione il suo pickup, a pulsanti.
+  // «Custom»: per ogni posizione il suo pickup, a pulsanti.
   const costruisci = document.createElement('div');
   costruisci.className = 'chitarra-altra';
-  // Gli humbucker si splittano? Solo se la chitarra scelta ne ha.
+  // Gli humbucker si splittano? Una casella nella griglia, accanto a «Custom» (18 novembre, chiesto
+  // dall'utente); solo se la chitarra scelta ne ha.
   const rigaSplit = document.createElement('div');
-  rigaSplit.className = 'riga-posizione';
+  rigaSplit.className = 'casella-split';
   let altra = null;
 
   const posizione = (nome, scelte) => {
@@ -189,10 +190,13 @@ function sceltaChitarra() {
   const disegnaSplit = () => {
     const l = miaChitarra();
     rigaSplit.hidden = !haHumbucker(l);
-    rigaSplit.replaceChildren(...posizione(tr('Humbucker splittabili'), [
+    const titolo = document.createElement('b');
+    titolo.textContent = tr('Humbucker splittabili');
+    const fila = posizione('', [
       { testo: tr('Sì'), sì: splitPossibile(), quando: () => { scrivi('chitarra-pc-split', 'si'); disegnaSplit(); } },
       { testo: tr('No'), sì: !splitPossibile(), quando: () => { scrivi('chitarra-pc-split', 'no'); disegnaSplit(); } },
-    ]).childNodes);
+    ]).querySelector('.pk-scelte');
+    rigaSplit.replaceChildren(titolo, fila);
   };
 
   const disegnaAltra = () => {
@@ -218,7 +222,7 @@ function sceltaChitarra() {
   };
 
   const segna = v => {
-    griglia.querySelectorAll('button').forEach(x => x.classList.toggle('sì', x.dataset.v === v));
+    griglia.querySelectorAll(':scope > button').forEach(x => x.classList.toggle('sì', x.dataset.v === v));
     costruisci.hidden = v !== 'altra';
     disegnaSplit();
   };
@@ -228,7 +232,7 @@ function sceltaChitarra() {
     b.dataset.v = v;
     b.appendChild(miniChitarra(v));
     const sigla = document.createElement('b');
-    sigla.textContent = v === 'altra' ? tr('Altra') : v || tr('Nessuna');
+    sigla.textContent = v === 'altra' ? 'Custom' : v || tr('Nessuna');
     const tipo = document.createElement('span');
     tipo.textContent = v ? TIPO_CHITARRA[v] || '' : tr('non indicata');
     b.append(sigla, tipo);
@@ -236,9 +240,10 @@ function sceltaChitarra() {
     if (v === 'altra') altra = b;
     griglia.appendChild(b);
   }
+  griglia.appendChild(rigaSplit);
   disegnaAltra();
   segna(sceltaMiaChitarra());
-  tutto.append(griglia, costruisci, rigaSplit);
+  tutto.append(griglia, costruisci);
   return tutto;
 }
 

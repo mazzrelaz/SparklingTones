@@ -342,7 +342,14 @@
   .riga-posizione[hidden] { display:none; }
   .riga-posizione > span { width:9.5em; flex:none; font-size:0.8rem; color:var(--dim); }
   .riga-posizione + .riga-posizione { margin-top:0; }
-  .finestra [data-f="chitarra"] > div > .riga-posizione { margin-bottom:12px; }
+  .casella-split { grid-column:span 2; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    padding:6px 4px; background:var(--incavo); border:1px dashed var(--line); border-radius:10px; }
+  .casella-split[hidden] { display:none; }
+  .casella-split b { font:700 0.74rem var(--strumento); color:var(--dim); text-align:center; }
+  .casella-split .pk-scelte { align-self:center; }
+  .scelta-chitarra .casella-split .pk-scelte button { display:block; padding:0 14px; height:26px; min-width:44px; border:0; background:none;
+    box-shadow:none; color:var(--dim); font:600 0.8rem var(--strumento); }
+  .scelta-chitarra .casella-split .pk-scelte button.sì { color:var(--su-accent); background:var(--accent); }
   .pk-vista .pk-sotto { margin:0 0 8px; font-size:0.85rem; color:var(--dim); }
   .pk-vista .pk-nota { margin:10px 0 0; font-size:0.9rem; line-height:1.45; }
   .pk-finestra { display:flex; flex-direction:column; gap:10px; margin-top:6px; }

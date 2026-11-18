@@ -2087,8 +2087,6 @@ window.LINGUA_EN = {
     "not set",
   "Nessuna":
     "None",
-  "Altra":
-    "Other",
   "niente":
     "none",
   "Humbucker splittabili":
