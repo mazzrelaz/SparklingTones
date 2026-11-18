@@ -154,7 +154,7 @@ function chiudiLive() {
 function firmaLive() {
   const accesi = ora && ora.effetti ? ora.effetti.map(e => (e && e.enabled ? 1 : 0)).join('') : '';
   const nomi = ora && ora.effetti ? ora.effetti.map(e => e && e.name).join(',') : '';
-  return [live.vista, live.banco, live.meta, live.stomp, live.looper, live.impara, ora && ora.nome, ora && ora.slot, accesi, nomi,
+  return [live.vista, live.banco, live.meta, live.stomp, live.looper, live.scene, ora && ora.scena, ora && ora.record && JSON.stringify(ora.record.scene || null), live.impara, ora && ora.nome, ora && ora.slot, accesi, nomi,
     banchi.length, suAmpli.map(r => r && r.id).join(','), spark.connected, !!midi.usb, midi.bleNome, pedaliera.switch.length].join('|');
 }
 setInterval(() => { if (schermoLive && firmaLive() !== live.firma) disegnaLive(); }, 300);
@@ -199,18 +199,20 @@ function disegnaPalcoLive(corpo) {
   testa.className = 'lv-testa';
   testa.innerHTML = `
     <div class="lv-banco"><button data-a="prima" title="${tr('Banco precedente')}">◀</button><b>${testoConNome(banco.nome)}</b><button data-a="dopo" title="${tr('Banco successivo')}">▶</button></div>
-    <div class="lv-modo"><button data-a="preset" class="${live.stomp || live.looper ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp && !live.looper ? 'sì' : ''}">${tr('Stomp')}</button>${profilo.banchi ? `<button data-a="looper" class="${live.looper ? 'sì' : ''}">${tr('Looper')}</button>` : ''}${aiuto('live')}</div>
+    <div class="lv-modo"><button data-a="preset" class="${live.stomp || live.looper || live.scene ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp && !live.looper && !live.scene ? 'sì' : ''}">${tr('Stomp')}</button><button data-a="scene" class="${live.scene && !live.looper ? 'sì' : ''}">${tr('Scene')}</button>${profilo.banchi ? `<button data-a="looper" class="${live.looper ? 'sì' : ''}">${tr('Looper')}</button>` : ''}${aiuto('live')}</div>
     <div class="lv-blocco lv-bt"><button data-a="bt" class="${midi.ble ? 'sì' : ''}" title="${midi.ble ? tr('Stacca il pedale Bluetooth') : tr('Collega un pedale Bluetooth')}">${midi.ble ? '● ' + tr('MIDI controller connesso') : tr('Collega Pedale BT')}</button></div>
-    <div class="lv-suona"><small>${live.stomp && !live.looper ? tr('Stomp su') : tr('Suona')}</small><span>${ora ? testoConNome(ora.nome) : '—'}</span></div>`;
+    <div class="lv-suona"><small>${live.stomp && !live.looper ? tr('Stomp su') : tr('Suona')}</small><span>${ora ? testoConNome(ora.nome) : '—'}${live.scene && ora && ora.record && Array.isArray(ora.record.scene) && ora.scena !== undefined && ora.scena !== null && ora.record.scene[ora.scena] ? ' · ' + testoConNome(ora.record.scene[ora.scena].nome) : ''}</span></div>`;
   // Il pedale Bluetooth a portata di mano, senza passare dal Foot controller.
   testa.querySelector('[data-a="bt"]').addEventListener('click', () => (midi.ble ? staccaBle() : collegaBle()));
   testa.querySelector('[data-a="prima"]').addEventListener('click', () => cambiaBanco(-1));
   testa.querySelector('[data-a="dopo"]').addEventListener('click', () => cambiaBanco(1));
-  testa.querySelector('[data-a="preset"]').addEventListener('click', () => { live.stomp = false; live.looper = false; disegnaLive(); });
-  testa.querySelector('[data-a="stomp"]').addEventListener('click', () => { live.stomp = true; live.looper = false; disegnaLive(); });
-  if (profilo.banchi) testa.querySelector('[data-a="looper"]').addEventListener('click', () => { if (!live.looper) { live.looper = true; chiediLooper(); } disegnaLive(); });
+  testa.querySelector('[data-a="preset"]').addEventListener('click', () => { live.stomp = false; live.looper = false; live.scene = false; disegnaLive(); });
+  testa.querySelector('[data-a="stomp"]').addEventListener('click', () => { live.stomp = true; live.looper = false; live.scene = false; disegnaLive(); });
+  testa.querySelector('[data-a="scene"]').addEventListener('click', () => { live.scene = true; live.stomp = false; live.looper = false; disegnaLive(); });
+  if (profilo.banchi) testa.querySelector('[data-a="looper"]').addEventListener('click', () => { if (!live.looper) { live.looper = true; live.scene = false; chiediLooper(); } disegnaLive(); });
   corpo.appendChild(testa);
   if (live.looper) { disegnaLooper(corpo); return; }
+  if (live.scene) { disegnaScene(corpo); return; }
 
   const griglia = document.createElement('div');
   griglia.className = 'lv-griglia' + (live.stomp ? ' stomp' : '');

@@ -61,6 +61,7 @@ async function apriSalva() {
   }
 
   const azioni = [{ testo: tr('Annulla'), valore: null }];
+  if (ora.record) azioni.push({ testo: tr('Salva come scena'), valore: 'scena' });
   if (ora.record) azioni.push({ testo: tr('Salva come nuovo'), valore: 'nuovo' });
   azioni.push({ testo: tr('Salva'), valore: 'salva', primario: true });
 
@@ -71,6 +72,7 @@ async function apriSalva() {
     azioni,
   });
   if (!r) return false;
+  if (r.azione === 'scena') return await salvaComeScena();
   const nome = r.testo.replace(/\s+/g, ' ').trim();
   if (!nome) { await avvisa(tr('manca il nome'), tr('Scrivi un nome per il preset.')); return false; }
   return await salva(nome, r.azione === 'nuovo' || !ora.record, slotScelto);

@@ -512,6 +512,14 @@
   .lv-posto.blocco:not(.sì) .lv-foto { opacity:0.35; }
   .lv-posto.blocco .lv-nome { min-height:0; font-size:0.92rem; }
   .lv-stato { color:var(--dim); font-size:0.8rem; min-height:1em; }
+  /* Le scene (bozza, 18 novembre 2026): stessi pulsantoni dei preset, cinque per riga come lo Stomp. */
+  .lv-posto.scena .lv-led { background:#3a3561; }
+  .lv-posto.scena.sì .lv-led { background:radial-gradient(circle at 40% 35%, #fff 0, #9b8cff 45%); box-shadow:0 0 10px #9b8cff, 0 0 24px #9b8cff; }
+  .lv-posto.scena.sì { animation:lv-neon 1.8s ease-in-out infinite; }
+  .lv-matita { position:absolute; top:8px; right:10px; width:26px; height:26px; border-radius:7px; display:flex; align-items:center;
+    justify-content:center; color:var(--faint); font-size:0.85rem; }
+  .lv-matita:hover { color:var(--testo, #fff); background:rgba(255,255,255,0.08); }
+  .lv-scene-vuoto { color:var(--dim); text-align:center; padding:60px 0; font-size:0.95rem; }
   .lv-tag { position:absolute; top:10px; right:10px; font:700 0.66rem var(--strumento); background:var(--accent); color:var(--su-accent); border-radius:5px; padding:2px 6px; }
   /* il looper (15-looper.js): lo stile del tuner — tacche al neon, numero grande, tasti tondi */
   .lp { flex:1; display:grid; grid-template-columns:minmax(260px, 420px) minmax(0, 1fr); gap:40px; align-items:center; padding:8px 12px; }
@@ -784,6 +792,7 @@
 <script src="src/pc/11-genera-ia.js"></script>
 <script src="src/pc/12-live.js"></script>
 <script src="src/pc/15-looper.js"></script>
+<script src="src/pc/16-scene.js"></script>
 <script src="src/pc/13-benvenuto.js"></script>
 <script src="src/pc/14-guida.js"></script>
 <script src="src/novita.js"></script>
