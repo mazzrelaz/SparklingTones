@@ -14,6 +14,12 @@ posizioni, «Mode», «Master», gate, comp e riverbero; ogni raffica si verific
 piccolo per gestire tutte ste robe». La prima bozza (fila sotto i pulsantoni della Live del telefono, ramo
 `bozza-scene`) è scartata per questo.
 
+**Bozza sul PC** (ramo `bozza-scene-pc`, `src/pc/16-scene.js`): quarto modo «Scene» della Live, con gli stessi
+pulsantoni del modo Preset; «Salva come scena» nel «Salva…» dell'editor; titolo «Live – modo» con il preset
+sotto, al centro (il nome a destra andava a capo e spostava la Live). **Tutto pensato per un MIDI controller da
+4 switch** (regola dell'utente): **3 scene più la Base**; lo switch del posto n (1–4) suona la Base o la scena
+n−1, e c'è il gesto «Entra/esci dalle Scene» per la pressione lunga.
+
 ## Prima misura — 18 novembre 2026, Spark 2
 
 Cattura `captures/2026-11-18-scene-sonda.json`, preset «On the turning away» (drive, chorus, delay accesi),
