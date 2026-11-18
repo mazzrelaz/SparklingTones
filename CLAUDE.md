@@ -356,7 +356,9 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
 - **Scene di un preset** (18 novembre): **solo nel ramo `scene`, mai in `main` finché lui non lo dice** (non deve
   toccare le versioni pubblicate). Solo PC, modo «Scene» della Live, 3 scene + Base per 4 switch MIDI; grafica
-  approvata in bozza. Tutto in `docs/scene.md` **del ramo**; copia di lavoro: `git worktree list`.
+  approvata in bozza. Tutto in `docs/scene.md` **del ramo** (`git show scene:docs/scene.md`); per riprendere,
+  `git worktree add <scratchpad>/scene scene`, poi `pc.html?bozza#finto`. Mancano: prova con lo Spark, togliere
+  i preset finti della bozza, inglese, guida del PC, test, «Salva» mentre suona una scena.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - Copia oraria dei progetti in `Desktop\Cloud Backup`.
