@@ -355,8 +355,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso. **Pickup consigliati** e «La mia chitarra»
   (18 nov., `src/pc/16-pickup.js`): campo `pickup` fra gli `USER_FIELDS`; un'icona, mai un riquadro (niente scroll).
-- **Scene** (18 novembre): **solo nel ramo `scene`, mai in `main` finché lui non lo dice**. Solo PC, grafica
-  approvata. Tutto, anche cosa manca, in `git show scene:docs/scene.md`; si riprende con `git worktree add`.
+- **Scene e scalette** (18 nov.): **solo nel ramo `scene`, mai in `main` finché lui non lo dice**. Solo PC, grafica
+  approvata. Tutto in `git show scene:docs/scene.md` e `…:docs/scaletta.md`; si riprende con `git worktree add`.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - Copia oraria dei progetti in `Desktop\Cloud Backup`.
