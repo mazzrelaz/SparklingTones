@@ -71,6 +71,33 @@ function catalogoPerIA() {
   return righe.join('\n');
 }
 
+/**
+ * «La mia chitarra» (18 novembre, chiesto dall'utente): il suono di un artista con un'altra
+ * chitarra (Santana con una Strat). Il preset si regola per avvicinarsi a quel suono con la
+ * chitarra che l'utente ha davvero, e i pickup consigliati sono i suoi.
+ */
+function domandaChitarra(lingua) {
+  const mia = miaChitarra();
+  if (!mia) return [];
+  const tipi = { S: 'single coil', H: 'humbucker', P: 'P-90' };
+  const pezzi = mia.split('').map(c => tipi[c]).join(', ');
+  return [
+    '',
+    `# The player's guitar: ${mia} (from bridge to neck: ${pezzi})`,
+    'This is the guitar that will be plugged in, and the target sound may come from a',
+    'different one (e.g. a Santana tone, humbuckers, played on an SSS Strat). Voice the',
+    'preset so that THIS guitar gets as close as possible to the target sound: compensate',
+    'in the chain. Single coils for a humbucker sound: more gain or a drive in front, more',
+    'bass and low mids, a bit less treble and presence, a gate if it hums. Humbuckers for a',
+    'single-coil sound: less gain, more treble and presence, fewer low mids, maybe a',
+    'compressor for the snap. P-90 sit in between.',
+    `"pickups.layout" must be "${mia}": choose the positions on this guitar closest to the`,
+    'target (e.g. bridge + middle on a Strat for a quacky tone, the bridge single coil with the',
+    'tone knob rolled back for a humbucker lead).',
+    `In "why" say in ${lingua} what you compensated for this guitar.`,
+  ];
+}
+
 /** La domanda intera da incollare nella chat. */
 function domandaIA(descrizione) {
   const lingua = Lingua.attuale === 'en' ? 'English' : 'Italian';
@@ -109,6 +136,7 @@ function domandaIA(descrizione) {
     `true when a humbucker is coil-split. "tip": one short sentence in ${lingua} with selector`,
     'position, volume/tone knob and the artist\'s trick if any (e.g. Brian May: bridge + neck',
     'in phase, treble booster).',
+    ...domandaChitarra(lingua),
     '',
     'Answer with the JSON object only, in one code block, exactly in this shape:',
     '{',
@@ -254,8 +282,15 @@ function presetDaIA(risposta, scheletro) {
   // La famiglia (clean, drive, acoustic, bass): solo una che in libreria c'è davvero.
   const fam = String(risposta.family || '').trim().toLowerCase();
   const famiglia = famiglie.some(f => f.id === fam) ? fam : null;
-  // I pickup consigliati (16-pickup.js): se la risposta non li ha, niente.
-  return { preset, famiglia, pickup: pickupDaIA(risposta.pickups), avvisi };
+  // I pickup consigliati (16-pickup.js): se la risposta non li ha, niente. Con «La mia chitarra»
+  // sono sulla sua, anche se la chat ha messo quella dell'artista.
+  let pickup = pickupDaIA(risposta.pickups);
+  const mia = miaChitarra();
+  if (pickup && mia && pickup.layout !== mia) {
+    pickup = adattaLayout(pickup, mia);
+    if (!pickup.attivi.length) pickup = null;
+  }
+  return { preset, famiglia, pickup, avvisi };
 }
 
 /**
@@ -299,6 +334,30 @@ async function mettiGeneratoSulPalco(preset, famiglia, pickup) {
 
 /* ---------------------------------------------------------------- la finestra */
 
+/** «BM - Bohemian Lead» è sul palco: il perché dell'IA e la configurazione dei pickup. */
+async function mostraRisultatoIA(nome, motivo, pickup) {
+  const corpo = document.createElement('div');
+  corpo.className = 'ia-risultato';
+  if (motivo) {
+    const p = document.createElement('p');
+    p.className = 'ia-motivo';
+    p.textContent = motivo;
+    corpo.appendChild(p);
+  }
+  if (pickup) {
+    const h = document.createElement('h3');
+    h.textContent = tr('Configurazione pickup ideale');
+    corpo.append(h, cartaPickup(pickup));
+  }
+  await finestra({
+    titolo: tr('«{0}» è sul palco', nome),
+    icona: document.querySelector('#genera-ia svg').innerHTML,
+    corpo,
+    larga: true,
+    azioni: [{ testo: tr('Chiudi'), valore: true, primario: true }],
+  });
+}
+
 async function apriGeneraIA() {
   const scheletro = scheletroPerIA();
   if (!scheletro) {
@@ -310,12 +369,15 @@ async function apriGeneraIA() {
     const corpo = document.createElement('div');
     corpo.innerHTML = `
       <textarea data-f="descrizione" style="min-height:90px" placeholder="${tr('che suono vuoi')}"></textarea>
+      <h3>${tr('La mia chitarra')}</h3>
+      <div data-f="chitarra"></div>
       <div class="riga-azioni" style="margin:10px 0 4px"><button data-f="copia">${tr('Copia la domanda')}</button>
         <span class="stato-db" data-f="copiata"></span></div>
       <textarea data-f="domanda" hidden readonly style="min-height:90px"></textarea>
       <h3>${tr('La risposta')}</h3>
       <textarea data-f="risposta" style="min-height:130px" placeholder="${tr('incolla qui la risposta')}"></textarea>`;
     const q = f => corpo.querySelector(`[data-f="${f}"]`);
+    q('chitarra').appendChild(sceltaChitarra());
     q('descrizione').value = bozzaIA.descrizione;
     q('risposta').value = bozzaIA.risposta;
     q('copia').addEventListener('click', async () => {
@@ -355,6 +417,9 @@ async function apriGeneraIA() {
       (fatto.avvisi.length ? ' — ' + fatto.avvisi.join('; ') : '') + (motivo ? ' — ' + motivo : ''),
       fatto.avvisi.length ? 'errore' : 'ok');
     bozzaIA.risposta = '';
+    // Il risultato nella finestra (18 novembre, come la «Prova» di Pulze): perché l'IA ha scelto
+    // così, e i pickup da usare. Il preset suona già; la finestra è solo da leggere.
+    if (fatto.pickup || motivo) await mostraRisultatoIA(fatto.preset.name, motivo, fatto.pickup);
     return;
   }
 }

@@ -2081,4 +2081,12 @@ window.LINGUA_EN = {
     "Show suggested pickups",
   "Scarta":
     "Discard",
+  "La mia chitarra":
+    "My guitar",
+  "non indicata":
+    "not set",
+  "Configurazione pickup ideale":
+    "Ideal pickup setting",
+  "«{0}» è sul palco":
+    "«{0}» is on stage",
 };

@@ -41,6 +41,53 @@ function pickupDaIA(pk) {
   return { layout, attivi, split: split && layout.includes('H'), consiglio: String(pk.tip || '').trim().slice(0, 300) };
 }
 
+/**
+ * Gli stessi pickup su un'altra chitarra: con un numero diverso di pickup i posti cambiano, e si
+ * tengono manico e ponte (il centrale va solo su una chitarra a tre). Modifica pk e lo rende.
+ */
+function adattaLayout(pk, layout) {
+  const prima = pk.layout.length, n = layout.length;
+  pk.layout = layout;
+  if (n !== prima) {
+    pk.attivi = pk.attivi.map(i => (i === prima - 1 ? n - 1 : i === 0 ? 0 : (n === 3 ? 1 : -1)))
+      .filter((i, k, a) => i >= 0 && i < n && a.indexOf(i) === k).sort();
+  }
+  if (!layout.includes('H')) pk.split = false;
+  return pk;
+}
+
+/* ---------------------------------------------------------------- la chitarra dell'utente */
+
+// «La mia chitarra» di «Genera con l'IA» (18 novembre, chiesto dall'utente): si ricorda in questo
+// browser. '' = non detta: l'IA sceglie la chitarra dell'artista.
+const NOMI_CHITARRA = { SSS: 'SSS (Strat)', HH: 'HH (Les Paul)', SS: 'SS (Tele)', PP: 'PP (P-90)' };
+
+function miaChitarra() {
+  try { const v = localStorage.getItem('chitarra-pc') || ''; return LAYOUT_PICKUP.includes(v) ? v : ''; } catch (e) { return ''; }
+}
+function scriviMiaChitarra(v) {
+  try { localStorage.setItem('chitarra-pc', v); } catch (e) { /* resta per questa volta */ }
+}
+
+/** La fila di scelte «La mia chitarra»: Nessuna, SSS (Strat), HSS… */
+function sceltaChitarra() {
+  const fila = document.createElement('div');
+  fila.className = 'pk-scelte';
+  const ridisegna = () => {
+    fila.textContent = '';
+    for (const v of [''].concat(LAYOUT_PICKUP)) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = v ? (NOMI_CHITARRA[v] || v) : tr('non indicata');
+      b.classList.toggle('sì', v === miaChitarra());
+      b.addEventListener('click', () => { scriviMiaChitarra(v); ridisegna(); });
+      fila.appendChild(b);
+    }
+  };
+  ridisegna();
+  return fila;
+}
+
 /** Un pk letto dalla libreria (o da un backup), controllato; null se non va. */
 function pickupValido(pk) {
   if (!pk || typeof pk !== 'object' || !LAYOUT_PICKUP.includes(pk.layout) || !Array.isArray(pk.attivi)) return null;
@@ -132,11 +179,8 @@ function disegnaPannelloPickup() {
   b.title = pk ? tr('Pickup consigliati') + ': ' + descriviPickup(pk) : tr('Pickup consigliati');
 }
 
-/** La finestrella: il disegno, la descrizione e il consiglio; «Modifica» apre la matita. */
-async function mostraPickup() {
-  if (!ora) return;
-  const pk = pickupValido(ora.pickup);
-  if (!pk) return modificaPickup();
+/** La descrizione, il disegno e il consiglio: nella finestrella e nel risultato di «Genera con l'IA». */
+function cartaPickup(pk) {
   const corpo = document.createElement('div');
   corpo.className = 'pk-vista';
   const sotto = document.createElement('p');
@@ -152,10 +196,18 @@ async function mostraPickup() {
     nota.textContent = pk.consiglio;
     corpo.appendChild(nota);
   }
+  return corpo;
+}
+
+/** La finestrella: il disegno, la descrizione e il consiglio; «Modifica» apre la matita. */
+async function mostraPickup() {
+  if (!ora) return;
+  const pk = pickupValido(ora.pickup);
+  if (!pk) return modificaPickup();
   const scelta = await finestra({
     titolo: tr('Pickup consigliati'),
     icona: ICONE.chitarra,
-    corpo,
+    corpo: cartaPickup(pk),
     azioni: [{ testo: tr('Modifica'), valore: 'modifica' }, { testo: tr('Chiudi'), valore: null, primario: true }],
   });
   if (scelta === 'modifica') await modificaPickup();
@@ -197,17 +249,7 @@ async function modificaPickup() {
       b.type = 'button';
       b.textContent = l;
       b.classList.toggle('sì', l === pk.layout);
-      b.addEventListener('click', () => {
-        const prima = pk.layout.length, n = l.length;
-        pk.layout = l;
-        // Con un numero diverso di pickup i posti cambiano: si tengono manico e ponte.
-        if (n !== prima) {
-          pk.attivi = pk.attivi.map(i => (i === prima - 1 ? n - 1 : i === 0 ? 0 : (n === 3 ? 1 : -1)))
-            .filter((i, k, a) => i >= 0 && i < n && a.indexOf(i) === k).sort();
-        }
-        if (!l.includes('H')) pk.split = false;
-        ridisegna();
-      });
+      b.addEventListener('click', () => { adattaLayout(pk, l); ridisegna(); });
       scelte.appendChild(b);
     }
     const disegno = q('disegno');
