@@ -20,7 +20,8 @@ scene, ritmica, lead, clean: devo poter scegliere che parte col clean».
   cambia col doppio clic); lasciato su una canzone ne cambia il preset (e la partenza torna alla Base). Una
   canzone lasciata su un'altra prende il suo posto. **▶ Base** accanto alla canzone: la scena di partenza.
 - **Live, modo Scene**: «◀ banco ▶» diventa «◀ scaletta ▶» (con «Nessuna scaletta»); a sinistra dei pulsantoni la
-  lista delle canzoni, la canzone dopo segnata con un filo blu. Un clic: `suonaDalBanco` del preset, poi
+  lista delle canzoni (la riga in cima al centro e staccata, lista e pulsantoni più larghi; il segno
+sulla canzone dopo tolto: confondeva, chiesto dall'utente). Un clic: `suonaDalBanco` del preset, poi
   `suonaScena(partenza)`. La partenza si cambia anche da lì. Vince l'ultima canzone premuta.
 - **Pedaliera**: due gesti nuovi, «Canzone successiva» e «Canzone precedente» (in fondo ci si ferma).
 - **Provato con l'ampli finto**, non con lo Spark. Grafica da approvare.

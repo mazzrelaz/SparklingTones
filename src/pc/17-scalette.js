@@ -309,7 +309,7 @@ function listaCanzoni() {
   s.canzoni.forEach((c, n) => {
     const record = perUuid(c.preset);
     const li = document.createElement('li');
-    li.className = (n === live.canzone ? 'sì' : '') + (n === live.canzone + 1 ? ' dopo' : '') + (record ? '' : ' senza');
+    li.className = (n === live.canzone ? 'sì' : '') + (record ? '' : ' senza');
     li.innerHTML = `<span class="n">${n + 1}</span><span class="sc-testi"><span class="nome">${testoConNome(c.nome)}</span>
       <span class="sc-preset">${record ? testoConNome(record.name) : tr('preset non più in libreria')}</span></span>`;
     const partenza = document.createElement('button');
