@@ -9,7 +9,9 @@
 // dipende da cosa suonava prima. 80 ms fra un comando e l'altro (scelta dell'utente); oltre
 // SCENA_TETTO comandi si manda il preset intero con i valori già dentro.
 //
-// Si salvano da «Salva…» nell'editor («Salva come scena»), si suonano dal quarto modo della Live.
+// **Tutto dalla schermata Scene della Live** (regola dell'utente): sotto ogni pulsantone la catena
+// con le immagini (accesi a colori, spenti al buio); tenendo premuto un pulsantone si apre il
+// riquadro che modifica la scena, e la si sente mentre la si regola.
 'use strict';
 
 const SCENA_PAUSA = 80;
@@ -17,6 +19,7 @@ const SCENA_TETTO = 12;
 // Tre scene più la Base: quattro, quanti gli switch di un MIDI controller (regola dell'utente,
 // 18 novembre 2026). Lo switch del posto n (1–4 nella metà) suona la Base o la scena n−1.
 const SCENE_MAX = 3;
+const SCENA_PRESSIONE = 700;   // ms tenendo premuto per aprire il riquadro
 
 live.scene = false;     // il modo Scene della Live
 
@@ -59,6 +62,20 @@ function comandiScena(record, scena) {
   return { comandi, bersaglio };
 }
 
+/** Le differenze fra una catena e il preset salvato: quello che finisce nella scena. */
+function differenzeScena(record, effetti) {
+  const cambi = {}, accesi = {};
+  record.effects.forEach((prima, b) => {
+    const adesso = effetti[b];
+    if (adesso.enabled !== prima.enabled) accesi[adesso.name] = adesso.enabled;
+    for (const par of adesso.params) {
+      const vecchio = prima.params.find(x => x.index === par.index);
+      if (vecchio && Math.abs(vecchio.value - par.value) > 0.001) cambi[adesso.name + '#' + par.index] = par.value;
+    }
+  });
+  return { cambi, accesi };
+}
+
 let scenaInCorso = false;
 
 async function suonaScena(indice) {
@@ -90,68 +107,75 @@ async function suonaScena(indice) {
   scenaInCorso = false;
 }
 
-/** Il quarto modo della Live: Base e le scene del preset che suona, come pulsantoni. */
+/* ---------------------------------------------------------------- la schermata */
+
+/** La catena di una scena: sette immagini su due righe, gli spenti al buio. */
+function catenaScena(effetti, quando) {
+  const div = document.createElement('div');
+  div.className = 'lv-catena';
+  effetti.forEach((e, b) => {
+    const img = immagineBlocco(e);
+    const el = document.createElement(quando ? 'button' : 'span');
+    if (quando) el.type = 'button';
+    el.className = 'lv-anello' + (e.enabled ? '' : ' spento');
+    el.title = `${tr(Spark.CATENA[b])} · ${nomeBlocco(e)} · ${e.enabled ? tr('acceso') : tr('spento')}`;
+    el.innerHTML = img ? `<img src="${img}" alt="">` : `<span class="lv-anello-nome">${testoConNome(nomeBlocco(e))}</span>`;
+    if (quando) el.addEventListener('click', () => quando(b));
+    div.appendChild(el);
+  });
+  return div;
+}
+
+/** Il quarto modo della Live: Base e tre scene, ognuna con la sua catena sotto. */
 function disegnaScene(corpo) {
   const record = recordDiOra();
-  const scene = sceneDi(record);
-  if (!record || !scene.length) {
+  if (!record) {
     const vuoto = document.createElement('div');
     vuoto.className = 'lv-scene-vuoto';
-    vuoto.textContent = record ? tr('Questo preset non ha scene.') : tr('prima fai suonare un preset.');
+    vuoto.textContent = tr('prima fai suonare un preset.');
     corpo.appendChild(vuoto);
     return;
   }
+  const scene = sceneDi(record);
   const attiva = ora.scena === undefined ? null : ora.scena;
   const griglia = document.createElement('div');
   // Gli stessi pulsantoni del modo Preset (chiesto dall'utente): griglia da quattro, LED, nome, switch.
   griglia.className = 'lv-griglia lv-scene';
-  [null, ...scene.map((_, i) => i)].forEach(indice => {
+  [null, 0, 1, 2].slice(0, SCENE_MAX + 1).forEach(indice => {
     const s = indice === null ? null : scene[indice];
+    const vuota = indice !== null && !s;
+    const n = indice === null ? 0 : indice + 1;
+    const colonna = document.createElement('div');
+    colonna.className = 'lv-colonna';
     const el = document.createElement('button');
     el.type = 'button';
-    el.className = `lv-posto meta-a scena${attiva === indice ? ' sì' : ''}`;
-    const n = indice === null ? 0 : indice + 1;
-    el.innerHTML = `${etichetteSwitch(sw => sw.preset && !sw.preset.startsWith('g:') && postoDiSwitch(sw) % 4 === n)}<span class="lv-num">${indice === null ? tr('Base') : tr('Scena {0}', indice + 1)}</span>
-      <span class="lv-led"></span><span class="lv-nome">${s ? testoConNome(s.nome) : testoConNome(record.name)}</span><span class="lv-sw"></span>`;
-    el.addEventListener('click', () => suonaScena(indice));
-    if (s) {
-      const matita = document.createElement('span');
-      matita.className = 'lv-matita';
-      matita.title = tr('Rinomina o elimina');
-      matita.textContent = '✎';
-      matita.addEventListener('click', e => { e.stopPropagation(); rinominaOEliminaScena(record, indice); });
-      el.appendChild(matita);
+    el.className = `lv-posto meta-a scena${!vuota && attiva === indice ? ' sì' : ''}${vuota ? ' vuoto' : ''}`;
+    el.innerHTML = `${etichetteSwitch(sw => sw.preset && !sw.preset.startsWith('g:') && postoDiSwitch(sw) % 4 === n)}<span class="lv-num">${indice === null ? tr('Base') : tr('Scena {0}', n)}</span>
+      <span class="lv-led"></span><span class="lv-nome">${s ? testoConNome(s.nome) : vuota ? tr('vuota') : testoConNome(record.name)}</span><span class="lv-sw"></span>
+      <span class="lv-carica"></span>`;
+    // Un clic suona; tenendo premuto si apre il riquadro (sulla Base no: il preset si cambia nell'editor).
+    let lunga = false, timer = null;
+    const molla = () => { clearTimeout(timer); el.classList.remove('carica'); };
+    if (indice !== null) {
+      el.addEventListener('pointerdown', e => {
+        if (e.button !== 0) return;
+        lunga = false;
+        el.classList.add('carica');
+        timer = setTimeout(() => { lunga = true; molla(); apriRiquadroScena(record, indice); }, SCENA_PRESSIONE);
+      });
+      el.addEventListener('pointerup', molla);
+      el.addEventListener('pointerleave', molla);
     }
-    griglia.appendChild(el);
+    el.addEventListener('click', () => {
+      if (lunga) { lunga = false; return; }
+      if (!vuota) suonaScena(indice);
+    });
+    colonna.appendChild(el);
+    colonna.appendChild(vuota ? Object.assign(document.createElement('div'), { className: 'lv-catena vuota' })
+      : catenaScena(presetConScena(record, s).effects));
+    griglia.appendChild(colonna);
   });
   corpo.appendChild(griglia);
-}
-
-async function rinominaOEliminaScena(record, indice) {
-  const scena = record.scene[indice];
-  const r = await finestra({
-    titolo: tr('scena'),
-    campo: { valore: scena.nome },
-    azioni: [
-      { testo: tr('Annulla'), valore: null },
-      { testo: tr('Elimina la scena'), valore: 'via', pericolo: true },
-      { testo: tr('Salva il nome'), valore: 'nome', primario: true },
-    ],
-  });
-  if (!r) return;
-  const fresco = await store.get(record.id);
-  if (!fresco || !fresco.scene || !fresco.scene[indice]) return;
-  if (r.azione === 'via') {
-    fresco.scene.splice(indice, 1);
-    if (ora && ora.scena === indice) ora.scena = null;
-  } else {
-    const nome = r.testo.replace(/\s+/g, ' ').trim();
-    if (!nome) return;
-    fresco.scene[indice].nome = nome;
-  }
-  await store.put(fresco);
-  await ricarica(); disegnaTutto();
-  disegnaLive();
 }
 
 /** Uno switch della pedaliera nel modo Scene: il suo posto nella metà dice quale scena. */
@@ -163,58 +187,118 @@ function scenaDaSwitch(s) {
   if (sceneDi(recordDiOra())[n - 1]) suonaScena(n - 1);
 }
 
-/* ---------------------------------------------------------------- «Salva come scena» */
+/* ---------------------------------------------------------------- il riquadro della scena */
 
-/** Le differenze fra quello che suona e il preset salvato; null se cambia un modello. */
-function differenzeScena(record, effetti) {
-  const cambi = {}, accesi = {};
-  for (let b = 0; b < record.effects.length; b++) {
-    const prima = record.effects[b], adesso = effetti[b];
-    if (!adesso || adesso.name !== prima.name) return null;
-    if (adesso.enabled !== prima.enabled) accesi[adesso.name] = adesso.enabled;
-    for (const par of adesso.params) {
-      const vecchio = prima.params.find(x => x.index === par.index);
-      if (vecchio && Math.abs(vecchio.value - par.value) > 0.001) cambi[adesso.name + '#' + par.index] = par.value;
-    }
+// Le manopole mosse nel riquadro partono subito, una alla volta con la solita pausa: si tiene
+// solo l'ultimo valore per manopola, e l'ultimo parte sempre.
+const codaScena = new Map();
+let timerCodaScena = null;
+function mandaInScena(chiave, comando) {
+  if (!ora || ora.offline || !spark.connected) return;
+  codaScena.set(chiave, comando);
+  if (!timerCodaScena) timerCodaScena = setTimeout(svuotaCodaScena, SCENA_PAUSA);
+}
+async function svuotaCodaScena() {
+  const comandi = [...codaScena.values()];
+  codaScena.clear();
+  for (const c of comandi) {
+    try { await spark.send(c); } catch (err) { stato(tr('errore: {0}', err.message), 'errore'); }
+    await new Promise(r => setTimeout(r, SCENA_PAUSA));
   }
-  return { cambi, accesi };
+  timerCodaScena = codaScena.size ? setTimeout(svuotaCodaScena, SCENA_PAUSA) : null;
 }
 
-async function salvaComeScena() {
-  const record = ora && ora.record ? await store.get(ora.record.id) : null;
-  if (!record) {
-    await avvisa(tr('scena'), tr('Prima salva il preset in libreria: una scena è una variante di un preset salvato.'));
-    return false;
+async function apriRiquadroScena(record, indice) {
+  record = await store.get(record.id);
+  if (!record) return;
+  const scene = sceneDi(record);
+  const nuova = !scene[indice];
+  if (nuova) indice = scene.length;          // le scene stanno in fila: una nuova va dopo le altre
+  // Si lavora su una copia della catena; mentre la si regola, la scena suona.
+  const lavoro = presetConScena(record, scene[indice] || null).effects;
+  if (!nuova) await suonaScena(indice);
+  else { ora.effetti = copiaEffetti(lavoro); ora.scena = null; }
+  let scelto = lavoro.findIndex((e, b) => b === 2) ;   // si parte dal drive
+  if (scelto < 0) scelto = 0;
+
+  const corpo = document.createElement('div');
+  corpo.className = 'riquadro-scena';
+  const disegna = () => {
+    corpo.textContent = '';
+    corpo.appendChild(catenaScena(lavoro, b => { scelto = b; disegna(); }));
+    corpo.querySelectorAll('.lv-anello')[scelto].classList.add('scelto');
+    const e = lavoro[scelto];
+    const testa = document.createElement('div');
+    testa.className = 'rs-testa';
+    testa.innerHTML = `<b>${tr(Spark.CATENA[scelto])} · ${testoConNome(nomeBlocco(e))}</b>`;
+    const leva = document.createElement('button');
+    leva.type = 'button';
+    leva.className = 'rs-acceso' + (e.enabled ? ' sì' : '');
+    leva.textContent = e.enabled ? tr('acceso') : tr('spento');
+    leva.addEventListener('click', () => {
+      e.enabled = !e.enabled;
+      mandaInScena('acceso#' + e.name, Spark.commands.effectOnOff(e.name, e.enabled));
+      disegna();
+    });
+    testa.appendChild(leva);
+    corpo.appendChild(testa);
+    const manopole = document.createElement('div');
+    manopole.className = 'rs-manopole';
+    // Solo le manopole: niente modello, niente tipo di riverbero (una scena non cambia modello).
+    for (const p of manopoleVere(e)) {
+      if (SparkEffetti.posizioni(e.name, p.index)) continue;
+      const riga = document.createElement('label');
+      riga.className = 'rs-manopola';
+      const interr = SparkEffetti.interruttore(e.name, p.index);
+      riga.innerHTML = `<span>${testoConNome(nomeManopola(e, p))}</span>`;
+      const cursore = document.createElement('input');
+      cursore.type = 'range';
+      cursore.min = 0; cursore.max = interr ? 1 : 100; cursore.step = 1;
+      cursore.value = interr ? (p.value >= 0.5 ? 1 : 0) : Math.round(p.value * 100);
+      const val = document.createElement('output');
+      const scrivi = () => { val.textContent = interr ? (p.value >= 0.5 ? 'ON' : 'OFF') : (p.value * 10).toFixed(1); };
+      scrivi();
+      cursore.addEventListener('input', () => {
+        p.value = interr ? +cursore.value : cursore.value / 100;
+        scrivi();
+        mandaInScena(e.name + '#' + p.index, Spark.commands.changeParam(e.name, p.index, p.value));
+      });
+      riga.append(cursore, val);
+      manopole.appendChild(riga);
+    }
+    corpo.appendChild(manopole);
+  };
+  disegna();
+
+  const azioni = [{ testo: tr('Annulla'), valore: null }];
+  if (!nuova) azioni.push({ testo: tr('Elimina la scena'), valore: 'via', pericolo: true });
+  azioni.push({ testo: tr('Salva la scena'), valore: 'salva', primario: true });
+  const promessa = finestra({
+    titolo: nuova ? tr('nuova scena') : tr('Scena {0}', indice + 1),
+    campo: { valore: nuova ? tr('Scena {0}', indice + 1) : scene[indice].nome, invito: tr('nome della scena') },
+    corpo,
+    azioni,
+  });
+  const box = corpo.closest('.finestra');
+  if (box) box.style.width = 'min(860px, calc(100vw - 32px))';
+  const r = await promessa;
+
+  const fresco = await store.get(record.id);
+  if (r && fresco) {
+    fresco.scene = sceneDi(fresco);
+    if (r.azione === 'via') {
+      fresco.scene.splice(indice, 1);
+      if (ora.scena === indice) ora.scena = null;
+    } else {
+      const nome = (r.testo || '').replace(/\s+/g, ' ').trim() || tr('Scena {0}', indice + 1);
+      fresco.scene[indice] = { nome, ...differenzeScena(fresco, lavoro) };
+    }
+    await store.put(fresco);
+    await ricarica();
+    if (ora && ora.record && ora.record.id === fresco.id) ora.record = fresco;
   }
-  const diff = differenzeScena(record, ora.effetti);
-  if (!diff) {
-    await avvisa(tr('scena'), tr('Hai cambiato un modello: una scena cambia solo manopole e acceso/spento. ' +
-      'Per un modello diverso serve un preset nuovo.'));
-    return false;
-  }
-  const quanti = Object.keys(diff.cambi).length + Object.keys(diff.accesi).length;
-  if (!quanti) {
-    await avvisa(tr('scena'), tr('È uguale al preset salvato: non c\'è niente da mettere in una scena.'));
-    return false;
-  }
-  if (sceneDi(record).length >= SCENE_MAX) {
-    await avvisa(tr('scena'), tr('Ci sono già {0} scene: eliminane una dalla Live, modo Scene.', SCENE_MAX));
-    return false;
-  }
-  const nome = await chiediTesto(tr('nuova scena'),
-    tr('{0} cambi rispetto a <strong>{1}</strong>.', quanti, testoConNome(record.name)),
-    tr('Scena {0}', sceneDi(record).length + 1));
-  if (nome === null || !nome.trim()) return false;
-  record.scene = [...sceneDi(record), { nome: nome.replace(/\s+/g, ' ').trim(), ...diff }];
-  await store.put(record);
-  await ricarica(); disegnaTutto();
-  // Il lavoro è finito nella scena, non nel preset: «modificato» si spegne e la scena resta accesa.
-  ora.record = record;
-  ora.scena = record.scene.length - 1;
-  ora.toccato = false;
-  disegnaTutto();
-  stato(tr('scena «{0}» salvata in «{1}»', nome.trim(), record.name), 'ok');
-  return true;
+  // Si torna a quello che deve suonare: la scena salvata, o quella di prima se si annulla o si elimina.
+  await suonaScena(r && r.azione === 'salva' ? indice : (ora.scena === undefined ? null : ora.scena));
 }
 
 /* ---- SOLO BOZZA (pc.html?bozza#finto): due preset finti con le scene già fatte. ---- */
@@ -231,7 +315,7 @@ if (/bozza/.test(location.search)) {
       const gain = (e, d) => ({ [e.name + '#0']: Math.max(0, Math.min(1, e.params[0].value + d)) });
       record.scene = [
         { nome: 'Ritmica', cambi: gain(drive, -0.2), accesi: { [delay.name]: false } },
-        { nome: 'Solo', cambi: { ...gain(drive, 0.3), ...gain(delay, 0.15) }, accesi: { [delay.name]: true } },
+        { nome: 'Solo', cambi: { ...gain(drive, 0.3), ...gain(delay, 0.15) }, accesi: { [delay.name]: true, [drive.name]: true } },
         { nome: 'Pulito', cambi: gain(ampli, -0.4), accesi: { [drive.name]: false } },
       ];
       await store.put(record);
