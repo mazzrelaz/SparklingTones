@@ -109,22 +109,25 @@ async function suonaScena(indice) {
 
 /* ---------------------------------------------------------------- la schermata */
 
-// Sotto i pulsantoni la catena va a serpente, due per riga: gate comp / amp ← drive / mod delay /
-// ← reverb. Così le immagini sono grandi e la linea che le unisce si legge come un cavo.
-const SERPENTE = [[1, 1], [1, 2], [2, 2], [2, 1], [3, 1], [3, 2], [4, 2]];   // [riga, colonna] per blocco
+// Sotto i pulsantoni la catena va a U (chiesto dall'utente): il noise gate in alto al centro, poi
+// compressore, drive e ampli in colonna a sinistra, e risalendo a destra modulazione, delay e riverbero
+// (dall'alto: 7, 6, 5). [riga, colonna] per blocco.
+const DISPOSIZIONE_U = [[1, '1 / span 2'], [2, 1], [3, 1], [4, 1], [4, 2], [3, 2], [2, 2]];
 
 /**
  * La catena di una scena, con gli spenti al buio. `quando` la rende cliccabile (il riquadro, in fila);
- * senza, è quella sotto il pulsantone, a serpente.
+ * senza, è quella sotto il pulsantone, a U.
  */
 function catenaScena(effetti, quando) {
   const div = document.createElement('div');
-  div.className = 'lv-catena ' + (quando ? 'fila' : 'serpente');
+  div.className = 'lv-catena ' + (quando ? 'fila' : 'a-u');
   effetti.forEach((e, b) => {
     const img = immagineBlocco(e);
     const el = document.createElement(quando ? 'button' : 'span');
     if (quando) el.type = 'button';
-    else if (SERPENTE[b]) { el.style.gridRow = SERPENTE[b][0]; el.style.gridColumn = SERPENTE[b][1]; }
+    else if (DISPOSIZIONE_U[b]) { el.style.gridRow = DISPOSIZIONE_U[b][0]; el.style.gridColumn = DISPOSIZIONE_U[b][1];
+      // le due colonne verso i lati: la linea che risale a destra resta lontana dal gate
+      if (b > 0) el.style.justifySelf = b < 4 ? 'start' : 'end'; }
     el.className = 'lv-anello' + (e.enabled ? '' : ' spento');
     el.title = `${tr(Spark.CATENA[b])} · ${nomeBlocco(e)} · ${e.enabled ? tr('acceso') : tr('spento')}`;
     el.innerHTML = img ? `<img src="${img}" alt="">` : `<span class="lv-anello-nome">${testoConNome(nomeBlocco(e))}</span>`;
@@ -137,39 +140,47 @@ function catenaScena(effetti, quando) {
 }
 
 /**
- * La linea che attraversa la catena, nel suo ordine, con una freccia a metà di ogni tratto: dice da
- * dove entra il suono e dove esce. Sta dietro le immagini; le frecce sopra, negli spazi fra l'una e l'altra.
+ * La linea della catena, come quella della catena in home: sottile, grigia, dietro le immagini, con
+ * un pallino IN dove entra il suono e uno OUT dove esce. Niente frecce. Nella U il percorso è ad
+ * angoli retti: IN a sinistra → gate → giù e a sinistra → 2, 3, 4 → a destra → 5, 6, 7 → su fino a OUT, in alto.
  */
 function tracciaFilo(catena) {
   if (!catena.isConnected) return;
   catena.querySelectorAll('.lv-filo').forEach(s => s.remove());
   const base = catena.getBoundingClientRect();
-  const centri = [...catena.querySelectorAll('.lv-anello')].map(a => {
+  const c = [...catena.querySelectorAll('.lv-anello')].map(a => {
     const r = a.getBoundingClientRect();
-    return [r.left - base.left + r.width / 2, r.top - base.top + r.height / 2];
+    return { x: r.left - base.left + r.width / 2, y: r.top - base.top + r.height / 2, alto: r.top - base.top, basso: r.bottom - base.top };
   });
-  if (centri.length < 2) return;
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = (cls) => {
-    const s = document.createElementNS(ns, 'svg');
-    s.setAttribute('class', 'lv-filo ' + cls);
-    s.setAttribute('width', base.width);
-    s.setAttribute('height', base.height);
-    catena.prepend(s);
-    return s;
-  };
-  const linea = svg('dietro'), frecce = svg('sopra');
-  const p = document.createElementNS(ns, 'polyline');
-  p.setAttribute('points', centri.map(c => c.join(',')).join(' '));
-  linea.appendChild(p);
-  for (let i = 0; i < centri.length - 1; i++) {
-    const [x1, y1] = centri[i], [x2, y2] = centri[i + 1];
-    const angolo = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-    const f = document.createElementNS(ns, 'path');
-    f.setAttribute('d', 'M -5 -5 L 5 0 L -5 5 Z');
-    f.setAttribute('transform', `translate(${(x1 + x2) / 2} ${(y1 + y2) / 2}) rotate(${angolo})`);
-    frecce.appendChild(f);
+  if (c.length < 7) return;
+  const margine = 10;
+  let punti;
+  if (catena.classList.contains('a-u')) {
+    const meta = (c[0].basso + c[1].alto) / 2;                // fra il gate e la prima riga sotto
+    punti = [[margine, c[0].y], [c[0].x, c[0].y], [c[0].x, meta], [c[1].x, meta],
+      [c[1].x, c[3].y], [c[4].x, c[3].y], [c[4].x, margine]];   // OUT in alto, sopra la colonna destra
+  } else {
+    punti = [[margine, c[0].y], ...c.map(p => [p.x, p.y]), [base.width - margine, c[0].y]];
   }
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('class', 'lv-filo');
+  svg.setAttribute('width', base.width);
+  svg.setAttribute('height', base.height);
+  const linea = document.createElementNS(ns, 'polyline');
+  linea.setAttribute('points', punti.map(p => p.join(',')).join(' '));
+  svg.appendChild(linea);
+  const fine = punti[punti.length - 1], inAlto = fine[1] === margine;
+  for (const [[x, y], testo, aLato] of [[punti[0], 'IN', false], [fine, 'OUT', inAlto]]) {
+    const tondo = document.createElementNS(ns, 'circle');
+    tondo.setAttribute('cx', x); tondo.setAttribute('cy', y); tondo.setAttribute('r', 6);
+    const scritta = document.createElementNS(ns, 'text');
+    scritta.setAttribute('x', aLato ? x + 12 : x); scritta.setAttribute('y', aLato ? y + 4 : y + 20);
+    if (aLato) scritta.setAttribute('text-anchor', 'start');
+    scritta.textContent = testo;
+    svg.append(tondo, scritta);
+  }
+  catena.prepend(svg);
 }
 addEventListener('resize', () => document.querySelectorAll('.lv-catena').forEach(tracciaFilo));
 

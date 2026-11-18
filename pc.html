@@ -516,19 +516,20 @@
      sette immagini su due righe, gli accesi a colori e gli spenti al buio, solo la sagoma. */
   .lv-colonna { display:flex; flex-direction:column; gap:12px; min-width:0; }
   .lv-catena { position:relative; padding:12px 10px; background:var(--incavo); border:1px solid var(--line); border-radius:12px; }
-  .lv-catena.serpente { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px 10px; justify-items:center; }
+  .lv-catena.a-u { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px 10px; justify-items:center;
+    padding:22px 22px 12px; }
   /* grandi, ma la catena intera deve stare nello schermo: l'altezza decide */
-  .lv-catena.serpente .lv-anello { width:min(100%, calc((100vh - 530px) / 4)); max-width:120px; }
-  .lv-catena.fila { display:flex; gap:12px; }
+  /* le due colonne ai lati, il gate al centro: la linea che risale a destra non lo sfiora */
+  .lv-catena.a-u .lv-anello { width:min(100%, calc((100vh - 530px) / 4)); max-width:120px; }
+  .lv-catena.fila { display:flex; gap:12px; padding:12px 26px; }
   .lv-catena.vuota { min-height:300px; border-style:dashed; background:none; }
   .lv-anello { position:relative; z-index:1; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
     background:none; border:1px solid transparent; border-radius:8px; padding:0; min-width:0; }
-  /* la linea della catena: dietro le immagini, con le frecce sopra, negli spazi */
-  .lv-filo { position:absolute; left:0; top:0; pointer-events:none; overflow:visible; }
-  .lv-filo.dietro { z-index:0; }
-  .lv-filo.sopra { z-index:2; }
-  .lv-filo polyline { fill:none; stroke:var(--accent-chiaro); stroke-width:2; stroke-opacity:0.45; stroke-linejoin:round; }
-  .lv-filo path { fill:var(--accent-chiaro); }
+  /* la linea della catena, come quella in home: grigia, sottile, dietro le immagini; IN e OUT ai capi */
+  .lv-filo { position:absolute; left:0; top:0; z-index:0; pointer-events:none; overflow:visible; }
+  .lv-filo polyline { fill:none; stroke:var(--traccia); stroke-width:2; stroke-linejoin:round; }
+  .lv-filo circle { fill:var(--incavo); stroke:var(--traccia); stroke-width:2; }
+  .lv-filo text { fill:var(--faint); font:600 0.58rem var(--strumento); letter-spacing:0.05em; text-anchor:middle; }
   .lv-anello img { width:100%; height:100%; object-fit:contain; }
   .lv-anello.spento img { filter:brightness(0.12) saturate(0); opacity:0.75; }
   .lv-anello-nome { font:600 0.6rem var(--strumento); color:var(--dim); text-align:center; overflow:hidden; }
