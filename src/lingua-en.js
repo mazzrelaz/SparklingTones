@@ -2085,6 +2085,8 @@ window.LINGUA_EN = {
     "My guitar",
   "non indicata":
     "not set",
+  "Nessuna":
+    "None",
   "Configurazione pickup ideale":
     "Ideal pickup setting",
   "«{0}» è sul palco":

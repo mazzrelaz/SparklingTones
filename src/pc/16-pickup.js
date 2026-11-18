@@ -60,7 +60,38 @@ function adattaLayout(pk, layout) {
 
 // «La mia chitarra» di «Genera con l'IA» (18 novembre, chiesto dall'utente): si ricorda in questo
 // browser. '' = non detta: l'IA sceglie la chitarra dell'artista.
-const NOMI_CHITARRA = { SSS: 'SSS (Strat)', HH: 'HH (Les Paul)', SS: 'SS (Tele)', PP: 'PP (P-90)' };
+// Sotto la sigla, la chitarra tipica (nomi di modelli: non si traducono).
+const TIPO_CHITARRA = { SSS: 'Strat', HSS: 'Fat Strat', HSH: 'Superstrat', HH: 'Les Paul', SS: 'Tele',
+                        PP: 'P-90', HS: 'H + S', H: 'Humbucker', S: 'Single coil', P: 'P-90' };
+
+/** Il disegnino dei pickup per i pulsanti, dal manico al ponte (il layout si scrive dal ponte). */
+function miniChitarra(layout) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 60 28');
+  svg.setAttribute('aria-hidden', 'true');
+  const pezzi = layout ? layout.split('').reverse() : [];
+  const largo = { S: 6, P: 10, H: 13 };
+  const tot = pezzi.reduce((s, t) => s + largo[t], 0) + Math.max(0, pezzi.length - 1) * 7;
+  let x = (60 - tot) / 2;
+  for (const t of pezzi) {
+    const r = document.createElementNS(NS, 'rect');
+    Object.entries({ x, y: 3, width: largo[t], height: 22, rx: t === 'S' ? 3 : 2 }).forEach(([k, v]) => r.setAttribute(k, v));
+    svg.appendChild(r);
+    if (t === 'H') {
+      const l = document.createElementNS(NS, 'line');
+      Object.entries({ x1: x + largo[t] / 2, y1: 3, x2: x + largo[t] / 2, y2: 25 }).forEach(([k, v]) => l.setAttribute(k, v));
+      svg.appendChild(l);
+    }
+    x += largo[t] + 7;
+  }
+  if (!pezzi.length) {
+    const l = document.createElementNS(NS, 'path');
+    l.setAttribute('d', 'M22 14h16');
+    svg.appendChild(l);
+  }
+  return svg;
+}
 
 function miaChitarra() {
   try { const v = localStorage.getItem('chitarra-pc') || ''; return LAYOUT_PICKUP.includes(v) ? v : ''; } catch (e) { return ''; }
@@ -69,23 +100,28 @@ function scriviMiaChitarra(v) {
   try { localStorage.setItem('chitarra-pc', v); } catch (e) { /* resta per questa volta */ }
 }
 
-/** La fila di scelte «La mia chitarra»: Nessuna, SSS (Strat), HSS… */
+/** I pulsanti «La mia chitarra»: per ognuno il disegnino dei pickup, la sigla e la chitarra tipica. */
 function sceltaChitarra() {
-  const fila = document.createElement('div');
-  fila.className = 'pk-scelte';
-  const ridisegna = () => {
-    fila.textContent = '';
-    for (const v of [''].concat(LAYOUT_PICKUP)) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = v ? (NOMI_CHITARRA[v] || v) : tr('non indicata');
-      b.classList.toggle('sì', v === miaChitarra());
-      b.addEventListener('click', () => { scriviMiaChitarra(v); ridisegna(); });
-      fila.appendChild(b);
-    }
-  };
-  ridisegna();
-  return fila;
+  const griglia = document.createElement('div');
+  griglia.className = 'scelta-chitarra';
+  for (const v of [''].concat(LAYOUT_PICKUP)) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.v = v;
+    b.appendChild(miniChitarra(v));
+    const sigla = document.createElement('b');
+    sigla.textContent = v || tr('Nessuna');
+    const tipo = document.createElement('span');
+    tipo.textContent = v ? TIPO_CHITARRA[v] : tr('non indicata');
+    b.append(sigla, tipo);
+    b.addEventListener('click', () => {
+      scriviMiaChitarra(v);
+      griglia.querySelectorAll('button').forEach(x => x.classList.toggle('sì', x.dataset.v === v));
+    });
+    b.classList.toggle('sì', v === miaChitarra());
+    griglia.appendChild(b);
+  }
+  return griglia;
 }
 
 /** Un pk letto dalla libreria (o da un backup), controllato; null se non va. */

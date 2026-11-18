@@ -321,7 +321,21 @@
   #pk-apri svg.ico { width:18px; height:18px; }
   .ia-risultato .ia-motivo { margin:0 0 4px; line-height:1.5; color:var(--dim); }
   .ia-risultato h3 { margin:14px 0 6px; }
-  .finestra [data-f="chitarra"] .pk-scelte { margin-bottom:4px; }
+  /* «La mia chitarra»: un pulsante per configurazione, col disegnino dei pickup */
+  .scelta-chitarra { display:grid; grid-template-columns:repeat(auto-fill, minmax(84px, 1fr)); gap:6px; margin-bottom:12px; }
+  .scelta-chitarra button { display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px 7px;
+    background:var(--incavo); border:1px solid var(--line); border-radius:10px; text-transform:none; color:var(--dim); }
+  .scelta-chitarra button:hover { border-color:var(--accent-chiaro); color:var(--text); }
+  .scelta-chitarra button.sì { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 18%, var(--incavo)); color:var(--text);
+    box-shadow:0 0 0 1px var(--accent) inset; }
+  .scelta-chitarra svg { width:48px; height:22px; margin-bottom:3px; }
+  .scelta-chitarra svg rect { fill:var(--rialzo); stroke:var(--traccia); stroke-width:1; }
+  .scelta-chitarra svg line, .scelta-chitarra svg path { stroke:var(--traccia); stroke-width:1; }
+  .scelta-chitarra svg path { stroke:var(--faint); stroke-width:1.5; stroke-linecap:round; }
+  .scelta-chitarra button.sì svg rect { fill:var(--accent); stroke:var(--accent-chiaro); }
+  .scelta-chitarra button.sì svg line { stroke:var(--accent-chiaro); }
+  .scelta-chitarra b { font:700 0.82rem var(--strumento); letter-spacing:0.04em; }
+  .scelta-chitarra span { font-size:0.68rem; color:var(--faint); white-space:nowrap; }
   .pk-vista .pk-sotto { margin:0 0 8px; font-size:0.85rem; color:var(--dim); }
   .pk-vista .pk-nota { margin:10px 0 0; font-size:0.9rem; line-height:1.45; }
   .pk-finestra { display:flex; flex-direction:column; gap:10px; margin-top:6px; }
