@@ -79,7 +79,7 @@
 
 <h1>2 — Una manopola, un acceso/spento (ascolto)</h1>
 <div class="sub">
-  Come sopra, ma cambia una sola manopola dell'ampli (di 0,15, si sente) o accende/spegne la
+  Come sopra, ma cambia una sola manopola dell'ampli (di 0,3) o accende/spegne la
   modulazione. Premi due volte per tornare com'era.
 </div>
 <div class="row">
@@ -126,7 +126,7 @@ const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const GAP_TRASPORTO = 30;
 const PASSO = 0.05;              // spostamento delle manopole nelle raffiche
-const PASSO_ASCOLTO = 0.15;      // nella prova 2, perché si senta
+const PASSO_ASCOLTO = 0.3;       // nella prova 2, perché si senta (0,15 non si sentiva, 18 novembre)
 const BLOCCHI = [2, 3, 4, 5];    // drive, ampli, modulazione, delay: gate, comp e riverbero no
 const NOMI_VIETATI = /mode|modalit|select|bpm|nota|note|tipo|type|master|volume/i;
 const RAFFICHE = [[5, 90], [10, 90], [20, 90], [5, 50], [10, 50], [20, 50], [5, 0], [10, 0], [20, 0]];
@@ -268,7 +268,17 @@ $('btnManopola').addEventListener('click', async () => {
   await spark.send(Spark.commands.changeParam(c.nome, c.indice, v));
   const ms = Math.round(performance.now() - t0);
   spostato.manopola = su;
-  registro.prove.push({ prova: 2, tipo: 'una manopola', parametro: c.etichetta, valore: v, ms });
+  // Rilettura: distingue «non è arrivato» da «è arrivato ma non si sente».
+  await sleep(300);
+  const { p } = await leggiStato();
+  const letto = p && (p.effects[c.blocco].params.find(x => x.index === c.indice) || {}).value;
+  const arrivato = letto !== undefined && letto !== null && Math.abs(letto - v) < 0.002;
+  scrivi(!p ? 'rilettura senza risposta'
+            : `riletto dall'ampli: ${p.effects[c.blocco].name} · ${c.etichetta.split(' · ')[1]} = ${letto === undefined ? '?' : letto.toFixed(3)}` +
+              (arrivato ? ' — arrivato' : ' — NON arrivato'), arrivato ? 'bene' : 'fuori');
+  registro.prove.push({ prova: 2, tipo: 'una manopola', parametro: c.etichetta, prima, valore: v, ms,
+                        letto: letto === undefined ? null : letto, arrivato,
+                        acceso: p ? p.effects[c.blocco].enabled : null });
   riassumi();
 });
 
