@@ -101,16 +101,15 @@ function disegnaScene(corpo) {
   }
   const attiva = ora.scena === undefined ? null : ora.scena;
   const griglia = document.createElement('div');
-  griglia.className = 'lv-griglia stomp lv-scene';
+  // Gli stessi pulsantoni del modo Preset (chiesto dall'utente): griglia da quattro, LED, nome, switch.
+  griglia.className = 'lv-griglia lv-scene';
   [null, ...scene.map((_, i) => i)].forEach(indice => {
     const s = indice === null ? null : scene[indice];
-    const cambi = s ? Object.keys(s.cambi).length + Object.keys(s.accesi).length : 0;
     const el = document.createElement('button');
     el.type = 'button';
-    el.className = `lv-posto scena${attiva === indice ? ' sì' : ''}`;
+    el.className = `lv-posto meta-a scena${attiva === indice ? ' sì' : ''}`;
     el.innerHTML = `<span class="lv-num">${indice === null ? tr('Base') : tr('Scena {0}', indice + 1)}</span>
-      <span class="lv-led"></span><span class="lv-nome">${s ? testoConNome(s.nome) : testoConNome(record.name)}</span>
-      <span class="lv-stato">${s ? tr('{0} cambi', cambi) : tr('il preset salvato')}</span><span class="lv-sw"></span>`;
+      <span class="lv-led"></span><span class="lv-nome">${s ? testoConNome(s.nome) : testoConNome(record.name)}</span><span class="lv-sw"></span>`;
     el.addEventListener('click', () => suonaScena(indice));
     if (s) {
       const matita = document.createElement('span');
