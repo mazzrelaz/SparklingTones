@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark — sonda scene</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:#14161a; color:#e8e8ea;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; max-width:760px; }
+  h1 { font-size:1.15rem; margin:18px 0 2px; }
+  h1:first-child { margin-top:0; }
+  .sub { color:#8a8f98; font-size:0.85rem; margin-bottom:10px; line-height:1.45; }
+  .avviso { background:#3a2a18; color:#ffd0a0; border-radius:10px; padding:10px 12px;
+            font-size:0.85rem; line-height:1.45; margin-bottom:12px; }
+  .status { display:inline-block; padding:4px 10px; border-radius:12px;
+            font-size:0.8rem; font-weight:600; }
+  .status.disconnected { background:#3a2020; color:#ff8080; }
+  .status.connected    { background:#1f3a24; color:#7fe08a; }
+  .status.connecting   { background:#3a3520; color:#f0d060; }
+  button { background:#ff6a3d; color:#fff; border:none; padding:11px 14px;
+           border-radius:9px; font-size:0.9rem; font-weight:600; cursor:pointer;
+           margin:0 6px 8px 0; }
+  button:disabled { background:#3a3d42; color:#7a7d82; cursor:not-allowed; }
+  button.secondary { background:#2a2d33; }
+  button.si { background:#2f7d3a; }
+  button.no { background:#8a3030; }
+  .row { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:6px; }
+  .etichetta { color:#8a8f98; font-size:0.8rem; min-width:70px; }
+  #catena, #riassunto { background:#181a1f; border:1px solid #24272c; border-radius:10px;
+               padding:10px 12px; margin:8px 0; font-size:0.85rem; line-height:1.55;
+               white-space:pre-wrap; font-family:Consolas,monospace; }
+  #catena:empty, #riassunto:empty { display:none; }
+  .fuori { color:#ffb070; }
+  .bene { color:#7fe08a; }
+  #log { background:#0e0f12; border:1px solid #24272c; border-radius:10px; padding:10px;
+         max-height:40vh; overflow-y:auto; margin-top:12px;
+         font-family:'SF Mono',Consolas,monospace; font-size:0.72rem; line-height:1.5;
+         color:#8a8f98; word-break:break-all; }
+</style>
+</head>
+<body>
+
+<h1>Sonda scene</h1>
+<div class="sub">
+  Misura se si può cambiare «scena» mandando solo le manopole e gli acceso/spento che cambiano, invece
+  del preset intero. Non scrive mai negli slot dell'ampli. Prima chiudi l'app ufficiale Spark e
+  SparklingTones, sennò l'ampli non si lascia trovare.
+</div>
+<div class="avviso">
+  Uso a tuo rischio. Le raffiche servono proprio a vedere quando l'ampli si pianta: se succede, stacca la
+  corrente e riaccendi. Il volume dell'ampli tienilo basso. Le manopole si spostano di poco (±0,05), il
+  volume del finale e il riverbero non si toccano.
+</div>
+
+<div class="row">
+  <button id="btnConnetti">Connetti</button>
+  <button id="btnStacca" class="secondary" disabled>Disconnetti</button>
+  <span class="status disconnected" id="stato">Disconnesso</span>
+</div>
+<div class="sub">
+  Alla connessione legge il suono che sta suonando: è il <b>suono di partenza</b>. Sceglilo prima, con
+  l'ampli: meglio uno con <b>drive, modulazione e delay accesi</b> e un delay lungo, così si sentono le code.
+</div>
+<div id="catena"></div>
+<div class="row">
+  <button id="btnRipristina" class="secondary" disabled>Rimetti il suono di partenza</button>
+</div>
+
+<h1>1 — Preset intero (ascolto)</h1>
+<div class="sub">
+  Suona una nota e lasciala andare nel delay; mentre suona, premi. Rimanda lo stesso suono come preset
+  intero, come fa la Live oggi. Poi dimmi cosa hai sentito.
+</div>
+<div class="row">
+  <button id="btnIntero" disabled>Manda il preset intero</button>
+</div>
+<div class="row" data-ascolto="1"></div>
+
+<h1>2 — Una manopola, un acceso/spento (ascolto)</h1>
+<div class="sub">
+  Come sopra, ma cambia una sola manopola dell'ampli (di 0,15, si sente) o accende/spegne la
+  modulazione. Premi due volte per tornare com'era.
+</div>
+<div class="row">
+  <button id="btnManopola" disabled>Cambia una manopola</button>
+  <button id="btnOnOff" disabled>Modulazione accesa/spenta</button>
+</div>
+<div class="row" data-ascolto="2"></div>
+
+<h1>3 — Raffica di manopole</h1>
+<div class="sub">
+  Manda N manopole di fila con la pausa scelta, poi rilegge il suono dall'ampli e conta quante sono
+  arrivate. Ogni pressione va e torna: la prima sposta, la seconda rimette. <b>Dall'alto in basso,
+  una riga alla volta</b>: se l'ampli si pianta, fermati lì.
+</div>
+<div id="raffiche"></div>
+
+<h1>4 — Raffica mista</h1>
+<div class="sub">
+  Manopole più l'acceso/spento di modulazione e delay, come una scena vera.
+</div>
+<div id="miste"></div>
+
+<div class="row" style="margin-top:14px">
+  <button id="btnScarica" class="secondary" disabled>Scarica il registro</button>
+</div>
+<div id="riassunto"></div>
+<div id="log"></div>
+
+<script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-transport.js"></script>
+<script src="../src/spark-effetti.js"></script>
+<script>
+'use strict';
+
+/* Sonda delle scene (18 novembre 2026), studio in docs/scene.md.
+   Le domande: il preset intero lascia un buco nel suono? Una manopola o un
+   acceso/spento cambiano pulito? Quante manopole di fila regge l'ampli, e con
+   quale pausa? Ogni prova si verifica rileggendo il suono attivo (0x0201 su
+   [0x01, 0x00]): l'ack dice solo che il comando è arrivato.
+   Le pause: `send` del trasporto aspetta già SEND_GAP_MS (30 ms) dopo ogni
+   write, quindi la pausa vera è quella scelta più 30. */
+
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const GAP_TRASPORTO = 30;
+const PASSO = 0.05;              // spostamento delle manopole nelle raffiche
+const PASSO_ASCOLTO = 0.15;      // nella prova 2, perché si senta
+const BLOCCHI = [2, 3, 4, 5];    // drive, ampli, modulazione, delay: gate, comp e riverbero no
+const NOMI_VIETATI = /mode|modalit|select|bpm|nota|note|tipo|type|master|volume/i;
+const RAFFICHE = [[5, 90], [10, 90], [20, 90], [5, 50], [10, 50], [20, 50], [5, 0], [10, 0], [20, 0]];
+const MISTE = [[5, 90], [10, 50], [10, 0]];
+
+let registro = nuovoRegistro();
+let base = null;        // il suono di partenza, letto dall'ampli
+let candidati = [];     // [{blocco, nome, indice, etichetta}] le manopole che si possono muovere
+let spostato = {};      // chiave della prova → true se adesso è spostata
+let piantato = false;   // l'ampli non risponde più: niente altre raffiche
+
+function nuovoRegistro() {
+  return { quando: new Date().toISOString(), ampli: null, base: null, prove: [], ascolti: [], righe: [] };
+}
+
+function scrivi(testo, classe) {
+  const riga = `[${new Date().toTimeString().slice(0, 8)}] ${testo}`;
+  registro.righe.push(riga);
+  const div = document.createElement('div');
+  if (classe) div.className = classe;
+  div.textContent = riga;
+  $('log').appendChild(div);
+  $('log').scrollTop = $('log').scrollHeight;
+}
+
+const spark = new SparkTransport({
+  onStatus: (stato, etichetta) => {
+    $('stato').className = 'status ' + stato;
+    $('stato').textContent = stato === 'connected' ? 'Connesso: ' + etichetta : etichetta;
+    $('btnConnetti').disabled = stato === 'connected';
+    $('btnStacca').disabled = stato !== 'connected';
+    if (stato !== 'connected') abilita(false);
+  },
+  onLog: msg => { if (!/^TX 0x0104|^TX 0x0115/.test(msg)) scrivi(msg); },
+  onMessage: () => {},
+});
+
+function abilita(on) {
+  const ok = on && !!base && !piantato;
+  for (const b of document.querySelectorAll('button[data-prova], #btnIntero, #btnManopola, #btnOnOff, #btnRipristina')) {
+    b.disabled = !ok;
+  }
+  if (on && base) $('btnRipristina').disabled = false;
+}
+
+/* ---------------- il suono di partenza ---------------- */
+
+function scegliCandidati(p) {
+  const out = [];
+  for (const b of BLOCCHI) {
+    const e = p.effects[b];
+    if (!e) continue;
+    const voce = SparkEffetti.TABELLA[e.name];
+    // Solo i parametri che hanno un nome di manopola: quelli senza nome non sappiamo cosa siano.
+    if (!voce || !voce.manopole) continue;
+    for (const par of e.params) {
+      const i = par.index;
+      const nome = voce.manopole[i];
+      if (!nome || NOMI_VIETATI.test(nome)) continue;
+      if (SparkEffetti.interruttore(e.name, i) || SparkEffetti.posizioni(e.name, i) || SparkEffetti.extra(e.name, i)) continue;
+      out.push({ blocco: b, nome: e.name, indice: i, etichetta: `${e.name} · ${nome}` });
+    }
+  }
+  return out;
+}
+
+function mostraCatena() {
+  const righe = base.effects.map((e, b) => {
+    const usate = candidati.filter(c => c.blocco === b).length;
+    return `${(Spark.CATENA[b] || b).padEnd(11)} ${e.enabled ? 'acceso' : 'spento'}  ${e.name}` +
+           (usate ? `  (${usate} manopole usabili)` : '');
+  });
+  righe.push('', `Manopole usabili per le raffiche: ${candidati.length}` +
+             (candidati.length < 20 ? ` — le raffiche più lunghe ripassano le stesse` : ''));
+  $('catena').textContent = `Suono di partenza: ${base.name || '?'}\n` + righe.join('\n');
+}
+
+async function leggiStato() {
+  const t0 = performance.now();
+  const p = await spark.readLiveState(3000).catch(() => null);
+  return { p, ms: Math.round(performance.now() - t0) };
+}
+
+$('btnConnetti').addEventListener('click', async () => {
+  registro = nuovoRegistro();
+  piantato = false; spostato = {};
+  $('log').innerHTML = '';
+  try {
+    await spark.connect();
+    await spark.request(Spark.commands.getName(),
+      m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x11).catch(() => null);
+    registro.ampli = spark.state.name || spark.device.name || null;
+    scrivi(`ampli: ${registro.ampli || '?'}`);
+    const { p } = await leggiStato();
+    if (!p) { scrivi('non riesco a leggere il suono attivo: riprova', 'fuori'); return; }
+    base = p;
+    registro.base = JSON.parse(JSON.stringify(p));
+    candidati = scegliCandidati(p);
+    mostraCatena();
+    abilita(true);
+    $('btnScarica').disabled = false;
+  } catch (err) {
+    scrivi('errore: ' + err.message, 'fuori');
+  }
+});
+
+$('btnStacca').addEventListener('click', () => spark.disconnect());
+
+$('btnRipristina').addEventListener('click', async () => {
+  scrivi('— rimetto il suono di partenza (preset intero)', 'fuori');
+  await spark.loadPreset(base);
+  spostato = {};
+  if (piantato) { piantato = false; abilita(true); }
+});
+
+/* ---------------- 1: preset intero ---------------- */
+
+$('btnIntero').addEventListener('click', async () => {
+  scrivi('— prova 1: preset intero', 'fuori');
+  const t0 = performance.now();
+  const esito = await spark.loadPreset(base);
+  const ms = Math.round(performance.now() - t0);
+  registro.prove.push({ prova: 1, tipo: 'preset intero', ms, ack: `${esito.acks}/${esito.total}` });
+  scrivi(`preset intero in ${ms} ms (${esito.acks}/${esito.total} pezzi confermati)`, 'bene');
+  spostato = {};
+  riassumi();
+});
+
+/* ---------------- 2: una manopola, un acceso/spento ---------------- */
+
+$('btnManopola').addEventListener('click', async () => {
+  const c = candidati.find(x => x.blocco === 3) || candidati[0];
+  if (!c) { scrivi('nessuna manopola usabile in questo suono', 'fuori'); return; }
+  const prima = valoreBase(c);
+  const su = !spostato.manopola;
+  const v = su ? spostaDi(prima, PASSO_ASCOLTO) : prima;
+  scrivi(`— prova 2: ${c.etichetta} ${prima.toFixed(3)} → ${v.toFixed(3)}`, 'fuori');
+  const t0 = performance.now();
+  await spark.send(Spark.commands.changeParam(c.nome, c.indice, v));
+  const ms = Math.round(performance.now() - t0);
+  spostato.manopola = su;
+  registro.prove.push({ prova: 2, tipo: 'una manopola', parametro: c.etichetta, valore: v, ms });
+  riassumi();
+});
+
+$('btnOnOff').addEventListener('click', async () => {
+  const e = base.effects[4];
+  const acceso = spostato.onoff ? e.enabled : !e.enabled;
+  scrivi(`— prova 2: ${e.name} ${acceso ? 'acceso' : 'spento'}`, 'fuori');
+  const t0 = performance.now();
+  await spark.send(Spark.commands.effectOnOff(e.name, acceso));
+  const ms = Math.round(performance.now() - t0);
+  spostato.onoff = !spostato.onoff;
+  registro.prove.push({ prova: 2, tipo: 'acceso/spento', effetto: e.name, acceso, ms });
+  riassumi();
+});
+
+/* ---------------- ascolto: cosa ha sentito l'utente ---------------- */
+
+const DOMANDE = {
+  1: [['Nessun buco', 'Buco nel suono'], ['Code restano', 'Code tagliate']],
+  2: [['Cambio pulito', 'Fa un colpo']],
+};
+for (const [prova, coppie] of Object.entries(DOMANDE)) {
+  const riga = document.querySelector(`[data-ascolto="${prova}"]`);
+  for (const [si, no] of coppie) {
+    for (const [testo, classe] of [[si, 'si'], [no, 'no']]) {
+      const b = document.createElement('button');
+      b.className = classe;
+      b.textContent = testo;
+      b.addEventListener('click', () => {
+        registro.ascolti.push({ prova: +prova, esito: testo, t: new Date().toISOString() });
+        scrivi(`ascolto, prova ${prova}: ${testo}`, classe === 'si' ? 'bene' : 'fuori');
+        riassumi();
+      });
+      riga.appendChild(b);
+    }
+  }
+}
+
+/* ---------------- 3 e 4: le raffiche ---------------- */
+
+function valoreBase(c) {
+  return base.effects[c.blocco].params.find(p => p.index === c.indice).value;
+}
+function spostaDi(v, d) { return v + d <= 1 ? v + d : v - d; }
+
+/** Le N manopole della raffica e il valore che devono avere alla fine. */
+function bersagli(n, su) {
+  const out = new Map();
+  for (let i = 0; i < n && candidati.length; i++) {
+    const c = candidati[i % candidati.length];
+    // Ripassando la stessa manopola si alterna, così ogni invio cambia davvero qualcosa;
+    // il valore finale è quello dell'ultimo passaggio.
+    const giro = Math.floor(i / candidati.length);
+    const v = su ? (giro % 2 === 0 ? spostaDi(valoreBase(c), PASSO) : spostaDi(valoreBase(c), PASSO / 2))
+                 : valoreBase(c);
+    out.set(c.blocco + '#' + c.indice, { c, v, ordine: i });
+  }
+  return out;
+}
+
+async function raffica(n, pausa, mista, bottone) {
+  const chiave = `${mista ? 'mista' : 'raffica'}-${n}-${pausa}`;
+  const su = !spostato[chiave];
+  const comandi = [];
+  for (let i = 0; i < n && candidati.length; i++) {
+    const c = candidati[i % candidati.length];
+    const giro = Math.floor(i / candidati.length);
+    const v = su ? (giro % 2 === 0 ? spostaDi(valoreBase(c), PASSO) : spostaDi(valoreBase(c), PASSO / 2))
+                 : valoreBase(c);
+    comandi.push({ tipo: 'manopola', c, v });
+  }
+  const accesi = {};
+  if (mista) {
+    for (const b of [4, 5]) {
+      const e = base.effects[b];
+      accesi[b] = su ? !e.enabled : e.enabled;
+      // Gli acceso/spento in mezzo alla raffica, non in fondo: come una scena vera.
+      comandi.splice(Math.floor(comandi.length * (b === 4 ? 0.3 : 0.7)), 0, { tipo: 'onoff', b, nome: e.name, acceso: accesi[b] });
+    }
+  }
+  const attesi = bersagli(n, su);
+
+  bottone.disabled = true;
+  scrivi(`— ${mista ? 'mista' : 'raffica'}: ${comandi.length} comandi, pausa ${pausa} ms (+${GAP_TRASPORTO}), ` +
+         (su ? 'sposto' : 'rimetto'), 'fuori');
+  const rxPrima = spark.rxTotali;
+  const t0 = performance.now();
+  for (const k of comandi) {
+    const cmd = k.tipo === 'manopola'
+      ? Spark.commands.changeParam(k.c.nome, k.c.indice, k.v)
+      : Spark.commands.effectOnOff(k.nome, k.acceso);
+    await spark.send(cmd);
+    if (pausa) await sleep(pausa);
+  }
+  const msInvio = Math.round(performance.now() - t0);
+  await sleep(400);
+  const { p, ms: msLettura } = await leggiStato();
+
+  const prova = { prova: mista ? 4 : 3, tipo: mista ? 'mista' : 'raffica', n, comandi: comandi.length,
+                  pausa, pausaVera: pausa + GAP_TRASPORTO, verso: su ? 'sposto' : 'rimetto',
+                  msInvio, msLettura, rx: spark.rxTotali - rxPrima };
+  if (!p) {
+    piantato = true;
+    prova.esito = 'nessuna risposta';
+    scrivi(`nessuna risposta alla rilettura dopo ${msInvio} ms di invio. L'ampli suona ancora? ` +
+           `Se è piantato: stacca la corrente, riaccendi, Connetti.`, 'fuori');
+    abilita(false);
+    $('btnRipristina').disabled = false;
+  } else {
+    let arrivate = 0;
+    const mancate = [];
+    for (const { c, v } of attesi.values()) {
+      const letto = (p.effects[c.blocco].params.find(x => x.index === c.indice) || {}).value;
+      if (letto !== undefined && Math.abs(letto - v) < 0.002) arrivate++;
+      else mancate.push(`${c.etichetta}: voluto ${v.toFixed(3)}, letto ${letto === undefined ? '?' : letto.toFixed(3)}`);
+    }
+    let onoffOk = 0;
+    for (const [b, a] of Object.entries(accesi)) {
+      if (p.effects[b].enabled === a) onoffOk++;
+      else mancate.push(`${p.effects[b].name}: voluto ${a ? 'acceso' : 'spento'}, letto ${p.effects[b].enabled ? 'acceso' : 'spento'}`);
+    }
+    prova.arrivate = arrivate; prova.attese = attesi.size;
+    if (mista) { prova.onoffOk = onoffOk; prova.onoffAttesi = Object.keys(accesi).length; }
+    prova.mancate = mancate;
+    prova.esito = mancate.length ? 'incompleta' : 'completa';
+    scrivi(`${comandi.length} comandi in ${msInvio} ms; riletto in ${msLettura} ms: ${arrivate}/${attesi.size} manopole` +
+           (mista ? `, ${onoffOk}/2 acceso/spento` : '') + (mancate.length ? ' — mancano:' : ' — tutte'),
+           mancate.length ? 'fuori' : 'bene');
+    for (const m of mancate) scrivi('   ' + m, 'fuori');
+    spostato[chiave] = su;
+    bottone.textContent = etichettaBottone(n, pausa, mista, su);
+    bottone.disabled = false;
+  }
+  registro.prove.push(prova);
+  riassumi();
+}
+
+function etichettaBottone(n, pausa, mista, ora) {
+  return `${ora ? 'Rimetti' : 'Sposta'} ${n}${mista ? ' + 2' : ''} a ${pausa + GAP_TRASPORTO} ms`;
+}
+
+for (const [contenitore, elenco, mista] of [['raffiche', RAFFICHE, false], ['miste', MISTE, true]]) {
+  let riga = null, ultimaPausa = null;
+  for (const [n, pausa] of elenco) {
+    if (pausa !== ultimaPausa) {
+      riga = document.createElement('div');
+      riga.className = 'row';
+      riga.innerHTML = `<span class="etichetta">pausa ${pausa + GAP_TRASPORTO} ms</span>`;
+      $(contenitore).appendChild(riga);
+      ultimaPausa = pausa;
+    }
+    const b = document.createElement('button');
+    b.dataset.prova = '1';
+    b.disabled = true;
+    b.textContent = etichettaBottone(n, pausa, mista, false);
+    b.addEventListener('click', () => raffica(n, pausa, mista, b));
+    riga.appendChild(b);
+  }
+}
+
+/* ---------------- riassunto e registro ---------------- */
+
+function riassumi() {
+  const r = registro;
+  const righe = [`Ampli: ${r.ampli || '?'}`];
+  for (const p of r.prove) {
+    if (p.prova === 1) righe.push(`1  preset intero: ${p.ms} ms`);
+    else if (p.prova === 2) righe.push(`2  ${p.tipo}: ${p.ms} ms`);
+    else righe.push(`${p.prova}  ${p.comandi} comandi a ${p.pausaVera} ms (${p.verso}): ${p.msInvio} ms → ` +
+                    (p.esito === 'nessuna risposta' ? 'NESSUNA RISPOSTA'
+                      : `${p.arrivate}/${p.attese}` + (p.onoffAttesi ? ` + ${p.onoffOk}/${p.onoffAttesi}` : '')));
+  }
+  for (const a of r.ascolti) righe.push(`ascolto ${a.prova}: ${a.esito}`);
+  $('riassunto').textContent = righe.join('\n');
+}
+
+$('btnScarica').addEventListener('click', () => {
+  riassumi();
+  const blob = new Blob([JSON.stringify(registro, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `scene-sonda-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>

@@ -4,6 +4,12 @@ Idea scelta dall'utente il 18 novembre: due o tre varianti dello stesso suono (r
 che si cambiano in fretta. Le sue parole: «va studiata bene». **Qui non c'è ancora niente di deciso
 né di misurato**: quello che sappiamo, le strade possibili e le misure da fare con l'ampli acceso.
 
+**18 novembre, scelta dell'utente: strada B** (solo manopole e acceso/spento), dopo aver visto come fanno
+Helix (Snapshot), Fractal e Quad Cortex (Scene): modelli fissi, cambio senza buchi, code che passano.
+Prima si misura con `tools/scene-sonda.html` (da Chrome o Edge, anche da `http://localhost:8099`: il
+riquadro del browser non apre la scelta Bluetooth). La sonda muove solo manopole con un nome, mai interruttori,
+posizioni, «Mode», «Master», gate, comp e riverbero; ogni raffica si verifica rileggendo il suono attivo.
+
 ## Cosa sappiamo già (verificato)
 
 - **Preset intero** (`0x0101` su `0x7f` + `0x0138`): ~1 s. Sul pedale l'utente lo ha accettato («non
