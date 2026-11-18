@@ -127,6 +127,7 @@ async function apriLive() {
     <div class="sch-cima">
       <span class="lv-logo"><img class="logo" src="icons/logo.svg" alt="SparklingTones"><img class="logo alone" src="icons/logo.svg" alt=""></span>
       <h2 class="lv-titolo">${tr('Live')}</h2>
+      <div class="lv-sottotitolo" data-f="sotto"></div>
       <span data-f="casa-schede"></span>
       <div class="lv-schede">
         <button data-f="v-live">${tr('Live')}</button><button data-f="v-ped">${tr('Pedaliera')}</button>
@@ -174,7 +175,13 @@ function disegnaLive() {
   if (live.vista === 'live') disegnaPalcoLive(corpo); else disegnaPedaliera(corpo);
   const testa = corpo.querySelector('.lv-testa');
   if (testa) testa.querySelector('.lv-banco').after(schede);   // nel Live: banco, poi le schede
-  schermoLive.querySelector('.lv-titolo').style.visibility = live.vista === 'live' ? '' : 'hidden';   // «Live» solo nel Live
+  // In cima il modo, sotto al centro il preset che suona (chiesto dall'utente, 18 novembre 2026): a destra
+  // andava a capo coi nomi lunghi e spostava tutta la Live.
+  const modo = live.looper ? tr('Looper') : live.scene ? tr('Scene') : live.stomp ? tr('Stomp') : tr('Preset');
+  schermoLive.querySelector('.lv-titolo').textContent = tr('Live – {0}', modo);
+  schermoLive.querySelector('.lv-sottotitolo').textContent = ora ? ora.nome : '—';
+  for (const c of ['.lv-titolo', '.lv-sottotitolo'])
+    schermoLive.querySelector(c).style.visibility = live.vista === 'live' ? '' : 'hidden';   // solo nel Live
   const pedali = corpo.querySelector('.lv-pedali');
   if (pedali) pedali.prepend(schede);                           // nella Pedaliera: sulla riga dei pedali
 }
@@ -200,8 +207,7 @@ function disegnaPalcoLive(corpo) {
   testa.innerHTML = `
     <div class="lv-banco"><button data-a="prima" title="${tr('Banco precedente')}">◀</button><b>${testoConNome(banco.nome)}</b><button data-a="dopo" title="${tr('Banco successivo')}">▶</button></div>
     <div class="lv-modo"><button data-a="preset" class="${live.stomp || live.looper || live.scene ? '' : 'sì'}">${tr('Preset')}</button><button data-a="stomp" class="${live.stomp && !live.looper && !live.scene ? 'sì' : ''}">${tr('Stomp')}</button><button data-a="scene" class="${live.scene && !live.looper ? 'sì' : ''}">${tr('Scene')}</button>${profilo.banchi ? `<button data-a="looper" class="${live.looper ? 'sì' : ''}">${tr('Looper')}</button>` : ''}${aiuto('live')}</div>
-    <div class="lv-blocco lv-bt"><button data-a="bt" class="${midi.ble ? 'sì' : ''}" title="${midi.ble ? tr('Stacca il pedale Bluetooth') : tr('Collega un pedale Bluetooth')}">${midi.ble ? '● ' + tr('MIDI controller connesso') : tr('Collega Pedale BT')}</button></div>
-    <div class="lv-suona"><small>${live.stomp && !live.looper ? tr('Stomp su') : tr('Suona')}</small><span>${ora ? testoConNome(ora.nome) : '—'}${live.scene && ora && ora.record && Array.isArray(ora.record.scene) && ora.scena !== undefined && ora.scena !== null && ora.record.scene[ora.scena] ? ' · ' + testoConNome(ora.record.scene[ora.scena].nome) : ''}</span></div>`;
+    <div class="lv-blocco lv-bt"><button data-a="bt" class="${midi.ble ? 'sì' : ''}" title="${midi.ble ? tr('Stacca il pedale Bluetooth') : tr('Collega un pedale Bluetooth')}">${midi.ble ? '● ' + tr('MIDI controller connesso') : tr('Collega Pedale BT')}</button></div>`;
   // Il pedale Bluetooth a portata di mano, senza passare dal Foot controller.
   testa.querySelector('[data-a="bt"]').addEventListener('click', () => (midi.ble ? staccaBle() : collegaBle()));
   testa.querySelector('[data-a="prima"]').addEventListener('click', () => cambiaBanco(-1));

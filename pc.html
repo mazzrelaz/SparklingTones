@@ -445,7 +445,10 @@
   .schermo.live { padding:8px 16px 16px; }          /* il logo nello stesso punto della barra principale */
   .schermo.live .sch-cima { height:36px; position:relative; }
   .lv-titolo { position:absolute; left:50%; top:22px; transform:translateX(-50%); margin:0; font:700 2.1rem var(--strumento); letter-spacing:0.02em; }
-  .schermo.live .lv-corpo { padding-top:36px; }
+  .schermo.live .lv-corpo { padding-top:62px; }
+  /* il preset che suona, sotto il titolo: una riga sola, i nomi lunghi finiscono in «…» */
+  .lv-sottotitolo { position:absolute; left:50%; top:64px; transform:translateX(-50%); max-width:min(60vw, 720px);
+    text-align:center; font:600 1.15rem var(--strumento); color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   /* il logo (barra e Live): alone rosso scuro che respira. Pulsa una copia del logo dietro, solo in opacità:
      un filtro animato rompe il disegno della pagina in Chromium */
   @keyframes lv-logo-alone { 0%, 100% { opacity:0.25; } 50% { opacity:0.9; } }
@@ -472,12 +475,7 @@
   .lv-corpo { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:center; padding:8px 10px 20px; }
   .lv-corpo > * { width:100%; max-width:1100px; }
   .lv-testa { display:flex; align-items:center; gap:14px; margin:6px 0 22px; }
-  .lv-testa > :not(.lv-suona) { flex:none; }   /* stringe solo il nome di ciò che suona, mai i tasti */
   .lv-banco b { font:600 0.82rem var(--strumento); min-width:150px; text-align:center; color:var(--text); }
-  .lv-suona { margin-left:auto; margin-right:6px; text-align:right; min-width:0; flex:0 1 auto; }   /* compensazione ottica: a filo sembrava uscire dal pulsantone */
-  .lv-suona small { display:block; color:var(--faint); font:0.7rem var(--strumento); letter-spacing:0.08em; text-transform:uppercase; }
-  .lv-suona span { font:600 1.15rem var(--strumento); display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  /* Una riga sola anche col nome lungo (o la scena accanto): andando a capo spostava tutta la Live. */
   .lv-griglia { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:16px; }
   .lv-griglia.stomp { grid-template-columns:repeat(5, minmax(0, 1fr)); }
   .lv-posto { position:relative; background:linear-gradient(#323a47, #262d37); border:1px solid var(--line); border-radius:14px; padding:14px 14px 18px;
