@@ -660,6 +660,41 @@ const DB_NAME = 'spark-test-' + Date.now();
   await PresetStore.deleteDatabase(DB_COPIA);
 
   /* ------------------------------------------------------------------ */
+  group('le scene di un preset (pagina PC)');
+
+  // Le scene sono lavoro dell'utente: nessun import le deve perdere.
+  const DB_SCENE = DB_NAME + '-scene';
+  const sc = await new PresetStore(DB_SCENE).open();
+  const SCENE = [{ nome: 'Solo', cambi: { 'Twin#0': 0.9 }, accesi: { Twin: true } }];
+  const conScene = await sc.add(Object.assign(makePreset('uuid-sc', 'Con scene', ['Twin']), { scene: SCENE }));
+  await sc.importFromAmp([Object.assign(makePreset('uuid-sc', 'Con scene', ['Twin']), { slot: 0 })]);
+  check('rileggere il preset dall\x27ampli non tocca le scene', (await sc.get(conScene)).scene, SCENE);
+  await sc.importFromBackup([makePreset('uuid-sc', 'Con scene', ['Twin'])]);
+  check('e nemmeno il backup dell\x27app ufficiale', (await sc.get(conScene)).scene, SCENE);
+  check('«Duplica» copia anche le scene', (await sc.get(await sc.duplicate(conScene))).scene, SCENE);
+
+  // Il sync: lo stesso preset c'è già dall'altra parte, senza scene.
+  const scLa = await new PresetStore(DB_SCENE + '-la').open();
+  await scLa.add(makePreset('uuid-sc', 'Con scene', ['Twin']));
+  await attesa(5);
+  await sc.put(await sc.get(conScene));         // le scene fatte dopo: il record è più recente
+  await scLa.fondiSincro(await sc.exportAll());
+  check('il sync porta le scene su un preset che l\x27altro apparecchio ha già',
+        (await scLa.byUuid('uuid-sc')).scene, SCENE);
+  await attesa(5);
+  const senza = await sc.get(conScene); senza.scene = []; await sc.put(senza);
+  await scLa.fondiSincro(await sc.exportAll());
+  check('e tolte tutte di qua, spariscono anche di là', (await scLa.byUuid('uuid-sc')).scene, []);
+  await scLa.importBackup(await sc.exportAll());
+  const conDiNuovo = await sc.get(conScene); conDiNuovo.scene = SCENE; await sc.put(conDiNuovo);
+  await scLa.importBackup(await sc.exportAll(), { lapidi: false });
+  check('un backup rimesso a mano riporta le scene', (await scLa.byUuid('uuid-sc')).scene, SCENE);
+
+  sc.close(); scLa.close();
+  await PresetStore.deleteDatabase(DB_SCENE);
+  await PresetStore.deleteDatabase(DB_SCENE + '-la');
+
+  /* ------------------------------------------------------------------ */
   group('svuotare la libreria tenendo gli otto dell\'ampli');
 
   const DB_VUOTA = DB_NAME + '-vuota';

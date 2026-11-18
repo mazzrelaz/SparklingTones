@@ -69,7 +69,9 @@ window.PresetStore = (function () {
 
   /** Campi dell'utente: non vengono mai toccati da un import. */
   // `pickup`: i pickup consigliati della pagina PC (src/pc/16-pickup.js); tolti valgono null.
-  const USER_FIELDS  = ['tags', 'notes', 'favorite', 'order', 'pickup'];
+  // `scene`: le scene della pagina PC (src/pc/16-scene.js); senza, il sync non le portava su un
+  // preset che l'altro apparecchio aveva già.
+  const USER_FIELDS  = ['tags', 'notes', 'favorite', 'order', 'pickup', 'scene'];
 
   /**
    * Le impostazioni che fanno parte della libreria e viaggiano col sync.

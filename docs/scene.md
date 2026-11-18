@@ -38,10 +38,16 @@ Manca, prima che vada in `main` (e ci va solo quando lo dice l'utente):
 
 1. **Prova con lo Spark vero**: le scene cambiano il suono? cambio pulito? le code del delay restano?
 2. **Togliere la parte SOLO BOZZA** in fondo a `src/pc/16-scene.js` (le scene finte).
-3. **Inglese** di ogni testo nuovo (`tr`) e **guida del PC** in italiano e inglese.
-4. **Test** in `test/`: le scene sopravvivono a `importFromAmp` (non sono in `SOUND_FIELDS`), al sync Dropbox
-   e a «Duplica».
-5. **«Salva» nell'editor mentre suona una scena**: oggi salverebbe nel preset i valori della scena. Da decidere.
+3. ~~Inglese e guida del PC~~: **fatti il 18 novembre** (12 frasi in `lingua-en.js`; «Le scene» nel capitolo
+   Live di `guida-pc.html` e `guida-pc.en.html`).
+4. ~~Test~~: **fatti il 18 novembre** in `test/store-test.html`, «le scene di un preset». Hanno trovato un
+   difetto vero: il sync e il backup rimesso a mano, su un preset che l'altra parte ha già, copiano solo
+   `SOUND_FIELDS` + `USER_FIELDS`, e le scene non arrivavano. Ora `scene` sta fra gli `USER_FIELDS`.
+5. ~~«Salva» durante una scena~~: **deciso il 18 novembre** (l'utente: «procedi come ritieni più opportuno»), come
+   gli Snapshot di Helix: manopole e acceso/spento vanno nella scena che suona, il preset resta com'era
+   (`scenaNelSalvataggio`). Se nell'editor è cambiato un modello, va tutto nel preset e si torna alla Base.
+   «Salva come nuovo» fa un preset nuovo col suono della scena, senza scene. Con lo slot scelto, nello slot va
+   il preset senza scene e poi si risuona la scena. Provato con l'ampli finto, non con lo Spark.
 6. Pedale: fuori, per scelta.
 
 ## Prima misura — 18 novembre 2026, Spark 2

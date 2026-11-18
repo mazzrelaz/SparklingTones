@@ -2095,4 +2095,29 @@ window.LINGUA_EN = {
     "Ideal pickup setting",
   "«{0}» è sul palco":
     "«{0}» is on stage",
+  // Le scene della pagina PC (ramo scene, 18 novembre 2026).
+  "Scene":
+    "Scenes",
+  "Live – {0}":
+    "Live – {0}",
+  "Base":
+    "Base",
+  "Scena {0}":
+    "Scene {0}",
+  "vuota":
+    "empty",
+  "Elimina la scena":
+    "Delete the scene",
+  "Salva la scena":
+    "Save the scene",
+  "nuova scena":
+    "new scene",
+  "nome della scena":
+    "scene name",
+  "Entra/esci dalle Scene":
+    "Enter/leave Scenes",
+  "salvare la scena «{0}»":
+    "save the scene «{0}»",
+  "scena «{0}» di «{1}» salvata.":
+    "scene «{0}» of «{1}» saved.",
 };

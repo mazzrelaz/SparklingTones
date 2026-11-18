@@ -76,6 +76,22 @@ function differenzeScena(record, effetti) {
   return { cambi, accesi };
 }
 
+/**
+ * «Salva» dell'editor mentre suona una scena (scelto il 18 novembre 2026, come negli Snapshot di
+ * Helix): le manopole e gli acceso/spento vanno nella scena che suona, il preset resta com'era.
+ * Se nell'editor è cambiato un modello, quello è del preset (una scena non cambia modello): allora
+ * si salva tutto nel preset, come senza scene, e si torna alla Base. Torna true se ha salvato la scena.
+ */
+function scenaNelSalvataggio(record) {
+  if (typeof ora.scena !== 'number') return false;
+  const scena = sceneDi(record)[ora.scena];
+  const stessiModelli = scena && record.effects.length === ora.effetti.length &&
+    record.effects.every((e, b) => e.name === ora.effetti[b].name);
+  if (!stessiModelli) { ora.scena = null; return false; }
+  record.scene[ora.scena] = { nome: scena.nome, ...differenzeScena(record, ora.effetti) };
+  return true;
+}
+
 let scenaInCorso = false;
 
 async function suonaScena(indice) {

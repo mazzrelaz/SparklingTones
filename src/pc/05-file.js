@@ -65,7 +65,8 @@ async function apriSalva() {
   azioni.push({ testo: tr('Salva'), valore: 'salva', primario: true });
 
   const r = await finestra({
-    titolo: tr('salvare il preset'),
+    titolo: ora.record && typeof ora.scena === 'number' && sceneDi(ora.record)[ora.scena]
+      ? tr('salvare la scena «{0}»', sceneDi(ora.record)[ora.scena].nome) : tr('salvare il preset'),
     campo: { valore: ora.nome, invito: tr('nome del preset') },
     corpo,
     azioni,
@@ -102,8 +103,10 @@ async function salva(nome, comeNuovo, slot) {
       record = await store.get(ora.record.id);
       if (!record) { stato(tr('il preset non è più in libreria.'), 'errore'); return false; }
       record.name = nome;
-      record.effects = copiaEffetti(ora.effetti);
       record.bpm = ora.bpm;
+      // Mentre suona una scena le manopole finiscono nella scena, e il preset resta com'era
+      // (src/pc/16-scene.js); un modello cambiato invece è del preset, e tutto va lì.
+      if (!scenaNelSalvataggio(record)) record.effects = copiaEffetti(ora.effetti);
       await store.put(record);
     }
   } catch (err) {
@@ -118,10 +121,15 @@ async function salva(nome, comeNuovo, slot) {
   ora.toccato = false;
   await ricarica();
   disegnaTutto();
-  stato(tr('«{0}» salvato in libreria.', record.name), 'ok');
+  const scena = typeof ora.scena === 'number' && sceneDi(record)[ora.scena];
+  stato(scena ? tr('scena «{0}» di «{1}» salvata.', scena.nome, record.name)
+    : tr('«{0}» salvato in libreria.', record.name), 'ok');
 
   if (slot === null || slot === undefined || !spark.connected || ora.offline) return true;
-  return await scriviNelloSlot(record, slot);
+  const scritto = await scriviNelloSlot(record, slot);
+  // Nello slot va il preset senza scene: dopo, si torna alla scena che suonava.
+  if (scritto && scena) await suonaScena(ora.scena);
+  return scritto;
 }
 
 async function scriviNelloSlot(record, slot) {
