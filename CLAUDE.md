@@ -354,11 +354,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   del PC e nella home del sito. **Ogni pubblicazione ha la splash «Novità»** (`src/novita.js`: voce in cima con la versione di `sw.js`).
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso.
-- **Scene di un preset** (18 novembre): **solo nel ramo `scene`, mai in `main` finché lui non lo dice** (non deve
-  toccare le versioni pubblicate). Solo PC, modo «Scene» della Live, 3 scene + Base per 4 switch MIDI; grafica
-  approvata in bozza. Tutto in `docs/scene.md` **del ramo** (`git show scene:docs/scene.md`); per riprendere,
-  `git worktree add <scratchpad>/scene scene`, poi `pc.html?bozza#finto`. Mancano: prova con lo Spark, togliere
-  i preset finti della bozza, inglese, guida del PC, test, «Salva» mentre suona una scena.
+- **Scene** (18 novembre): **solo nel ramo `scene`, mai in `main` finché lui non lo dice**. Solo PC, grafica
+  approvata. Tutto, anche cosa manca, in `git show scene:docs/scene.md`; si riprende con `git worktree add`.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - Copia oraria dei progetti in `Desktop\Cloud Backup`.
