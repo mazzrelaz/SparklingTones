@@ -79,11 +79,16 @@ function catalogoPerIA() {
 function domandaChitarra(lingua) {
   const mia = miaChitarra();
   if (!mia) return [];
-  const tipi = { S: 'single coil', H: 'humbucker', P: 'P-90' };
-  const pezzi = mia.split('').map(c => tipi[c]).join(', ');
+  // Le posizioni per nome, perché «--H» o «PS» non siano ambigui.
+  const posti = mia.length === 3 ? ['bridge', 'middle', 'neck'] : mia.length === 2 ? ['bridge', 'neck'] : ['bridge'];
+  const pezzi = mia.split('').map((c, i) => `${posti[i]}: ${c === '-' ? 'none' : TIPI_PICKUP[c]}`).join(', ');
+  const split = !haHumbucker(mia) ? []
+    : splitPossibile() ? ['Its humbuckers can be coil-split: use "split" when a single-coil sound helps.']
+    : ['Its humbuckers CANNOT be coil-split: "split" must be false; get any single-coil brightness from the chain.'];
   return [
     '',
-    `# The player's guitar: ${mia} (from bridge to neck: ${pezzi})`,
+    `# The player's guitar: ${mia} (${pezzi})`,
+    ...split,
     'This is the guitar that will be plugged in, and the target sound may come from a',
     'different one (e.g. a Santana tone, humbuckers, played on an SSS Strat). Voice the',
     'preset so that THIS guitar gets as close as possible to the target sound: compensate',
@@ -130,7 +135,8 @@ function domandaIA(descrizione) {
     'tempo for the delay (60-200).',
     '"pickups" is the ideal pickup setting for the sound. "layout" = the guitar pickups written',
     'the usual way, from bridge to neck (HSS = humbucker at the bridge): S single coil,',
-    'H humbucker, P P-90 (e.g. "SSS" Strat, "HH" Les Paul, "HSS", "SS" Tele, "PP"): the',
+    'H humbucker, M mini humbucker, P P-90, "-" an empty position (e.g. "SSS" Strat, "HH" Les',
+    'Paul, "HSS", "SS" Tele, "PP", "--H" one humbucker at the neck; two letters = bridge and neck): the',
     'artist\'s own guitar, or the user\'s guitar when they describe it. "on" = the active',
     'positions among "neck", "middle", "bridge" ("middle" only with three pickups). "split":',
     `true when a humbucker is coil-split. "tip": one short sentence in ${lingua} with selector`,
@@ -290,6 +296,8 @@ function presetDaIA(risposta, scheletro) {
     pickup = adattaLayout(pickup, mia);
     if (!pickup.attivi.length) pickup = null;
   }
+  // Humbucker che non si splittano: niente split, anche se la chat l'ha messo.
+  if (pickup && mia && !splitPossibile()) pickup.split = false;
   return { preset, famiglia, pickup, avvisi };
 }
 

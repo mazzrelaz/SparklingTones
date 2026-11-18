@@ -336,6 +336,13 @@
   .scelta-chitarra button.sì svg line { stroke:var(--accent-chiaro); }
   .scelta-chitarra b { font:700 0.82rem var(--strumento); letter-spacing:0.04em; }
   .scelta-chitarra span { font-size:0.68rem; color:var(--faint); white-space:nowrap; }
+  /* «Altra»: il pickup di ogni posizione, e «Humbucker splittabili» */
+  .chitarra-altra { display:flex; flex-direction:column; gap:6px; margin:-4px 0 10px; }
+  .riga-posizione { display:flex; align-items:center; gap:10px; }
+  .riga-posizione[hidden] { display:none; }
+  .riga-posizione > span { width:9.5em; flex:none; font-size:0.8rem; color:var(--dim); }
+  .riga-posizione + .riga-posizione { margin-top:0; }
+  .finestra [data-f="chitarra"] > div > .riga-posizione { margin-bottom:12px; }
   .pk-vista .pk-sotto { margin:0 0 8px; font-size:0.85rem; color:var(--dim); }
   .pk-vista .pk-nota { margin:10px 0 0; font-size:0.9rem; line-height:1.45; }
   .pk-finestra { display:flex; flex-direction:column; gap:10px; margin-top:6px; }

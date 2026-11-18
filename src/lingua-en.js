@@ -2087,6 +2087,12 @@ window.LINGUA_EN = {
     "not set",
   "Nessuna":
     "None",
+  "Altra":
+    "Other",
+  "niente":
+    "none",
+  "Humbucker splittabili":
+    "Splittable humbuckers",
   "Configurazione pickup ideale":
     "Ideal pickup setting",
   "«{0}» è sul palco":
