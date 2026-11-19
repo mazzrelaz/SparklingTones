@@ -126,8 +126,11 @@ static void midiPremuto(uint8_t k) {
   } else if (paginaMidi == 0) {
     programmaMidi = (int16_t)(gruppoMidi * 4 + k);
     midiCcGiu[k] = (int16_t)(MIDI_CC_PRESET + programmaMidi);
+    // Prima il CC (la Live del PC impara il primo messaggio, e col CC misura la pressione
+    // lunga), poi il Program Change, che resta per l'iPad (deciso con l'utente il 19 novembre).
     mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), (uint8_t)midiCcGiu[k], 127);
-    Serial.printf("MIDI: CC %d = 127 (preset %d)\n", midiCcGiu[k], programmaMidi + 1);
+    mandaMidi((uint8_t)(0xc0 | (MIDI_CANALE - 1)), (uint8_t)programmaMidi, -1);
+    Serial.printf("MIDI: CC %d = 127 + program change %d\n", midiCcGiu[k], programmaMidi);
   } else {
     stompAccesi ^= (uint8_t)(1 << k);
     const bool su = stompAccesi & (1 << k);

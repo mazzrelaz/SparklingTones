@@ -681,8 +681,8 @@ scritto «finito»):
    Togni», `VERSIONE`, da alzare a ogni cambio visibile), che non ferma niente. Avvisi e ponte aperto prendono per un attimo il posto del nome del
    banco. **Visto in foto e approvato nei caratteri il 24 settembre; il quadratino in negativo
    va ancora guardato.**
-2. **19 novembre 2026: la pagina preset manda CC 102–109 (127 premendo, 0 rilasciando) al posto dei Program
-   Change**, chiesto dall'utente per la pressione lunga della Live del PC (le scene). Da provare.
+2. **19 novembre 2026: la pagina preset manda CC 102–109 (127 premendo, 0 rilasciando) prima del Program
+   Change, che resta per l'iPad**, chiesto dall'utente per la pressione lunga della Live del PC (le scene). Da provare.
    **La modalità MIDI c'è, verificata il 24 settembre** (Program Change e Control Change
    arrivano a Windows, letti con `midiIn`): FS1+FS4 per 1,5 s cambiano modalità (ricordata),
    in MIDI il quinto passa fra pagina **preset** (otto Program Change 0–7: tasto banco SX = 1–4
