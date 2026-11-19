@@ -1,4 +1,4 @@
-// Sparkling Tones — pc/17-scalette.js: le scalette, solo sul PC (bozza, 18 novembre 2026).
+// Sparkling Tones — pc/17-scalette.js: le scalette, solo sul PC (18 novembre 2026).
 //
 // L'idea è dell'utente (docs/scaletta.md): **le scalette si creano fuori dalla Live**, in una
 // schermata come i Banchi, coi nomi delle canzoni; **a ogni canzone si assegna un preset** e la

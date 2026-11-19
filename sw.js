@@ -14,7 +14,7 @@
  */
 'use strict';
 
-const VERSIONE = 'v169';
+const VERSIONE = 'v170';
 const CACHE = 'spark-' + VERSIONE;
 
 /** Tutto quello che serve per far partire l'app da spenta, senza rete. */
@@ -89,8 +89,8 @@ const GUSCIO = [
   './src/pc/16-pickup.js',
   './src/pc/17-scalette.js',
   './immagini/classico/ampli.webp',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
+  './icons/icon-192.png?v=2',
+  './icons/icon-512.png?v=2',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
   './immagini/circuito-elettroni.svg',

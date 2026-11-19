@@ -59,8 +59,12 @@ function New-Master {
   if (-not (Test-Path $Destinazione)) { throw "rasterizzazione fallita: $Destinazione" }
 }
 
+# -Raggio (frazione del lato, 0 = quadrato pieno): gli angoli arrotondati e trasparenti, come le
+# icone delle app (19 novembre 2026, chiesto dall'utente: «come quella di Pulze Control»). Solo per
+# le icone «any», che Windows e Chrome mostrano così come sono: la maskable la ritaglia Android, e
+# l'apple-touch-icon iOS la arrotonda da solo e la vuole piena (gli angoli trasparenti li fa neri).
 function Riduci {
-  param([string]$Sorgente, [string]$Destinazione, [int]$Lato)
+  param([string]$Sorgente, [string]$Destinazione, [int]$Lato, [double]$Raggio = 0)
   $src = [System.Drawing.Image]::FromFile($Sorgente)
   $bmp = New-Object System.Drawing.Bitmap($Lato, $Lato)
   $g   = [System.Drawing.Graphics]::FromImage($bmp)
@@ -69,6 +73,26 @@ function Riduci {
   $g.SmoothingMode     = 'HighQuality'
   $g.DrawImage($src, 0, 0, $Lato, $Lato)
   $g.Dispose()
+  if ($Raggio -gt 0) {
+    # Il bordo arrotondato con l'antialiasing: si riempie un tracciato con l'immagine come trama
+    # (un ritaglio con SetClip farebbe gli scalini).
+    $tondo = New-Object System.Drawing.Bitmap($Lato, $Lato)
+    $g = [System.Drawing.Graphics]::FromImage($tondo)
+    $g.SmoothingMode = 'AntiAlias'
+    $g.PixelOffsetMode = 'HighQuality'
+    $d = [single]($Lato * $Raggio * 2)
+    $l = [single]$Lato
+    $p = New-Object System.Drawing.Drawing2D.GraphicsPath
+    $p.AddArc(0, 0, $d, $d, 180, 90)
+    $p.AddArc($l - $d, 0, $d, $d, 270, 90)
+    $p.AddArc($l - $d, $l - $d, $d, $d, 0, 90)
+    $p.AddArc(0, $l - $d, $d, $d, 90, 90)
+    $p.CloseFigure()
+    $trama = New-Object System.Drawing.TextureBrush($bmp)
+    $g.FillPath($trama, $p)
+    $g.Dispose(); $trama.Dispose(); $p.Dispose(); $bmp.Dispose()
+    $bmp = $tondo
+  }
   $bmp.Save($Destinazione, [System.Drawing.Imaging.ImageFormat]::Png)
   $bmp.Dispose(); $src.Dispose()
   Write-Host ("{0,-24} {1} px" -f [IO.Path]::GetFileName($Destinazione), $Lato)
@@ -79,8 +103,8 @@ $masterMask = Join-Path $temp 'master-mask-1024.png'
 New-Master -Margine 6  -Destinazione $master
 New-Master -Margine 16 -Destinazione $masterMask
 
-Riduci $master     (Join-Path $out 'icon-512.png')          512
-Riduci $master     (Join-Path $out 'icon-192.png')          192
+Riduci $master     (Join-Path $out 'icon-512.png')          512 0.22
+Riduci $master     (Join-Path $out 'icon-192.png')          192 0.22
 Riduci $master     (Join-Path $out 'apple-touch-icon.png')  180
 Riduci $master     (Join-Path $out 'favicon-32.png')        32
 Riduci $masterMask (Join-Path $out 'icon-maskable-512.png') 512

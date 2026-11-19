@@ -26,6 +26,24 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v170',
+    data: '19 novembre 2026',
+    voci: [
+      { icona: '🎛️', titolo: tr('Le scene'), dove: 'pc',
+        testo: tr('Fino a tre scene per preset, più la Base: cambiano manopole ed effetti accesi senza cambiare preset. Nella Live, modo Scene; tenendo premuto un pulsantone la scena si modifica mentre la senti.') },
+      { icona: '📋', titolo: tr('Le scalette'), dove: 'pc',
+        testo: tr('Le canzoni della serata, ognuna col suo preset e la scena da cui parte. Si preparano da «Scalette» e si suonano dalla Live, modo Scene.') },
+      { icona: '🎸', titolo: tr('Pickup consigliati'), dove: 'pc',
+        testo: tr('Con «La mia chitarra», «Genera con l\'IA» consiglia anche quali pickup usare; si vedono dall\'icona della chitarra, e si possono scrivere a mano.') },
+      { icona: '⏱️', titolo: tr('Pressione lunga più corta'), dove: 'pc',
+        testo: tr('Nella Live, la pressione lunga degli switch MIDI si può fissare anche a 0,7 s.') },
+      { icona: '🛡️', titolo: tr('Più sicura sul palco'), dove: 'telefono',
+        testo: tr('Un preset con un effetto che l\'ampli non conosce non parte più dalla Live né dall\'editor: avrebbe potuto bloccare l\'ampli.') },
+      { icona: '📱', titolo: tr('Icona arrotondata'),
+        testo: tr('L\'icona dell\'app installata ha gli angoli arrotondati.') },
+    ],
+  },
+  {
     versione: 'v169',
     data: '17 novembre 2026',
     voci: [

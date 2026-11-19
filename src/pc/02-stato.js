@@ -32,8 +32,27 @@ async function ricarica() {
   famiglie = await store.getFamiglie();
   categorie = await store.allCategories();
   banchi = await store.getBanks();
-  scalette = await store.getScalette();
+  scalette = scalettePulite(await store.getScalette());
   vista.ordine = await store.getSetting('ordineLibreria', vista.ordine);
+}
+
+/**
+ * Le scalette come le usa la pagina, qualunque cosa arrivi dal sync o da un backup (audit del 19
+ * novembre 2026): campi del tipo giusto, la scena di partenza fra 0 e 2 o null (la Base).
+ */
+function scalettePulite(elenco) {
+  const oggetti = a => (Array.isArray(a) ? a : []).filter(x => x && typeof x === 'object');
+  return oggetti(elenco).map(s => ({
+    uuid: typeof s.uuid === 'string' && s.uuid ? s.uuid : nuovoUuid(),
+    nome: String(s.nome == null ? '' : s.nome).slice(0, 100) || tr('Scaletta'),
+    canzoni: oggetti(s.canzoni).map(c => ({
+      uuid: typeof c.uuid === 'string' && c.uuid ? c.uuid : nuovoUuid(),
+      nome: String(c.nome == null ? '' : c.nome).slice(0, 100),
+      preset: typeof c.preset === 'string' ? c.preset : null,
+      // 3 = SCENE_MAX (16-scene.js, che qui al caricamento non c'è ancora)
+      partenza: Number.isInteger(c.partenza) && c.partenza >= 0 && c.partenza < 3 ? c.partenza : null,
+    })),
+  }));
 }
 
 /** Come si guarda la libreria: ricerca, filtri e ordine (l'ordine si ricorda, come nell'app). */

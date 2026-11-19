@@ -2045,6 +2045,26 @@ window.LINGUA_EN = {
     "The PC guide explains the Live looper: length, count-in, click and every button.",
   "Versione {0}":
     "Version {0}",
+  "Le scene":
+    "Scenes",
+  "Fino a tre scene per preset, più la Base: cambiano manopole ed effetti accesi senza cambiare preset. Nella Live, modo Scene; tenendo premuto un pulsantone la scena si modifica mentre la senti.":
+    "Up to three scenes per preset, plus the Base: they change knobs and which effects are on without changing preset. In Live, Scenes mode; hold a big button down to edit the scene while you hear it.",
+  "Le canzoni della serata, ognuna col suo preset e la scena da cui parte. Si preparano da «Scalette» e si suonano dalla Live, modo Scene.":
+    "The songs of the night, each with its preset and the scene it starts from. Prepare them from “Setlists” and play them from Live, Scenes mode.",
+  "Con «La mia chitarra», «Genera con l'IA» consiglia anche quali pickup usare; si vedono dall'icona della chitarra, e si possono scrivere a mano.":
+    "With “My guitar”, “Generate with AI” also suggests which pickups to use; you see them from the guitar icon, and you can write them yourself.",
+  "Pressione lunga più corta":
+    "Shorter long press",
+  "Nella Live, la pressione lunga degli switch MIDI si può fissare anche a 0,7 s.":
+    "In Live, the long press of MIDI switches can now also be set to 0.7 s.",
+  "Più sicura sul palco":
+    "Safer on stage",
+  "Un preset con un effetto che l'ampli non conosce non parte più dalla Live né dall'editor: avrebbe potuto bloccare l'ampli.":
+    "A preset with an effect the amp doesn't know no longer starts from Live or from the editor: it could have frozen the amp.",
+  "Icona arrotondata":
+    "Rounded icon",
+  "L'icona dell'app installata ha gli angoli arrotondati.":
+    "The installed app's icon has rounded corners.",
   "Spark Mini, GO e 40 sul PC":
     "Spark Mini, GO and 40 on the PC",
   "Cambiando preset l'app aspetta un attimo prima di rileggere il suono, come già sul NEO.":

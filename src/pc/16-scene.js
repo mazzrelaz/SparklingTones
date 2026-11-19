@@ -1,4 +1,4 @@
-// Sparkling Tones — pc/16-scene.js: le scene di un preset, solo sul PC (bozza, 18 novembre 2026).
+// Sparkling Tones — pc/16-scene.js: le scene di un preset, solo sul PC (18 novembre 2026).
 //
 // Studio e misure in docs/scene.md. Una scena è una variante dello stesso preset: **cambia solo
 // manopole e acceso/spento, mai un modello**. Nel record: `record.scene = [{ nome,
@@ -23,7 +23,26 @@ const SCENA_PRESSIONE = 700;   // ms tenendo premuto per aprire il riquadro
 
 live.scene = false;     // il modo Scene della Live
 
-const sceneDi = record => (record && Array.isArray(record.scene)) ? record.scene : [];
+/**
+ * Le scene di un preset, ripulite sul posto (audit del 19 novembre 2026): `record.scene` arriva anche
+ * dal sync e dai backup, e i suoi valori vanno all'ampli con `0x0104`. Al più tre; valori numerici fra
+ * 0 e 1, acceso/spento veri booleani; il resto si scarta. Si pulisce senza togliere scene, così gli
+ * indici (la scena che suona, la partenza delle canzoni) restano quelli.
+ */
+function scenaPulita(s) {
+  const o = x => (x && typeof x === 'object' && !Array.isArray(x)) ? x : {};
+  const cambi = {}, accesi = {};
+  for (const [k, v] of Object.entries(o(s && s.cambi)))
+    if (/^[^#]+#\d+$/.test(k) && typeof v === 'number' && Number.isFinite(v)) cambi[k] = Math.max(0, Math.min(1, v));
+  for (const [k, v] of Object.entries(o(s && s.accesi)))
+    if (typeof v === 'boolean') accesi[k] = v;
+  return { nome: String((s && s.nome) == null ? '' : s.nome).slice(0, 100), cambi, accesi };
+}
+function sceneDi(record) {
+  if (!record || !Array.isArray(record.scene)) return [];
+  record.scene = record.scene.slice(0, SCENE_MAX).map(scenaPulita);
+  return record.scene;
+}
 
 /** Il record in libreria di quello che suona, fresco (le scene cambiano anche da qui). */
 const recordDiOra = () => (ora && ora.record ? tutti.find(r => r.id === ora.record.id) || ora.record : null);
@@ -386,37 +405,4 @@ async function apriRiquadroScena(record, indice) {
   }
   // Si torna a quello che deve suonare: la scena salvata, o quella di prima se si annulla o si elimina.
   await suonaScena(r && r.azione === 'salva' ? indice : (ora.scena === undefined ? null : ora.scena));
-}
-
-/* ---- SOLO BOZZA (pc.html?bozza#finto): due preset finti con le scene già fatte. ---- */
-if (/bozza/.test(location.search)) {
-  // La libreria la riempie l'ampli finto quando si collega: si aspetta che ci sia.
-  const aspetta = setInterval(async () => {
-    const elenco = await store.all();
-    if (!elenco.length) return;
-    clearInterval(aspetta);
-    for (const record of elenco.slice(0, 2)) {
-      if (sceneDi(record).length) continue;
-      const fx = record.effects;
-      const drive = fx[2], delay = fx[5], ampli = fx[3];
-      const gain = (e, d) => ({ [e.name + '#0']: Math.max(0, Math.min(1, e.params[0].value + d)) });
-      record.scene = [
-        { nome: 'Ritmica', cambi: gain(drive, -0.2), accesi: { [delay.name]: false } },
-        { nome: 'Solo', cambi: { ...gain(drive, 0.3), ...gain(delay, 0.15) }, accesi: { [delay.name]: true, [drive.name]: true } },
-        { nome: 'Pulito', cambi: gain(ampli, -0.4), accesi: { [drive.name]: false } },
-      ];
-      await store.put(record);
-    }
-    // E una scaletta finta: «Billie Jean» parte dalla terza scena.
-    if (!(await store.getScalette()).length) {
-      const [a, b, c] = elenco;
-      await store.setScalette([{ uuid: nuovoUuid(), nome: 'Serata di prova', canzoni: [
-        { uuid: nuovoUuid(), nome: 'Billie Jean', preset: a.uuid, partenza: 2 },
-        { uuid: nuovoUuid(), nome: 'Wish You Were Here', preset: b.uuid, partenza: null },
-        { uuid: nuovoUuid(), nome: 'Sunshine of Your Love', preset: (c || a).uuid, partenza: null },
-        { uuid: nuovoUuid(), nome: 'Hotel California', preset: a.uuid, partenza: 1 },
-      ] }]);
-    }
-    await ricarica(); disegnaTutto();
-  }, 1000);
 }
