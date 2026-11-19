@@ -1432,3 +1432,12 @@ Durante le prove l'utente ha visto nell'editor del PC **il bollo «JH» tagliato
 riquadro del modello nella catena: ora i puntini li prende solo il nome (`.mod-nome`), il bollo resta
 intero. Provato con lo Spark vero: l'app Windows su Electron 45 si collega e legge gli otto slot.
 «Aggiorna tutti» col pedale 2.42 verificato (due banchi di fila, salvati tutti e due). Da provare: l'installer 1.0.2.
+
+## 19 novembre 2026 — scene col pedale MIDI; spostato da CLAUDE.md
+
+Scene provate con lo Spark e col nostro pedale in modalità MIDI via Bluetooth (che quindi ora usa anche la Pedaliera del PC). Firmware: pagina preset con CC 102–109 a 127/0 più il Program Change (iPad), motivo dell'ultimo riavvio nel comando `M`. Pressione lunga anche a 0,7 s. Dettaglio nel ramo `scene`, `docs/scene.md`.
+
+Spostato parola per parola da CLAUDE.md:
+
+- **Live del PC** (`src/pc/12-live.js`): **la Pedaliera è per pedali MIDI commerciali, non per il nostro**, che ha solo lui.
+  **Trappola: un `filter` animato rompe il disegno in Chromium.** Diario, 15 novembre.

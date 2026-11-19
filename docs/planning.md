@@ -8,7 +8,7 @@ Le cose aperte, in ordine di priorità (deciso con l'utente il 13 novembre). Si 
 Dentro: splash «Novità», i «?» su telefono e PC, web ed exe uguali col Live (beta), guide aggiornate in
 italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 
-- [ ] **Provare il Live del PC nel browser** (Chrome/Edge) con lo Spark e la pedaliera veri: finora provato
+- [x] **Provare il Live del PC nel browser** — 19 novembre, Edge con Spark e nostro pedale via BT (ramo `scene`). (Chrome/Edge) con lo Spark e la pedaliera veri: finora provato
   solo dentro l'exe (12 novembre).
 - [ ] Pubblicazione: **quando lo dice l'utente**. L'exe apre la guida dal sito: la guida inglese del computer
   si vede solo dopo.
@@ -49,7 +49,7 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [ ] Montare la basetta stampata (pezzi TME e basetta arrivati).
 - [ ] Rimisurare la corrente di carica della batteria a ~3,5 V.
 - [ ] Pedale d'espressione: riprovare iPad/GarageBand e l'adattatore.
-- [ ] **Modalità MIDI: anche il rilascio** (14 novembre, deciso con l'utente): oltre al Program Change, CC a 127
+- [x] **Modalità MIDI: anche il rilascio** — **fatto il 19 novembre**: CC 102–109 e poi il Program Change (per l'iPad), provati il 19 novembre col PC e con l'iPad. (14 novembre, deciso con l'utente): oltre al Program Change, CC a 127
   premendo e a 0 rilasciando, come Play Acoustic; così sul PC funziona la pressione lunga (FS4 tenuto cancella il
   loop). Poi reimparare gli switch nel Foot controller. Prima guardare chi altro ascolta quel MIDI (iPad).
 

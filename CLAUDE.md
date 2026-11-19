@@ -20,7 +20,7 @@ ripercorrere una strada chiusa**, più il lavoro in corso. Il ragionamento sta i
 | `docs/looper.md` · `docs/snake.md` | il looper (archiviato) · StompSnake |
 | `docs/HANDOFF-2026-08-10.md` | ricerca originale: comandi, tipi dati, catture |
 | `docs/diario.md` | sessioni passate; **le versioni lunghe di questo file** |
-| `docs/sito.md` · `docs/sicurezza.md` | `sparklingtones.com` · audit del 15 novembre 2026 |
+| `docs/sito.md` · `docs/sicurezza.md` | `sparklingtones.com` · audit del 19 novembre 2026 |
 
 **I documenti grossi non si leggono interi** (`pedale.md` 175 KB, `decisioni-ui.md` 115 KB, `diario.md`
 100 KB, `HANDOFF` 45 KB): `grep -n '^#'` per l'indice, poi solo la sezione. **Si sposta, non si butta**:
@@ -317,7 +317,7 @@ Snake in «Fai una pausa», in `src/snake-pedali.js`: **non tocca niente dell'ap
 - **In locale la libreria è vuota** (altra origine): preset finti con `store.importFromAmp([...])`.
 - **Questa memoria la aggiorno io a fine sessione**, ipotesi escluse comprese; si segna cosa è
   verificato sull'hardware. **Controllo di sicurezza** dopo ogni novità che parla con l'esterno, esito
-  in `docs/sicurezza.md` (ultimo audit intero 15 novembre 2026).
+  in `docs/sicurezza.md` (ultimo audit intero 19 novembre 2026).
 - Italiano in commenti e UI. Byte in hex minuscolo separato da spazi.
 
 ## Dropbox e sito
@@ -346,8 +346,6 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   provato sul NEO e sullo Spark 2; `docs/protocollo-spark2.md`; il telefono non ha ancora l'attesa). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire. **Store 1.0.1
   online**; **1.0.2** (Electron 45, permessi, fuse) **in certificazione dal 15 novembre**. **npm 11 non scarica
   Electron**: dopo `npm install`, `node node_modules/electron/install.js`. Uscite prima: diario.
-- **Live del PC** (`src/pc/12-live.js`): **la Pedaliera è per pedali MIDI commerciali, non per il nostro**, che ha solo lui.
-  **Trappola: un `filter` animato rompe il disegno in Chromium.** Diario, 15 novembre.
 - **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
   l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
   moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.1 online**: `https://apps.microsoft.com/detail/9PLB9RG9VLNX`, già nelle guide
@@ -356,7 +354,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso. **Pickup consigliati** e «La mia chitarra»
   (18 nov., `src/pc/16-pickup.js`): campo `pickup` fra gli `USER_FIELDS`; un'icona, mai un riquadro (niente scroll).
 - **Scene e scalette** (18 nov.): **solo nel ramo `scene`, mai in `main` finché lui non lo dice**. Solo PC, grafica
-  approvata. Tutto in `git show scene:docs/scene.md` e `…:docs/scaletta.md`; si riprende con `git worktree add`.
+  approvata. Tutto in `git show scene:docs/scene.md` e `…:docs/scaletta.md`; si riprende con `git worktree add`. **19 nov.: provate con Spark e pedale MIDI (BT), vanno**; la coda del delay si taglia (l'ampli, accettato). Resta: riavvio del pedale a batteria carica (motivo col comando `M`), scene finte da togliere. Pedale MIDI: CC 102–109 127/0 + Program Change.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - Copia oraria dei progetti in `Desktop\Cloud Backup`.
