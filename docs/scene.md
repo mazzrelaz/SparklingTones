@@ -36,7 +36,7 @@ e i primi due preset prendono tre scene finte). Il service worker va tolto a ogn
 
 Manca, prima che vada in `main` (e ci va solo quando lo dice l'utente):
 
-1. **Prova con lo Spark vero**: le scene cambiano il suono? cambio pulito? le code del delay restano?
+1. ~~Prova con lo Spark vero~~: **fatta il 19 novembre**, vedi sotto.
 2. **Togliere la parte SOLO BOZZA** in fondo a `src/pc/16-scene.js` (le scene finte).
 3. ~~Inglese e guida del PC~~: **fatti il 18 novembre** (12 frasi in `lingua-en.js`; «Le scene» nel capitolo
    Live di `guida-pc.html` e `guida-pc.en.html`).
@@ -131,6 +131,7 @@ Le scene suonano: il suono cambia come previsto, dal PC (ramo `scene` servito in
 **La coda del delay sparisce** quando la scena nuova spegne il delay **e anche quando ne cambia solo i parametri**:
 l'ampli ricalcola il delay sulla scena nuova. Il cambio di una manopola che non è del delay non è stato provato
 per la coda. È l'ampli, non i nostri comandi (mandiamo solo `0x0104`/`0x0115`, niente preset intero).
+**Deciso dall'utente lo stesso giorno: si accetta così.** Il delay si lascia uguale nelle scene dove serve la coda.
 
 ## Misure da fare con l'ampli (una alla volta, rileggendo dall'ampli)
 
