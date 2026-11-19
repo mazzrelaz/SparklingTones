@@ -133,6 +133,8 @@ l'ampli ricalcola il delay sulla scena nuova. Il cambio di una manopola che non 
 per la coda. È l'ampli, non i nostri comandi (mandiamo solo `0x0104`/`0x0115`, niente preset intero).
 **Deciso dall'utente lo stesso giorno: si accetta così.** Il delay si lascia uguale nelle scene dove serve la coda.
 
+**Col nostro pedale in modalità MIDI, via Bluetooth (19 novembre, verificato dall'utente)**: gli switch cambiano scena e la pressione lunga entra ed esce dalle Scene, da quando il firmware manda CC 102–109 a 127/0 sulla pagina preset (commit in `main`). Durata scelta dall'utente: 1 s. Un riavvio del pedale durante la prova, a batteria, non si è ripetuto dopo averlo caricato: probabile batteria scarica, non dimostrato.
+
 ## Misure da fare con l'ampli (una alla volta, rileggendo dall'ampli)
 
 1. **Preset intero, ascoltando**: si sente un buco? Le code di delay e riverbero restano?
