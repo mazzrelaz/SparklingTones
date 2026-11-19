@@ -356,7 +356,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso. **Pickup consigliati** e «La mia chitarra»
   (18 nov., `src/pc/16-pickup.js`): campo `pickup` fra gli `USER_FIELDS`; un'icona, mai un riquadro (niente scroll).
 - **Scene e scalette** (18 nov.): **solo nel ramo `scene`, mai in `main` finché lui non lo dice**. Solo PC, grafica
-  approvata. Tutto in `git show scene:docs/scene.md` e `…:docs/scaletta.md`; si riprende con `git worktree add`.
+  approvata. Tutto in `git show scene:docs/scene.md` e `…:docs/scaletta.md`; si riprende con `git worktree add`. **19 nov.: provate con Spark e pedale MIDI (BT), vanno**; la coda del delay si taglia (l'ampli, accettato). Resta: riavvio del pedale a batteria carica (motivo col comando `M`), scene finte da togliere. Pedale MIDI: CC 102–109 127/0 + Program Change.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - Copia oraria dei progetti in `Desktop\Cloud Backup`.
