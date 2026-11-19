@@ -47,6 +47,11 @@ per il banco vuoto); un test in `protocol-test` o `store-test`.
 
 ### Prima di portare le scene in `main`
 
+**Fatto il 19 novembre, col merge (v170):** `sceneDi` ripulisce sul posto ogni scena (`scenaPulita`: al più
+tre, valori numerici portati fra 0 e 1, chiavi `Effetto#indice`, acceso/spento solo booleani) e
+`ricarica` ripulisce le scalette (`scalettePulite`: campi del tipo giusto, partenza 0–2 o null). Provato
+nella pagina PC con dati sporchi (un 5, un NaN, una stringa, quattro scene, un nome con HTML).
+
 - **I valori delle scene non passano da nessun controllo.** `record.scene` (sync, backup) e le
   `scalette` arrivano come sono: un valore fuori da 0–1 o non numerico va all'ampli con `0x0104`, e
   una scena senza `accesi` o `cambi` fa saltare `presetConScena` (`in` su `undefined`). Da fare

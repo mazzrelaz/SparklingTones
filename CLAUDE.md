@@ -341,7 +341,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v169 pubblicata** (17 novembre: i 600 ms anche per Mini, GO e 40, non provati). **v168**
+- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v170** (19 novembre: scene, scalette, pickup, icona arrotondata; Store fermo alla 1.0.2, per sua scelta). **v169** (17 novembre: i 600 ms anche per Mini, GO e 40, non provati). **v168**
   (16 novembre: NEO, 600 ms fra `0x0138` e la rilettura sul PC e secondo tentativo sulle letture a metà,
   provato sul NEO e sullo Spark 2; `docs/protocollo-spark2.md`; il telefono non ha ancora l'attesa). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire. **Store 1.0.1
   online**; **1.0.2** (Electron 45, permessi, fuse) **in certificazione dal 15 novembre**. **npm 11 non scarica
@@ -353,8 +353,8 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso. **Pickup consigliati** e «La mia chitarra»
   (18 nov., `src/pc/16-pickup.js`): campo `pickup` fra gli `USER_FIELDS`; un'icona, mai un riquadro (niente scroll).
-- **Scene e scalette** (18 nov.): **solo nel ramo `scene`, mai in `main` finché lui non lo dice**. Solo PC, grafica
-  approvata. Tutto in `git show scene:docs/scene.md` e `…:docs/scaletta.md`; si riprende con `git worktree add`. **19 nov.: provate con Spark e pedale MIDI (BT), vanno**; la coda del delay si taglia (l'ampli, accettato). Resta: riavvio del pedale a batteria carica (motivo col comando `M`), scene finte da togliere. Pedale MIDI: CC 102–109 127/0 + Program Change.
+- **Scene e scalette** (18 nov.): **in `main` dal 19 novembre (v170)**, solo PC. Tutto in `docs/scene.md` e
+  `docs/scaletta.md`; dati ripuliti all'ingresso (`scenaPulita`, `scalettePulite`). Provate con Spark e pedale MIDI (BT); la coda del delay si taglia (l'ampli, accettato). Resta: riavvio del pedale a batteria carica (motivo col comando `M`). Pedale MIDI: CC 102–109 127/0 + Program Change.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - Copia oraria dei progetti in `Desktop\Cloud Backup`.

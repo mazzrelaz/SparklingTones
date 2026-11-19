@@ -37,7 +37,7 @@ e i primi due preset prendono tre scene finte). Il service worker va tolto a ogn
 Manca, prima che vada in `main` (e ci va solo quando lo dice l'utente):
 
 1. ~~Prova con lo Spark vero~~: **fatta il 19 novembre**, vedi sotto.
-2. **Togliere la parte SOLO BOZZA** in fondo a `src/pc/16-scene.js` (le scene finte).
+2. ~~Togliere la parte SOLO BOZZA~~: **tolta il 19 novembre**, quando le scene sono andate in `main` (v170).
 3. ~~Inglese e guida del PC~~: **fatti il 18 novembre** (12 frasi in `lingua-en.js`; «Le scene» nel capitolo
    Live di `guida-pc.html` e `guida-pc.en.html`).
 4. ~~Test~~: **fatti il 18 novembre** in `test/store-test.html`, «le scene di un preset». Hanno trovato un
