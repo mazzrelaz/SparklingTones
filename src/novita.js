@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v171',
+    data: '19 novembre 2026',
+    voci: [
+      { icona: '🧹', titolo: tr('Barra in alto più ordinata'), dove: 'pc',
+        testo: tr('Lo slot e «modificato» non coprono più Live, Banchi e Scalette; il bollo «software» non c\'è più.') },
+    ],
+  },
+  {
     versione: 'v170',
     data: '19 novembre 2026',
     voci: [

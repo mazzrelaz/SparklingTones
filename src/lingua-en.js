@@ -2045,6 +2045,10 @@ window.LINGUA_EN = {
     "The PC guide explains the Live looper: length, count-in, click and every button.",
   "Versione {0}":
     "Version {0}",
+  "Barra in alto più ordinata":
+    "Tidier top bar",
+  "Lo slot e «modificato» non coprono più Live, Banchi e Scalette; il bollo «software» non c'è più.":
+    "The slot and “modified” badges no longer cover Live, Banks and Setlists; the “software” badge is gone.",
   "Le scene":
     "Scenes",
   "Fino a tre scene per preset, più la Base: cambiano manopole ed effetti accesi senza cambiare preset. Nella Live, modo Scene; tenendo premuto un pulsantone la scena si modifica mentre la senti.":

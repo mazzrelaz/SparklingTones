@@ -341,7 +341,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
   si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v170** (19 novembre: scene, scalette, pickup, icona arrotondata; Store fermo alla 1.0.2, per sua scelta). **v169** (17 novembre: i 600 ms anche per Mini, GO e 40, non provati). **v168**
+- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v171** (19 novembre: bolli della barra del PC, via «software»). **v170** (19 novembre: scene, scalette, pickup, icona arrotondata; Store fermo alla 1.0.2, per sua scelta). **v169** (17 novembre: i 600 ms anche per Mini, GO e 40, non provati). **v168**
   (16 novembre: NEO, 600 ms fra `0x0138` e la rilettura sul PC e secondo tentativo sulle letture a metà,
   provato sul NEO e sullo Spark 2; `docs/protocollo-spark2.md`; il telefono non ha ancora l'attesa). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire. **Store 1.0.1
   online**; **1.0.2** (Electron 45, permessi, fuse) **in certificazione dal 15 novembre**. **npm 11 non scarica
