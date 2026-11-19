@@ -32,6 +32,12 @@ delle pagine restano dov'erano (arrivano prima); il trasporto risponde `{ ok: fa
 un errore GATT, e non manda niente. Quattro test in `transport-test` (71 verdi); nove preset veri delle
 catture passano. Nessuna frase nuova.
 
+**`tools/prove.js`, la sera.** Server di prova su `127.0.0.1`, porta libera, solo GET/HEAD (POST → 405),
+chiuso nella cartella del progetto col separatore in coda: `..%2f`, `..%5c` → 403, `%2e%2e` → 404
+(provato). Edge con `--remote-debugging-port=0` (solo locale) e profilo nuovo in `%TEMP%`, cancellato a
+fine giro (verificato: nessuno resta). Vive solo mentre girano le prove; non tocca la libreria vera
+né l'app pubblicata. L'iniezione dell'ampli finto esiste solo dentro le prove.
+
 ### Da correggere (com'era la mattina)
 
 **1. Il controllo dei modelli inesistenti non copre tutte le strade verso l'ampli — basso-medio,

@@ -7,6 +7,25 @@ riprende» pesava da sola 13 KB.
 
 Le voci sono in ordine dal più recente al più vecchio.
 
+## 19 novembre 2026, sera — le prove in un comando solo
+
+Dopo il voto tecnico all'app (test 6,5: niente sulle schermate, suite lanciate a mano), l'utente ha
+chiesto il secondo punto. Fatto `tools/prove.js`: un server suo su 127.0.0.1, Edge senza finestra
+pilotato dal DevTools Protocol (Node 24 ha `WebSocket`), profilo usa e getta. Le cinque suite in 8 s,
+store compreso: in headless restava su «esecuzione…» per colpa di `--virtual-time-budget`, non di
+IndexedDB. Poi i **giri**: la pagina del PC con `#finto` e quella del telefono con l'ampli finto
+iniettato prima degli script (un setter su `window.SparkTransport`), senza cambiare una riga dell'app.
+L'ampli finto ora ha anche il cancello dei modelli e segna i preset mandati. Ogni giro è stato provato
+rompendo apposta la pagina (controllo dei modelli, manopole, Live del telefono): cade quello giusto e
+gli altri restano verdi. Trappola trovata: **l'avvertenza della prima apertura arriva dopo 300 ms e
+copre tutto**; i clic finti la attraversano, il mouse vero no (`chiudiPrimaApertura`).
+
+Dal CLAUDE.md, parola per parola: **Dopo ogni modifica a `src/`, le suite in `test/` restano verdi.** Protocol, transport e dropbox da
+`file://` con Edge headless (`--headless=new --disable-gpu --no-first-run --user-data-dir=…
+--virtual-time-budget=20000 --dump-dom <url>`, lanciato con `Start-Process … -RedirectStandardOutput`
+perché lo stdout non torna), poi `id="summary"`. **Store e backup da `localhost:8099`**; store in
+headless resta su «esecuzione…»: si apre nel riquadro del browser e si legge `#summary` (22 ottobre).
+
 ## Estratto di CLAUDE.md, 19 novembre 2026 — v168, v169, scene
 
 Da «Pubblicazione»: **v169** (17 novembre: i 600 ms anche per Mini, GO e 40, non provati). **v168**

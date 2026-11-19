@@ -45,8 +45,8 @@ src/lingua.js / lingua-en.js      le lingue (lingua-en.js NON si legge: vedi «L
 pedale/prova-ble/                 firmware del pedale (prova-ble.ino + 01-…11-*.ino, banchi.h)
 pedale/prova-espansore|usb|display|midi/   sketch di prova (mappatura guidata)
 pcb/basetta/                      basetta stampata v1 (20 ottobre 2026), sorgente tools/genera-basetta.py; pcb/*.kicad_* vecchio, fermo
-tools/                            serve.ps1, server-rete.js, wah-ponte.ps1 + wah.html, togli-sfondo/, video-demo/
-test/*.html                       protocol 173, transport 71, store 182, backup 41, dropbox 44
+tools/                            prove.js, serve.ps1, server-rete.js, wah-ponte.ps1 + wah.html, togli-sfondo/, video-demo/
+test/*.html · giri-*.js            suite: protocol 173, transport 71, store 182, backup 41, dropbox 44; giri: PC 8, telefono 5
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
 ```
 
@@ -87,12 +87,10 @@ dall'una all'altra, si esporta in JSON.
   `tools/server-rete.js` (vedi «Dove si riprende»). **Il riquadro del browser non apre la scelta
   dei dispositivi Bluetooth**: ampli e pedale veri si provano solo dall'app pubblicata.
 
-**Dopo ogni modifica a `src/`, le suite in `test/` restano verdi.** Protocol, transport e dropbox da
-`file://` con Edge headless (`--headless=new --disable-gpu --no-first-run --user-data-dir=…
---virtual-time-budget=20000 --dump-dom <url>`, lanciato con `Start-Process … -RedirectStandardOutput`
-perché lo stdout non torna), poi `id="summary"`. **Store e backup da `localhost:8099`**; store in
-headless resta su «esecuzione…»: si apre nel riquadro del browser e si legge `#summary` (22 ottobre).
-Un `file://` nel riquadro non carica gli script.
+**Dopo ogni modifica a `src/`: `node tools/prove.js`, e tutto verde** (19 novembre): le cinque suite e i
+giri (`test/giri-*.js`: la pagina cliccata davvero con l'ampli finto, iniettato anche nel telefono senza
+toccarlo), ~30 s, Edge senza finestra e profilo buttato. `suite` o `giri` per una parte. **Un guasto
+trovato = un giro nuovo.** Un `file://` nel riquadro non carica gli script.
 
 - **`requestAnimationFrame` non gira** né nel riquadro né in headless: ciò che si muove usa `setInterval`.
 - **Il service worker serve i file vecchi**: query in coda all'url, profilo nuovo, o va tolto.

@@ -65,6 +65,8 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
   diverse (il PC fa di più). Fatto solo il **cancello unico** dei modelli in `writePreset`. **Un modulo
   comune per le operazioni sull'ampli non si fa**: toccherebbe Live ed editor del telefono, che vanno.
   Si riapre solo se una correzione dimenticata su un lato ricapita.
+- [x] **Prove in un comando solo** (19 novembre): `node tools/prove.js`, cinque suite e 13 giri (PC 8,
+  telefono 5) con l'ampli finto. Da allargare quando serve: banchi del pedale, scene, sync, looper.
 
 ## 6. Funzioni nuove (18 novembre, scelte dall'utente fra otto proposte)
 

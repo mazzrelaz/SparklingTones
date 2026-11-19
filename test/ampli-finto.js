@@ -88,6 +88,7 @@ window.AmpliFinto = (function () {
         await sleep(60);
         fuori.push(Object.assign(copia(this.slot[i]), { slot: i }));
       }
+      this.letture = (this.letture || 0) + 1;   // per i giri: la lettura degli slot è finita
       return fuori;
     },
     async readPreset(n) { await sleep(120); return Object.assign(copia(this.slot[n]), { slot: n }); },
@@ -159,7 +160,17 @@ window.AmpliFinto = (function () {
       else if (a === 0x0c) L.stato = 0x08;
       else if (a === 0x0a) { clearInterval(L.flusso); L.flusso = null; L.durata = 0; stato(0x0a); setTimeout(() => stato(0x00), 1200); }
     },
+    /* Come `writePreset` del trasporto vero (19 novembre 2026): un preset con un modello che
+       l'ampli non ha non parte, e si risponde come lui. I preset mandati finiscono in `comandi`,
+       così i giri di `tools/prove.js` vedono cosa è arrivato. */
+    _cancello(p) {
+      const c = Spark.controllaPreset(p, { modelli: E.MODELLI.flat() });
+      return c.errori.length ? { ok: false, sent: 0, total: 0, acks: 0, error: c.errori[0] } : null;
+    },
     async loadPreset(p, onProgress) {
+      const no = this._cancello(p);
+      if (no) return no;
+      this.comandi.push(['preset', p.name]);
       for (let i = 0; i < 4; i++) { if (onProgress) onProgress(i, 4); await sleep(60); }
       this.vivo = copia(p);
       this.attuale = Spark.SOFTWARE_PRESET;
@@ -167,6 +178,9 @@ window.AmpliFinto = (function () {
       return { ok: true, acks: 4, total: 4 };
     },
     async storePreset(p, slot, onProgress) {
+      const no = this._cancello(p);
+      if (no) return no;
+      this.comandi.push(['scrivi', p.name, slot]);
       for (let i = 0; i < 4; i++) { if (onProgress) onProgress(i, 4); await sleep(60); }
       const pulito = copia(p);
       delete pulito.id; delete pulito.slots; delete pulito.tags; delete pulito.notes;
