@@ -104,7 +104,25 @@ static void annota(const char* formato, ...) {
 }
 
 /** La scatola nera, dalla riga piu' vecchia, sul seriale o in un file. */
+/** Perche' il pedale si e' riavviato l'ultima volta (19 novembre 2026: si riavviava
+ *  cambiando scena dal PC in modalita' MIDI). Panic e watchdog sono un difetto nostro;
+ *  brownout e' l'alimentazione. */
+static const char* motivoAvvio() {
+  switch (esp_reset_reason()) {
+    case ESP_RST_POWERON:  return "accensione";
+    case ESP_RST_SW:       return "riavvio voluto (software)";
+    case ESP_RST_PANIC:    return "PANIC: il firmware e' andato in crash";
+    case ESP_RST_INT_WDT:  return "WATCHDOG interrupt: firmware bloccato";
+    case ESP_RST_TASK_WDT: return "WATCHDOG task: firmware bloccato";
+    case ESP_RST_WDT:      return "WATCHDOG";
+    case ESP_RST_BROWNOUT: return "BROWNOUT: tensione caduta";
+    case ESP_RST_USB:      return "USB";
+    default:               return "altro";
+  }
+}
+
 static void scriviScatola(Print& fuori) {
+  fuori.printf("ultimo avvio: %s (%d)\n", motivoAvvio(), (int)esp_reset_reason());
   const uint32_t fine = scatolaPos;
   const uint32_t inizio = fine > SCATOLA_RIGHE ? fine - SCATOLA_RIGHE : 0;
   fuori.printf("scatola nera: %lu righe in tutto, le ultime %lu (adesso %lu.%lu s)\n",
