@@ -142,6 +142,11 @@ static void leggiTasto() {
     if (giuPrima && !giuOra) {
       // In Play Acoustic il rilascio e' un comando anche lui (manda lo 0).
       if (modo == MODO_PLAY) playTasto(k, false);
+      // In MIDI, pagina preset: il rilascio manda lo 0 dello stesso CC.
+      if (modo == MODO_MIDI && k < 8 && midiCcGiu[k] >= 0) {
+        mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), (uint8_t)midiCcGiu[k], 0);
+        midiCcGiu[k] = -1;
+      }
       if ((int8_t)k == bancoInAttesa) {
         bancoInAttesa = -1;
         if (!bancoAnnullato && !tuner && !looper && modo == MODO_SPARK && chScrittura)
