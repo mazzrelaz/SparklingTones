@@ -61,12 +61,6 @@ window.LINGUA_EN = {
     "Import a file",
   "Dropbox":
     "Dropbox",
-  "Due gesti espliciti, mai in automatico. Quello che arriva si <strong>fonde</strong>: aggiorna i preset che riconosce, aggiunge quelli che non ci sono, e quelli cancellati sull'altro apparecchio spariscono anche qui — a meno che tu non li abbia toccati dopo.":
-    "Two explicit actions, never automatic. What comes in is <strong>merged</strong>: it updates the presets it recognises, adds the ones that aren't here, and the ones deleted on the other device disappear here too — unless you touched them afterwards.",
-  "Manda su Dropbox":
-    "Send to Dropbox",
-  "Prendi da Dropbox":
-    "Get from Dropbox",
   "Scollega Dropbox":
     "Disconnect Dropbox",
   "app key della tua app Dropbox":
@@ -79,8 +73,6 @@ window.LINGUA_EN = {
     "code from Dropbox",
   "Serve un'app tua, una volta sola: su <code>dropbox.com/developers</code>, «Create app», <em>Scoped access</em> e <em>App folder</em>; nella scheda «Permissions» spunta <code>files.content.write</code> e <code>files.content.read</code>. L'app key sta nella scheda «Settings». L'app secret non serve: una pagina come questa non potrebbe tenerlo nascosto, ed è il motivo per cui si usa PKCE.":
     "You need an app of your own, just once: on <code>dropbox.com/developers</code>, «Create app», <em>Scoped access</em> and <em>App folder</em>; in the «Permissions» tab tick <code>files.content.write</code> and <code>files.content.read</code>. The app key is in the «Settings» tab. The app secret isn't needed: a page like this one couldn't keep it hidden, which is why PKCE is used.",
-  "Toglie dalla libreria tutti i preset <strong>tranne gli otto caricati sull'ampli</strong>, che restano coi loro tag e le loro note. L'ampli non viene toccato. Se usi Dropbox, al prossimo «Manda su» spariranno anche di là.":
-    "Removes from the library every preset <strong>except the eight loaded on the amp</strong>, which keep their tags and notes. The amp is not touched. If you use Dropbox, at the next «Send to» they will disappear from there too.",
   "Elimina tutti i preset":
     "Delete all presets",
   "Informazioni, licenze e responsabilità":
@@ -575,12 +567,6 @@ window.LINGUA_EN = {
     "the official app's categories were not imported: make your own from «Categories».",
   "{0} preset saltati: {1}":
     "{0} presets skipped: {1}",
-  "controllo cosa c'è su Dropbox…":
-    "checking what's on Dropbox…",
-  "Lassù: {0}, {1} KB.":
-    "Up there: {0}, {1} KB.",
-  "Su Dropbox non c'è ancora niente: il primo invio lo crea.":
-    "There's nothing on Dropbox yet: the first upload creates it.",
   "non riesco a leggere Dropbox: {0}":
     "I can't read Dropbox: {0}",
   "serve l'app key della tua app Dropbox":
@@ -599,24 +585,6 @@ window.LINGUA_EN = {
     "Dropbox connected",
   "Dropbox non ha accettato il codice ({0}). Un codice vale una volta sola: riapri Dropbox col link qui sopra e incolla quello nuovo.":
     "Dropbox didn't accept the code ({0}). A code works only once: reopen Dropbox with the link above and paste the new one.",
-  "mando la libreria su Dropbox…":
-    "sending the library to Dropbox…",
-  "{0} preset mandati su Dropbox":
-    "{0} presets sent to Dropbox",
-  "non sono riuscito a mandarla su: {0}":
-    "I couldn't send it up: {0}",
-  "prendere da Dropbox":
-    "get from Dropbox",
-  "Prendere la libreria da Dropbox e fonderla con questa? <strong>Quello che è stato cancellato sull'altro apparecchio sparisce anche qui</strong>, se qui non l'hai toccato dopo.":
-    "Get the library from Dropbox and merge it with this one? <strong>Whatever was deleted on the other device disappears here too</strong>, unless you touched it here afterwards.",
-  "Prendi e fondi":
-    "Get and merge",
-  "prendo la libreria da Dropbox…":
-    "getting the library from Dropbox…",
-  "{0} preset presi da Dropbox":
-    "{0} presets taken from Dropbox",
-  "non sono riuscito a prenderla: {0}":
-    "I couldn't get it: {0}",
   "scollegare Dropbox":
     "disconnect Dropbox",
   "Scollegare Dropbox? La libreria qui e quella lassù restano dove sono: smettono solo di parlarsi.":
@@ -637,8 +605,6 @@ window.LINGUA_EN = {
     "Delete {0} presets",
   "ultima conferma":
     "last confirmation",
-  "<strong>{0} preset, e non si torna indietro.</strong> Se usi Dropbox, al prossimo «Manda su» spariranno anche dagli altri apparecchi.":
-    "<strong>{0} presets, and there's no way back.</strong> If you use Dropbox, at the next «Send to» they'll disappear from the other devices too.",
   "Sì, elimina":
     "Yes, delete",
   "elimino…":
@@ -1101,10 +1067,6 @@ window.LINGUA_EN = {
     "By name",
   "Preset con <strong>le stesse impostazioni</strong>, qualunque nome abbiano: stessi effetti nello stesso ordine, accesi e spenti uguali, stesse manopole e stesso tempo. Tag, note e banchi sono di ciascuno: guarda prima di togliere.":
     "Presets with <strong>the same settings</strong>, whatever their name: the same effects in the same order, switched on and off the same way, the same knobs and the same tempo. Tags, notes and banks belong to each one: look before you remove.",
-  "Si sente <strong>subito</strong>; in libreria non si salva niente finché non premi «Salva». Un tocco su un blocco della catena lo apre qui sotto; <strong>due tocchi</strong> cambiano il modello.":
-    "You hear it <strong>straight away</strong>; nothing is saved to the library until you press «Save». One tap on a block of the chain opens it below; <strong>two taps</strong> change the model.",
-  "Le manopole si girano sul disegno <strong>trascinando in su o in giù</strong>, non in cerchio. L'interruttore del disegno, la levetta ON/OFF o il footswitch, accende e spegne il blocco.":
-    "Turn the knobs on the drawing by <strong>dragging up or down</strong>, not in a circle. The switch on the drawing, the ON/OFF toggle or the footswitch, turns the block on and off.",
   "Pedale SparklingTones":
     "SparklingTones pedal",
   "Cerca":
@@ -1351,14 +1313,10 @@ window.LINGUA_EN = {
     "Reading the amp…",
   "senza ampli":
     "no amp",
-  "software":
-    "software",
   "copia in libreria: non si sente niente":
     "library copy: you won't hear anything",
   "lo slot dell'ampli da cui viene":
     "the amp slot it comes from",
-  "il preset software dell'ampli":
-    "the amp's software preset",
   "ascolti il preset salvato":
     "you're hearing the saved preset",
   "ispirato a {0}":
@@ -1503,10 +1461,6 @@ window.LINGUA_EN = {
     "Dropbox connected.",
   "Dropbox non ha accettato il codice ({0}). Un codice vale una volta sola: riapri la pagina e incolla quello nuovo.":
     "Dropbox didn't accept the code ({0}). A code works only once: reopen the page and paste the new one.",
-  "Backup e Dropbox":
-    "Backup and Dropbox",
-  "Impostazioni":
-    "Settings",
   "serve l'ampli":
     "the amp is needed",
   "Premi «Collega» in alto e riprova.":
@@ -1523,12 +1477,8 @@ window.LINGUA_EN = {
     "Categories and families…",
   "Doppioni…":
     "Duplicates…",
-  "Backup e Dropbox…":
-    "Backup and Dropbox…",
   "Elimina tutti i preset…":
     "Delete all presets…",
-  "Impostazioni…":
-    "Settings…",
   "Apri l'app per il telefono":
     "Open the phone app",
   "famiglia":
@@ -1803,8 +1753,6 @@ window.LINGUA_EN = {
     "USB MIDI",
   "Stomp":
     "Stomp",
-  "Stomp su":
-    "Stomp on",
   "(da leggere)":
     "(to be read)",
   "Banco A · {0}":
@@ -1919,20 +1867,6 @@ window.LINGUA_EN = {
     "Looper · tap",
   "Looper · tenuto":
     "Looper · hold",
-  "Looper come il nostro pedale":
-    "Looper like our pedal",
-  "nessuno switch":
-    "no switches",
-  "Impara prima gli switch del pedale.":
-    "Learn the pedal's switches first.",
-  "assegnare il looper come il nostro pedale?":
-    "assign the looper like our pedal?",
-  "Le assegnazioni del looper dei primi cinque switch vengono sostituite.":
-    "The looper assignments of the first five switches will be replaced.",
-  "Assegna":
-    "Assign",
-  "looper assegnato come il nostro pedale":
-    "looper assigned like our pedal",
   "Registra / sovraincidi":
     "Record / overdub",
   "Ferma":
@@ -2089,8 +2023,6 @@ window.LINGUA_EN = {
     "Before you connect the amp, the logo engraved in the background and the version under «Connect».",
   "Pickup consigliati":
     "Suggested pickups",
-  "Cambia i pickup consigliati":
-    "Change the suggested pickups",
   "Nota (selettore, manopole…)":
     "Note (selector, knobs…)",
   "Manico":
@@ -2195,4 +2127,8 @@ window.LINGUA_EN = {
     "«{0}»: the preset is no longer in the library.",
   "scaletta vuota":
     "empty setlist",
+  "Spark 40: messaggi col block header":
+    "Spark 40: messages with block header",
+  "Spark 40":
+    "Spark 40",
 };

@@ -58,7 +58,9 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 ## 5. Piccole cose
 
 - [ ] Schermata vera del Live nella guida del PC (dopo il collaudo con l'ampli).
-- [ ] Togliere le 23 traduzioni inglesi non più usate (`tools/lingua.html`).
+- [x] (19 novembre) Tolte le traduzioni inglesi non più usate: erano diventate 34 (vecchio Dropbox a mano,
+  bollo «software», looper «come il nostro pedale»…), controllate una per una nel codice; aggiunte le due
+  mancanti (Spark 40). `tools/lingua.html`: 1058 su 1058, nessuna in più.
 - [ ] Registro dei MIDI ricevuti per la Pedaliera: era per il beta test, chiuso. Probabilmente da lasciar perdere.
 - [x] **Codice in comune fra telefono e PC** (19 novembre, scelta lasciata a me: «non rompere quello che
   funziona»). Delle 46 funzioni con lo stesso nome solo 6 sono identiche e 6 quasi; le altre sono versioni
