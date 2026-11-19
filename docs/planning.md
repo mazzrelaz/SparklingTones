@@ -49,7 +49,7 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [ ] Montare la basetta stampata (pezzi TME e basetta arrivati).
 - [ ] Rimisurare la corrente di carica della batteria a ~3,5 V.
 - [ ] Pedale d'espressione: riprovare iPad/GarageBand e l'adattatore.
-- [x] **Modalità MIDI: anche il rilascio** — **fatto il 19 novembre**: CC 102–109 e poi il Program Change (per l'iPad), CC provato col PC; i due insieme da provare. (14 novembre, deciso con l'utente): oltre al Program Change, CC a 127
+- [x] **Modalità MIDI: anche il rilascio** — **fatto il 19 novembre**: CC 102–109 e poi il Program Change (per l'iPad), provati il 19 novembre col PC e con l'iPad. (14 novembre, deciso con l'utente): oltre al Program Change, CC a 127
   premendo e a 0 rilasciando, come Play Acoustic; così sul PC funziona la pressione lunga (FS4 tenuto cancella il
   loop). Poi reimparare gli switch nel Foot controller. Prima guardare chi altro ascolta quel MIDI (iPad).
 
