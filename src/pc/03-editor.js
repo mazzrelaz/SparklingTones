@@ -45,12 +45,11 @@ function disegnaTesta() {
   const pieno = !!ora;
   $('preset-nome').textContent = pieno ? ora.nome : '—';
   const dove = $('preset-dove');
-  dove.hidden = !pieno;
-  if (pieno) {
-    dove.textContent = ora.offline ? tr('senza ampli')
-      : ora.slot !== null ? nomeSlot(ora.slot) : tr('software');
-    dove.title = ora.offline ? tr('copia in libreria: non si sente niente')
-      : ora.slot !== null ? tr('lo slot dell\'ampli da cui viene') : tr('il preset software dell\'ampli');
+  // il preset software dell'ampli non ha bollo: «software» non diceva niente (19 novembre, l'utente)
+  dove.hidden = !pieno || (!ora.offline && ora.slot === null);
+  if (!dove.hidden) {
+    dove.textContent = ora.offline ? tr('senza ampli') : nomeSlot(ora.slot);
+    dove.title = ora.offline ? tr('copia in libreria: non si sente niente') : tr('lo slot dell\'ampli da cui viene');
   }
   const mod = $('modificato');
   mod.hidden = !(pieno && (ora.toccato || ascoltoBase));
