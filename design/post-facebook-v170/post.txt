@@ -1,0 +1,33 @@
+🎸 SparklingTones update: Scenes, Setlists and pickup tips!
+
+SparklingTones is a free companion app for the Positive Grid Spark 2 (and Spark NEO): keep all your presets in a library and in banks, edit the whole effect chain with real-looking pedals and knobs, play live with big buttons or a MIDI footswitch, tune up, and back everything up to Dropbox. It runs in Chrome/Edge on Android and on the computer, on iPhone/iPad with the Bluefy browser, and as a Windows app. No ads, no account.
+
+What's new on the computer:
+
+🎛️ Scenes
+Up to three scenes per preset, plus the Base: each one changes knobs and which effects are on, without changing preset. Think rhythm, lead and clean inside the same sound. Switch them from the Live page in Scenes mode, or with your MIDI footswitch. Hold a big button down and you edit the scene while you hear it.
+
+📋 Setlists
+Write the songs of the night, give each one its preset and the scene it starts from, then play the gig straight from Live: click the song and the sound is ready.
+
+🎸 Suggested pickups
+Tell "Generate with AI" which guitar you play ("My guitar") and it also suggests which pickups to use and how to set them. Tap the guitar icon on the preset to see them, or write your own.
+
+⏱️ Shorter long press
+In Live, the long press of your MIDI switches can now be as short as 0.7 s.
+
+And on the phone too:
+🛡️ Safer on stage: a preset with an effect the amp doesn't know won't start from Live or the editor anymore (it could freeze the amp).
+📱 The installed app now has a proper rounded icon.
+
+👉 sparklingtones.com
+💻 On the computer: https://mazzrelaz.github.io/SparklingTones/pc.html?lang=en
+📱 On the phone: https://mazzrelaz.github.io/SparklingTones/?lang=en
+🪟 Windows app: https://apps.microsoft.com/detail/9PLB9RG9VLNX (the new features reach the Store in a few days)
+🎬 Short videos for every feature: https://www.youtube.com/@SparklingTones
+
+☕ SparklingTones is free and it will stay that way. I build it in my spare time: if you find it useful, a coffee helps me keep going 🙏 https://buymeacoffee.com/mazzgear
+
+⚠️ Independent project, not affiliated with Positive Grid. Provided as is: you use it at your own risk.
+
+#PositiveGrid #Spark2 #SparkNEO #GuitarTone #Setlist #GuitarPedals
