@@ -327,32 +327,22 @@ più recente, gli slot non viaggiano, oltre 5 cancellazioni si chiede; il **back
 **`sparklingtones.com`** sta in `..\sparklingtones-sito`: **l'app non si sposta lì**, e **prima di
 ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs/sito.md`.
 
-## Dove si riprende — 1° novembre 2026
+## Dove si riprende — 19 novembre 2026
 
-**Si riparte da `docs/planning.md`** (13 novembre): le cose aperte in ordine di priorità, da spuntare lì.
+**Si riparte da `docs/planning.md`**: le cose aperte in ordine, da spuntare lì. Uscite, collaudi e voci lunghe: `docs/diario.md`.
 
-- **Due editor** (Neon / Classico): **ritoccando il classico il neon non si tocca mai**; il classico non scorre mai. Diario, 9 e 15 novembre.
+- **Due editor** (Neon / Classico): ritoccando il classico il neon non si tocca mai; il classico non scorre mai.
 - **Trappola**: `hidden` su un `button` del menu o `.imp-voce` non basta, il loro `display` lo batte.
-- **Basetta** `pcb/basetta/`: **solo** da `tools/genera-basetta.py`, mai a mano. Diario, 15 novembre.
-- **App Windows** (`desktop/`, Electron): `npm.cmd start` per provare (`npm` da PowerShell è bloccato), `npm run dist`
-  per l'installer. Il nome è **SparklingTones**, mai «Spark Controller». Inglese di guida e «?» del PC: aspetta il suo via.
-  Il resto: `docs/diario.md`, estratto del 12 novembre (sera).
-- **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
-  si tocca, **niente scritte guida**; Live provato con Spark e pedale il 19 novembre. Prove senza ampli: `pc.html#finto`
-  (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v171** (19 novembre: bolli della barra del PC, via «software»). **v170** (19 novembre: scene, scalette, pickup, icona arrotondata; Store fermo alla 1.0.2, per sua scelta). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire; il telefono non ha l'attesa dei 600 ms
-  (v168, diario). **Store 1.0.1
-  online**; **1.0.2** (Electron 45, permessi, fuse) **in certificazione dal 15 novembre**. **npm 11 non scarica
-  Electron**: dopo `npm install`, `node node_modules/electron/install.js`. Uscite prima: diario.
-- **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
-  l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
-  moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.1 online**: `https://apps.microsoft.com/detail/9PLB9RG9VLNX`, già nelle guide
-  del PC e nella home del sito. **Ogni pubblicazione ha la splash «Novità»** (`src/novita.js`: voce in cima con la versione di `sw.js`).
-- **«Genera con l'IA» solo sul PC** (`src/pc/11-genera-ia.js`): copia e incolla, **niente API né chiavi**.
-  **Fermo per sua scelta**: il tap tempo con l'ampli acceso. **Pickup consigliati** e «La mia chitarra»
-  (18 nov., `src/pc/16-pickup.js`): campo `pickup` fra gli `USER_FIELDS`; un'icona, mai un riquadro (niente scroll).
-- **Scene e scalette** (18 nov.): **in `main` dal 19 novembre (v170)**, solo PC. Tutto in `docs/scene.md` e
-  `docs/scaletta.md`; dati ripuliti all'ingresso (`scenaPulita`, `scalettePulite`). Provate con Spark e pedale MIDI (BT): resto nel diario.
+- **Basetta** `pcb/basetta/`: **solo** da `tools/genera-basetta.py`, mai a mano.
+- **App Windows** (`desktop/`, Electron; nome **SparklingTones**, mai «Spark Controller»): `npm.cmd start` (`npm` da
+  PowerShell è bloccato); **npm 11 non scarica Electron**: dopo `npm install`, `node node_modules/electron/install.js`.
+  Store: `npm.cmd run store`, account **a nome della moglie**; la 1.7.0 in certificazione dal 19 novembre.
+- **Versione PC** (`pc.html` + `src/pc/`): web ed exe sono la stessa app; l'app del telefono non si tocca, **niente
+  scritte guida**. Senza ampli: `pc.html#finto` (riempie la libreria) o `node tools/prove.js`.
+- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì; ogni uscita ha la splash «Novità»
+  (`src/novita.js`). Online la **v171**. Mini, GO e 40 **non provati**; il telefono non ha l'attesa dei 600 ms.
+- **Tutto gratuito, con donazioni.** «Genera con l'IA» solo sul PC, copia e incolla, **niente API né chiavi**.
+  Tap tempo con l'ampli acceso: **fermo per sua scelta**. Pickup: un'icona, mai un riquadro.
+- **Scene e scalette** (v170, solo PC): `docs/scene.md`, `docs/scaletta.md`; dati ripuliti all'ingresso.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
-- Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - Copia oraria dei progetti in `Desktop\Cloud Backup`.

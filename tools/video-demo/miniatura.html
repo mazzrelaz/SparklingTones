@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Miniatura</title>
+<!-- La miniatura di un video YouTube, 1280×720. Si apre con
+       miniatura.html?n=1&t=Connect%20your%20Spark&img=../../video-youtube/01-connecting/fotogrammi/f00080.jpg&pc=0
+     e si fotografa con Edge headless (--screenshot --window-size=1280,720).
+     n: il numero della puntata; t: il titolo (| va a capo); img: un fotogramma;
+     pc=1: fotogramma orizzontale, in una finestra invece che in un telefono. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1280px; height: 720px; overflow: hidden; background: #060607; }
+  body { position: relative; font-family: Inter, sans-serif; color: #fff;
+         background: radial-gradient(circle at 25% 30%, rgba(230,30,45,.35), rgba(230,30,45,0) 55%), #060607; }
+  .testo { position: absolute; left: 70px; top: 0; bottom: 0; width: 640px;
+           display: flex; flex-direction: column; justify-content: center; gap: 26px; }
+  .marchio { display: flex; align-items: center; gap: 14px; font: 700 34px 'Space Grotesk', sans-serif; }
+  .marchio img { width: 58px; height: 58px; }
+  .marchio span { color: #e11d2e; }
+  .numero { display: inline-block; align-self: flex-start; background: #e11d2e; color: #fff;
+            font: 700 30px Inter, sans-serif; padding: 8px 20px; border-radius: 10px; }
+  h1 { font: 700 92px/1.0 'Space Grotesk', sans-serif; letter-spacing: -1px; text-transform: uppercase; }
+  .sotto { font: 500 30px Inter, sans-serif; color: #d4d4d8; }
+  .telefono { position: absolute; right: 90px; top: 40px; width: 330px; height: 714px;
+              border-radius: 44px; background: #1b1b1f; padding: 10px; transform: rotate(4deg);
+              box-shadow: 0 30px 80px rgba(0,0,0,.8), 0 0 0 2px #2a2a30; }
+  .telefono img { width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 36px; }
+  .finestra { position: absolute; right: -60px; top: 120px; width: 640px; height: 360px;
+              border-radius: 14px; background: #1b1b1f; padding: 8px; transform: rotate(-3deg);
+              box-shadow: 0 30px 80px rgba(0,0,0,.8), 0 0 0 2px #2a2a30; }
+  .finestra img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+  .pc .testo { width: 600px; }
+  .pc h1 { font-size: 80px; }
+</style>
+</head>
+<body>
+<div class="testo">
+  <div class="marchio"><img src="../../icons/icon-192.png" alt=""><div>Sparkling<span>Tones</span></div></div>
+  <div class="numero" id="numero"></div>
+  <h1 id="titolo"></h1>
+  <div class="sotto" id="sotto"></div>
+</div>
+<div id="schermo"><img id="foto" alt=""></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const pc = q.get('pc') === '1';
+  document.body.classList.toggle('pc', pc);
+  document.getElementById('schermo').className = pc ? 'finestra' : 'telefono';
+  document.getElementById('numero').textContent = (pc ? 'DESKTOP · PART ' : 'PART ') + (q.get('n') || '1');
+  document.getElementById('titolo').innerHTML = (q.get('t') || '').split('|').map(r => r.replace(/[<&]/g, '')).join('<br>');
+  document.getElementById('sotto').textContent = q.get('s') || 'for the Positive Grid Spark 2';
+  document.getElementById('foto').src = q.get('img') || '';
+</script>
+</body>
+</html>

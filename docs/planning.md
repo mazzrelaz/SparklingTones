@@ -72,9 +72,9 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 
 Ognuna in italiano e inglese e nelle guide, nello stesso lavoro.
 
-- [ ] **Scaletta (setlist)**: brani in fila (preset, bpm, nota); la Live avanza di brano in brano, il pedale la
+- [x] (19 novembre, v170, **solo PC**) **Scaletta (setlist)**: brani in fila (preset, bpm, nota); la Live avanza di brano in brano, il pedale la
   segue e mostra il prossimo. Nessun comando nuovo.
-- [ ] **Scene dentro un preset** (ritmica / solo / pulito): solo le manopole e gli on/off che cambiano, con
+- [x] (19 novembre, v170, **solo PC**; `docs/scene.md`) **Scene dentro un preset** (ritmica / solo / pulito): solo le manopole e gli on/off che cambiano, con
   `0x0104`/`0x0115`, invece del preset intero. **L'utente: «va studiata bene» — prima lo studio, poi si decide.**
   Da capire: quanti parametri si possono mandare in fila senza piantare l'ampli (`PAUSA_PARAMETRO`), quando
   conviene il preset intero, cosa succede se la scena cambia un modello (`0x0106`), come si salvano nel record
