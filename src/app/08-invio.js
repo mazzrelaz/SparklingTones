@@ -33,6 +33,21 @@ function scaricaDiagnostica() {
 }
 
 /**
+ * Il controllo di `mandaPreset` per le strade che mandano il preset da sole: la vista Live
+ * (un preset che non sta in uno slot) e «Regola» dell'editor. Audit del 19 novembre 2026:
+ * prima non c'era, e un preset importato con un modello che l'ampli non ha lo piantava da lì.
+ * Torna true se si può mandare; se no lo dice in una finestra, come la pagina PC.
+ */
+async function mandabileOAvvisa(record) {
+  const controllo = Spark.controllaPreset(record, { modelli: SparkEffetti.MODELLI.flat() });
+  if (!controllo.errori.length) return true;
+  logLine(tr('«{0}» non è mandabile così com\'è: {1}.', record.name, controllo.errori.join('; ')));
+  await avvisa(tr('non si può mandare'), tr('«{0}» non è mandabile così com\'è: {1}.',
+    testoConNome(record.name), testoConNome(controllo.errori.slice(0, 3).join('; '))));
+  return false;
+}
+
+/**
  * Manda un preset all'ampli e verifica l'esito rileggendolo.
  * L'ack conferma solo la ricezione: l'unica prova che il preset sia stato
  * applicato è ritrovarlo sull'ampli.

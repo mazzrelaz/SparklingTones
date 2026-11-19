@@ -87,6 +87,13 @@ window.PedalePonte = (function () {
       // Un record senza catena di effetti non e' un preset: mandarlo
       // produrrebbe un banco che il pedale accetta e non sa suonare.
       if (!record.effects) throw new Error(tr`"${record.name}" non ha dati sonori`);
+      // Un modello che l'ampli non ha lo pianta, e qui il pedale lo suonerebbe da solo, sul
+      // palco (audit del 19 novembre 2026): lo stesso controllo di `mandaPreset`.
+      const controllo = Spark.controllaPreset(record,
+        window.SparkEffetti ? { modelli: SparkEffetti.MODELLI.flat() } : undefined);
+      if (controllo.errori.length)
+        throw new Error(tr('«{0}» non è mandabile così com\'è: {1}.', record.name,
+          controllo.errori.slice(0, 3).join('; ')));
       out.push(1);
       out.push(...testo(record.uuid || record.id || ''));
       out.push(...testo(record.name || ''));

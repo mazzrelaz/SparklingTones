@@ -23,6 +23,7 @@
 
 <script src="../src/spark-protocol.js"></script>
 <script src="../src/spark-effetti.js"></script>
+<script src="../src/pedale-ponte.js"></script>
 <script src="fixtures/preset0.js"></script>
 <script>
 'use strict';
@@ -374,6 +375,16 @@ check('e l\'errore dice il nome del modello',
       Spark.controllaPreset(inventato, { modelli: noti }).errori[0].includes('TrebleBooster'), true);
 check('senza elenco il nome non si controlla: il modulo resta puro',
       Spark.controllaPreset(inventato).errori, []);
+
+/* I banchi del pedale passano dallo stesso controllo (audit del 19 novembre 2026): il
+   pedale suona da solo, e un modello inesistente pianterebbe l'ampli sul palco. */
+const bancoCon = record => ({ nome: 'prova', posti: [Object.assign({ name: 'x', uuid: 'u' }, record)] });
+check('un preset vero entra in un banco del pedale',
+      typeof PedalePonte.improntaDiBanco(bancoCon(copia(preset))), 'number');
+let rifiutoPedale = '';
+try { PedalePonte.improntaDiBanco(bancoCon(inventato)); } catch (e) { rifiutoPedale = e.message; }
+check('un modello inesistente non entra in un banco del pedale, e l\'errore dice quale',
+      rifiutoPedale.includes('TrebleBooster'), true);
 
 const troppiEffetti = copia(preset);
 troppiEffetti.effects = new Array(16).fill(0).map(() => copia(preset.effects[0]));

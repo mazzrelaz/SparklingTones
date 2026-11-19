@@ -13,7 +13,19 @@ entrato dopo: Spark 40 (block header) e NEO (rilettura a metà) in `spark-protoc
 MIDI, motivo del riavvio), il **ramo `scene`** (scene e scalette, non in `main`), il sito, le
 dipendenze, segreti e immagini (anche quelle non tracciate).
 
-### Da correggere
+### La correzione — lo stesso giorno
+
+**1. corretto il 19 novembre.** `mandabileOAvvisa(record)` in `src/app/08-invio.js` (lo stesso
+controllo di `mandaPreset`, con la finestra «non si può mandare» come sul PC) prima di
+`loadPreset` nella Live del telefono (solo per un preset che non sta in uno slot) e in «Regola»;
+in `blocco()` di `pedale-ponte.js` un errore col nome del preset e del modello, che finisce nel
+registro del pedale (e un banco così non ha impronta, come un banco vuoto). Nessuna frase nuova: sono
+quelle del PC, già in inglese. Due test in `protocol-test` (173 verdi; transport 67, dropbox 44,
+store 172, backup 41). **Provato nell'app locale con un ampli finto**: un preset con
+`TrebleBooster` nella Live e in «Regola» si ferma alla finestra e non parte niente; uno buono parte.
+Non provato con lo Spark vero, che non serve: l'invio non c'è.
+
+### Da correggere (com'era la mattina)
 
 **1. Il controllo dei modelli inesistenti non copre tutte le strade verso l'ampli — basso-medio,
 sul palco.** Dal 17 settembre `controllaPreset(…, { modelli })` ferma un nome che l'ampli non ha
@@ -77,8 +89,8 @@ per il banco vuoto); un test in `protocol-test` o `store-test`.
 ### Voto
 
 **Buono.** Una cosa da fare davvero (1: il controllo dei modelli sulle strade che lo saltano, perché
-sul palco un ampli piantato è il danno peggiore che l'app possa fare) e una da fare prima del merge
-delle scene.
+sul palco un ampli piantato è il danno peggiore che l'app possa fare), corretta lo stesso giorno, e
+una da fare prima del merge delle scene.
 
 ## Audit completo — 15 novembre 2026
 

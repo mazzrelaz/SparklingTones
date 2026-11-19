@@ -56,6 +56,7 @@ async function apriEditor(record) {
     return;
   }
 
+  if (!await mandabileOAvvisa(record)) return;
   logLine(tr`mando «${record.name}» all'ampli per regolarlo…`);
   const esito = await spark.loadPreset(record, (i, total) =>
     logProgress(tr`invio «${record.name}»: chunk ${i + 1} di ${total}…`));

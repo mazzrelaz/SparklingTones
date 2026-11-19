@@ -264,6 +264,9 @@ async function rinominaOElimina(banco) {
 
 async function attiva(record, barra) {
   if (live.occupato || !spark.connected) return;
+  // Uno slot dell'ampli il preset ce l'ha già; un invio intero passa dal controllo dei modelli.
+  if (!residente(record) && !await mandabileOAvvisa(record)) return;
+  if (live.occupato || !spark.connected) return;   // mentre la finestra era aperta
   live.occupato = true;
   live.attivo = record.id;
   disegnaLive();
