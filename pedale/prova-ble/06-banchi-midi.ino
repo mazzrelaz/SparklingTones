@@ -125,8 +125,9 @@ static void midiPremuto(uint8_t k) {
     Serial.printf("MIDI: preset %u-%u\n", gruppoMidi * 4 + 1, gruppoMidi * 4 + 4);
   } else if (paginaMidi == 0) {
     programmaMidi = (int16_t)(gruppoMidi * 4 + k);
-    mandaMidi((uint8_t)(0xc0 | (MIDI_CANALE - 1)), (uint8_t)programmaMidi, -1);
-    Serial.printf("MIDI: program change %d\n", programmaMidi);
+    midiCcGiu[k] = (int16_t)(MIDI_CC_PRESET + programmaMidi);
+    mandaMidi((uint8_t)(0xb0 | (MIDI_CANALE - 1)), (uint8_t)midiCcGiu[k], 127);
+    Serial.printf("MIDI: CC %d = 127 (preset %d)\n", midiCcGiu[k], programmaMidi + 1);
   } else {
     stompAccesi ^= (uint8_t)(1 << k);
     const bool su = stompAccesi & (1 << k);

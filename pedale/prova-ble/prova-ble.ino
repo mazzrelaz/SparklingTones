@@ -316,6 +316,11 @@ static void    pulzeStato();
 static USBMIDI midi("SparkPedale MIDI");
 static const uint8_t MIDI_CANALE = 1;
 static const uint8_t MIDI_CC_STOMP = 80;       // 80..83: liberi nello standard
+// Pagina preset: CC 102 + preset (0-7) a 127 premendo e a 0 rilasciando, al posto del
+// Program Change (19 novembre 2026, chiesto dall'utente): cosi' la Live del PC misura
+// la pressione lunga. 102..109: liberi nello standard.
+static const uint8_t MIDI_CC_PRESET = 102;
+static int16_t midiCcGiu[8] = { -1, -1, -1, -1, -1, -1, -1, -1 };  // il CC premuto per footswitch
 static uint8_t paginaMidi  = 0;                // 0 = preset, 1 = stomp
 static uint8_t gruppoMidi  = 0;                // i quattro preset mostrati: gruppo*4 .. +3
 static int16_t programmaMidi = -1;             // l'ultimo Program Change mandato
