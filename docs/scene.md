@@ -125,6 +125,13 @@ Viaggiano con Dropbox insieme al preset. Da coprire con test:
   `frameAccettabile()` va allargato a `0x0104` e `0x0115` — **controllo di sicurezza** da rifare. E va
   deciso quale footswitch cambia scena.
 
+## Prova con lo Spark vero (19 novembre 2026, utente)
+
+Le scene suonano: il suono cambia come previsto, dal PC (ramo `scene` servito in locale, Edge).
+**La coda del delay sparisce** quando la scena nuova spegne il delay **e anche quando ne cambia solo i parametri**:
+l'ampli ricalcola il delay sulla scena nuova. Il cambio di una manopola che non è del delay non è stato provato
+per la coda. È l'ampli, non i nostri comandi (mandiamo solo `0x0104`/`0x0115`, niente preset intero).
+
 ## Misure da fare con l'ampli (una alla volta, rileggendo dall'ampli)
 
 1. **Preset intero, ascoltando**: si sente un buco? Le code di delay e riverbero restano?
