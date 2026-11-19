@@ -33,7 +33,7 @@ const GESTI = [
   { id: 'banco+', nome: () => tr('Banco successivo') },
   { id: 'banco-', nome: () => tr('Banco precedente') },
 ];
-const DURATE = [1000, 1500, 2000, 3000];
+const DURATE = [700, 1000, 1500, 2000, 3000];   // 0,7 s chiesto dall'utente il 19 novembre 2026
 
 let schermoLive = null;
 const live = {
