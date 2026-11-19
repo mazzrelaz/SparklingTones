@@ -561,6 +561,20 @@ window.SparkTransport = (function () {
       if (!this.writeChar) throw new Error(tr('non connesso'));
       const opts = options || {};
 
+      // Il cancello di ogni preset che va all'ampli (19 novembre 2026): `loadPreset` e
+      // `storePreset` passano di qui, dal telefono, dal PC e dalle sonde. Le pagine controllano
+      // già prima, con le loro finestre; questo copre le strade che se ne dimenticano, di oggi
+      // e di domani (l'audit del 19 novembre ne aveva trovate due). Un modello che l'ampli non
+      // ha lo pianta (`TrebleBooster`: si stacca la corrente). Stessa regola delle pagine: gli
+      // errori fermano, gli avvisi no. L'elenco dei modelli c'è dove è caricato `spark-effetti.js`.
+      const controllo = Spark.controllaPreset(preset, typeof SparkEffetti !== 'undefined'
+        ? { modelli: SparkEffetti.MODELLI.flat() } : undefined);
+      if (controllo.errori.length) {
+        const error = controllo.errori[0];
+        this.onLog(tr('invio interrotto: {0}', error));
+        return { ok: false, sent: 0, total: 0, acks: 0, error };
+      }
+
       // I due float di coda non vengono mandati: `create_preset` non li scrive
       // (SparkIO.ino:1019) e nemmeno l'ampli li usa per lo stato live.
       const payload = Spark.serializePreset(preset, target, { omitTail: !opts.includeTail });

@@ -60,6 +60,11 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [ ] Schermata vera del Live nella guida del PC (dopo il collaudo con l'ampli).
 - [ ] Togliere le 23 traduzioni inglesi non più usate (`tools/lingua.html`).
 - [ ] Registro dei MIDI ricevuti per la Pedaliera: era per il beta test, chiuso. Probabilmente da lasciar perdere.
+- [x] **Codice in comune fra telefono e PC** (19 novembre, scelta lasciata a me: «non rompere quello che
+  funziona»). Delle 46 funzioni con lo stesso nome solo 6 sono identiche e 6 quasi; le altre sono versioni
+  diverse (il PC fa di più). Fatto solo il **cancello unico** dei modelli in `writePreset`. **Un modulo
+  comune per le operazioni sull'ampli non si fa**: toccherebbe Live ed editor del telefono, che vanno.
+  Si riapre solo se una correzione dimenticata su un lato ricapita.
 
 ## 6. Funzioni nuove (18 novembre, scelte dall'utente fra otto proposte)
 

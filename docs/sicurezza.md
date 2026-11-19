@@ -25,6 +25,13 @@ store 172, backup 41). **Provato nell'app locale con un ampli finto**: un preset
 `TrebleBooster` nella Live e in «Regola» si ferma alla finestra e non parte niente; uno buono parte.
 Non provato con lo Spark vero, che non serve: l'invio non c'è.
 
+**E il cancello unico, la sera.** Lo stesso controllo sta ora anche dentro `writePreset` di
+`spark-transport.js`, da cui passano `loadPreset` e `storePreset` di telefono, PC e sonde: una strada
+nuova che si dimentica il controllo non può più mandare all'ampli un modello che non ha. Le finestre
+delle pagine restano dov'erano (arrivano prima); il trasporto risponde `{ ok: false, error }`, come per
+un errore GATT, e non manda niente. Quattro test in `transport-test` (71 verdi); nove preset veri delle
+catture passano. Nessuna frase nuova.
+
 ### Da correggere (com'era la mattina)
 
 **1. Il controllo dei modelli inesistenti non copre tutte le strade verso l'ampli — basso-medio,

@@ -7,6 +7,14 @@ riprende» pesava da sola 13 KB.
 
 Le voci sono in ordine dal più recente al più vecchio.
 
+## Estratto di CLAUDE.md, 19 novembre 2026 — v168, v169, scene
+
+Da «Pubblicazione»: **v169** (17 novembre: i 600 ms anche per Mini, GO e 40, non provati). **v168**
+  (16 novembre: NEO, 600 ms fra `0x0138` e la rilettura sul PC e secondo tentativo sulle letture a metà,
+  provato sul NEO e sullo Spark 2; `docs/protocollo-spark2.md`; il telefono non ha ancora l'attesa).
+
+Da «Scene e scalette»: Provate con Spark e pedale MIDI (BT); la coda del delay si taglia (l'ampli, accettato). Resta: riavvio del pedale a batteria carica (motivo col comando `M`). Pedale MIDI: CC 102–109 127/0 + Program Change.
+
 ## Estratto di CLAUDE.md, 15 novembre 2026 — editor, basetta, Live del PC
 
 Tolti da «Dove si riprende» per stare sotto i 25 KB, parola per parola:

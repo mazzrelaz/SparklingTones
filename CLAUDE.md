@@ -46,7 +46,7 @@ pedale/prova-ble/                 firmware del pedale (prova-ble.ino + 01-…11-
 pedale/prova-espansore|usb|display|midi/   sketch di prova (mappatura guidata)
 pcb/basetta/                      basetta stampata v1 (20 ottobre 2026), sorgente tools/genera-basetta.py; pcb/*.kicad_* vecchio, fermo
 tools/                            serve.ps1, server-rete.js, wah-ponte.ps1 + wah.html, togli-sfondo/, video-demo/
-test/*.html                       protocol 147, transport 64, store 151, backup 41, dropbox 38
+test/*.html                       protocol 173, transport 71, store 182, backup 41, dropbox 44
 captures/ reference/ design/      log dell'ampli; sorgenti paulhamsh; proposte grafiche
 ```
 
@@ -240,8 +240,9 @@ intero, `0x0176` bpm, `0x0175` looper.
 - **`0x0127` non salva sullo Spark 2.** Un parametro di un effetto spento non suona.
 - **`0x0106` vuole il nome del modello di adesso**, riletto: se sbagliato, ogni cambio
   successivo fallisce per sempre.
-- **Un modello che l'ampli non ha lo pianta**: `mandaPreset` chiama `controllaPreset` con
-  `{ modelli: SparkEffetti.MODELLI.flat() }`, e un nome fuori elenco non parte.
+- **Un modello che l'ampli non ha lo pianta**: `writePreset` del trasporto (ci passano `loadPreset` e
+  `storePreset`, da ogni pagina) chiama `controllaPreset` con `{ modelli: SparkEffetti.MODELLI.flat() }`,
+  e un nome fuori elenco non parte (19 novembre, test). Le pagine controllano prima, per le finestre.
 - **L'ampli si può piantare** (si stacca la corrente). `rxTotali` = 0 → ampli muto o
   connessione morta; > 0 → siamo noi a scartare.
 
@@ -339,11 +340,10 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   per l'installer. Il nome è **SparklingTones**, mai «Spark Controller». Inglese di guida e «?» del PC: aspetta il suo via.
   Il resto: `docs/diario.md`, estratto del 12 novembre (sera).
 - **La versione per il PC** (`pc.html` + `src/pc/`, pubblicata v148): pagina a parte, l'app del telefono non
-  si tocca, **niente scritte guida**; **con lo Spark vero è da provare**. Prove senza ampli: `pc.html#finto`
+  si tocca, **niente scritte guida**; Live provato con Spark e pedale il 19 novembre. Prove senza ampli: `pc.html#finto`
   (riempie la libreria: poi va svuotata). Dettaglio: `docs/decisioni-ui.md`, «La versione per il PC».
-- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v171** (19 novembre: bolli della barra del PC, via «software»). **v170** (19 novembre: scene, scalette, pickup, icona arrotondata; Store fermo alla 1.0.2, per sua scelta). **v169** (17 novembre: i 600 ms anche per Mini, GO e 40, non provati). **v168**
-  (16 novembre: NEO, 600 ms fra `0x0138` e la rilettura sul PC e secondo tentativo sulle letture a metà,
-  provato sul NEO e sullo Spark 2; `docs/protocollo-spark2.md`; il telefono non ha ancora l'attesa). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire. **Store 1.0.1
+- **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì. **v171** (19 novembre: bolli della barra del PC, via «software»). **v170** (19 novembre: scene, scalette, pickup, icona arrotondata; Store fermo alla 1.0.2, per sua scelta). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire; il telefono non ha l'attesa dei 600 ms
+  (v168, diario). **Store 1.0.1
   online**; **1.0.2** (Electron 45, permessi, fuse) **in certificazione dal 15 novembre**. **npm 11 non scarica
   Electron**: dopo `npm install`, `node node_modules/electron/install.js`. Uscite prima: diario.
 - **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
@@ -354,7 +354,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   **Fermo per sua scelta**: il tap tempo con l'ampli acceso. **Pickup consigliati** e «La mia chitarra»
   (18 nov., `src/pc/16-pickup.js`): campo `pickup` fra gli `USER_FIELDS`; un'icona, mai un riquadro (niente scroll).
 - **Scene e scalette** (18 nov.): **in `main` dal 19 novembre (v170)**, solo PC. Tutto in `docs/scene.md` e
-  `docs/scaletta.md`; dati ripuliti all'ingresso (`scenaPulita`, `scalettePulite`). Provate con Spark e pedale MIDI (BT); la coda del delay si taglia (l'ampli, accettato). Resta: riavvio del pedale a batteria carica (motivo col comando `M`). Pedale MIDI: CC 102–109 127/0 + Program Change.
+  `docs/scaletta.md`; dati ripuliti all'ingresso (`scenaPulita`, `scalettePulite`). Provate con Spark e pedale MIDI (BT): resto nel diario.
 - **Pedale d'espressione**: presa **H**, solo volume. **Mai il volume del finale (0x72) in punta**: un botto.
 - Voci lunghe e collaudi aperti (editor con l'ampli sul telefono, l'ampli che si pianta, il NEO, la batteria): `docs/diario.md`.
 - Copia oraria dei progetti in `Desktop\Cloud Backup`.

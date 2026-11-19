@@ -24,6 +24,7 @@
 <div id="out"></div>
 
 <script src="../src/spark-protocol.js"></script>
+<script src="../src/spark-effetti.js"></script>
 <script src="../src/spark-transport.js"></script>
 <script src="fixtures/preset0.js"></script>
 <script>
@@ -341,6 +342,28 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       await t.loadPreset(preset);
       check('se l\'invio fallisce non si manda il comando di attivazione',
             t.sent.length, 0);
+    }
+
+    /* ---------- il cancello dei modelli (19 novembre 2026) ----------
+       Un modello che l'ampli non ha lo pianta (TrebleBooster): writePreset non manda
+       niente, per qualunque strada ci si arrivi. Un preset vero dell'ampli passa. */
+    {
+      const sbagliato = JSON.parse(JSON.stringify(preset));
+      sbagliato.effects[2].name = 'TrebleBooster';
+
+      const t = transportChe(99);
+      const esito = await t.loadPreset(sbagliato);
+      check('loadPreset con un modello inesistente non manda niente', t.sent.length, 0);
+      check('e dice perché', [esito.ok, /TrebleBooster/.test(esito.error)], [false, true]);
+
+      const t2 = transportChe(99);
+      const esito2 = await t2.storePreset(sbagliato, 3);
+      check('storePreset con un modello inesistente non manda niente',
+            [esito2.ok, t2.sent.length], [false, 0]);
+
+      const t3 = transportChe(99);
+      const esito3 = await t3.loadPreset(preset);
+      check('un preset vero dell\'ampli passa il cancello', [esito3.ok, t3.sent.length > 0], [true, true]);
     }
 
     /* ---------- rilettura del suono corrente ---------- */
