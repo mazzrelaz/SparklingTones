@@ -1,8 +1,84 @@
-# Audit di sicurezza — 17 settembre e 15 novembre 2026
+# Audit di sicurezza — 17 settembre, 15 e 19 novembre 2026
 
 Fatto su tutto il repository: app (`index.html`, `src/`), service worker, sync Dropbox,
 firmware del pedale (`pedale/prova-ble/`), strumenti e catture. Il repository
 `mazzrelaz/SparklingTones` è **pubblico**.
+
+## Audit completo — 19 novembre 2026
+
+Quattro giorni e ~50 commit dopo il 15. Riguardate le correzioni del 15, poi tutto quello che è
+entrato dopo: Spark 40 (block header) e NEO (rilettura a metà) in `spark-protocol.js` e
+`spark-transport.js`, i pickup consigliati e «La mia chitarra» (`src/pc/16-pickup.js`, campo
+`pickup` nel sync), «Genera con l'IA», il doppio clic dei Banchi, il firmware 2.42 (ponte, CC del
+MIDI, motivo del riavvio), il **ramo `scene`** (scene e scalette, non in `main`), il sito, le
+dipendenze, segreti e immagini (anche quelle non tracciate).
+
+### Da correggere
+
+**1. Il controllo dei modelli inesistenti non copre tutte le strade verso l'ampli — basso-medio,
+sul palco.** Dal 17 settembre `controllaPreset(…, { modelli })` ferma un nome che l'ampli non ha
+(`TrebleBooster` l'ha piantato: si stacca la corrente). Lo chiamano `mandaPreset` del telefono e,
+sul PC, `apriRecord`, `scriviNelloSlot` e «Genera con l'IA». **Non lo chiamano**:
+
+- la **vista Live del telefono** (`src/app/07-vista-live.js`, `attiva()`), per un preset che non sta
+  in uno slot: `spark.loadPreset` diretto;
+- **«Regola» dell'editor del telefono** (`src/app/09-editor.js`): `spark.loadPreset` diretto;
+- i **banchi del pedale** (`src/pedale-ponte.js`, `frameDiPreset`), dal telefono e dal PC: il
+  pedale li suona da solo, e `frameAccettabile` guarda solo il comando e la destinazione.
+
+E nessun import lo chiama (file, backup, Dropbox): un preset con un nome sbagliato entra in libreria
+senza avvisi. **Il caso vero**: un file di preset preso da un altro (un gruppo Facebook, un forum) o
+scritto male, importato sul telefono, suonato dalla Live o messo in un banco del pedale → l'ampli
+si pianta a metà serata. **Correzione**: `controllaPreset` prima di `loadPreset` in quei due punti
+(con `avvisa`, come sul PC) e in `blocco()` di `pedale-ponte.js` (errore col nome del preset, come
+per il banco vuoto); un test in `protocol-test` o `store-test`.
+
+### Prima di portare le scene in `main`
+
+- **I valori delle scene non passano da nessun controllo.** `record.scene` (sync, backup) e le
+  `scalette` arrivano come sono: un valore fuori da 0–1 o non numerico va all'ampli con `0x0104`, e
+  una scena senza `accesi` o `cambi` fa saltare `presetConScena` (`in` su `undefined`). Da fare
+  all'ingresso: valori fra 0 e 1, `accesi` e `cambi` oggetti, al più tre scene. L'HTML invece è a
+  posto: nomi di scene, canzoni, preset e switch passano da `testoConNome`.
+
+### Accettati, da sapere
+
+- **`tools/serve.ps1`** (8099, suite e prove) è registrato su `localhost`, ma http.sys risponde anche
+  dall'indirizzo di rete se la richiesta dice `Host: localhost` (provato dal PC stesso; da un altro
+  apparecchio decide il firewall, non provato). Serve solo il repository, codice già pubblico, e
+  **non esce dalla cartella**: `..%2f`, `..%5c` e `../` danno 403 da http.sys (provato).
+- **Lo Spark 40 si riconosce dal nome Bluetooth** (`\b40\b`): un apparecchio che si chiamasse con un
+  40 riceverebbe i messaggi col block header. Conta solo per farlo funzionare, non per la sicurezza.
+
+### A posto
+
+- **Le correzioni del 15 ci sono tutte**: CSP su `index.html` e `pc.html` (anche sulla v169
+  pubblicata), nessuno script in linea; server dei video su `127.0.0.1` e chiusi nella loro
+  cartella; `protocol.handle` e `server-rete.js` col separatore in coda; permessi e fuse dell'exe;
+  ponte del pedale 2.42 (un PEZZO dopo FINE trova `ricDati` vuoto e viene rifiutato).
+- **Pickup e «La mia chitarra»**: `pickupValido` rifà layout, posti e split da capo; la nota si
+  scrive con `textContent`, il disegno con `setAttribute`; la chitarra «Custom» da `localStorage` è
+  ripulita lettera per lettera. Gli `innerHTML` nuovi contengono solo testi nostri (`tr`).
+- **«Genera con l'IA»**: la risposta incollata passa da `JSON.parse`, poi `valoreSicuroIA` e
+  `controllaPreset` prima dell'invio.
+- **Protocollo**: il block header del 40 si toglie solo su `01 fe`, che negli altri ampli non
+  compare; la rilettura del NEO si ritenta una volta sola. Le ultime quattro notifiche grezze nel
+  registro sono byte dell'ampli, niente di personale.
+- **Firmware**: i CC 102–109 del MIDI hanno l'indice controllato al rilascio; il motivo del riavvio è
+  solo sul seriale.
+- **Segreti**: nessuna chiave o token, né nei file tracciati né in quelli non tracciati; nessun
+  `.pfx`, `.pem` o `.env`. **Immagini nuove** (`design/post-facebook-*`, non ancora in git): nessun
+  EXIF né GPS.
+- **Dipendenze dell'exe**: `npm audit --omit=dev` **0 falle**; restano le 6 moderate di `minimatch`
+  negli attrezzi per compilare (come il 15).
+- **Sito**: nessun commit dopo il 15; ancora nessuno script, modulo o iframe; `http` → `https` (301).
+- **Sync Dropbox e service worker**: non toccati dal 15, a parte la versione.
+
+### Voto
+
+**Buono.** Una cosa da fare davvero (1: il controllo dei modelli sulle strade che lo saltano, perché
+sul palco un ampli piantato è il danno peggiore che l'app possa fare) e una da fare prima del merge
+delle scene.
 
 ## Audit completo — 15 novembre 2026
 
