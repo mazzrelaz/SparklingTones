@@ -93,7 +93,10 @@
      fuori dal conto del centro */
   .preset-centro { display:flex; flex-direction:column; align-items:center; justify-content:center; align-self:stretch; min-width:0; }
   .preset-riga { display:flex; align-items:center; gap:10px; min-width:0; max-width:100%; position:relative; }
-  .preset-riga .accanto { position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); display:flex; gap:6px; align-items:center; white-space:nowrap; }
+  /* i bolli in testa alla colonna di destra, nel flusso: appesi al nome finivano sopra Live/Banchi/… (19 novembre) */
+  .sb-lato.destra .accanto { margin-right:auto; display:flex; gap:6px; align-items:center; white-space:nowrap; min-width:0; overflow:hidden; }
+  .sb-lato.destra .gruppo { flex:none; }
+  .sb-lato.destra { container-type:inline-size; }
   .freccia { flex:none; width:34px; height:34px; padding:0; border-radius:50%; display:grid; place-items:center; }
   .freccia > svg.ico { width:18px; height:18px; }
   #preset-nome { font-family:var(--strumento); font-size:1.65rem; line-height:1.15; letter-spacing:0.01em; font-weight:700; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -103,6 +106,10 @@
                 border:1px solid var(--ambra); border-radius:999px; padding:1px 9px; white-space:nowrap; }
   @media (max-width:1279px) {
     /* poco posto: solo un pallino ambra (il titolo dice cosa), come nel Pulze */
+    #modificato { width:11px; height:11px; padding:0; font-size:0; border-radius:50%; background:var(--ambra); }
+  }
+  /* il bollo intero non ci sta accanto a Live, Banchi, Scalette…: anche qui solo il pallino */
+  @container (max-width:640px) {
     #modificato { width:11px; height:11px; padding:0; font-size:0; border-radius:50%; background:var(--ambra); }
   }
   #modificato.confronto { background:rgba(245,176,65,0.12); }
@@ -825,10 +832,10 @@
       <button id="prima" class="freccia" title="Slot prima" aria-label="Slot prima"><svg class="ico" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>
       <h1 id="preset-nome">—</h1>
       <button id="dopo" class="freccia" title="Slot dopo" aria-label="Slot dopo"><svg class="ico" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
-      <span class="accanto"><span id="preset-dove" hidden></span><span id="modificato" hidden>modificato · non salvato</span></span>
     </div>
   </div>
   <div class="sb-lato destra">
+    <span class="accanto"><span id="preset-dove" hidden></span><span id="modificato" hidden>modificato · non salvato</span></span>
     <div class="gruppo">
       <button id="apri-live" title="La vista Live, con la pedaliera"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="10" rx="2"/><circle cx="8" cy="14" r="2"/><circle cx="16" cy="14" r="2"/><path d="M8 9V6M16 9V6"/></svg><span class="testo">Live</span></button>
       <button id="apri-banchi" title="I banchi, come le Songlist"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="testo">Banchi</span></button>
