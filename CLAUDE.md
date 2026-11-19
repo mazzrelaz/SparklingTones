@@ -346,8 +346,6 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
   provato sul NEO e sullo Spark 2; `docs/protocollo-spark2.md`; il telefono non ha ancora l'attesa). Mini, GO e 40 **non provati**, LIVE ed EDGE da capire. **Store 1.0.1
   online**; **1.0.2** (Electron 45, permessi, fuse) **in certificazione dal 15 novembre**. **npm 11 non scarica
   Electron**: dopo `npm install`, `node node_modules/electron/install.js`. Uscite prima: diario.
-- **Live del PC** (`src/pc/12-live.js`): **la Pedaliera è per pedali MIDI commerciali, non per il nostro**, che ha solo lui.
-  **Trappola: un `filter` animato rompe il disegno in Chromium.** Diario, 15 novembre.
 - **Tutto gratuito, con donazioni** (13 novembre). **`pc.html` del web ed exe sono la stessa app**, Live compreso;
   l'exe aggiunge connessione veloce, scelta Bluetooth e benvenuto. **Va sul Microsoft Store** (account **a nome della
   moglie**; `npm.cmd run store` → `pacchetto-store.ps1`, makeappx del Windows SDK). **1.0.1 online**: `https://apps.microsoft.com/detail/9PLB9RG9VLNX`, già nelle guide
