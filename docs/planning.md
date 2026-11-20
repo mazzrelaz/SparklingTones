@@ -38,7 +38,7 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [x] Editor dell'interfaccia telefono con l'ampli collegato (20 novembre, da localhost sul PC, prima di pubblicare cad2743): slot letti, Live, manopole, cambio modello, salvataggio.
 - [x] L'ampli che si pianta girando le manopole: un minuto di manopole veloci senza piantarsi (20 novembre, `PAUSA_PARAMETRO` 90 ms). Da ritenere se ricapita.
 - [x] «Importa un file» con un preset vero: JSON esportato dall'app ufficiale («Uku-bass»), importato e suonato sullo Spark (20 novembre, v172). Anche lo zip della libreria intera dell'app ufficiale (su localhost, libreria di prova): 88 preset, suonano.
-- [ ] Spark NEO.
+- [x] Spark NEO (20 novembre, app pubblicata v172): CH1–CH4 letti, Live, manopole, cambio modello, preset dalla libreria, salvataggio in uno slot riletto.
 - [x] Versione PC con lo Spark vero, fuori dal Live (20 novembre): slot, editor, cambio modello, salvataggio in uno slot riletto.
 - [ ] **Spark 40 «non si collega»** (15 novembre, segnalato da un utente). Correzione pronta nel ramo
   **`spark-40`** (`30cf20c`: block header in invio solo per lo Spark 40, tolto in ricezione), **ripubblicata in
