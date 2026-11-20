@@ -30,7 +30,7 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
   trasparente), in `desktop/build/appx/` e nelle immagini della scheda. Prima una bozza da fargli vedere.
 - [x] (19 novembre) **Allineare la versione**: pacchetto `desktop/dist/SparklingTones-1.7.0.appx` (= v170).
   Scheda rivista contro le Store Policies 7.20 in `design/store/scheda-store.md` (parole chiave senza «Spark 2» e
-  «Positive Grid», ampli richiesto in apertura). **Inviata alla certificazione il 19 novembre** (Submission 4, schede
+  «Positive Grid», ampli richiesto in apertura). **Inviata alla certificazione il 19 novembre, pubblicata il 20 novembre** (Submission 4, schede
   it+en aggiornate da me in Partner Center, avvertenza in fondo conservata; il pacchetto lo carica l'utente: 221 MB).
 
 ## 3. Collaudi con l'ampli
