@@ -40,10 +40,10 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 - [x] «Importa un file» con un preset vero: JSON esportato dall'app ufficiale («Uku-bass»), importato e suonato sullo Spark (20 novembre, v172). Anche lo zip della libreria intera dell'app ufficiale (su localhost, libreria di prova): 88 preset, suonano.
 - [x] Spark NEO (20 novembre, app pubblicata v172): CH1–CH4 letti, Live, manopole, cambio modello, preset dalla libreria, salvataggio in uno slot riletto.
 - [x] Versione PC con lo Spark vero, fuori dal Live (20 novembre): slot, editor, cambio modello, salvataggio in uno slot riletto.
-- [ ] **Spark 40 «non si collega»** (15 novembre, segnalato da un utente). Correzione pronta nel ramo
-  **`spark-40`** (`30cf20c`: block header in invio solo per lo Spark 40, tolto in ricezione), **ripubblicata in
-  v167** (16 novembre) per la prova con lo Spark 40 di un amico: **esito da segnare qui.** Perché e cosa
-  verificare: `docs/protocollo-spark2.md`, «Spark 40», nel ramo. Per riprenderla: `git cherry-pick 30cf20c`.
+- [x] **Spark 40 «non si collega»** (15 novembre, segnalato da un utente). Correzione (`30cf20c`: block header
+  in invio solo per lo Spark 40, tolto in ricezione) in main dalla v167. **Collaudata il 20 novembre con lo
+  Spark 40 di un amico (v172): funziona tutto**, lettura degli slot e libreria comprese. Dettaglio:
+  `docs/protocollo-spark2.md`, «Spark 40».
   Al tester: telefono o PC e browser, nome esatto nell'elenco Bluetooth, messaggio d'errore, registro (Altro).
 
 ## 4. Pedale ESP32

@@ -656,7 +656,7 @@ al pedale come `0x0E`); `0x0128 [nome, bool, 00]` mai confermato, ignoto; `0x01a
 `0x029c`, ignoto; `0x03a1 [n, bool]` pedale n inserito. Dettaglio, byte e prove in
 `docs/pedale-lavoro.md`, «Il pedale d'espressione».
 
-## Spark 40 — 15 novembre 2026, NON provato
+## Spark 40 — 15 novembre 2026, collaudato il 20 novembre
 
 Un utente: «lo Spark 40 non si collega». Nessuno Spark 40 per provare: quello che segue viene da
 `reference/paulhamsh/` (scritto proprio sullo Spark 40, su BLE) e da Ignitron.
