@@ -35,11 +35,11 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
 
 ## 3. Collaudi con l'ampli
 
-- [ ] Editor sul telefono con l'ampli collegato.
-- [ ] L'ampli che si pianta girando le manopole (correzione `PAUSA_PARAMETRO` non verificata).
+- [x] Editor dell'interfaccia telefono con l'ampli collegato (20 novembre, da localhost sul PC, prima di pubblicare cad2743): slot letti, Live, manopole, cambio modello, salvataggio.
+- [x] L'ampli che si pianta girando le manopole: un minuto di manopole veloci senza piantarsi (20 novembre, `PAUSA_PARAMETRO` 90 ms). Da ritenere se ricapita.
 - [ ] «Importa un file» con un preset vero (anche lo zip dell'app ufficiale: non verificato).
 - [ ] Spark NEO.
-- [ ] Versione PC con lo Spark vero, fuori dal Live.
+- [x] Versione PC con lo Spark vero, fuori dal Live (20 novembre): slot, editor, cambio modello, salvataggio in uno slot riletto.
 - [ ] **Spark 40 «non si collega»** (15 novembre, segnalato da un utente). Correzione pronta nel ramo
   **`spark-40`** (`30cf20c`: block header in invio solo per lo Spark 40, tolto in ricezione), **ripubblicata in
   v167** (16 novembre) per la prova con lo Spark 40 di un amico: **esito da segnare qui.** Perché e cosa
