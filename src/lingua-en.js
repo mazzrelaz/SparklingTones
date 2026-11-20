@@ -1979,6 +1979,10 @@ window.LINGUA_EN = {
     "The PC guide explains the Live looper: length, count-in, click and every button.",
   "Versione {0}":
     "Version {0}",
+  "Ampli più protetto":
+    "Better amp protection",
+  "Un preset con un modello che l'ampli non conosce non parte più: prima poteva piantarlo.":
+    "A preset with a model the amp doesn't know is no longer sent: before, it could freeze the amp.",
   "Barra in alto più ordinata":
     "Tidier top bar",
   "Lo slot e «modificato» non coprono più Live, Banchi e Scalette; il bollo «software» non c'è più.":

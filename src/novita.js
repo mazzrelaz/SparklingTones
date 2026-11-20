@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v172',
+    data: '20 novembre 2026',
+    voci: [
+      { icona: '🛡️', titolo: tr('Ampli più protetto'),
+        testo: tr('Un preset con un modello che l\'ampli non conosce non parte più: prima poteva piantarlo.') },
+    ],
+  },
+  {
     versione: 'v171',
     data: '19 novembre 2026',
     voci: [
