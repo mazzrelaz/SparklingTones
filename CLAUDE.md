@@ -336,7 +336,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Basetta** `pcb/basetta/`: **solo** da `tools/genera-basetta.py`, mai a mano.
 - **App Windows** (`desktop/`, Electron; nome **SparklingTones**, mai «Spark Controller»): `npm.cmd start` (`npm` da
   PowerShell è bloccato); **npm 11 non scarica Electron**: dopo `npm install`, `node node_modules/electron/install.js`.
-  Store: `npm.cmd run store`, account **a nome della moglie**; la 1.7.0 pubblicata il 20 novembre.
+  Store: `npm.cmd run store`, account **a nome della moglie**; la 1.7.0 (= v170) pubblicata il 20 novembre; la 1.7.2 (= v172) in certificazione dal 23.
 - **Versione PC** (`pc.html` + `src/pc/`): web ed exe sono la stessa app; l'app del telefono non si tocca, **niente
   scritte guida**. Senza ampli: `pc.html#finto` (riempie la libreria) o `node tools/prove.js`.
 - **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì; ogni uscita ha la splash «Novità»

@@ -29,6 +29,7 @@ italiano e inglese (guida inglese del computer nuova), 0 traduzioni mancanti.
   Sulla pagina dello Store l'icona ha gli angoli neri: va fatta senza angoli (sfondo pieno fino al bordo o
   trasparente), in `desktop/build/appx/` e nelle immagini della scheda. Prima una bozza da fargli vedere.
 - [x] (19 novembre) **Allineare la versione**: pacchetto `desktop/dist/SparklingTones-1.7.0.appx` (= v170).
+- [x] (23 novembre) **Store alla v172**: `SparklingTones-1.7.2.appx` caricato e inviato alla certificazione (submission 5).
   Scheda rivista contro le Store Policies 7.20 in `design/store/scheda-store.md` (parole chiave senza «Spark 2» e
   «Positive Grid», ampli richiesto in apertura). **Inviata alla certificazione il 19 novembre, pubblicata il 20 novembre** (Submission 4, schede
   it+en aggiornate da me in Partner Center, avvertenza in fondo conservata; il pacchetto lo carica l'utente: 221 MB).
