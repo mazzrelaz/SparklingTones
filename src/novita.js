@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v174',
+    data: '24 novembre 2026',
+    voci: [
+      { icona: '🎛️', titolo: tr('Cambio di modello'),
+        testo: tr('Cambiando modello, un effetto acceso resta acceso: sullo Spark NEO si spegneva.') },
+    ],
+  },
+  {
     versione: 'v173',
     data: '24 novembre 2026',
     voci: [

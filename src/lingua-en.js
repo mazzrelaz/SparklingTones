@@ -1981,6 +1981,10 @@ window.LINGUA_EN = {
     "The PC guide explains the Live looper: length, count-in, click and every button.",
   "Versione {0}":
     "Version {0}",
+  "Cambio di modello":
+    "Model change",
+  "Cambiando modello, un effetto acceso resta acceso: sullo Spark NEO si spegneva.":
+    "When you change model, an effect that was on stays on: on the Spark NEO it used to switch off.",
   "Spark 40 di prima serie":
     "First-series Spark 40",
   "Se l'ampli non sa dire il suono che sta facendo, l'app legge il canale attivo: l'editor si apre anche sugli Spark 40 più vecchi.":

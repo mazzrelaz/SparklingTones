@@ -340,7 +340,7 @@ ogni push lì `git pull --rebase`** (GitHub riscrive `CNAME`). Il resto in `docs
 - **Versione PC** (`pc.html` + `src/pc/`): web ed exe sono la stessa app; l'app del telefono non si tocca, **niente
   scritte guida**. Senza ampli: `pc.html#finto` (riempie la libreria) o `node tools/prove.js`.
 - **Pubblicazione**: il push di `main` è pubblicare, solo col suo sì; ogni uscita ha la splash «Novità»
-  (`src/novita.js`). Online la **v173** (24 novembre: Spark 40 vecchio, se il suono corrente tace si legge lo slot attivo; da collaudare con l'utente). Mini, GO e 40 **non provati**; il telefono non ha l'attesa dei 600 ms.
+  (`src/novita.js`). Online la **v174** (24 novembre: v173 Spark 40 vecchio, se il suono corrente tace si legge lo slot attivo; v174 il NEO spegne il blocco al cambio di modello, lo riaccendiamo; tutte e due da collaudare). Mini, GO e 40 **non provati**; il telefono non ha l'attesa dei 600 ms.
 - **Tutto gratuito, con donazioni.** «Genera con l'IA» solo sul PC, copia e incolla, **niente API né chiavi**.
   Tap tempo con l'ampli acceso: **fermo per sua scelta**. Pickup: un'icona, mai un riquadro.
 - **Scene e scalette** (v170, solo PC): `docs/scene.md`, `docs/scaletta.md`; dati ripuliti all'ingresso.
