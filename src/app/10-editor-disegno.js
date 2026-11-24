@@ -1795,6 +1795,7 @@ async function cambiaModello(posizione, nuovo) {
       return;
     }
     if (nuovo === vecchio) { logLine(tr`${nuovo} c'era già.`); return; }
+    const eraAcceso = prima[posizione].enabled;
 
     logProgress(tr`sostituisco ${vecchio} con ${nuovo}…`);
     await spark.send(Spark.commands.changeEffectModel(vecchio, nuovo));
@@ -1812,6 +1813,15 @@ async function cambiaModello(posizione, nuovo) {
     }
 
     if (dopo[posizione] && dopo[posizione].name === nuovo) {
+      // Lo Spark NEO spegne il blocco cambiandogli il modello (24 novembre 2026):
+      // se era acceso lo si riaccende, perché acceso o spento lo sceglie l'utente.
+      if (eraAcceso && !dopo[posizione].enabled) {
+        await new Promise(r => setTimeout(r, 150));
+        await spark.send(Spark.commands.effectOnOff(nuovo, true));
+        dopo[posizione].enabled = true;
+        if (inModifica && inModifica.effetti[posizione]) inModifica.effetti[posizione].enabled = true;
+        disegnaCatena();
+      }
       logLine(tr`${vecchio} → ${nuovo}. Verificato rileggendo la catena dall'ampli.`);
     } else {
       logLine(tr('il comando è partito ma quel blocco riporta ancora ' +

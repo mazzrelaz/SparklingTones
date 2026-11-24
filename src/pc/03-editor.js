@@ -613,6 +613,7 @@ async function cambiaModello(posizione, nuovo) {
       return;
     }
     const daCambiare = prima[posizione].name;
+    const eraAcceso = prima[posizione].enabled;
     if (daCambiare === nuovo) return;
     stato(tr('sostituisco {0} con {1}…', nomeModello(daCambiare), nomeModello(nuovo)));
     await spark.send(Spark.commands.changeEffectModel(daCambiare, nuovo));
@@ -621,11 +622,26 @@ async function cambiaModello(posizione, nuovo) {
     const dopo = await rileggiCatena();
     if (!dopo) stato(tr('comando mandato, ma non riesco a rileggere la catena.'), 'errore');
     else if (dopo[posizione] && dopo[posizione].name === nuovo) {
+      await riaccendiDopoCambio(posizione, nuovo, eraAcceso, dopo);
       stato(tr('{0} → {1}. Verificato rileggendo la catena dall\'ampli.', nomeModello(daCambiare), nomeModello(nuovo)), 'ok');
     } else {
       stato(tr('il comando è partito ma quel blocco riporta ancora {0}.', dopo[posizione] ? dopo[posizione].name : '?'), 'errore');
     }
   });
+}
+
+/**
+ * Lo Spark NEO spegne il blocco quando gli si cambia il modello (24 novembre 2026): se
+ * prima era acceso, lo si riaccende. Acceso o spento è una scelta dell'utente.
+ */
+async function riaccendiDopoCambio(posizione, nome, eraAcceso, dopo) {
+  if (!eraAcceso || !dopo[posizione] || dopo[posizione].enabled) return;
+  await attendi(150);
+  await spark.send(Spark.commands.effectOnOff(nome, true));
+  dopo[posizione].enabled = true;
+  if (ora && ora.effetti[posizione]) ora.effetti[posizione].enabled = true;
+  disegnaPalco();
+  disegnaCatena();
 }
 
 /**

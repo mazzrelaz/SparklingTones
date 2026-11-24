@@ -112,7 +112,8 @@ window.AmpliFinto = (function () {
       else if (tipo === 'param') { const e = effetto(a); const p = e && e.params.find(x => x.index === b); if (p) p.value = c; }
       else if (tipo === 'modello') {
         const i = this.vivo.effects.findIndex(e => e.name === a);
-        if (i >= 0) this.vivo.effects[i] = blocco(b, this.vivo.effects[i].enabled, 0.5);
+        // `cambioSpegne`: come lo Spark NEO (24 novembre 2026), il blocco nuovo nasce spento.
+        if (i >= 0) this.vivo.effects[i] = blocco(b, this.cambioSpegne ? false : this.vivo.effects[i].enabled, 0.5);
       } else if (tipo === 'looper' || tipo === 'statoLooper' || tipo === 'leggiLooper' || tipo === 'scriviLooper') {
         this._looper(tipo, a);
       } else if (tipo === 'tuner') {

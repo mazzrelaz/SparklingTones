@@ -100,6 +100,17 @@ module.exports = {
       },
     },
     {
+      nome: 'cambio di modello: un blocco acceso resta acceso (NEO)',
+      fai: async p => {
+        await collega(p);
+        await p.valuta(`spark.cambioSpegne = true; cambiaModello(5, 'VintageDelay')`);
+        await arrivato(p, `c[0] === 'modello'`, 'il cambio di modello all\'ampli');
+        const c = await arrivato(p, `c[0] === 'onoff'`, 'il blocco riacceso');
+        uguale([c[1], c[2]], ['VintageDelay', true], 'quale effetto e come');
+        await p.aspetta(`spark.vivo.effects[5].enabled && ora.effetti[5].enabled`, 3000, 'acceso sull\'ampli e sul palco');
+      },
+    },
+    {
       nome: 'la Live: il pulsantone fa suonare il suo slot',
       fai: async p => {
         await collega(p);
