@@ -1981,6 +1981,10 @@ window.LINGUA_EN = {
     "The PC guide explains the Live looper: length, count-in, click and every button.",
   "Versione {0}":
     "Version {0}",
+  "Spark 40 di prima serie":
+    "First-series Spark 40",
+  "Se l'ampli non sa dire il suono che sta facendo, l'app legge il canale attivo: l'editor si apre anche sugli Spark 40 più vecchi.":
+    "If the amp can't report the sound it is playing, the app reads the active channel: the editor now opens on older Spark 40s too.",
   "Ampli più protetto":
     "Better amp protection",
   "Un preset con un modello che l'ampli non conosce non parte più: prima poteva piantarlo.":

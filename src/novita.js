@@ -26,6 +26,14 @@ function dataNovita(d) {
 
 const NOVITA = [
   {
+    versione: 'v173',
+    data: '24 novembre 2026',
+    voci: [
+      { icona: '🔌', titolo: tr('Spark 40 di prima serie'),
+        testo: tr('Se l\'ampli non sa dire il suono che sta facendo, l\'app legge il canale attivo: l\'editor si apre anche sugli Spark 40 più vecchi.') },
+    ],
+  },
+  {
     versione: 'v172',
     data: '20 novembre 2026',
     voci: [
