@@ -377,6 +377,31 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       check('readLiveState interroga il bank 1', t.sent[0].data, [1, 0]);
       check('e non attribuisce uno slot', live && live.slot, undefined);
     }
+
+    /* ---------- Spark 40 di prima serie: il suono corrente tace, si legge lo slot attivo ---------- */
+    {
+      const t = fakeTransport(0x02);
+      t.send = async command => {
+        t.sent.push(command);
+        if (command.sub === 0x10) setTimeout(() => feed(t, [Spark.buildChunk(0x03, 0x10, [0x00, 0x02], 0x02)]), 0);
+        else if (command.data[0] === 0x00) setTimeout(() => feed(t, FIXTURE_PRESET0), 0);
+        return 0x02;
+      };
+      const live = await t.readLiveState(100);
+      check('ripiego: chiede lo slot attivo e legge quello', t.sent.map(c => [c.sub, ...c.data]),
+            [[0x01, 1, 0], [0x10], [0x01, 0, 2]]);
+      check('ripiego: torna il preset, senza attribuirgli lo slot',
+            [live && live.name, live && live.slot, live && live.dalloSlot], ['DG - Shine On  clean', undefined, 2]);
+
+      const t2 = fakeTransport(0x02);
+      t2.send = async command => {
+        t2.sent.push(command);
+        if (command.sub === 0x10) setTimeout(() => feed(t2, [Spark.buildChunk(0x03, 0x10, [0x00, 0x7f], 0x02)]), 0);
+        return 0x02;
+      };
+      check('ripiego: con un preset software non legge nessuno slot',
+            [await t2.readLiveState(100), t2.sent.length], [null, 2]);
+    }
   }
 
   /* ---------- stato ---------- */

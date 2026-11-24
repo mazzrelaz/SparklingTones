@@ -344,9 +344,26 @@ window.SparkTransport = (function () {
       return preset;
     },
 
-    /** Legge il suono attualmente attivo, che non è uno degli slot salvati. */
-    readLiveState(timeoutMs) {
-      return this._readPresetVia(Spark.commands.getLiveState(), 'stato live', timeoutMs);
+    /**
+     * Legge il suono attualmente attivo, che non è uno degli slot salvati.
+     *
+     * Ripiego: lo Spark 40 di prima serie non risponde affatto a `0x0201 01 00`
+     * (segnalato il 24 novembre 2026, «0 messaggi arrivati in tutto»), mentre gli
+     * slot li legge. Se il suono corrente tace, si chiede quale slot è attivo
+     * (`0x0210`) e si legge quello: si perdono solo le modifiche non salvate.
+     * Se suona un preset software (fuori da 0-7) non c'è slot da leggere: `null`.
+     */
+    async readLiveState(timeoutMs) {
+      const live = await this._readPresetVia(Spark.commands.getLiveState(), 'stato live', timeoutMs);
+      if (live) return live;
+      const risposta = await this.request(Spark.commands.getCurrentPreset(),
+        m => m.cmd === Spark.CMD_NOTIFY && m.sub === 0x10, 1500);
+      const n = this.state.currentPreset;
+      if (!risposta || !Number.isInteger(n) || n < 0 || n > 7) return null;
+      this.onLog(tr('suono corrente muto: leggo lo slot attivo ({0})', n));
+      const preset = await this._readPresetVia(Spark.commands.getPreset(n), `preset ${n}`, timeoutMs);
+      if (preset) preset.dalloSlot = n;
+      return preset;
     },
 
     /* ----------------------------------------------------------------
